@@ -159,10 +159,6 @@ func (s Charge) Tap(c context.Context, a identity.ActorContext, q TapRequest, op
 			}
 			return json.Unmarshal(stored.ResultPayload, &out)
 		}
-		c, e = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
-		if e != nil {
-			return e
-		}
 		out, e = s.settle(c, sc, a, q, revision, at)
 		if e != nil {
 			return e
@@ -207,6 +203,10 @@ func (s Charge) settle(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		return nil, e
 	}
 	cards, e := s.Store.LockCardsTx(c, sc.Tx, a.PlayerID)
+	if e != nil {
+		return nil, e
+	}
+	c, e = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
 	if e != nil {
 		return nil, e
 	}

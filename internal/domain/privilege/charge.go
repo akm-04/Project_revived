@@ -90,11 +90,17 @@ func (c ChargeCatalog) Product(id int64) (ChargeProduct, bool) {
 	return ChargeProduct{}, false
 }
 
-// ChargeOverride replaces the source values of one product. A nil field keeps the source value.
+// ChargeOverride replaces the source values of one product. A nil field keeps
+// the source value; off withdraws the product from the shop and the tap (D476).
 type ChargeOverride struct {
 	Crystal  *int64 `json:"crystal,omitempty"`
 	VIPXP    *int64 `json:"vip_xp,omitempty"`
 	CardDays *int64 `json:"card_days,omitempty"`
+	Off      bool   `json:"off,omitempty"`
+}
+
+func (t ChargeTuning) ProductOff(id int64) bool {
+	return t.Products[strconv.FormatInt(id, 10)].Off
 }
 
 // ChargeTuning is the operator overlay; an invalid one leaves the source policy (I11 writes it).
@@ -132,7 +138,7 @@ func DecideGrant(p ChargeProduct, priorCount int64, t ChargeTuning, tuned bool) 
 		out.Crystal += p.FirstExtraDiamond
 	}
 	if tuned && t.Validate() == nil {
-		if t.Mode == TuningDisabled {
+		if t.Mode == TuningDisabled || t.ProductOff(p.ID) {
 			return ChargeGrant{}, ErrChargeRefused
 		}
 		out = out.tuned(t.Products[strconv.FormatInt(p.ID, 10)])

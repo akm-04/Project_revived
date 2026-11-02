@@ -46,8 +46,8 @@ func TestChargeDispatcherRefusesMalformedAndBusinessErrors(t *testing.T) {
 		{"354", 354, map[string]any{}, 200},
 		{"354 extra", 354, map[string]any{"charge_id": int64(1)}, 400},
 		{"657", 657, map[string]any{"id": int64(1)}, 200},
-		{"657 level zero", 657, map[string]any{"id": int64(0)}, 400},
-		{"657 level high", 657, map[string]any{"id": int64(16)}, 400},
+		{"657 level zero", 657, map[string]any{"id": int64(0)}, 409},
+		{"657 level high", 657, map[string]any{"id": int64(16)}, 409},
 		{"657 missing", 657, map[string]any{}, 400},
 		{"tap", 32000, map[string]any{"charge_id": int64(80001007), "intent_id": "vc-1"}, 200},
 		{"tap zero charge", 32000, map[string]any{"charge_id": int64(0), "intent_id": "vc-1"}, 400},
@@ -76,5 +76,11 @@ func TestChargeDispatcherRefusesMalformedAndBusinessErrors(t *testing.T) {
 	}
 	if probe.queries != 1 || probe.claims != 2 || probe.taps != 2 {
 		t.Fatalf("calls query=%d claim=%d tap=%d", probe.queries, probe.claims, probe.taps)
+	}
+	if got := failCharge(d.ErrConflict); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+		t.Fatalf("conflict mapped to %d %v", got.HTTPStatus, got.Body)
+	}
+	if got := failCharge(d.ErrUnavailable); got.HTTPStatus != 503 {
+		t.Fatalf("unavailable mapped to %d", got.HTTPStatus)
 	}
 }

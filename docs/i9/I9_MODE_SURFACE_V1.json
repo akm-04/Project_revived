@@ -19,18 +19,18 @@
  },
  "counts": {
   "by_disposition": {
-   "DELIVERED": 185,
-   "ACTIVE": 415,
-   "LATER": 503,
+   "DELIVERED": 186,
+   "ACTIVE": 416,
+   "LATER": 502,
    "INACTIVE_SUPERSEDED": 59,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
-   "I9-11": 72,
+   "I9-11": 71,
    "I9-3": 17,
    "I9-4": 7,
    "I9-4D": 12,
-   "I9-10": 112,
+   "I9-10": 114,
    "I9-7": 42,
    "I9-5": 24,
    "I9-8": 71,
@@ -1909,9 +1909,9 @@
    "mid": 354,
    "name": "QUERY_CHARGE_DATA",
    "family": "CHARGE_VIP_GIFTPUSH",
-   "disposition": "LATER",
-   "target": "I10",
-   "v2": "unimplemented",
+   "disposition": "ACTIVE",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -2783,8 +2783,8 @@
    "name": "GET_VIP_AWARD",
    "family": "CHARGE_VIP_GIFTPUSH",
    "disposition": "ACTIVE",
-   "target": "I9-11",
-   "v2": "unimplemented",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": "STATE_BACKED",
    "note": "D80 obligation I9-GET-VIP-AWARD; the rest of CHARGE_VIP_GIFTPUSH is I10A recharge"
   },
@@ -10863,6 +10863,15 @@
    "mid": 8194,
    "name": "READ_PIC_NOTICE",
    "family": "V2_DELIVERED_OTHER",
+   "disposition": "DELIVERED",
+   "target": null,
+   "v2": "implemented",
+   "v1": null
+  },
+  {
+   "mid": 32000,
+   "name": "PRESERVATION_RECHARGE_TAP",
+   "family": "CHARGE_VIP_GIFTPUSH",
    "disposition": "DELIVERED",
    "target": null,
    "v2": "implemented",

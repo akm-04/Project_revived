@@ -57,12 +57,12 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if e != nil {
 		return out, true, e
 	}
-	chargeCatalog, e := p.Content.ChargeCatalogTx(c, q, s.ContentRevision)
-	if e != nil {
-		return out, true, e
-	}
 	privilegeActive := cards.PrivilegeCardEnd > at.Unix()
 	if privilegeActive {
+		chargeCatalog, e := p.Content.ChargeCatalogTx(c, q, s.ContentRevision)
+		if e != nil {
+			return out, true, e
+		}
 		cap += chargeCatalog.PrivilegeSkillMax
 	}
 	if revision == "" {

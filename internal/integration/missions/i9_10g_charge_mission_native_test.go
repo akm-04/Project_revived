@@ -57,9 +57,7 @@ func TestI910GMonthAndPrivilegeCardMissionClaims(t *testing.T) {
 	}
 	ticker := &missionClock{at: stamp}
 	service := runtimeService(p, ticker)
-	grantOnly := service
-	grantOnly.Missions = nil
-	charge := chargeForMissions(p, grantOnly)
+	charge := chargeForMissions(p, service)
 	claim := func(id int64) error {
 		at, clockErr := (pg.AuthoritativeTime{Queryer: p}).Now(ctx)
 		if clockErr != nil {

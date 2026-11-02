@@ -336,8 +336,23 @@ func TestI910GChargeQueryHistoryAndBoundedOtherRead(t *testing.T) {
 		t.Fatal(e)
 	}
 	charges, ok := reply["charges"].([]d.Purchase)
-	if !ok || len(charges) != 1 || charges[0].ChargeID != 80001007 || charges[0].ChargeCount != 1 || charges[0].LastBuyTime == 0 {
+	if !ok || len(charges) != 23 {
 		t.Fatalf("354 charges: %#v", reply["charges"])
+	}
+	var bought, unbought *d.Purchase
+	for index := range charges {
+		switch charges[index].ChargeID {
+		case 80001007:
+			bought = &charges[index]
+		case 80001001:
+			unbought = &charges[index]
+		}
+	}
+	if bought == nil || bought.ChargeCount != 1 || bought.LastBuyTime == 0 {
+		t.Fatalf("354 bought row: %#v", bought)
+	}
+	if unbought == nil || unbought.ChargeCount != 0 || unbought.LastBuyTime != 0 {
+		t.Fatalf("354 unbought row: %#v", unbought)
 	}
 	if reply["server_time"] != int64(1700000000) || reply["giftbags"] == nil {
 		t.Fatalf("354 envelope: %#v", reply)

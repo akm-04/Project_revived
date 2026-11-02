@@ -50,8 +50,11 @@ func (o ChargeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		body, err = o.Service.Query(ctx, a, req.Envelope.ReceivedAt)
 	case 657:
 		level, ok := topFloorInteger(p, "id", true)
-		if !ok || level < 1 || level > 15 || !onlyStockGameplayParams(p, "id") {
+		if !ok || !onlyStockGameplayParams(p, "id") {
 			return bad
+		}
+		if level < 1 || level > 15 {
+			return conflictRefusal(1)
 		}
 		body, err = o.Service.ClaimVIPAward(ctx, a, level, op)
 	case mids.MIDRechargeTap:
@@ -85,7 +88,7 @@ func validTapIntent(intent string) bool {
 // failCharge refuses business conflicts on 409 so stock callbacks see ERROR.
 func failCharge(err error) httpedge.Response {
 	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrChargeRefused) || errors.As(err, &conflict) {
+	if errors.Is(err, d.ErrChargeRefused) || errors.Is(err, d.ErrConflict) || errors.As(err, &conflict) {
 		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "charge_unavailable"}}

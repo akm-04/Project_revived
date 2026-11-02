@@ -1,7 +1,7 @@
 """Recharge products (I9_COMMERCE_CHARGE_V1 C4/C5) and VIP award gifts (C11)."""
 
 POLICY = "I10_CHARGE_TAP_V1"
-MONTH_CARD_DAYS = {1: 30, 2: 90, 3: 180}
+CARD_DAY_KEYS = {1: ('monthly_card_time2', 30), 2: ('season_privilege_card', 90), 3: ('halfyear_privilege_card', 180)}
 CARD_BY_MONTH_CARD = {1: "MONTH", 4: "PRIVILEGE", 5: "PRIVILEGE"}
 EXPECTED_PRODUCT_IDS = [
     80001001, 80001002, 80001003, 80001004, 80001005, 80001006, 80001007,
@@ -22,7 +22,25 @@ def _pipe_ints(raw):
     return [int(value) for value in raw.split('|') if value != '']
 
 
+def _card_days_by_type(blobs, parse):
+    misc = {row['key']: row['value'] for row in parse(blobs['data/tables/misc.lua'].data)}
+    out = {}
+    for card_type, (key, expected) in CARD_DAY_KEYS.items():
+        raw = misc.get(key)
+        if raw is None:
+            raise ValueError('misc.lua missing required key %s' % key)
+        try:
+            days = int(raw)
+        except ValueError:
+            raise ValueError('misc.lua %s is not an integer: %r' % (key, raw))
+        if days != expected:
+            raise ValueError('misc.lua %s drift: %r != %d' % (key, raw, expected))
+        out[card_type] = days
+    return out
+
+
 def build_charge(blobs, parse):
+    card_days_by_type = _card_days_by_type(blobs, parse)
     rows = sorted(parse(blobs['data/tables/charge.lua'].data), key=lambda row: int(row['charge_id']))
     if [int(row['charge_id']) for row in rows] != EXPECTED_PRODUCT_IDS:
         raise ValueError('charge.lua product profile drift')
@@ -32,17 +50,18 @@ def build_charge(blobs, parse):
         month_card = _int(row, 'month_card')
         card_type = _int(row, 'card_type')
         card = CARD_BY_MONTH_CARD.get(month_card, '')
-        if card and card_type not in MONTH_CARD_DAYS:
+        if card and card_type not in card_days_by_type:
             raise ValueError('charge.lua card without a duration: %d' % charge_id)
         if not card and card_type != 0:
             raise ValueError('charge.lua duration without a card: %d' % charge_id)
-        card_days = MONTH_CARD_DAYS[card_type] if card else 0
+        card_days = card_days_by_type[card_type] if card else 0
         products.append(dict(id=charge_id, diamond=_int(row, 'diamond'), extra_diamond=_int(row, 'extra_diamond'),
                              first_extra_diamond=_int(row, 'first_extra_diamond'), card=card, card_days=card_days))
     by_id = {product['id']: product for product in products}
-    if by_id[80001001]['card_days'] != 30 or by_id[80001014]['card_days'] != 90 or by_id[80001015]['card_days'] != 180:
+    month_days, season_days, halfyear_days = card_days_by_type[1], card_days_by_type[2], card_days_by_type[3]
+    if by_id[80001001]['card_days'] != month_days or by_id[80001014]['card_days'] != season_days or by_id[80001015]['card_days'] != halfyear_days:
         raise ValueError('charge.lua month card duration drift')
-    if by_id[80001010]['card_days'] != 30 or by_id[80001011]['card_days'] != 90 or by_id[80001012]['card_days'] != 180:
+    if by_id[80001010]['card_days'] != month_days or by_id[80001011]['card_days'] != season_days or by_id[80001012]['card_days'] != halfyear_days:
         raise ValueError('charge.lua privilege card duration drift')
     if by_id[80001013]['card'] != 'PRIVILEGE' or by_id[80001013]['card_days'] != by_id[80001010]['card_days']:
         raise ValueError('charge.lua discount privilege card drift')

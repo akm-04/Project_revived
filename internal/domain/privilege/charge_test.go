@@ -36,6 +36,40 @@ func TestDecideGrantTuning(t *testing.T) {
 	}
 }
 
+func TestDecideGrantOffProduct(t *testing.T) {
+	p := ChargeProduct{ID: 7, Diamond: 100}
+	off := ChargeTuning{Version: 1, Mode: TuningGrant, Products: map[string]ChargeOverride{"7": {Off: true}}}
+	if !off.ProductOff(7) || off.ProductOff(8) {
+		t.Fatalf("off flag: %+v", off.Products)
+	}
+	if _, e := DecideGrant(p, 0, off, true); e != ErrChargeRefused {
+		t.Fatalf("off product tap e=%v", e)
+	}
+	if kept, e := DecideGrant(p, 0, off, false); e != nil || kept.Crystal != 100 {
+		t.Fatalf("absent overlay must keep source: %+v e=%v", kept, e)
+	}
+}
+
+func TestChargeCatalogBindsVipAwards(t *testing.T) {
+	catalog := ChargeCatalog{Policy: TapPolicy, Products: []ChargeProduct{{ID: 1, Diamond: 1}}, VipAwards: make([]VipAward, 15)}
+	for index := range catalog.VipAwards {
+		catalog.VipAwards[index] = VipAward{Level: int64(index + 1), GiftID: 1, Items: []int64{1}, ItemNums: []int64{1}}
+	}
+	if e := catalog.Validate(); e != nil {
+		t.Fatalf("valid catalog rejected: %v", e)
+	}
+	short := catalog
+	short.VipAwards = catalog.VipAwards[:14]
+	if e := short.Validate(); e == nil {
+		t.Fatal("14 awards admitted; ClaimVIPAward would index past the slice")
+	}
+	mismatched := catalog
+	mismatched.VipAwards[14] = VipAward{Level: 14, GiftID: 1, Items: []int64{1}, ItemNums: []int64{1}}
+	if e := mismatched.Validate(); e == nil {
+		t.Fatal("level order mismatch admitted")
+	}
+}
+
 func TestCardsStackDaysAndLeftDaysRoundUp(t *testing.T) {
 	const now = int64(1000000)
 	c := Cards{}.Extended(CardMonth, 30, now)

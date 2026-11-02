@@ -3,7 +3,7 @@
  "level": 10,
  "steps": [
   "wait:5",
-  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:queryChargeData(function(code, body) if code~=xyd.error.OK then error('vc-charge-query-'..tostring(code)) end if type(body.charges)~='table' then error('vc-charge-array') end xyd.WindowManager.get():openWindow('vip_recharge',{}) end)",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:queryChargeData(function(code, body) if code~=xyd.error.OK then error('vc-charge-query-'..tostring(code)) end if type(body.charges)~='table' then error('vc-charge-array') end if #body.charges~=23 then error('vc-charge-count-'..#body.charges) end xyd.WindowManager.get():openWindow('vip_recharge',{}) end)",
   "wait:6",
   "lua:local w=xyd.WindowManager.get():getWindow('vip_recharge') if not w then error('vc-vip-window') end",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local intent='vc-card-'..tostring(math.random(1000000000)) xyd.Backend.get():request(32000,{charge_id=80001001,intent_id=intent},function(code,body) if code~=xyd.error.OK then error('vc-tap-card-'..tostring(code)) end local re=body and body.recharge_event if not re or tonumber(re.mid)~=36857 or not re.params then error('vc-tap-card-shape') end if tonumber(re.params.left_card_day)~=30 then error('vc-tap-card-days-'..tostring(re.params.left_card_day)) end xyd.EventDispatcher.get():dispatchEvent({name=xyd.event.RECHARGE,params=re}) end)",
