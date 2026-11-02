@@ -255,7 +255,20 @@
   }
  ],
  "name": "guildcore",
- "pushes": [],
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/guild_apply_notice.go",
+   "kind": "notice",
+   "line": 40,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 7,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
  "stores": [
   "internal/adapters/postgres/guildstore",
   "internal/adapters/postgres/i4store",

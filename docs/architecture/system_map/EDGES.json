@@ -1374,7 +1374,7 @@
   "memoir": {},
   "missioninputs": {
    "i5": [
-    "*MissionPartnerTemplatesTx",
+    "*MissionRosterTx",
     "*ObserveMissionTx"
    ]
   },
@@ -3723,7 +3723,7 @@
     "*ReadGuildBroadcastMailSourceTx"
    ],
    "missioninputs": [
-    "*MissionPartnerTemplatesTx",
+    "*MissionRosterTx",
     "*ObserveMissionTx"
    ],
    "spirit": [

@@ -2421,32 +2421,7 @@
    "system": ""
   }
  ],
- "narrow_param_checks": [
-  {
-   "file": "internal/adapters/stockruntime/profile_comments.go",
-   "line": 33,
-   "function": "Dispatch",
-   "style": "allowed_map"
-  },
-  {
-   "file": "internal/adapters/stockruntime/profile_feedback.go",
-   "line": 70,
-   "function": "Dispatch",
-   "style": "inline_rejection"
-  },
-  {
-   "file": "internal/adapters/stockruntime/profile_feedback.go",
-   "line": 92,
-   "function": "Dispatch",
-   "style": "inline_rejection"
-  },
-  {
-   "file": "internal/adapters/stockruntime/public_profile_reads.go",
-   "line": 37,
-   "function": "Dispatch",
-   "style": "allowed_map"
-  }
- ],
+ "narrow_param_checks": [],
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
@@ -2468,7 +2443,7 @@
   },
   {
    "file": "internal/application/awakeningbattle/mode.go",
-   "line": 160,
+   "line": 164,
    "code": 1,
    "kind": "code_1"
   },
@@ -2480,25 +2455,25 @@
   },
   {
    "file": "internal/application/march/settle.go",
-   "line": 28,
+   "line": 32,
    "code": 1,
    "kind": "code_1"
   },
   {
    "file": "internal/application/march/settle.go",
-   "line": 49,
+   "line": 54,
    "code": 1,
    "kind": "code_1"
   },
   {
    "file": "internal/application/march/settle.go",
-   "line": 53,
+   "line": 59,
    "code": 1,
    "kind": "code_1"
   },
   {
    "file": "internal/application/petcampaign/commands.go",
-   "line": 249,
+   "line": 253,
    "code": 1,
    "kind": "code_1"
   }
