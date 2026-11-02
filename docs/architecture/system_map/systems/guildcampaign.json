@@ -1,13 +1,30 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerroot"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appguildcampaign.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "StartTx"
+  ],
+  "generation": [
+   "NewTimedOperation"
+  ],
+  "i5": [
+   "DeliverNoticeTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -66,80 +83,78 @@
    "file": "docs/i9/I9_WORLD_BOSS_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_campaign_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 601,
    "name": "LOAD_GUILD_CAMPAIGN_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 602,
    "name": "RESET_CHAPTER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 603,
    "name": "LOAD_GUILD_MAP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 604,
    "name": "GUILD_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 605,
    "name": "LOAD_GUILD_AWARD_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 606,
    "name": "APPLY_REWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 607,
    "name": "GUILD_CHAPTER_DAMAGE_RANK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 608,
    "name": "GUILF_ALL_SERVER_DAMAGE_RANK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 609,
    "name": "GET_DATA_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 610,
    "name": "GUILD_FIGHT_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 611,
    "name": "OPEN_CHAPTER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 613,
    "name": "LOAD_GUILD_MAP_DETAIL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 614,
    "name": "GUILD_FIGHT_PREPARE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
    "mid": 615,
    "name": "GUILD_DISTRIBUTE_RECORD"
   }
  ],
  "name": "guildcampaign",
- "path": "internal/application/guildcampaign",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
@@ -180,20 +195,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_9c_guild_campaign.json"
+   "i9_9c_guild_campaign.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "combat",
-  "generation",
-  "i5",
-  "realtimewakeup"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

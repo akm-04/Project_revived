@@ -1,19 +1,65 @@
 {
- "called_by": [
-  "socialprojection"
- ],
- "calls": [
-  "generation",
-  "i5",
-  "playerroot",
-  "socialinbox",
-  "socialrelation",
-  "socialreloadref"
- ],
+ "background": [],
+ "called_by": {
+  "socialprojection": [
+   "Day",
+   "GiftNoticeValidityTx",
+   "GiftSnapshotTx"
+  ]
+ },
+ "calls": {
+  "i5": [
+   "GiftGrantIdentityExistsTx",
+   "ReadGrantEvidenceTx",
+   "SettleGrantTx",
+   "VerifyGiftBalanceTx"
+  ],
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ],
+  "socialinbox": [
+   "ApplyConsumptionTx",
+   "ApplyTx",
+   "InviteFamily",
+   "MatchGift",
+   "NoticeLockKey",
+   "PreflightConsumption",
+   "PrepareConsumptionTx",
+   "RelationFamily",
+   "RoomInviteFamily",
+   "ValidateGiftLifecycle",
+   "ValidateRelationLifecycle",
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialrelation": [
+   "CanonicalServer",
+   "PrepareFriendDMPrivacyTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "socialgift.LockRankEpoch",
+    "rank": 371
+   },
+   {
+    "name": "socialgift.LockRankTransfer",
+    "rank": 372
+   }
+  ]
+ },
+ "login": [],
  "mids": [],
  "name": "socialgift",
- "path": "internal/application/socialgift",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -26,15 +72,13 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/playerdisplay",
-   "internal/integration/socialactivation"
+   "guildinvite",
+   "playerdisplay",
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/socialgift/types_test.go"
+   "types_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

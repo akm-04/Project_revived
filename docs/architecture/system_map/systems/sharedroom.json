@@ -1,19 +1,53 @@
 {
- "called_by": [
-  "adventure",
-  "illusion",
-  "occult"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appsharedroom.Reconciler",
+   "kind": "reconcile"
+  }
  ],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "playerroot"
- ],
+ "called_by": {
+  "adventure": [
+   "Join",
+   "SetReady",
+   "Update"
+  ],
+  "illusion": [
+   "Join",
+   "SetReady",
+   "Update"
+  ],
+  "occult": [
+   "Join",
+   "SetReady",
+   "Update"
+  ]
+ },
+ "calls": {
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "shared-room"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "sharedroom",
- "path": "internal/application/sharedroom",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -25,13 +59,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/sharedroom/commands_test.go"
+   "commands_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

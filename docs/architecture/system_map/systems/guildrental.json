@@ -1,13 +1,20 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "ValidateReferenceGuardPlan"
+  ],
+  "generation": [
+   "NewTimedOperation"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 8,
@@ -18,50 +25,73 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_rental_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "HERO_LENT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "course.RootLockRank",
+    "rank": 520
+   },
+   {
+    "name": "elementequipment.RootLockRank",
+    "rank": 560
+   },
+   {
+    "name": "inscription.RootLockRank",
+    "rank": 540
+   },
+   {
+    "name": "spirit.RootLockRank",
+    "rank": 580
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 593,
    "name": "LOAD_SENT_HEROS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 594,
    "name": "RENT_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 595,
    "name": "CANCEL_RENT_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 618,
    "name": "LOAD_RENT_PET"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 619,
    "name": "RENT_PET"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 620,
    "name": "CANCEL_RENT_PET"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 621,
    "name": "LOAD_CAN_RENT_PET_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
    "mid": 2768,
    "name": "GET_RENT_HEROS"
   }
  ],
  "name": "guildrental",
- "path": "internal/application/guildrental",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/bookstore",
@@ -123,75 +153,14 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_9b_guild_rental.json"
+   "i9_9b_guild_rental.json"
   ],
   "unit": [
-   "internal/application/guildrental/guard_test.go",
-   "internal/application/guildrental/reads_test.go"
+   "guard_test.go",
+   "reads_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

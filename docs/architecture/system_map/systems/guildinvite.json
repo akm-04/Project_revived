@@ -1,16 +1,54 @@
 {
- "called_by": [
-  "guildcore",
-  "guildinvitetarget"
+ "background": [
+  {
+   "enqueued_by": [
+    "gxb-api"
+   ],
+   "kind": "river",
+   "workers": []
+  }
  ],
- "calls": [
-  "generation",
-  "playerroot"
- ],
+ "called_by": {
+  "guildcore": [
+   "ApplyIssueTx",
+   "ApplyMarkerTx",
+   "PrepareIssueTx",
+   "PrepareMarkerTx",
+   "ReadInviteSnapshotTx",
+   "ValidateCommitted",
+   "ValidateCurrentInviteTx",
+   "ValidateMembershipTx",
+   "ValidateRetirementTx"
+  ],
+  "guildinvitetarget": [
+   "ReadInviteSnapshotTx",
+   "ReadIssueDeliveryEvidenceTx",
+   "ReadIssueEvidenceTx",
+   "ReadIssueTupleEvidenceTx",
+   "ReadMarkerEvidenceTx"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7A8B_GUILD_PROGRESS"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "guildinvite",
- "path": "internal/application/guildinvite",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -24,12 +62,10 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/publicshowcase"
+   "guildinvite",
+   "publicshowcase"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

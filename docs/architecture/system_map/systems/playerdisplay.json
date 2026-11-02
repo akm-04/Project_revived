@@ -1,19 +1,31 @@
 {
- "called_by": [
-  "achievement",
-  "arena",
-  "championsleague",
-  "oneonone",
-  "publicprofile",
-  "ranking"
- ],
- "calls": [
-  "characterasset",
-  "directorysync",
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "SkinCollectionTx"
+  ],
+  "championsleague": [
+   "ReceiveOriginTx"
+  ],
+  "publicprofile": [
+   "CosmeticCountTx",
+   "ReadEffectivePlayerDisplayTx",
+   "SkinCollectionTx"
+  ],
+  "ranking": [
+   "ReceiveOriginTx"
+  ]
+ },
+ "calls": {
+  "directorysync": [
+   "ReconcileDirectoryTx"
+  ],
+  "i5": [
+   "ApplyDisplayValueTx",
+   "PrepareDisplayValueTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 2,
@@ -68,55 +80,58 @@
    "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/player_display.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 23,
    "name": "EDIT_PLAYER_NAME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 98,
    "name": "SET_AVATAR_ID"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 100,
    "name": "EDIT_AVATAR_RRAME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 119,
    "name": "GENERATE_PLAYER_NAME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 656,
    "name": "BUY_AVATAR"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2490,
    "name": "GET_TITLE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2492,
    "name": "CHANGE_TITLE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2493,
    "name": "GET_BUBBLE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2494,
    "name": "CHANGE_BUBBLE"
   }
  ],
  "name": "playerdisplay",
- "path": "internal/application/playerdisplay",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore"
@@ -127,20 +142,16 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay",
-   "internal/integration/publicshowcase"
+   "playerdisplay",
+   "publicshowcase"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_4_real_pk.json",
-   "virtualclient/scenarios/topfloor_battle.json"
+   "i9_4_real_pk.json",
+   "topfloor_battle.json"
   ],
   "unit": [
-   "internal/application/playerdisplay/family_origins_test.go",
-   "internal/application/playerdisplay/hero_predicate_test.go"
+   "family_origins_test.go",
+   "hero_predicate_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": [
-  "cmd/gxb-api/player_display_postgres.go"
- ]
+ }
 }

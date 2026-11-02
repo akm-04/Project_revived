@@ -1,22 +1,72 @@
 {
- "called_by": [
-  "adventure",
-  "guildinvitetarget",
-  "illusion",
-  "occult",
-  "roominvite",
-  "socialdismiss",
-  "socialgift",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "socialreloadref"
- ],
- "calls": [],
+ "background": [],
+ "called_by": {
+  "guildinvitetarget": [
+   "InviteTuple",
+   "MatchInvite",
+   "PreflightConsumption"
+  ],
+  "roominvite": [
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialdismiss": [
+   "RelationFamily",
+   "RoomInviteFamily",
+   "ValidateRelationLifecycle",
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialgift": [
+   "ApplyConsumptionTx",
+   "ApplyTx",
+   "InviteFamily",
+   "MatchGift",
+   "NoticeLockKey",
+   "PreflightConsumption",
+   "PrepareConsumptionTx",
+   "RelationFamily",
+   "RoomInviteFamily",
+   "ValidateGiftLifecycle",
+   "ValidateRelationLifecycle",
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialprojection": [
+   "InviteFamily",
+   "RelationFamily",
+   "RoomInviteFamily",
+   "RoomInviteTuple",
+   "ValidateRelationDescriptor",
+   "ValidateRelationLifecycle",
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialrelation": [
+   "ApplyRelationsTx",
+   "PrepareRelationsTx"
+  ],
+  "socialreload": [
+   "ValidateRelationLifecycle"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "socialinbox.LockRankNotice",
+    "rank": 370
+   }
+  ]
+ },
+ "login": [],
  "mids": [],
  "name": "socialinbox",
- "path": "internal/application/socialinbox",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -29,18 +79,16 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/playerdisplay",
-   "internal/integration/socialactivation",
-   "internal/integration/socialprojection",
-   "internal/integration/socialrelation"
+   "guildinvite",
+   "playerdisplay",
+   "socialactivation",
+   "socialprojection",
+   "socialrelation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/socialinbox/locks_test.go",
-   "internal/application/socialinbox/room_invite_notice_test.go"
+   "locks_test.go",
+   "room_invite_notice_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

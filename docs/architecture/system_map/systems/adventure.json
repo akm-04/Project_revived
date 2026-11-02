@@ -1,15 +1,34 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "roominvite",
-  "sharedroom",
-  "socialinbox"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appadventure.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "MonsterWaves",
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "sharedroom": [
+   "Join",
+   "SetReady",
+   "Update"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -24,110 +43,114 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/adventure_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": [
+   "CAMPAIGN_SWEEP",
+   "FANTASY",
+   "PVP_FIGHT",
+   "SUMMON"
+  ]
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "adventure"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2410,
    "name": "ADVENTURE_DEFENSE_FIGHT_ROOM_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2411,
    "name": "ADVENTURE_ILLUSION_TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2412,
    "name": "ADVENTURE_DEFENSE_PREPARE_ROOM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2413,
    "name": "ADVENTURE_DEFENSE_QUIT_ROOM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2416,
    "name": "GET_ADVENTURE_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2417,
    "name": "GET_ADVENTURE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2418,
    "name": "BUY_ADVENTURE_ITEM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2419,
    "name": "START_PVP_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2420,
    "name": "BUY_ADVENTURE_CARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2421,
    "name": "START_PARADISE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2422,
    "name": "FIGHT_PARADISE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2423,
    "name": "ADVENTURE_ILLUSION_CREATE_TEAM_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2424,
    "name": "ADVENTURE_ILLUSION_KICK_MEMBER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2425,
    "name": "ADVENTURE_ILLUSION_JOIN_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2426,
    "name": "ADVENTURE_ILLUSION_EXIT_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2427,
    "name": "ADVENTURE_ILLUSION_INVITE_FRIEND"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2428,
    "name": "ADVENTURE_ILLUSION_ENTER_TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2429,
    "name": "ADVENTURE_ILLUSION_PICK_TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2430,
    "name": "ADVENTURE_ILLUSION_PREPARE_TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/adventure_dispatcher.go",
    "mid": 2431,
    "name": "ADVENTURE_DEFENSE_START_ROOM_FIGHT"
   }
  ],
  "name": "adventure",
- "path": "internal/application/adventure",
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/adventure_notice.go",
@@ -191,27 +214,14 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_8d_adventure.json"
+   "i9_8d_adventure.json"
   ],
   "unit": [
-   "internal/application/adventure/observer_test.go",
-   "internal/application/adventure/solo_test.go"
+   "observer_test.go",
+   "solo_test.go"
   ]
- },
- "wired_with": [
-  "arena",
-  "combat",
-  "generation",
-  "i5",
-  "realtimewakeup",
-  "roominvite",
-  "sharedroom",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

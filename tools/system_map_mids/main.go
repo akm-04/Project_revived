@@ -436,6 +436,7 @@ type registration struct {
 	Owner            string   `json:"owner"`
 	Reason           string   `json:"reason,omitempty"`
 	Fallback         bool     `json:"fallback,omitempty"`
+	Wrappers         []string `json:"wrappers"`
 	Stores           []string `json:"stores"`
 }
 
@@ -718,6 +719,11 @@ func (v *walker) walkRegisterHelper(path, name string, call *ast.CallExpr, sc *s
 
 func (v *walker) emit(mid int, dispatcherExpr ast.Expr, sc *scope, fc *fileContext, pkg *packageInfo, registrationFile string, line int, wiringFile string) {
 	owner, dispatcherType, dispatcherFile, constructionFile, stores, reason := v.w.attribute(dispatcherExpr, sc, fc, pkg, registrationFile)
+	wrappers := v.w.wrappersOf(dispatcherExpr, sc, fc, pkg, 0)
+	if wrappers == nil {
+		wrappers = []string{}
+	}
+	sort.Strings(wrappers)
 	fallback := v.fallback
 	if fallback {
 		owner = ""
@@ -733,7 +739,7 @@ func (v *walker) emit(mid int, dispatcherExpr ast.Expr, sc *scope, fc *fileConte
 	v.output.Registrations = append(v.output.Registrations, registration{
 		MID: mid, DispatcherType: dispatcherType, DispatcherFile: dispatcherFile,
 		RegistrationFile: registrationFile, RegistrationLine: line, WiringFile: wiringFile,
-		ConstructionFile: constructionFile, Owner: owner, Reason: reason, Fallback: fallback, Stores: stores,
+		ConstructionFile: constructionFile, Owner: owner, Reason: reason, Fallback: fallback, Wrappers: wrappers, Stores: stores,
 	})
 }
 
@@ -916,6 +922,35 @@ func (w *world) refsOf(expr ast.Expr, sc *scope, fc *fileContext, pkg *packageIn
 	seen := map[string]bool{}
 	w.collectRefs(expr, sc, fc, pkg, 0, seen, &r)
 	return r
+}
+
+func (w *world) wrappersOf(expr ast.Expr, sc *scope, fc *fileContext, pkg *packageInfo, depth int) []string {
+	if expr == nil || depth > 8 {
+		return nil
+	}
+	switch typed := unwrap(expr).(type) {
+	case *ast.CallExpr:
+		name := ""
+		switch fun := unwrap(typed.Fun).(type) {
+		case *ast.Ident:
+			name = fun.Name
+		case *ast.SelectorExpr:
+			name = fun.Sel.Name
+		}
+		if name != "" {
+			for _, argument := range typed.Args {
+				if literal, _ := w.findDispatcherLiteral(argument, sc, fc, pkg, depth+1); literal != nil {
+					return []string{name}
+				}
+			}
+		}
+	case *ast.Ident:
+		value, ok := w.bindingFor(typed, sc, pkg)
+		if ok && value.expr != nil {
+			return w.wrappersOf(value.expr, sc, value.file, pkg, depth+1)
+		}
+	}
+	return nil
 }
 
 func (w *world) constructionCall(expr ast.Expr, sc *scope, fc *fileContext, pkg *packageInfo, depth int) (*ast.CallExpr, bool) {

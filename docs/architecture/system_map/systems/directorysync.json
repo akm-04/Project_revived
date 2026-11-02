@@ -1,13 +1,29 @@
 {
- "called_by": [
-  "commerceprivilege",
-  "playerdisplay"
- ],
- "calls": [],
+ "background": [],
+ "called_by": {
+  "playerdisplay": [
+   "ReconcileDirectoryTx"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [
+  "ReconcileDirectoryTx",
+  "Reconciler"
+ ],
  "mids": [],
  "name": "directorysync",
- "path": "internal/application/directorysync",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -16,13 +32,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/directorysync/service_test.go"
+   "service_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

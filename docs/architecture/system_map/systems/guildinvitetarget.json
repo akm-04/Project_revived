@@ -1,17 +1,43 @@
 {
- "called_by": [],
- "calls": [
-  "generation",
-  "guildinvite",
-  "playerroot",
-  "socialinbox",
-  "socialrelation",
-  "socialreloadref"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "guildinvite": [
+   "ReadInviteSnapshotTx",
+   "ReadIssueDeliveryEvidenceTx",
+   "ReadIssueEvidenceTx",
+   "ReadIssueTupleEvidenceTx",
+   "ReadMarkerEvidenceTx"
+  ],
+  "socialinbox": [
+   "InviteTuple",
+   "MatchInvite",
+   "PreflightConsumption"
+  ],
+  "socialrelation": [
+   "ApplyChangeTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7A8B_SOCIAL_INVITE_TARGET"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "guildinvitetarget",
- "path": "internal/application/guildinvitetarget",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -20,11 +46,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite"
+   "guildinvite"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

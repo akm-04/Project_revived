@@ -1,49 +1,71 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerpresentation",
-  "playerroot",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestDerivedTx",
+   "StartTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "socialrelation": [
+   "PrepareFriendDMPrivacyTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 5,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/dodgeball_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "dodgeball"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
    "mid": 2960,
    "name": "SANDBAG_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
    "mid": 2961,
    "name": "SANDBAG_ENTER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
    "mid": 2962,
    "name": "SANDBAG_START"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
    "mid": 2963,
    "name": "SANDBAG_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
    "mid": 2964,
    "name": "SANDBAG_FRIEND_INFO"
   }
  ],
  "name": "dodgeball",
- "path": "internal/application/dodgeball",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
@@ -63,21 +85,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_6b_dodgeball.json"
+   "i9_6b_dodgeball.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "combat",
-  "generation",
-  "i5",
-  "playerdisplay",
-  "socialrelation"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

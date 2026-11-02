@@ -1,14 +1,31 @@
 {
- "called_by": [
-  "campaign"
- ],
- "calls": [
-  "i5"
- ],
+ "background": [],
+ "called_by": {
+  "campaign": [
+   "BuyTrialTx",
+   "Pipe"
+  ]
+ },
+ "calls": {
+  "i5": [
+   "DebitMaterialCostTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "dailyconsume",
- "path": "internal/application/dailyconsume",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -17,11 +34,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

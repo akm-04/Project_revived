@@ -1,14 +1,38 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "characterpet",
-  "combat",
-  "dailyconsume",
-  "generation",
-  "i5",
-  "playerdirectory"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "characterpet": [
+   "CreditCampaignEXPTx",
+   "LockCampaignPetTx"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "BorrowedTx",
+   "LiveGenerationTx",
+   "StartTx"
+  ],
+  "dailyconsume": [
+   "BuyTrialTx",
+   "Pipe"
+  ],
+  "i5": [
+   "CompleteAwakeningPetTx",
+   "DebitMaterialCostTx",
+   "DebitTemporalTx",
+   "FreezeAwakeningCampaignTx",
+   "FreezeAwakeningPetTx",
+   "MaxHeroColorTx",
+   "OpenStageFunctionsTx",
+   "SettleAwakeningCampaignTx",
+   "SettleGrantTx",
+   "TemporalBalanceTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 2,
@@ -67,75 +91,84 @@
    "file": "docs/i9/I9_WORKPLACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/campaign_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "CAMPAIGN_SWEEP",
+   "INFINITY_BOSS_DEFEATED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "campaign"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 28,
    "name": "DAILY_CONSUNME_LOAD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 29,
    "name": "DAILY_CONSUNME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 112,
    "name": "LOAD_WORLD_MAP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 113,
    "name": "FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 114,
    "name": "FIGHT_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 115,
    "name": "LOAD_TRIAL_INFOS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 116,
    "name": "RESET_CAMPAIGN"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 117,
    "name": "SWEEP_CAMPAIGN"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 118,
    "name": "GET_BONUS_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 122,
    "name": "GET_MAXLEVEL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 123,
    "name": "CHALLENGEINFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 2064,
    "name": "GET_STORY_DROP_PARTNER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/campaign_dispatcher.go",
    "mid": 2576,
    "name": "GET_CHAPTER_GACHA_AWARD"
   }
  ],
  "name": "campaign",
- "path": "internal/application/campaign",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/achievementstore",
@@ -288,53 +321,22 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_3a_campaign.json",
-   "virtualclient/scenarios/i9_3b_crystal.json",
-   "virtualclient/scenarios/i9_3b_sweep.json",
-   "virtualclient/scenarios/i9_3c_awards.json",
-   "virtualclient/scenarios/i9_3d_challenge_loss.json",
-   "virtualclient/scenarios/i9_3d_trials.json",
-   "virtualclient/scenarios/i9_4a_missions.json",
-   "virtualclient/scenarios/i9_4b_chest.json",
-   "virtualclient/scenarios/i9_9b_guild_rental.json",
-   "virtualclient/scenarios/i9_tutorial_switches.json"
+   "i9_3a_campaign.json",
+   "i9_3b_crystal.json",
+   "i9_3b_sweep.json",
+   "i9_3c_awards.json",
+   "i9_3d_challenge_loss.json",
+   "i9_3d_trials.json",
+   "i9_4a_missions.json",
+   "i9_4b_chest.json",
+   "i9_9b_guild_rental.json",
+   "i9_tutorial_switches.json"
   ],
   "unit": [
-   "internal/application/campaign/awakening_test.go"
+   "awakening_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "adventure",
-  "arena",
-  "bookskill",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "combat",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "dormhouse",
-  "elementequipment",
-  "generation",
-  "heroevolution",
-  "i5",
-  "inscription",
-  "librarylocal",
-  "oneonone",
-  "playerdisplay",
-  "publicstats",
-  "socialrelation",
-  "spirit",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

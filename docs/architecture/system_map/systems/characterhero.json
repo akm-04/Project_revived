@@ -1,15 +1,45 @@
 {
- "called_by": [
-  "elementequipment",
-  "publicprofile"
- ],
- "calls": [
-  "characterasset",
-  "characterpractice",
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "publicprofile": [
+   "BookmarkTx",
+   "HeroBaseObservationTx",
+   "RawAwakeningTx"
+  ]
+ },
+ "calls": {
+  "characterasset": [
+   "BuildEffectiveHeroAppearance",
+   "BuildEffectiveHeroAppearanceTx",
+   "HeroPromotionRestorationSource",
+   "HeroReferenceLockKey",
+   "ModifyRestoration",
+   "ValidateExactRevisionID"
+  ],
+  "characterpractice": [
+   "ReduceAppliedPracticeContribution"
+  ],
+  "i5": [
+   "ApplyHeroEquipmentResourceDebitTx",
+   "ApplyHeroPromotionResourcesTx",
+   "ApplyStrictRestorationTx",
+   "CommitAwakeningEquipmentTx",
+   "DebitHeroEvolutionTx",
+   "DebitHeroExpItemsTx",
+   "DebitMaterialCostTx",
+   "MaxHeroColorTx",
+   "OpenCharacterFunctionsTx",
+   "PlanPromotionRestoration",
+   "PlayerLevelTx",
+   "PrepareAwakeningEquipmentTx",
+   "PrepareCharacterFunctionsTx",
+   "PrepareHeroEquipmentResourcesTx",
+   "PrepareHeroPromotionResourcesTx",
+   "PrepareStrictRestorationTx",
+   "StackQuantity"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 15,
@@ -100,115 +130,128 @@
    "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/hero_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA2_HERO_CORE"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA7_3_HERO_APPEARANCE"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA7_4_HERO_LIVE"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "character.HeroRootLockRank",
+    "rank": 400
+   }
+  ]
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 49,
    "name": "LOAD_HEROS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 51,
    "name": "POWERUP_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 52,
    "name": "EVOLVE_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 54,
    "name": "SET_HERO_EQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 55,
    "name": "USE_EXP_ITEM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 57,
    "name": "ONE_CLICK_JINJIE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 58,
    "name": "FUMO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 59,
    "name": "STONE_SUMMON_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 60,
    "name": "SKIN_ON"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 61,
    "name": "SKIN_CANCEL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 62,
    "name": "ONE_CLICK_EQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 63,
    "name": "USE_EXP_ITEMS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 67,
    "name": "LOAD_HERO_PIECES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 68,
    "name": "UNLOCK_DYNAMIC_CARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 69,
    "name": "SHOW_DYNAMIC_CARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 89,
    "name": "SAVA_SORT_TYPE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 304,
    "name": "UPGRADE_SUPER_EQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 305,
    "name": "SUMMON_SUPER_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 2144,
    "name": "CHANGE_PARTNER_SKILL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 2979,
    "name": "USE_ILLUSION_SKIN_ITEM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "mid": 3116,
    "name": "HERO_COLLOCATION"
   }
  ],
  "name": "characterhero",
- "path": "internal/application/characterhero",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterbirth",
@@ -242,105 +285,45 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/missions",
-   "internal/integration/playerdisplay",
-   "internal/integration/publicshowcase"
+   "missions",
+   "playerdisplay",
+   "publicshowcase"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/arena.json",
-   "virtualclient/scenarios/conquer.json",
-   "virtualclient/scenarios/i9_3b_crystal.json",
-   "virtualclient/scenarios/i9_3b_sweep.json",
-   "virtualclient/scenarios/i9_3d_challenge_loss.json",
-   "virtualclient/scenarios/i9_3d_trials.json",
-   "virtualclient/scenarios/i9_4_real_pk.json",
-   "virtualclient/scenarios/i9_4d_awakening.json",
-   "virtualclient/scenarios/i9_7d_production_functions.json",
-   "virtualclient/scenarios/league.json",
-   "virtualclient/scenarios/oneonone.json",
-   "virtualclient/scenarios/topfloor.json",
-   "virtualclient/scenarios/topfloor_battle.json"
+   "arena.json",
+   "conquer.json",
+   "i9_3b_crystal.json",
+   "i9_3b_sweep.json",
+   "i9_3d_challenge_loss.json",
+   "i9_3d_trials.json",
+   "i9_4_real_pk.json",
+   "i9_4d_awakening.json",
+   "i9_7d_production_functions.json",
+   "league.json",
+   "oneonone.json",
+   "topfloor.json",
+   "topfloor_battle.json"
   ],
   "unit": [
-   "internal/application/characterhero/acquisition_test.go",
-   "internal/application/characterhero/appearance_contribution_test.go",
-   "internal/application/characterhero/appearance_service_test.go",
-   "internal/application/characterhero/base_observation_test.go",
-   "internal/application/characterhero/ca4_5_recovery_test.go",
-   "internal/application/characterhero/ca7_6_preservation_test.go",
-   "internal/application/characterhero/ca8_observation_adapters_test.go",
-   "internal/application/characterhero/collection_admission_test.go",
-   "internal/application/characterhero/equipment_planner_oracle_test.go",
-   "internal/application/characterhero/equipment_service_test.go",
-   "internal/application/characterhero/equipment_state_test.go",
-   "internal/application/characterhero/fumo_service_test.go",
-   "internal/application/characterhero/live_service_test.go",
-   "internal/application/characterhero/practice_contribution_test.go",
-   "internal/application/characterhero/progression_test.go",
-   "internal/application/characterhero/promotion_restoration_test.go",
-   "internal/application/characterhero/promotion_service_test.go",
-   "internal/application/characterhero/raw_skill_receipt_test.go",
-   "internal/application/characterhero/service_test.go"
+   "acquisition_test.go",
+   "appearance_contribution_test.go",
+   "appearance_service_test.go",
+   "base_observation_test.go",
+   "ca4_5_recovery_test.go",
+   "ca7_6_preservation_test.go",
+   "ca8_observation_adapters_test.go",
+   "collection_admission_test.go",
+   "equipment_planner_oracle_test.go",
+   "equipment_service_test.go",
+   "equipment_state_test.go",
+   "fumo_service_test.go",
+   "live_service_test.go",
+   "practice_contribution_test.go",
+   "progression_test.go",
+   "promotion_restoration_test.go",
+   "promotion_service_test.go",
+   "raw_skill_receipt_test.go",
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

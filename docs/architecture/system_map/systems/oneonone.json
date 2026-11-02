@@ -1,73 +1,99 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerdisplay"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "apponeonone.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttemptTx",
+   "CloseTx",
+   "ReplayTx",
+   "ResolveDetached",
+   "StartManyTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 9,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/oneonone_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "one-on-one"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2480,
    "name": "LOAD_PEAK_ARENA"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2481,
    "name": "PEAK_CHANGE_TEAMS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2482,
    "name": "MATCH_ENEMIES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2483,
    "name": "GET_ENEMY_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2484,
    "name": "PEAK_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2485,
    "name": "PEAK_RECORDS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2486,
    "name": "BUY_PEAK_TIMES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2487,
    "name": "PEAK_RECORDS_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2488,
    "name": "RESET_PEAK_TIME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
    "mid": 2489,
    "name": "PEAK_RECORDS_DETAIL"
   }
  ],
  "name": "oneonone",
- "path": "internal/application/oneonone",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/achievementstore",
@@ -220,43 +246,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_7a_oneonone_purchase.json",
-   "virtualclient/scenarios/oneonone.json"
+   "i9_7a_oneonone_purchase.json",
+   "oneonone.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "adventure",
-  "arena",
-  "bookskill",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "combat",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "dormhouse",
-  "elementequipment",
-  "generation",
-  "heroevolution",
-  "i5",
-  "inscription",
-  "librarylocal",
-  "playerdisplay",
-  "publicstats",
-  "socialrelation",
-  "spirit",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

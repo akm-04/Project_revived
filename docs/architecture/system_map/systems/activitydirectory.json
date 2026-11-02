@@ -1,10 +1,8 @@
 {
- "called_by": [
-  "worldboss"
- ],
- "calls": [
-  "generation"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {},
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -23,20 +21,32 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/activity_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [
+  "BootstrapProjection"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/activity_dispatcher.go",
    "mid": 229,
    "name": "ACTIVITIES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/activity_dispatcher.go",
    "mid": 234,
    "name": "LOAD_SINGLE_ACTIVITY"
   }
  ],
  "name": "activitydirectory",
- "path": "internal/application/activitydirectory",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/i4store"
@@ -49,67 +59,7 @@
   "integration": [],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/activitydirectory/service_test.go"
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

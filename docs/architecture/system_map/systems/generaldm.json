@@ -1,26 +1,47 @@
 {
- "called_by": [],
- "calls": [
-  "generation",
-  "playerpresentation",
-  "playerroot",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ],
+  "socialrelation": [
+   "CanonicalServer",
+   "ReadGeneralBlockTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/general_dm.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "generaldm.LockRank",
+    "rank": 381
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/general_dm.go",
    "mid": 513,
    "name": "CHAT_TO_PLAYER"
   }
  ],
  "name": "generaldm",
- "path": "internal/application/generaldm",
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/general_dm_events.go",
@@ -85,73 +106,13 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay",
-   "internal/integration/socialactivation"
+   "playerdisplay",
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/generaldm/legacy_payload_test.go",
-   "internal/application/generaldm/types_test.go"
+   "legacy_payload_test.go",
+   "types_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

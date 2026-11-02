@@ -1,13 +1,18 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "generation",
-  "playerdirectory",
-  "playerdisplay",
-  "playerroot",
-  "publicprofile"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "playerdisplay": [
+   "ReceiveOriginTx"
+  ],
+  "publicprofile": [
+   "ReadMetricsScopeTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -22,15 +27,31 @@
    "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/ranking.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C4C_GIRLS_RANKING"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/ranking.go",
    "mid": 301,
    "name": "LOAD_RANK_LIST"
   }
  ],
  "name": "ranking",
- "path": "internal/application/ranking",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
@@ -57,19 +78,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_8_rank_boards.json",
-   "virtualclient/scenarios/i9_8b_illusion.json"
+   "i9_8_rank_boards.json",
+   "i9_8b_illusion.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "generation",
-  "playerdisplay"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

@@ -1,68 +1,86 @@
 {
- "called_by": [
-  "publicstats"
- ],
- "calls": [
-  "characterasset",
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "generation": [
+   "Bind"
+  ],
+  "i5": [
+   "ApplyMaterialDebitTx",
+   "PrepareMaterialDebitTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 9,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/spirit_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2H_SPIRIT_INPUTS"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "spirit.RootLockRank",
+    "rank": 580
+   }
+  ]
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3089,
    "name": "HUNQI_ENHANCE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3090,
    "name": "HUNQI_LOCK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3091,
    "name": "HUNQI_UNLOCK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3094,
    "name": "HUNQI_EQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3095,
    "name": "HUNQI_ONE_KEY_UNEQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3112,
    "name": "HUNQI_GET_COLLOCATION_INFOS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3113,
    "name": "HUNQI_SAVE_COLLOCATION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3114,
    "name": "DEL_COLLOCATION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/spirit_dispatcher.go",
    "mid": 3115,
    "name": "APPLY_COLLOCATION"
   }
  ],
  "name": "spirit",
- "path": "internal/application/spirit",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterbirth",
@@ -89,69 +107,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

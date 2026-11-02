@@ -1,11 +1,22 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "MonsterWaves",
+   "StartTx"
+  ],
+  "i5": [
+   "DebitTemporalTx",
+   "SettleGrantTx",
+   "TemporalBalanceTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 5,
@@ -24,40 +35,55 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/godstrial_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "GODS_TRIAL_CLEARED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "gods-trial"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
    "mid": 3092,
    "name": "HUNQI_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
    "mid": 3093,
    "name": "HUNQI_FIGHT_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
    "mid": 3097,
    "name": "HUNQI_GET_CAMPAIGN_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
    "mid": 3099,
    "name": "HUNQI_AUTO_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
    "mid": 3100,
    "name": "HUNQI_GET_AUTO_AWRAD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
    "mid": 3101,
    "name": "HUNQI_START_GAME_GET_INFO"
   }
  ],
  "name": "godstrial",
- "path": "internal/application/godstrial",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -76,22 +102,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_6a_gods_trial.json"
+   "i9_6a_gods_trial.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "characterhero",
-  "characterpet",
-  "combat",
-  "generation",
-  "i5",
-  "spirit"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

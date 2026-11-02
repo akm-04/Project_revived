@@ -1,13 +1,26 @@
 {
- "called_by": [],
- "calls": [
-  "bookskill",
-  "i5"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "bookskill": [
+   "BookInputsTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "missioninputs",
- "path": "internal/application/missioninputs",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -16,14 +29,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/missions",
-   "internal/integration/playerdisplay"
+   "missions",
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/missioninputs/reader_test.go"
+   "reader_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

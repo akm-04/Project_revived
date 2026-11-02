@@ -1,14 +1,35 @@
 {
- "called_by": [
-  "guildbroadcast",
-  "publicprofile"
- ],
- "calls": [
-  "generation",
-  "guildinvite",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "guildbroadcast": [
+   "NewLockPlan"
+  ],
+  "publicprofile": [
+   "ReadPublicGuildTx"
+  ]
+ },
+ "calls": {
+  "guildinvite": [
+   "ApplyIssueTx",
+   "ApplyMarkerTx",
+   "PrepareIssueTx",
+   "PrepareMarkerTx",
+   "ReadInviteSnapshotTx",
+   "ValidateCommitted",
+   "ValidateCurrentInviteTx",
+   "ValidateMembershipTx",
+   "ValidateRetirementTx"
+  ],
+  "i5": [
+   "AuthorizeLevelAndDebitScalarTx",
+   "DebitScalarTx",
+   "PlayerLevelTx"
+  ],
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 6,
@@ -23,110 +44,132 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I6C_GUILD_WRITE"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "guildcore.LockRankAllocator",
+    "rank": 300
+   },
+   {
+    "name": "guildcore.LockRankApplication",
+    "rank": 330
+   },
+   {
+    "name": "guildcore.LockRankAudit",
+    "rank": 350
+   },
+   {
+    "name": "guildcore.LockRankGuild",
+    "rank": 310
+   },
+   {
+    "name": "guildcore.LockRankInvite",
+    "rank": 340
+   },
+   {
+    "name": "guildcore.LockRankMembership",
+    "rank": 320
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 576,
    "name": "LOAD_ALL_TEAMS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 577,
    "name": "CREATE_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 578,
    "name": "DISSOLUTION_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 579,
    "name": "LOAD_TEAM_BY_ID"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 580,
    "name": "APPLY_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 581,
    "name": "LOAD_APPLY_LIST_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 582,
    "name": "ACCEPT_APPLY_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 583,
    "name": "REFUSE_APPLY_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 584,
    "name": "LEAVE_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 585,
    "name": "UPDATE_DES_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 586,
    "name": "APPOINT_JOB_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 587,
    "name": "KICK_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 589,
    "name": "SETTING_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 598,
    "name": "PLAYER_LOAD_APPLY_LIST_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 599,
    "name": "CANCEL_APPLY_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 612,
    "name": "GET_SELF_GUILD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 616,
    "name": "GUILD_RANK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 2563,
    "name": "INVITE_TO_GUILD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 2564,
    "name": "ACCEPT_INVITE_TO_GUILD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_dispatcher.go",
    "mid": 2565,
    "name": "GET_GUILD_INFO"
   }
  ],
  "name": "guildcore",
- "path": "internal/application/guildcore",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
@@ -174,78 +217,18 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/playerdisplay",
-   "internal/integration/publicshowcase"
+   "guildinvite",
+   "playerdisplay",
+   "publicshowcase"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/guild.json",
-   "virtualclient/scenarios/i9_8a_world_boss.json",
-   "virtualclient/scenarios/i9_9a_guild_tea.json"
+   "guild.json",
+   "i9_8a_world_boss.json",
+   "i9_9a_guild_tea.json"
   ],
   "unit": [
-   "internal/application/guildcore/lock_plan_test.go",
-   "internal/application/guildcore/service_test.go"
+   "lock_plan_test.go",
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

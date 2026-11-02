@@ -1,52 +1,234 @@
 {
- "called_by": [
-  "achievement",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "campaign",
-  "championsleague",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "dodgeball",
-  "dormhouse",
-  "elementequipment",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildrental",
-  "guildtea",
-  "heroevolution",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "memoir",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "playerpresentation",
-  "profilefeedback",
-  "publicprofile",
-  "socialgift",
-  "spirit",
-  "summon",
-  "topfloor",
-  "workplace",
-  "worldboss"
- ],
- "calls": [
-  "generation",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "SettleGrantTx"
+  ],
+  "adventure": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "arena": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "awakeningbattle": [
+   "CompleteAwakeningBloodTx",
+   "FreezeAwakeningBloodTx"
+  ],
+  "bookskill": [
+   "ApplyMaterialDebitTx",
+   "ApplyMaterialExchangeTx",
+   "PrepareMaterialDebitTx",
+   "PrepareMaterialExchangeTx",
+   "SettleGrantTx"
+  ],
+  "campaign": [
+   "CompleteAwakeningPetTx",
+   "DebitMaterialCostTx",
+   "DebitTemporalTx",
+   "FreezeAwakeningCampaignTx",
+   "FreezeAwakeningPetTx",
+   "MaxHeroColorTx",
+   "OpenStageFunctionsTx",
+   "SettleAwakeningCampaignTx",
+   "SettleGrantTx",
+   "TemporalBalanceTx"
+  ],
+  "championsleague": [
+   "DeliverLeagueTitleNoticeTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "characterhero": [
+   "ApplyHeroEquipmentResourceDebitTx",
+   "ApplyHeroPromotionResourcesTx",
+   "ApplyStrictRestorationTx",
+   "CommitAwakeningEquipmentTx",
+   "DebitHeroEvolutionTx",
+   "DebitHeroExpItemsTx",
+   "DebitMaterialCostTx",
+   "MaxHeroColorTx",
+   "OpenCharacterFunctionsTx",
+   "PlanPromotionRestoration",
+   "PlayerLevelTx",
+   "PrepareAwakeningEquipmentTx",
+   "PrepareCharacterFunctionsTx",
+   "PrepareHeroEquipmentResourcesTx",
+   "PrepareHeroPromotionResourcesTx",
+   "PrepareStrictRestorationTx",
+   "StackQuantity"
+  ],
+  "characterpet": [
+   "ApplyEquipmentResourceDebitTx",
+   "ApplyPetExpDebitTx",
+   "ApplyPromotionResourcesTx",
+   "ApplyStrictRestorationTx",
+   "CommitAwakeningEquipmentTx",
+   "DebitMaterialCostTx",
+   "DebitPetAcquisitionAtTx",
+   "DebitScalarTx",
+   "PlanPromotionRestoration",
+   "PrepareAwakeningEquipmentTx",
+   "PrepareEquipmentResourcesTx",
+   "PreparePetExpDebitTx",
+   "PreparePromotionResourcesTx",
+   "PrepareStrictRestorationTx",
+   "StackQuantity"
+  ],
+  "characterpractice": [
+   "ApplyLevelAndStackDebitTx",
+   "AuthorizeLevelAndDebitScalarTx",
+   "PlayerLevelTx",
+   "PrepareLevelAndStackDebitTx"
+  ],
+  "commerceprivilege": [
+   "Apply",
+   "PreparePrivilegeTransitionTx"
+  ],
+  "conquerschool": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "course": [
+   "ApplyMaterialDebitTx",
+   "ApplyMaterialExchangeTx",
+   "PrepareMaterialDebitTx",
+   "PrepareMaterialExchangeTx"
+  ],
+  "dailyconsume": [
+   "DebitMaterialCostTx"
+  ],
+  "dodgeball": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "dormhouse": [
+   "ApplyMaterialDebitTx",
+   "ApplyMaterialExchangeTx",
+   "PrepareMaterialDebitTx",
+   "PrepareMaterialExchangeTx"
+  ],
+  "elementequipment": [
+   "ApplyMaterialDebitTx",
+   "ApplyMaterialExchangeTx",
+   "PrepareMaterialDebitTx",
+   "PrepareMaterialExchangeTx",
+   "SettleGrantTx"
+  ],
+  "godstrial": [
+   "DebitTemporalTx",
+   "SettleGrantTx",
+   "TemporalBalanceTx"
+  ],
+  "guildcampaign": [
+   "DeliverNoticeTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "guildcore": [
+   "AuthorizeLevelAndDebitScalarTx",
+   "DebitScalarTx",
+   "PlayerLevelTx"
+  ],
+  "guildrental": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "guildtea": [
+   "DebitMaterialCostTx",
+   "SettleGrantTx"
+  ],
+  "heroevolution": [
+   "ApplyMaterialDebitTx",
+   "PrepareMaterialDebitTx"
+  ],
+  "illusion": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ],
+  "inscription": [
+   "ApplyInscriptionValueTx",
+   "PrepareInscriptionValueTx"
+  ],
+  "librarylocal": [
+   "DebitMaterialCostTx"
+  ],
+  "march": [
+   "DebitMaterialCostTx",
+   "SettleGrantTx"
+  ],
+  "memoir": [
+   "ApplyMaterialExchangeTx",
+   "DebitMaterialCostTx",
+   "DebitTemporalTx",
+   "PrepareMaterialExchangeTx",
+   "SettleGrantTx",
+   "StockRepresentableBulkAwards"
+  ],
+  "occult": [
+   "CheckAwakeningOccultMaterialTx",
+   "DebitOccultTicketTx",
+   "FreezeAwakeningOccultMaterialTx",
+   "OccultTicketsTx",
+   "SettleGrantTx"
+  ],
+  "oneonone": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ],
+  "petcampaign": [
+   "CheckAwakeningPetMaterialTx",
+   "DebitMaterialCostTx",
+   "FreezeAwakeningPetMaterialTx",
+   "SettleGrantTx"
+  ],
+  "playerdisplay": [
+   "ApplyDisplayValueTx",
+   "PrepareDisplayValueTx"
+  ],
+  "publicprofile": [
+   "Apply"
+  ],
+  "socialgift": [
+   "GiftGrantIdentityExistsTx",
+   "ReadGrantEvidenceTx",
+   "SettleGrantTx",
+   "VerifyGiftBalanceTx"
+  ],
+  "spirit": [
+   "ApplyMaterialDebitTx",
+   "PrepareMaterialDebitTx"
+  ],
+  "summon": [
+   "DebitMaterialCostTx",
+   "SettleGrantTx"
+  ],
+  "topfloor": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ],
+  "workplace": [
+   "DebitTemporalTx",
+   "SettleGrantTx",
+   "WorkplaceSPTx"
+  ],
+  "worldboss": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ]
+ },
+ "calls": {
+  "generation": [
+   "Bind"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -105,135 +287,184 @@
    "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/i5_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": [
+   "GODS_TRIAL_CLEARED",
+   "MARCH_FINISHED",
+   "SKY_CITY_BATTLE",
+   "WORKPLACE_TEAM_SENT"
+  ]
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I5_CURRENT_SCALAR_PROJECTION"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I5_PLAYER_WRITE"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "i5.CharacterAssetLockRankMax",
+    "rank": 599
+   },
+   {
+    "name": "i5.CharacterAssetLockRankMin",
+    "rank": 400
+   },
+   {
+    "name": "i5.grantLockRankDirectory",
+    "rank": 740
+   },
+   {
+    "name": "i5.grantLockRankEconomyOwner",
+    "rank": 700
+   },
+   {
+    "name": "i5.grantLockRankFunctionState",
+    "rank": 730
+   },
+   {
+    "name": "i5.grantLockRankMailNamespace",
+    "rank": 610
+   },
+   {
+    "name": "i5.grantLockRankProgression",
+    "rank": 710
+   },
+   {
+    "name": "i5.grantLockRankScalar",
+    "rank": 720
+   },
+   {
+    "name": "i5.grantLockRankStack",
+    "rank": 722
+   },
+   {
+    "name": "i5.grantLockRankTemporal",
+    "rank": 721
+   }
+  ]
+ },
+ "login": [
+  "AwakeningBootstrap",
+  "MissionBootstrap",
+  "OverlayMID1",
+  "PetStarterLoginReconciler",
+  "ReconcileCharacterLogin",
+  "SignInBootstrap"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 26,
    "name": "SAVE_STORY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 81,
    "name": "LOAD_BACKPACK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 160,
    "name": "LOAD_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 161,
    "name": "TAKE_MISSION_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 163,
    "name": "OPEN_AWAKE_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 164,
    "name": "GIVE_UP_AWAKE_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 165,
    "name": "OPEN_PET_AWAKE_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 166,
    "name": "GIVE_UP_PET_AWAKE_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 167,
    "name": "OPEN_AWAKE_TWICE_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 168,
    "name": "GIVE_UP_AWAKE_TWICE_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 169,
    "name": "GET_DAY_HUOYUE_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 170,
    "name": "GET_WEEK_HUOYUE_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 171,
    "name": "GET_AWAKE_ITEM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 230,
    "name": "REDEEM_CODE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 352,
    "name": "LOAD_SIGN_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 353,
    "name": "SIGN"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 368,
    "name": "LOAD_MAIL_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 369,
    "name": "SET_MAIL_READ"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 370,
    "name": "MAIL_ONEKEY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 2561,
    "name": "AWAKE_MISSION_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 2736,
    "name": "TASK_LOAD_BY_TYPE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 2737,
    "name": "TASK_AWAKE_GIVE_UP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 2738,
    "name": "TASK_AWAKE_OPEN"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 2865,
    "name": "SET_PLAYER_GUIDE_FUNCTION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/i5_dispatcher.go",
    "mid": 2866,
    "name": "SET_PLAYER_RETURN_ID"
   }
  ],
  "name": "i5",
- "path": "internal/application/i5",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/commerceprivilegestore",
@@ -317,112 +548,52 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildbroadcast",
-   "internal/integration/guildinvite",
-   "internal/integration/missions",
-   "internal/integration/playerdisplay",
-   "internal/integration/publicshowcase",
-   "internal/integration/socialactivation"
+   "guildbroadcast",
+   "guildinvite",
+   "missions",
+   "playerdisplay",
+   "publicshowcase",
+   "socialactivation"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_3_fresh_lobby.json",
-   "virtualclient/scenarios/i9_3_strong_guide.json",
-   "virtualclient/scenarios/i9_3d_challenge_loss.json",
-   "virtualclient/scenarios/i9_4_guide17.json",
-   "virtualclient/scenarios/i9_4_real_pk.json",
-   "virtualclient/scenarios/i9_4a_missions.json",
-   "virtualclient/scenarios/i9_4b_chest.json",
-   "virtualclient/scenarios/i9_4c_signin.json",
-   "virtualclient/scenarios/i9_4c_signin_bonus.json",
-   "virtualclient/scenarios/i9_4d_awakening.json",
-   "virtualclient/scenarios/i9_5c_pet_awakening.json",
-   "virtualclient/scenarios/i9_tutorial_switches.json"
+   "i9_3_fresh_lobby.json",
+   "i9_3_strong_guide.json",
+   "i9_3d_challenge_loss.json",
+   "i9_4_guide17.json",
+   "i9_4_real_pk.json",
+   "i9_4a_missions.json",
+   "i9_4b_chest.json",
+   "i9_4c_signin.json",
+   "i9_4c_signin_bonus.json",
+   "i9_4d_awakening.json",
+   "i9_5c_pet_awakening.json",
+   "i9_tutorial_switches.json"
   ],
   "unit": [
-   "internal/application/i5/awakening_occult_material_test.go",
-   "internal/application/i5/ca1_test.go",
-   "internal/application/i5/character_functions_test.go",
-   "internal/application/i5/composite_functions_test.go",
-   "internal/application/i5/equipment_resources_test.go",
-   "internal/application/i5/hero_equipment_resources_test.go",
-   "internal/application/i5/hero_progression_test.go",
-   "internal/application/i5/hero_promotion_resources_test.go",
-   "internal/application/i5/level_function_announcement_test.go",
-   "internal/application/i5/level_stack_test.go",
-   "internal/application/i5/march_binding_test.go",
-   "internal/application/i5/material_exchange_test.go",
-   "internal/application/i5/max_hero_color_policy_test.go",
-   "internal/application/i5/mission_fact_binding_test.go",
-   "internal/application/i5/mission_projection_test.go",
-   "internal/application/i5/missions_test.go",
-   "internal/application/i5/objective_facts_test.go",
-   "internal/application/i5/occult_ticket_test.go",
-   "internal/application/i5/pet_acquisition_test.go",
-   "internal/application/i5/pet_progression_test.go",
-   "internal/application/i5/promotion_restoration_test.go",
-   "internal/application/i5/service_test.go",
-   "internal/application/i5/temporal_repin_test.go",
-   "internal/application/i5/workplace_sp_test.go"
+   "awakening_occult_material_test.go",
+   "ca1_test.go",
+   "character_functions_test.go",
+   "composite_functions_test.go",
+   "equipment_resources_test.go",
+   "hero_equipment_resources_test.go",
+   "hero_progression_test.go",
+   "hero_promotion_resources_test.go",
+   "level_function_announcement_test.go",
+   "level_stack_test.go",
+   "march_binding_test.go",
+   "material_exchange_test.go",
+   "max_hero_color_policy_test.go",
+   "mission_fact_binding_test.go",
+   "mission_projection_test.go",
+   "missions_test.go",
+   "objective_facts_test.go",
+   "occult_ticket_test.go",
+   "pet_acquisition_test.go",
+   "pet_progression_test.go",
+   "promotion_restoration_test.go",
+   "service_test.go",
+   "temporal_repin_test.go",
+   "workplace_sp_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

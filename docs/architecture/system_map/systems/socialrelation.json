@@ -1,25 +1,52 @@
 {
- "called_by": [
-  "arena",
-  "dodgeball",
-  "frienddm",
-  "generaldm",
-  "guildinvitetarget",
-  "profilefeedback",
-  "publicprofile",
-  "roominvite",
-  "socialdismiss",
-  "socialgift",
-  "socialprojection",
-  "socialreload"
- ],
- "calls": [
-  "generation",
-  "playerpresentation",
-  "playerroot",
-  "socialinbox",
-  "socialreloadref"
- ],
+ "background": [],
+ "called_by": {
+  "arena": [
+   "CanonicalServer",
+   "PrepareFriendFightPrivacyTx"
+  ],
+  "dodgeball": [
+   "PrepareFriendDMPrivacyTx"
+  ],
+  "frienddm": [
+   "CanonicalServer",
+   "PrepareFriendDMPrivacyTx"
+  ],
+  "generaldm": [
+   "CanonicalServer",
+   "ReadGeneralBlockTx"
+  ],
+  "guildinvitetarget": [
+   "ApplyChangeTx"
+  ],
+  "profilefeedback": [
+   "CanonicalServer"
+  ],
+  "publicprofile": [
+   "BlockLockKey",
+   "CanonicalServer"
+  ],
+  "roominvite": [
+   "ApplyChangeTx"
+  ],
+  "socialdismiss": [
+   "CanonicalServer"
+  ],
+  "socialgift": [
+   "CanonicalServer",
+   "PrepareFriendDMPrivacyTx"
+  ],
+  "socialprojection": [
+   "CanonicalServer"
+  ]
+ },
+ "calls": {
+  "socialinbox": [
+   "ApplyRelationsTx",
+   "PrepareRelationsTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -46,85 +73,108 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/social_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7A4B_SOCIAL_RELATION"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "socialrelation.LockRankBlock",
+    "rank": 363
+   },
+   {
+    "name": "socialrelation.LockRankFriendship",
+    "rank": 361
+   },
+   {
+    "name": "socialrelation.LockRankRequest",
+    "rank": 362
+   },
+   {
+    "name": "socialrelation.LockRankRequestEpoch",
+    "rank": 364
+   },
+   {
+    "name": "socialrelation.LockRankSocialRoot",
+    "rank": 360
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 176,
    "name": "LOAD_FRIENDS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 177,
    "name": "REQUEST_FRIEND"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 178,
    "name": "DENY_FRIEND_REQUEST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 179,
    "name": "IGNORE_FRIEND_REQUEST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 180,
    "name": "ACCEPT_FRIEND_REQUEST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 181,
    "name": "DELETE_FRIEND"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 182,
    "name": "ACCEPT_ALL_FRIEND_REQUEST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 183,
    "name": "SEND_SOCIAL_GIFT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 184,
    "name": "READ_NOTICE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 185,
    "name": "ADD_BLACK_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 186,
    "name": "REMOVE_BLACK_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 187,
    "name": "CLEAR_BLACK_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 188,
    "name": "SEARCH_PLAYER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 189,
    "name": "LOAD_FRIEND_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/social_dispatcher.go",
    "mid": 190,
    "name": "GET_RECOMMEND_FRIENDS"
   }
  ],
  "name": "socialrelation",
- "path": "internal/application/socialrelation",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -184,78 +234,18 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/playerdisplay",
-   "internal/integration/socialactivation",
-   "internal/integration/socialprojection",
-   "internal/integration/socialrelation"
+   "guildinvite",
+   "playerdisplay",
+   "socialactivation",
+   "socialprojection",
+   "socialrelation"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_7c_friend_fight.json",
-   "virtualclient/scenarios/social.json"
+   "i9_7c_friend_fight.json",
+   "social.json"
   ],
   "unit": [
-   "internal/application/socialrelation/locks_test.go"
+   "locks_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

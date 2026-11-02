@@ -1,9 +1,13 @@
 {
- "called_by": [],
- "calls": [
-  "generation",
-  "i5"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "i5": [
+   "DebitMaterialCostTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 2,
@@ -46,35 +50,51 @@
    "file": "docs/i9/I9_WORKPLACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/summon_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "VENDING_JUICE_PURCHASED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "summon"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/summon_dispatcher.go",
    "mid": 50,
    "name": "SUMMON_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/summon_dispatcher.go",
    "mid": 56,
    "name": "LOAD_SUMMON_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/summon_dispatcher.go",
    "mid": 70,
    "name": "MAGIC_SUMMON_BUY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/summon_dispatcher.go",
    "mid": 71,
    "name": "MAGIC_SUMMON_SWITCH_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/summon_dispatcher.go",
    "mid": 306,
    "name": "SUPER_HERO_STONE_EXCHANGE"
   }
  ],
  "name": "summon",
- "path": "internal/application/summon",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/adventurestore",
@@ -100,76 +120,16 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_3_strong_guide.json",
-   "virtualclient/scenarios/i9_3e_summon.json",
-   "virtualclient/scenarios/i9_3f_premium.json",
-   "virtualclient/scenarios/i9_4a_missions.json",
-   "virtualclient/scenarios/i9_4b_chest.json",
-   "virtualclient/scenarios/i9_8d_adventure.json"
+   "i9_3_strong_guide.json",
+   "i9_3e_summon.json",
+   "i9_3f_premium.json",
+   "i9_4a_missions.json",
+   "i9_4b_chest.json",
+   "i9_8d_adventure.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

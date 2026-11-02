@@ -1,15 +1,30 @@
 {
- "called_by": [
-  "achievement",
-  "combat",
-  "publicprofile",
-  "publicstats"
- ],
- "calls": [
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "HeroLibraryInputsTx",
+   "MarriedHeroCountTx"
+  ],
+  "combat": [
+   "PlayerCollectionInputsTx"
+  ],
+  "publicprofile": [
+   "MarriedHeroCountTx"
+  ],
+  "publicstats": [
+   "HeroLibraryInputsTx",
+   "PlayerCollectionInputsTx"
+  ]
+ },
+ "calls": {
+  "generation": [
+   "Bind"
+  ],
+  "i5": [
+   "DebitMaterialCostTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -36,50 +51,62 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/library_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2B_LIBRARY_INPUTS"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "BootstrapProjection",
+  "OverlayRosterTx"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 72,
    "name": "ALBUM_PARTNER_UNLOCK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 836,
    "name": "GET_LIBRARY_INFOS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 840,
    "name": "ADD_FAVOR"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 852,
    "name": "HERO_FEED"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 853,
    "name": "GET_FEED_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 854,
    "name": "SAVE_HERO_FEED"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 2784,
    "name": "ALBUM_SPECIAL_COLLECT_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/library_dispatcher.go",
    "mid": 2785,
    "name": "ALBUM_SPECIAL_COLLECT_REWARD"
   }
  ],
  "name": "librarylocal",
- "path": "internal/application/librarylocal",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterbirth",
@@ -106,71 +133,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/librarylocal/roll_policy_test.go"
+   "roll_policy_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

@@ -1,93 +1,117 @@
 {
- "called_by": [
-  "achievement",
-  "publicstats"
- ],
- "calls": [
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "HeroCourseInputsTx"
+  ],
+  "publicstats": [
+   "HeroCourseInputsTx"
+  ]
+ },
+ "calls": {
+  "generation": [
+   "Bind"
+  ],
+  "i5": [
+   "ApplyMaterialDebitTx",
+   "ApplyMaterialExchangeTx",
+   "PrepareMaterialDebitTx",
+   "PrepareMaterialExchangeTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 14,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/course_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2E_COURSE_INPUTS"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "course.RootLockRank",
+    "rank": 520
+   }
+  ]
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2128,
    "name": "APPLY_COURSE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2129,
    "name": "GET_COURSE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2130,
    "name": "GET_STUDYROOM_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2131,
    "name": "STUDY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2132,
    "name": "SPEED_STUDY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2133,
    "name": "ADD_SKILL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2134,
    "name": "FORGET_COURSE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2135,
    "name": "ENTER_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2136,
    "name": "LEAVE_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2137,
    "name": "GET_STUDY_INFOS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2138,
    "name": "CANCEL_STUDY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2139,
    "name": "GET_GIFT_BOX_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2140,
    "name": "INCR_COURESE_EXP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/course_dispatcher.go",
    "mid": 2142,
    "name": "CONTINUE_STUDY"
   }
  ],
  "name": "course",
- "path": "internal/application/course",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterbirth",
@@ -114,69 +138,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

@@ -1,52 +1,71 @@
 {
- "called_by": [],
- "calls": [
-  "generation",
-  "i5",
-  "playerroot",
-  "publicprofile",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "generation": [
+   "Bind",
+   "NewTimedOperation"
+  ],
+  "publicprofile": [
+   "ReadBasicTx"
+  ],
+  "socialrelation": [
+   "CanonicalServer"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 6,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/profile_comments.go",
+  "internal/adapters/stockruntime/profile_feedback.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "profilefeedback.LockRankRoot",
+    "rank": 392
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/profile_feedback.go",
    "mid": 1830,
    "name": "PLAYER_CARD_ADD_PRAISE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/profile_comments.go",
    "mid": 1835,
    "name": "ADD_COMMENT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/profile_comments.go",
    "mid": 1836,
    "name": "ADD_COMMENT_PRAISE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/profile_comments.go",
    "mid": 1839,
    "name": "GET_COMMENT_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/profile_comments.go",
    "mid": 1841,
    "name": "DEL_COMMENT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/profile_feedback.go",
    "mid": 1842,
    "name": "GET_PRAISE_LIST"
   }
  ],
  "name": "profilefeedback",
- "path": "internal/application/profilefeedback",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
@@ -82,19 +101,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay",
-   "internal/integration/profilefeedback",
-   "internal/integration/publicshowcase"
+   "playerdisplay",
+   "profilefeedback",
+   "publicshowcase"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [
-  "generation",
-  "publicprofile",
-  "realtimeauth"
- ],
- "wiring_files": [
-  "cmd/gxb-api/profile_feedback_postgres.go"
- ]
+ }
 }

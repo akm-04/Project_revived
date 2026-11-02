@@ -1,14 +1,26 @@
 {
- "called_by": [],
- "calls": [
-  "activitydirectory",
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerroot"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appworldboss.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "StartTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -23,35 +35,49 @@
    "file": "docs/i9/I9_WORLD_BOSS_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/world_boss_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "world-boss"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
    "mid": 624,
    "name": "WORLD_BOSS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
    "mid": 625,
    "name": "WORLD_BOSS_BUY_TIMES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
    "mid": 626,
    "name": "WORLD_BOSS_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
    "mid": 627,
    "name": "WORLD_BOSS_FIGHT_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
    "mid": 628,
    "name": "WORLD_BOSS_SWEEP"
   }
  ],
  "name": "worldboss",
- "path": "internal/application/worldboss",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
@@ -76,21 +102,13 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_8a_world_boss.json"
+   "i9_8a_world_boss.json"
   ],
   "unit": [
-   "internal/application/worldboss/service_test.go"
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "combat",
-  "generation",
-  "i5"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

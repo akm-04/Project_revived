@@ -1,72 +1,115 @@
 {
- "called_by": [
-  "profilefeedback",
-  "ranking"
- ],
- "calls": [
-  "achievement",
-  "characterasset",
-  "characterhero",
-  "generation",
-  "guildcore",
-  "i5",
-  "librarylocal",
-  "playerdisplay",
-  "playerroot",
-  "profileasset",
-  "publicstats",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {
+  "profilefeedback": [
+   "ReadBasicTx"
+  ],
+  "ranking": [
+   "ReadMetricsScopeTx"
+  ]
+ },
+ "calls": {
+  "achievement": [
+   "TrophyCountTx"
+  ],
+  "characterasset": [
+   "HeroReferenceFromLockKey",
+   "HeroReferenceLockKey",
+   "NewCoherentReadScope",
+   "PetReferenceFromLockKey",
+   "PetReferenceLockKey",
+   "ValidateExactRevisionID",
+   "ValidateReferenceGuardPlan"
+  ],
+  "characterhero": [
+   "BookmarkTx",
+   "HeroBaseObservationTx",
+   "RawAwakeningTx"
+  ],
+  "guildcore": [
+   "ReadPublicGuildTx"
+  ],
+  "i5": [
+   "Apply"
+  ],
+  "librarylocal": [
+   "MarriedHeroCountTx"
+  ],
+  "playerdisplay": [
+   "CosmeticCountTx",
+   "ReadEffectivePlayerDisplayTx",
+   "SkinCollectionTx"
+  ],
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ],
+  "socialrelation": [
+   "BlockLockKey",
+   "CanonicalServer"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 7,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/profile_media.go",
+  "internal/adapters/stockruntime/public_profile.go",
+  "internal/adapters/stockruntime/public_profile_reads.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "publicprofile.LockRankRoot",
+    "rank": 391
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/public_profile_reads.go",
    "mid": 1829,
    "name": "GET_PLAYER_CARD_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/public_profile.go",
    "mid": 1831,
    "name": "MODIFY_SHOW_TYPES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/public_profile_reads.go",
    "mid": 1832,
    "name": "MODIFY_SHOW_CASE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/public_profile.go",
    "mid": 1833,
    "name": "HIDE_SUB_TYPE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/public_profile.go",
    "mid": 1834,
    "name": "MODIFY_INTRO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/public_profile_reads.go",
    "mid": 1838,
    "name": "GET_SHOWCASE_DETAIL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/public_profile_reads.go",
    "mid": 1840,
    "name": "GET_ALL_SHOW_TYPE_INFOS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/profile_media.go",
    "mid": 1844,
    "name": "UPLOAD_SPACE_AVATAR"
   }
  ],
  "name": "publicprofile",
- "path": "internal/application/publicprofile",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -104,35 +147,20 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay",
-   "internal/integration/profilefeedback",
-   "internal/integration/profilemedia",
-   "internal/integration/publicprofilecommands",
-   "internal/integration/publicprofilefoundation",
-   "internal/integration/publicshowcase"
+   "playerdisplay",
+   "profilefeedback",
+   "profilemedia",
+   "publicprofilecommands",
+   "publicprofilefoundation",
+   "publicshowcase"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/publicprofile/media_test.go",
-   "internal/application/publicprofile/rich_records_test.go",
-   "internal/application/publicprofile/roster_metrics_test.go",
-   "internal/application/publicprofile/selected_metrics_test.go",
-   "internal/application/publicprofile/showcase_test.go"
+   "media_test.go",
+   "rich_records_test.go",
+   "roster_metrics_test.go",
+   "selected_metrics_test.go",
+   "showcase_test.go"
   ]
- },
- "wired_with": [
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "generation",
-  "guildcore",
-  "playerdisplay",
-  "profilefeedback",
-  "realtimeauth"
- ],
- "wiring_files": [
-  "cmd/gxb-api/profile_media_postgres.go",
-  "cmd/gxb-api/public_profile_postgres.go",
-  "cmd/gxb-api/public_profile_reads_postgres.go"
- ]
+ }
 }

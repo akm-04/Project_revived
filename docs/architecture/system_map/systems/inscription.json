@@ -1,64 +1,88 @@
 {
- "called_by": [
-  "achievement",
-  "publicstats"
- ],
- "calls": [
-  "characterasset",
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "HeroInscriptionInputsTx"
+  ]
+ },
+ "calls": {
+  "generation": [
+   "Bind"
+  ],
+  "i5": [
+   "ApplyInscriptionValueTx",
+   "PrepareInscriptionValueTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 8,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/inscription_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2F_INSCRIPTION_INPUTS"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "inscription.RootLockRank",
+    "rank": 540
+   }
+  ]
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1400,
    "name": "INSCRIPTION_MAKE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1401,
    "name": "INSCRIPTION_REBUILD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1402,
    "name": "INSCRIPTION_INSERT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1403,
    "name": "INSCRIPTION_REMOVE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1404,
    "name": "INSCRIPTION_RESOLVE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1405,
    "name": "INSCRIPTION_SAVE_REBUILD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1406,
    "name": "INSCRIPTION_ABANDON_REBUILD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/inscription_dispatcher.go",
    "mid": 1407,
    "name": "EXCHANGE_MATERIALS"
   }
  ],
  "name": "inscription",
- "path": "internal/application/inscription",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterbirth",
@@ -87,69 +111,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

@@ -1,12 +1,22 @@
 {
- "called_by": [
-  "publicprofile"
- ],
- "calls": [],
+ "background": [],
+ "called_by": {},
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "profileasset",
- "path": "internal/application/profileasset",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -15,11 +25,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/profilemedia"
+   "profilemedia"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

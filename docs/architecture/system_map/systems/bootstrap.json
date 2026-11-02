@@ -1,6 +1,8 @@
 {
- "called_by": [],
- "calls": [],
+ "background": [],
+ "called_by": {},
+ "calls": {},
+ "content": [],
  "contracts": [
   {
    "count": 2,
@@ -191,20 +193,47 @@
    "file": "docs/i9/I9_WORLD_BOSS_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/http_dispatchers.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "course.RootLockRank",
+    "rank": 520
+   },
+   {
+    "name": "elementequipment.RootLockRank",
+    "rank": 560
+   },
+   {
+    "name": "inscription.RootLockRank",
+    "rank": 540
+   },
+   {
+    "name": "spirit.RootLockRank",
+    "rank": 580
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/http_dispatchers.go",
    "mid": 1,
    "name": "RETRIEVE_TOKEN"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/http_dispatchers.go",
    "mid": 18,
    "name": "LOAD_USER_REGIONS"
   }
  ],
  "name": "bootstrap",
- "path": "internal/application/bootstrap",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/activitystore",
@@ -327,78 +356,18 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_2_foundation.json",
-   "virtualclient/scenarios/i9_3b_crystal.json",
-   "virtualclient/scenarios/i9_3b_sweep.json",
-   "virtualclient/scenarios/i9_4b_chest.json"
+   "i9_2_foundation.json",
+   "i9_3b_crystal.json",
+   "i9_3b_sweep.json",
+   "i9_4b_chest.json"
   ],
   "unit": [
-   "internal/application/bootstrap/contributor_test.go",
-   "internal/application/bootstrap/reconcile_test.go",
-   "internal/application/bootstrap/service_test.go"
+   "contributor_test.go",
+   "reconcile_test.go",
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

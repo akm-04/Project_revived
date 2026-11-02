@@ -1,10 +1,13 @@
 {
- "called_by": [],
- "calls": [
-  "i5",
-  "playerdirectory",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "i5": [
+   "DebitMaterialCostTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 4,
@@ -15,30 +18,40 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_tea_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "TEA_PARTY_DONATED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
    "mid": 1808,
    "name": "GET_TEA_TALK_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
    "mid": 1809,
    "name": "TEA_TALK_QUEST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
    "mid": 1810,
    "name": "TEA_TALK_PRESENT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
    "mid": 1811,
    "name": "TEA_TALK_CONFIRM_GIFT"
   }
  ],
  "name": "guildtea",
- "path": "internal/application/guildtea",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -56,71 +69,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_9a_guild_tea.json"
+   "i9_9a_guild_tea.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

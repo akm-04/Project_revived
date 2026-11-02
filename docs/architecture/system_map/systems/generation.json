@@ -1,63 +1,60 @@
 {
- "called_by": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "campaign",
-  "championsleague",
-  "characterhero",
-  "characterpet",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dodgeball",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "godstrial",
-  "guildbroadcast",
-  "guildcampaign",
-  "guildcore",
-  "guildinvite",
-  "guildinvitetarget",
-  "guildrental",
-  "heroevolution",
-  "i5",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "memoir",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "profilefeedback",
-  "publication",
-  "publicprofile",
-  "ranking",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialpresence",
-  "socialrelation",
-  "spirit",
-  "summon",
-  "topfloor",
-  "workplace",
-  "worldboss"
- ],
- "calls": [],
+ "background": [],
+ "called_by": {
+  "bookskill": [
+   "Bind"
+  ],
+  "course": [
+   "Bind"
+  ],
+  "dormhouse": [
+   "Bind"
+  ],
+  "elementequipment": [
+   "Bind"
+  ],
+  "guildcampaign": [
+   "NewTimedOperation"
+  ],
+  "guildrental": [
+   "NewTimedOperation"
+  ],
+  "heroevolution": [
+   "Bind"
+  ],
+  "i5": [
+   "Bind"
+  ],
+  "inscription": [
+   "Bind"
+  ],
+  "librarylocal": [
+   "Bind"
+  ],
+  "profilefeedback": [
+   "Bind",
+   "NewTimedOperation"
+  ],
+  "spirit": [
+   "Bind"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "generation",
- "path": "internal/application/generation",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -66,29 +63,27 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildbroadcast",
-   "internal/integration/guildinvite",
-   "internal/integration/missions",
-   "internal/integration/playerdisplay",
-   "internal/integration/profilefeedback",
-   "internal/integration/profilemedia",
-   "internal/integration/publication",
-   "internal/integration/publicprofilecommands",
-   "internal/integration/publicprofilefoundation",
-   "internal/integration/publicshowcase",
-   "internal/integration/socialactivation",
-   "internal/integration/socialprojection",
-   "internal/integration/socialrelation"
+   "guildbroadcast",
+   "guildinvite",
+   "missions",
+   "playerdisplay",
+   "profilefeedback",
+   "profilemedia",
+   "publication",
+   "publicprofilecommands",
+   "publicprofilefoundation",
+   "publicshowcase",
+   "socialactivation",
+   "socialprojection",
+   "socialrelation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/generation/dispatch_test.go",
-   "internal/application/generation/kernel_contract_test.go",
-   "internal/application/generation/reconcile_test.go",
-   "internal/application/generation/time_test.go",
-   "internal/application/generation/transaction_test.go"
+   "dispatch_test.go",
+   "kernel_contract_test.go",
+   "reconcile_test.go",
+   "time_test.go",
+   "transaction_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

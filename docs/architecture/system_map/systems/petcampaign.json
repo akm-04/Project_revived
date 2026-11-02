@@ -1,82 +1,102 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "MonsterWaves",
+   "StartTx"
+  ],
+  "i5": [
+   "CheckAwakeningPetMaterialTx",
+   "DebitMaterialCostTx",
+   "FreezeAwakeningPetMaterialTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 12,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/petcampaign_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "SKY_CITY_BATTLE"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "pet-campaign"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 816,
    "name": "PET_CAMPAIGN_LOAD_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 817,
    "name": "PET_CAMPAIGN_SWEEP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 818,
    "name": "PET_CAMPAIGN_RECORD_SWEEP_TIME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 819,
    "name": "PET_CAMPAIGN_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 820,
    "name": "PET_CAMPAIGN_BATTLE_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 821,
    "name": "PET_CAMPAIGN_RESTART"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 822,
    "name": "PET_CAMPAIGN_RED_POINT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 823,
    "name": "PET_CAMPAIGN_AWAKE_SWEEP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 824,
    "name": "PET_CAMPAIGN_SWEEP_SUPER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 825,
    "name": "PET_CAMPAIGN_BUY_SUPER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 826,
    "name": "PET_CAMPAIGN_SAVE_SUPER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
    "mid": 827,
    "name": "PET_CAMPAIGN_PRACTICE"
   }
  ],
  "name": "petcampaign",
- "path": "internal/application/petcampaign",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -96,22 +116,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_5c_pet_awakening.json",
-   "virtualclient/scenarios/i9_5c_petcampaign.json"
+   "i9_5c_pet_awakening.json",
+   "i9_5c_petcampaign.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "characterhero",
-  "characterpet",
-  "combat",
-  "generation",
-  "i5"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

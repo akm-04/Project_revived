@@ -1,10 +1,22 @@
 {
- "called_by": [],
- "calls": [],
+ "background": [],
+ "called_by": {},
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "clientlog",
- "path": "internal/application/clientlog",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -18,13 +30,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/clientlog"
+   "clientlog"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/clientlog/service_test.go"
+   "service_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

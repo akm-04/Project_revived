@@ -1,39 +1,75 @@
 {
- "called_by": [
-  "publicprofile"
- ],
- "calls": [
-  "bookskill",
-  "characterasset",
-  "course",
-  "dormhouse",
-  "generation",
-  "i5",
-  "inscription",
-  "librarylocal",
-  "playerdirectory",
-  "playerdisplay"
- ],
+ "background": [],
+ "called_by": {
+  "publicprofile": [
+   "TrophyCountTx"
+  ]
+ },
+ "calls": {
+  "bookskill": [
+   "BookInputsTx"
+  ],
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "course": [
+   "HeroCourseInputsTx"
+  ],
+  "dormhouse": [
+   "VillaCountTx"
+  ],
+  "i5": [
+   "SettleGrantTx"
+  ],
+  "inscription": [
+   "HeroInscriptionInputsTx"
+  ],
+  "librarylocal": [
+   "HeroLibraryInputsTx",
+   "MarriedHeroCountTx"
+  ],
+  "playerdisplay": [
+   "SkinCollectionTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 2,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/achievement_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "MARRIED_HERO_POPULATION"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "achievement"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/achievement_dispatcher.go",
    "mid": 1302,
    "name": "LOAD_ACHIEVEMENT_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/achievement_dispatcher.go",
    "mid": 1303,
    "name": "GET_ACHIEVEMENT_AWARD"
   }
  ],
  "name": "achievement",
- "path": "internal/application/achievement",
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/achievement_notice.go",
@@ -83,25 +119,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/achievement.json",
-   "virtualclient/scenarios/display.json"
+   "achievement.json",
+   "display.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "bookskill",
-  "conquerschool",
-  "course",
-  "dormhouse",
-  "generation",
-  "i5",
-  "inscription",
-  "realtimeauth"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

@@ -1,12 +1,31 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "apptopfloor.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttemptTx",
+   "CloseTx",
+   "ReplayTx",
+   "ResultTx",
+   "StartEvidenceTx",
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -21,125 +40,122 @@
    "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/topfloor_dispatcher.go",
+  "internal/adapters/stockruntime/topfloor_task_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "top-floor"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 272,
    "name": "LOAD_ARENA"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 273,
    "name": "LOAD_ARENA_PLAYER_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 278,
    "name": "SAVE_ARENA_DEFENSE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 280,
    "name": "START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 281,
    "name": "ARENA_BUY_TICKET"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 282,
    "name": "ARENA_MODE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 283,
    "name": "ARENA_MODE_ENEMY_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 284,
    "name": "ARENA_MODE_DEFENCE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 285,
    "name": "ARENA_MODE_FIGHT_PRE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 286,
    "name": "ARENA_MODE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 287,
    "name": "ARENA_MODE_BUY_TICKET"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 288,
    "name": "ARENA_RESET_TIMER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 289,
    "name": "LOAD_ARENA_FIGHT_RECORDS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 290,
    "name": "LOAD_ARENA_FIGHT_REPORT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 291,
    "name": "query_arena_formation"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 292,
    "name": "SEAL_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 293,
    "name": "ARENA_GET_RCORD_PLAYER_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
    "mid": 294,
    "name": "ARENA_PRE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 295,
    "name": "ARENA_MODE_QUERY_FORMATION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 296,
    "name": "ARENA_MODE_RESET_TIME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 298,
    "name": "ARENA_MODE_RECORD_DETAIL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 299,
    "name": "ARENA_MODE_RECORD_PLAYER_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
    "mid": 300,
    "name": "ARENA_MODE_SCHEDULE"
   }
  ],
  "name": "topfloor",
- "path": "internal/application/topfloor",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/achievementstore",
@@ -292,46 +308,15 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_4_real_pk.json",
-   "virtualclient/scenarios/i9_7a_top_floor_task.json",
-   "virtualclient/scenarios/i9_7a_top_floor_task_battle.json",
-   "virtualclient/scenarios/topfloor.json",
-   "virtualclient/scenarios/topfloor_battle.json"
+   "i9_4_real_pk.json",
+   "i9_7a_top_floor_task.json",
+   "i9_7a_top_floor_task_battle.json",
+   "topfloor.json",
+   "topfloor_battle.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "adventure",
-  "arena",
-  "bookskill",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "combat",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "dormhouse",
-  "elementequipment",
-  "generation",
-  "heroevolution",
-  "i5",
-  "inscription",
-  "librarylocal",
-  "oneonone",
-  "playerdisplay",
-  "publicstats",
-  "socialrelation",
-  "spirit"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

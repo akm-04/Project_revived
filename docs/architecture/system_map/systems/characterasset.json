@@ -1,45 +1,134 @@
 {
- "called_by": [
-  "achievement",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "campaign",
-  "championsleague",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "combat",
-  "conquerschool",
-  "dodgeball",
-  "elementequipment",
-  "godstrial",
-  "guildcampaign",
-  "guildrental",
-  "heroevolution",
-  "illusion",
-  "inscription",
-  "march",
-  "memoir",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publicprofile",
-  "publicstats",
-  "ranking",
-  "sharedroom",
-  "spirit",
-  "topfloor",
-  "workplace",
-  "worldboss"
- ],
- "calls": [],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "NewCoherentReadScope"
+  ],
+  "adventure": [
+   "NewCoherentReadScope"
+  ],
+  "arena": [
+   "NewCoherentReadScope"
+  ],
+  "awakeningbattle": [
+   "NewCoherentReadScope"
+  ],
+  "campaign": [
+   "NewCoherentReadScope"
+  ],
+  "championsleague": [
+   "NewCoherentReadScope"
+  ],
+  "characterhero": [
+   "BuildEffectiveHeroAppearance",
+   "BuildEffectiveHeroAppearanceTx",
+   "HeroPromotionRestorationSource",
+   "HeroReferenceLockKey",
+   "ModifyRestoration",
+   "ValidateExactRevisionID"
+  ],
+  "characterpet": [
+   "BuildEffectivePetAppearance",
+   "BuildEffectivePetAppearanceTx",
+   "ModifyRestoration",
+   "PetPromotionRestorationSource",
+   "ValidateExactRevisionID"
+  ],
+  "charactersavedpreset": [
+   "HeroReferenceLockKey",
+   "PetReferenceLockKey",
+   "SavedPresetRootLockKey",
+   "SavedPresetRootPlayerFromLockKey",
+   "ValidateReferenceGuardPlan"
+  ],
+  "conquerschool": [
+   "NewCoherentReadScope"
+  ],
+  "dodgeball": [
+   "NewCoherentReadScope"
+  ],
+  "godstrial": [
+   "NewCoherentReadScope"
+  ],
+  "guildcampaign": [
+   "NewCoherentReadScope"
+  ],
+  "guildrental": [
+   "ValidateReferenceGuardPlan"
+  ],
+  "illusion": [
+   "NewCoherentReadScope"
+  ],
+  "march": [
+   "NewCoherentReadScope"
+  ],
+  "memoir": [
+   "NewCoherentReadScope"
+  ],
+  "occult": [
+   "NewCoherentReadScope"
+  ],
+  "oneonone": [
+   "NewCoherentReadScope"
+  ],
+  "petcampaign": [
+   "NewCoherentReadScope"
+  ],
+  "publicprofile": [
+   "HeroReferenceFromLockKey",
+   "HeroReferenceLockKey",
+   "NewCoherentReadScope",
+   "PetReferenceFromLockKey",
+   "PetReferenceLockKey",
+   "ValidateExactRevisionID",
+   "ValidateReferenceGuardPlan"
+  ],
+  "publicstats": [
+   "OwnedHeroTx",
+   "OwnedPetTx"
+  ],
+  "ranking": [
+   "NewCoherentReadScope"
+  ],
+  "topfloor": [
+   "NewCoherentReadScope"
+  ],
+  "workplace": [
+   "NewCoherentReadScope"
+  ],
+  "worldboss": [
+   "NewCoherentReadScope"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "character.HeroInstanceLockRank",
+    "rank": 410
+   },
+   {
+    "name": "character.PetInstanceLockRank",
+    "rank": 430
+   },
+   {
+    "name": "characterasset.SavedPresetRootLockRank",
+    "rank": 440
+   }
+  ]
+ },
+ "login": [],
  "mids": [],
  "name": "characterasset",
- "path": "internal/application/characterasset",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -48,25 +137,23 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay",
-   "internal/integration/publicshowcase"
+   "playerdisplay",
+   "publicshowcase"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/characterasset/appearance_projection_test.go",
-   "internal/application/characterasset/battle_contribution_test.go",
-   "internal/application/characterasset/borrowed_composite_test.go",
-   "internal/application/characterasset/ca8_foundation_test.go",
-   "internal/application/characterasset/contracts_test.go",
-   "internal/application/characterasset/mode_guild_test.go",
-   "internal/application/characterasset/owned_composite_test.go",
-   "internal/application/characterasset/practice_contribution_test.go",
-   "internal/application/characterasset/public_showcase_test.go",
-   "internal/application/characterasset/references_test.go",
-   "internal/application/characterasset/saved_preset_reference_state_test.go",
-   "internal/application/characterasset/synthetic_projection_test.go"
+   "appearance_projection_test.go",
+   "battle_contribution_test.go",
+   "borrowed_composite_test.go",
+   "ca8_foundation_test.go",
+   "contracts_test.go",
+   "mode_guild_test.go",
+   "owned_composite_test.go",
+   "practice_contribution_test.go",
+   "public_showcase_test.go",
+   "references_test.go",
+   "saved_preset_reference_state_test.go",
+   "synthetic_projection_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

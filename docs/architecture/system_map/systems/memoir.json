@@ -1,11 +1,26 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestReportTx",
+   "CloseTx",
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "ApplyMaterialExchangeTx",
+   "DebitMaterialCostTx",
+   "DebitTemporalTx",
+   "PrepareMaterialExchangeTx",
+   "SettleGrantTx",
+   "StockRepresentableBulkAwards"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 12,
@@ -16,70 +31,75 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/memoir_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "memoir"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2304,
    "name": "MEMORIES_OF_SCHOOL_GET_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2305,
    "name": "MEMORIES_OF_SCHOOL_START_GAME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2306,
    "name": "MEMORIES_OF_SCHOOL_SAVE_MAP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2307,
    "name": "MEMORIES_OF_SCHOOL_OPEN_BOX"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2308,
    "name": "MEMORIES_OF_SCHOOL_ENTER_NEXT_FLOOR"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2309,
    "name": "MEMORIES_OF_SCHOOL_GET_ENEMY_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2310,
    "name": "MEMORIES_OF_SCHOOL_FIGHT_MONSTER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2311,
    "name": "MEMORIES_OF_SCHOOL_FIGHT_PLAYER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2312,
    "name": "MEMORIES_OF_SCHOOL_ABANDON_GAME"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2313,
    "name": "MEMORIES_OF_SCHOOL_GET_FINAL_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2314,
    "name": "MEMORIES_OF_SCHOOL_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/memoir_dispatcher.go",
    "mid": 2315,
    "name": "MEMORIES_OF_SCHOOL_REBORN_HERO"
   }
  ],
  "name": "memoir",
- "path": "internal/application/memoir",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -98,24 +118,14 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_6c_memoir.json",
-   "virtualclient/scenarios/i9_6c_memoir_map.json"
+   "i9_6c_memoir.json",
+   "i9_6c_memoir_map.json"
   ],
   "unit": [
-   "internal/application/memoir/player_test.go"
+   "player_test.go"
   ]
- },
- "wired_with": [
-  "characterhero",
-  "combat",
-  "generation",
-  "i5",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

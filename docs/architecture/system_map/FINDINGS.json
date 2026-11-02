@@ -7,7 +7,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 4,
@@ -15,7 +18,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/windows/ChatWindow.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 5,
@@ -23,7 +29,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/windows/ChatWindow.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 17,
@@ -32,7 +41,10 @@
     "app/common/network/Backend.lua",
     "app/model/Player.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 20,
@@ -40,7 +52,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 21,
@@ -48,21 +63,30 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 27,
    "name": "USE_ENERGY_ITEM",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 30,
    "name": "FUNCTION_CLICK",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 32,
@@ -70,7 +94,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/Shop.lua"
-   ]
+   ],
+   "family": "SHOP",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 33,
@@ -78,7 +105,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/Shop.lua"
-   ]
+   ],
+   "family": "SHOP",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 34,
@@ -86,7 +116,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/Shop.lua"
-   ]
+   ],
+   "family": "SHOP",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 35,
@@ -94,7 +127,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/MagicShop.lua"
-   ]
+   ],
+   "family": "SHOP",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 37,
@@ -102,35 +138,50 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/Shop.lua"
-   ]
+   ],
+   "family": "SHOP",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 38,
    "name": "CLOSE_SHOP",
    "files": [
     "app/model/Shop.lua"
-   ]
+   ],
+   "family": "SHOP",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 39,
    "name": "SET_ALL_SKILL_LEVEL",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 53,
    "name": "SET_SKILL_LEVEL",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 64,
    "name": "EXPAND_HERO_SLOTS",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 65,
@@ -138,14 +189,20 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 66,
    "name": "DISMISS_HERO",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 82,
@@ -153,42 +210,60 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 86,
    "name": "SELL_ITEMS",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 87,
    "name": "USE_MAGIC_ITEMS",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 88,
    "name": "BACKPACK_SORT_TYPE",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 90,
    "name": "USE_SKILL_POINT_ITEM",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 91,
    "name": "OPEN_ACT_ITEM",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 96,
@@ -196,7 +271,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/GoldenHand.lua"
-   ]
+   ],
+   "family": "GOLDEN_HAND",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 97,
@@ -204,105 +282,150 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/AddEnergy.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 99,
    "name": "BUY_SKILL_POINT",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 120,
    "name": "GET_COMMENT_AWARD",
    "files": [
     "app/windows/CommentWindow.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 144,
    "name": "LOAD_BUILDING",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 145,
    "name": "OPEN_BUILDING",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 146,
    "name": "BUILDING_UPGRADE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 147,
    "name": "BUILDING_OUTPUT",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 148,
    "name": "BUILIDNG_PARTNER",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 149,
    "name": "LOAD_WISH_INFO",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 150,
    "name": "WISH",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 151,
    "name": "LOAD_ALL_BUILDING_INFO",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 152,
    "name": "LOAD_YANWUCHANG_HERO_EXP",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "LEGACY_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 191,
    "name": "EXCHANGE_ITEMS",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "SOCIAL_RECALL_EXCHANGE",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 193,
    "name": "recall_friend",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "SOCIAL_RECALL_EXCHANGE",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 194,
    "name": "get_recall_award",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "SOCIAL_RECALL_EXCHANGE",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 208,
@@ -310,14 +433,20 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/Player.lua"
-   ]
+   ],
+   "family": "BATTLE_LEGACY_ENVELOPE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 209,
    "name": "SET_FORMATION",
    "files": [
     "app/model/Player.lua"
-   ]
+   ],
+   "family": "BATTLE_LEGACY_ENVELOPE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 211,
@@ -325,14 +454,20 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "BATTLE_LEGACY_ENVELOPE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 212,
    "name": "END_BATTLE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "BATTLE_LEGACY_ENVELOPE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 241,
@@ -342,7 +477,10 @@
     "app/windows/GiftbagUseWindow.lua",
     "app/windows/SelectEquipWindow.lua",
     "app/windows/SelectSXHeroWindow.lua"
-   ]
+   ],
+   "family": "INVENTORY_ITEM_USE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 246,
@@ -350,7 +488,10 @@
    "files": [
     "app/model/Sakura.lua",
     "app/scenes/BattleCreate.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 279,
@@ -358,7 +499,10 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/scenes/BattleCreateReport.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 384,
@@ -367,7 +511,10 @@
     "app/common/network/Backend.lua",
     "app/model/InviteFriends.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "SOCIAL_RECALL_EXCHANGE",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 385,
@@ -375,210 +522,300 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/InviteFriends.lua"
-   ]
+   ],
+   "family": "SOCIAL_RECALL_EXCHANGE",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 435,
    "name": "LOAD_GET_REQUEST_PLAYERS",
    "files": [
     "app/model/GetRequestPlayers.lua"
-   ]
+   ],
+   "family": "SOCIAL_RECALL_EXCHANGE",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 514,
    "name": "CHAT_FROM_PLAYER",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 516,
    "name": "CHAT_FROM_FRIEND",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 517,
    "name": "ILLUSION_INVITE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "ILLUSION_FANTASY",
+   "disposition": "ACTIVE",
+   "stage": "I9-8"
   },
   {
    "mid": 518,
    "name": "ILLUSION_NOTICE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "ILLUSION_FANTASY",
+   "disposition": "ACTIVE",
+   "stage": "I9-8"
   },
   {
    "mid": 623,
    "name": "LOAD_USED_PARTNER",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "BATTLE_LEGACY_ENVELOPE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 657,
    "name": "GET_VIP_AWARD",
    "files": [
     "app/windows/VipRechargeWindow.lua"
-   ]
+   ],
+   "family": "CHARGE_VIP_GIFTPUSH",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 804,
    "name": "BROCAST_SEND_KITES",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "BROADCASTS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 805,
    "name": "BROCAST_FINISH_KITES",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "BROADCASTS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 832,
    "name": "QUERY_FORUM_BY_PAGE",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 833,
    "name": "ADD_FORUM_LIKE",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 834,
    "name": "ADD_FORUM_COMMENT",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 835,
    "name": "SET_BOARD_HERO",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 837,
    "name": "READ_DIALOG",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 838,
    "name": "GET_HERO_DIALOG",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 839,
    "name": "BUY_GIFT",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 841,
    "name": "GET_PARTNER_MISSION",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 842,
    "name": "GET_HERO_ACT",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 843,
    "name": "GET_HERO_TALK_AWARD",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 844,
    "name": "GET_HERO_ACT_AWARD",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 845,
    "name": "GET_HERO_MISSION_AWARD",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 846,
    "name": "ACCEPT_HERO_MISSION",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 847,
    "name": "ABANDON_MISSION",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 851,
    "name": "GET_SCHOOL_STORY_REWARD",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 855,
    "name": "GET_CG_AWARD",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 856,
    "name": "UNLOCK_BG",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 857,
    "name": "SET_BG",
    "files": [
     "app/model/Library.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1025,
    "name": "MESSAGE_PUSH_ADD",
    "files": [
     "app/model/MessagePush.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 1026,
    "name": "MESSAGE_PUSH_REMOVE",
    "files": [
     "app/model/MessagePush.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 1051,
@@ -586,126 +823,180 @@
    "files": [
     "app/windows/ActivitySelectHeroWindow.lua",
     "app/windows/SelectSXHeroWindow.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 1072,
    "name": "GET_RECYCLE_INFO",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1073,
    "name": "RECYCLE_ITEMS",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1074,
    "name": "GET_DESKP_INFO",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1075,
    "name": "MAKE_ITEM",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1076,
    "name": "CANCEL_MAKE_ITEM",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1081,
    "name": "GET_ADMIN_INFO",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1082,
    "name": "ADMIN_CONVERSION",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1083,
    "name": "GET_NOTICE_BOARD_INFO",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1084,
    "name": "RECEIVE_MISSION",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1085,
    "name": "GIVE_UP_MISSION",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1086,
    "name": "CONFIRM_NEW_AWARD_LOG",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1087,
    "name": "GET_NOTICE_BOARD_REPORT",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1088,
    "name": "CONFIRM_MAKE_ITEM",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1089,
    "name": "ACCELERATE_MAKE_ITEM",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1090,
    "name": "GET_PET_ROOM_INFO",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1091,
    "name": "MAKE_PET_ITEM",
    "files": [
     "app/model/EventCentre.lua"
-   ]
+   ],
+   "family": "EVENT_CENTRE_BUILDINGS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1170,
    "name": "BROCAST_FINISH_JIGSAW",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "BROADCASTS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1304,
@@ -713,21 +1004,30 @@
    "files": [
     "app/model/Achievement.lua",
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 1412,
    "name": "REGION_FIGHT_RESULT",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 1845,
    "name": "BUY_GLUE",
    "files": [
     "app/windows/FurnitureFactoryWindow.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1856,
@@ -735,231 +1035,330 @@
    "files": [
     "app/model/SelfPlayer.lua",
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1857,
    "name": "APPLY_RELATION",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1858,
    "name": "GET_CLASS_FINDING_LIST",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1859,
    "name": "ACCEPT_TEACH_APPLY",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1860,
    "name": "DENY_TEACH_APPLY",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1861,
    "name": "TERMINATE_RELATION",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1862,
    "name": "GET_CLASS_MISSION_AWARD",
    "files": [
     "app/model/SocialSystem.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1863,
    "name": "STUDENT_OVER_FIGHT_RESULT",
    "files": [
     "app/scenes/BattleCreate.lua"
-   ]
+   ],
+   "family": "MENTOR_STUDENT",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 1864,
    "name": "FIRST_MAIN_TOUCH",
    "files": [
     "app/windows/MainSceneTouchWindow.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2065,
    "name": "SELECT_DATE_HERO",
    "files": [
     "app/windows/activities/Activity1107.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2066,
    "name": "CHANGE_DATE_HERO",
    "files": [
     "app/windows/activities/Activity1107.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2067,
    "name": "SELECT_DATE_HERO_2",
    "files": [
     "app/windows/activities/Activity1126.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2141,
    "name": "OPEN_GIFT_BOX",
    "files": [
     "app/model/Course.lua"
-   ]
+   ],
+   "family": "COURSE_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2197,
    "name": "ZHUGE_SELECT_DIALOG",
    "files": [
     "app/model/ZhugeFestival.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2198,
    "name": "ZHUGE_END_DIALOG",
    "files": [
     "app/model/ZhugeFestival.lua"
-   ]
+   ],
+   "family": "LIBRARY",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2496,
    "name": "GET_HERO_SCORE",
    "files": [
     "app/model/HeroRecommend.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2497,
    "name": "GET_RECOMMEND_INFO",
    "files": [
     "app/model/HeroRecommend.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2498,
    "name": "GET_HERO_RECOMMEND_DETAIL",
    "files": [
     "app/model/HeroRecommend.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2499,
    "name": "GET_FORCE_RANK_LIST",
    "files": [
     "app/model/HeroRecommend.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2500,
    "name": "GET_COURSES_RECOMMEND",
    "files": [
     "app/model/Course.lua"
-   ]
+   ],
+   "family": "COURSE_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2501,
    "name": "GET_HERO_RECOMMEND_SCORES",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "HERO_ASSET_RESIDUAL",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2518,
    "name": "CHANGE_HOUSE_NAME",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2519,
    "name": "VISIT_RANDOM_HOUSE",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2520,
    "name": "HIDE_HOUSE",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2521,
    "name": "PRAISE_HOUSE",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2522,
    "name": "GET_DORM_PRAISE_LIST",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2523,
    "name": "COMMENT_HOUSE",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2524,
    "name": "GET_DORM_COMMENT_LIST",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2525,
    "name": "PRAISE_COMMENT",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2526,
    "name": "DELETE_COMMENT",
    "files": [
     "app/model/Dorm.lua"
-   ]
+   ],
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 2560,
    "name": "RED_POINT",
    "files": [
     "app/model/SelfPlayer.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2568,
    "name": "SEND_BARRAGE_MESSAGE",
    "files": [
     "app/windows/ChatWindow.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2657,
    "name": "CV_LINK_ANSWER",
    "files": [
     "app/model/CvLink.lua"
-   ]
+   ],
+   "family": "STOCK_COMPAT_MISC",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 2982,
@@ -967,42 +1366,60 @@
    "files": [
     "app/common/network/Backend.lua",
     "app/model/Shop.lua"
-   ]
+   ],
+   "family": "SHOP",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 4096,
    "name": "ACTIVITY_BROADCAST",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "BROADCASTS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 4099,
    "name": "ACTIVITY_LVBU_BROADCAST",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "BROADCASTS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 4101,
    "name": "SYSTEM_BROADCAST",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": "BROADCASTS",
+   "disposition": "ACTIVE",
+   "stage": "I9-10"
   },
   {
    "mid": 32771,
    "name": "TCP_LOGIN",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 32779,
    "name": "CHAT_ROOM_ENTERED",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 32782,
@@ -1018,105 +1435,150 @@
     "app/windows/OccultInviteWindow.lua",
     "app/windows/RagnarokInviteWindow.lua",
     "app/windows/RecordShareMenuWindow.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 32783,
    "name": "CHAT_MESSAGE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 32784,
    "name": "WORLD_NOTICE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 32797,
    "name": "SOCKET_HEARTBEAT",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36853,
    "name": "GUILD_FIGHT_NOTICE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36854,
    "name": "PLAYER_NOTICE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36855,
    "name": "FORCE_RELOAD",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36856,
    "name": "GM_BROADCAST",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36857,
    "name": "RECHARGE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36858,
    "name": "SECRET_DUNGEON_MESSAGE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36859,
    "name": "HERO_EVOLVE_MESSAGE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36860,
    "name": "HERO_SUMMON_MESSAGE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36861,
    "name": "RUNE_MAX_MESSAGE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36862,
    "name": "GIFTBOX_MESSAGE",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   },
   {
    "mid": 36863,
    "name": "GUILD_BROADCAST",
    "files": [
     "app/common/network/Backend.lua"
-   ]
+   ],
+   "family": null,
+   "disposition": null,
+   "stage": null
   }
  ],
  "inactive_mids": {
@@ -1872,6 +2334,88 @@
    "mid": 20480,
    "name": "",
    "system": ""
+  }
+ ],
+ "narrow_param_checks": [
+  {
+   "file": "internal/adapters/stockruntime/profile_comments.go",
+   "line": 33,
+   "function": "Dispatch",
+   "style": "allowed_map"
+  },
+  {
+   "file": "internal/adapters/stockruntime/profile_feedback.go",
+   "line": 70,
+   "function": "Dispatch",
+   "style": "inline_rejection"
+  },
+  {
+   "file": "internal/adapters/stockruntime/profile_feedback.go",
+   "line": 92,
+   "function": "Dispatch",
+   "style": "inline_rejection"
+  },
+  {
+   "file": "internal/adapters/stockruntime/public_profile_reads.go",
+   "line": 37,
+   "function": "Dispatch",
+   "style": "allowed_map"
+  }
+ ],
+ "soft_refusals": [
+  {
+   "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+   "line": 328,
+   "code": 30001,
+   "kind": "dispatcher"
+  },
+  {
+   "file": "internal/adapters/stockruntime/http_dispatchers.go",
+   "line": 226,
+   "code": 20018,
+   "kind": "dispatcher"
+  },
+  {
+   "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+   "line": 179,
+   "code": 30001,
+   "kind": "dispatcher"
+  },
+  {
+   "file": "internal/application/awakeningbattle/mode.go",
+   "line": 160,
+   "code": 1,
+   "kind": "application"
+  },
+  {
+   "file": "internal/application/godstrial/auto.go",
+   "line": 55,
+   "code": 1,
+   "kind": "application"
+  },
+  {
+   "file": "internal/application/march/settle.go",
+   "line": 28,
+   "code": 1,
+   "kind": "application"
+  },
+  {
+   "file": "internal/application/march/settle.go",
+   "line": 49,
+   "code": 1,
+   "kind": "application"
+  },
+  {
+   "file": "internal/application/march/settle.go",
+   "line": 53,
+   "code": 1,
+   "kind": "application"
+  },
+  {
+   "file": "internal/application/petcampaign/commands.go",
+   "line": 249,
+   "code": 1,
+   "kind": "application"
   }
  ],
  "systems_not_wired": [],

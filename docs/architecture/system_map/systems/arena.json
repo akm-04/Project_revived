@@ -1,15 +1,40 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerdisplay",
-  "playerroot",
-  "socialrelation"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "apparena.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttemptTx",
+   "CloseTx",
+   "ReplayTx",
+   "ResolveDetached",
+   "ResultTx",
+   "StartManyTx",
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ],
+  "socialrelation": [
+   "CanonicalServer",
+   "PrepareFriendFightPrivacyTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 8,
@@ -52,205 +77,187 @@
    "file": "docs/i9/I9_WORLD_BOSS_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/arena_dispatcher.go",
+  "internal/adapters/stockruntime/friend_fight_dispatcher.go",
+  "internal/adapters/stockruntime/tournament_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "arena"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 276,
    "name": "LOAD_ARENA_RANK"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 666,
    "name": "GIVE_UP_REGION_MISSION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 768,
    "name": "GET_REARENA_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 769,
    "name": "GET_REARENA_PARTNERS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 770,
    "name": "REARENA_MODIFY_DEFENCE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 771,
    "name": "REARENA_MATCH_ENEMY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 772,
    "name": "REARENA_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 773,
    "name": "REARENA_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 774,
    "name": "REARENA_END_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 775,
    "name": "REARENA_LOAD_RANKS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 776,
    "name": "REARENA_FIGHT_RECORDS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 777,
    "name": "REARENA_FIGHT_REPORT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 778,
    "name": "REARENA_PREPARE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 779,
    "name": "REARENA_STOP_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 848,
    "name": "GET_EXCHANGE_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/arena_dispatcher.go",
    "mid": 849,
    "name": "GET_MISSION_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1281,
    "name": "PLAYOFFS_READY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1282,
    "name": "PLAYOFFS_CHOOSE_MEMBER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1283,
    "name": "PLAYOFFS_GET_PLAYOFF_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1284,
    "name": "PLAYOFFS_SIGN_UP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1285,
    "name": "PLAYOFFS_GET_SIGN_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1286,
    "name": "PLAYOFFS_GET_GROUP_DETAILS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1287,
    "name": "PLAYOFFS_SET_DECLARATION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1288,
    "name": "PLAYOFFS_SUPPORT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1289,
    "name": "PLAYOFFS_GET_MATCH_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1290,
    "name": "PLAYOFFS_BATTLE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1291,
    "name": "PLAYOFFS_RECORD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1292,
    "name": "PLAYOFFS_REQUEST_ROOM_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1294,
    "name": "PLAYOFFS_CONFIRM_SELECT_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
    "mid": 1312,
    "name": "INVITE_FRIEND_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
    "mid": 1313,
    "name": "ACCEPT_FRIEND_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
    "mid": 1314,
    "name": "FRIEND_FIGHT_RECORD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
    "mid": 1315,
    "name": "REJECT_FRIEND_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1872,
    "name": "REGION_CASUAL_GET_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1873,
    "name": "REGION_CASUAL_GET_RECORD_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1874,
    "name": "REGION_CASUAL_GET_RECORD_REPORT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1875,
    "name": "REGION_CASUAL_MATCH_ENEMY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1876,
    "name": "REGION_CASUAL_CANCEL_MATCH"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/tournament_dispatcher.go",
    "mid": 1877,
    "name": "REGION_CASUAL_GET_FIGHT_REPORT"
   }
  ],
  "name": "arena",
- "path": "internal/application/arena",
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/friend_fight_notice.go",
@@ -428,48 +435,17 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/arena.json",
-   "virtualclient/scenarios/i9_7b_playoffs.json",
-   "virtualclient/scenarios/i9_7c_friend_fight.json",
-   "virtualclient/scenarios/i9_7d_production_functions.json",
-   "virtualclient/scenarios/i9_8a_world_boss.json"
+   "arena.json",
+   "i9_7b_playoffs.json",
+   "i9_7c_friend_fight.json",
+   "i9_7d_production_functions.json",
+   "i9_8a_world_boss.json"
   ],
   "unit": [
-   "internal/application/arena/tournament_view_test.go"
+   "tournament_view_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "adventure",
-  "bookskill",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "combat",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "dormhouse",
-  "elementequipment",
-  "generation",
-  "heroevolution",
-  "i5",
-  "inscription",
-  "librarylocal",
-  "oneonone",
-  "playerdisplay",
-  "publicstats",
-  "socialrelation",
-  "spirit",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

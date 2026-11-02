@@ -1,13 +1,21 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "publicstats"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "DebitTemporalTx",
+   "SettleGrantTx",
+   "WorkplaceSPTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 5,
@@ -18,35 +26,51 @@
    "file": "docs/i9/I9_WORKPLACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/workplace_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "WORKPLACE_TEAM_SENT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "workplace"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/workplace_dispatcher.go",
    "mid": 528,
    "name": "TREASURE_LOAD_SP_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/workplace_dispatcher.go",
    "mid": 530,
    "name": "TREASURE_LOAD_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/workplace_dispatcher.go",
    "mid": 531,
    "name": "TREASURE_SET_PARTNER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/workplace_dispatcher.go",
    "mid": 532,
    "name": "TREASURE_FINISH_ONE_TEAM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/workplace_dispatcher.go",
    "mid": 533,
    "name": "TREASURE_LOG"
   }
  ],
  "name": "workplace",
- "path": "internal/application/workplace",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/campaignstore",
@@ -71,21 +95,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_5b_workplace.json"
+   "i9_5b_workplace.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "characterhero",
-  "combat",
-  "generation",
-  "i5",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

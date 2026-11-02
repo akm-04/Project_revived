@@ -1,49 +1,52 @@
 {
- "called_by": [
-  "arena",
-  "bookskill",
-  "championsleague",
-  "characterhero",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dodgeball",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "guildbroadcast",
-  "guildcampaign",
-  "guildcore",
-  "guildinvite",
-  "guildinvitetarget",
-  "guildrental",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "occult",
-  "playerdisplay",
-  "profilefeedback",
-  "publication",
-  "publicprofile",
-  "ranking",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialgift",
-  "socialprojection",
-  "socialrelation",
-  "spirit",
-  "worldboss"
- ],
- "calls": [],
+ "background": [],
+ "called_by": {
+  "arena": [
+   "CanonicalPlayerIDs"
+  ],
+  "frienddm": [
+   "CanonicalPlayerIDs"
+  ],
+  "generaldm": [
+   "CanonicalPlayerIDs"
+  ],
+  "guildcore": [
+   "CanonicalPlayerIDs"
+  ],
+  "occult": [
+   "CanonicalPlayerIDs"
+  ],
+  "publicprofile": [
+   "CanonicalPlayerIDs"
+  ],
+  "sharedroom": [
+   "CanonicalPlayerIDs"
+  ],
+  "socialgift": [
+   "CanonicalPlayerIDs"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "playerroot.LockRank",
+    "rank": 315
+   }
+  ]
+ },
+ "login": [],
  "mids": [],
  "name": "playerroot",
- "path": "internal/application/playerroot",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -52,17 +55,15 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay",
-   "internal/integration/profilefeedback",
-   "internal/integration/socialactivation",
-   "internal/integration/socialprojection",
-   "internal/integration/socialrelation"
+   "playerdisplay",
+   "profilefeedback",
+   "socialactivation",
+   "socialprojection",
+   "socialrelation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/playerroot/ports_test.go"
+   "ports_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

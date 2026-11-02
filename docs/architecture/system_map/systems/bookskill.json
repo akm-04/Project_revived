@@ -1,79 +1,105 @@
 {
- "called_by": [
-  "achievement",
-  "missioninputs",
-  "publicstats"
- ],
- "calls": [
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "BookInputsTx"
+  ],
+  "missioninputs": [
+   "BookInputsTx"
+  ],
+  "publicstats": [
+   "HeroBookInputsTx"
+  ]
+ },
+ "calls": {
+  "generation": [
+   "Bind"
+  ],
+  "i5": [
+   "ApplyMaterialDebitTx",
+   "ApplyMaterialExchangeTx",
+   "PrepareMaterialDebitTx",
+   "PrepareMaterialExchangeTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 11,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/book_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2D_BOOK_INPUTS"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "BootstrapProjection",
+  "OverlayRosterTx"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 83,
    "name": "COMPOSE_ITEM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1056,
    "name": "GET_BUILDING_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1057,
    "name": "UPGRADE_BUILDING"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1058,
    "name": "CANCEL_EVOLVE_BUILDING"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1059,
    "name": "GET_CABINET_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1060,
    "name": "LEARN_SKILL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1061,
    "name": "GIVE_UP_LEARN_SKILL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1077,
    "name": "SPEED_UP_BUILDING"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1078,
    "name": "SPEED_UP_SKILL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1079,
    "name": "CABINET_SKILL_CONFIRM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/book_dispatcher.go",
    "mid": 1080,
    "name": "CONFIRM_BUILDING_UPGRADE"
   }
  ],
  "name": "bookskill",
- "path": "internal/application/bookskill",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/bookstore",
@@ -98,70 +124,10 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/missions",
-   "internal/integration/playerdisplay"
+   "missions",
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

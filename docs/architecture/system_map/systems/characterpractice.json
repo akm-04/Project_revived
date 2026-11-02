@@ -1,12 +1,22 @@
 {
- "called_by": [
-  "characterhero",
-  "characterpet"
- ],
- "calls": [
-  "characterasset",
-  "i5"
- ],
+ "background": [],
+ "called_by": {
+  "characterhero": [
+   "ReduceAppliedPracticeContribution"
+  ],
+  "characterpet": [
+   "ReduceAppliedPracticeContribution"
+  ]
+ },
+ "calls": {
+  "i5": [
+   "ApplyLevelAndStackDebitTx",
+   "AuthorizeLevelAndDebitScalarTx",
+   "PlayerLevelTx",
+   "PrepareLevelAndStackDebitTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 2,
@@ -37,60 +47,75 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/practice_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA6_3_PRACTICE"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA6_4_PRACTICE_AUTO"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA6_PRACTICE_DAILY_GENERATION"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 124,
    "name": "GET_PRACTICE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 125,
    "name": "PRACTICE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 126,
    "name": "PRACTICE_SAVE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 127,
    "name": "PRACTICE_AUTO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 128,
    "name": "WASH_BY_TICKET"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 129,
    "name": "PET_GET_PRACTICE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 130,
    "name": "PET_PRACTICE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 131,
    "name": "PET_PRACTICE_SAVE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 132,
    "name": "PET_PRACTICE_AUTO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/practice_dispatcher.go",
    "mid": 133,
    "name": "PET_WASH_BY_TICKET"
   }
  ],
  "name": "characterpractice",
- "path": "internal/application/characterpractice",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -116,74 +141,14 @@
   "integration": [],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/characterpractice/auto_test.go",
-   "internal/application/characterpractice/ca7_6_integration_test.go",
-   "internal/application/characterpractice/contracts_test.go",
-   "internal/application/characterpractice/contribution_test.go",
-   "internal/application/characterpractice/daily_generation_test.go",
-   "internal/application/characterpractice/manual_accounting_test.go",
-   "internal/application/characterpractice/roll_policy_test.go",
-   "internal/application/characterpractice/service_semantics_test.go"
+   "auto_test.go",
+   "ca7_6_integration_test.go",
+   "contracts_test.go",
+   "contribution_test.go",
+   "daily_generation_test.go",
+   "manual_accounting_test.go",
+   "roll_policy_test.go",
+   "service_semantics_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

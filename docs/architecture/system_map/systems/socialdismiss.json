@@ -1,15 +1,32 @@
 {
- "called_by": [],
- "calls": [
-  "generation",
-  "playerroot",
-  "socialinbox",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "socialinbox": [
+   "RelationFamily",
+   "RoomInviteFamily",
+   "ValidateRelationLifecycle",
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialrelation": [
+   "CanonicalServer"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "socialdismiss",
- "path": "internal/application/socialdismiss",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -18,12 +35,10 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay",
-   "internal/integration/socialactivation"
+   "playerdisplay",
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

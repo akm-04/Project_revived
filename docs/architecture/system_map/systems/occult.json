@@ -1,17 +1,40 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerroot",
-  "publicstats",
-  "roominvite",
-  "sharedroom",
-  "socialinbox"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appoccult.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "MonsterWaves",
+   "SettleMemberTx",
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "CheckAwakeningOccultMaterialTx",
+   "DebitOccultTicketTx",
+   "FreezeAwakeningOccultMaterialTx",
+   "OccultTicketsTx",
+   "SettleGrantTx"
+  ],
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ],
+  "sharedroom": [
+   "Join",
+   "SetReady",
+   "Update"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 23,
@@ -22,125 +45,119 @@
    "file": "docs/i9/I9_OCCULT_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/occult_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "occult"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2362,
    "name": "GET_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2363,
    "name": "START_CHALLENGE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2364,
    "name": "GET_CAMPAIGN_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2365,
    "name": "GET_MEMBER_STAT_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2366,
    "name": "CREATE_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2367,
    "name": "JOIN_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2368,
    "name": "EXIT_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2369,
    "name": "INVITE_FRIEND"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2370,
    "name": "KICK_MEMBER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2371,
    "name": "PREPARE_SINGLE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2372,
    "name": "SINGLE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2373,
    "name": "QUIT_SINGLE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2374,
    "name": "TEAM_FIGHT_INVITE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2375,
    "name": "ACCEPT_TEAM_INVITE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2376,
    "name": "QUIT_TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2377,
    "name": "TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2378,
    "name": "PREPARE_TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2379,
    "name": "START_SINGLE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2380,
    "name": "GET_CAMPAIGN_LOG_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2382,
    "name": "GET_TEAM_FIGHT_REPORT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2383,
    "name": "PICK_TEAM_FORMATION"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2384,
    "name": "CHANGE_POS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/occult_dispatcher.go",
    "mid": 2385,
    "name": "OCCULT_SWEEP"
   }
  ],
  "name": "occult",
- "path": "internal/application/occult",
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/occult_room_notice.go",
@@ -190,23 +207,13 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_8c_occult.json"
+   "i9_8c_occult.json"
   ],
   "unit": [
-   "internal/application/occult/service_test.go"
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "combat",
-  "generation",
-  "i5",
-  "roominvite",
-  "sharedroom"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

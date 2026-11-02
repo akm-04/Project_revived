@@ -1,10 +1,22 @@
 {
- "called_by": [],
- "calls": [],
+ "background": [],
+ "called_by": {},
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "realtimewakeup",
- "path": "internal/application/realtimewakeup",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -13,14 +25,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/socialactivation"
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/realtimewakeup/duplicate_test.go",
-   "internal/application/realtimewakeup/registry_test.go"
+   "duplicate_test.go",
+   "registry_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

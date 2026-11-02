@@ -1,17 +1,26 @@
 {
- "called_by": [
-  "guildinvitetarget",
-  "socialgift",
-  "socialrelation",
-  "socialreload"
- ],
- "calls": [
-  "socialinbox"
- ],
+ "background": [],
+ "called_by": {
+  "socialreload": [
+   "ValidAt"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "socialreloadref",
- "path": "internal/application/socialreloadref",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -20,14 +29,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/socialactivation"
+   "guildinvite",
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/socialreloadref/codec_test.go"
+   "codec_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

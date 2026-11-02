@@ -1,29 +1,58 @@
 {
- "called_by": [
-  "socialfriendbase",
-  "socialprojection"
- ],
- "calls": [
-  "generation",
-  "playerpresentation",
-  "playerroot",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {
+  "socialfriendbase": [
+   "ActorValid",
+   "ApplyDrainTx",
+   "LockPlanTx",
+   "Preflight",
+   "PrepareDrainTx"
+  ],
+  "socialprojection": [
+   "Eligible"
+  ]
+ },
+ "calls": {
+  "playerroot": [
+   "CanonicalPlayerIDs"
+  ],
+  "socialrelation": [
+   "CanonicalServer",
+   "PrepareFriendDMPrivacyTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/friend_dm.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "frienddm.LockRank",
+    "rank": 380
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/friend_dm.go",
    "mid": 515,
    "name": "CHAT_TO_FRIEND"
   }
  ],
  "name": "frienddm",
- "path": "internal/application/frienddm",
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/friend_dm_delivery.go",
@@ -80,69 +109,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/socialactivation"
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

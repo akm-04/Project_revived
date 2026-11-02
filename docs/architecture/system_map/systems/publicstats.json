@@ -1,27 +1,40 @@
 {
- "called_by": [
-  "combat",
-  "illusion",
-  "march",
-  "occult",
-  "publicprofile",
-  "workplace"
- ],
- "calls": [
-  "bookskill",
-  "characterasset",
-  "course",
-  "dormhouse",
-  "elementequipment",
-  "heroevolution",
-  "inscription",
-  "librarylocal",
-  "spirit"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "bookskill": [
+   "HeroBookInputsTx"
+  ],
+  "characterasset": [
+   "OwnedHeroTx",
+   "OwnedPetTx"
+  ],
+  "course": [
+   "HeroCourseInputsTx"
+  ],
+  "dormhouse": [
+   "DormHouseInputsTx"
+  ],
+  "librarylocal": [
+   "HeroLibraryInputsTx",
+   "PlayerCollectionInputsTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "publicstats",
- "path": "internal/application/publicstats",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -30,13 +43,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/publicstats/service_test.go"
+   "service_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

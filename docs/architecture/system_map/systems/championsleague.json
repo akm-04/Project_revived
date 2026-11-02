@@ -1,64 +1,96 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerdisplay",
-  "playerroot"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appleague.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttemptTx",
+   "CloseTx",
+   "ReplayTx",
+   "ResolveDetached",
+   "ResultTx",
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "DeliverLeagueTitleNoticeTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ],
+  "playerdisplay": [
+   "ReceiveOriginTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 8,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/league_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 30000,
+    "name": "champions-league"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2800,
    "name": "CHAMPIONS_LEAGUE_GET_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2801,
    "name": "CHAMPIONS_LEAGUE_GET_ENEMY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2802,
    "name": "CHAMPIONS_LEAGUE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2803,
    "name": "CHAMPIONS_GET_FIGHT_RECORD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2804,
    "name": "CHAMPIONS_GET_DAILY_AWARD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2805,
    "name": "CHAMPIONS_SET_DEFENSE_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2806,
    "name": "CHAMPIONS_SELECT_AWARD_GROUP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/league_dispatcher.go",
    "mid": 2807,
    "name": "CHAMPIONS_GET_SEASON_TOP"
   }
  ],
  "name": "championsleague",
- "path": "internal/application/championsleague",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/achievementstore",
@@ -211,42 +243,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/league.json"
+   "league.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "adventure",
-  "arena",
-  "bookskill",
-  "campaign",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "combat",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "dormhouse",
-  "elementequipment",
-  "generation",
-  "heroevolution",
-  "i5",
-  "inscription",
-  "librarylocal",
-  "oneonone",
-  "playerdisplay",
-  "publicstats",
-  "socialrelation",
-  "spirit",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

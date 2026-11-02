@@ -1,13 +1,20 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "publicstats"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestReportTx",
+   "StartTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
@@ -26,45 +33,61 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/march_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [
+   "MARCH_FINISHED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "march"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/march_dispatcher.go",
    "mid": 336,
    "name": "LOAD_MARCH"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/march_dispatcher.go",
    "mid": 337,
    "name": "RESTART_MARCH"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/march_dispatcher.go",
    "mid": 338,
    "name": "MARCH_FIGHT_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/march_dispatcher.go",
    "mid": 339,
    "name": "MARCH_OPEN_BOX"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/march_dispatcher.go",
    "mid": 340,
    "name": "MARCH_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/march_dispatcher.go",
    "mid": 341,
    "name": "MARCH_OPEN_EXTRA_CHEST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/march_dispatcher.go",
    "mid": 342,
    "name": "MARCH_ADVANCE_SWEEP"
   }
  ],
  "name": "march",
- "path": "internal/application/march",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -84,21 +107,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_5a_march.json"
+   "i9_5a_march.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "characterhero",
-  "combat",
-  "generation",
-  "i5",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

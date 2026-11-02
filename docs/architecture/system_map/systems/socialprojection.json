@@ -1,20 +1,52 @@
 {
- "called_by": [
-  "socialfriendbase"
- ],
- "calls": [
-  "frienddm",
-  "playerdirectory",
-  "playerpresentation",
-  "playerroot",
-  "socialgift",
-  "socialinbox",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {
+  "socialfriendbase": [
+   "ReadBasePreparedTx"
+  ]
+ },
+ "calls": {
+  "frienddm": [
+   "Eligible"
+  ],
+  "socialgift": [
+   "Day",
+   "GiftNoticeValidityTx",
+   "GiftSnapshotTx"
+  ],
+  "socialinbox": [
+   "InviteFamily",
+   "RelationFamily",
+   "RoomInviteFamily",
+   "RoomInviteTuple",
+   "ValidateRelationDescriptor",
+   "ValidateRelationLifecycle",
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialrelation": [
+   "CanonicalServer"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7A4C_SOCIAL_PROJECTION"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "socialprojection",
- "path": "internal/application/socialprojection",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -23,14 +55,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/playerdisplay",
-   "internal/integration/socialactivation",
-   "internal/integration/socialprojection"
+   "guildinvite",
+   "playerdisplay",
+   "socialactivation",
+   "socialprojection"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

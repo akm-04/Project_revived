@@ -1,15 +1,26 @@
 {
- "called_by": [
-  "guildview",
-  "playerpresentation"
- ],
- "calls": [
-  "generation"
- ],
+ "background": [],
+ "called_by": {
+  "guildview": [
+   "ReadMany"
+  ]
+ },
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "socialpresence",
- "path": "internal/application/socialpresence",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -24,9 +35,7 @@
   "integration": [],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/socialpresence/service_test.go"
+   "service_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

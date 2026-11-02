@@ -1,19 +1,34 @@
 {
- "called_by": [
-  "adventure",
-  "illusion",
-  "occult"
- ],
- "calls": [
-  "generation",
-  "playerroot",
-  "socialinbox",
-  "socialrelation"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "socialinbox": [
+   "ValidateRoomInviteLifecycle"
+  ],
+  "socialrelation": [
+   "ApplyChangeTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I9_8_ROOM_INVITE_MATERIALIZE"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "roominvite",
- "path": "internal/application/roominvite",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -22,11 +37,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

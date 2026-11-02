@@ -1,14 +1,33 @@
 {
- "called_by": [],
- "calls": [
-  "frienddm",
-  "generation",
-  "socialprojection"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "frienddm": [
+   "ActorValid",
+   "ApplyDrainTx",
+   "LockPlanTx",
+   "Preflight",
+   "PrepareDrainTx"
+  ],
+  "socialprojection": [
+   "ReadBasePreparedTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "socialfriendbase",
- "path": "internal/application/socialfriendbase",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -17,11 +36,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/socialactivation"
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

@@ -1,15 +1,30 @@
 {
- "called_by": [],
- "calls": [
-  "directorysync",
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "i5": [
+   "Apply",
+   "PreparePrivilegeTransitionTx"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [
+  "BootstrapProjection",
+  "OverlayMID1"
+ ],
  "mids": [],
  "name": "commerceprivilege",
- "path": "internal/application/commerceprivilege",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -20,12 +35,10 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/missions",
-   "internal/integration/playerdisplay"
+   "missions",
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

@@ -1,25 +1,51 @@
 {
- "called_by": [],
- "calls": [
-  "generation",
-  "guildcore",
-  "playerroot"
+ "background": [
+  {
+   "enqueued_by": [
+    "gxb-api",
+    "gxb-content-broadcast-deploy",
+    "gxb-worker"
+   ],
+   "kind": "river",
+   "workers": [
+    "gxb-content-broadcast-deploy",
+    "gxb-worker"
+   ]
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "guildcore": [
+   "NewLockPlan"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_broadcast.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/guild_broadcast.go",
    "mid": 588,
    "name": "MESSAGE_TEAM"
   }
  ],
  "name": "guildbroadcast",
- "path": "internal/application/guildbroadcast",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
@@ -40,20 +66,14 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildbroadcast"
+   "guildbroadcast"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/guildbroadcast/membership_snapshot_test.go",
-   "internal/application/guildbroadcast/reference_test.go",
-   "internal/application/guildbroadcast/request_test.go",
-   "internal/application/guildbroadcast/stored_reference_test.go"
+   "membership_snapshot_test.go",
+   "reference_test.go",
+   "request_test.go",
+   "stored_reference_test.go"
   ]
- },
- "wired_with": [
-  "realtimeauth"
- ],
- "wiring_files": [
-  "cmd/gxb-api/guild_broadcast_river.go"
- ]
+ }
 }

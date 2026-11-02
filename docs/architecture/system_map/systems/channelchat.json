@@ -1,13 +1,27 @@
 {
- "called_by": [],
- "calls": [
-  "playerpresentation",
-  "realtimeauth"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 500,
+    "name": "channel-chat-read-v1"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "channelchat",
- "path": "internal/application/channelchat",
  "pushes": [
   {
    "file": "internal/protocol/realtime/channel_chat.go",
@@ -28,14 +42,12 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/socialactivation"
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/channelchat/service_test.go",
-   "internal/application/channelchat/structured_test.go"
+   "service_test.go",
+   "structured_test.go"
   ]
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

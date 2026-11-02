@@ -1,23 +1,51 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "HeroReferenceLockKey",
+   "PetReferenceLockKey",
+   "SavedPresetRootLockKey",
+   "SavedPresetRootPlayerFromLockKey",
+   "ValidateReferenceGuardPlan"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 1,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/saved_preset_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "character.HeroInstanceLockRank",
+    "rank": 410
+   },
+   {
+    "name": "character.PetInstanceLockRank",
+    "rank": 430
+   }
+  ]
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/saved_preset_dispatcher.go",
    "mid": 1793,
    "name": "SAVE_TEAM"
   }
  ],
  "name": "charactersavedpreset",
- "path": "internal/application/charactersavedpreset",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -40,78 +68,18 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/publicshowcase"
+   "publicshowcase"
   ],
   "scenarios_naming": [],
   "unit": [
-   "internal/application/charactersavedpreset/ca7_6_preservation_test.go",
-   "internal/application/charactersavedpreset/command_codec_test.go",
-   "internal/application/charactersavedpreset/contracts_test.go",
-   "internal/application/charactersavedpreset/legacy_import_test.go",
-   "internal/application/charactersavedpreset/reference_guard_concurrency_test.go",
-   "internal/application/charactersavedpreset/reference_guard_test.go",
-   "internal/application/charactersavedpreset/reference_state_test.go",
-   "internal/application/charactersavedpreset/service_test.go"
+   "ca7_6_preservation_test.go",
+   "command_codec_test.go",
+   "contracts_test.go",
+   "legacy_import_test.go",
+   "reference_guard_concurrency_test.go",
+   "reference_guard_test.go",
+   "reference_state_test.go",
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

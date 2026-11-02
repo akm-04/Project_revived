@@ -1,58 +1,83 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "CloseTx",
+   "StartTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx",
+   "SettleGrantTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 6,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/conquer_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2J_CONQUER_FACTS"
+   },
+   {
+    "lock_timeout_ms": 5000,
+    "name": "conquer-school"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/conquer_dispatcher.go",
    "mid": 1568,
    "name": "GET_CONQUER_SCHOOL_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/conquer_dispatcher.go",
    "mid": 1569,
    "name": "START_CONQUER_SCHOOL_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/conquer_dispatcher.go",
    "mid": 1570,
    "name": "CONQUER_SCHOOL_FIGHT_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/conquer_dispatcher.go",
    "mid": 1571,
    "name": "GET_CONQUER_SCHOOL_REPORT_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/conquer_dispatcher.go",
    "mid": 1572,
    "name": "GET_CONQUER_SCHOOL_REPORT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/conquer_dispatcher.go",
    "mid": 1573,
    "name": "RESET_CONQUER_SCHOOL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/conquer_dispatcher.go",
    "mid": 2790,
    "name": "BUY_CONQUER_TIMES"
   }
  ],
  "name": "conquerschool",
- "path": "internal/application/conquerschool",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/achievementstore",
@@ -205,42 +230,11 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/conquer.json"
+   "conquer.json"
   ],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "adventure",
-  "arena",
-  "bookskill",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "combat",
-  "commerceprivilege",
-  "course",
-  "dailyconsume",
-  "dormhouse",
-  "elementequipment",
-  "generation",
-  "heroevolution",
-  "i5",
-  "inscription",
-  "librarylocal",
-  "oneonone",
-  "playerdisplay",
-  "publicstats",
-  "socialrelation",
-  "spirit",
-  "topfloor"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

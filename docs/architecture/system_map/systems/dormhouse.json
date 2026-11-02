@@ -1,68 +1,92 @@
 {
- "called_by": [
-  "achievement",
-  "publicstats"
- ],
- "calls": [
-  "generation",
-  "i5",
-  "playerroot"
- ],
+ "background": [],
+ "called_by": {
+  "achievement": [
+   "VillaCountTx"
+  ],
+  "publicstats": [
+   "DormHouseInputsTx"
+  ]
+ },
+ "calls": {
+  "generation": [
+   "Bind"
+  ],
+  "i5": [
+   "ApplyMaterialDebitTx",
+   "ApplyMaterialExchangeTx",
+   "PrepareMaterialDebitTx",
+   "PrepareMaterialExchangeTx"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 8,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/dorm_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2C_DORM_INPUTS"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2512,
    "name": "GET_HOUSE_LIST"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2513,
    "name": "OPEN_HOUSE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2514,
    "name": "GET_HOUSE_DETAIL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2515,
    "name": "SAVE_FURNITURES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2516,
    "name": "HOUSE_EQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2517,
    "name": "ENTER_HERO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2693,
    "name": "EXCHANGE_DORM_KEY"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2694,
    "name": "START_EXPAND_HOUSE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/dorm_dispatcher.go",
    "mid": 2695,
    "name": "FINISH_EXPAND_HOUSE"
   }
  ],
  "name": "dormhouse",
- "path": "internal/application/dormhouse",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterbirth",
@@ -90,69 +114,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpet",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

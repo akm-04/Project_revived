@@ -1,32 +1,22 @@
 {
- "called_by": [
-  "achievement",
-  "adventure",
-  "arena",
-  "campaign",
-  "championsleague",
-  "conquerschool",
-  "guildcampaign",
-  "guildrental",
-  "guildtea",
-  "guildview",
-  "illusion",
-  "march",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerpresentation",
-  "ranking",
-  "socialprojection",
-  "topfloor",
-  "workplace",
-  "worldboss"
- ],
- "calls": [],
+ "background": [],
+ "called_by": {},
+ "calls": {},
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "playerdirectory",
- "path": "internal/application/playerdirectory",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -37,11 +27,9 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/socialprojection"
+   "socialprojection"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

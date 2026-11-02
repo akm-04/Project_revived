@@ -1,15 +1,34 @@
 {
- "called_by": [],
- "calls": [
-  "playerpresentation",
-  "socialinbox",
-  "socialrelation",
-  "socialreloadref"
- ],
+ "background": [],
+ "called_by": {},
+ "calls": {
+  "socialinbox": [
+   "ValidateRelationLifecycle"
+  ],
+  "socialreloadref": [
+   "ValidAt"
+  ]
+ },
+ "content": [],
  "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 500,
+    "name": "I7A4D_RELOAD"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [],
  "name": "socialreload",
- "path": "internal/application/socialreload",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -18,12 +37,10 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/guildinvite",
-   "internal/integration/socialactivation"
+   "guildinvite",
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": []
- },
- "wired_with": [],
- "wiring_files": []
+ }
 }

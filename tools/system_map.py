@@ -99,6 +99,11 @@ def self_check():
     assert normalize_table('"public"."account_sessions"') == "account_sessions"
     scenario = {"steps": ["lua:xyd.mid.A + xyd.mid.B"], "expect_ok": [7], "expect_inactive": [8]}
     assert scenario_mids(scenario, {"A": 1, "B": 2}) == {1, 2, 7, 8}
+    assert balanced_span("f(a(b), c)", 1) == "(a(b), c)"
+    assert defined_callables("func (s Service) Apply(c context.Context) error") == {"Apply": True}
+    assert defined_callables("func Accessor() int") == {"Accessor": False}
+    assert duration_milliseconds("500 * time.Millisecond") == 500
+    assert duration_milliseconds("5 * time.Second") == 5000
     assert json_text({"b": 1, "a": [2, 1]}) == '{\n "a": [\n  2,\n  1\n ],\n "b": 1\n}\n'
 
 
@@ -424,6 +429,340 @@ def documentation_files():
     return files
 
 
+
+GO_FUNC_DEF_RE = re.compile(r"(?m)^func\s+(?:\([^)]*\)\s*)?([A-Z][A-Za-z0-9_]*)\s*\(([^)]*)\)")
+LOCK_CONST_RE = re.compile(r"([A-Za-z0-9_]*LockRank[A-Za-z0-9_]*)\s*(?:uint16)?\s*=\s*(?:uint16\()?(\d+)")
+PROFILE_RE = re.compile(r"tx\.Profile\{Name:\s*\"([^\"]+)\"[^\n]*?LockTimeout:\s*([0-9]+\s*\*\s*time\.(?:Second|Millisecond|Minute)|[0-9]+)")
+DURATION_UNITS = {"Second": 1000, "Millisecond": 1, "Minute": 60000}
+
+
+def balanced_span(text, start, opening="(", closing=")"):
+    depth = 0
+    for index in range(start, len(text)):
+        character = text[index]
+        if character == opening:
+            depth += 1
+        elif character == closing:
+            depth -= 1
+            if depth == 0:
+                return text[start:index + 1]
+    return text[start:]
+
+
+def defined_callables(text):
+    return {
+        name: bool(parameters.strip())
+        for name, parameters in GO_FUNC_DEF_RE.findall(text)
+    }
+
+
+def cross_system_calls(systems, system_imports, system_texts):
+    defined = {system: defined_callables(system_texts[system]) for system in systems}
+    owners = {}
+    for system, names in defined.items():
+        for name in names:
+            owners.setdefault(name, set()).add(system)
+    calls = {}
+    for system in systems:
+        edges = {}
+        for target in systems:
+            if target == system or APPLICATION_PREFIX + target not in system_imports[system]:
+                continue
+            used = sorted(
+                name for name, has_parameters in defined[target].items()
+                if has_parameters and len(owners[name]) == 1
+                and re.search(r"\." + re.escape(name) + r"\s*\(", system_texts[system])
+            )
+            if used:
+                edges[target] = used
+        calls[system] = edges
+    return calls
+
+
+def inverse_calls(systems, calls):
+    inverse = {system: {} for system in systems}
+    for source, edges in calls.items():
+        for target, names in edges.items():
+            inverse[target][source] = names
+    return inverse
+
+
+def fact_constants():
+    constants = {}
+    for path in sorted((ROOT / "internal" / "domain" / "objective").glob("*.go")):
+        if path.name.endswith("_test.go"):
+            continue
+        for name, value in re.findall(r'([A-Za-z0-9_]+)\s*=\s*"([A-Z0-9_]+)"', read_text(path)):
+            constants[name] = value
+    catalog = ROOT / "internal" / "domain" / "adventure" / "catalog.go"
+    if catalog.is_file():
+        for name, value in re.findall(r'([A-Za-z0-9_]+)\s*=\s*(?:objective\.)?("?[A-Za-z0-9_]+"?)', read_text(catalog)):
+            value = value.strip('"')
+            constants.setdefault(name, constants.get(value, value))
+    return constants
+
+
+def fact_literals(text, constants):
+    found = set()
+    for match in re.finditer(r"objective\.Fact\{", text):
+        span = balanced_span(text, match.end() - 1, "{", "}")
+        for value in re.findall(r'Kind:\s*"([A-Z0-9_]+)"', span):
+            found.add(value)
+        for name in re.findall(r"Kind:\s*objective\.([A-Za-z0-9_]+)", span):
+            if name in constants:
+                found.add(constants[name])
+        for name in re.findall(r"Kind:\s*([A-Za-z0-9_]+)", span):
+            if name in constants:
+                found.add(constants[name])
+    return found
+
+
+def emitted_facts(text, constants):
+    if "RecordTx(" not in text and "objective.Fact{" not in text:
+        return set()
+    return fact_literals(text, constants)
+
+
+def adventure_read_facts(constants):
+    path = ROOT / "internal" / "domain" / "adventure" / "catalog.go"
+    if not path.is_file():
+        return set()
+    text = read_text(path)
+    match = re.search(r"func EventForFactKind\(kind string\).*?switch kind \{(.*?)default:", text, re.S)
+    if not match:
+        return set()
+    names = re.findall(r"case\s+([A-Za-z0-9_]+):", match.group(1))
+    return {constants[name] for name in names if name in constants}
+
+
+def read_facts(system, text, constants):
+    if system == "i5":
+        return set(re.findall(r'AcceptedFactKind\s*==\s*"([A-Z0-9_]+)"', text))
+    if system == "adventure":
+        return adventure_read_facts(constants)
+    return set()
+
+
+def import_aliases(path):
+    text = read_text(path)
+    aliases = {}
+    for block in IMPORT_BLOCK_RE.findall(text):
+        for line in block.splitlines():
+            match = re.match(r'^\s*(?:([A-Za-z0-9_.]+)\s+)?"([^"]+)"\s*$', line)
+            if not match:
+                continue
+            alias = match.group(1) or match.group(2).split("/")[-1]
+            aliases[alias] = match.group(2)
+    for line in text.splitlines():
+        if not line.startswith("import "):
+            continue
+        match = re.match(r'^import\s+(?:([A-Za-z0-9_.]+)\s+)?"([^"]+)"', line)
+        if match:
+            alias = match.group(1) or match.group(2).split("/")[-1]
+            aliases[alias] = match.group(2)
+    return aliases
+
+
+def login_contributors(systems):
+    path = ROOT / "cmd" / "gxb-api" / "main_postgres.go"
+    text = read_text(path)
+    start = text.find("i4store.BootstrapService{")
+    if start < 0:
+        return {}
+    block = balanced_span(text, start + len("i4store.BootstrapService") - 1, "{", "}")
+    aliases = import_aliases(path)
+    result = {}
+    for field in ("PersistenceContributors", "LoginReconcilers", "DetailContributors", "DirectoryReconciler"):
+        for line in block.splitlines():
+            if field + ":" not in line:
+                continue
+            value = line.split(field + ":", 1)[1]
+            for package, name in re.findall(r"([a-z][A-Za-z0-9_]*)\.([A-Z][A-Za-z0-9_]*)", value):
+                if not name.endswith(("Projection", "Bootstrap", "Reconciler", "Contributor")):
+                    continue
+                import_path = aliases.get(package)
+                if not import_path or import_path == APPLICATION_PREFIX + "bootstrap":
+                    continue
+                if import_path.startswith(APPLICATION_PREFIX):
+                    result.setdefault(import_path[len(APPLICATION_PREFIX):].rstrip("/"), set()).add(name)
+                    continue
+                if not import_path.startswith(POSTGRES_PREFIX):
+                    continue
+                adapter = ROOT / import_path[len(MODULE_PATH):]
+                apps = set()
+                for go_path in go_files(adapter):
+                    for imported in imports_of(go_path):
+                        if imported.startswith(APPLICATION_PREFIX):
+                            apps.add(imported[len(APPLICATION_PREFIX):].rstrip("/"))
+                apps.discard("bootstrap")
+                if len(apps) == 1:
+                    result.setdefault(next(iter(apps)), set()).add(name)
+    for system in systems:
+        text = system_source(system)
+        for name in re.findall(r"func\s+\([^)]*\)\s+(OverlayMID1|OverlayRosterTx|ReconcileCharacterLogin|ReconcileDirectoryTx)\s*\(", text):
+            result.setdefault(system, set()).add(name)
+    return result
+
+
+def system_source(system):
+    return "\n".join(read_text(path) for path in go_files(APPLICATION_DIRECTORY / system))
+
+
+def background_rows(systems, system_imports, system_texts):
+    rows = {system: [] for system in systems}
+    command_directory = ROOT / "cmd" / "gxb-api"
+    for path in sorted(command_directory.glob("*.go")):
+        if path.name.endswith("_test.go"):
+            continue
+        aliases = import_aliases(path)
+        text = read_text(path)
+        for alias in re.findall(r"go\s+runReconcile\([^)]*?,?\s*([A-Za-z0-9_]+)\.Reconciler\{", text):
+            import_path = aliases.get(alias)
+            if import_path and import_path.startswith(APPLICATION_PREFIX):
+                system = import_path[len(APPLICATION_PREFIX):].rstrip("/")
+                rows.setdefault(system, []).append({"kind": "reconcile", "binary": "gxb-api", "entry": alias + ".Reconciler"})
+    worker_binaries = {}
+    for binary_directory in sorted((ROOT / "cmd").iterdir()):
+        if not binary_directory.is_dir():
+            continue
+        text = "\n".join(read_text(path) for path in go_files(binary_directory))
+        for system in systems:
+            if ("/" + system + "worker") in text:
+                worker_binaries.setdefault(system, set()).add(binary_directory.name)
+    for system in systems:
+        text = system_texts[system]
+        if "Enqueue.InsertTx(" not in text:
+            continue
+        enqueuers = sorted(
+            binary.name for binary in (ROOT / "cmd").iterdir()
+            if binary.is_dir() and any(
+                system in read_text(path) and "river" in read_text(path)
+                for path in go_files(binary)
+            )
+        )
+        rows[system].append({
+            "kind": "river",
+            "enqueued_by": enqueuers,
+            "workers": sorted(worker_binaries.get(system, [])),
+        })
+    return rows
+
+
+def lock_constants():
+    constants = {}
+    for base in (ROOT / "internal" / "domain", APPLICATION_DIRECTORY):
+        for path in go_files(base):
+            package = path.parent.name
+            for name, value in LOCK_CONST_RE.findall(read_text(path)):
+                constants[package + "." + name] = int(value)
+    return constants
+
+
+def duration_milliseconds(raw):
+    match = re.match(r"(\d+)\s*\*\s*time\.(\w+)", raw)
+    if match:
+        return int(match.group(1)) * DURATION_UNITS.get(match.group(2), 1)
+    return int(raw)
+
+
+def lock_rows(system, text, stores, constants):
+    sources = [text] + [
+        "\n".join(read_text(path) for path in go_files(ROOT / "internal" / "adapters" / "postgres" / store.split("/")[-1]))
+        for store in stores
+        if store.startswith("internal/adapters/postgres/")
+    ]
+    ranks = {}
+    for source in sources:
+        for reference in re.findall(r"([A-Za-z0-9_.]*LockRank[A-Za-z0-9_]*)", source):
+            parts = reference.split(".")
+            key = None
+            if len(parts) == 2:
+                key = parts[0] + "." + parts[1]
+            elif len(parts) == 1:
+                local = system + "." + parts[0]
+                key = local if local in constants else None
+                if key is None:
+                    matches = [candidate for candidate in constants if candidate.endswith("." + parts[0])]
+                    if len(matches) == 1:
+                        key = matches[0]
+            if key in constants:
+                ranks[key] = constants[key]
+    profiles = []
+    for name, raw in PROFILE_RE.findall(text):
+        profiles.append({"name": name, "lock_timeout_ms": duration_milliseconds(raw)})
+    return {
+        "ranks": [{"rank": ranks[key], "name": key} for key in sorted(ranks)],
+        "profiles": sorted(profiles, key=lambda row: row["name"]),
+    }
+
+
+def soft_refusals(system_texts):
+    rows = []
+    dispatchers = ROOT / "internal" / "adapters" / "stockruntime"
+    for path in go_files(dispatchers):
+        if path.name.endswith("_test.go") or path.name == "inactive_dispatcher.go":
+            continue
+        text = read_text(path)
+        for match in re.finditer(r'HTTPStatus:\s*http\.StatusOK[^\n}]*"error_code":\s*(?:int64\()?(\d+)', text):
+            code = int(match.group(1))
+            if code in (0, 30005):
+                continue
+            rows.append({"file": relative(path), "line": text.count("\n", 0, match.start()) + 1, "code": code, "kind": "dispatcher"})
+    for path in go_files(APPLICATION_DIRECTORY):
+        text = read_text(path)
+        for match in re.finditer(r'map\[string\]any\{\s*"error_code":\s*(?:int64\()?(\d+)', text):
+            code = int(match.group(1))
+            if code in (0, 30005):
+                continue
+            rows.append({"file": relative(path), "line": text.count("\n", 0, match.start()) + 1, "code": code, "kind": "application"})
+    return sorted(rows, key=lambda row: (row["file"], row["line"], row["code"]))
+
+
+def enclosing_function(text, position):
+    names = re.findall(r"(?m)^func\s+(?:\([^)]*\)\s*)?([A-Za-z0-9_]+)\s*\(", text[:position])
+    return names[-1] if names else ""
+
+
+def narrow_param_checks():
+    rows = []
+    directory = ROOT / "internal" / "adapters" / "stockruntime"
+    for path in go_files(directory):
+        if path.name.endswith("_test.go"):
+            continue
+        text = read_text(path)
+        relative_path = relative(path)
+        for match in re.finditer(r"allowed\s*:=\s*map\[string\](?:bool|struct\{\})\{", text):
+            tail = text[match.start():match.start() + 1500]
+            if "for k := range" in tail and ("!allowed[k]" in tail or "_, ok := allowed" in tail):
+                rows.append({
+                    "file": relative_path,
+                    "line": text.count("\n", 0, match.start()) + 1,
+                    "function": enclosing_function(text, match.start()),
+                    "style": "allowed_map",
+                })
+        for match in re.finditer(r"for k := range (?:params|p)\s*\{", text):
+            tail = text[match.start():match.start() + 300]
+            if 'k != "mid"' in tail:
+                rows.append({
+                    "file": relative_path,
+                    "line": text.count("\n", 0, match.start()) + 1,
+                    "function": enclosing_function(text, match.start()),
+                    "style": "inline_rejection",
+                })
+    return sorted(rows, key=lambda row: (row["file"], row["line"]))
+
+
+def mode_surface():
+    path = ROOT / "docs" / "i9" / "I9_MODE_SURFACE_V1.json"
+    if not path.is_file():
+        return {}
+    return {entry["mid"]: entry for entry in json.loads(read_text(path)).get("mids", [])}
+
+
+def content_tables(read_tables):
+    return sorted(table for table in read_tables if table.startswith("content_"))
+
+
 def build_system_map():
     helper = run_helper()
     client = load_client_callers()
@@ -447,6 +786,14 @@ def build_system_map():
     system_imports = {
         system: directory_imports(APPLICATION_DIRECTORY / system) for system in systems
     }
+    system_texts = {system: system_source(system) for system in systems}
+    call_edges = cross_system_calls(systems, system_imports, system_texts)
+    reverse_call_edges = inverse_calls(systems, call_edges)
+    fact_kinds = fact_constants()
+    login_sets = login_contributors(systems)
+    background = background_rows(systems, system_imports, system_texts)
+    lock_rank_constants = lock_constants()
+    modes = mode_surface()
     graph = build_package_graph()
     command_starts = sorted(directory for directory in graph if directory.startswith("cmd/"))
     reachable = reachable_packages(graph, command_starts)
@@ -492,7 +839,6 @@ def build_system_map():
             mid_rows.append({
                 "mid": mid,
                 "name": client_entry["name"],
-                "dispatcher_file": entry["dispatcher_file"],
             })
         stores = system_stores[system]
         owner_tables = {
@@ -510,27 +856,12 @@ def build_system_map():
         )
         touched = set(owned_tables) | set(read_tables)
 
-        imports = system_imports[system]
-        calls = sorted({
-            sys for sys in systems
-            if sys != system and APPLICATION_PREFIX + sys in imports
-        })
-        called_by = sorted(
-            other for other in systems
-            if other != system and APPLICATION_PREFIX + system in system_imports[other]
-        )
-
         wiring_files = {entry.get("construction_file", "") for entry in system_entries}
         wiring_files.discard("")
-        wired_apps = set()
-        for wiring_file in sorted(wiring_files):
-            path = ROOT / wiring_file
-            if not path.is_file():
-                continue
-            for import_path in imports_of(path):
-                if import_path.startswith(APPLICATION_PREFIX):
-                    wired_apps.add(import_path[len(APPLICATION_PREFIX):].rstrip("/"))
-        wired_apps.discard(system)
+        decorated = set()
+        for mid, entry in unique_mids.items():
+            if owners[mid] == system:
+                decorated.update(entry.get("wrappers") or [])
 
         contract_files = []
         identifiers = {str(mid) for mid in unique_mids} | set(touched)
@@ -547,7 +878,7 @@ def build_system_map():
             pushes.append(row)
         pushes.sort(key=lambda row: (row["kind"], row.get("mid", 0), row.get("parent_mid", 0), row["file"], row["line"], row.get("notice_type", 0)))
 
-        unit_tests = sorted(relative(path) for path in directory.glob("*_test.go"))
+        unit_tests = sorted(path.name for path in directory.glob("*_test.go"))
         integration = []
         integration_root = ROOT / "internal" / "integration"
         if integration_root.is_dir():
@@ -555,23 +886,30 @@ def build_system_map():
                 if not candidate.is_dir():
                     continue
                 if any(APPLICATION_PREFIX + system in imports_of(path) for path in candidate.rglob("*.go")):
-                    integration.append(relative(candidate))
+                    integration.append(candidate.name)
         scenarios = sorted(
-            scenario for scenario, mids in scenario_files.items()
+            Path(scenario).name for scenario, mids in scenario_files.items()
             if mids & set(unique_mids)
         )
 
         system_records[system] = {
             "name": system,
-            "path": "internal/application/" + system,
             "mids": mid_rows,
             "pushes": pushes,
             "tables": {"owned": owned_tables, "read": read_tables},
-            "calls": calls,
-            "called_by": called_by,
-            "wired_with": sorted(wired_apps),
+            "calls": call_edges[system],
+            "called_by": reverse_call_edges[system],
+            "decorated_by": sorted(decorated),
+            "facts": {
+                "emits": sorted(emitted_facts(system_texts[system], fact_kinds)),
+                "reads": sorted(read_facts(system, system_texts[system], fact_kinds)),
+            },
+            "login": sorted(login_sets.get(system, [])),
+            "background": background.get(system, []),
+            "locks": lock_rows(system, system_texts[system], stores, lock_rank_constants),
+            "content": content_tables(read_tables),
+            "dispatcher_files": sorted({entry["dispatcher_file"] for entry in system_entries if entry["dispatcher_file"]}),
             "stores": stores,
-            "wiring_files": sorted({entry.get("wiring_file", entry["registration_file"]) for entry in system_entries}),
             "contracts": contract_files,
             "tests": {"unit": unit_tests, "integration": integration, "scenarios_naming": scenarios},
         }
@@ -583,7 +921,7 @@ def build_system_map():
         record = system_records[system]
         index_rows.append({
             "name": system,
-            "path": record["path"],
+            "path": "internal/application/" + system,
             "purpose": package_purpose(system),
             "mids": len(record["mids"]),
             "tables": len(record["tables"]["owned"]),
@@ -656,10 +994,14 @@ def build_system_map():
     for raw_mid, client_entry in sorted(client.items(), key=lambda item: int(item[0])):
         if not client_entry["files"] or int(raw_mid) in grouped:
             continue
+        mode = modes.get(int(raw_mid), {})
         client_not_live.append({
             "mid": int(raw_mid),
             "name": client_entry["name"],
             "files": client_entry["files"],
+            "family": mode.get("family"),
+            "disposition": mode.get("disposition"),
+            "stage": mode.get("target"),
         })
 
     several_writers = []
@@ -687,6 +1029,8 @@ def build_system_map():
         "inactive_mids": {"count": len(inactive_mids), "mids": inactive_mids},
         "live_mids_not_covered": live_not_covered,
         "live_mids_without_client_caller": live_without_caller,
+        "narrow_param_checks": narrow_param_checks(),
+        "soft_refusals": soft_refusals(system_texts),
         "systems_not_wired": unwired,
         "tables_with_several_writers": several_writers,
         "tables_without_owner_row": without_owner,
@@ -778,8 +1122,20 @@ def check_output(files):
     return 1
 
 
+SHOW_ALIASES = {"missions": "i5"}
+
+
 def show_entry(key):
     index = json.loads(read_text(OUTPUT_DIRECTORY / "INDEX.json"))
+    if key in SHOW_ALIASES:
+        target = SHOW_ALIASES[key]
+        print(json.dumps({
+            "alias": key,
+            "system": target,
+            "note": "no internal/application/missions package; mission ownership lives in " + target,
+            "record": json.loads(read_text(SYSTEMS_DIRECTORY / (target + ".json"))),
+        }, indent=1, ensure_ascii=False))
+        return
     if key in {row["name"] for row in index["systems"]}:
         print(json.dumps(json.loads(read_text(SYSTEMS_DIRECTORY / (key + ".json"))), indent=1, ensure_ascii=False))
         return

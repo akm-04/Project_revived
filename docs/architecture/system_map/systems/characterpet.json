@@ -1,13 +1,41 @@
 {
- "called_by": [
-  "campaign"
- ],
- "calls": [
-  "characterasset",
-  "characterpractice",
-  "generation",
-  "i5"
- ],
+ "background": [],
+ "called_by": {
+  "campaign": [
+   "CreditCampaignEXPTx",
+   "LockCampaignPetTx"
+  ]
+ },
+ "calls": {
+  "characterasset": [
+   "BuildEffectivePetAppearance",
+   "BuildEffectivePetAppearanceTx",
+   "ModifyRestoration",
+   "PetPromotionRestorationSource",
+   "ValidateExactRevisionID"
+  ],
+  "characterpractice": [
+   "ReduceAppliedPracticeContribution"
+  ],
+  "i5": [
+   "ApplyEquipmentResourceDebitTx",
+   "ApplyPetExpDebitTx",
+   "ApplyPromotionResourcesTx",
+   "ApplyStrictRestorationTx",
+   "CommitAwakeningEquipmentTx",
+   "DebitMaterialCostTx",
+   "DebitPetAcquisitionAtTx",
+   "DebitScalarTx",
+   "PlanPromotionRestoration",
+   "PrepareAwakeningEquipmentTx",
+   "PrepareEquipmentResourcesTx",
+   "PreparePetExpDebitTx",
+   "PreparePromotionResourcesTx",
+   "PrepareStrictRestorationTx",
+   "StackQuantity"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 2,
@@ -34,85 +62,93 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/pet_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA3_PET_ACQUISITION"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA7_5_PET_HOME_STYLE"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 134,
    "name": "PET_USE_EXP_ITEMS"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 780,
    "name": "PETS_GET"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 781,
    "name": "PET_SUMMON"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 782,
    "name": "PET_CLEAN_CD"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 783,
    "name": "PET_EQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 785,
    "name": "PET_ADVANCE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 786,
    "name": "PET_EVOLVE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 787,
    "name": "PET_FEED"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 789,
    "name": "PET_SET_SHOW"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 790,
    "name": "PET_ONE_KEY_UP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 791,
    "name": "PET_UPGRADE_ALL_SKILL"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 792,
    "name": "PET_ONE_KEY_EQUIP"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 1893,
    "name": "GET_PET_STYLE_FORM_ITEM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 1894,
    "name": "USE_PET_STYLE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "mid": 1895,
    "name": "CANCEL_PET_STYLE"
   }
  ],
  "name": "characterpet",
- "path": "internal/application/characterpet",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/characterstore",
@@ -137,91 +173,31 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/missions",
-   "internal/integration/playerdisplay",
-   "internal/integration/publicshowcase"
+   "missions",
+   "playerdisplay",
+   "publicshowcase"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_3d_trials.json"
+   "i9_3d_trials.json"
   ],
   "unit": [
-   "internal/application/characterpet/appearance_contribution_test.go",
-   "internal/application/characterpet/appearance_style_recovery_test.go",
-   "internal/application/characterpet/appearance_style_service_test.go",
-   "internal/application/characterpet/base_observation_test.go",
-   "internal/application/characterpet/ca3_2_test.go",
-   "internal/application/characterpet/ca7_6_preservation_test.go",
-   "internal/application/characterpet/ca8_observation_adapters_test.go",
-   "internal/application/characterpet/equipment_planner_oracle_test.go",
-   "internal/application/characterpet/equipment_recovery_test.go",
-   "internal/application/characterpet/equipment_service_test.go",
-   "internal/application/characterpet/equipment_state_test.go",
-   "internal/application/characterpet/practice_contribution_test.go",
-   "internal/application/characterpet/progression_test.go",
-   "internal/application/characterpet/promotion_onekey_test.go",
-   "internal/application/characterpet/promotion_recovery_test.go",
-   "internal/application/characterpet/promotion_service_test.go",
-   "internal/application/characterpet/service_test.go"
+   "appearance_contribution_test.go",
+   "appearance_style_recovery_test.go",
+   "appearance_style_service_test.go",
+   "base_observation_test.go",
+   "ca3_2_test.go",
+   "ca7_6_preservation_test.go",
+   "ca8_observation_adapters_test.go",
+   "equipment_planner_oracle_test.go",
+   "equipment_recovery_test.go",
+   "equipment_service_test.go",
+   "equipment_state_test.go",
+   "practice_contribution_test.go",
+   "progression_test.go",
+   "promotion_onekey_test.go",
+   "promotion_recovery_test.go",
+   "promotion_service_test.go",
+   "service_test.go"
   ]
- },
- "wired_with": [
-  "achievement",
-  "activitydirectory",
-  "adventure",
-  "arena",
-  "awakeningbattle",
-  "bookskill",
-  "bootstrap",
-  "campaign",
-  "championsleague",
-  "characterasset",
-  "characterhero",
-  "characterpractice",
-  "charactersavedpreset",
-  "commerceprivilege",
-  "conquerschool",
-  "course",
-  "dailyconsume",
-  "directorysync",
-  "dormhouse",
-  "elementequipment",
-  "frienddm",
-  "generaldm",
-  "generation",
-  "godstrial",
-  "guildcampaign",
-  "guildcore",
-  "guildtea",
-  "heroevolution",
-  "i5",
-  "identitylifecycle",
-  "illusion",
-  "inscription",
-  "librarylocal",
-  "march",
-  "missioninputs",
-  "occult",
-  "oneonone",
-  "petcampaign",
-  "playerdisplay",
-  "publication",
-  "publicprofile",
-  "realtimeauth",
-  "roominvite",
-  "sharedroom",
-  "socialdismiss",
-  "socialfriendbase",
-  "socialgift",
-  "socialinbox",
-  "socialprojection",
-  "socialrelation",
-  "socialreload",
-  "spirit",
-  "summon",
-  "topfloor",
-  "worldboss"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }

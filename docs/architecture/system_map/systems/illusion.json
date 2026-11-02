@@ -1,17 +1,34 @@
 {
- "called_by": [],
- "calls": [
-  "characterasset",
-  "combat",
-  "generation",
-  "i5",
-  "playerdirectory",
-  "playerroot",
-  "publicstats",
-  "roominvite",
-  "sharedroom",
-  "socialinbox"
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appillusion.Reconciler",
+   "kind": "reconcile"
+  }
  ],
+ "called_by": {},
+ "calls": {
+  "characterasset": [
+   "NewCoherentReadScope"
+  ],
+  "combat": [
+   "AttestSummaryTx",
+   "MonsterWaves",
+   "SettleMemberTx",
+   "StartTx",
+   "TerminalTx"
+  ],
+  "i5": [
+   "DebitMaterialCostTx",
+   "DeliverTx"
+  ],
+  "sharedroom": [
+   "Join",
+   "SetReady",
+   "Update"
+  ]
+ },
+ "content": [],
  "contracts": [
   {
    "count": 17,
@@ -22,95 +39,96 @@
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/illusion_dispatcher.go",
+  "internal/adapters/stockruntime/illusion_room_dispatcher.go"
+ ],
+ "facts": {
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "illusion"
+   }
+  ],
+  "ranks": []
+ },
+ "login": [],
  "mids": [
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_dispatcher.go",
    "mid": 1344,
    "name": "ILLUSION_LOAD_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_dispatcher.go",
    "mid": 1345,
    "name": "ILLUSION_BUY_TIMES"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_dispatcher.go",
    "mid": 1346,
    "name": "ILLUSION_START_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_dispatcher.go",
    "mid": 1347,
    "name": "ILLUSION_FIGHT_RESULT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1349,
    "name": "ILLUSION_CREATE_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1350,
    "name": "ILLUSION_GET_ROOM_INFO"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1351,
    "name": "ILLUSION_PREPARE_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1352,
    "name": "ILLUSION_ENTER_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1353,
    "name": "ILLUSION_REMOVE_PLAYER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1354,
    "name": "ILLUSION_EXIT_ROOM"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1356,
    "name": "ILLUSION_SET_PARTNER"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1357,
    "name": "ILLUSION_PREPARE_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1358,
    "name": "ILLUSION_START_TEAM_FIGHT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1360,
    "name": "ILLUSION_INVITE_FRIEND"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1362,
    "name": "ILLUSION_GET_REPORT"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "mid": 1363,
    "name": "ILLUSION_CANCEL_PREPARE"
   },
   {
-   "dispatcher_file": "internal/adapters/stockruntime/illusion_dispatcher.go",
    "mid": 1364,
    "name": "ILLUSION_RANK_HEROS"
   }
  ],
  "name": "illusion",
- "path": "internal/application/illusion",
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/illusion_room_notice.go",
@@ -157,25 +175,14 @@
  },
  "tests": {
   "integration": [
-   "internal/integration/playerdisplay"
+   "playerdisplay"
   ],
   "scenarios_naming": [
-   "virtualclient/scenarios/i9_8b_illusion.json"
+   "i9_8b_illusion.json"
   ],
   "unit": [
-   "internal/application/illusion/service_test.go",
-   "internal/application/illusion/team_test.go"
+   "service_test.go",
+   "team_test.go"
   ]
- },
- "wired_with": [
-  "adventure",
-  "combat",
-  "generation",
-  "i5",
-  "roominvite",
-  "sharedroom"
- ],
- "wiring_files": [
-  "cmd/gxb-api/main_postgres.go"
- ]
+ }
 }
