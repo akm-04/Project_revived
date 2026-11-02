@@ -95,7 +95,7 @@ func (s Charge) ready() bool {
 }
 
 func tapProfile() tx.Profile {
-	return tx.Profile{Name: "charge-tap", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 10 * time.Second, TransactionTimeout: 30 * time.Second}
+	return tx.Profile{Name: "charge-tap", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 10 * time.Second, TransactionTimeout: 30 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 45 * time.Second}
 }
 
 func tapRetry() tx.RetryPolicy {
@@ -287,8 +287,13 @@ func (s Charge) transition(c context.Context, q tx.Queryer, a identity.ActorCont
 			return d.State{}, 0, 0, e
 		}
 		tooLarge := old.Charge > math.MaxInt64-xp || old.StateVersion == math.MaxInt64
-		if old.Validate() != nil || old.ValidateCatalog(oldCatalog) != nil || old.LogicalServerID != a.LogicalServerID || old.UpdatedAt.After(at) || tooLarge {
+		// The root row is locked, so a later UpdatedAt is a concurrent winner's
+		// write, not a future fact: keep timestamps monotone instead of refusing.
+		if old.Validate() != nil || old.ValidateCatalog(oldCatalog) != nil || old.LogicalServerID != a.LogicalServerID || tooLarge {
 			return d.State{}, 0, 0, d.ErrConflict
+		}
+		if old.UpdatedAt.After(next.UpdatedAt) {
+			next.UpdatedAt = old.UpdatedAt
 		}
 		if oldCap, e = oldCatalog.SkillCap(old.VIPLevel); e != nil {
 			return d.State{}, 0, 0, e

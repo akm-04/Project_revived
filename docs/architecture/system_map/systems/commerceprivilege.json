@@ -127,7 +127,9 @@
    "missions",
    "playerdisplay"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_10g_charge.json"
+  ],
   "unit": []
  }
 }
