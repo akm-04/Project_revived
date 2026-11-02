@@ -5,9 +5,11 @@ package publicpresentation
 import (
 	"context"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
@@ -19,7 +21,8 @@ import (
 
 func Display() playerdisplay.Service {
 	c := contentstore.Store{}
-	return playerdisplay.Service{Store: i5store.Store{}, Content: c, Characters: characterstore.DisplayReader{Store: characterstore.Store{}, Content: c}}
+	return playerdisplay.Service{Store: i5store.Store{}, Content: c, Characters: characterstore.DisplayReader{Store: characterstore.Store{}, Content: c},
+		CosmeticPrivileges: commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: c}}
 }
 
 type Reader struct {
