@@ -2,6 +2,7 @@ package guildcampaign
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/i5"
@@ -80,11 +81,12 @@ type ServerView struct {
 
 // LogRow is one 609 row.
 type LogRow struct {
-	Type      int64
-	Profile   ProfileView
-	PlayerJob int64
-	ChapterID int64
-	At        time.Time
+	Type       int64
+	Profile    ProfileView
+	MemberName string
+	PlayerJob  int64
+	ChapterID  int64
+	At         time.Time
 }
 
 // DetailView is 613.
@@ -264,6 +266,7 @@ func (m Mode) GuildLog(c context.Context, a identity.ActorContext, op operation.
 	var out []LogRow
 	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		guildID := int64(membership.GuildID)
+		cutoff := op.StartedAt.AddDate(0, 0, -int(m.Settings.RetentionDays))
 		roles := map[identity.PlayerID]int64{}
 		memberships, err := m.Service.Guilds.ListMembershipsTx(c, sc.Tx, guild.ID(guildID))
 		if err != nil {
@@ -272,7 +275,7 @@ func (m Mode) GuildLog(c context.Context, a identity.ActorContext, op operation.
 		for _, member := range memberships {
 			roles[member.PlayerID] = int64(member.Role)
 		}
-		rows, err := m.ModeStore.ListGuildLogTx(c, sc.Tx, guildID, op.StartedAt.AddDate(0, 0, -int(m.Settings.RetentionDays)), 100)
+		rows, err := m.ModeStore.ListGuildLogTx(c, sc.Tx, guildID, cutoff, 100)
 		if err != nil {
 			return err
 		}
@@ -283,9 +286,65 @@ func (m Mode) GuildLog(c context.Context, a identity.ActorContext, op operation.
 			}
 			out = append(out, LogRow{Type: row.Type, Profile: profile, PlayerJob: roles[identity.PlayerID(row.PlayerID)], ChapterID: row.ChapterID, At: row.At})
 		}
+		members, err := m.Service.Guilds.ListMemberLogTx(c, sc.Tx, guildID, cutoff, 100)
+		if err != nil {
+			return err
+		}
+		for _, row := range members {
+			kind, known := memberLogType(row.Kind, row.Role)
+			if !known {
+				continue
+			}
+			actor, err := m.profileTx(c, sc.Tx, identity.PlayerID(row.ActorID))
+			if err != nil {
+				continue
+			}
+			subject := ""
+			if row.SubjectID != row.ActorID {
+				if profile, err := m.profileTx(c, sc.Tx, identity.PlayerID(row.SubjectID)); err == nil {
+					subject = profile.Name
+				}
+			}
+			out = append(out, LogRow{Type: kind, Profile: actor, MemberName: subject, PlayerJob: roles[identity.PlayerID(row.ActorID)], At: row.At})
+		}
+		sort.SliceStable(out, func(i, j int) bool { return out[i].At.After(out[j].At) })
+		if len(out) > 100 {
+			out = out[:100]
+		}
 		return nil
 	})
 	return out, err
+}
+
+// memberLogType maps the membership audit kinds onto the client's log types.
+// Kinds with no stock row (APPLY, CANCEL_APPLY, REFUSE_APPLY, INVITE, SETTINGS,
+// DISSOLVE, BROADCAST) are not shown; 10 and 14 stay unemitted until drink or
+// their source activates.
+func memberLogType(kind string, role int64) (int64, bool) {
+	switch kind {
+	case "CREATE":
+		return 1, true
+	case "DESCRIPTION":
+		return 2, true
+	case "KICK":
+		return 3, true
+	case "JOIN", "ACCEPT_INVITE":
+		return 4, true
+	case "ACCEPT_APPLY":
+		return 5, true
+	case "LEAVE":
+		return 6, true
+	case "ROLE":
+		switch role {
+		case 1:
+			return 11, true
+		case 2:
+			return 12, true
+		case 0:
+			return 13, true
+		}
+	}
+	return 0, false
 }
 
 // MapDetail is 613.

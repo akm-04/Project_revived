@@ -1441,6 +1441,20 @@
       "owner": "mail",
       "write_exceptions": []
     },
+    "mail_tuning": {
+      "allowed_query_owners": [
+        "mail"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "migration": "migrations/00108_i9_10_mail_tuning.sql",
+      "owner": "mail",
+      "write_exceptions": []
+    },
     "objective_definitions": {
       "allowed_query_owners": [
         "objective-definition-policy"

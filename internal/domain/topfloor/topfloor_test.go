@@ -48,6 +48,21 @@ func TestBandsAndRevenge(t *testing.T) {
 	if near := ranks[len(ranks)-1]; len(near) < 3 || near[0] != 2 || near[1] != 3 {
 		t.Fatalf("rank 1 nearest %v", near)
 	}
+	for _, rank := range []int64{3, 2} {
+		near := c.OfferRanks(1, 100001, rank, 7, 0)
+		last := near[len(near)-1]
+		for _, r := range last {
+			if r >= rank {
+				t.Fatalf("rank %d nearest offered %d at or below its rank: %v", rank, r, last)
+			}
+		}
+	}
+	if last := c.OfferRanks(1, 100001, 3, 7, 0); len(last[len(last)-1]) != 2 || last[len(last)-1][0] != 2 || last[len(last)-1][1] != 1 {
+		t.Fatalf("rank 3 nearest %v", last[len(last)-1])
+	}
+	if last := c.OfferRanks(1, 100001, 2, 7, 0); len(last[len(last)-1]) != 1 || last[len(last)-1][0] != 1 {
+		t.Fatalf("rank 2 nearest %v", last[len(last)-1])
+	}
 	if a, b := c.OfferRanks(1, 100001, 1000, 7, 0), c.OfferRanks(1, 100001, 1000, 7, 1); a[0][0] == b[0][0] && a[1][0] == b[1][0] && a[2][0] == b[2][0] {
 		t.Fatal("refresh must reorder the bands")
 	}

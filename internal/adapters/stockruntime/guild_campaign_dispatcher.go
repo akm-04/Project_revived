@@ -413,7 +413,7 @@ func guildLog(rows []guildcampaign.LogRow) []any {
 	out := make([]any, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, map[string]any{"type": row.Type, "time": row.At.Unix(), "player_name": row.Profile.Name,
-			"player_job": row.PlayerJob, "member_name": "", "chapter_id": row.ChapterID})
+			"player_job": row.PlayerJob, "member_name": row.MemberName, "chapter_id": row.ChapterID})
 	}
 	return out
 }

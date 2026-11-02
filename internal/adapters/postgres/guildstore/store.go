@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	app "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -378,6 +379,35 @@ func (Store) AppendAuditTx(ctx context.Context, t tx.Tx, gid guild.ID, kind stri
 		return err
 	}
 	return one(tag, "guild audit")
+}
+
+// ListMemberLogTx is the bounded newest-first membership slice for 609. The
+// guild store owns guild_audit_log; the campaign store owns its own log.
+func (Store) ListMemberLogTx(ctx context.Context, q tx.Queryer, guildID int64, cutoff time.Time, limit int) ([]app.MemberLogRow, error) {
+	var raw string
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+		'kind',event_kind,'actor',COALESCE(actor_player_id,0),'subject',COALESCE(subject_player_id,0),
+		'role',COALESCE((details->>'role')::bigint,-1),'at',EXTRACT(EPOCH FROM occurred_at)::bigint) ORDER BY occurred_at DESC,sequence DESC),'[]'::jsonb)::text
+		FROM (SELECT event_kind,actor_player_id,subject_player_id,details,occurred_at,sequence
+			FROM guild_audit_log WHERE guild_id=$1 AND occurred_at>=$2 ORDER BY occurred_at DESC,sequence DESC LIMIT $3) recent`, guildID, cutoff, limit).Scan(&raw)
+	if err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		Kind    string `json:"kind"`
+		Actor   int64  `json:"actor"`
+		Subject int64  `json:"subject"`
+		Role    int64  `json:"role"`
+		At      int64  `json:"at"`
+	}
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]app.MemberLogRow, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, app.MemberLogRow{Kind: row.Kind, ActorID: row.Actor, SubjectID: row.Subject, Role: row.Role, At: time.Unix(row.At, 0).UTC()})
+	}
+	return out, nil
 }
 
 // DeleteApplicationsForPlayerTx clears obsolete application state after a

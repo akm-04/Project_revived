@@ -48,6 +48,10 @@ func (g guildRentalRuntime) GuildOffers(c context.Context, a identity.ActorConte
 	return g.Reads.GuildOffers(c, a, kind, requested, op)
 }
 
+func (g guildRentalRuntime) UsedPartners(c context.Context, a identity.ActorContext, op operation.Context) ([]int64, error) {
+	return g.Reads.UsedPartners(c, a, op)
+}
+
 var _ stockruntime.GuildRentalPort = guildRentalRuntime{}
 
 func rentalPolicyBinding(p guildrentalpolicy.Policy) guildrental.Policy {
@@ -101,6 +105,7 @@ func canonicalGuildRental(p *pg.Pool, r tx.Runner, content contentstore.Store, g
 		Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: content, Policy: binding,
 	}
 	reads := guildrental.Reader{Runner: r, Store: guildDB, Characters: guildrentalread.Characters{}, Profiles: guildrentalread.Profiles{},
-		Levels: guildrentalread.Levels{}, Mana: guildrentalread.Mana{}, Privileges: privileges, Policy: binding}
+		Levels: guildrentalread.Levels{}, Mana: guildrentalread.Mana{}, Privileges: privileges,
+		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: binding}
 	return service, reads
 }

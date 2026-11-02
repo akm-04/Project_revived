@@ -56,6 +56,7 @@ type Guilds interface {
 	LockGuildTx(context.Context, tx.Tx, guild.ID) (guild.Guild, bool, error)
 	LockMembershipTx(context.Context, tx.Tx, identity.PlayerID) (guild.Membership, bool, error)
 	ListMembershipsTx(context.Context, tx.Queryer, guild.ID) ([]guild.Membership, error)
+	ListMemberLogTx(context.Context, tx.Queryer, int64, time.Time, int) ([]MemberLogRow, error)
 	SaveGuildTx(context.Context, tx.Tx, guild.Guild, int64) error
 	FoldActivityTx(context.Context, tx.Tx, []identity.PlayerID) (int64, error)
 	FoldActivityAwardsTx(context.Context, tx.Tx, guild.ID) (int64, error)

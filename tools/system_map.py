@@ -1327,12 +1327,12 @@ def validate_generated(files):
 TRACE_ANCHORS = {
     114: [
         "internal/application/campaign/mode.go:858",
-        "SettleGrantTx internal/application/i5/service.go:234",
+        "SettleGrantTx internal/application/i5/service.go:237",
         "mail_records",
         "player_item_stacks",
     ],
     161: [
-        "MaterializeTx internal/application/i5/missions.go:62",
+        "MaterializeTx internal/application/i5/missions.go:63",
         "LockMissionRootTx internal/adapters/postgres/i5store/missions.go:14",
         "player_mission_roots",
         "FOR UPDATE",

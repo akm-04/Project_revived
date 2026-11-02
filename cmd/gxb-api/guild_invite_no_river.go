@@ -9,7 +9,6 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
-	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialprojection"
@@ -33,7 +32,6 @@ func configureGuildInvite(c context.Context, p *postgres.Pool, r tx.Runner, _ *g
 		gift.InviteConsumption = socialinboxstore.Store{}
 		gift.Invites = b.Target
 		reads.Invites = b.Target
-		reads.PresentationAt = socialpresentation.TransactionReader{}
 		reload.Invites = b.Target
 	}
 	return nil

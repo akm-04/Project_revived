@@ -44,7 +44,7 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 		allowed = []string{"to_player_id", "index"}
 	case 1840:
 	case 1832:
-		allowed = []string{"hero_ids"}
+		allowed = []string{"ids"}
 	default:
 		return fail(http.StatusNotImplemented)
 	}
@@ -55,7 +55,7 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 		if d.Showcase == nil {
 			return fail(http.StatusBadRequest)
 		}
-		array, ok := p["hero_ids"].([]any)
+		array, ok := p["ids"].([]any)
 		if !ok || len(array) != 6 {
 			return fail(http.StatusBadRequest)
 		}

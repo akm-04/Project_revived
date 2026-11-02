@@ -307,6 +307,12 @@ func (s Mode) BusyTx(c context.Context, q tx.Queryer, p identity.PlayerID, partn
 	return r.Busy(partner), err
 }
 
+// BusyPartnersTx is the bounded list form of BusyTx.
+func (s Mode) BusyPartnersTx(c context.Context, q tx.Queryer, p identity.PlayerID) ([]int64, error) {
+	r, _, err := s.Store.ReadTx(c, q, p)
+	return r.BusyPartners(), err
+}
+
 func ownerOp(sc gen.TimedScope) operation.Context {
 	op := sc.Operation.Operation()
 	op.StartedAt = sc.Operation.DecisionAt()

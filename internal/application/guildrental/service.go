@@ -107,6 +107,7 @@ type Levels interface {
 
 type Workplace interface {
 	BusyTx(context.Context, tx.Queryer, identity.PlayerID, int64) (bool, error)
+	BusyPartnersTx(context.Context, tx.Queryer, identity.PlayerID) ([]int64, error)
 }
 
 type Values interface {

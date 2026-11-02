@@ -249,6 +249,7 @@
  },
  "login": [
   "AwakeningBootstrap",
+  "MailExpiryLoginReconciler",
   "MissionBootstrap",
   "OverlayMID1",
   "PetStarterLoginReconciler",
@@ -486,6 +487,7 @@
    "mail_attachments",
    "mail_namespace_counters",
    "mail_records",
+   "mail_tuning",
    "player_awakening_roots",
    "player_currency_balances",
    "player_directory_profiles",

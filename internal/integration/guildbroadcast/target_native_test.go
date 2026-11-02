@@ -163,7 +163,7 @@ func TestRealGuildBroadcastTargetLifecycle(t *testing.T) {
 		t.Fatal(proof, e)
 	}
 	m, ok, e := (i5store.Store{}).ReadGuildBroadcastMailTx(c, p, pids[1], s.Operation.ID)
-	if e != nil || !ok || m.Title != s.Request.Title || m.Sender != s.LeaderName || m.CreatedAt.UnixMicro() != s.DecisionAt.UnixMicro() || len(m.Attachments) != 0 || !m.Shown {
+	if e != nil || !ok || m.Title != s.Request.Title || m.Sender != s.LeaderName || m.CreatedAt.UnixMicro() != s.DecisionAt.UnixMicro() || m.ExpiresAt == nil || !m.ExpiresAt.Equal(s.DecisionAt.Add(7*24*time.Hour)) || len(m.Attachments) != 0 || !m.Shown {
 		t.Fatal(m, ok, e)
 	}
 	// A read/hidden Mail is still the same semantic completion.

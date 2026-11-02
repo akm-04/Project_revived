@@ -1,6 +1,10 @@
 package workplace
 
-import "gxb.local/backend/v2/internal/domain/grant"
+import (
+	"sort"
+
+	"gxb.local/backend/v2/internal/domain/grant"
+)
 
 type Occurrence struct {
 	ID           string
@@ -57,4 +61,24 @@ func (s State) Busy(partner int64) bool {
 		}
 	}
 	return false
+}
+
+// BusyPartners lists the units currently working in a slot, deduplicated and sorted.
+func (s State) BusyPartners() []int64 {
+	seen := map[int64]bool{}
+	out := []int64{}
+	for _, o := range s.Slots {
+		if o == nil {
+			continue
+		}
+		for _, w := range o.Workers {
+			if seen[w.PartnerID] {
+				continue
+			}
+			seen[w.PartnerID] = true
+			out = append(out, w.PartnerID)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return out
 }

@@ -174,7 +174,9 @@
    "publicprofilefoundation",
    "publicshowcase"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "playtest4_fixes.json"
+  ],
   "unit": [
    "media_test.go",
    "rich_records_test.go",

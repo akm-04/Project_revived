@@ -68,6 +68,7 @@ type Reader struct {
 	Levels     Levels
 	Mana       Mana
 	Privileges i5.PrivilegeSnapshotProvider
+	Workplace  Workplace
 	Policy     Policy
 }
 
@@ -81,6 +82,43 @@ func (r Reader) validate() error {
 func (r Reader) readTx(c context.Context, op operation.Context, body func(context.Context, tx.Scope) error) error {
 	_, err := r.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, body)
 	return err
+}
+
+// UsedPartners is 623: units the stock hero picker must not offer. It is the
+// union of the player's workplace workers and their own hero offers.
+func (r Reader) UsedPartners(c context.Context, a identity.ActorContext, op operation.Context) ([]int64, error) {
+	if err := r.validate(); err != nil {
+		return nil, err
+	}
+	if r.Workplace == nil {
+		return nil, ErrUnavailable
+	}
+	seen := map[int64]bool{}
+	out := []int64{}
+	add := func(id int64) {
+		if id > 0 && !seen[id] {
+			seen[id] = true
+			out = append(out, id)
+		}
+	}
+	err := r.readTx(c, op, func(c context.Context, sc tx.Scope) error {
+		workers, err := r.Workplace.BusyPartnersTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		for _, worker := range workers {
+			add(worker)
+		}
+		offers, err := r.Store.ListLenderRentalOffersTx(c, sc.Tx, a.PlayerID, guild.RentalHero, listLimit)
+		if err != nil {
+			return err
+		}
+		for _, offer := range offers {
+			add(offer.Unit)
+		}
+		return nil
+	})
+	return out, err
 }
 
 // OwnOffers is 593/618's list: the caller's own offers, with the current

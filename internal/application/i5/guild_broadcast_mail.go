@@ -58,7 +58,7 @@ func targetProof(s gb.Source, pid identity.PlayerID, r receipt.Receipt, x broadc
 	return p, p.Validate()
 }
 func mailMatchesSource(m mail.Record, s gb.Source, pid identity.PlayerID) bool {
-	return m.Validate() == nil && m.Recipient == pid && m.SourceKind == "GUILD_BROADCAST" && m.SourceKey == s.Operation.ID.String() && m.Address.Namespace == mail.Normal && m.Address.WireID > 0 && m.Address.WireID <= 9007199254740991 && m.Category == 0 && m.Platform == mail.AnyPlatform && m.Title == s.Request.Title && m.Body == s.Request.Content && m.Sender == s.LeaderName && m.CreatedAt.UnixMicro() == s.DecisionAt.UnixMicro() && m.ExpiresAt == nil && m.ClaimedAt == nil && len(m.Attachments) == 0 && m.CompatibilityPolicyVersion == s.PolicyID
+	return m.Validate() == nil && m.Recipient == pid && m.SourceKind == "GUILD_BROADCAST" && m.SourceKey == s.Operation.ID.String() && m.Address.Namespace == mail.Normal && m.Address.WireID > 0 && m.Address.WireID <= 9007199254740991 && m.Category == 0 && m.Platform == mail.AnyPlatform && m.Title == s.Request.Title && m.Body == s.Request.Content && m.Sender == s.LeaderName && m.CreatedAt.UnixMicro() == s.DecisionAt.UnixMicro() && m.ExpiresAt != nil && m.ClaimedAt == nil && len(m.Attachments) == 0 && m.CompatibilityPolicyVersion == s.PolicyID
 }
 func bindingMatchesProof(b gb.Binding, p gb.TargetProof) bool {
 	if b.State == gb.Pending {
@@ -229,7 +229,7 @@ func (v GuildBroadcastMailService) Materialize(c context.Context, id ids.UUID, p
 			if e != nil {
 				return e
 			}
-			m := mail.Record{MailUUID: mid, Recipient: pid, Address: mail.Address{Namespace: mail.Normal, WireID: wire}, SourceKind: "GUILD_BROADCAST", SourceKey: id.String(), Category: 0, Title: source.Request.Title, Sender: source.LeaderName, Body: source.Request.Content, CreatedAt: source.DecisionAt, Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: source.PolicyID, StateVersion: 1}
+			m := mail.Record{MailUUID: mid, Recipient: pid, Address: mail.Address{Namespace: mail.Normal, WireID: wire}, SourceKind: "GUILD_BROADCAST", SourceKey: id.String(), Category: 0, Title: source.Request.Title, Sender: source.LeaderName, Body: source.Request.Content, CreatedAt: source.DecisionAt, ExpiresAt: expiryAt(source.DecisionAt, mailTuning(c, sc.Tx, v.Mail).Ordinary()), Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: source.PolicyID, StateVersion: 1}
 			if e = v.Mail.InsertMailTx(c, sc.Tx, m); e != nil {
 				return e
 			}

@@ -466,6 +466,34 @@ func (Store) AllocateMailWireIDTx(ctx context.Context, t tx.Tx, pid identity.Pla
 	err := t.QueryRow(ctx, `INSERT INTO mail_namespace_counters(recipient_player_id,namespace,next_wire_id,state_version) VALUES($1,$2,2,1) ON CONFLICT(recipient_player_id,namespace) DO UPDATE SET next_wire_id=mail_namespace_counters.next_wire_id+1,state_version=mail_namespace_counters.state_version+1 RETURNING next_wire_id-1`, int64(pid), ns.String()).Scan(&id)
 	return id, err
 }
+
+// MailTuningTx reads the operator overlay; found=false keeps the built-in durations.
+func (Store) MailTuningTx(c context.Context, q tx.Queryer) (mail.Tuning, bool, error) {
+	var raw string
+	err := q.QueryRow(c, `SELECT payload::text FROM mail_tuning`).Scan(&raw)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return mail.Tuning{}, false, nil
+	}
+	if err != nil {
+		return mail.Tuning{}, false, err
+	}
+	var tuning mail.Tuning
+	err = json.Unmarshal([]byte(raw), &tuning)
+	return tuning, true, err
+}
+
+// StampOverflowMailExpiryTx bounds one login's backlog so a large mailbox cannot
+// hold the MID1 transaction; later logins stamp the remainder.
+func (Store) StampOverflowMailExpiryTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, expires time.Time) (int64, error) {
+	tag, err := t.Exec(ctx, `UPDATE mail_records SET expires_at=$2,state_version=state_version+1
+		WHERE mail_uuid IN (SELECT mail_uuid FROM mail_records
+			WHERE recipient_player_id=$1 AND source_kind='GRANT_OVERFLOW' AND claimed_at IS NULL AND expires_at IS NULL
+			ORDER BY created_at LIMIT 100)`, int64(pid), expires.UTC())
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}
 func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 	if err := r.Validate(); err != nil {
 		return err

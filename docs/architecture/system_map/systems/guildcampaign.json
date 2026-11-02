@@ -269,6 +269,7 @@
   ],
   "read": [
    "gameplay_contexts",
+   "guild_audit_log",
    "guild_campaign_application_days",
    "guild_campaign_applications",
    "guild_campaign_awards",
@@ -311,7 +312,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [
-   "i9_9c_guild_campaign.json"
+   "i9_9c_guild_campaign.json",
+   "playtest4_fixes.json"
   ],
   "unit": []
  }

@@ -25,9 +25,10 @@
    "appadventure.Mode"
   ],
   "LoginReconcilers": [
-   "appi5.AwakeningBootstrap",
+   "appi5.MailExpiryLoginReconciler",
    "appi5.SignInBootstrap",
    "appi5.MissionBootstrap",
+   "appi5.AwakeningBootstrap",
    "appi5.PetStarterLoginReconciler"
   ]
  },
@@ -428,6 +429,7 @@
    "62": "characterhero",
    "620": "guildrental",
    "621": "guildrental",
+   "623": "guildrental",
    "624": "worldboss",
    "625": "worldboss",
    "626": "worldboss",
@@ -1017,7 +1019,7 @@
   {
    "callees": 9,
    "callers": 3,
-   "mids": 8,
+   "mids": 9,
    "name": "guildrental",
    "path": "internal/application/guildrental",
    "purpose": "owns guild hero and pet rental (I9_GUILD_RENTAL_V1): open offers and day uses at lock rank 609b, the mana price paid inside a battle START, and the lender's payout on recall or departure",

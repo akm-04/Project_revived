@@ -331,7 +331,8 @@
   "scenarios_naming": [
    "guild.json",
    "i9_8a_world_boss.json",
-   "i9_9a_guild_tea.json"
+   "i9_9a_guild_tea.json",
+   "playtest4_fixes.json"
   ],
   "unit": [
    "lock_plan_test.go",

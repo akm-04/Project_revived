@@ -118,7 +118,7 @@ func TestGuildDispatcherRecoveredCooldownProtocolShapes(t *testing.T) {
 	rq := env(580, nil, now)
 	rq.Envelope.Params["guild_id"] = int64(1000001)
 	r := d.Dispatch(context.Background(), rq)
-	if r.HTTPStatus != 200 || r.Body["error_code"] != int64(30010) || r.Body["time"] != int64(77) {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != int64(30010) || r.Body["time"] != int64(77) {
 		t.Fatalf("other-guild cooldown=%+v", r)
 	}
 	if core.seenGID != guild.ID(1000001) {
@@ -127,7 +127,7 @@ func TestGuildDispatcherRecoveredCooldownProtocolShapes(t *testing.T) {
 
 	core.applyErr = &guildcore.CantJoinError{Kind: guildcore.JoinCooldownSameGuild, RemainingSeconds: 88}
 	r = d.Dispatch(context.Background(), rq)
-	if r.HTTPStatus != 200 || r.Body["error_code"] != int64(30011) {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != int64(30011) {
 		t.Fatalf("same-guild cooldown=%+v", r)
 	}
 	if _, exists := r.Body["time"]; exists {
@@ -154,7 +154,7 @@ func TestGuildMutationResultMapsOnlySourceRecoveredGuildCodes(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := guildMutationResult(tc.err)
-			if r.HTTPStatus != 200 || r.Body["error_code"] != tc.code {
+			if r.HTTPStatus != 409 || r.Body["error_code"] != tc.code {
 				t.Fatalf("response=%+v", r)
 			}
 		})

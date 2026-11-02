@@ -112,6 +112,15 @@ type GuildLogRow struct {
 	At        time.Time
 }
 
+// MemberLogRow is one guild_audit_log membership event as 609 needs it.
+type MemberLogRow struct {
+	Kind      string
+	ActorID   int64
+	SubjectID int64
+	Role      int64
+	At        time.Time
+}
+
 // Detail is the 613 view.
 type Detail struct {
 	Copy       CopyRow
