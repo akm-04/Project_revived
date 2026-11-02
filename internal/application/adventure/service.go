@@ -208,7 +208,7 @@ func (s Mode) settleGrant(c context.Context, sc gen.TimedScope, a identity.Actor
 	}
 	current := sc.Operation.Operation()
 	plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "adventure", Operation: name, BusinessKey: occurrence.SourceKey, Occurrence: occurrence.SourceKey, PolicyVersion: d.PolicyID}, Lines: lines}
-	_, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{})
+	_, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true})
 	return err
 }
 

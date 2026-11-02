@@ -469,7 +469,7 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result
 				lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: reward[0], Amount: reward[1]})
 			}
 			plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "conquer-school", Operation: "promote", BusinessKey: attempt, Occurrence: current.ID.String(), PolicyVersion: d.ModeContractID}, Lines: lines}
-			if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{}); err != nil {
+			if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 				return d.ResultView{}, err
 			}
 		}
