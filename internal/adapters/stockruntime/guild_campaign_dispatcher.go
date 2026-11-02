@@ -164,7 +164,8 @@ func (d GuildCampaignDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 		return okI5(settled.Body)
 	case 613:
 		copyID, err := requiredInt64(p, "copy_id")
-		if err != nil || copyID <= 0 || !onlyStockGameplayParams(p, "copy_id") {
+		// GuildMapDetailWindow forwards the whole 36853 push body as this request.
+		if err != nil || copyID <= 0 || !onlyStockGameplayParams(p, "copy_id", "chapter_id", "player_id") {
 			return campaignBad()
 		}
 		view, err := d.Service.MapDetail(c, a, copyID, op)

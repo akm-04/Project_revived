@@ -4833,6 +4833,278 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00102_i9_8d_adventure.sql"
+    },
+    "player_guild_activity_days": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/i5store/store.go",
+          "reason": "Energy debit credits guild activity inside the I5 debit transaction (I9_GUILD_ACTIVITY_V1); insert-or-add on amount only."
+        }
+      ],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "player_guild_activity_totals": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_activity_awards": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_tea_wishes": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_tea_gifts": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_rental_offers": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00104_i9_9b_guild_rental.sql"
+    },
+    "guild_rental_uses": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00104_i9_9b_guild_rental.sql"
+    },
+    "guild_campaign_chapters": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_registrations": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_copies": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_member_days": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_damage": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_awards": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_applications": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_application_days": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_distributions": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_log": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_server_records": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_server_kills": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
     }
   }
 }

@@ -41,8 +41,10 @@ if "(3,'Server 3'" in mig or "(4,'Server 4'" in mig: errs.append('fake Server 3/
 # Keep I4 bounded: deep systems must remain untouched placeholders, not routed startup facades.
 api=(root/'cmd/gxb-api/main_postgres.go').read_text()
 # I7C-4 routed the commerce privilege owner; gacha (I9 loot boxes), GuildWar and chat send stay out of the router.
+# D404: the red point 1152 alone answers while Guild War stays inactive.
+routed=api.replace('GuildWarRedPoint','')
 for forbidden in ['CombatAttempt','gacha','GuildWar','SEND_CHAT_MESSAGE']:
- if forbidden in api: errs.append(f'I4 production router expanded into forbidden deep domain: {forbidden}')
+ if forbidden in routed: errs.append(f'I4 production router expanded into forbidden deep domain: {forbidden}')
 if errs:
  print('I4 VALIDATION: FAIL'); [print(' -',x) for x in errs]; sys.exit(1)
 print('I4 VALIDATION: PASS')

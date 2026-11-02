@@ -140,6 +140,10 @@ func TestI9_9CDispatcherChapterAndCopyJSON(t *testing.T) {
 	if len(status) != 3 || detail.Body["current_index"] != int64(2) || detail.Body["stage"] != int64(2) {
 		t.Fatalf("613 %+v", detail.Body)
 	}
+	pushed := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028), "chapter_id": int64(7), "player_id": int64(9)})
+	if pushed.HTTPStatus != 200 {
+		t.Fatalf("613 with the forwarded push body %d %+v", pushed.HTTPStatus, pushed.Body)
+	}
 }
 
 func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
