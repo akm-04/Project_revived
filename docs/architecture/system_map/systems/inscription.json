@@ -1,10 +1,73 @@
 {
  "background": [],
- "content": [],
+ "content": [
+  "content_achievement_catalogs",
+  "content_adventure_catalogs",
+  "content_arena_catalogs",
+  "content_awakening_catalogs",
+  "content_book_input_catalogs",
+  "content_campaign_catalogs",
+  "content_conquer_input_catalogs",
+  "content_conquer_mode_catalogs",
+  "content_course_input_catalogs",
+  "content_dodgeball_catalogs",
+  "content_dorm_input_catalogs",
+  "content_element_input_catalogs",
+  "content_evolution_input_catalogs",
+  "content_gods_trial_catalogs",
+  "content_guild_broadcast_policies",
+  "content_guild_invite_policies",
+  "content_illusion_catalogs",
+  "content_inscription_input_catalogs",
+  "content_league_catalogs",
+  "content_library_input_catalogs",
+  "content_march_catalogs",
+  "content_memoir_catalogs",
+  "content_monthly_signin_catalogs",
+  "content_occult_catalogs",
+  "content_one_on_one_catalogs",
+  "content_pet_campaign_catalogs",
+  "content_player_display_catalogs",
+  "content_privilege_catalogs",
+  "content_public_profile_policies",
+  "content_public_showcase_policies",
+  "content_social_gift_catalogs",
+  "content_spirit_input_catalogs",
+  "content_stat_input_catalogs",
+  "content_stat_rule_catalogs",
+  "content_summon_catalogs",
+  "content_top_floor_catalogs",
+  "content_workplace_catalogs",
+  "content_world_boss_catalogs"
+ ],
  "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
   {
    "count": 8,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [
@@ -27,14 +90,29 @@
   ],
   "ranks": [
    {
+    "name": "course.RootLockRank",
+    "rank": 520
+   },
+   {
+    "name": "elementequipment.RootLockRank",
+    "rank": 560
+   },
+   {
     "name": "inscription.RootLockRank",
     "rank": 540
+   },
+   {
+    "name": "spirit.RootLockRank",
+    "rank": 580
    }
   ],
   "row_locks": [
    "gameplay_contexts",
    "player_currency_balances",
-   "player_economy_owners"
+   "player_economy_owners",
+   "player_inscription_admissions",
+   "player_inscription_heroes",
+   "player_inscription_roots"
   ]
  },
  "login": [
@@ -42,34 +120,66 @@
  ],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1400,
    "name": "INSCRIPTION_MAKE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1401,
    "name": "INSCRIPTION_REBUILD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1402,
    "name": "INSCRIPTION_INSERT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1403,
    "name": "INSCRIPTION_REMOVE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1404,
    "name": "INSCRIPTION_RESOLVE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1405,
    "name": "INSCRIPTION_SAVE_REBUILD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1406,
    "name": "INSCRIPTION_ABANDON_REBUILD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
+    "line": 26
+   },
    "mid": 1407,
    "name": "EXCHANGE_MATERIALS"
   }
@@ -77,15 +187,15 @@
  "name": "inscription",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/characterbirth",
   "internal/adapters/postgres/characterstore",
-  "internal/adapters/postgres/commerceprivilegestore",
   "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/dormstore",
+  "internal/adapters/postgres/coursestore",
+  "internal/adapters/postgres/elementstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/inscriptionstore",
-  "internal/adapters/postgres/kernelstore"
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/spiritstore"
  ],
  "tables": {
   "owned": [
@@ -95,10 +205,188 @@
    "player_inscription_roots"
   ],
   "read": [
+   "account_session_credentials",
+   "account_session_server_observations",
+   "account_sessions",
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "gxb_content_hero_templates",
+   "gxb_content_objective_definitions",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "i5_resource_registry",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_course_admissions",
+   "player_course_heroes",
+   "player_course_roots",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_element_admissions",
+   "player_element_heroes",
+   "player_element_roots",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_hero_evolution",
+   "player_hero_evolution_admissions",
+   "player_hero_raw_awakening",
+   "player_hero_roots",
    "player_inscription_admissions",
    "player_inscription_heroes",
    "player_inscription_imports",
-   "player_inscription_roots"
+   "player_inscription_roots",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_spirit_admissions",
+   "player_spirit_heroes",
+   "player_spirit_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_codes",
+   "redeem_redemptions"
+  ],
+  "written": [
+   "account_session_server_observations",
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_mission_activity_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_course_admissions",
+   "player_course_heroes",
+   "player_course_roots",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_element_admissions",
+   "player_element_heroes",
+   "player_element_roots",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_guild_activity_days",
+   "player_hero_evolution",
+   "player_hero_evolution_admissions",
+   "player_hero_raw_awakening",
+   "player_heroes",
+   "player_inscription_admissions",
+   "player_inscription_heroes",
+   "player_inscription_imports",
+   "player_inscription_roots",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_pets",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_spirit_admissions",
+   "player_spirit_heroes",
+   "player_spirit_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_codes",
+   "redeem_redemptions"
   ]
  },
  "tests": {

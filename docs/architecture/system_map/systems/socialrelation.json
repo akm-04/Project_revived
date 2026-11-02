@@ -25,6 +25,10 @@
   {
    "count": 15,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
@@ -70,62 +74,122 @@
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 176,
    "name": "LOAD_FRIENDS"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 177,
    "name": "REQUEST_FRIEND"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 178,
    "name": "DENY_FRIEND_REQUEST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 179,
    "name": "IGNORE_FRIEND_REQUEST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 180,
    "name": "ACCEPT_FRIEND_REQUEST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 181,
    "name": "DELETE_FRIEND"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 182,
    "name": "ACCEPT_ALL_FRIEND_REQUEST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 183,
    "name": "SEND_SOCIAL_GIFT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 184,
    "name": "READ_NOTICE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 185,
    "name": "ADD_BLACK_LIST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 186,
    "name": "REMOVE_BLACK_LIST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 187,
    "name": "CLEAR_BLACK_LIST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 188,
    "name": "SEARCH_PLAYER"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 189,
    "name": "LOAD_FRIEND_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_dispatcher.go",
+    "line": 134
+   },
    "mid": 190,
    "name": "GET_RECOMMEND_FRIENDS"
   }
@@ -133,58 +197,43 @@
  "name": "socialrelation",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/characterstore",
-  "internal/adapters/postgres/commerceprivilegestore",
-  "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/dormstore",
-  "internal/adapters/postgres/frienddmstore",
   "internal/adapters/postgres/i4store",
-  "internal/adapters/postgres/i5store",
-  "internal/adapters/postgres/kernelstore",
-  "internal/adapters/postgres/presencestore",
-  "internal/adapters/postgres/socialgiftstore",
-  "internal/adapters/postgres/socialinboxstore",
   "internal/adapters/postgres/socialrelationstore"
  ],
  "tables": {
   "owned": [
-   "friend_dm_delivery",
-   "friend_dm_occurrences",
-   "friend_dm_projection_receipts",
-   "friend_dm_roots",
-   "player_social_presence",
    "player_social_roots",
-   "realtime_presence_leases",
-   "realtime_presence_owner_state",
    "social_blocks",
    "social_friend_requests",
    "social_friendships",
-   "social_gift_claim_operations",
-   "social_gift_epochs",
-   "social_gift_transfers",
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
-   "social_notices",
    "social_request_epochs"
   ],
   "read": [
-   "friend_dm_delivery",
-   "friend_dm_occurrences",
-   "friend_dm_projection_receipts",
-   "friend_dm_roots",
-   "player_social_presence",
+   "account_session_credentials",
+   "account_session_server_observations",
+   "account_sessions",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "player_directory_profiles",
    "player_social_roots",
-   "realtime_presence_leases",
-   "realtime_presence_owner_state",
+   "players",
    "social_blocks",
    "social_friend_requests",
    "social_friendships",
-   "social_gift_claim_operations",
-   "social_gift_epochs",
-   "social_gift_transfers",
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
-   "social_notices",
+   "social_request_epochs"
+  ],
+  "written": [
+   "account_session_server_observations",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "player_directory_profiles",
+   "player_social_roots",
+   "players",
+   "social_blocks",
+   "social_friend_requests",
+   "social_friendships",
    "social_request_epochs"
   ]
  },

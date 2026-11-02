@@ -23,14 +23,25 @@
  "mids": [],
  "name": "socialinbox",
  "pushes": [],
- "stores": [],
+ "stores": [
+  "internal/adapters/postgres/socialinboxstore"
+ ],
  "tables": {
   "owned": [
    "social_guild_invite_invalidations",
    "social_guild_invite_materializations",
    "social_notices"
   ],
-  "read": []
+  "read": [
+   "social_guild_invite_invalidations",
+   "social_guild_invite_materializations",
+   "social_notices"
+  ],
+  "written": [
+   "social_guild_invite_invalidations",
+   "social_guild_invite_materializations",
+   "social_notices"
+  ]
  },
  "tests": {
   "integration": [

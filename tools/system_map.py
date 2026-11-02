@@ -2,7 +2,6 @@
 """Generate the backend system map under docs/architecture/system_map."""
 
 import argparse
-import hashlib
 import json
 import re
 import subprocess
@@ -15,7 +14,6 @@ SYSTEMS_DIRECTORY = OUTPUT_DIRECTORY / "systems"
 APPLICATION_DIRECTORY = ROOT / "internal" / "application"
 CLIENT_CALLERS = OUTPUT_DIRECTORY / "client_mid_callers.json"
 SCENARIO_COVERAGE = OUTPUT_DIRECTORY / "scenario_coverage.json"
-SHARED_STORE_SYSTEMS = 10
 MODULE_PATH = "gxb.local/backend/v2/"
 APPLICATION_PREFIX = MODULE_PATH + "internal/application/"
 POSTGRES_PREFIX = MODULE_PATH + "internal/adapters/postgres/"
@@ -105,6 +103,10 @@ def self_check():
     assert defined_callables("func Accessor() int") == {"Accessor": False}
     assert duration_milliseconds("500 * time.Millisecond") == 500
     assert duration_milliseconds("5 * time.Second") == 5000
+    store_edge = [{"from": "x", "to": "store:internal/adapters/postgres/i4store", "method": "FindTx", "via_port": False}]
+    assert typed_calls(["x"], store_edge) == {"x": {"store:i4store": ["FindTx"]}}
+    self_edge = [{"from": "x", "to": "x", "method": "FindTx", "via_port": False}]
+    assert typed_calls(["x"], self_edge) == {"x": {}}
     assert json_text({"b": 1, "a": [2, 1]}) == '{\n "a": [\n  2,\n  1\n ],\n "b": 1\n}\n'
 
 
@@ -214,29 +216,9 @@ def package_purpose(name):
     return ""
 
 
-def source_hash():
-    digest = hashlib.sha256()
-    paths = sorted(ROOT.rglob("*.go")) + [ROOT / "go.mod", ROOT / "go.sum"]
-    for path in paths:
-        if not path.is_file() or "tmp/" in relative(path):
-            continue
-        digest.update(relative(path).encode())
-        digest.update(hashlib.sha256(path.read_bytes()).digest())
-    return digest.hexdigest()
-
-
-def run_helper():
-    key = source_hash()
-    cache = ROOT / "tmp" / "system_map" / "helper-cache.json"
-    if cache.is_file():
-        try:
-            cached = json.loads(read_text(cache))
-            if cached.get("key") == key:
-                return cached["output"]
-        except (ValueError, KeyError):
-            pass
+def run_helper(arguments=None):
     completed = subprocess.run(
-        ["go", "run", HELPER],
+        ["go", "run", HELPER] + list(arguments or []),
         cwd=str(ROOT),
         capture_output=True,
         text=True,
@@ -244,10 +226,20 @@ def run_helper():
     if completed.returncode != 0:
         sys.stderr.write(completed.stderr)
         raise SystemExit("tools/system_map_mids failed")
-    output = json.loads(completed.stdout)
-    cache.parent.mkdir(parents=True, exist_ok=True)
-    cache.write_text(json.dumps({"key": key, "output": output}), encoding="utf-8")
-    return output
+    return json.loads(completed.stdout)
+
+
+def helper_trace(mid):
+    completed = subprocess.run(
+        ["go", "run", HELPER, "--trace", str(mid)],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        sys.stderr.write(completed.stderr)
+        raise SystemExit("tools/system_map_mids --trace %s failed" % mid)
+    return completed.stdout
 
 
 def refresh_client(source_directory):
@@ -351,15 +343,6 @@ def unresolved_reason(entries):
     return reasons[0]
 
 
-def store_directories(registrations):
-    stores = set()
-    for entry in registrations:
-        for store in entry.get("stores") or []:
-            if store.startswith(POSTGRES_PREFIX):
-                stores.add(store[len(MODULE_PATH):].rstrip("/"))
-    return sorted(stores)
-
-
 def store_matches(path, stores):
     normalized = path.rstrip("/")
     for store in stores:
@@ -368,20 +351,43 @@ def store_matches(path, stores):
     return False
 
 
-def store_owner_system(store, systems):
-    stem = Path(store).name
-    if stem.endswith("store"):
-        stem = stem[: -len("store")]
-    if stem in systems:
-        return stem
-    candidates = [name for name in systems if name.startswith(stem)]
-    if len(candidates) == 1:
-        return candidates[0]
-    return None
+DIRECTORY_SQL_CACHE = {}
 
 
-def matching_stores(paths, stores):
-    return [store for store in stores if any(store_matches(path, [store]) for path in paths)]
+def directory_sql(directory):
+    if directory in DIRECTORY_SQL_CACHE:
+        return DIRECTORY_SQL_CACHE[directory]
+    read = set()
+    written = set()
+    path_directory = ROOT / directory
+    if path_directory.is_dir():
+        for path in go_files(path_directory):
+            text = read_text(path)
+            for pattern in (INSERT_RE, UPDATE_RE, DELETE_RE):
+                for token in pattern.findall(text):
+                    written.add(normalize_table(token))
+            for token in FROM_RE.findall(text):
+                read.add(normalize_table(token))
+    DIRECTORY_SQL_CACHE[directory] = (read, written)
+    return read, written
+
+
+def reached_stores(system, edges):
+    return sorted({
+        edge["store"]
+        for edge in edges
+        if edge["from"] == system and edge.get("store")
+    })
+
+
+def system_sql_tables(system, stores, table_names):
+    read = set()
+    written = set()
+    for directory in ["internal/application/" + system] + stores:
+        directory_read, directory_written = directory_sql(directory)
+        read.update(directory_read & table_names)
+        written.update(directory_written & table_names)
+    return sorted(read), sorted(written)
 
 
 def scan_sql(tables):
@@ -873,7 +879,7 @@ def fact_consumers(missions, adventure_events):
     return consumers
 
 
-def typed_calls(systems, edges, store_systems):
+def typed_calls(systems, edges):
     calls = {system: {} for system in systems}
     for edge in edges:
         source = edge["from"]
@@ -881,14 +887,7 @@ def typed_calls(systems, edges, store_systems):
             continue
         target = edge["to"]
         if target.startswith("store:"):
-            store = target[len("store:"):]
-            candidates = store_systems.get(store, set())
-            if len(candidates) == 1:
-                target = next(iter(candidates))
-            else:
-                target = store_owner_system(store, systems)
-            if not target:
-                continue
+            target = "store:" + Path(target[len("store:"):]).name
         if target == source:
             continue
         if target.startswith("interface:"):
@@ -945,14 +944,7 @@ def build_system_map():
     }
     system_texts = {system: system_source(system) for system in systems}
     typed = helper["typed"]
-    store_systems = {}
-    for mid, entries in grouped.items():
-        for entry in entries:
-            if entry.get("owner") and owners[mid] == entry["owner"]:
-                for store in entry.get("stores") or []:
-                    if store.startswith(POSTGRES_PREFIX):
-                        store_systems.setdefault(store[len(MODULE_PATH):].rstrip("/"), set()).add(entry["owner"])
-    call_edges = typed_calls(systems, typed["edges"], store_systems)
+    call_edges = typed_calls(systems, typed["edges"])
     reverse_call_edges = inverse_calls(systems, call_edges)
     fact_kinds = fact_constants()
     emitted_by_system = {row["system"]: row["kinds"] for row in typed.get("facts", [])}
@@ -988,15 +980,8 @@ def build_system_map():
         for system in systems
     }
     system_stores = {
-        system: store_directories(entries)
-        for system, entries in system_entries_by_system.items()
-    }
-    store_counts = {}
-    for stores in system_stores.values():
-        for store in stores:
-            store_counts[store] = store_counts.get(store, 0) + 1
-    shared_stores = {
-        store for store, count in store_counts.items() if count >= SHARED_STORE_SYSTEMS
+        system: reached_stores(system, typed["edges"])
+        for system in systems
     }
 
     system_records = {}
@@ -1010,28 +995,21 @@ def build_system_map():
         for mid in sorted(unique_mids):
             entry = unique_mids[mid]
             client_entry = client.get(str(mid), {"name": "", "files": []})
-            mid_rows.append({
+            row = {
                 "mid": mid,
                 "name": client_entry["name"],
-            })
+            }
+            if entry.get("handler_file"):
+                row["handler"] = {"file": entry["handler_file"], "line": entry.get("handler_line", 0)}
+            mid_rows.append(row)
         stores = system_stores[system]
-        owner_tables = {
+        owned_tables = sorted(
             table for table, record in ownership_tables.items()
             if owner_system_name(record.get("owner", ""), systems) == system
-        }
-        writable = {
-            table for table, record in ownership_tables.items()
-            if table_visible(record, stores, shared_stores, systems, system, "allowed_write_paths")
-        }
-        owned_tables = sorted(owner_tables | writable)
-        read_tables = sorted(
-            table for table, record in ownership_tables.items()
-            if table_visible(record, stores, shared_stores, systems, system, "allowed_read_paths")
         )
-        touched = set(owned_tables) | set(read_tables)
+        read_tables, written_tables = system_sql_tables(system, stores, set(ownership_tables))
+        touched = set(owned_tables) | set(read_tables) | set(written_tables)
 
-        wiring_files = {entry.get("construction_file", "") for entry in system_entries}
-        wiring_files.discard("")
         decorated = set()
         for mid, entry in unique_mids.items():
             if owners[mid] == system:
@@ -1070,7 +1048,7 @@ def build_system_map():
             "name": system,
             "mids": mid_rows,
             "pushes": pushes,
-            "tables": {"owned": owned_tables, "read": read_tables},
+            "tables": {"owned": owned_tables, "read": read_tables, "written": written_tables},
 
             "decorated_by": sorted(decorated),
             "facts": {
@@ -1235,25 +1213,17 @@ def build_system_map():
     if coverage_note:
         findings["live_mids_not_covered_note"] = coverage_note
 
-    wired_by_system = {}
-    for system in systems:
-        companion_files = {entry.get("construction_file", "") for entry in system_entries_by_system[system]}
-        companion_files.discard("")
-        companions = set()
-        for companion_file in sorted(companion_files):
-            companion_path = ROOT / companion_file
-            if not companion_path.is_file():
-                continue
-            for import_path in imports_of(companion_path):
-                if import_path.startswith(APPLICATION_PREFIX):
-                    companions.add(import_path[len(APPLICATION_PREFIX):].rstrip("/"))
-        companions.discard(system)
-        known = set(call_edges[system]) | set(reverse_call_edges[system])
-        wired_by_system[system] = sorted(name for name in companions if name not in known)
+    composition_by_system = {
+        system: sorted({
+            entry.get("construction_file", "")
+            for entry in system_entries_by_system[system]
+        } - {""})
+        for system in systems
+    }
     edges_document = {
         "calls": call_edges,
         "called_by": reverse_call_edges,
-        "wired": wired_by_system,
+        "composition": composition_by_system,
     }
     files = {"INDEX.json": json_text(index), "FINDINGS.json": findings_text(findings), "EDGES.json": json_text(edges_document)}
     for system, record in system_records.items():
@@ -1263,20 +1233,6 @@ def build_system_map():
 
 def findings_text(findings):
     return json.dumps(findings, indent=1, ensure_ascii=False) + "\n"
-
-
-def table_visible(record, stores, shared_stores, systems, system, path_key):
-    paths = list(record.get(path_key, []))
-    if path_key == "allowed_write_paths":
-        paths += [entry["path"] for entry in record.get("write_exceptions", []) if isinstance(entry, dict)]
-    matching = matching_stores(paths, stores)
-    if not matching:
-        return False
-    if owner_system_name(record.get("owner", ""), systems) == system:
-        return True
-    if any(store not in shared_stores for store in matching):
-        return True
-    return any(store_owner_system(store, systems) == system for store in matching)
 
 
 def owner_system_name(owner, systems):
@@ -1337,6 +1293,44 @@ def validate_generated(files):
                     stack.extend((item, key) for item in value)
                 elif isinstance(value, str) and key in ("file", "migrations"):
                     require(value, key)
+    campaign_owned = set(json.loads(files["systems/campaign.json"])["tables"]["owned"])
+    for required in ("campaign_players", "campaign_nodes"):
+        if required not in campaign_owned:
+            raise SystemExit("campaign does not own %s" % required)
+    for table in campaign_owned:
+        if table.startswith(("arena_", "top_floor_")):
+            raise SystemExit("campaign falsely owns %s" % table)
+    clientlog_calls = json.loads(files["EDGES.json"])["calls"].get("clientlog", {})
+    if "arena" in clientlog_calls:
+        raise SystemExit("clientlog has a false arena edge")
+
+
+TRACE_ANCHORS = {
+    114: [
+        "internal/application/campaign/mode.go:858",
+        "SettleGrantTx internal/application/i5/service.go:234",
+        "mail_records",
+        "player_item_stacks",
+    ],
+    161: [
+        "MaterializeTx internal/application/i5/missions.go:62",
+        "LockMissionRootTx internal/adapters/postgres/i5store/missions.go:14",
+        "player_mission_roots",
+        "FOR UPDATE",
+    ],
+    338: [
+        "Mode.Result internal/application/march/settle.go:21",
+        "AttestReportTx internal/application/combat/service.go:633",
+    ],
+}
+
+
+def validate_trace_anchors():
+    for mid, anchors in sorted(TRACE_ANCHORS.items()):
+        output = helper_trace(mid)
+        for anchor in anchors:
+            if anchor not in output:
+                raise SystemExit("trace %d is missing %s" % (mid, anchor))
 
 
 def write_output(files):
@@ -1357,6 +1351,7 @@ def write_output(files):
 
 def check_output(files):
     validate_generated(files)
+    validate_trace_anchors()
     differences = []
     for relative_path, content in sorted(files.items()):
         path = OUTPUT_DIRECTORY / relative_path
@@ -1393,7 +1388,7 @@ def show_entry(key):
         edges = json.loads(read_text(OUTPUT_DIRECTORY / "EDGES.json"))
         record["calls"] = edges["calls"].get(key, {})
         record["called_by"] = edges["called_by"].get(key, {})
-        record["wired"] = edges["wired"].get(key, [])
+        record["composition"] = edges["composition"].get(key, [])
         print(json.dumps(record, indent=1, ensure_ascii=False))
         return
     if key.isdigit():
@@ -1427,6 +1422,7 @@ def show_entry(key):
         system_record = json.loads(read_text(SYSTEMS_DIRECTORY / (system + ".json")))
         output["owned"] = key in system_record["tables"]["owned"]
         output["read"] = key in system_record["tables"]["read"]
+        output["written"] = key in system_record["tables"]["written"]
     output["locked_by"] = sorted(
         path.stem for path in SYSTEMS_DIRECTORY.glob("*.json")
         if key in json.loads(read_text(path))["locks"].get("row_locks", [])
@@ -1459,6 +1455,9 @@ def main():
         if len(words) == 2 and words[0] == "show":
             show_entry(words[1])
             return 0
+        if len(words) == 2 and words[0] == "trace" and words[1].isdigit():
+            sys.stdout.write(helper_trace(int(words[1])))
+            return 0
         if len(words) == 1:
             show_entry(words[0])
             return 0
@@ -1467,4 +1466,7 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except BrokenPipeError:
+        sys.exit(0)

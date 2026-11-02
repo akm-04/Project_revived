@@ -502,10 +502,6 @@
    "combat_snapshots": "combat",
    "combat_start_packages": "combat",
    "commerce_privilege_roots": "commerceprivilege",
-   "conquer_school_players": "achievement",
-   "conquer_school_report_views": "achievement",
-   "conquer_school_reports": "achievement",
-   "daily_consumption_players": "arena",
    "dodgeball_players": "dodgeball",
    "friend_dm_delivery": "frienddm",
    "friend_dm_occurrences": "frienddm",
@@ -557,9 +553,6 @@
    "league_players": "championsleague",
    "league_settlements": "championsleague",
    "logical_servers": "bootstrap",
-   "mail_attachments": "i5",
-   "mail_namespace_counters": "i5",
-   "mail_records": "i5",
    "march_players": "march",
    "memoir_players": "memoir",
    "occult_logs": "occult",
@@ -574,35 +567,20 @@
    "one_on_one_rounds": "oneonone",
    "one_on_one_settlement_ranks": "oneonone",
    "one_on_one_settlements": "oneonone",
-   "personal_dm_delivery": "generaldm",
-   "personal_dm_intents": "generaldm",
-   "personal_dm_payloads": "generaldm",
    "petcampaign_players": "petcampaign",
-   "player_awakening_roots": "i5",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
-   "player_conquer_facts": "achievement",
-   "player_cosmetic_entitlements": "i5",
    "player_course_admissions": "course",
    "player_course_heroes": "course",
    "player_course_roots": "course",
-   "player_crystal_spend_days": "i5",
-   "player_currency_balances": "i5",
    "player_directory_profiles": "playerdirectory",
-   "player_display_admissions": "i5",
-   "player_display_selections": "i5",
    "player_dorm_admissions": "dormhouse",
    "player_dorm_heroes": "dormhouse",
    "player_dorm_rooms": "dormhouse",
    "player_dorm_roots": "dormhouse",
-   "player_economy_owners": "i5",
    "player_element_admissions": "elementequipment",
    "player_element_heroes": "elementequipment",
    "player_element_roots": "elementequipment",
-   "player_function_eligibility": "i5",
-   "player_function_state_owners": "i5",
-   "player_function_unlocks": "i5",
-   "player_guide_return_state": "i5",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
    "player_hero_evolution": "characterhero",
@@ -617,12 +595,9 @@
    "player_inscription_heroes": "inscription",
    "player_inscription_imports": "inscription",
    "player_inscription_roots": "inscription",
-   "player_item_stacks": "i5",
    "player_library_admissions": "librarylocal",
    "player_library_heroes": "librarylocal",
    "player_library_roots": "librarylocal",
-   "player_mission_instances": "i5",
-   "player_mission_roots": "i5",
    "player_pet_practice_candidates": "characterpractice",
    "player_pet_roots": "characterpet",
    "player_pet_style_entitlements": "characterpet",
@@ -633,8 +608,6 @@
    "player_profile_comments": "profilefeedback",
    "player_profile_feedback_roots": "profilefeedback",
    "player_profile_praises": "profilefeedback",
-   "player_profiles": "i5",
-   "player_progression": "i5",
    "player_public_profile_media_current": "publicprofile",
    "player_public_profile_media_history": "publicprofile",
    "player_public_profile_roots": "publicprofile",
@@ -642,14 +615,11 @@
    "player_saved_preset_heroes": "charactersavedpreset",
    "player_saved_preset_lanes": "charactersavedpreset",
    "player_saved_preset_roots": "charactersavedpreset",
-   "player_signin_roots": "i5",
    "player_social_presence": "socialpresence",
    "player_social_roots": "socialrelation",
    "player_spirit_admissions": "spirit",
    "player_spirit_heroes": "spirit",
    "player_spirit_roots": "spirit",
-   "player_story_cursors": "i5",
-   "player_temporal_resources": "i5",
    "players": "bootstrap",
    "publication_items": "publication",
    "publication_picture_reads": "publication",
@@ -661,10 +631,6 @@
    "ranking_girls_snapshots": "ranking",
    "realtime_presence_leases": "socialpresence",
    "realtime_presence_owner_state": "socialpresence",
-   "redeem_campaigns": "i5",
-   "redeem_codes": "i5",
-   "redeem_redemptions": "i5",
-   "redeem_reward_bundle_revisions": "i5",
    "request_journal": "clientlog",
    "shared_room_seats": "sharedroom",
    "shared_rooms": "sharedroom",
@@ -704,16 +670,16 @@
  },
  "systems": [
   {
-   "callees": 10,
-   "callers": 5,
+   "callees": 15,
+   "callers": 6,
    "mids": 2,
    "name": "achievement",
    "path": "internal/application/achievement",
    "purpose": "owns earned tier facts",
-   "tables": 9
+   "tables": 5
   },
   {
-   "callees": 0,
+   "callees": 2,
    "callers": 0,
    "mids": 2,
    "name": "activitydirectory",
@@ -722,34 +688,34 @@
    "tables": 0
   },
   {
-   "callees": 8,
+   "callees": 12,
    "callers": 1,
    "mids": 20,
    "name": "adventure",
    "path": "internal/application/adventure",
    "purpose": "converts objective facts into Adventure event occurrences",
-   "tables": 5
+   "tables": 3
   },
   {
-   "callees": 8,
-   "callers": 14,
+   "callees": 14,
+   "callers": 2,
    "mids": 39,
    "name": "arena",
    "path": "internal/application/arena",
    "purpose": "composes the Arena owner (C5D_ARENA_SEASON_MODE_V1): entry, defense, matching, START/FIGHT/STOP through the Combat foundation, terminal star/point settlement, missions, exchanges, season settlement mail and history facts",
-   "tables": 62
+   "tables": 13
   },
   {
-   "callees": 6,
+   "callees": 7,
    "callers": 0,
    "mids": 2,
    "name": "awakeningbattle",
    "path": "internal/application/awakeningbattle",
    "purpose": "orchestrates only the source Blood branch of 866/867",
-   "tables": 18
+   "tables": 0
   },
   {
-   "callees": 8,
+   "callees": 13,
    "callers": 4,
    "mids": 11,
    "name": "bookskill",
@@ -764,25 +730,25 @@
    "name": "bootstrap",
    "path": "internal/application/bootstrap",
    "purpose": "",
-   "tables": 43
+   "tables": 9
   },
   {
-   "callees": 8,
+   "callees": 13,
    "callers": 2,
    "mids": 13,
    "name": "campaign",
    "path": "internal/application/campaign",
    "purpose": "composes the Campaign mode (I9_CAMPAIGN_V1): the world map (112, MID1 detail[\"112\"]), FIGHT (113) and FIGHT_RESULT (114) for Normal and Super nodes",
-   "tables": 62
+   "tables": 2
   },
   {
-   "callees": 7,
-   "callers": 0,
+   "callees": 14,
+   "callers": 1,
    "mids": 8,
    "name": "championsleague",
    "path": "internal/application/championsleague",
    "purpose": "composes the canonical League owner through existing I4, I5, Combat, Character, Achievement and display ports",
-   "tables": 62
+   "tables": 5
   },
   {
    "callees": 0,
@@ -794,7 +760,7 @@
    "tables": 0
   },
   {
-   "callees": 0,
+   "callees": 4,
    "callers": 32,
    "mids": 0,
    "name": "characterasset",
@@ -803,8 +769,8 @@
    "tables": 0
   },
   {
-   "callees": 5,
-   "callers": 14,
+   "callees": 23,
+   "callers": 15,
    "mids": 21,
    "name": "characterhero",
    "path": "internal/application/characterhero",
@@ -812,8 +778,8 @@
    "tables": 7
   },
   {
-   "callees": 4,
-   "callers": 4,
+   "callees": 14,
+   "callers": 5,
    "mids": 15,
    "name": "characterpet",
    "path": "internal/application/characterpet",
@@ -821,7 +787,7 @@
    "tables": 3
   },
   {
-   "callees": 2,
+   "callees": 7,
    "callers": 2,
    "mids": 10,
    "name": "characterpractice",
@@ -830,8 +796,8 @@
    "tables": 3
   },
   {
-   "callees": 2,
-   "callers": 0,
+   "callees": 8,
+   "callers": 1,
    "mids": 1,
    "name": "charactersavedpreset",
    "path": "internal/application/charactersavedpreset",
@@ -848,7 +814,7 @@
    "tables": 4
   },
   {
-   "callees": 8,
+   "callees": 10,
    "callers": 18,
    "mids": 0,
    "name": "combat",
@@ -857,7 +823,7 @@
    "tables": 9
   },
   {
-   "callees": 2,
+   "callees": 6,
    "callers": 15,
    "mids": 0,
    "name": "commerceprivilege",
@@ -866,16 +832,16 @@
    "tables": 1
   },
   {
-   "callees": 6,
+   "callees": 12,
    "callers": 4,
    "mids": 7,
    "name": "conquerschool",
    "path": "internal/application/conquerschool",
    "purpose": "",
-   "tables": 62
+   "tables": 0
   },
   {
-   "callees": 7,
+   "callees": 11,
    "callers": 7,
    "mids": 14,
    "name": "course",
@@ -893,7 +859,7 @@
    "tables": 0
   },
   {
-   "callees": 0,
+   "callees": 2,
    "callers": 1,
    "mids": 0,
    "name": "directorysync",
@@ -902,7 +868,7 @@
    "tables": 0
   },
   {
-   "callees": 6,
+   "callees": 9,
    "callers": 0,
    "mids": 5,
    "name": "dodgeball",
@@ -911,8 +877,8 @@
    "tables": 1
   },
   {
-   "callees": 4,
-   "callers": 4,
+   "callees": 9,
+   "callers": 3,
    "mids": 9,
    "name": "dormhouse",
    "path": "internal/application/dormhouse",
@@ -920,8 +886,8 @@
    "tables": 4
   },
   {
-   "callees": 7,
-   "callers": 6,
+   "callees": 12,
+   "callers": 1,
    "mids": 5,
    "name": "elementequipment",
    "path": "internal/application/elementequipment",
@@ -929,25 +895,25 @@
    "tables": 3
   },
   {
-   "callees": 4,
+   "callees": 7,
    "callers": 2,
    "mids": 1,
    "name": "frienddm",
    "path": "internal/application/frienddm",
    "purpose": "",
-   "tables": 7
+   "tables": 4
   },
   {
-   "callees": 4,
+   "callees": 7,
    "callers": 1,
    "mids": 1,
    "name": "generaldm",
    "path": "internal/application/generaldm",
    "purpose": "",
-   "tables": 6
+   "tables": 0
   },
   {
-   "callees": 2,
+   "callees": 5,
    "callers": 49,
    "mids": 0,
    "name": "generation",
@@ -956,7 +922,7 @@
    "tables": 0
   },
   {
-   "callees": 7,
+   "callees": 10,
    "callers": 0,
    "mids": 6,
    "name": "godstrial",
@@ -965,7 +931,7 @@
    "tables": 1
   },
   {
-   "callees": 4,
+   "callees": 8,
    "callers": 2,
    "mids": 1,
    "name": "guildbroadcast",
@@ -974,7 +940,7 @@
    "tables": 2
   },
   {
-   "callees": 4,
+   "callees": 7,
    "callers": 1,
    "mids": 14,
    "name": "guildcampaign",
@@ -983,7 +949,7 @@
    "tables": 12
   },
   {
-   "callees": 6,
+   "callees": 9,
    "callers": 2,
    "mids": 20,
    "name": "guildcore",
@@ -992,7 +958,7 @@
    "tables": 15
   },
   {
-   "callees": 2,
+   "callees": 6,
    "callers": 3,
    "mids": 0,
    "name": "guildinvite",
@@ -1001,7 +967,7 @@
    "tables": 4
   },
   {
-   "callees": 5,
+   "callees": 7,
    "callers": 4,
    "mids": 0,
    "name": "guildinvitetarget",
@@ -1010,16 +976,16 @@
    "tables": 0
   },
   {
-   "callees": 5,
-   "callers": 2,
+   "callees": 9,
+   "callers": 3,
    "mids": 8,
    "name": "guildrental",
    "path": "internal/application/guildrental",
    "purpose": "owns guild hero and pet rental (I9_GUILD_RENTAL_V1): open offers and day uses at lock rank 609b, the mana price paid inside a battle START, and the lender's payout on recall or departure",
-   "tables": 18
+   "tables": 0
   },
   {
-   "callees": 1,
+   "callees": 6,
    "callers": 0,
    "mids": 4,
    "name": "guildtea",
@@ -1028,7 +994,7 @@
    "tables": 0
   },
   {
-   "callees": 1,
+   "callees": 3,
    "callers": 0,
    "mids": 0,
    "name": "guildview",
@@ -1037,7 +1003,7 @@
    "tables": 0
   },
   {
-   "callees": 8,
+   "callees": 13,
    "callers": 1,
    "mids": 2,
    "name": "heroevolution",
@@ -1046,13 +1012,13 @@
    "tables": 0
   },
   {
-   "callees": 6,
-   "callers": 50,
+   "callees": 12,
+   "callers": 51,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
    "purpose": "implements Wave-E transactional orchestration",
-   "tables": 28
+   "tables": 0
   },
   {
    "callees": 1,
@@ -1064,16 +1030,16 @@
    "tables": 0
   },
   {
-   "callees": 9,
+   "callees": 15,
    "callers": 0,
    "mids": 17,
    "name": "illusion",
    "path": "internal/application/illusion",
    "purpose": "",
-   "tables": 8
+   "tables": 6
   },
   {
-   "callees": 7,
+   "callees": 12,
    "callers": 7,
    "mids": 8,
    "name": "inscription",
@@ -1082,7 +1048,7 @@
    "tables": 4
   },
   {
-   "callees": 4,
+   "callees": 12,
    "callers": 5,
    "mids": 8,
    "name": "librarylocal",
@@ -1091,7 +1057,7 @@
    "tables": 3
   },
   {
-   "callees": 8,
+   "callees": 13,
    "callers": 0,
    "mids": 7,
    "name": "march",
@@ -1100,7 +1066,7 @@
    "tables": 1
   },
   {
-   "callees": 7,
+   "callees": 10,
    "callers": 0,
    "mids": 12,
    "name": "memoir",
@@ -1109,8 +1075,8 @@
    "tables": 1
   },
   {
-   "callees": 4,
-   "callers": 0,
+   "callees": 5,
+   "callers": 1,
    "mids": 0,
    "name": "missioninputs",
    "path": "internal/application/missioninputs",
@@ -1118,25 +1084,25 @@
    "tables": 0
   },
   {
-   "callees": 10,
+   "callees": 15,
    "callers": 0,
    "mids": 23,
    "name": "occult",
    "path": "internal/application/occult",
    "purpose": "is the Sorcery War application: solo rooms on the shared room core, tickets and rewards through I5, and awakening fragments by mission",
-   "tables": 9
+   "tables": 4
   },
   {
-   "callees": 7,
-   "callers": 1,
+   "callees": 12,
+   "callers": 2,
    "mids": 10,
    "name": "oneonone",
    "path": "internal/application/oneonone",
    "purpose": "composes the 1 on 1 owner (C5C_ONE_ON_ONE_MODE_V1): entry, teams, candidates, multi-round START through the Combat foundation, terminal slot/points settlement, promotion, Wednesday/Sunday mail settlement, titles and history facts",
-   "tables": 62
+   "tables": 8
   },
   {
-   "callees": 7,
+   "callees": 12,
    "callers": 0,
    "mids": 12,
    "name": "petcampaign",
@@ -1154,7 +1120,7 @@
    "tables": 1
   },
   {
-   "callees": 8,
+   "callees": 17,
    "callers": 6,
    "mids": 9,
    "name": "playerdisplay",
@@ -1163,7 +1129,7 @@
    "tables": 0
   },
   {
-   "callees": 3,
+   "callees": 4,
    "callers": 4,
    "mids": 0,
    "name": "playerpresentation",
@@ -1190,16 +1156,16 @@
    "tables": 0
   },
   {
-   "callees": 6,
+   "callees": 10,
    "callers": 1,
    "mids": 6,
    "name": "profilefeedback",
    "path": "internal/application/profilefeedback",
    "purpose": "",
-   "tables": 9
+   "tables": 5
   },
   {
-   "callees": 3,
+   "callees": 4,
    "callers": 0,
    "mids": 4,
    "name": "publication",
@@ -1208,16 +1174,16 @@
    "tables": 3
   },
   {
-   "callees": 17,
-   "callers": 1,
+   "callees": 23,
+   "callers": 2,
    "mids": 8,
    "name": "publicprofile",
    "path": "internal/application/publicprofile",
    "purpose": "",
-   "tables": 9
+   "tables": 4
   },
   {
-   "callees": 11,
+   "callees": 13,
    "callers": 6,
    "mids": 0,
    "name": "publicstats",
@@ -1226,8 +1192,8 @@
    "tables": 0
   },
   {
-   "callees": 6,
-   "callers": 0,
+   "callees": 11,
+   "callers": 1,
    "mids": 1,
    "name": "ranking",
    "path": "internal/application/ranking",
@@ -1235,7 +1201,7 @@
    "tables": 5
   },
   {
-   "callees": 0,
+   "callees": 2,
    "callers": 1,
    "mids": 3,
    "name": "realtimeauth",
@@ -1253,7 +1219,7 @@
    "tables": 0
   },
   {
-   "callees": 3,
+   "callees": 4,
    "callers": 3,
    "mids": 0,
    "name": "roominvite",
@@ -1262,8 +1228,8 @@
    "tables": 0
   },
   {
-   "callees": 3,
-   "callers": 3,
+   "callees": 4,
+   "callers": 4,
    "mids": 0,
    "name": "sharedroom",
    "path": "internal/application/sharedroom",
@@ -1271,7 +1237,7 @@
    "tables": 2
   },
   {
-   "callees": 4,
+   "callees": 5,
    "callers": 0,
    "mids": 0,
    "name": "socialdismiss",
@@ -1289,7 +1255,7 @@
    "tables": 0
   },
   {
-   "callees": 8,
+   "callees": 10,
    "callers": 2,
    "mids": 0,
    "name": "socialgift",
@@ -1307,7 +1273,7 @@
    "tables": 3
   },
   {
-   "callees": 1,
+   "callees": 3,
    "callers": 2,
    "mids": 0,
    "name": "socialpresence",
@@ -1316,7 +1282,7 @@
    "tables": 3
   },
   {
-   "callees": 7,
+   "callees": 8,
    "callers": 1,
    "mids": 0,
    "name": "socialprojection",
@@ -1325,13 +1291,13 @@
    "tables": 0
   },
   {
-   "callees": 5,
+   "callees": 6,
    "callers": 12,
    "mids": 15,
    "name": "socialrelation",
    "path": "internal/application/socialrelation",
    "purpose": "",
-   "tables": 18
+   "tables": 5
   },
   {
    "callees": 5,
@@ -1352,8 +1318,8 @@
    "tables": 0
   },
   {
-   "callees": 7,
-   "callers": 7,
+   "callees": 11,
+   "callers": 8,
    "mids": 9,
    "name": "spirit",
    "path": "internal/application/spirit",
@@ -1361,7 +1327,7 @@
    "tables": 3
   },
   {
-   "callees": 4,
+   "callees": 6,
    "callers": 0,
    "mids": 5,
    "name": "summon",
@@ -1370,26 +1336,26 @@
    "tables": 2
   },
   {
-   "callees": 7,
+   "callees": 12,
    "callers": 4,
    "mids": 23,
    "name": "topfloor",
    "path": "internal/application/topfloor",
    "purpose": "composes the Top Floor owner (C5B_TOP_FLOOR_MODE_V1): ladder entry, opponents, tickets, START through the Combat foundation, terminal rank settlement, daily mail settlement and history facts",
-   "tables": 62
+   "tables": 15
   },
   {
-   "callees": 10,
-   "callers": 1,
+   "callees": 15,
+   "callers": 18,
    "mids": 5,
    "name": "workplace",
    "path": "internal/application/workplace",
    "purpose": "",
-   "tables": 3
+   "tables": 1
   },
   {
-   "callees": 6,
-   "callers": 0,
+   "callees": 11,
+   "callers": 1,
    "mids": 5,
    "name": "worldboss",
    "path": "internal/application/worldboss",

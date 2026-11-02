@@ -18,10 +18,23 @@
  "mids": [],
  "name": "socialfriendbase",
  "pushes": [],
- "stores": [],
+ "stores": [
+  "internal/adapters/postgres/frienddmstore"
+ ],
  "tables": {
   "owned": [],
-  "read": []
+  "read": [
+   "friend_dm_delivery",
+   "friend_dm_occurrences",
+   "friend_dm_projection_receipts",
+   "friend_dm_roots"
+  ],
+  "written": [
+   "friend_dm_delivery",
+   "friend_dm_occurrences",
+   "friend_dm_projection_receipts",
+   "friend_dm_roots"
+  ]
  },
  "tests": {
   "integration": [

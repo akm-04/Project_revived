@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -64,14 +65,95 @@ type typedWorld struct {
 	fset     *token.FileSet
 	packages map[string]*listedPackage
 	importer types.Importer
+	source   *sourceImporter
 	appNames []string
 	types    []*types.Named
 	typePkg  map[*types.Named]string
-	iface    map[string][]string
+	iface    map[string][]*types.Named
+}
+
+type checkedPackage struct {
+	pkg   *types.Package
+	info  *types.Info
+	files []*ast.File
+}
+
+type sourceImporter struct {
+	world    *typedWorld
+	packages map[string]*checkedPackage
+	loading  map[string]bool
+}
+
+// Import type-checks module packages from source so an interface and its
+// implementers share one type universe; export data would duplicate them.
+func (s *sourceImporter) Import(path string) (*types.Package, error) {
+	if !strings.HasPrefix(path, modulePath) {
+		return s.world.importer.Import(path)
+	}
+	checked := s.load(path)
+	if checked == nil {
+		return nil, fmt.Errorf("cannot load %s", path)
+	}
+	return checked.pkg, nil
+}
+
+func (s *sourceImporter) load(path string) *checkedPackage {
+	if checked, ok := s.packages[path]; ok {
+		return checked
+	}
+	listed, ok := s.world.packages[path]
+	if !ok || s.loading[path] {
+		return nil
+	}
+	s.loading[path] = true
+	defer delete(s.loading, path)
+	info := newTypeInfo()
+	files := parseListed(s.world.fset, listed)
+	config := types.Config{Importer: s, Error: func(error) {}}
+	pkg, _ := config.Check(path, s.world.fset, files, info)
+	if pkg == nil {
+		s.packages[path] = nil
+		return nil
+	}
+	checked := &checkedPackage{pkg: pkg, info: info, files: files}
+	s.packages[path] = checked
+	return checked
+}
+
+func newTypeInfo() *types.Info {
+	return &types.Info{
+		Types:      map[ast.Expr]types.TypeAndValue{},
+		Defs:       map[*ast.Ident]types.Object{},
+		Uses:       map[*ast.Ident]types.Object{},
+		Selections: map[*ast.SelectorExpr]*types.Selection{},
+	}
+}
+
+func parseListed(fset *token.FileSet, listed *listedPackage) []*ast.File {
+	names := listed.CompiledGoFiles
+	if len(names) == 0 {
+		names = listed.GoFiles
+	}
+	files := []*ast.File{}
+	for _, name := range names {
+		if !filepath.IsAbs(name) {
+			name = filepath.Join(listed.Dir, name)
+		}
+		parsed, err := parser.ParseFile(fset, name, nil, 0)
+		if err != nil {
+			continue
+		}
+		files = append(files, parsed)
+	}
+	return files
+}
+
+func newTypedWorld(root string) *typedWorld {
+	return &typedWorld{root: root, fset: token.NewFileSet(), packages: map[string]*listedPackage{}, typePkg: map[*types.Named]string{}, iface: map[string][]*types.Named{}}
 }
 
 func collectTyped(root string) typedOutput {
-	world := &typedWorld{root: root, fset: token.NewFileSet(), packages: map[string]*listedPackage{}, typePkg: map[*types.Named]string{}, iface: map[string][]string{}}
+	world := newTypedWorld(root)
 	if err := world.load(); err != nil {
 		return typedOutput{Gaps: []string{err.Error()}}
 	}
@@ -171,6 +253,7 @@ func (w *typedWorld) load() error {
 		return os.Open(export)
 	}
 	w.importer = importer.ForCompiler(w.fset, "gc", lookup)
+	w.source = &sourceImporter{world: w, packages: map[string]*checkedPackage{}, loading: map[string]bool{}}
 	for _, path := range sortedApplicationPaths(w.packages) {
 		w.appNames = append(w.appNames, strings.TrimPrefix(path, modulePath+"internal/application/"))
 	}
@@ -178,33 +261,11 @@ func (w *typedWorld) load() error {
 }
 
 func (w *typedWorld) check(listed *listedPackage) (*types.Info, []*ast.File) {
-	names := listed.CompiledGoFiles
-	if len(names) == 0 {
-		names = listed.GoFiles
-	}
-	files := []*ast.File{}
-	for _, name := range names {
-		if !filepath.IsAbs(name) {
-			name = filepath.Join(listed.Dir, name)
-		}
-		parsed, err := parser.ParseFile(w.fset, name, nil, 0)
-		if err != nil {
-			continue
-		}
-		files = append(files, parsed)
-	}
-	info := &types.Info{
-		Types:      map[ast.Expr]types.TypeAndValue{},
-		Defs:       map[*ast.Ident]types.Object{},
-		Uses:       map[*ast.Ident]types.Object{},
-		Selections: map[*ast.SelectorExpr]*types.Selection{},
-	}
-	config := types.Config{Importer: w.importer, Error: func(error) {}}
-	checked, _ := config.Check(listed.ImportPath, w.fset, files, info)
+	checked := w.source.load(listed.ImportPath)
 	if checked == nil {
 		return nil, nil
 	}
-	return info, files
+	return checked.info, checked.files
 }
 
 func derefNamed(t types.Type) *types.Named {
@@ -236,26 +297,48 @@ func (w *typedWorld) owner(path string) (string, string, string) {
 	return "", "", ""
 }
 
-var storeStem = regexp.MustCompile(`(.*)store$`)
-
 func (w *typedWorld) storeOwner(store string) string {
-	base := filepath.Base(store)
-	stem := strings.TrimSuffix(base, "store")
+	stem := strings.TrimSuffix(filepath.Base(store), "store")
 	for _, system := range w.appNames {
 		if system == stem {
 			return system
 		}
 	}
-	candidates := []string{}
-	for _, system := range w.appNames {
-		if strings.HasPrefix(system, stem) {
-			candidates = append(candidates, system)
+	return "store:" + store
+}
+
+func (w *typedWorld) relativeFilename(filename string) string {
+	relative, err := filepath.Rel(w.root, filename)
+	if err != nil {
+		return filepath.ToSlash(filename)
+	}
+	return filepath.ToSlash(relative)
+}
+
+var noiseMethods = map[string]bool{
+	"Error": true, "SQLState": true, "Unwrap": true, "Is": true, "As": true, "String": true,
+}
+
+func noiseInterface(iface *types.Interface) bool {
+	if iface.NumMethods() == 0 {
+		return false
+	}
+	for index := 0; index < iface.NumMethods(); index++ {
+		if !noiseMethods[iface.Method(index).Name()] {
+			return false
 		}
 	}
-	if len(candidates) == 1 {
-		return candidates[0]
+	return true
+}
+
+// interfaceAllowed drops the universe error interface and every other interface
+// declared outside this module, plus anonymous interfaces that only inspect err.
+func interfaceAllowed(named *types.Named, iface *types.Interface) bool {
+	if named != nil {
+		pkg := named.Obj().Pkg()
+		return pkg != nil && strings.HasPrefix(pkg.Path(), modulePath)
 	}
-	return "store:" + store
+	return !noiseInterface(iface)
 }
 
 func (w *typedWorld) eachEdge(system, sourcePath string, call *ast.CallExpr, info *types.Info, emit func(typedEdge)) {
@@ -280,6 +363,9 @@ func (w *typedWorld) eachEdge(system, sourcePath string, call *ast.CallExpr, inf
 	var iface *types.Interface
 	if named := derefNamed(receiver); named != nil {
 		if interfaceType, isInterface := named.Underlying().(*types.Interface); isInterface {
+			if !interfaceAllowed(named, interfaceType) {
+				return
+			}
 			iface = interfaceType
 			if named.Obj().Pkg() != nil {
 				ifaceName = named.Obj().Pkg().Path() + "." + named.Obj().Name()
@@ -301,12 +387,19 @@ func (w *typedWorld) eachEdge(system, sourcePath string, call *ast.CallExpr, inf
 			return
 		}
 	} else if direct, ok := receiver.Underlying().(*types.Interface); ok {
+		if !interfaceAllowed(nil, direct) {
+			return
+		}
 		iface = direct
 	}
 	if iface == nil {
 		return
 	}
-	implementers := w.implementers(iface, ifaceName)
+	if ifaceName == "" {
+		position := w.fset.Position(call.Pos())
+		ifaceName = "anonymous@" + w.relativeFilename(position.Filename) + ":" + strconv.Itoa(position.Line)
+	}
+	implementers := w.implementerTypes(iface, ifaceName)
 	if len(implementers) == 0 {
 		return
 	}
@@ -314,30 +407,36 @@ func (w *typedWorld) eachEdge(system, sourcePath string, call *ast.CallExpr, inf
 		emit(typedEdge{From: system, To: "interface:" + ifaceName, Method: function.Name(), ViaPort: true, Interface: ifaceName})
 		return
 	}
+	seen := map[string]bool{}
 	for _, implementer := range implementers {
-		target, _, store := w.owner(implementer)
+		target, _, store := w.owner(w.typePkg[implementer])
 		if store != "" {
 			target = w.storeOwner(store)
 		}
-		if target == "" {
+		if target == "" || seen[target+"\x00"+store] {
 			continue
 		}
 		if store == "" && target == system {
 			continue
 		}
+		seen[target+"\x00"+store] = true
 		emit(typedEdge{From: system, To: target, Method: function.Name(), ViaPort: true, Interface: ifaceName, Store: store})
 	}
 }
 
-func (w *typedWorld) implementers(iface *types.Interface, name string) []string {
-	if cached, ok := w.iface[name]; ok {
+func (w *typedWorld) implementerTypes(iface *types.Interface, name string) []*types.Named {
+	key := name
+	if key == "" {
+		key = fmt.Sprintf("anonymous:%p", iface)
+	}
+	if cached, ok := w.iface[key]; ok {
 		return cached
 	}
-	w.iface[name] = []string{}
+	w.iface[key] = nil
 	if w.types == nil {
 		w.collectModuleTypes()
 	}
-	found := map[string]bool{}
+	found := map[*types.Named]bool{}
 	for _, named := range w.types {
 		if types.IsInterface(named) {
 			continue
@@ -345,17 +444,19 @@ func (w *typedWorld) implementers(iface *types.Interface, name string) []string 
 		if types.Implements(named, iface) || types.Implements(types.NewPointer(named), iface) {
 			path := w.typePkg[named]
 			if strings.HasPrefix(path, modulePath+"internal/application/") || strings.HasPrefix(path, modulePath+"internal/adapters/postgres/") {
-				found[path] = true
+				found[named] = true
 			}
 		}
 	}
-	paths := []string{}
-	for path := range found {
-		paths = append(paths, path)
+	implementers := []*types.Named{}
+	for named := range found {
+		implementers = append(implementers, named)
 	}
-	sort.Strings(paths)
-	w.iface[name] = paths
-	return paths
+	sort.Slice(implementers, func(i, j int) bool {
+		return w.typePkg[implementers[i]]+"."+implementers[i].Obj().Name() < w.typePkg[implementers[j]]+"."+implementers[j].Obj().Name()
+	})
+	w.iface[key] = implementers
+	return implementers
 }
 
 func (w *typedWorld) collectModuleTypes() {
@@ -367,10 +468,11 @@ func (w *typedWorld) collectModuleTypes() {
 	}
 	sort.Strings(paths)
 	for _, path := range paths {
-		pkg, err := w.importer.Import(path)
-		if err != nil || pkg == nil {
+		checked := w.source.load(path)
+		if checked == nil {
 			continue
 		}
+		pkg := checked.pkg
 		for _, name := range pkg.Scope().Names() {
 			object, ok := pkg.Scope().Lookup(name).(*types.TypeName)
 			if !ok {

@@ -23,7 +23,8 @@
   "owned": [
    "player_directory_profiles"
   ],
-  "read": []
+  "read": [],
+  "written": []
  },
  "tests": {
   "integration": [

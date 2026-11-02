@@ -8,21 +8,26 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 ## Files
 - `INDEX.json` – one row per `internal/application/<system>` with counts and purpose,
   plus `mid_to_system` and `table_to_system`.
-- `EDGES.json` – `calls`, `called_by`, `wired` for every system.
+- `EDGES.json` – `calls`, `called_by`, `composition` for every system.
 - `systems/<system>.json` – one system; open `EDGES.json` for its edge detail.
 - `FINDINGS.json` – review leads, not verdicts.
 - `client_mid_callers.json` – MIDs, names, files, `senders` (same-line `request(`), `other`.
 
 ## Fields
-- `mids` – registered stock HTTP MIDs and client names; dispatcher files once per system.
+- `mids` – registered stock HTTP MIDs, client names, and the handler `file:line`
+  (the dispatcher's `Dispatch` method); dispatcher files once per system.
 - `pushes` – realtime S2C registrations attributable to the system.
-- `tables.owned` / `tables.read` – table names only; `content` is the `content_*` read subset.
-  A store wired by `SHARED_STORE_SYSTEMS` or more systems keeps its tables only for the system
-  owning the store by name, the table's ownership owner, or leaves the `stores` link.
+- `tables.owned` – tables whose ownership `owner` names this system.
+- `tables.read` / `tables.written` – table names in SQL (`FROM`, and
+  `INSERT`/`UPDATE`/`DELETE`) found in the stores this system reaches through typed edges,
+  plus its own package. `content` is the `content_*` read subset.
+- `stores` – the postgres store packages those typed edges reach.
 - `calls` / `called_by` (in `EDGES.json`) – system → callable names per import edge. A leading
   `*` marks a call through an interface (`via_port`). Wide interfaces (more than
   `implementerThreshold = 6` implementers) appear as `interface:<pkg>.<Name>`.
-  `wired` lists construction-file companions not already covered by an edge.
+  A store target is `store:<package>` unless `<x>store` names an application system `<x>`;
+  `i4store`, `kernelstore`, `contentstore` and similar stay explicit store targets.
+- `composition` (in `EDGES.json`) – construction files that register the system's MIDs.
 - `decorated_by` – registration wrappers such as `observing`.
 - `facts` – `emits` resolved through `go/types` constants (simple same-function assignments
   followed); `consumers` maps each emitted fact to mission task kinds, high-water kinds,
@@ -40,17 +45,30 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 python3 tools/system_map.py --write
 python3 tools/system_map.py --check
 python3 tools/system_map.py show <system|mid|table>
+python3 tools/system_map.py trace <mid>
 python3 tools/system_map.py --refresh-client <src_64>
 python3 tools/system_map.py --refresh-coverage <one-mid-per-line-file>
 ```
-`--check` fails only on stale generated files and validates every generated path exists.
-The typed helper output is cached in `tmp/system_map/helper-cache.json`, keyed by the hash of
-Go sources and `go.mod`/`go.sum`; the cache is not committed.
+`--check` fails on stale generated files, validates every generated path exists, checks the
+campaign/clientlog attribution anchors, and re-runs `trace` for MIDs 114, 161 and 338.
 `show missions` aliases to `i5`: there is no `internal/application/missions` package.
 
+## trace versus show
+`show <system>` is the generated, committed view: attribution, tables, stores, composition and
+cross-system call names. `trace <mid>` is computed live and is the right tool for "what does this
+request touch": from the registered dispatcher it follows the MID's branch, then the
+function-level call graph (each function once), printing `file:line`, SQL tables with read,
+write and `FOR UPDATE`/`FOR SHARE`, objective fact kinds recorded, and push calls. It prints
+`UNRESOLVED <expression>` for function values and dynamic routes it will not guess, and a
+`BOUND` line when its node or depth limit stops the walk.
+
 ## Limits
+- Interfaces declared outside this module (including the universe `error`) and anonymous
+  interfaces whose methods are only error inspection (`SQLState`, `Unwrap`, `Is`, `As`,
+  `String`) are ignored when resolving ports.
 - Interface implementers are searched among module concrete types exported by compiled packages;
-  unexported implementation types are invisible.
+  unexported implementation types and implementers outside `internal/application` and
+  `internal/adapters/postgres` are invisible.
 - Fact kinds assigned through non-constant expressions are reported in `gaps`.
 - Locks are listed as taken, never as a proven order; SQL text without `FOR UPDATE`/`FOR SHARE`
   (e.g. `pgx.CopyFrom`) is not a row lock here.

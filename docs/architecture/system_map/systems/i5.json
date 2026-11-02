@@ -1,6 +1,45 @@
 {
  "background": [],
- "content": [],
+ "content": [
+  "content_achievement_catalogs",
+  "content_adventure_catalogs",
+  "content_arena_catalogs",
+  "content_awakening_catalogs",
+  "content_book_input_catalogs",
+  "content_campaign_catalogs",
+  "content_conquer_input_catalogs",
+  "content_conquer_mode_catalogs",
+  "content_course_input_catalogs",
+  "content_dodgeball_catalogs",
+  "content_dorm_input_catalogs",
+  "content_element_input_catalogs",
+  "content_evolution_input_catalogs",
+  "content_gods_trial_catalogs",
+  "content_guild_broadcast_policies",
+  "content_guild_invite_policies",
+  "content_illusion_catalogs",
+  "content_inscription_input_catalogs",
+  "content_league_catalogs",
+  "content_library_input_catalogs",
+  "content_march_catalogs",
+  "content_memoir_catalogs",
+  "content_monthly_signin_catalogs",
+  "content_occult_catalogs",
+  "content_one_on_one_catalogs",
+  "content_pet_campaign_catalogs",
+  "content_player_display_catalogs",
+  "content_privilege_catalogs",
+  "content_public_profile_policies",
+  "content_public_showcase_policies",
+  "content_social_gift_catalogs",
+  "content_spirit_input_catalogs",
+  "content_stat_input_catalogs",
+  "content_stat_rule_catalogs",
+  "content_summon_catalogs",
+  "content_top_floor_catalogs",
+  "content_workplace_catalogs",
+  "content_world_boss_catalogs"
+ ],
  "contracts": [
   {
    "count": 1,
@@ -29,6 +68,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_GACHA_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
    "count": 1,
@@ -148,13 +191,21 @@
   "row_locks": [
    "gameplay_contexts",
    "mail_namespace_counters",
+   "mail_records",
    "player_awakening_roots",
    "player_currency_balances",
+   "player_directory_profiles",
    "player_economy_owners",
+   "player_function_state_owners",
+   "player_guide_return_state",
    "player_item_stacks",
+   "player_mission_instances",
    "player_mission_roots",
    "player_progression",
-   "player_signin_roots"
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "redeem_codes"
   ]
  },
  "login": [
@@ -167,102 +218,202 @@
  ],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 26,
    "name": "SAVE_STORY"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 81,
    "name": "LOAD_BACKPACK"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 160,
    "name": "LOAD_MISSION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 161,
    "name": "TAKE_MISSION_AWARD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 163,
    "name": "OPEN_AWAKE_MISSION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 164,
    "name": "GIVE_UP_AWAKE_MISSION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 165,
    "name": "OPEN_PET_AWAKE_MISSION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 166,
    "name": "GIVE_UP_PET_AWAKE_MISSION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 167,
    "name": "OPEN_AWAKE_TWICE_MISSION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 168,
    "name": "GIVE_UP_AWAKE_TWICE_MISSION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 169,
    "name": "GET_DAY_HUOYUE_AWARD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 170,
    "name": "GET_WEEK_HUOYUE_AWARD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 171,
    "name": "GET_AWAKE_ITEM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 230,
    "name": "REDEEM_CODE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 352,
    "name": "LOAD_SIGN_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 353,
    "name": "SIGN"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 368,
    "name": "LOAD_MAIL_LIST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 369,
    "name": "SET_MAIL_READ"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 370,
    "name": "MAIL_ONEKEY"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 2561,
    "name": "AWAKE_MISSION_LIST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 2736,
    "name": "TASK_LOAD_BY_TYPE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 2737,
    "name": "TASK_AWAKE_GIVE_UP"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 2738,
    "name": "TASK_AWAKE_OPEN"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 2865,
    "name": "SET_PLAYER_GUIDE_FUNCTION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 66
+   },
    "mid": 2866,
    "name": "SET_PLAYER_RETURN_ID"
   }
@@ -270,58 +421,67 @@
  "name": "i5",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/commerceprivilegestore",
+  "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/dormstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore"
  ],
  "tables": {
-  "owned": [
-   "mail_attachments",
-   "mail_namespace_counters",
-   "mail_records",
-   "player_awakening_roots",
-   "player_cosmetic_entitlements",
-   "player_crystal_spend_days",
-   "player_currency_balances",
-   "player_display_admissions",
-   "player_display_selections",
-   "player_economy_owners",
-   "player_function_eligibility",
-   "player_function_state_owners",
-   "player_function_unlocks",
-   "player_guide_return_state",
-   "player_guild_activity_days",
-   "player_item_stacks",
-   "player_mission_instances",
-   "player_mission_roots",
-   "player_profiles",
-   "player_progression",
-   "player_signin_roots",
-   "player_story_cursors",
-   "player_temporal_resources",
-   "players",
-   "redeem_campaigns",
-   "redeem_codes",
-   "redeem_redemptions",
-   "redeem_reward_bundle_revisions"
-  ],
+  "owned": [],
   "read": [
-   "account_provider_bindings",
    "account_session_credentials",
    "account_session_server_observations",
    "account_sessions",
-   "accounts",
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
    "gameplay_context_credentials",
    "gameplay_contexts",
+   "gxb_content_hero_templates",
+   "gxb_content_objective_definitions",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
    "i5_resource_registry",
    "logical_servers",
    "mail_attachments",
    "mail_namespace_counters",
    "mail_records",
-   "objective_definitions",
    "player_awakening_roots",
    "player_cosmetic_entitlements",
    "player_crystal_spend_days",
@@ -334,6 +494,10 @@
    "player_function_state_owners",
    "player_function_unlocks",
    "player_guide_return_state",
+   "player_hero_evolution",
+   "player_hero_evolution_admissions",
+   "player_hero_raw_awakening",
+   "player_hero_roots",
    "player_item_stacks",
    "player_mission_instances",
    "player_mission_roots",
@@ -343,10 +507,85 @@
    "player_story_cursors",
    "player_temporal_resources",
    "players",
-   "redeem_campaigns",
    "redeem_codes",
-   "redeem_redemptions",
-   "redeem_reward_bundle_revisions"
+   "redeem_redemptions"
+  ],
+  "written": [
+   "account_session_server_observations",
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_mission_activity_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_guild_activity_days",
+   "player_hero_evolution",
+   "player_hero_evolution_admissions",
+   "player_hero_raw_awakening",
+   "player_heroes",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_pets",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_codes",
+   "redeem_redemptions"
   ]
  },
  "tests": {

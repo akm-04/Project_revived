@@ -38,22 +38,29 @@
  ],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/activity_dispatcher.go",
+    "line": 20
+   },
    "mid": 229,
    "name": "ACTIVITIES"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/activity_dispatcher.go",
+    "line": 20
+   },
    "mid": 234,
    "name": "LOAD_SINGLE_ACTIVITY"
   }
  ],
  "name": "activitydirectory",
  "pushes": [],
- "stores": [
-  "internal/adapters/postgres/i4store"
- ],
+ "stores": [],
  "tables": {
   "owned": [],
-  "read": []
+  "read": [],
+  "written": []
  },
  "tests": {
   "integration": [],

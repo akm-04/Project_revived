@@ -1,7 +1,50 @@
 {
  "background": [],
- "content": [],
+ "content": [
+  "content_achievement_catalogs",
+  "content_adventure_catalogs",
+  "content_arena_catalogs",
+  "content_awakening_catalogs",
+  "content_book_input_catalogs",
+  "content_campaign_catalogs",
+  "content_conquer_input_catalogs",
+  "content_conquer_mode_catalogs",
+  "content_course_input_catalogs",
+  "content_dodgeball_catalogs",
+  "content_dorm_input_catalogs",
+  "content_element_input_catalogs",
+  "content_evolution_input_catalogs",
+  "content_gods_trial_catalogs",
+  "content_guild_broadcast_policies",
+  "content_guild_invite_policies",
+  "content_illusion_catalogs",
+  "content_inscription_input_catalogs",
+  "content_league_catalogs",
+  "content_library_input_catalogs",
+  "content_march_catalogs",
+  "content_memoir_catalogs",
+  "content_monthly_signin_catalogs",
+  "content_occult_catalogs",
+  "content_one_on_one_catalogs",
+  "content_pet_campaign_catalogs",
+  "content_player_display_catalogs",
+  "content_privilege_catalogs",
+  "content_public_profile_policies",
+  "content_public_showcase_policies",
+  "content_social_gift_catalogs",
+  "content_spirit_input_catalogs",
+  "content_stat_input_catalogs",
+  "content_stat_rule_catalogs",
+  "content_summon_catalogs",
+  "content_top_floor_catalogs",
+  "content_workplace_catalogs",
+  "content_world_boss_catalogs"
+ ],
  "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
   {
    "count": 2,
    "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
@@ -12,10 +55,18 @@
   },
   {
    "count": 1,
-   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+   "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 2,
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
@@ -25,6 +76,10 @@
   {
    "count": 15,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [
@@ -55,62 +110,122 @@
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 134,
    "name": "PET_USE_EXP_ITEMS"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 780,
    "name": "PETS_GET"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 781,
    "name": "PET_SUMMON"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 782,
    "name": "PET_CLEAN_CD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 783,
    "name": "PET_EQUIP"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 785,
    "name": "PET_ADVANCE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 786,
    "name": "PET_EVOLVE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 787,
    "name": "PET_FEED"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 789,
    "name": "PET_SET_SHOW"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 790,
    "name": "PET_ONE_KEY_UP"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 791,
    "name": "PET_UPGRADE_ALL_SKILL"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 792,
    "name": "PET_ONE_KEY_EQUIP"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 1893,
    "name": "GET_PET_STYLE_FORM_ITEM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 1894,
    "name": "USE_PET_STYLE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 52
+   },
    "mid": 1895,
    "name": "CANCEL_PET_STYLE"
   }
@@ -118,11 +233,7 @@
  "name": "characterpet",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/characterstore",
-  "internal/adapters/postgres/commerceprivilegestore",
   "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/dormstore",
-  "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore"
  ],
@@ -133,9 +244,141 @@
    "player_pets"
   ],
   "read": [
-   "player_pet_roots",
-   "player_pet_style_entitlements",
-   "player_pets"
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
+   "gameplay_contexts",
+   "gxb_content_hero_templates",
+   "gxb_content_objective_definitions",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "i5_resource_registry",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "redeem_codes",
+   "redeem_redemptions"
+  ],
+  "written": [
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_mission_activity_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_guild_activity_days",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_codes",
+   "redeem_redemptions"
   ]
  },
  "tests": {

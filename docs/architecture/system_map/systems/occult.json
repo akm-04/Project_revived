@@ -6,8 +6,67 @@
    "kind": "reconcile"
   }
  ],
- "content": [],
+ "content": [
+  "content_achievement_catalogs",
+  "content_adventure_catalogs",
+  "content_arena_catalogs",
+  "content_awakening_catalogs",
+  "content_book_input_catalogs",
+  "content_campaign_catalogs",
+  "content_conquer_input_catalogs",
+  "content_conquer_mode_catalogs",
+  "content_course_input_catalogs",
+  "content_dodgeball_catalogs",
+  "content_dorm_input_catalogs",
+  "content_element_input_catalogs",
+  "content_evolution_input_catalogs",
+  "content_gods_trial_catalogs",
+  "content_guild_broadcast_policies",
+  "content_guild_invite_policies",
+  "content_illusion_catalogs",
+  "content_inscription_input_catalogs",
+  "content_league_catalogs",
+  "content_library_input_catalogs",
+  "content_march_catalogs",
+  "content_memoir_catalogs",
+  "content_monthly_signin_catalogs",
+  "content_occult_catalogs",
+  "content_one_on_one_catalogs",
+  "content_pet_campaign_catalogs",
+  "content_player_display_catalogs",
+  "content_privilege_catalogs",
+  "content_public_profile_policies",
+  "content_public_showcase_policies",
+  "content_social_gift_catalogs",
+  "content_spirit_input_catalogs",
+  "content_stat_input_catalogs",
+  "content_stat_rule_catalogs",
+  "content_summon_catalogs",
+  "content_top_floor_catalogs",
+  "content_workplace_catalogs",
+  "content_world_boss_catalogs"
+ ],
  "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
   {
    "count": 23,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
@@ -15,6 +74,10 @@
   {
    "count": 23,
    "file": "docs/i9/I9_OCCULT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
@@ -41,94 +104,186 @@
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2362,
    "name": "GET_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2363,
    "name": "START_CHALLENGE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2364,
    "name": "GET_CAMPAIGN_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2365,
    "name": "GET_MEMBER_STAT_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2366,
    "name": "CREATE_ROOM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2367,
    "name": "JOIN_ROOM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2368,
    "name": "EXIT_ROOM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2369,
    "name": "INVITE_FRIEND"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2370,
    "name": "KICK_MEMBER"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2371,
    "name": "PREPARE_SINGLE_FIGHT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2372,
    "name": "SINGLE_FIGHT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2373,
    "name": "QUIT_SINGLE_FIGHT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2374,
    "name": "TEAM_FIGHT_INVITE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2375,
    "name": "ACCEPT_TEAM_INVITE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2376,
    "name": "QUIT_TEAM_FIGHT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2377,
    "name": "TEAM_FIGHT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2378,
    "name": "PREPARE_TEAM_FIGHT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2379,
    "name": "START_SINGLE_FIGHT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2380,
    "name": "GET_CAMPAIGN_LOG_LIST"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2382,
    "name": "GET_TEAM_FIGHT_REPORT"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2383,
    "name": "PICK_TEAM_FORMATION"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2384,
    "name": "CHANGE_POS"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 61
+   },
    "mid": 2385,
    "name": "OCCULT_SWEEP"
   }
@@ -150,6 +305,7 @@
  ],
  "stores": [
   "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
@@ -162,21 +318,171 @@
    "occult_logs",
    "occult_players",
    "occult_reports",
-   "occult_runs",
+   "occult_runs"
+  ],
+  "read": [
+   "account_session_credentials",
+   "account_session_server_observations",
+   "account_sessions",
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "gxb_content_hero_templates",
+   "gxb_content_objective_definitions",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "i5_resource_registry",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "occult_logs",
+   "occult_players",
+   "occult_reports",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
    "player_social_presence",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
    "realtime_presence_leases",
    "realtime_presence_owner_state",
+   "redeem_codes",
+   "redeem_redemptions",
    "shared_room_seats",
    "shared_rooms"
   ],
-  "read": [
+  "written": [
+   "account_session_server_observations",
+   "content_achievement_catalogs",
+   "content_adventure_catalogs",
+   "content_arena_catalogs",
+   "content_awakening_catalogs",
+   "content_book_input_catalogs",
+   "content_campaign_catalogs",
+   "content_conquer_input_catalogs",
+   "content_conquer_mode_catalogs",
+   "content_course_input_catalogs",
+   "content_dodgeball_catalogs",
+   "content_dorm_input_catalogs",
+   "content_element_input_catalogs",
+   "content_evolution_input_catalogs",
+   "content_gods_trial_catalogs",
+   "content_guild_broadcast_policies",
+   "content_guild_invite_policies",
+   "content_illusion_catalogs",
+   "content_inscription_input_catalogs",
+   "content_league_catalogs",
+   "content_library_input_catalogs",
+   "content_march_catalogs",
+   "content_memoir_catalogs",
+   "content_mission_activity_catalogs",
+   "content_monthly_signin_catalogs",
+   "content_occult_catalogs",
+   "content_one_on_one_catalogs",
+   "content_pet_campaign_catalogs",
+   "content_player_display_catalogs",
+   "content_privilege_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "content_social_gift_catalogs",
+   "content_spirit_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "content_summon_catalogs",
+   "content_top_floor_catalogs",
+   "content_workplace_catalogs",
+   "content_world_boss_catalogs",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
    "occult_logs",
    "occult_players",
    "occult_reports",
    "occult_runs",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_guild_activity_days",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
    "player_social_presence",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
    "realtime_presence_leases",
    "realtime_presence_owner_state",
+   "redeem_codes",
+   "redeem_redemptions",
    "shared_room_seats",
    "shared_rooms"
   ]

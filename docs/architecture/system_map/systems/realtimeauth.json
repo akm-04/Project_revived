@@ -9,6 +9,10 @@
   {
    "count": 3,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
@@ -30,14 +34,26 @@
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/operation_log.go",
+    "line": 19
+   },
    "mid": 121,
    "name": "SEND_OPERATION_LOG"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/http_dispatchers.go",
+    "line": 32
+   },
    "mid": 192,
    "name": "LOAD_CHAT_ROOM_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_war_dispatcher.go",
+    "line": 18
+   },
    "mid": 1152,
    "name": "GUILD_WAR_RED_POINT"
   }
@@ -50,7 +66,24 @@
  ],
  "tables": {
   "owned": [],
-  "read": []
+  "read": [
+   "account_session_credentials",
+   "account_session_server_observations",
+   "account_sessions",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "player_directory_profiles",
+   "players"
+  ],
+  "written": [
+   "account_session_server_observations",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "player_directory_profiles",
+   "players"
+  ]
  },
  "tests": {
   "integration": [

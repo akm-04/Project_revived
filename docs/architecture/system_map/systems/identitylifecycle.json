@@ -23,10 +23,15 @@
  "mids": [],
  "name": "identitylifecycle",
  "pushes": [],
- "stores": [],
+ "stores": [
+  "internal/adapters/postgres/kernelstore"
+ ],
  "tables": {
   "owned": [],
-  "read": []
+  "read": [
+   "gxb_operation_receipts"
+  ],
+  "written": []
  },
  "tests": {
   "integration": [],

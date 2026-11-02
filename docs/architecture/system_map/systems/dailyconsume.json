@@ -12,16 +12,25 @@
  "locks": {
   "profiles": [],
   "ranks": [],
-  "row_locks": []
+  "row_locks": [
+   "daily_consumption_players"
+  ]
  },
  "login": [],
  "mids": [],
  "name": "dailyconsume",
  "pushes": [],
- "stores": [],
+ "stores": [
+  "internal/adapters/postgres/dailyconsumestore"
+ ],
  "tables": {
   "owned": [],
-  "read": []
+  "read": [
+   "daily_consumption_players"
+  ],
+  "written": [
+   "daily_consumption_players"
+  ]
  },
  "tests": {
   "integration": [

@@ -5,6 +5,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
@@ -25,12 +29,17 @@
    }
   ],
   "row_locks": [
+   "personal_dm_intents",
    "player_social_presence"
   ]
  },
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/general_dm.go",
+    "line": 28
+   },
    "mid": 513,
    "name": "CHAT_TO_PLAYER"
   }
@@ -69,31 +78,39 @@
   }
  ],
  "stores": [
-  "internal/adapters/postgres/characterstore",
-  "internal/adapters/postgres/commerceprivilegestore",
-  "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/dormstore",
   "internal/adapters/postgres/generaldmstore",
   "internal/adapters/postgres/i4store",
-  "internal/adapters/postgres/i5store",
-  "internal/adapters/postgres/kernelstore",
-  "internal/adapters/postgres/presencestore",
-  "internal/adapters/postgres/socialrelationstore"
+  "internal/adapters/postgres/presencestore"
  ],
  "tables": {
-  "owned": [
+  "owned": [],
+  "read": [
+   "account_session_credentials",
+   "account_session_server_observations",
+   "account_sessions",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
    "personal_dm_delivery",
    "personal_dm_intents",
    "personal_dm_payloads",
+   "player_directory_profiles",
    "player_social_presence",
+   "players",
    "realtime_presence_leases",
    "realtime_presence_owner_state"
   ],
-  "read": [
+  "written": [
+   "account_session_server_observations",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
    "personal_dm_delivery",
    "personal_dm_intents",
    "personal_dm_payloads",
+   "player_directory_profiles",
    "player_social_presence",
+   "players",
    "realtime_presence_leases",
    "realtime_presence_owner_state"
   ]

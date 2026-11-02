@@ -7,6 +7,10 @@
    "championsleague": [
     "*ObserveLeagueDaysTx"
    ],
+   "librarylocal": [
+    "*ApplyMarriageTx",
+    "*PrepareMarriageTx"
+   ],
    "oneonone": [
     "*ObserveOneOnOneWeekTx",
     "*ObserveOneOnOneWinStreakTx"
@@ -25,52 +29,11 @@
    ]
   },
   "arena": {
-   "awakeningbattle": [
-    "*ActiveRevision",
-    "*FenceActorTx"
-   ],
-   "bookskill": [
-    "*Error"
-   ],
-   "clientlog": [
-    "*Error",
-    "*SQLState"
-   ],
-   "combat": [
-    "*Error"
-   ],
-   "course": [
-    "*Error"
-   ],
-   "dormhouse": [
-    "*Error"
-   ],
-   "elementequipment": [
-    "*Error"
-   ],
-   "heroevolution": [
-    "*Error"
-   ],
-   "identitylifecycle": [
-    "*Error"
-   ],
-   "inscription": [
-    "*Error"
-   ],
-   "librarylocal": [
-    "*EnsurePlayerRootTx",
-    "*Error",
-    "*ListHeroRootPlayerIDsTx",
-    "*LockRootTx"
-   ],
-   "occult": [
-    "*ReadScoresTx"
+   "playerdisplay": [
+    "*ReadCatalogDisplayOriginsTx"
    ],
    "publicprofile": [
     "*PublicHistoryTx"
-   ],
-   "spirit": [
-    "*Error"
    ]
   },
   "awakeningbattle": {},
@@ -97,7 +60,11 @@
     "*ReadTx"
    ]
   },
-  "championsleague": {},
+  "championsleague": {
+   "playerdisplay": [
+    "*ReadCatalogDisplayOriginsTx"
+   ]
+  },
   "channelchat": {},
   "characterasset": {
    "achievement": [
@@ -249,6 +216,13 @@
     "*AwardStoryPartnerTx",
     "*LockStoryRosterTx"
    ],
+   "characterasset": [
+    "*HeroAppearanceObservationTx",
+    "*HeroBaseObservationTx",
+    "*HeroEquipmentObservationTx",
+    "*HeroPracticeObservationTx",
+    "*HeroRawSkillsTx"
+   ],
    "combat": [
     "*RawAwakeningTx"
    ],
@@ -264,7 +238,13 @@
     "*AwardStoryPartnerTx",
     "*HasAwakeningHeroEquipmentTx",
     "*LockAwakeningHeroesTx",
-    "*LockStoryRosterTx"
+    "*LockPartnerEntityKeyTx",
+    "*LockStoryRosterTx",
+    "*MaterializePartnerEntityBatchTx",
+    "*PreflightPartnerEntityBatchTx",
+    "*ProviderID",
+    "*ProviderRevision",
+    "*ValidatePartnerEntityBatchLockedTx"
    ],
    "march": [
     "*AwardStoryPartnerTx",
@@ -281,6 +261,7 @@
     "*RawAwakeningTx"
    ],
    "publicstats": [
+    "*HeroRawSkillsTx",
     "*RawAwakeningTx"
    ],
    "summon": [
@@ -296,6 +277,12 @@
    "campaign": [
     "*CreditCampaignEXPTx",
     "*LockCampaignPetTx"
+   ],
+   "characterasset": [
+    "*PetAppearanceObservationTx",
+    "*PetBaseObservationTx",
+    "*PetEquipmentObservationTx",
+    "*PetPracticeObservationTx"
    ],
    "godstrial": [
     "*LockCampaignPetTx"
@@ -318,7 +305,11 @@
     "ReduceAppliedPracticeContribution"
    ]
   },
-  "charactersavedpreset": {},
+  "charactersavedpreset": {
+   "characterasset": [
+    "*SavedPresetReferenceStateTx"
+   ]
+  },
   "clientlog": {},
   "combat": {
    "adventure": [
@@ -542,9 +533,6 @@
    "achievement": [
     "*VillaCountTx"
    ],
-   "bookskill": [
-    "*EnsureRootTx"
-   ],
    "playerdisplay": [
     "*TitleProgressTx"
    ],
@@ -553,26 +541,8 @@
    ]
   },
   "elementequipment": {
-   "bookskill": [
-    "*EnsureRootTx"
-   ],
-   "course": [
-    "*EnsureHeroTx",
-    "*EnsureRootTx"
-   ],
-   "heroevolution": [
-    "*EnsureHeroTx"
-   ],
-   "inscription": [
-    "*EnsureHeroTx",
-    "*EnsureRootTx"
-   ],
    "publicstats": [
     "*CoherentHeroInputsTx"
-   ],
-   "spirit": [
-    "*EnsureHeroTx",
-    "*EnsureRootTx"
    ]
   },
   "frienddm": {
@@ -580,6 +550,7 @@
     "*ReloadAndDeliver"
    ],
    "socialfriendbase": [
+    "*FindProjection",
     "ActorValid",
     "ApplyDrainTx",
     "LockPlanTx",
@@ -910,6 +881,9 @@
    ]
   },
   "guildrental": {
+   "combat": [
+    "*LendTx"
+   ],
    "guildcore": [
     "*CloseLenderOffersTx"
    ],
@@ -947,6 +921,7 @@
    ],
    "awakeningbattle": [
     "*CompleteAwakeningBloodTx",
+    "*FenceActorTx",
     "*FreezeAwakeningBloodTx",
     "DefaultProfile"
    ],
@@ -1061,6 +1036,7 @@
     "*ListStacksTx"
    ],
    "commerceprivilege": [
+    "*Apply",
     "*PreparePrivilegeTransitionTx",
     "DefaultProfile",
     "SnapshotTx",
@@ -1087,6 +1063,9 @@
    ],
    "dailyconsume": [
     "*DebitMaterialCostTx"
+   ],
+   "directorysync": [
+    "*ReadCanonicalDirectoryTx"
    ],
    "dodgeball": [
     "*DebitMaterialCostTx",
@@ -1251,8 +1230,19 @@
     "*SnapshotTx"
    ],
    "playerdisplay": [
+    "*ApplyDisplayValueTx",
     "*FenceActorTx",
+    "*InsertDisplayAdmissionTx",
+    "*ListStacksTx",
+    "*PendingDisplayAdmissionTx",
     "*PrepareDisplayValueTx",
+    "*PutDisplayEntitlementTx",
+    "*ReadDisplayAdmissionTx",
+    "*ReadDisplayEntitlementsTx",
+    "*ReadDisplayInventoryTx",
+    "*ReadDisplayStateTx",
+    "*SaveDisplayStateTx",
+    "*SetDisplayAdmissionTx",
     "DefaultProfile",
     "Validate"
    ],
@@ -1382,9 +1372,17 @@
   },
   "march": {},
   "memoir": {},
-  "missioninputs": {},
+  "missioninputs": {
+   "i5": [
+    "*MissionPartnerTemplatesTx",
+    "*ObserveMissionTx"
+   ]
+  },
   "occult": {},
   "oneonone": {
+   "playerdisplay": [
+    "*ReadCatalogDisplayOriginsTx"
+   ],
    "publicprofile": [
     "*PublicHistoryTx"
    ]
@@ -1510,6 +1508,9 @@
    "profilefeedback": [
     "ReadBasicTx",
     "Validate"
+   ],
+   "ranking": [
+    "*ReadMetricsScopeTx"
    ]
   },
   "publicstats": {
@@ -1534,7 +1535,11 @@
     "*HeroTx"
    ]
   },
-  "ranking": {},
+  "ranking": {
+   "playerdisplay": [
+    "*ReadCatalogDisplayOriginsTx"
+   ]
+  },
   "realtimeauth": {
    "socialgift": [
     "*ValidateActor"
@@ -1562,6 +1567,9 @@
     "Open",
     "SetReady",
     "Update"
+   ],
+   "combat": [
+    "*AdmitTx"
    ],
    "illusion": [
     "*ReadPlayerRoomTx",
@@ -1798,6 +1806,14 @@
    "heroevolution": [
     "*EnsureHeroTx"
    ],
+   "i5": [
+    "*LockSpiritKeyTx",
+    "*MaterializeSpiritBatchTx",
+    "*PreflightSpiritBatchTx",
+    "*ProviderID",
+    "*ProviderRevision",
+    "*ValidateSpiritBatchLockedTx"
+   ],
    "inscription": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
@@ -1822,11 +1838,66 @@
    ]
   },
   "workplace": {
+   "activitydirectory": [
+    "*Now"
+   ],
+   "adventure": [
+    "*Now"
+   ],
+   "arena": [
+    "*Now"
+   ],
+   "championsleague": [
+    "*Now"
+   ],
+   "characterhero": [
+    "*Now"
+   ],
+   "commerceprivilege": [
+    "*Now"
+   ],
+   "generaldm": [
+    "*Now"
+   ],
+   "generation": [
+    "*Now"
+   ],
    "guildrental": [
     "*BusyTx"
+   ],
+   "illusion": [
+    "*Now"
+   ],
+   "occult": [
+    "*Now"
+   ],
+   "oneonone": [
+    "*Now"
+   ],
+   "playerdisplay": [
+    "*Now"
+   ],
+   "profilefeedback": [
+    "*Now"
+   ],
+   "publicprofile": [
+    "*Now"
+   ],
+   "socialpresence": [
+    "*Now"
+   ],
+   "topfloor": [
+    "*Now"
+   ],
+   "worldboss": [
+    "*Now"
    ]
   },
-  "worldboss": {}
+  "worldboss": {
+   "activitydirectory": [
+    "*Project"
+   ]
+  }
  },
  "calls": {
   "achievement": {
@@ -1865,9 +1936,36 @@
    ],
    "playerdisplay": [
     "*SkinCollectionTx"
+   ],
+   "store:characterstore": [
+    "*ReadRosterMetricsTx"
+   ],
+   "store:contentstore": [
+    "*AchievementCatalogTx",
+    "*ActiveRevision",
+    "*ReadPlayerDisplayCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx",
+    "*ServerNameTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
-  "activitydirectory": {},
+  "activitydirectory": {
+   "workplace": [
+    "*Now"
+   ],
+   "worldboss": [
+    "*Project"
+   ]
+  },
   "adventure": {
    "characterasset": [
     "NewCoherentReadScope"
@@ -1908,6 +2006,21 @@
     "Open",
     "SetReady",
     "Update"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*AdventureCatalogTx",
+    "*IllusionCatalogTx",
+    "*SummonCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "arena": {
@@ -1953,13 +2066,35 @@
    "socialrelation": [
     "*PrepareFriendFightPrivacyTx",
     "CanonicalServer"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ArenaCatalogTx",
+    "*ArenaTemplatesTx",
+    "*ReadPlayerDisplayCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:guildstore": [
+    "*ReadGuildTx",
+    "*ReadMembershipTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx",
+    "*ServerNameTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "awakeningbattle": {
-   "arena": [
-    "*ActiveRevision",
-    "*FenceActorTx"
-   ],
    "characterasset": [
     "NewCoherentReadScope"
    ],
@@ -1977,21 +2112,20 @@
    ],
    "i5": [
     "*CompleteAwakeningBloodTx",
+    "*FenceActorTx",
     "*FreezeAwakeningBloodTx",
     "DefaultProfile"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "bookskill": {
-   "arena": [
-    "*Error"
-   ],
    "course": [
-    "*EnsureRootTx"
-   ],
-   "dormhouse": [
-    "*EnsureRootTx"
-   ],
-   "elementequipment": [
     "*EnsureRootTx"
    ],
    "generation": [
@@ -2012,8 +2146,42 @@
    "inscription": [
     "*EnsureRootTx"
    ],
+   "interface:bookskill.BackfillHeroPort": [
+    "*ListHeroRootPlayerIDsTx",
+    "*LockRootTx"
+   ],
+   "interface:bookskill.HeroPort": [
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
    "spirit": [
     "*EnsureRootTx"
+   ],
+   "store:bookstore": [
+    "*EnsureRootTx",
+    "*LockAdmissionTx",
+    "*LockRootTx",
+    "*ReadRootTx",
+    "*SaveAdmissionTx",
+    "*SaveRootTx"
+   ],
+   "store:contentstore": [
+    "*BookCatalogTx",
+    "*BookInputsActive",
+    "*BookInputsRevisionTx"
+   ],
+   "store:dormstore": [
+    "*EnsureRootTx"
+   ],
+   "store:elementstore": [
+    "*EnsureRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "bootstrap": {
@@ -2080,6 +2248,25 @@
     "*SettleGrantTx",
     "*SnapshotTx",
     "*TemporalBalanceTx"
+   ],
+   "interface:campaign.Heroes": [
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*CampaignCatalogTx",
+    "*ResolveProgressionPolicyTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "championsleague": {
@@ -2121,10 +2308,73 @@
    "playerdisplay": [
     "*ReceiveOriginTx",
     "Validate"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*LeagueCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:guildstore": [
+    "*ReadGuildTx",
+    "*ReadMembershipTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ],
+   "store:leaguestore": [
+    "*IntentTx",
+    "*MatchTx",
+    "*OpenTx",
+    "*OriginsTx",
+    "*PlayersTx",
+    "*PutMatchTx",
+    "*PutOriginTx",
+    "*PutPlayerTx",
+    "*PutRootTx",
+    "*PutSettlementTx",
+    "*RecordsTx",
+    "*RootTx",
+    "*SettlementTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "channelchat": {},
-  "characterasset": {},
+  "characterasset": {
+   "characterhero": [
+    "*HeroAppearanceObservationTx",
+    "*HeroBaseObservationTx",
+    "*HeroEquipmentObservationTx",
+    "*HeroPracticeObservationTx",
+    "*HeroRawSkillsTx"
+   ],
+   "characterpet": [
+    "*PetAppearanceObservationTx",
+    "*PetBaseObservationTx",
+    "*PetEquipmentObservationTx",
+    "*PetPracticeObservationTx"
+   ],
+   "charactersavedpreset": [
+    "*SavedPresetReferenceStateTx"
+   ],
+   "store:contentstore": [
+    "*AppearanceLIVE",
+    "*AppearanceLIVETx",
+    "*AppearancePetStyle",
+    "*AppearancePetStyleTx",
+    "*AppearanceSkin",
+    "*AppearanceSkinTx"
+   ]
+  },
   "characterhero": {
    "characterasset": [
     "*ModifyRestoration",
@@ -2175,8 +2425,132 @@
     "StackQuantity",
     "Validate"
    ],
+   "interface:characterhero.AcquisitionStore": [
+    "*InsertHeroTx",
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadRootTx",
+    "*SaveRootAllocatorTx"
+   ],
+   "interface:characterhero.BaseObservationStore": [
+    "*ReadHeroByPartnerIDTx"
+   ],
+   "interface:characterhero.BookmarkStore": [
+    "*LockHeroByPartnerIDTx",
+    "*SaveHeroBookmarkTx"
+   ],
+   "interface:characterhero.EquipmentStateStore": [
+    "*ReadHeroByPartnerIDTx"
+   ],
+   "interface:characterhero.HeroAppearanceContributionStore": [
+    "*ListHeroLIVEEntitlementsTx",
+    "*ListHeroSkinEntitlementsTx",
+    "*ReadHeroByPartnerIDTx"
+   ],
+   "interface:characterhero.HeroAppearanceMutationStore": [
+    "*ListHeroSkinEntitlementsTx",
+    "*LockHeroByPartnerIDTx",
+    "*SaveHeroAppearanceMutationTx"
+   ],
+   "interface:characterhero.HeroAppearanceStore": [
+    "*ListHeroLIVEEntitlements",
+    "*ListHeroSkinEntitlements"
+   ],
+   "interface:characterhero.HeroLIVEMutationStore": [
+    "*ListHeroLIVEEntitlementsTx",
+    "*LockHeroByPartnerIDTx",
+    "*SaveHeroLIVEEntitlementTx"
+   ],
    "interface:characterhero.HeroLocalFacetInitializer": [
     "*InitFreshHeroTx"
+   ],
+   "interface:characterhero.HeroPracticeContributionStore": [
+    "*ReadHeroByPartnerIDTx"
+   ],
+   "interface:characterhero.HeroRosterTxAppearanceStore": [
+    "*ListHeroLIVEEntitlementsTx",
+    "*ListHeroSkinEntitlementsTx"
+   ],
+   "interface:characterhero.ProgressionStore": [
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx",
+    "*SaveHeroProgressionTx",
+    "*SaveHeroStateTx"
+   ],
+   "interface:characterhero.SkillChoiceStore": [
+    "*LockHeroByPartnerIDTx",
+    "*SaveHeroSkillChoiceTx"
+   ],
+   "interface:characterhero.Store": [
+    "*ListHeroes",
+    "*LockRootTx",
+    "*ReadRoot",
+    "*SaveSortTypeTx"
+   ],
+   "store:characterstore": [
+    "*FindRawAwakeningTx",
+    "*ReadRawAwakeningBirthTx"
+   ],
+   "store:contentstore": [
+    "*AppearanceActive",
+    "*AppearanceLIVETx",
+    "*AppearanceRevision",
+    "*AppearanceRevisionTx",
+    "*AppearanceSkinItemTx",
+    "*AppearanceSkinTx",
+    "*AwakeningCatalogTx",
+    "*EquipmentPrimitiveTx",
+    "*EquipmentPrimitivesRevision",
+    "*EquipmentRecipeEdgesTx",
+    "*HeroAcquisitionByItemTx",
+    "*HeroCoreActive",
+    "*HeroEquipmentPosition",
+    "*HeroEquipmentPositionTx",
+    "*HeroEquipmentRevision",
+    "*HeroEquipmentRevisionTx",
+    "*HeroExpItemTx",
+    "*HeroExpPolicyTx",
+    "*HeroFumoMaterialTx",
+    "*HeroFumoRevision",
+    "*HeroFumoTarget",
+    "*HeroFumoTargetTx",
+    "*HeroKind",
+    "*HeroKindTx",
+    "*HeroMaxLevelTx",
+    "*HeroNormalEvolutionTx",
+    "*HeroNormalSummonTx",
+    "*HeroOriginCatalogTx",
+    "*HeroPieceMappings",
+    "*HeroPracticeThresholdsTx",
+    "*HeroProgressionActive",
+    "*HeroProgressionRevision",
+    "*HeroPromotionRestorationEligibilityTx",
+    "*HeroPromotionRestorationPolicyTx",
+    "*HeroPromotionRestorationRevision",
+    "*HeroRawSkillsActive",
+    "*HeroSkillCatalogTx",
+    "*HeroSuperEvolutionTx",
+    "*HeroSuperPrerequisitesTx",
+    "*HeroTemplateProgressionTx",
+    "*HeroVowsRequiredLevelTx",
+    "*PracticeRevisionTx",
+    "*SuperEquipmentCapTx",
+    "*SuperEquipmentPositionTx",
+    "*SuperEquipmentRevision",
+    "*SuperEquipmentRevisionTx",
+    "*SuperEquipmentTierTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "characterpet": {
@@ -2216,6 +2590,83 @@
     "PlayerLevel",
     "PreparedStackItemIDs",
     "StackQuantity"
+   ],
+   "interface:characterpet.AwakeningStore": [
+    "*ListPetsTx",
+    "*SavePetAwakeningTx"
+   ],
+   "interface:characterpet.BaseObservationStore": [
+    "*ReadPetByIDTx"
+   ],
+   "interface:characterpet.EquipmentStateStore": [
+    "*ReadPetByIDTx"
+   ],
+   "interface:characterpet.PetAppearanceContributionStore": [
+    "*ListPetStyleEntitlementsTx",
+    "*ReadPetByIDTx"
+   ],
+   "interface:characterpet.PetAppearanceMutationStore": [
+    "*ListPetStyleEntitlementsTx",
+    "*SavePetActiveStyleTx",
+    "*SavePetAppearanceMutationTx"
+   ],
+   "interface:characterpet.PetAppearanceStore": [
+    "*ListPetStyleEntitlements"
+   ],
+   "interface:characterpet.PetPracticeContributionStore": [
+    "*ReadPetByIDTx"
+   ],
+   "interface:characterpet.Store": [
+    "*FindPetByOriginTx",
+    "*InsertPetTx",
+    "*ListPets",
+    "*LockPetByIDTx",
+    "*LockPetRootTx",
+    "*ReadPetRoot",
+    "*SavePetRootAllocatorTx",
+    "*SavePetRootFreeHatchTx",
+    "*SavePetShowStateTx",
+    "*SavePetStateTx"
+   ],
+   "store:contentstore": [
+    "*AppearanceActive",
+    "*AppearancePetStyleTx",
+    "*AppearanceRevision",
+    "*AppearanceRevisionTx",
+    "*CharacterMaxLevelTx",
+    "*EquipmentCompatibilityExpPolicyTx",
+    "*EquipmentPrimitiveTx",
+    "*EquipmentPrimitivesRevision",
+    "*EquipmentRecipeEdgesTx",
+    "*PetAcquisitionActive",
+    "*PetAcquisitionPolicyTx",
+    "*PetAcquisitionRevision",
+    "*PetAcquisitionRevisionTx",
+    "*PetAcquisitionTx",
+    "*PetEquipmentPositionTx",
+    "*PetEquipmentRevision",
+    "*PetEquipmentRevisionTx",
+    "*PetEvolutionCostTx",
+    "*PetExpItemTx",
+    "*PetExpPolicyTx",
+    "*PetPracticeThresholdsTx",
+    "*PetProgressionActive",
+    "*PetProgressionPolicyTx",
+    "*PetProgressionRevision",
+    "*PetProgressionTemplateTx",
+    "*PetPromotionRestorationEligibilityTx",
+    "*PetPromotionRestorationRevision",
+    "*PetSkillBookCostTx",
+    "*PetSkillSlotPolicyTx",
+    "*PetSkillSlotsTx",
+    "*PetTemplateAwakenedTx",
+    "*PracticeRevisionTx",
+    "*PromotionRestorationPolicyTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "characterpractice": {
@@ -2229,6 +2680,41 @@
     "*PlayerLevelTx",
     "*PrepareLevelAndStackDebitTx",
     "*SnapshotTx"
+   ],
+   "interface:characterpractice.HeroPracticeOwner": [
+    "*CompareAndSwapHeroPracticeTx",
+    "*LockHeroPracticeTx"
+   ],
+   "interface:characterpractice.PetPracticeOwner": [
+    "*CompareAndSwapPetPracticeTx",
+    "*LockPetPracticeTx"
+   ],
+   "interface:characterpractice.Store": [
+    "*DeleteHeroProposalTx",
+    "*DeletePetProposalTx",
+    "*LockHeroProposalTx",
+    "*LockPetProposalTx",
+    "*LockPracticeRootTx",
+    "*ReadPracticeRootTx",
+    "*SaveAccountingTx",
+    "*SaveGenerationTx",
+    "*UpsertHeroProposalTx",
+    "*UpsertPetProposalTx"
+   ],
+   "store:contentstore": [
+    "*HeroTemplateAwakenedTx",
+    "*PetTemplateAwakenedTx",
+    "*PracticeActive",
+    "*PracticeLockTx",
+    "*PracticeMethodTx",
+    "*PracticePolicyFactsTx",
+    "*PracticeRevision",
+    "*PracticeVIPBlessTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "charactersavedpreset": {
@@ -2240,18 +2726,41 @@
    ],
    "i5": [
     "*FenceActorTx"
+   ],
+   "interface:characterasset.HeroReferenceOwner": [
+    "*HeroReferenceLockKey",
+    "*LockHeroReferenceKeyTx"
+   ],
+   "interface:characterasset.PetReferenceOwner": [
+    "*LockPetReferenceKeyTx",
+    "*PetReferenceLockKey"
+   ],
+   "interface:charactersavedpreset.ReferenceGuardStore": [
+    "*LockSavedPresetRootTx",
+    "*SavedPresetReferencesHeroTx",
+    "*SavedPresetReferencesPetTx"
+   ],
+   "interface:charactersavedpreset.ReferenceStateStore": [
+    "*ReadSavedPresetAggregateTx"
+   ],
+   "interface:charactersavedpreset.Store": [
+    "*EnsureSavedPresetRootTx",
+    "*LockSavedPresetRootTx",
+    "*ReadSavedPresetAggregateTx",
+    "*ReplaceSavedPresetAggregateTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "clientlog": {
-   "arena": [
-    "*Error",
-    "*SQLState"
+   "store:i4store": [
+    "*ResolveGameplayBearer"
    ]
   },
   "combat": {
-   "arena": [
-    "*Error"
-   ],
    "characterasset": [
     "Queryer",
     "Validate"
@@ -2261,6 +2770,9 @@
    ],
    "conquerschool": [
     "*FactsTx"
+   ],
+   "guildrental": [
+    "*LendTx"
    ],
    "i5": [
     "*ListStacksTx"
@@ -2274,10 +2786,18 @@
    "publicstats": [
     "*HeroTx",
     "*PetTx"
+   ],
+   "sharedroom": [
+    "*AdmitTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*SourceArchiveTx"
    ]
   },
   "commerceprivilege": {
    "i5": [
+    "*Apply",
     "*PreparePrivilegeTransitionTx",
     "DefaultProfile",
     "SnapshotTx",
@@ -2285,6 +2805,23 @@
    ],
    "playerroot": [
     "Validate"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*PrivilegeCatalogTx"
+   ],
+   "store:i4store": [
+    "*Apply",
+    "*LockBoundRecipientTx",
+    "*PrepareVIPProjectionTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "conquerschool": {
@@ -2314,20 +2851,48 @@
     "*SettleGrantTx",
     "*SnapshotTx"
    ],
+   "interface:conquerschool.HeroPort": [
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
    "interface:conquerschool.Roster": [
     "*OverlayMID1"
+   ],
+   "store:conquerstore": [
+    "*InsertLegacyUnknownTx",
+    "*InsertModeTx",
+    "*InsertReportTx",
+    "*InsertViewTx",
+    "*LockFactsTx",
+    "*ReadFactsTx",
+    "*ReadModeTx",
+    "*ReportTx",
+    "*ReportsTx",
+    "*SaveFactsTx",
+    "*SaveModeTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ConquerCatalogTx",
+    "*ConquerModeCatalogTx",
+    "*HeroKindTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ListPlayerRootsTx",
+    "*LockPlayerRootsTx",
+    "*ProfileTx",
+    "*ProjectConquerTx"
+   ],
+   "store:kernelstore": [
+    "*PutTx"
    ]
   },
   "course": {
-   "arena": [
-    "*Error"
-   ],
    "commerceprivilege": [
     "*SnapshotTx"
-   ],
-   "elementequipment": [
-    "*EnsureHeroTx",
-    "*EnsureRootTx"
    ],
    "generation": [
     "Bind",
@@ -2349,9 +2914,39 @@
     "*EnsureHeroTx",
     "*EnsureRootTx"
    ],
+   "interface:course.BackfillHeroPort": [
+    "*ListHeroRootPlayerIDsTx",
+    "*ListHeroesTx",
+    "*LockRootTx"
+   ],
+   "interface:course.HeroPort": [
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
    "spirit": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
+   ],
+   "store:contentstore": [
+    "*CourseCatalogTx",
+    "*CourseInputsActive",
+    "*CourseInputsRevisionTx",
+    "*HeroKindTx",
+    "*HeroSkillCatalogTx"
+   ],
+   "store:elementstore": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "dailyconsume": {
@@ -2359,7 +2954,15 @@
     "*DebitMaterialCostTx"
    ]
   },
-  "directorysync": {},
+  "directorysync": {
+   "i5": [
+    "*ReadCanonicalDirectoryTx"
+   ],
+   "store:i4store": [
+    "*ApplyOwnedDirectoryTx",
+    "*LockOwnedDirectoryTx"
+   ]
+  },
   "dodgeball": {
    "characterasset": [
     "NewCoherentReadScope"
@@ -2387,12 +2990,20 @@
    "socialrelation": [
     "*ActiveFriendsTx",
     "*PrepareFriendDMPrivacyTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*DodgeballCatalogTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "dormhouse": {
-   "arena": [
-    "*Error"
-   ],
    "characterhero": [
     "*ApplyDormEXPLockedTx"
    ],
@@ -2410,12 +3021,49 @@
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
     "*ReadDormPlayerStateTx"
+   ],
+   "interface:dormhouse.BackfillHeroPort": [
+    "*ListHeroRootPlayerIDsTx",
+    "*ListHeroesTx",
+    "*LockRootTx"
+   ],
+   "interface:dormhouse.HeroPort": [
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
+   "store:contentstore": [
+    "*DormCatalogTx",
+    "*DormInputsActive",
+    "*DormInputsRevisionTx",
+    "*HeroTemplateProgressionTx"
+   ],
+   "store:dormstore": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx",
+    "*InsertRoomTx",
+    "*ListRoomsTx",
+    "*LockAdmissionTx",
+    "*LockRootTx",
+    "*ReadHeroTx",
+    "*ReadRoomTx",
+    "*ReadRootTx",
+    "*SaveAdmissionTx",
+    "*SaveHeroTx",
+    "*SaveRoomTx",
+    "*SaveRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "elementequipment": {
-   "arena": [
-    "*Error"
-   ],
    "characterasset": [
     "Queryer",
     "Validate"
@@ -2443,9 +3091,48 @@
     "*EnsureHeroTx",
     "*EnsureRootTx"
    ],
+   "interface:elementequipment.BackfillHeroPort": [
+    "*ListHeroRootPlayerIDsTx",
+    "*ListHeroesTx",
+    "*LockRootTx"
+   ],
+   "interface:elementequipment.HeroPort": [
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
    "spirit": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
+   ],
+   "store:contentstore": [
+    "*ElementCatalogTx",
+    "*ElementInputsActive",
+    "*ElementInputsRevisionTx",
+    "*HeroEquipmentPositionTx",
+    "*HeroKindTx",
+    "*ResolveProgressionPolicyTx",
+    "*SuperEquipmentPositionTx"
+   ],
+   "store:elementstore": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx",
+    "*LockAdmissionTx",
+    "*LockHeroTx",
+    "*LockRootTx",
+    "*ReadHeroTx",
+    "*ReadRootTx",
+    "*SaveAdmissionTx",
+    "*SaveHeroTx",
+    "*SaveRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "frienddm": {
@@ -2464,6 +3151,17 @@
    "socialrelation": [
     "*PrepareFriendDMPrivacyTx",
     "CanonicalServer"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ResolveEmoticonTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:presencestore": [
+    "*AssertOwnerFenceTx",
+    "*ReadOwnerFenceTx"
    ]
   },
   "generaldm": {
@@ -2481,6 +3179,15 @@
    "socialrelation": [
     "*ReadGeneralBlockTx",
     "CanonicalServer"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:presencestore": [
+    "*ReadOwnerFenceTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "generation": {
@@ -2489,6 +3196,16 @@
    ],
    "guildinvite": [
     "*HandleObligation"
+   ],
+   "interface:generation.ReconcileProvider": [
+    "*Name",
+    "*Reconcile"
+   ],
+   "interface:generation.TimedUnknownCommitResolver": [
+    "*ResolveTimed"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "godstrial": {
@@ -2522,9 +3239,20 @@
     "*SettleGrantTx",
     "*TemporalBalanceTx"
    ],
+   "interface:godstrial.HeroLocks": [
+    "*LockHeroByPartnerIDTx"
+   ],
    "spirit": [
     "*LockTrialInventoryTx",
     "*ProviderRevision"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*GodsTrialCatalogTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "guildbroadcast": {
@@ -2545,6 +3273,26 @@
    ],
    "playerroot": [
     "Validate"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ReadBroadcastPolicy"
+   ],
+   "store:guildstore": [
+    "*AppendAuditTx",
+    "*LatestMembershipEventTx",
+    "*ListMembershipsTx",
+    "*LockGuildTx",
+    "*LockMembershipTx",
+    "*ReadMembershipTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ReadNameSnapshotTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "guildcampaign": {
@@ -2569,6 +3317,22 @@
     "*RecordTx",
     "*SettleGrantTx",
     "DefaultProfile"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision"
+   ],
+   "store:guildstore": [
+    "*FoldActivityAwardsTx",
+    "*FoldActivityTx",
+    "*ListMembershipsTx",
+    "*LockGuildTx",
+    "*LockMembershipTx",
+    "*ReadMembership",
+    "*SaveGuildTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
    ]
   },
   "guildcore": {
@@ -2605,6 +3369,58 @@
    "playerroot": [
     "CanonicalPlayerIDs",
     "LockKey"
+   ],
+   "store:guildstore": [
+    "*AdvanceAllocatorTx",
+    "*AppendAuditTx",
+    "*AppendInviteSendReturningTx",
+    "*AppendInviteSendTx",
+    "*AppendMembershipEventReturningTx",
+    "*AppendMembershipEventTx",
+    "*CountGuildApplicationsTx",
+    "*CountInvitesSinceTx",
+    "*CountJoinsSinceTx",
+    "*CountMembersTx",
+    "*CountOutgoingApplicationsTx",
+    "*CountRoleTx",
+    "*DeleteApplicationTx",
+    "*DeleteApplicationsForPlayerTx",
+    "*DeleteGuildApplicationsTx",
+    "*DeleteGuildInvitesTx",
+    "*DeleteInviteTx",
+    "*DeleteMembershipTx",
+    "*FoldActivityTx",
+    "*ForfeitActivityLifetimeTx",
+    "*GuildNameInUseTx",
+    "*InsertApplicationTx",
+    "*InsertGuildTx",
+    "*InsertMembershipTx",
+    "*LastDepartureTx",
+    "*LatestMembershipEventTx",
+    "*LockAllocatorTx",
+    "*LockApplicationTx",
+    "*LockGuildTx",
+    "*LockInviteTx",
+    "*LockMembershipTx",
+    "*MarkActivityFoldedTx",
+    "*MembershipEpochTx",
+    "*PrepareMembershipCleanupTx",
+    "*ReadGuild",
+    "*ReadGuildTx",
+    "*ReadInviteIssueIDTx",
+    "*ReadMembership",
+    "*ReadMembershipTx",
+    "*SaveGuildTx",
+    "*SaveMembershipRoleTx",
+    "*UpsertInviteForProjectionTx",
+    "*UpsertInviteTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "guildinvite": {
@@ -2621,6 +3437,31 @@
     "*ReadInviteInvalidationProofTx",
     "*ReadInviteTargetProofTx",
     "*ValidateCoveredInviteInvalidationsTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ReadInvitePolicy"
+   ],
+   "store:guildstore": [
+    "*BindInviteIssueTx",
+    "*BindMembershipMarkerTx",
+    "*LatestJoinTx",
+    "*PrepareRetirementChildrenTx",
+    "*ReadGuildInviteSnapshotTx",
+    "*ReadInviteIssueIDTx",
+    "*ReadMembershipMarkerIDTx",
+    "*ReadRetirementEventTx",
+    "*ValidateIssueBindingsTx",
+    "*ValidateMarkerBindingsTx"
+   ],
+   "store:i4store": [
+    "*LockBoundRecipientTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*GuildInviteGenerationHighWaterTx",
+    "*GuildInviteReceiptSetWitnessTx",
+    "*PutTx"
    ]
   },
   "guildinvitetarget": {
@@ -2658,6 +3499,14 @@
    ],
    "socialreloadref": [
     "Validate"
+   ],
+   "store:i4store": [
+    "*LockBoundRecipientTx",
+    "*ReadBoundRecipientTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "guildrental": {
@@ -2680,6 +3529,36 @@
     "*SnapshotTx",
     "DefaultProfile"
    ],
+   "store:contentstore": [
+    "*ActiveRevision"
+   ],
+   "store:guildrentalread": [
+    "*BalanceTx",
+    "*HeroTx",
+    "*LevelTx",
+    "*PetTx",
+    "*ProfileTx",
+    "*UnitTx"
+   ],
+   "store:guildstore": [
+    "*AddRentalAwardTx",
+    "*DeleteExpiredRentalUsesTx",
+    "*DeleteRentalOfferTx",
+    "*InsertRentalOfferTx",
+    "*InsertRentalUseTx",
+    "*ListLenderRentalOffersTx",
+    "*ListRentalOffersByGuildTx",
+    "*LockLenderRentalOffersTx",
+    "*LockMembershipTx",
+    "*LockRentalOfferTx",
+    "*LockRentalUseTx",
+    "*ReadMembershipTx",
+    "*ReadRentalUsesDayTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
    "workplace": [
     "*BusyTx"
    ]
@@ -2692,25 +3571,63 @@
     "*RecordTx",
     "*SettleGrantTx",
     "DefaultProfile"
+   ],
+   "interface:guildtea.Heroes": [
+    "*ListHeroesTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*HeroAcquisitionByItemTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:guildstore": [
+    "*AdvanceWishTx",
+    "*ClaimGiftsTx",
+    "*DeleteExpiredGiftsForPlayerTx",
+    "*DeleteExpiredWishesTx",
+    "*GiftedReceiversTx",
+    "*InsertGiftTx",
+    "*InsertWishTx",
+    "*ListUnclaimedGiftsTx",
+    "*ListWishesTx",
+    "*LockWishTx",
+    "*ReadMembershipTx",
+    "*ReadWishTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
    ]
   },
   "guildview": {
    "socialpresence": [
     "*ReadMany"
+   ],
+   "store:guildstore": [
+    "*ListActivityBoard",
+    "*ListGuildApplications",
+    "*ListGuilds",
+    "*ListMemberships",
+    "*ListPlayerApplications",
+    "*ReadGuild",
+    "*ReadGuildThreeDayActivity",
+    "*ReadMembership",
+    "*ReadPlayerActivity",
+    "*ReadSevenDayActivity",
+    "*ReadUnfoldedActivity"
+   ],
+   "store:i4store": [
+    "*Profile"
    ]
   },
   "heroevolution": {
-   "arena": [
-    "*Error"
-   ],
    "characterasset": [
     "Queryer",
     "Validate"
    ],
    "course": [
-    "*EnsureHeroTx"
-   ],
-   "elementequipment": [
     "*EnsureHeroTx"
    ],
    "generation": [
@@ -2727,8 +3644,45 @@
    "inscription": [
     "*EnsureHeroTx"
    ],
+   "interface:heroevolution.BackfillHeroPort": [
+    "*ListHeroRootPlayerIDsTx",
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx"
+   ],
+   "interface:heroevolution.HeroPort": [
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
    "spirit": [
     "*EnsureHeroTx"
+   ],
+   "store:characterstore": [
+    "*EnsureHeroTx",
+    "*LockAdmissionTx",
+    "*LockHeroTx",
+    "*ReadHeroTx",
+    "*SaveAdmissionTx",
+    "*SaveHeroTx"
+   ],
+   "store:contentstore": [
+    "*EvolutionCatalogTx",
+    "*EvolutionInputsActive",
+    "*EvolutionInputsRevisionTx",
+    "*HeroKindTx",
+    "*ResolveProgressionPolicyTx"
+   ],
+   "store:elementstore": [
+    "*EnsureHeroTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "i5": {
@@ -2741,7 +3695,13 @@
     "*AwardStoryPartnerTx",
     "*HasAwakeningHeroEquipmentTx",
     "*LockAwakeningHeroesTx",
-    "*LockStoryRosterTx"
+    "*LockPartnerEntityKeyTx",
+    "*LockStoryRosterTx",
+    "*MaterializePartnerEntityBatchTx",
+    "*PreflightPartnerEntityBatchTx",
+    "*ProviderID",
+    "*ProviderRevision",
+    "*ValidatePartnerEntityBatchLockedTx"
    ],
    "characterpet": [
     "*AwakeningPetsTx",
@@ -2761,11 +3721,51 @@
    ],
    "guildbroadcast": [
     "*ReadGuildBroadcastMailSourceTx"
+   ],
+   "missioninputs": [
+    "*MissionPartnerTemplatesTx",
+    "*ObserveMissionTx"
+   ],
+   "spirit": [
+    "*LockSpiritKeyTx",
+    "*MaterializeSpiritBatchTx",
+    "*PreflightSpiritBatchTx",
+    "*ProviderID",
+    "*ProviderRevision",
+    "*ValidateSpiritBatchLockedTx"
+   ],
+   "store:characterstore": [
+    "*ReadCharacterFunctionPrerequisitesTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*AwakeningCatalogTx",
+    "*MissionActivityCatalogTx",
+    "*MissionDefinitionsTx",
+    "*ResolveFunctionGatePolicyTx",
+    "*ResolveObjective",
+    "*ResolveObjectiveTx",
+    "*ResolvePetStarterPolicyTx",
+    "*ResolveProgressionPolicyTx",
+    "*ResolveResourceTx",
+    "*SignInCatalogTx",
+    "*SummonCatalogTx"
+   ],
+   "store:i4store": [
+    "*LockBoundRecipientTx",
+    "*LockTx",
+    "*SetLevelTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "identitylifecycle": {
-   "arena": [
-    "*Error"
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "illusion": {
@@ -2816,21 +3816,34 @@
     "Open",
     "SetReady",
     "Update"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*IllusionCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:guildstore": [
+    "*CreditActivityAwardTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "inscription": {
-   "arena": [
-    "*Error"
-   ],
    "characterasset": [
     "Queryer",
     "Validate"
    ],
    "course": [
-    "*EnsureHeroTx",
-    "*EnsureRootTx"
-   ],
-   "elementequipment": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
    ],
@@ -2848,17 +3861,47 @@
     "*PrepareInscriptionValueTx",
     "*ReadScalarTx"
    ],
+   "interface:inscription.BackfillHeroPort": [
+    "*ListHeroRootPlayerIDsTx",
+    "*ListHeroesTx",
+    "*LockRootTx"
+   ],
+   "interface:inscription.HeroPort": [
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
    "spirit": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
+   ],
+   "store:characterstore": [
+    "*InscriptionEligibilityTx"
+   ],
+   "store:contentstore": [
+    "*HeroKindTx",
+    "*InscriptionCatalogTx",
+    "*InscriptionInputsActive",
+    "*InscriptionInputsRevisionTx"
+   ],
+   "store:elementstore": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "librarylocal": {
-   "arena": [
-    "*EnsurePlayerRootTx",
-    "*Error",
-    "*ListHeroRootPlayerIDsTx",
-    "*LockRootTx"
+   "achievement": [
+    "*ApplyMarriageTx",
+    "*PrepareMarriageTx"
    ],
    "generation": [
     "Bind",
@@ -2869,8 +3912,50 @@
     "*DebitMaterialCostTx",
     "*FenceActorTx"
    ],
+   "interface:anonymous@internal/application/librarylocal/backfill.go:68": [
+    "*ListHeroRootPlayerIDsTx"
+   ],
+   "interface:anonymous@internal/application/librarylocal/backfill.go:79": [
+    "*LockRootTx"
+   ],
+   "interface:librarylocal.BackfillHeroPort": [
+    "*ListHeroesTx"
+   ],
+   "interface:librarylocal.HeroPort": [
+    "*ListHeroesTx",
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
    "interface:librarylocal.RosterProjectionPort": [
     "*OverlayMID1"
+   ],
+   "store:contentstore": [
+    "*AchievementRevisionTx",
+    "*HeroCoreActiveTx",
+    "*LibraryCatalogTx",
+    "*LibraryInputsActive",
+    "*LibraryInputsRevisionTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ],
+   "store:librarystore": [
+    "*BackfillMissingHeroTx",
+    "*EnsurePlayerRootTx",
+    "*LockAdmissionTx",
+    "*LockHeroTx",
+    "*LockRootTx",
+    "*ReadHeroTx",
+    "*ReadRootTx",
+    "*SaveAdmissionTx",
+    "*SaveHeroTx",
+    "*SavePlayerTx"
    ]
   },
   "march": {
@@ -2898,11 +3983,29 @@
     "*RecordTx",
     "*SettleGrantTx"
    ],
+   "interface:march.HeroLocks": [
+    "*LockHeroByPartnerIDTx"
+   ],
    "interface:march.Roster": [
     "*OverlayMID1"
    ],
    "publicstats": [
     "*HeroTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*MarchCatalogTx",
+    "*SummonCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ],
    "topfloor": [
     "*MarchCandidatesTx"
@@ -2937,8 +4040,20 @@
     "*SettleGrantTx",
     "StockRepresentableBulkAwards"
    ],
+   "interface:memoir.HeroLocks": [
+    "*LockHeroByPartnerIDTx"
+   ],
    "interface:memoir.Roster": [
     "*OverlayMID1"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*MemoirCatalogTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ],
    "topfloor": [
     "*MarchCandidatesTx"
@@ -2958,12 +4073,12 @@
     "*CrystalSpentOnDayTx",
     "*ReadProgressionTx",
     "*SnapshotTx"
+   ],
+   "interface:missioninputs.Heroes": [
+    "*ListHeroesTx"
    ]
   },
   "occult": {
-   "arena": [
-    "*ReadScoresTx"
-   ],
    "characterasset": [
     "NewCoherentReadScope"
    ],
@@ -3012,6 +4127,27 @@
     "Leave",
     "Open",
     "Update"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*OccultCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*PutTx"
+   ],
+   "store:presencestore": [
+    "*OnlineAt"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "oneonone": {
@@ -3049,6 +4185,23 @@
    ],
    "interface:oneonone.Roster": [
     "*OverlayMID1"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*OneOnOneCatalogTx",
+    "*ReadPlayerDisplayCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "petcampaign": {
@@ -3084,12 +4237,35 @@
     "*RecordTx",
     "*SettleGrantTx",
     "*SnapshotTx"
+   ],
+   "interface:petcampaign.HeroLocks": [
+    "*LockHeroByPartnerIDTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*PetCampaignCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "playerdirectory": {},
   "playerdisplay": {
+   "arena": [
+    "*ReadCatalogDisplayOriginsTx"
+   ],
    "bookskill": [
     "*TitleProgressTx"
+   ],
+   "championsleague": [
+    "*ReadCatalogDisplayOriginsTx"
    ],
    "characterasset": [
     "Queryer",
@@ -3105,16 +4281,54 @@
     "*TitleProgressTx"
    ],
    "i5": [
+    "*ApplyDisplayValueTx",
     "*FenceActorTx",
+    "*InsertDisplayAdmissionTx",
+    "*ListStacksTx",
+    "*PendingDisplayAdmissionTx",
     "*PrepareDisplayValueTx",
+    "*PutDisplayEntitlementTx",
+    "*ReadDisplayAdmissionTx",
+    "*ReadDisplayEntitlementsTx",
+    "*ReadDisplayInventoryTx",
+    "*ReadDisplayStateTx",
+    "*SaveDisplayStateTx",
+    "*SetDisplayAdmissionTx",
     "DefaultProfile",
     "Validate"
    ],
    "librarylocal": [
     "*TitleProgressTx"
    ],
+   "oneonone": [
+    "*ReadCatalogDisplayOriginsTx"
+   ],
    "playerroot": [
     "Validate"
+   ],
+   "ranking": [
+    "*ReadCatalogDisplayOriginsTx"
+   ],
+   "store:characterstore": [
+    "*PrepareDisplayHeroesTx",
+    "*ReadDisplayHeroesTx",
+    "*ReadDisplayPopulationTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*AppearanceSkinItemTx",
+    "*ReadPlayerDisplayCatalogTx"
+   ],
+   "store:i4store": [
+    "*LockOwnedDirectoryTx",
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "playerpresentation": {
@@ -3128,6 +4342,9 @@
    ],
    "socialpresence": [
     "Validate"
+   ],
+   "store:i4store": [
+    "*Profile"
    ]
   },
   "playerroot": {},
@@ -3159,6 +4376,21 @@
    ],
    "socialrelation": [
     "CanonicalServer"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ReadPublicProfilePolicy"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ReadBoundRecipientTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "publication": {
@@ -3171,6 +4403,9 @@
    ],
    "playerroot": [
     "LockKey"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
    ]
   },
   "publicprofile": {
@@ -3219,6 +4454,12 @@
    "interface:publicprofile.Roster": [
     "*OverlayMID1"
    ],
+   "interface:publicprofile.ShowcaseReferences": [
+    "*HeroReferenceLockKey",
+    "*LockHeroReferenceKeyTx",
+    "*LockPetReferenceKeyTx",
+    "*PetReferenceLockKey"
+   ],
    "librarylocal": [
     "*MarriedHeroCountTx"
    ],
@@ -3252,8 +4493,27 @@
     "CanonicalServer",
     "Validate"
    ],
+   "store:characterstore": [
+    "*ReadRosterMetricsTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ReadPublicProfilePolicy",
+    "*ReadPublicShowcasePolicy"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*ListIdentitiesTx",
+    "*PutTx"
+   ],
    "topfloor": [
     "*PublicHistoryTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "publicstats": {
@@ -3267,6 +4527,7 @@
     "Validate"
    ],
    "characterhero": [
+    "*HeroRawSkillsTx",
     "*RawAwakeningTx"
    ],
    "conquerschool": [
@@ -3287,12 +4548,20 @@
    "inscription": [
     "*CoherentHeroInputsTx"
    ],
+   "interface:publicstats.PetState": [
+    "*ReadPetByIDTx"
+   ],
    "librarylocal": [
     "*HeroLibraryInputsTx",
     "*PlayerCollectionInputsTx"
    ],
    "spirit": [
     "*CoherentHeroInputsTx"
+   ],
+   "store:contentstore": [
+    "*DormCatalogTx",
+    "*StatCatalogTx",
+    "*StatInputCatalogTx"
    ]
   },
   "ranking": {
@@ -3317,9 +4586,36 @@
    ],
    "playerroot": [
     "Validate"
+   ],
+   "publicprofile": [
+    "*ReadMetricsScopeTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ReadPlayerDisplayCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ListPlayerRootsTx",
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
-  "realtimeauth": {},
+  "realtimeauth": {
+   "store:guildprojection": [
+    "*CurrentGuildBinding"
+   ],
+   "store:i4store": [
+    "*ResolveGameplayBearer",
+    "*ValidateActor"
+   ]
+  },
   "realtimewakeup": {
    "frienddm": [
     "*ReloadAndDeliver"
@@ -3345,6 +4641,9 @@
    "socialrelation": [
     "ApplyChangeTx",
     "PrepareTx"
+   ],
+   "store:i4store": [
+    "*LockBoundRecipientTx"
    ]
   },
   "sharedroom": {
@@ -3358,6 +4657,9 @@
    ],
    "playerroot": [
     "CanonicalPlayerIDs"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
    ]
   },
   "socialdismiss": {
@@ -3383,10 +4685,14 @@
     "CanonicalServer",
     "DefaultCommandProfile",
     "Validate"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
    ]
   },
   "socialfriendbase": {
    "frienddm": [
+    "*FindProjection",
     "ActorValid",
     "ApplyDrainTx",
     "LockPlanTx",
@@ -3463,6 +4769,14 @@
    ],
    "socialreloadref": [
     "Validate"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ReadGiftContent"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ValidateActor"
    ]
   },
   "socialinbox": {},
@@ -3472,6 +4786,19 @@
     "Operation",
     "Run",
     "Validate"
+   ],
+   "store:presencestore": [
+    "*AdvanceLastSeenTx",
+    "*AssertOwnerFenceTx",
+    "*DeleteExactLeaseTx",
+    "*EnsureAndLockRootTx",
+    "*ExpiredPlayerIDs",
+    "*ReadManyAt",
+    "*SettleExpiredTx",
+    "*UpsertLeaseTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "socialprojection": {
@@ -3513,6 +4840,13 @@
     "*LockRootTx",
     "CanonicalServer",
     "Validate"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*PlayerIDBoundsTx",
+    "*ProfileTx",
+    "*ProfilesAfterTx",
+    "*ProfilesByExactNameTx"
    ]
   },
   "socialrelation": {
@@ -3534,6 +4868,9 @@
    "socialreloadref": [
     "DecodeReloadReference",
     "Validate"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
    ]
   },
   "socialreload": {
@@ -3564,18 +4901,11 @@
    ]
   },
   "spirit": {
-   "arena": [
-    "*Error"
-   ],
    "characterasset": [
     "Queryer",
     "Validate"
    ],
    "course": [
-    "*EnsureHeroTx",
-    "*EnsureRootTx"
-   ],
-   "elementequipment": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
    ],
@@ -3596,6 +4926,37 @@
    "inscription": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
+   ],
+   "interface:spirit.BackfillHeroPort": [
+    "*ListHeroRootPlayerIDsTx",
+    "*ListHeroesTx",
+    "*LockRootTx"
+   ],
+   "interface:spirit.HeroPort": [
+    "*LockHeroByPartnerIDTx",
+    "*LockRootTx",
+    "*ReadHeroByPartnerIDTx",
+    "*ReadRootTx"
+   ],
+   "store:contentstore": [
+    "*HeroKindTx",
+    "*ResolveFunctionGatePolicyTx",
+    "*ResolveProgressionPolicyTx",
+    "*SpiritCatalogTx",
+    "*SpiritInputsActive",
+    "*SpiritInputsActiveTx",
+    "*SpiritInputsRevisionTx"
+   ],
+   "store:elementstore": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "summon": {
@@ -3619,6 +4980,14 @@
     "*RecordTx",
     "*SettleGrantTx",
     "*SnapshotTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*SummonCatalogTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "topfloor": {
@@ -3657,6 +5026,26 @@
    ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*TopFloorCatalogTx"
+   ],
+   "store:guildstore": [
+    "*ReadGuildTx",
+    "*ReadMembershipTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx",
+    "*ServerMaximumLevelTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "workplace": {
@@ -3695,8 +5084,26 @@
     "*SnapshotTx",
     "*WorkplaceSPTx"
    ],
+   "interface:workplace.HeroLocks": [
+    "*LockHeroByPartnerIDTx"
+   ],
    "publicstats": [
     "*HeroTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*HeroKindTx",
+    "*WorkplaceCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ],
    "topfloor": [
     "*WorkplaceOpponentTx"
@@ -3726,1261 +5133,173 @@
    ],
    "interface:worldboss.Heroes": [
     "*OverlayMID1"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*WorldBossCatalogTx"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*LevelAtLeastCountTx",
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   }
  },
- "wired": {
+ "composition": {
   "achievement": [
-   "realtimeauth"
+   "cmd/gxb-api/achievement_postgres.go"
   ],
   "activitydirectory": [
-   "achievement",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "generation",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "i5",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "adventure": [
-   "arena",
-   "realtimewakeup",
-   "topfloor"
+   "cmd/gxb-api/adventure_postgres.go"
   ],
   "arena": [
-   "adventure",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "commerceprivilege",
-   "conquerschool",
-   "dailyconsume",
-   "oneonone",
-   "playerdisplay",
-   "publicstats",
-   "topfloor"
+   "cmd/gxb-api/top_floor_postgres.go"
   ],
   "awakeningbattle": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "bookskill": [
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "dailyconsume",
-   "directorysync",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "librarylocal",
-   "march",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "bootstrap": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "generation",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "campaign": [
-   "achievement",
-   "adventure",
-   "arena",
-   "bookskill",
-   "championsleague",
-   "conquerschool",
-   "course",
-   "dormhouse",
-   "elementequipment",
-   "heroevolution",
-   "inscription",
-   "librarylocal",
-   "oneonone",
-   "playerdisplay",
-   "publicstats",
-   "socialrelation",
-   "spirit",
-   "topfloor"
+   "cmd/gxb-api/top_floor_postgres.go"
   ],
   "championsleague": [
-   "adventure",
-   "arena",
-   "bookskill",
-   "campaign",
-   "characterhero",
-   "characterpet",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "dormhouse",
-   "elementequipment",
-   "heroevolution",
-   "inscription",
-   "librarylocal",
-   "oneonone",
-   "publicstats",
-   "socialrelation",
-   "spirit",
-   "topfloor"
+   "cmd/gxb-api/top_floor_postgres.go"
   ],
   "channelchat": [],
   "characterasset": [],
   "characterhero": [
-   "achievement",
-   "activitydirectory",
-   "arena",
-   "bookskill",
-   "bootstrap",
-   "championsleague",
-   "characterpet",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "playerdisplay",
-   "publication",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "characterpet": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "championsleague",
-   "characterhero",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "characterpractice": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "charactersavedpreset",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "generation",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "charactersavedpreset": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "generation",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "clientlog": [],
   "combat": [],
   "commerceprivilege": [],
   "conquerschool": [
-   "adventure",
-   "arena",
-   "bookskill",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "course",
-   "dailyconsume",
-   "dormhouse",
-   "elementequipment",
-   "heroevolution",
-   "inscription",
-   "librarylocal",
-   "oneonone",
-   "playerdisplay",
-   "socialrelation",
-   "spirit",
-   "topfloor"
+   "cmd/gxb-api/top_floor_postgres.go"
   ],
   "course": [
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "conquerschool",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "identitylifecycle",
-   "illusion",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "dailyconsume": [],
   "directorysync": [],
   "dodgeball": [
-   "playerdisplay"
+   "cmd/gxb-api/dodgeball_postgres.go"
   ],
   "dormhouse": [
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "elementequipment": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "identitylifecycle",
-   "illusion",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "frienddm": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "generaldm": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "i5",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "generation": [],
-  "godstrial": [],
+  "godstrial": [
+   "cmd/gxb-api/godstrial_postgres.go"
+  ],
   "guildbroadcast": [
-   "realtimeauth"
+   "internal/adapters/stockruntime/guild_broadcast.go"
   ],
   "guildcampaign": [
-   "realtimewakeup"
+   "cmd/gxb-api/guild_campaign_postgres.go"
   ],
   "guildcore": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "guildinvite": [],
   "guildinvitetarget": [],
   "guildrental": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "guildtea": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "generation",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "guildview": [],
   "heroevolution": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "identitylifecycle",
-   "illusion",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "i5": [
-   "activitydirectory",
-   "characterasset",
-   "directorysync",
-   "generaldm",
-   "identitylifecycle",
-   "realtimeauth",
-   "roominvite",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "identitylifecycle": [],
   "illusion": [
-   "adventure"
+   "cmd/gxb-api/illusion_postgres.go"
   ],
   "inscription": [
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "identitylifecycle",
-   "illusion",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "librarylocal": [
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "publication",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
-  "march": [],
-  "memoir": [],
+  "march": [
+   "cmd/gxb-api/march_postgres.go"
+  ],
+  "memoir": [
+   "cmd/gxb-api/memoir_postgres.go"
+  ],
   "missioninputs": [],
-  "occult": [],
-  "oneonone": [
-   "adventure",
-   "arena",
-   "bookskill",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "dormhouse",
-   "elementequipment",
-   "heroevolution",
-   "inscription",
-   "librarylocal",
-   "playerdisplay",
-   "publicstats",
-   "socialrelation",
-   "spirit",
-   "topfloor"
+  "occult": [
+   "cmd/gxb-api/occult_postgres.go"
   ],
-  "petcampaign": [],
+  "oneonone": [
+   "cmd/gxb-api/top_floor_postgres.go"
+  ],
+  "petcampaign": [
+   "cmd/gxb-api/petcampaign_postgres.go"
+  ],
   "playerdirectory": [],
-  "playerdisplay": [],
+  "playerdisplay": [
+   "cmd/gxb-api/player_display_postgres.go"
+  ],
   "playerpresentation": [],
   "playerroot": [],
   "profileasset": [],
   "profilefeedback": [
-   "realtimeauth"
+   "cmd/gxb-api/profile_feedback_postgres.go"
   ],
   "publication": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "publicprofile": [
-   "characterpet",
-   "realtimeauth"
+   "cmd/gxb-api/profile_media_postgres.go",
+   "cmd/gxb-api/public_profile_postgres.go",
+   "cmd/gxb-api/public_profile_reads_postgres.go"
   ],
   "publicstats": [],
-  "ranking": [],
+  "ranking": [
+   "cmd/gxb-api/ranking_postgres.go"
+  ],
   "realtimeauth": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "generation",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "i5",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "realtimewakeup": [],
   "roominvite": [],
@@ -4992,176 +5311,24 @@
   "socialpresence": [],
   "socialprojection": [],
   "socialrelation": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "i5",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "realtimeauth",
-   "sharedroom",
-   "socialfriendbase",
-   "spirit",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "socialreload": [],
   "socialreloadref": [],
   "spirit": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "awakeningbattle",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "commerceprivilege",
-   "conquerschool",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "frienddm",
-   "generaldm",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "identitylifecycle",
-   "illusion",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "summon",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "summon": [
-   "achievement",
-   "activitydirectory",
-   "adventure",
-   "arena",
-   "awakeningbattle",
-   "bookskill",
-   "bootstrap",
-   "campaign",
-   "championsleague",
-   "characterasset",
-   "characterpet",
-   "characterpractice",
-   "charactersavedpreset",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "directorysync",
-   "dormhouse",
-   "elementequipment",
-   "frienddm",
-   "generaldm",
-   "godstrial",
-   "guildcampaign",
-   "guildcore",
-   "guildtea",
-   "heroevolution",
-   "identitylifecycle",
-   "illusion",
-   "inscription",
-   "librarylocal",
-   "march",
-   "missioninputs",
-   "occult",
-   "oneonone",
-   "petcampaign",
-   "playerdisplay",
-   "publication",
-   "publicprofile",
-   "realtimeauth",
-   "roominvite",
-   "sharedroom",
-   "socialdismiss",
-   "socialfriendbase",
-   "socialgift",
-   "socialinbox",
-   "socialprojection",
-   "socialrelation",
-   "socialreload",
-   "spirit",
-   "topfloor",
-   "worldboss"
+   "cmd/gxb-api/main_postgres.go"
   ],
   "topfloor": [
-   "adventure",
-   "arena",
-   "bookskill",
-   "campaign",
-   "championsleague",
-   "characterhero",
-   "characterpet",
-   "conquerschool",
-   "course",
-   "dailyconsume",
-   "dormhouse",
-   "elementequipment",
-   "heroevolution",
-   "inscription",
-   "librarylocal",
-   "oneonone",
-   "playerdisplay",
-   "publicstats",
-   "socialrelation",
-   "spirit"
+   "cmd/gxb-api/top_floor_postgres.go"
   ],
-  "workplace": [],
-  "worldboss": []
+  "workplace": [
+   "cmd/gxb-api/workplace_postgres.go"
+  ],
+  "worldboss": [
+   "cmd/gxb-api/world_boss_postgres.go"
+  ]
  }
 }

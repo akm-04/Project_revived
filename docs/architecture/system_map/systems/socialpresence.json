@@ -12,20 +12,33 @@
  "locks": {
   "profiles": [],
   "ranks": [],
-  "row_locks": []
+  "row_locks": [
+   "player_social_presence"
+  ]
  },
  "login": [],
  "mids": [],
  "name": "socialpresence",
  "pushes": [],
- "stores": [],
+ "stores": [
+  "internal/adapters/postgres/presencestore"
+ ],
  "tables": {
   "owned": [
    "player_social_presence",
    "realtime_presence_leases",
    "realtime_presence_owner_state"
   ],
-  "read": []
+  "read": [
+   "player_social_presence",
+   "realtime_presence_leases",
+   "realtime_presence_owner_state"
+  ],
+  "written": [
+   "player_social_presence",
+   "realtime_presence_leases",
+   "realtime_presence_owner_state"
+  ]
  },
  "tests": {
   "integration": [],

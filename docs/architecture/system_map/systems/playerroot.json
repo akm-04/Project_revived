@@ -26,7 +26,8 @@
  "stores": [],
  "tables": {
   "owned": [],
-  "read": []
+  "read": [],
+  "written": []
  },
  "tests": {
   "integration": [

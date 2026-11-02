@@ -3,6 +3,10 @@
  "content": [],
  "contracts": [
   {
+   "count": 1,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
    "count": 6,
    "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
   },
@@ -11,8 +15,20 @@
    "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
   },
   {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
    "count": 20,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
@@ -69,82 +85,162 @@
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 576,
    "name": "LOAD_ALL_TEAMS"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 577,
    "name": "CREATE_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 578,
    "name": "DISSOLUTION_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 579,
    "name": "LOAD_TEAM_BY_ID"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 580,
    "name": "APPLY_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 581,
    "name": "LOAD_APPLY_LIST_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 582,
    "name": "ACCEPT_APPLY_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 583,
    "name": "REFUSE_APPLY_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 584,
    "name": "LEAVE_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 585,
    "name": "UPDATE_DES_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 586,
    "name": "APPOINT_JOB_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 587,
    "name": "KICK_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 589,
    "name": "SETTING_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 598,
    "name": "PLAYER_LOAD_APPLY_LIST_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 599,
    "name": "CANCEL_APPLY_TEAM"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 612,
    "name": "GET_SELF_GUILD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 616,
    "name": "GUILD_RANK"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 2563,
    "name": "INVITE_TO_GUILD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 2564,
    "name": "ACCEPT_INVITE_TO_GUILD"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
    "mid": 2565,
    "name": "GET_GUILD_INFO"
   }
@@ -152,8 +248,6 @@
  "name": "guildcore",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/dormstore",
   "internal/adapters/postgres/guildstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
@@ -178,6 +272,11 @@
    "player_guild_activity_totals"
   ],
   "read": [
+   "account_session_credentials",
+   "account_session_server_observations",
+   "account_sessions",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
    "guild_activity_awards",
    "guild_applications",
    "guild_audit_log",
@@ -191,8 +290,84 @@
    "guild_tea_gifts",
    "guild_tea_wishes",
    "guilds",
+   "gxb_operation_receipts",
+   "i5_resource_registry",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
    "player_guild_activity_days",
-   "player_guild_activity_totals"
+   "player_guild_activity_totals",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_codes",
+   "redeem_redemptions"
+  ],
+  "written": [
+   "account_session_server_observations",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "guild_activity_awards",
+   "guild_applications",
+   "guild_audit_log",
+   "guild_invite_send_events",
+   "guild_invites",
+   "guild_membership_events",
+   "guild_memberships",
+   "guild_rental_offers",
+   "guild_rental_uses",
+   "guild_server_allocators",
+   "guild_tea_gifts",
+   "guild_tea_wishes",
+   "guilds",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_guild_activity_days",
+   "player_guild_activity_totals",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_codes",
+   "redeem_redemptions"
   ]
  },
  "tests": {

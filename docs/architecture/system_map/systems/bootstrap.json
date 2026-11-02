@@ -63,7 +63,7 @@
    "file": "docs/i9/I9_GACHA_PRIVATE_POLICY_V1.json"
   },
   {
-   "count": 4,
+   "count": 2,
    "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
@@ -103,7 +103,7 @@
    "file": "docs/i9/I9_ILLUSION_V1.json"
   },
   {
-   "count": 3,
+   "count": 2,
    "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
   },
   {
@@ -202,66 +202,31 @@
  },
  "locks": {
   "profiles": [],
-  "ranks": [
-   {
-    "name": "course.RootLockRank",
-    "rank": 520
-   },
-   {
-    "name": "elementequipment.RootLockRank",
-    "rank": 560
-   },
-   {
-    "name": "inscription.RootLockRank",
-    "rank": 540
-   },
-   {
-    "name": "spirit.RootLockRank",
-    "rank": 580
-   }
-  ],
+  "ranks": [],
   "row_locks": []
  },
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/http_dispatchers.go",
+    "line": 149
+   },
    "mid": 1,
    "name": "RETRIEVE_TOKEN"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/http_dispatchers.go",
+    "line": 149
+   },
    "mid": 18,
    "name": "LOAD_USER_REGIONS"
   }
  ],
  "name": "bootstrap",
  "pushes": [],
- "stores": [
-  "internal/adapters/postgres/activitystore",
-  "internal/adapters/postgres/adventurestore",
-  "internal/adapters/postgres/bookstore",
-  "internal/adapters/postgres/campaignstore",
-  "internal/adapters/postgres/characterbirth",
-  "internal/adapters/postgres/characterstore",
-  "internal/adapters/postgres/commerceprivilegestore",
-  "internal/adapters/postgres/conquerstore",
-  "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/coursestore",
-  "internal/adapters/postgres/dailyconsumestore",
-  "internal/adapters/postgres/dormstore",
-  "internal/adapters/postgres/elementstore",
-  "internal/adapters/postgres/godstrialstore",
-  "internal/adapters/postgres/guildprojection",
-  "internal/adapters/postgres/i4store",
-  "internal/adapters/postgres/i5store",
-  "internal/adapters/postgres/inscriptionstore",
-  "internal/adapters/postgres/kernelstore",
-  "internal/adapters/postgres/librarystore",
-  "internal/adapters/postgres/marchstore",
-  "internal/adapters/postgres/petcampaignstore",
-  "internal/adapters/postgres/spiritstore",
-  "internal/adapters/postgres/summonstore",
-  "internal/adapters/postgres/worldbossstore"
- ],
+ "stores": [],
  "tables": {
   "owned": [
    "account_provider_bindings",
@@ -269,90 +234,13 @@
    "account_session_server_observations",
    "account_sessions",
    "accounts",
-   "campaign_nodes",
-   "campaign_players",
-   "conquer_school_players",
-   "conquer_school_report_views",
-   "conquer_school_reports",
-   "daily_consumption_players",
    "gameplay_context_credentials",
    "gameplay_contexts",
-   "godstrial_players",
    "logical_servers",
-   "march_players",
-   "petcampaign_players",
-   "player_book_admissions",
-   "player_book_roots",
-   "player_conquer_facts",
-   "player_course_admissions",
-   "player_course_heroes",
-   "player_course_roots",
-   "player_element_admissions",
-   "player_element_heroes",
-   "player_element_roots",
-   "player_inscription_admissions",
-   "player_inscription_heroes",
-   "player_inscription_imports",
-   "player_inscription_roots",
-   "player_library_admissions",
-   "player_library_heroes",
-   "player_library_roots",
-   "player_spirit_admissions",
-   "player_spirit_heroes",
-   "player_spirit_roots",
-   "players",
-   "summon_players",
-   "summon_tuning",
-   "worldboss_attempts",
-   "worldboss_occurrences",
-   "worldboss_player_totals",
-   "worldboss_players"
+   "players"
   ],
-  "read": [
-   "account_provider_bindings",
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "accounts",
-   "campaign_nodes",
-   "campaign_players",
-   "conquer_school_players",
-   "conquer_school_report_views",
-   "conquer_school_reports",
-   "daily_consumption_players",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "godstrial_players",
-   "logical_servers",
-   "march_players",
-   "petcampaign_players",
-   "player_book_admissions",
-   "player_book_roots",
-   "player_conquer_facts",
-   "player_course_admissions",
-   "player_course_heroes",
-   "player_course_roots",
-   "player_element_admissions",
-   "player_element_heroes",
-   "player_element_roots",
-   "player_inscription_admissions",
-   "player_inscription_heroes",
-   "player_inscription_imports",
-   "player_inscription_roots",
-   "player_library_admissions",
-   "player_library_heroes",
-   "player_library_roots",
-   "player_spirit_admissions",
-   "player_spirit_heroes",
-   "player_spirit_roots",
-   "players",
-   "summon_players",
-   "summon_tuning",
-   "worldboss_attempts",
-   "worldboss_occurrences",
-   "worldboss_player_totals",
-   "worldboss_players"
-  ]
+  "read": [],
+  "written": []
  },
  "tests": {
   "integration": [

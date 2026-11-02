@@ -4,6 +4,8 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -426,18 +428,21 @@ func (w *world) callPackage(call *ast.CallExpr, sc *scope, fc *fileContext, pkg 
 }
 
 type registration struct {
-	MID              int      `json:"mid"`
-	DispatcherType   string   `json:"dispatcher_type"`
-	DispatcherFile   string   `json:"dispatcher_file"`
-	RegistrationFile string   `json:"registration_file"`
-	RegistrationLine int      `json:"registration_line"`
-	WiringFile       string   `json:"wiring_file"`
-	ConstructionFile string   `json:"construction_file"`
-	Owner            string   `json:"owner"`
-	Reason           string   `json:"reason,omitempty"`
-	Fallback         bool     `json:"fallback,omitempty"`
-	Wrappers         []string `json:"wrappers"`
-	Stores           []string `json:"stores"`
+	MID               int      `json:"mid"`
+	DispatcherType    string   `json:"dispatcher_type"`
+	DispatcherPackage string   `json:"dispatcher_package"`
+	DispatcherFile    string   `json:"dispatcher_file"`
+	HandlerFile       string   `json:"handler_file"`
+	HandlerLine       int      `json:"handler_line"`
+	RegistrationFile  string   `json:"registration_file"`
+	RegistrationLine  int      `json:"registration_line"`
+	WiringFile        string   `json:"wiring_file"`
+	ConstructionFile  string   `json:"construction_file"`
+	Owner             string   `json:"owner"`
+	Reason            string   `json:"reason,omitempty"`
+	Fallback          bool     `json:"fallback,omitempty"`
+	Wrappers          []string `json:"wrappers"`
+	Stores            []string `json:"stores"`
 }
 
 type push struct {
@@ -720,6 +725,7 @@ func (v *walker) walkRegisterHelper(path, name string, call *ast.CallExpr, sc *s
 
 func (v *walker) emit(mid int, dispatcherExpr ast.Expr, sc *scope, fc *fileContext, pkg *packageInfo, registrationFile string, line int, wiringFile string) {
 	owner, dispatcherType, dispatcherFile, constructionFile, stores, reason := v.w.attribute(dispatcherExpr, sc, fc, pkg, registrationFile)
+	dispatcherPackage, handlerFile, handlerLine := v.w.handlerOf(dispatcherType, dispatcherFile)
 	wrappers := v.w.wrappersOf(dispatcherExpr, sc, fc, pkg, 0)
 	if wrappers == nil {
 		wrappers = []string{}
@@ -738,10 +744,30 @@ func (v *walker) emit(mid int, dispatcherExpr ast.Expr, sc *scope, fc *fileConte
 	}
 	sort.Strings(stores)
 	v.output.Registrations = append(v.output.Registrations, registration{
-		MID: mid, DispatcherType: dispatcherType, DispatcherFile: dispatcherFile,
+		MID: mid, DispatcherType: dispatcherType, DispatcherPackage: dispatcherPackage,
+		DispatcherFile: dispatcherFile, HandlerFile: handlerFile, HandlerLine: handlerLine,
 		RegistrationFile: registrationFile, RegistrationLine: line, WiringFile: wiringFile,
 		ConstructionFile: constructionFile, Owner: owner, Reason: reason, Fallback: fallback, Wrappers: wrappers, Stores: stores,
 	})
+}
+
+func (w *world) handlerOf(dispatcherType, dispatcherFile string) (string, string, int) {
+	if dispatcherType == "" || dispatcherFile == "" {
+		return "", "", 0
+	}
+	for _, pkg := range w.packages {
+		for _, fc := range pkg.files {
+			if fc.rel != dispatcherFile {
+				continue
+			}
+			def, ok := pkg.methods[dispatcherType+".Dispatch"]
+			if !ok {
+				return fc.pkgPath, "", 0
+			}
+			return fc.pkgPath, def.file.rel, w.fset.Position(def.node.Pos()).Line
+		}
+	}
+	return "", "", 0
 }
 
 func (w *world) attribute(dispatcherExpr ast.Expr, sc *scope, fc *fileContext, pkg *packageInfo, registrationFile string) (string, string, string, string, []string, string) {
@@ -1254,6 +1280,8 @@ func identList(expr ast.Expr) []string {
 }
 
 func main() {
+	traceArgument := flag.Int("trace", -1, "print the live call graph of a registered MID")
+	flag.Parse()
 	root, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -1264,7 +1292,6 @@ func main() {
 	walker := &walker{w: w, output: out}
 	walker.walkPackage(commandPkg)
 	out.Pushes = w.collectPushes()
-	out.Typed = collectTyped(root)
 	sort.Slice(out.Registrations, func(i, j int) bool {
 		if out.Registrations[i].MID != out.Registrations[j].MID {
 			return out.Registrations[i].MID < out.Registrations[j].MID
@@ -1283,6 +1310,21 @@ func main() {
 		}
 		return out.Pushes[i].Kind < out.Pushes[j].Kind
 	})
+	if *traceArgument >= 0 {
+		typedWorld := newTypedWorld(root)
+		if err := typedWorld.load(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		text, traceErr := traceMID(out, typedWorld, *traceArgument)
+		if traceErr != nil {
+			fmt.Fprintln(os.Stderr, traceErr)
+			os.Exit(1)
+		}
+		fmt.Print(text)
+		return
+	}
+	out.Typed = collectTyped(root)
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", " ")
 	if err := encoder.Encode(out); err != nil {

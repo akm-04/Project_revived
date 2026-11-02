@@ -8,6 +8,10 @@
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
   },
   {
@@ -25,6 +29,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
   },
   {
    "count": 1,
@@ -51,11 +59,11 @@
    "file": "docs/i9/I9_MISSIONS_V1.json"
   },
   {
-   "count": 2,
+   "count": 3,
    "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
   },
   {
-   "count": 2,
+   "count": 3,
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
@@ -81,6 +89,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
@@ -107,18 +119,34 @@
  "login": [],
  "mids": [
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/publication_dispatcher.go",
+    "line": 20
+   },
    "mid": 7,
    "name": "LOAD_ANNOUNCE"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/publication_dispatcher.go",
+    "line": 20
+   },
    "mid": 1537,
    "name": "GET_BOARD_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/publication_dispatcher.go",
+    "line": 20
+   },
    "mid": 8193,
    "name": "GET_PIC_NOTICE_INFO"
   },
   {
+   "handler": {
+    "file": "internal/adapters/stockruntime/publication_dispatcher.go",
+    "line": 20
+   },
    "mid": 8194,
    "name": "READ_PIC_NOTICE"
   }
@@ -126,8 +154,6 @@
  "name": "publication",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/dormstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/publicationstore"
@@ -139,9 +165,78 @@
    "publication_sets"
   ],
   "read": [
+   "account_session_credentials",
+   "account_session_server_observations",
+   "account_sessions",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "i5_resource_registry",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
    "publication_items",
    "publication_picture_reads",
-   "publication_sets"
+   "publication_sets",
+   "redeem_codes",
+   "redeem_redemptions"
+  ],
+  "written": [
+   "account_session_server_observations",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_cosmetic_entitlements",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_guild_activity_days",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_profiles",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "publication_items",
+   "publication_picture_reads",
+   "publication_sets",
+   "redeem_codes",
+   "redeem_redemptions"
   ]
  },
  "tests": {

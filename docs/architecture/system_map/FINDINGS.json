@@ -2531,6 +2531,16 @@
    ]
   },
   {
+   "table": "player_directory_profiles",
+   "systems": [
+    "commerceprivilege",
+    "conquerschool",
+    "directorysync",
+    "i5",
+    "playerdisplay"
+   ]
+  },
+  {
    "table": "player_economy_owners",
    "systems": [
     "characterhero",
@@ -2546,6 +2556,14 @@
     "course",
     "dormhouse",
     "i5"
+   ]
+  },
+  {
+   "table": "player_social_presence",
+   "systems": [
+    "frienddm",
+    "generaldm",
+    "socialpresence"
    ]
   }
  ],
