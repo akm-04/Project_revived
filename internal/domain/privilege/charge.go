@@ -3,6 +3,8 @@ package privilege
 import (
 	"errors"
 	"strconv"
+
+	"gxb.local/backend/v2/internal/domain/identity"
 )
 
 // I9_COMMERCE_CHARGE_V1: a tap is a PRIVATE_POLICY grant, no payment exists (D455).
@@ -41,10 +43,10 @@ type VipAward struct {
 }
 
 type ChargeCatalog struct {
-	Policy            string      `json:"policy"`
-	PrivilegeSkillMax int64       `json:"privilege_skill_max"`
+	Policy            string          `json:"policy"`
+	PrivilegeSkillMax int64           `json:"privilege_skill_max"`
 	Products          []ChargeProduct `json:"products"`
-	VipAwards         []VipAward  `json:"vip_awards"`
+	VipAwards         []VipAward      `json:"vip_awards"`
 }
 
 func (c ChargeCatalog) Validate() error {
@@ -159,6 +161,20 @@ type Cards struct {
 	MonthCardStart   int64 `json:"month_card_start"`
 	MonthCardEnd     int64 `json:"month_card_end"`
 	PrivilegeCardEnd int64 `json:"privilege_card_end"`
+}
+
+// Purchase is the stock 354 row; times are epoch seconds.
+type Purchase struct {
+	ChargeID    int64 `json:"charge_id"`
+	ChargeCount int64 `json:"charge_count"`
+	LastBuyTime int64 `json:"last_buy_time"`
+}
+
+// PlayerCharge is the bounded other-player read of C16.
+type PlayerCharge struct {
+	PlayerID identity.PlayerID `json:"player_id"`
+	Charge   int64             `json:"charge"`
+	VIPLevel int64             `json:"vip_level"`
 }
 
 // Extended applies D463: a held card adds days.

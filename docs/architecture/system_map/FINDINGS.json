@@ -588,16 +588,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 657,
-   "name": "GET_VIP_AWARD",
-   "files": [
-    "app/windows/VipRechargeWindow.lua"
-   ],
-   "family": "CHARGE_VIP_GIFTPUSH",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 804,
    "name": "BROCAST_SEND_KITES",
    "files": [
@@ -1667,7 +1657,7 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 577,
+  "count": 576,
   "mids": [
    31,
    36,
@@ -1697,7 +1687,6 @@
    275,
    277,
    302,
-   354,
    386,
    529,
    534,
@@ -2419,6 +2408,11 @@
    "mid": 20480,
    "name": "",
    "system": ""
+  },
+  {
+   "mid": 32000,
+   "name": "",
+   "system": "commerceprivilege"
   }
  ],
  "narrow_param_checks": [],

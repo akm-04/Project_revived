@@ -5217,7 +5217,9 @@
   ],
   "clientlog": [],
   "combat": [],
-  "commerceprivilege": [],
+  "commerceprivilege": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "conquerschool": [
    "cmd/gxb-api/top_floor_postgres.go"
   ],

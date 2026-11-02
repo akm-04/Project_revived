@@ -107,6 +107,78 @@ ON CONFLICT(player_id) DO UPDATE SET month_card_start=$2,month_card_end=$3,privi
 	return nil
 }
 
+// ReadPurchasesTx returns the player's charge history for stock MID 354.
+func (Store) ReadPurchasesTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]d.Purchase, error) {
+	out := []d.Purchase{}
+	if q == nil || !pid.Valid() {
+		return out, d.ErrUnavailable
+	}
+	var raw string
+	e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('charge_id',charge_id,'charge_count',charge_count,'last_buy_time',last_buy_time) ORDER BY charge_id),'[]'::jsonb)::text FROM commerce_charge_purchases WHERE player_id=$1`, int64(pid)).Scan(&raw)
+	if e != nil {
+		return out, e
+	}
+	if e = json.Unmarshal([]byte(raw), &out); e != nil {
+		return []d.Purchase{}, e
+	}
+	return out, nil
+}
+
+// ClaimVIPAwardTx inserts the claim marker; the primary key makes a second claim visible.
+func (Store) ClaimVIPAwardTx(c context.Context, t tx.Tx, pid identity.PlayerID, level int64, at time.Time) (bool, error) {
+	if t == nil || !pid.Valid() || level < 1 || level > 15 || at.IsZero() {
+		return false, d.ErrUnavailable
+	}
+	tag, e := t.Exec(c, `INSERT INTO commerce_vip_awards(player_id,level,claimed_at)VALUES($1,$2,$3) ON CONFLICT(player_id,level)DO NOTHING`, int64(pid), level, at.UTC())
+	if e != nil {
+		return false, e
+	}
+	return tag.RowsAffected() == 1, nil
+}
+
+// ReadVIPClaimedTx returns claimed VIP levels for the MID 1 vip_awards array.
+func (Store) ReadVIPClaimedTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]int64, error) {
+	out := []int64{}
+	if q == nil || !pid.Valid() {
+		return out, d.ErrUnavailable
+	}
+	var raw string
+	e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(level ORDER BY level),'[]'::jsonb)::text FROM commerce_vip_awards WHERE player_id=$1`, int64(pid)).Scan(&raw)
+	if e != nil {
+		return out, e
+	}
+	if e = json.Unmarshal([]byte(raw), &out); e != nil {
+		return []int64{}, e
+	}
+	return out, nil
+}
+
+const maxBoundedChargePlayers = 200
+
+// ReadBoundedChargesTx is C16: at most 200 other-player charge facts on one logical server, no lock.
+func (Store) ReadBoundedChargesTx(c context.Context, q tx.Queryer, server identity.LogicalServerID, players []identity.PlayerID) ([]d.PlayerCharge, error) {
+	out := []d.PlayerCharge{}
+	if q == nil || !server.Valid() || len(players) == 0 || len(players) > maxBoundedChargePlayers {
+		return out, d.ErrUnavailable
+	}
+	ids := make([]int64, 0, len(players))
+	for _, pid := range players {
+		if !pid.Valid() {
+			return out, d.ErrUnavailable
+		}
+		ids = append(ids, int64(pid))
+	}
+	var raw string
+	e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'charge',qualifying_charge,'vip_level',vip_level) ORDER BY player_id),'[]'::jsonb)::text FROM commerce_privilege_roots WHERE logical_server_id=$1 AND player_id=ANY($2)`, int64(server), ids).Scan(&raw)
+	if e != nil {
+		return out, e
+	}
+	if e = json.Unmarshal([]byte(raw), &out); e != nil {
+		return []d.PlayerCharge{}, e
+	}
+	return out, nil
+}
+
 // ChargeTuningTx reads the operator overlay; found=false keeps the source policy.
 func (Store) ChargeTuningTx(c context.Context, q tx.Queryer) (d.ChargeTuning, bool, error) {
 	var raw string

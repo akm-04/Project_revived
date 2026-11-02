@@ -307,6 +307,19 @@ func main() {
 		Fence: i5db, Players: i4store.PlayerRootLocker{}, Policy: appguildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}}
 	vending := appsummon.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Fresh: pool, Store: summonstore.Store{}, Content: contentDB, Fence: i5db,
 		Heroes: heroSvc, HeroWire: heroproj.StockHero, Grants: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+	charge := commerceprivilege.Charge{
+		Timed:       appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
+		Fresh:       pool,
+		Fence:       i5db,
+		Facts:       appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}},
+		Store:       commerceprivilegestore.Store{},
+		Content:     contentDB,
+		Grants:      i5svc,
+		Effects:     appi5.PrivilegeTransitionOwner{Store: i5db, Content: contentDB},
+		Directory:   i4store.DirectoryLevelProjection{},
+		Receipts:    kernelstore.Store{},
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+	}
 	bootstrap := i4store.BootstrapService{
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,
@@ -520,6 +533,9 @@ func main() {
 	mustRegister(2754, lobbyD)
 	for _, mid := range stockruntime.SummonMIDs {
 		mustRegister(mid, stockruntime.SummonDispatcher{Authority: authority, Service: vending})
+	}
+	for _, mid := range stockruntime.ChargeMIDs {
+		mustRegister(mid, stockruntime.ChargeDispatcher{Authority: authority, Service: charge})
 	}
 	for _, mid := range stockruntime.AchievementMIDs {
 		mustRegister(mid, stockruntime.AchievementDispatcher{Authority: authority, Service: achievements})

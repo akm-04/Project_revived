@@ -36,6 +36,8 @@ type ChargeStore interface {
 	LockCardsTx(context.Context, tx.Queryer, identity.PlayerID) (d.Cards, error)
 	SaveCardsTx(context.Context, tx.Tx, identity.PlayerID, d.Cards, time.Time) error
 	ChargeTuningTx(context.Context, tx.Queryer) (d.ChargeTuning, bool, error)
+	ReadPurchasesTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.Purchase, error)
+	ClaimVIPAwardTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (bool, error)
 }
 
 type ChargeContent interface {
