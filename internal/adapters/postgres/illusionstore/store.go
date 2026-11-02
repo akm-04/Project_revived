@@ -145,6 +145,17 @@ func (Store) FindAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.
 	return attempt, err == nil, err
 }
 
+// FindDayAttemptTx reads the player's latest attempt of one open day. A settled
+// board outlives the occurrence row's campaign, so the day is its only key.
+func (Store) FindDayAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, serverID, openDay int64) (d.Attempt, bool, error) {
+	var attempt d.Attempt
+	err := q.QueryRow(ctx, `SELECT attempt_id,player_id,logical_server_id,open_day,campaign_id,COALESCE(room_id,0),formation,frozen_at,resolved,damage FROM illusion_attempts WHERE player_id=$1 AND logical_server_id=$2 AND open_day=$3 ORDER BY resolved,attempt_sequence DESC LIMIT 1`, int64(playerID), serverID, openDay).Scan(&attempt.ID, &attempt.PlayerID, &attempt.LogicalServerID, &attempt.OpenDay, &attempt.CampaignID, &attempt.RoomID, &attempt.Formation, &attempt.FrozenAt, &attempt.Resolved, &attempt.Damage)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return d.Attempt{}, false, nil
+	}
+	return attempt, err == nil, err
+}
+
 // FindLatestAttemptTx returns the player's open attempt first, otherwise the
 // newest resolved one, so a late result can still credit its frozen occurrence.
 func (Store) FindLatestAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) (d.Attempt, bool, error) {

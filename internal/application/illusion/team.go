@@ -343,6 +343,8 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 		if request.PetID != 0 {
 			return d.TeamPick{}, fmt.Errorf("%w: mate pet", d.ErrRefused)
 		}
+	} else if request.PetID == 0 {
+		return d.TeamPick{}, fmt.Errorf("%w: master pet", d.ErrRefused)
 	}
 	if len(request.Heroes) != heroes || request.PetID < 0 {
 		return d.TeamPick{}, d.ErrInvalid

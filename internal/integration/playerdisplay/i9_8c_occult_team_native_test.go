@@ -137,6 +137,45 @@ func TestI9_8COccultTeamRoomPolicyNative(t *testing.T) {
 	}
 }
 
+// C4: a member who leaves a started co-op room is refused at 119 s and
+// admitted at 120 s; the mark and the seat removal commit together.
+func TestI9_8COccultReentryWaitNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, _ := occultOwner(t, p, server, 2)
+	b, _ := occultOwner(t, p, server, 2)
+	c, _ := occultOwner(t, p, server, 2)
+	s, clock := occultTestMode(t, p)
+	created, err := s.CreateTeam(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := occultRoomID(t, created)
+	for _, member := range []identity.ActorContext{b, c} {
+		if _, err = s.JoinRoom(ctx, member, roomID, op()); err != nil {
+			t.Fatal("join", err)
+		}
+	}
+	if _, err = s.StartChallenge(ctx, a, op()); err != nil {
+		t.Fatal("challenge", err)
+	}
+	leftAt := clock.at
+	if _, err = s.ExitRoom(ctx, b, roomID, op()); err != nil {
+		t.Fatal("member exit", err)
+	}
+	if state := occultRoomState(t, p, roomID); state.LeftAt[keyOf(int64(b.PlayerID))] != leftAt.Unix() {
+		t.Fatalf("left_at not recorded with the removal %#v", state.LeftAt)
+	}
+	clock.Set(leftAt.Add(d.ReentrySeconds*time.Second - time.Second))
+	if _, err = s.JoinRoom(ctx, b, roomID, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("rejoined at 119 s: %v", err)
+	}
+	clock.Set(leftAt.Add(d.ReentrySeconds * time.Second))
+	if _, err = s.JoinRoom(ctx, b, roomID, op()); err != nil {
+		t.Fatalf("rejoin at 120 s: %v", err)
+	}
+}
+
 func TestI9_8COccultTeamInviteQuitNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)

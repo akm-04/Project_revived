@@ -41,6 +41,7 @@ type Store interface {
 	ListOccurrencesTx(context.Context, tx.Queryer, int64) ([]d.Occurrence, error)
 	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
 	FindAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64, int64) (d.Attempt, bool, error)
+	FindDayAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (d.Attempt, bool, error)
 	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID) (d.Attempt, bool, error)
 	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
 	InsertReportTx(context.Context, tx.Tx, string, int64, int64, int64, string, time.Time) error

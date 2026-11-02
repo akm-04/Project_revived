@@ -21,8 +21,8 @@ type Team struct {
 	Members []TeamMember `json:"members"`
 }
 
-// Validate enforces C5: three seats, master one hero and optional pet, mates
-// two heroes and no pets, unique hero table ids, power at least force/30, and
+// Validate enforces C5: three seats, master one hero and a pet, mates two
+// heroes and no pets, unique hero table ids, power at least force/30, and
 // academy level 65 within five levels of the master.
 func (t Team) Validate() error {
 	if len(t.Members) != TeamSeats {
@@ -45,6 +45,8 @@ func (t Team) Validate() error {
 			if member.PetID != 0 {
 				return fmt.Errorf("%w: mate pet", ErrRefused)
 			}
+		} else if member.PetID == 0 {
+			return fmt.Errorf("%w: master pet", ErrRefused)
 		}
 		if len(member.Heroes) != heroes {
 			return fmt.Errorf("%w: seat %d hero count", ErrRefused, index)

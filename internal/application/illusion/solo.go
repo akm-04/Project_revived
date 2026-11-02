@@ -319,7 +319,16 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 	if err != nil || !found {
 		return out, err
 	}
-	attempt, found, err := s.Store.FindAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), occurrence.OpenDay, occurrence.CampaignID)
+	boardDay := occurrence.BoardDay(at)
+	attempt, found, err := s.Store.FindAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), boardDay, occurrence.CampaignID)
+	if err != nil {
+		return nil, err
+	}
+	// Advance moves the occurrence's open day and campaign past the frozen board,
+	// so an attempt of the day the board shows is found by its day alone.
+	if !found {
+		attempt, found, err = s.Store.FindDayAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), boardDay)
+	}
 	if err != nil || !found {
 		return out, err
 	}

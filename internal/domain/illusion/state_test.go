@@ -262,6 +262,7 @@ func TestTeamRules(t *testing.T) {
 		"master two heroes": func(team *Team) {
 			team.Members[0].Heroes = append(team.Members[0].Heroes, Hero{TableID: 9, Power: 100})
 		},
+		"master no pet":      func(team *Team) { team.Members[0].PetID = 0 },
 		"mate one hero":      func(team *Team) { team.Members[1].Heroes = team.Members[1].Heroes[:1] },
 		"mate pet":           func(team *Team) { team.Members[1].PetID = 8 },
 		"duplicate hero":     func(team *Team) { team.Members[2].Heroes[1].TableID = 2 },

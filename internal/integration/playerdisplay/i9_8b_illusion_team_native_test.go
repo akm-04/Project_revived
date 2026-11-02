@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
@@ -22,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	di "gxb.local/backend/v2/internal/domain/illusion"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -85,6 +87,18 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 	a, aPicks := illusionTeamOwner(t, p, server, 10001002)
 	b, bPicks := illusionTeamOwner(t, p, server, 10001003, 10001004)
 	c, cPicks := illusionTeamOwner(t, p, server, 10001005, 10001006)
+	revision := installed(t, p)
+	contentStore := contentstore.Store{Queryer: p}
+	definition, err := contentStore.PetAcquisitionTx(ctx, p, revision, 10010001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grantGenuine(t, p, a, revision, "illusion master pet", []grant.Line{
+		{Kind: grant.StackItem, ItemID: definition.EggItemID, Amount: 1},
+		{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 10000}})
+	pets := genuinePetService(p)
+	ricky := must(pets.Summon(ctx, a, 10010001, op()))(t, "pet summon")
+	must(pets.CleanCD(ctx, a, ricky.PetID, op()))(t, "pet hatch")
 
 	created, err := s.CreateRoom(ctx, a, op())
 	if err != nil {
@@ -96,7 +110,10 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatal("join", err)
 		}
 	}
-	if _, err = s.SetPartner(ctx, a, il.PartnerRequest{Heroes: []int64{aPicks[0]}}, op()); err != nil {
+	if _, err = s.SetPartner(ctx, a, il.PartnerRequest{Heroes: []int64{aPicks[0]}}, op()); !errors.Is(err, di.ErrRefused) {
+		t.Fatalf("a petless master pick was accepted: %v", err)
+	}
+	if _, err = s.SetPartner(ctx, a, il.PartnerRequest{Heroes: []int64{aPicks[0]}, PetID: ricky.PetID}, op()); err != nil {
 		t.Fatal("master pick", err)
 	}
 	if _, err = s.SetPartner(ctx, b, il.PartnerRequest{Heroes: bPicks}, op()); err != nil {
@@ -362,5 +379,35 @@ func TestI9_8BIllusionMemberTeamNative(t *testing.T) {
 	}
 	if _, err = s.MemberTeam(ctx, member, other.PlayerID, op()); !errors.Is(err, di.ErrRefused) {
 		t.Fatalf("1364 crossed a logical server: %v", err)
+	}
+}
+
+// C11: settlement advances the occurrence and the rank board stays frozen on
+// the settled day, so 1364 must read the team of that day, not the new campaign.
+func TestI9_8BIllusionMemberTeamFrozenBoardNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := illusionOwner(t, p, server)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	if _, err := s.Start(ctx, a, il.StartRequest{Formation: []int64{partner}}, op()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Settle(ctx, a, il.ResultRequest{Star: 1, Damage: 1000, CostTime: 5, Formation: []int64{partner}}, op()); err != nil {
+		t.Fatal(err)
+	}
+	settledDay := modes.Day(clock.at)
+	clock.Set(modes.DayBegins(settledDay).Add(17 * time.Hour))
+	if _, err := (il.Reconciler{Service: s}).Reconcile(ctx, mustTimed(t, op(), clock.at), 100); err != nil {
+		t.Fatal(err)
+	}
+	clock.Set(modes.DayBegins(settledDay + di.RestDays).Add(6 * time.Hour))
+	body, err := s.MemberTeam(ctx, a, a.PlayerID, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	heroes, ok := body["heros"].([]map[string]any)
+	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != partner {
+		t.Fatalf("1364 lost the frozen team on the rest day %#v", body)
 	}
 }

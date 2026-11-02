@@ -294,18 +294,33 @@ func (s Mode) ExitRoom(c context.Context, a identity.ActorContext, roomID int64,
 	if err != nil {
 		return nil, err
 	}
+	left := false
 	_, err = s.updateRoom(c, a, op, true, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		if view.room.ID != roomID {
 			return nil, d.ErrRefused
 		}
 		view.state.Release(int64(a.PlayerID))
+		// A co-op room that stays open keeps the leaver's seat marked, so the
+		// member can rejoin after the 120 s wait; the removal and the mark commit
+		// together. An owner or last leave closes the room and is unrejoinable.
+		coOp := view.state.CampaignType == d.MultiCampaignType
+		closing := view.room.Owner == a.PlayerID || len(view.room.Members()) == 1
+		if coOp && !closing {
+			view.state.MarkLeft(int64(a.PlayerID), view.at.Unix())
+			if err := view.room.Leave(a.PlayerID, view.at); err != nil {
+				return nil, err
+			}
+			left = true
+		}
 		return nil, s.Store.FinishRunTx(c, sc.Tx, view.room.ID, view.at)
 	})
 	if err != nil && !errors.Is(err, sr.ErrNotInRoom) {
 		return nil, err
 	}
-	if _, err = s.Rooms.Leave(c, a, RoomFamilyRef(), op); err != nil {
-		return nil, err
+	if !left {
+		if _, err = s.Rooms.Leave(c, a, RoomFamilyRef(), op); err != nil {
+			return nil, err
+		}
 	}
 	return s.roomChange(c, a, op)
 }
