@@ -11,11 +11,18 @@ import (
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // PrivilegeCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var privilegeCatalogs sync.Map
+
 func (s Store) PrivilegeCatalogTx(ctx context.Context, q tx.Queryer, revision string) (privilege.Catalog, error) {
+	return memoCatalog(&privilegeCatalogs, revision, func() (privilege.Catalog, error) { return s.privilegeCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) privilegeCatalogTx(ctx context.Context, q tx.Queryer, revision string) (privilege.Catalog, error) {
 	var out privilege.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, privilege.ErrUnavailable

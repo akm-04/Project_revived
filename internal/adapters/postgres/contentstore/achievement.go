@@ -11,11 +11,18 @@ import (
 	achievement "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // AchievementCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var achievementCatalogs sync.Map
+
 func (s Store) AchievementCatalogTx(ctx context.Context, q tx.Queryer, revision string) (achievement.Catalog, error) {
+	return memoCatalog(&achievementCatalogs, revision, func() (achievement.Catalog, error) { return s.achievementCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) achievementCatalogTx(ctx context.Context, q tx.Queryer, revision string) (achievement.Catalog, error) {
 	var out achievement.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, achievement.ErrUnavailable
