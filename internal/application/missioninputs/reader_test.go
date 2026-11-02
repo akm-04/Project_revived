@@ -118,17 +118,17 @@ func TestReaderGatesMonthCardAndPrivilegeCardEntitlements(t *testing.T) {
 	}
 	scope := i5.MissionScope{PlayerID: 100001, DecisionAt: time.Unix(1000, 0)}
 	closed := Reader{Privileges: privilegeSnapshot{}}
-	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0); err != nil || got.GatePassed {
+	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0, nil); err != nil || got.GatePassed {
 		t.Fatalf("month card gate did not close: %+v %v", got, err)
 	}
-	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0); err != nil || got.GatePassed {
+	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0, nil); err != nil || got.GatePassed {
 		t.Fatalf("privilege gate did not close: %+v %v", got, err)
 	}
 	open := Reader{Privileges: privilegeSnapshot{snapshot: i5.PrivilegeSnapshot{MonthCardActive: true, MonthlyPrivilegeActive: true}}}
-	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0); err != nil || !got.GatePassed || got.Value != 1 {
+	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0, nil); err != nil || !got.GatePassed || got.Value != 1 {
 		t.Fatalf("month card gate: %+v %v", got, err)
 	}
-	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0); err != nil || !got.GatePassed || got.Value != 1 {
+	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0, nil); err != nil || !got.GatePassed || got.Value != 1 {
 		t.Fatalf("privilege gate: %+v %v", got, err)
 	}
 }
