@@ -18,9 +18,11 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
   (the dispatcher's `Dispatch` method); dispatcher files once per system.
 - `pushes` – realtime S2C registrations attributable to the system.
 - `tables.owned` – tables whose ownership `owner` names this system.
-- `tables.read` / `tables.written` – table names in SQL (`FROM`, and
-  `INSERT`/`UPDATE`/`DELETE`) found in the stores this system reaches through typed edges,
-  plus its own package. `content` is the `content_*` read subset.
+- `tables.read` / `tables.written` – tables in the SQL of this system's own package and of the
+  store methods it actually reaches, function by function. The walk stops at another application
+  system, whose tables are its own (see `calls`), and at an interface with more than three
+  implementers, so treat them as a lower bound where a `FANOUT` applies. `content` is the
+  `content_*` read subset.
 - `stores` – the postgres store packages those typed edges reach.
 - `calls` / `called_by` (in `EDGES.json`) – system → callable names per import edge. A leading
   `*` marks a call through an interface (`via_port`). Wide interfaces (more than
@@ -59,7 +61,9 @@ cross-system call names. `trace <mid>` is computed live and is the right tool fo
 request touch": from the registered dispatcher it follows the MID's branch, then the
 function-level call graph (each function once), printing `file:line`, SQL tables with read,
 write and `FOR UPDATE`/`FOR SHARE`, objective fact kinds recorded, and push calls. It prints
-`UNRESOLVED <expression>` for function values and dynamic routes it will not guess, and a
+`UNRESOLVED <expression>` for function values and dynamic routes it will not guess, `FANOUT` naming
+the implementers of an interface with more than three (a registry or per-mode port family; which one
+runs is decided at composition, so open the construction file), and a
 `BOUND` line when its node or depth limit stops the walk.
 
 ## Limits

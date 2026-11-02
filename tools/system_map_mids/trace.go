@@ -14,8 +14,12 @@ import (
 )
 
 const (
-	traceNodeLimit  = 2000
-	traceDepthLimit = 40
+	traceNodeLimit       = 2000
+	systemTableNodeLimit = 20000
+	traceDepthLimit      = 40
+	// An interface with more implementers than this is a registry, not one
+	// path; following all of them would bury the route the request really takes.
+	traceFanoutLimit = 3
 )
 
 type traceTarget struct {
@@ -53,10 +57,60 @@ type tracer struct {
 	lines     []string
 	nodes     int
 	truncated bool
+	limit     int
+	boundary  string
+	read      map[string]bool
+	written   map[string]bool
 }
 
 func newTracer(w *typedWorld, mid int) *tracer {
-	return &tracer{w: w, mid: mid, pkgs: map[string]*tracePackage{}, visited: map[string]bool{}}
+	return &tracer{
+		w: w, mid: mid, pkgs: map[string]*tracePackage{}, visited: map[string]bool{},
+		read: map[string]bool{}, written: map[string]bool{},
+	}
+}
+
+// outsideBoundary stops a system's table walk at another application system,
+// whose tables are its own; the system's calls name that dependency.
+func (t *tracer) outsideBoundary(path string) bool {
+	if t.boundary == "" || path == t.boundary || strings.HasPrefix(path, t.boundary+"/") {
+		return false
+	}
+	return strings.HasPrefix(path, modulePath+"internal/application/")
+}
+
+func fanoutLine(children []traceTarget) string {
+	names := []string{}
+	for _, child := range children {
+		names = append(names, pathBase(child.pkgPath)+"."+child.display())
+	}
+	sort.Strings(names)
+	return fmt.Sprintf("FANOUT %s has %d implementers, not followed: %s", children[0].name, len(children), strings.Join(names, ", "))
+}
+
+// systemTables returns what one system's own code and the store methods it
+// actually reaches read and write.
+func systemTables(w *typedWorld, path string) (typedTables, error) {
+	walker := newTracer(w, -1)
+	walker.boundary = path
+	walker.limit = systemTableNodeLimit
+	pkg, ok := walker.packageFor(path)
+	if !ok {
+		return typedTables{}, fmt.Errorf("%s: type information unavailable", path)
+	}
+	keys := []string{}
+	for key := range pkg.decls {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		parts := strings.Split(key, "\x00")
+		walker.walk(traceTarget{pkgPath: parts[0], receiver: parts[1], name: parts[2]}, 0, false)
+	}
+	if walker.truncated {
+		return typedTables{}, fmt.Errorf("%s: table walk hit a bound", path)
+	}
+	return typedTables{Read: sortedKeys(walker.read), Written: sortedKeys(walker.written)}, nil
 }
 
 func functionKey(fn *types.Func) string {
@@ -67,6 +121,13 @@ func functionKey(fn *types.Func) string {
 		}
 	}
 	return fn.Pkg().Path() + "\x00" + receiver + "\x00" + fn.Name()
+}
+
+func (t *tracer) nodeLimit() int {
+	if t.limit > 0 {
+		return t.limit
+	}
+	return traceNodeLimit
 }
 
 func (t *tracer) packageFor(path string) (*tracePackage, bool) {
@@ -259,10 +320,10 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 		t.line(depth, fmt.Sprintf("BOUND depth %d reached", traceDepthLimit))
 		return
 	}
-	if t.visited[target.key()] {
+	if t.visited[target.key()] || t.outsideBoundary(target.pkgPath) {
 		return
 	}
-	if t.nodes >= traceNodeLimit {
+	if t.nodes >= t.nodeLimit() {
 		t.truncated = true
 		return
 	}
@@ -342,6 +403,10 @@ func (t *tracer) inspectCalls(node ast.Node, pkg *tracePackage, depth int) {
 		children, unresolved := t.targets(call, pkg)
 		if unresolved != "" {
 			t.line(depth+1, "UNRESOLVED "+unresolved)
+		}
+		if len(children) > traceFanoutLimit {
+			t.line(depth+1, fanoutLine(children))
+			return true
 		}
 		for _, child := range children {
 			if strings.HasPrefix(child.name, "Push") {
@@ -432,6 +497,13 @@ func sortedKeys(values map[string]bool) []string {
 func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePackage, depth int) {
 	literals := []string{}
 	ast.Inspect(decl.Body, func(node ast.Node) bool {
+		if identifier, isIdentifier := node.(*ast.Ident); isIdentifier {
+			named, isConstant := pkg.info.Uses[identifier].(*types.Const)
+			if isConstant && named.Val().Kind() == constant.String {
+				literals = append(literals, constant.StringVal(named.Val()))
+			}
+			return true
+		}
 		literal, ok := node.(*ast.BasicLit)
 		if !ok || literal.Kind != token.STRING {
 			return true
@@ -443,6 +515,12 @@ func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePacka
 		return true
 	})
 	read, write, locks := traceSQLTables(strings.Join(literals, "\n"))
+	for _, table := range read {
+		t.read[table] = true
+	}
+	for _, table := range write {
+		t.written[table] = true
+	}
 	parts := []string{}
 	if len(read) > 0 {
 		parts = append(parts, "read "+strings.Join(read, ", "))

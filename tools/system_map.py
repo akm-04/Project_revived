@@ -354,40 +354,12 @@ def store_matches(path, stores):
 DIRECTORY_SQL_CACHE = {}
 
 
-def directory_sql(directory):
-    if directory in DIRECTORY_SQL_CACHE:
-        return DIRECTORY_SQL_CACHE[directory]
-    read = set()
-    written = set()
-    path_directory = ROOT / directory
-    if path_directory.is_dir():
-        for path in go_files(path_directory):
-            text = read_text(path)
-            for pattern in (INSERT_RE, UPDATE_RE, DELETE_RE):
-                for token in pattern.findall(text):
-                    written.add(normalize_table(token))
-            for token in FROM_RE.findall(text):
-                read.add(normalize_table(token))
-    DIRECTORY_SQL_CACHE[directory] = (read, written)
-    return read, written
-
-
 def reached_stores(system, edges):
     return sorted({
         edge["store"]
         for edge in edges
         if edge["from"] == system and edge.get("store")
     })
-
-
-def system_sql_tables(system, stores, table_names):
-    read = set()
-    written = set()
-    for directory in ["internal/application/" + system] + stores:
-        directory_read, directory_written = directory_sql(directory)
-        read.update(directory_read & table_names)
-        written.update(directory_written & table_names)
-    return sorted(read), sorted(written)
 
 
 def scan_sql(tables):
@@ -1007,7 +979,9 @@ def build_system_map():
             table for table, record in ownership_tables.items()
             if owner_system_name(record.get("owner", ""), systems) == system
         )
-        read_tables, written_tables = system_sql_tables(system, stores, set(ownership_tables))
+        system_tables = typed["tables"].get(system, {})
+        read_tables = sorted(set(system_tables.get("read") or []) & set(ownership_tables))
+        written_tables = sorted(set(system_tables.get("written") or []) & set(ownership_tables))
         touched = set(owned_tables) | set(read_tables) | set(written_tables)
 
         decorated = set()

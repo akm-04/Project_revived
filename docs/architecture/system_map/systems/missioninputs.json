@@ -4,11 +4,7 @@
  "contracts": [
   {
    "count": 1,
-   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
-  },
-  {
-   "count": 1,
-   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+   "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
    "count": 1,
@@ -17,10 +13,6 @@
   {
    "count": 1,
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
-  },
-  {
-   "count": 1,
-   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
@@ -48,63 +40,11 @@
   "read": [
    "campaign_nodes",
    "campaign_players",
-   "gameplay_contexts",
-   "i5_resource_registry",
-   "mail_attachments",
-   "mail_namespace_counters",
-   "mail_records",
-   "player_awakening_roots",
-   "player_cosmetic_entitlements",
    "player_crystal_spend_days",
-   "player_currency_balances",
-   "player_display_admissions",
-   "player_display_selections",
-   "player_economy_owners",
-   "player_function_eligibility",
-   "player_function_state_owners",
-   "player_function_unlocks",
-   "player_guide_return_state",
-   "player_item_stacks",
-   "player_mission_instances",
-   "player_mission_roots",
-   "player_profiles",
-   "player_progression",
-   "player_signin_roots",
-   "player_story_cursors",
-   "player_temporal_resources",
-   "redeem_codes",
-   "redeem_redemptions"
+   "player_heroes",
+   "player_progression"
   ],
-  "written": [
-   "campaign_nodes",
-   "campaign_players",
-   "mail_attachments",
-   "mail_namespace_counters",
-   "mail_records",
-   "player_awakening_roots",
-   "player_cosmetic_entitlements",
-   "player_crystal_spend_days",
-   "player_currency_balances",
-   "player_display_admissions",
-   "player_display_selections",
-   "player_economy_owners",
-   "player_function_eligibility",
-   "player_function_state_owners",
-   "player_function_unlocks",
-   "player_guide_return_state",
-   "player_guild_activity_days",
-   "player_item_stacks",
-   "player_mission_instances",
-   "player_mission_roots",
-   "player_profiles",
-   "player_progression",
-   "player_signin_roots",
-   "player_story_cursors",
-   "player_temporal_resources",
-   "players",
-   "redeem_codes",
-   "redeem_redemptions"
-  ]
+  "written": []
  },
  "tests": {
   "integration": [

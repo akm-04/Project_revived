@@ -36,8 +36,7 @@
   ],
   "written": [
    "player_social_presence",
-   "realtime_presence_leases",
-   "realtime_presence_owner_state"
+   "realtime_presence_leases"
   ]
  },
  "tests": {

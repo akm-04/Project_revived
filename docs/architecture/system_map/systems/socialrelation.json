@@ -209,13 +209,6 @@
    "social_request_epochs"
   ],
   "read": [
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
    "player_social_roots",
    "players",
    "social_blocks",
@@ -224,13 +217,7 @@
    "social_request_epochs"
   ],
   "written": [
-   "account_session_server_observations",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
    "player_social_roots",
-   "players",
    "social_blocks",
    "social_friend_requests",
    "social_friendships",

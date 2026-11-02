@@ -31,7 +31,9 @@
   "read": [
    "gxb_operation_receipts"
   ],
-  "written": []
+  "written": [
+   "gxb_operation_receipts"
+  ]
  },
  "tests": {
   "integration": [],

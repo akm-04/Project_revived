@@ -35,27 +35,11 @@
  "tables": {
   "owned": [],
   "read": [
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
    "logical_servers",
-   "player_directory_profiles",
    "players",
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
    "social_notices"
   ],
   "written": [
-   "account_session_server_observations",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
-   "players",
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
    "social_notices"
   ]
  },

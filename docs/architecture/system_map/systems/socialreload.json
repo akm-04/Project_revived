@@ -31,24 +31,10 @@
   "owned": [],
   "read": [
    "player_social_roots",
-   "social_blocks",
    "social_friend_requests",
-   "social_friendships",
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
-   "social_notices",
-   "social_request_epochs"
+   "social_notices"
   ],
-  "written": [
-   "player_social_roots",
-   "social_blocks",
-   "social_friend_requests",
-   "social_friendships",
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
-   "social_notices",
-   "social_request_epochs"
-  ]
+  "written": []
  },
  "tests": {
   "integration": [

@@ -85,34 +85,16 @@
  "tables": {
   "owned": [],
   "read": [
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
    "personal_dm_delivery",
    "personal_dm_intents",
    "personal_dm_payloads",
-   "player_directory_profiles",
-   "player_social_presence",
    "players",
-   "realtime_presence_leases",
    "realtime_presence_owner_state"
   ],
   "written": [
-   "account_session_server_observations",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
    "personal_dm_delivery",
    "personal_dm_intents",
-   "personal_dm_payloads",
-   "player_directory_profiles",
-   "player_social_presence",
-   "players",
-   "realtime_presence_leases",
-   "realtime_presence_owner_state"
+   "personal_dm_payloads"
   ]
  },
  "tests": {

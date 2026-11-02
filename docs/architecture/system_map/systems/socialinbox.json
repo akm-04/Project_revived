@@ -33,13 +33,9 @@
    "social_notices"
   ],
   "read": [
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
    "social_notices"
   ],
   "written": [
-   "social_guild_invite_invalidations",
-   "social_guild_invite_materializations",
    "social_notices"
   ]
  },

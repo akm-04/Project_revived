@@ -24,17 +24,9 @@
  "tables": {
   "owned": [],
   "read": [
-   "friend_dm_delivery",
-   "friend_dm_occurrences",
-   "friend_dm_projection_receipts",
-   "friend_dm_roots"
+   "friend_dm_projection_receipts"
   ],
-  "written": [
-   "friend_dm_delivery",
-   "friend_dm_occurrences",
-   "friend_dm_projection_receipts",
-   "friend_dm_roots"
-  ]
+  "written": []
  },
  "tests": {
   "integration": [

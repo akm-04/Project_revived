@@ -1,12 +1,7 @@
 {
  "background": [],
  "content": [],
- "contracts": [
-  {
-   "count": 1,
-   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
-  }
- ],
+ "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
@@ -35,29 +30,13 @@
    "request_journal"
   ],
   "read": [
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
    "client_log_capabilities",
-   "client_log_rows",
-   "client_log_uploads",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
-   "players",
-   "request_journal"
+   "gameplay_context_credentials"
   ],
   "written": [
-   "account_session_server_observations",
    "client_log_capabilities",
    "client_log_rows",
-   "client_log_uploads",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
-   "players"
+   "client_log_uploads"
   ]
  },
  "tests": {

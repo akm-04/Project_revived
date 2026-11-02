@@ -54,10 +54,16 @@ type typedLock struct {
 }
 
 type typedOutput struct {
-	Edges    []typedEdge `json:"edges"`
-	Facts    []typedFact `json:"facts"`
-	RowLocks []typedLock `json:"row_locks"`
-	Gaps     []string    `json:"gaps"`
+	Edges    []typedEdge            `json:"edges"`
+	Facts    []typedFact            `json:"facts"`
+	RowLocks []typedLock            `json:"row_locks"`
+	Gaps     []string               `json:"gaps"`
+	Tables   map[string]typedTables `json:"tables"`
+}
+
+type typedTables struct {
+	Read    []string `json:"read"`
+	Written []string `json:"written"`
 }
 
 type typedWorld struct {
@@ -157,7 +163,7 @@ func collectTyped(root string) typedOutput {
 	if err := world.load(); err != nil {
 		return typedOutput{Gaps: []string{err.Error()}}
 	}
-	output := typedOutput{Edges: []typedEdge{}, Facts: []typedFact{}, RowLocks: []typedLock{}, Gaps: []string{}}
+	output := typedOutput{Edges: []typedEdge{}, Facts: []typedFact{}, RowLocks: []typedLock{}, Gaps: []string{}, Tables: map[string]typedTables{}}
 	edgeSet := map[string]bool{}
 	for _, path := range sortedApplicationPaths(world.packages) {
 		listed := world.packages[path]
@@ -184,6 +190,11 @@ func collectTyped(root string) typedOutput {
 				return true
 			})
 		}
+		tables, tablesErr := systemTables(world, path)
+		if tablesErr != nil {
+			output.Gaps = append(output.Gaps, tablesErr.Error())
+		}
+		output.Tables[system] = tables
 		kinds := world.emittedFacts(system, files, info, &output.Gaps)
 		output.Facts = append(output.Facts, typedFact{System: system, Kinds: kinds})
 	}
