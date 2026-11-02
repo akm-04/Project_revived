@@ -25,11 +25,11 @@
    "appadventure.Mode"
   ],
   "LoginReconcilers": [
-   "appi5.AwakeningBootstrap",
+   "appi5.MailExpiryLoginReconciler",
    "appi5.SignInBootstrap",
    "appi5.MissionBootstrap",
-   "appi5.PetStarterLoginReconciler",
-   "appi5.MailExpiryLoginReconciler"
+   "appi5.AwakeningBootstrap",
+   "appi5.PetStarterLoginReconciler"
   ]
  },
  "lookups": {

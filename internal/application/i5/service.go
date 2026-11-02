@@ -214,7 +214,7 @@ func (s Service) SettleGrant(ctx context.Context, actor identity.ActorContext, p
 	if plan.PlayerID != actor.PlayerID {
 		return GrantResult{}, errors.New("grant actor/player mismatch")
 	}
-	return s.runGrant(ctx, actor, plan, op, true)
+	return s.runGrant(ctx, actor, plan, op, true, false)
 }
 
 // GrantTxOptions controls only orchestration behavior that is part of the
@@ -228,6 +228,9 @@ type GrantTxOptions struct {
 	// no mail overflow policy; a mode that re-pays display rewards uses it so a
 	// once-owned unique item cannot fail the whole grant.
 	SkipCappedStacks bool
+	// SystemSettlement marks a grant the owner did not request while present,
+	// so overflow mail waits for the owner's login to receive an expiry.
+	SystemSettlement bool
 }
 
 // SettleGrantTx settles one semantic Grant inside a caller-owned Wave-A
@@ -247,7 +250,7 @@ func (s Service) SettleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 	return s.settleGrantTx(ctx, t, actor, plan, op, opts)
 }
 
-func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context, fenceActor bool) (GrantResult, error) {
+func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context, fenceActor, systemSettlement bool) (GrantResult, error) {
 	if err := s.validate(); err != nil {
 		return GrantResult{}, err
 	}
@@ -269,7 +272,7 @@ func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan
 			return err
 		}
 		boundOp = prepared
-		got, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: true})
+		got, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: true, SystemSettlement: systemSettlement})
 		if err == nil {
 			out = got
 		}
@@ -471,7 +474,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 					over := line
 					over.Amount = cr.Overflow
 					var expires *time.Time
-					if plan.PlayerID == actor.PlayerID {
+					if !opts.SystemSettlement {
 						at := now.Add(mailTuning(ctx, t, s.Store).OverflowAfterLogin())
 						expires = &at
 					}
@@ -1611,7 +1614,7 @@ func (s Service) AdminGrant(ctx context.Context, admin AdminOperator, target ide
 		return GrantResult{}, errors.New("admin grant command incomplete or audit unavailable")
 	}
 	plan := grant.Plan{PlayerID: target, Source: grant.SourceIdentity{Domain: "admin", Operation: "grant", BusinessKey: admin.ID + ":" + commandKey, PolicyVersion: policyVersion}, Lines: append([]grant.Line(nil), lines...)}
-	got, err := s.runGrant(ctx, identity.ActorContext{PlayerID: target}, plan, op, false)
+	got, err := s.runGrant(ctx, identity.ActorContext{PlayerID: target}, plan, op, false, true)
 	outcome := "COMMITTED"
 	if err != nil {
 		outcome = "REJECTED"

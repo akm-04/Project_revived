@@ -3,7 +3,6 @@
 package playerdisplay_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/mail"
-	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -128,21 +127,29 @@ func TestPlaytestOverflowMailIsOpenableClaimableAndExpires(t *testing.T) {
 		t.Fatal("settlement mail not listed")
 	}
 
-	// A grant settled for a recipient by later system code writes NULL and the
-	// login reconciler stamps it. There is no present producer of that shape, so
-	// the fixture writes the row directly.
-	sourceKey := fmt.Sprintf("offline:%d", a.PlayerID)
-	nilExpiry := mail.Record{MailUUID: mustUUID(t), Recipient: a.PlayerID, Address: mail.Address{Namespace: mail.Normal, WireID: 901}, SourceKind: "GRANT_OVERFLOW", SourceKey: sourceKey, Title: "Items exceed capacity", Sender: "Academy", Body: "offline fixture", CreatedAt: time.Now().UTC(), Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: "i9-10-playtest-v1", StateVersion: 1, Attachments: []mail.Attachment{{Ordinal: 0, Line: grant.Line{Kind: grant.StackItem, ItemID: item, Amount: 1}}}}
-	tr, err = p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	// AdminGrant is the system settlement producer: its overflow mail waits
+	// without an expiry until the owner's next login stamps one.
+	admin := genuineGrants(p)
+	admin.Audit = audit.NopEmitter{}
+	if _, err = admin.AdminGrant(ctx, authority().Operator, a.PlayerID, uuid().String(), "i9-10-playtest-system", []grant.Line{{Kind: grant.StackItem, ItemID: item, Amount: 3}}, opPinned(revision)); err != nil {
+		t.Fatalf("system overflow grant: %v", err)
+	}
+	beforeLogin, _, _, err := values.ListMail(ctx, a.PlayerID, time.Now().UTC(), 20)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = values.InsertMailTx(ctx, tr, nilExpiry); err != nil {
-		tr.Rollback(ctx)
-		t.Fatal(err)
+	var systemMail *mail.Record
+	for index := range beforeLogin {
+		if beforeLogin[index].SourceKind == "GRANT_OVERFLOW" && beforeLogin[index].ExpiresAt == nil {
+			systemMail = &beforeLogin[index]
+			break
+		}
 	}
-	if err = tr.Commit(ctx); err != nil {
-		t.Fatal(err)
+	if systemMail == nil {
+		t.Fatal("system overflow mail not written")
+	}
+	if systemMail.ClaimedAt != nil {
+		t.Fatalf("system overflow mail claimed: %+v", systemMail)
 	}
 	loginAt := time.Now().UTC().Add(time.Minute)
 	tr, err = p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
@@ -162,7 +169,7 @@ func TestPlaytestOverflowMailIsOpenableClaimableAndExpires(t *testing.T) {
 	}
 	found := false
 	for _, record := range reconciled {
-		if record.SourceKey != sourceKey {
+		if record.MailUUID != systemMail.MailUUID {
 			continue
 		}
 		found = true
@@ -173,13 +180,4 @@ func TestPlaytestOverflowMailIsOpenableClaimableAndExpires(t *testing.T) {
 	if !found {
 		t.Fatal("reconciled mail not listed")
 	}
-}
-
-func mustUUID(t *testing.T) ids.UUID {
-	t.Helper()
-	id, err := ids.NewUUID()
-	if err != nil {
-		t.Fatal(err)
-	}
-	return id
 }

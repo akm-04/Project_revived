@@ -143,7 +143,7 @@ func TestStockRosterViewProjectsQualifiedAppearanceWire(t *testing.T) {
 		t.Fatal(err)
 	}
 	wire := body["heros"].(map[string]any)["7"].(map[string]any)
-	if wire["current_skin_id"] != int64(40001001) || wire["illusion_skin_id"] != int64(-1) {
+	if wire["current_skin_id"] != int64(40001001) || wire["illusion_skin_id"] != int64(0) {
 		t.Fatalf("selectors=%#v/%#v", wire["current_skin_id"], wire["illusion_skin_id"])
 	}
 	skins := wire["skin_ids"].(map[string]any)
@@ -152,5 +152,30 @@ func TestStockRosterViewProjectsQualifiedAppearanceWire(t *testing.T) {
 	}
 	if wire["unlocked_dynamic_card"] != "40001003|40001004" || wire["dynamic_card_state"] != "1|0" {
 		t.Fatalf("LIVE wire=%#v/%#v", wire["unlocked_dynamic_card"], wire["dynamic_card_state"])
+	}
+}
+
+func TestStockRosterViewMapsDefaultIllusionSkinByAwakening(t *testing.T) {
+	for _, testCase := range []struct {
+		name   string
+		table  int64
+		origin int64
+		want   int64
+	}{
+		{"normal", 11001, 11001, 0},
+		{"awakened", 11002, 11001, 1},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			h := fixture(character.NormalHero)
+			h.TableID, h.OriginTableID = testCase.table, testCase.origin
+			appearance := AppearanceView{OwnerStateVersion: h.StateVersion, CurrentSkinID: 0, IllusionSkinID: -1}
+			body, err := StockRosterView(0, []RosterHeroView{{Hero: h, FumoLevels: character.HeroFumoSlots{}, Appearance: appearance}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := body["heros"].(map[string]any)["7"].(map[string]any)["illusion_skin_id"]; got != testCase.want {
+				t.Fatalf("illusion_skin_id=%v want %v", got, testCase.want)
+			}
+		})
 	}
 }

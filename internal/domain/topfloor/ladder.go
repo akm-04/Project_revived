@@ -230,7 +230,8 @@ func OfferSeed(server identity.LogicalServerID, player identity.PlayerID, day, r
 }
 
 // OfferRanks lists candidate ranks per band in the private-policy probe order;
-// callers take the first eligible occupant of each band, then nearest others.
+// callers take the first eligible occupant of each band, then nearest better
+// ranks. Rank 1 has nobody above it, so its fallback keeps the lower ranks.
 func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
 	out := [][]int64{}
 	for i, band := range c.Bands(rank) {
@@ -244,10 +245,12 @@ func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.Pla
 	}
 	near := []int64{}
 	for step := int64(1); len(near) < 3 && step < 8; step++ {
-		for _, r := range []int64{rank - step, rank + step} {
-			if r >= 1 {
-				near = append(near, r)
-			}
+		r := rank - step
+		if rank == 1 {
+			r = rank + step
+		}
+		if r >= 1 {
+			near = append(near, r)
 		}
 	}
 	return append(out, near)
