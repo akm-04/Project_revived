@@ -118,6 +118,26 @@ func FuzzReportJudge(f *testing.F) {
 	})
 }
 
+func TestReportedHPBoundAdmitsStockBuffedHP(t *testing.T) {
+	policy := marchPolicy
+	policy.Version = 2
+	policy.HPPerFrozen = ReportedHPBound
+	if !policy.Valid() {
+		t.Fatal("production HP bound policy invalid")
+	}
+	// Frozen HP 100; the reported stock battle accepted 84585 for frozen 34318 (2.46x).
+	buffed := acceptedReport()
+	buffed.Allies[0].HP = 845.85
+	if verdict, reason := policy.Judge(reportSnapshot(), buffed); verdict != VerdictAccepted {
+		t.Fatal("legitimate buffed HP refused", verdict, reason)
+	}
+	above := acceptedReport()
+	above.Allies[0].HP = 100*ReportedHPBound + 0.5
+	if verdict, reason := policy.Judge(reportSnapshot(), above); verdict != VerdictRejected || reason != "HP_ABOVE_FROZEN_BOUND" {
+		t.Fatal("over-bound HP accepted", verdict, reason)
+	}
+}
+
 func TestMarchCompleteReportDoesNotAcceptAnEmptyEnemyWin(t *testing.T) {
 	p := marchPolicy
 	p.ID = "MARCH_REPORT_V1"
