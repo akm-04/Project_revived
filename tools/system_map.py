@@ -352,9 +352,6 @@ def store_matches(path, stores):
     return False
 
 
-DIRECTORY_SQL_CACHE = {}
-
-
 def reached_stores(system, edges):
     return sorted({
         edge["store"]
