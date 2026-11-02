@@ -4,7 +4,7 @@
 # their decompiled plaintext in origin_lua/ (identical to the client baseline decompile) with the stock origins rewritten;
 # everything else stays stock bytecode. The Xinyd SDK base URL and getGoogleDNS point at the SDK endpoint. No Lua probes: v2 logs
 # through the stock ErrorLogPoster and the per-session log_url that MID1 issues (client_log_uploads, request_journal), so the v1
-# probe patches are not needed. MODS=1 also overlays mods/. www.game168.tw (store link of the update dialog) and
+# probe patches are not needed. mods/ is always overlaid (login picture, main scene, home music), as v1 did. www.game168.tw (store link of the update dialog) and
 # girls.game168.com.tw (voice-actor web page) are browser links, not server calls, so they stay stock (v1 rewrote them too).
 # Needs Java 17+ and python3; no wine (the decompiled Lua is in origin_lua/).
 # usage: patch_game_v2.sh [engine origin] [sdk origin] [build dir]   (arguments override the configuration below)
@@ -51,11 +51,10 @@ python3 -I -B "$HERE/patch_google_dns.py" "$B/decoded/smali/com/xyd/platform/and
 # Stock res/xml/network_security_config.xml already permits cleartext, so http origins need no manifest change.
 grep -q 'cleartextTrafficPermitted="true"' "$B/decoded/res/xml/network_security_config.xml"
 
-if [ "${MODS:-0}" = 1 ]; then
-  (cd "$HERE/mods" && find . -type f) | while read -r relative; do
-    if [ -f "$B/decoded/$relative" ]; then cp "$HERE/mods/$relative" "$B/decoded/$relative"; fi
-  done
-fi
+(cd "$HERE/mods" && find . -type f) | while read -r relative; do
+  [ -f "$B/decoded/$relative" ] || { echo "mod has no stock target: $relative" >&2; exit 1; }
+  cp "$HERE/mods/$relative" "$B/decoded/$relative"
+done
 
 java -jar "$HERE/tools/apktool.jar" b "$B/decoded" -o "$B/unsigned.apk"
 java -jar "$HERE/tools/uber-apk-signer.jar" -a "$B/unsigned.apk" -o "$B/signed"
