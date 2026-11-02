@@ -26,6 +26,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
@@ -43,6 +44,7 @@ import (
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/guildcore"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
@@ -318,12 +320,21 @@ func run() error {
 	}
 	guildFightNotices := stockruntime.GuildFightNoticeHandler{Registered: guildcampaignstore.Store{}, Queryer: pool, Registry: connectionsRegistry,
 		Publisher: stockruntime.RealtimePublisher{Registry: guildFightEvents, Limits: limits.Default()}, MaxHandles: runtimePolicy.MaxConnections}
+	guildApplyNoticeEvents, err := stockruntime.NewGuildApplyNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	guildApplyNotices := stockruntime.GuildApplyNoticeHandler{Members: guildstore.Store{Queryer: pool},
+		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: guildApplyNoticeEvents, Limits: limits.Default()},
+			Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
+			OnDeliveryError: func(err error) { log.Printf("guild apply notice degraded: %v", err) }}}
 	roomInviteNotices := stockruntime.RoomInviteNoticeListHandler{Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()},
 		Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
 		OnDeliveryError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
 	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}, realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices},
 		realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms},
 		realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices},
+		realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices},
 		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices})
 	if err != nil {
 		log.Fatal(err)

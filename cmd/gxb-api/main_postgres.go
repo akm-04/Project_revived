@@ -295,6 +295,7 @@ func main() {
 		Store: guildDB, Fencer: i5db, PlayerRoots: i4store.PlayerRootLocker{},
 		Level: i5CrossOwner, Scalar: i5CrossOwner, LevelAndScalar: i5CrossOwner,
 		Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Policy: guildPolicy,
+		Notices: postgres.GuildApplyNoticeEmitter{},
 	}
 	guildView := guildviewread.Reader{Runner: runner}
 	teaPolicy, err := guildteapolicy.LoadBuiltin()
