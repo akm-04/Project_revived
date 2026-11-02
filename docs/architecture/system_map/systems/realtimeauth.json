@@ -1,7 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {},
  "content": [],
  "contracts": [
   {
@@ -20,12 +18,14 @@
   "internal/adapters/stockruntime/operation_log.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [

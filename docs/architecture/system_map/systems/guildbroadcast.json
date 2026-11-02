@@ -13,12 +13,6 @@
    ]
   }
  ],
- "called_by": {},
- "calls": {
-  "guildcore": [
-   "NewLockPlan"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -31,12 +25,18 @@
   "internal/adapters/stockruntime/guild_broadcast.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "guild_broadcast_recipients",
+   "guild_memberships",
+   "guilds"
+  ]
  },
  "login": [],
  "mids": [

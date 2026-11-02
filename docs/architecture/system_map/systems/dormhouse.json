@@ -1,24 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "achievement": [
-   "VillaCountTx"
-  ],
-  "publicstats": [
-   "DormHouseInputsTx"
-  ]
- },
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -33,6 +14,7 @@
   "internal/adapters/stockruntime/dorm_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -43,7 +25,12 @@
     "name": "I7C2C_DORM_INPUTS"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "player_dorm_roots",
+   "player_economy_owners",
+   "player_progression"
+  ]
  },
  "login": [
   "OverlayRosterTx"

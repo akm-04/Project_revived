@@ -1,20 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "DebitTemporalTx",
-   "SettleGrantTx",
-   "WorkplaceSPTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -33,6 +18,13 @@
   "internal/adapters/stockruntime/workplace_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "WORKPLACE_TEAM_SENT": {
+    "missions": [
+     115
+    ]
+   }
+  },
   "emits": [
    "WORKPLACE_TEAM_SENT"
   ],
@@ -45,7 +37,10 @@
     "name": "workplace"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "workplace_players"
+  ]
  },
  "login": [],
  "mids": [

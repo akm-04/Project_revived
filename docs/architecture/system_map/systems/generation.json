@@ -1,56 +1,18 @@
 {
  "background": [],
- "called_by": {
-  "bookskill": [
-   "Bind"
-  ],
-  "course": [
-   "Bind"
-  ],
-  "dormhouse": [
-   "Bind"
-  ],
-  "elementequipment": [
-   "Bind"
-  ],
-  "guildcampaign": [
-   "NewTimedOperation"
-  ],
-  "guildrental": [
-   "NewTimedOperation"
-  ],
-  "heroevolution": [
-   "Bind"
-  ],
-  "i5": [
-   "Bind"
-  ],
-  "inscription": [
-   "Bind"
-  ],
-  "librarylocal": [
-   "Bind"
-  ],
-  "profilefeedback": [
-   "Bind",
-   "NewTimedOperation"
-  ],
-  "spirit": [
-   "Bind"
-  ]
- },
- "calls": {},
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

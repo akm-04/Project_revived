@@ -1,28 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "achievement": [
-   "BookInputsTx"
-  ],
-  "missioninputs": [
-   "BookInputsTx"
-  ],
-  "publicstats": [
-   "HeroBookInputsTx"
-  ]
- },
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -37,6 +14,7 @@
   "internal/adapters/stockruntime/book_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -47,7 +25,8 @@
     "name": "I7C2D_BOOK_INPUTS"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [
   "BootstrapProjection",

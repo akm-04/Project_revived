@@ -1,18 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -25,6 +12,7 @@
   "internal/adapters/stockruntime/element_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -40,7 +28,8 @@
     "name": "elementequipment.RootLockRank",
     "rank": 560
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [
   "OverlayRosterTx"

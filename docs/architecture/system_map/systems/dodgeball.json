@@ -1,23 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestDerivedTx",
-   "StartTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "socialrelation": [
-   "PrepareFriendDMPrivacyTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -30,6 +12,7 @@
   "internal/adapters/stockruntime/dodgeball_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -40,7 +23,11 @@
     "name": "dodgeball"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "dodgeball_players",
+   "mail_namespace_counters"
+  ]
  },
  "login": [],
  "mids": [

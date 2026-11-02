@@ -1,233 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "achievement": [
-   "SettleGrantTx"
-  ],
-  "adventure": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "arena": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "awakeningbattle": [
-   "CompleteAwakeningBloodTx",
-   "FreezeAwakeningBloodTx"
-  ],
-  "bookskill": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx",
-   "SettleGrantTx"
-  ],
-  "campaign": [
-   "CompleteAwakeningPetTx",
-   "DebitMaterialCostTx",
-   "DebitTemporalTx",
-   "FreezeAwakeningCampaignTx",
-   "FreezeAwakeningPetTx",
-   "MaxHeroColorTx",
-   "OpenStageFunctionsTx",
-   "SettleAwakeningCampaignTx",
-   "SettleGrantTx",
-   "TemporalBalanceTx"
-  ],
-  "championsleague": [
-   "DeliverLeagueTitleNoticeTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "characterhero": [
-   "ApplyHeroEquipmentResourceDebitTx",
-   "ApplyHeroPromotionResourcesTx",
-   "ApplyStrictRestorationTx",
-   "CommitAwakeningEquipmentTx",
-   "DebitHeroEvolutionTx",
-   "DebitHeroExpItemsTx",
-   "DebitMaterialCostTx",
-   "MaxHeroColorTx",
-   "OpenCharacterFunctionsTx",
-   "PlanPromotionRestoration",
-   "PlayerLevelTx",
-   "PrepareAwakeningEquipmentTx",
-   "PrepareCharacterFunctionsTx",
-   "PrepareHeroEquipmentResourcesTx",
-   "PrepareHeroPromotionResourcesTx",
-   "PrepareStrictRestorationTx",
-   "StackQuantity"
-  ],
-  "characterpet": [
-   "ApplyEquipmentResourceDebitTx",
-   "ApplyPetExpDebitTx",
-   "ApplyPromotionResourcesTx",
-   "ApplyStrictRestorationTx",
-   "CommitAwakeningEquipmentTx",
-   "DebitMaterialCostTx",
-   "DebitPetAcquisitionAtTx",
-   "DebitScalarTx",
-   "PlanPromotionRestoration",
-   "PrepareAwakeningEquipmentTx",
-   "PrepareEquipmentResourcesTx",
-   "PreparePetExpDebitTx",
-   "PreparePromotionResourcesTx",
-   "PrepareStrictRestorationTx",
-   "StackQuantity"
-  ],
-  "characterpractice": [
-   "ApplyLevelAndStackDebitTx",
-   "AuthorizeLevelAndDebitScalarTx",
-   "PlayerLevelTx",
-   "PrepareLevelAndStackDebitTx"
-  ],
-  "commerceprivilege": [
-   "Apply",
-   "PreparePrivilegeTransitionTx"
-  ],
-  "conquerschool": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "course": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx"
-  ],
-  "dailyconsume": [
-   "DebitMaterialCostTx"
-  ],
-  "dodgeball": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "dormhouse": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx"
-  ],
-  "elementequipment": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx",
-   "SettleGrantTx"
-  ],
-  "godstrial": [
-   "DebitTemporalTx",
-   "SettleGrantTx",
-   "TemporalBalanceTx"
-  ],
-  "guildcampaign": [
-   "DeliverNoticeTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "guildcore": [
-   "AuthorizeLevelAndDebitScalarTx",
-   "DebitScalarTx",
-   "PlayerLevelTx"
-  ],
-  "guildrental": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "guildtea": [
-   "DebitMaterialCostTx",
-   "SettleGrantTx"
-  ],
-  "heroevolution": [
-   "ApplyMaterialDebitTx",
-   "PrepareMaterialDebitTx"
-  ],
-  "illusion": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ],
-  "inscription": [
-   "ApplyInscriptionValueTx",
-   "PrepareInscriptionValueTx"
-  ],
-  "librarylocal": [
-   "DebitMaterialCostTx"
-  ],
-  "march": [
-   "DebitMaterialCostTx",
-   "SettleGrantTx"
-  ],
-  "memoir": [
-   "ApplyMaterialExchangeTx",
-   "DebitMaterialCostTx",
-   "DebitTemporalTx",
-   "PrepareMaterialExchangeTx",
-   "SettleGrantTx",
-   "StockRepresentableBulkAwards"
-  ],
-  "occult": [
-   "CheckAwakeningOccultMaterialTx",
-   "DebitOccultTicketTx",
-   "FreezeAwakeningOccultMaterialTx",
-   "OccultTicketsTx",
-   "SettleGrantTx"
-  ],
-  "oneonone": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ],
-  "petcampaign": [
-   "CheckAwakeningPetMaterialTx",
-   "DebitMaterialCostTx",
-   "FreezeAwakeningPetMaterialTx",
-   "SettleGrantTx"
-  ],
-  "playerdisplay": [
-   "ApplyDisplayValueTx",
-   "PrepareDisplayValueTx"
-  ],
-  "publicprofile": [
-   "Apply"
-  ],
-  "socialgift": [
-   "GiftGrantIdentityExistsTx",
-   "ReadGrantEvidenceTx",
-   "SettleGrantTx",
-   "VerifyGiftBalanceTx"
-  ],
-  "spirit": [
-   "ApplyMaterialDebitTx",
-   "PrepareMaterialDebitTx"
-  ],
-  "summon": [
-   "DebitMaterialCostTx",
-   "SettleGrantTx"
-  ],
-  "topfloor": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ],
-  "workplace": [
-   "DebitTemporalTx",
-   "SettleGrantTx",
-   "WorkplaceSPTx"
-  ],
-  "worldboss": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ]
- },
- "calls": {
-  "generation": [
-   "Bind"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -292,11 +64,31 @@
   "internal/adapters/stockruntime/i5_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": [
+   "CAMPAIGN_NORMAL_WIN",
+   "CAMPAIGN_SUPER_WIN",
+   "CAMPAIGN_TRIAL_WIN",
+   "COURSE_QUIZ",
+   "EQUIPMENT_ENCHANTED",
    "GODS_TRIAL_CLEARED",
+   "GOLDEN_HAND_USED",
+   "GUILD_ACTIVITY",
+   "HERO_LENT",
+   "HERO_PROMOTED",
+   "HERO_QUALITY_COUNT",
+   "HERO_SKILL_UPGRADED",
+   "INFINITY_BOSS_DEFEATED",
+   "INTIMACY_IMPROVED",
    "MARCH_FINISHED",
+   "PET_FED",
+   "PVP_FIGHT",
    "SKY_CITY_BATTLE",
+   "SUMMON",
+   "TEA_PARTY_DONATED",
+   "VENDING_JUICE_PURCHASED",
+   "VOYAGE_FINISHED",
    "WORKPLACE_TEAM_SENT"
   ]
  },
@@ -352,6 +144,17 @@
     "name": "i5.grantLockRankTemporal",
     "rank": 721
    }
+  ],
+  "row_locks": [
+   "gameplay_contexts",
+   "mail_namespace_counters",
+   "player_awakening_roots",
+   "player_currency_balances",
+   "player_economy_owners",
+   "player_item_stacks",
+   "player_mission_roots",
+   "player_progression",
+   "player_signin_roots"
   ]
  },
  "login": [

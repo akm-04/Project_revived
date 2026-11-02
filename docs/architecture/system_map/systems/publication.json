@@ -1,7 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {},
  "content": [],
  "contracts": [
   {
@@ -90,6 +88,7 @@
   "internal/adapters/stockruntime/publication_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -100,7 +99,10 @@
     "name": "publication"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "publication_picture_reads"
+  ]
  },
  "login": [],
  "mids": [

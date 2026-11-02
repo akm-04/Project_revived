@@ -1,12 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "i5": [
-   "DebitMaterialCostTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -23,6 +16,16 @@
   "internal/adapters/stockruntime/guild_tea_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "TEA_PARTY_DONATED": {
+    "missions": [
+     123
+    ],
+    "stages": [
+     "I9-9"
+    ]
+   }
+  },
   "emits": [
    "TEA_PARTY_DONATED"
   ],
@@ -30,7 +33,10 @@
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "guild_tea_wishes"
+  ]
  },
  "login": [],
  "mids": [

@@ -1,28 +1,18 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "socialinbox": [
-   "RelationFamily",
-   "RoomInviteFamily",
-   "ValidateRelationLifecycle",
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialrelation": [
-   "CanonicalServer"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

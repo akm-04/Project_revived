@@ -1,19 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "ValidateReferenceGuardPlan"
-  ],
-  "generation": [
-   "NewTimedOperation"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -30,6 +16,16 @@
   "internal/adapters/stockruntime/guild_rental_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "HERO_LENT": {
+    "missions": [
+     116
+    ],
+    "stages": [
+     "I9-9"
+    ]
+   }
+  },
   "emits": [
    "HERO_LENT"
   ],
@@ -54,6 +50,11 @@
     "name": "spirit.RootLockRank",
     "rank": 580
    }
+  ],
+  "row_locks": [
+   "guild_memberships",
+   "guild_rental_offers",
+   "guild_rental_uses"
   ]
  },
  "login": [],

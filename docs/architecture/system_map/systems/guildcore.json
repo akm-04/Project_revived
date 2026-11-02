@@ -1,34 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "guildbroadcast": [
-   "NewLockPlan"
-  ],
-  "publicprofile": [
-   "ReadPublicGuildTx"
-  ]
- },
- "calls": {
-  "guildinvite": [
-   "ApplyIssueTx",
-   "ApplyMarkerTx",
-   "PrepareIssueTx",
-   "PrepareMarkerTx",
-   "ReadInviteSnapshotTx",
-   "ValidateCommitted",
-   "ValidateCurrentInviteTx",
-   "ValidateMembershipTx",
-   "ValidateRetirementTx"
-  ],
-  "i5": [
-   "AuthorizeLevelAndDebitScalarTx",
-   "DebitScalarTx",
-   "PlayerLevelTx"
-  ],
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -49,6 +20,7 @@
   "internal/adapters/stockruntime/guild_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -84,6 +56,14 @@
     "name": "guildcore.LockRankMembership",
     "rank": 320
    }
+  ],
+  "row_locks": [
+   "guild_applications",
+   "guild_invites",
+   "guild_memberships",
+   "guild_server_allocators",
+   "guilds",
+   "player_guild_activity_days"
   ]
  },
  "login": [],

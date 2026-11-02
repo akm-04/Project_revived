@@ -2,6 +2,7 @@
 """Generate the backend system map under docs/architecture/system_map."""
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -213,7 +214,27 @@ def package_purpose(name):
     return ""
 
 
+def source_hash():
+    digest = hashlib.sha256()
+    paths = sorted(ROOT.rglob("*.go")) + [ROOT / "go.mod", ROOT / "go.sum"]
+    for path in paths:
+        if not path.is_file() or "tmp/" in relative(path):
+            continue
+        digest.update(relative(path).encode())
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
 def run_helper():
+    key = source_hash()
+    cache = ROOT / "tmp" / "system_map" / "helper-cache.json"
+    if cache.is_file():
+        try:
+            cached = json.loads(read_text(cache))
+            if cached.get("key") == key:
+                return cached["output"]
+        except (ValueError, KeyError):
+            pass
     completed = subprocess.run(
         ["go", "run", HELPER],
         cwd=str(ROOT),
@@ -223,7 +244,10 @@ def run_helper():
     if completed.returncode != 0:
         sys.stderr.write(completed.stderr)
         raise SystemExit("tools/system_map_mids failed")
-    return json.loads(completed.stdout)
+    output = json.loads(completed.stdout)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps({"key": key, "output": output}), encoding="utf-8")
+    return output
 
 
 def refresh_client(source_directory):
@@ -483,6 +507,8 @@ def inverse_calls(systems, calls):
     inverse = {system: {} for system in systems}
     for source, edges in calls.items():
         for target, names in edges.items():
+            if target not in inverse:
+                continue
             inverse[target][source] = names
     return inverse
 
@@ -707,14 +733,14 @@ def soft_refusals(system_texts):
             code = int(match.group(1))
             if code in (0, 30005):
                 continue
-            rows.append({"file": relative(path), "line": text.count("\n", 0, match.start()) + 1, "code": code, "kind": "dispatcher"})
+            rows.append({"file": relative(path), "line": text.count("\n", 0, match.start()) + 1, "code": code, "kind": "code_1" if code == 1 else "stock_code"})
     for path in go_files(APPLICATION_DIRECTORY):
         text = read_text(path)
         for match in re.finditer(r'map\[string\]any\{\s*"error_code":\s*(?:int64\()?(\d+)', text):
             code = int(match.group(1))
             if code in (0, 30005):
                 continue
-            rows.append({"file": relative(path), "line": text.count("\n", 0, match.start()) + 1, "code": code, "kind": "application"})
+            rows.append({"file": relative(path), "line": text.count("\n", 0, match.start()) + 1, "code": code, "kind": "code_1" if code == 1 else "stock_code"})
     return sorted(rows, key=lambda row: (row["file"], row["line"], row["code"]))
 
 
@@ -759,8 +785,139 @@ def mode_surface():
     return {entry["mid"]: entry for entry in json.loads(read_text(path)).get("mids", [])}
 
 
+def system_read_facts(system, mission_map, adventure_events):
+    if system == "i5":
+        return {
+            row["fact"]
+            for key in ("tasks", "high_water", "entitlements")
+            for row in mission_map.get(key, [])
+        }
+    if system == "adventure":
+        return set(adventure_events)
+    return set()
+
+
 def content_tables(read_tables):
     return sorted(table for table in read_tables if table.startswith("content_"))
+
+
+
+MISSION_TASK_RE = re.compile(r"(\d+):\s*\('([A-Z0-9_]+)',\s*'([^']*)'\)")
+MISSION_HIGH_WATER_RE = re.compile(r"(\d+):\s*'([A-Z0-9_]+)'")
+MISSION_ENTITLEMENT_RE = re.compile(r"(\d+):\s*'([A-Z0-9_]+)'")
+
+
+def mission_mappings():
+    path = ROOT / "tools" / "missions_content.py"
+    if not path.is_file():
+        return {"tasks": [], "high_water": [], "entitlements": []}
+    text = read_text(path)
+    delta_block = re.search(r"DELTA\s*=\s*\{(.*?)\n\}", text, re.S)
+    high_block = re.search(r"HIGH_WATER\s*=\s*\{(.*?)\n\}", text, re.S)
+    entitlement_block = re.search(r"ENTITLEMENTS\s*=\s*\{(.*?)\n\}", text, re.S)
+    tasks = []
+    for task_id, fact, stage in MISSION_TASK_RE.findall(delta_block.group(1) if delta_block else ""):
+        tasks.append({"task": int(task_id), "fact": fact, "stage": stage or None})
+    high_water = []
+    for task_id, fact in MISSION_HIGH_WATER_RE.findall(high_block.group(1) if high_block else ""):
+        high_water.append({"task": int(task_id), "fact": fact})
+    update = re.search(r"HIGH_WATER\.update\(\{kind: '([A-Z0-9_]+)' for kind in \(\*range\((\d+),\s*(\d+)\),\s*([0-9,\s]+)\)\}\)", text)
+    if update:
+        fact, start, end, extras = update.group(1), int(update.group(2)), int(update.group(3)), update.group(4)
+        for task_id in list(range(start, end)) + [int(value) for value in re.findall(r"\d+", extras)]:
+            high_water.append({"task": task_id, "fact": fact})
+    entitlements = []
+    for task_id, fact in MISSION_ENTITLEMENT_RE.findall(entitlement_block.group(1) if entitlement_block else ""):
+        entitlements.append({"task": int(task_id), "fact": fact})
+    return {"tasks": tasks, "high_water": high_water, "entitlements": entitlements}
+
+
+def adventure_fact_events(constants):
+    path = ROOT / "internal" / "domain" / "adventure" / "catalog.go"
+    if not path.is_file():
+        return {}
+    text = read_text(path)
+    match = re.search(r"func EventForFactKind\(kind string\).*?switch kind \{(.*?)default:", text, re.S)
+    if not match:
+        return {}
+    events = {}
+    for name, event in re.findall(r"case\s+([A-Za-z0-9_]+):\s*return\s+Profile\((\w+)\)", match.group(1)):
+        if name in constants:
+            events[constants[name]] = event
+    return events
+
+
+def fact_consumers(missions, adventure_events):
+    consumers = {}
+    for row in missions["tasks"]:
+        consumers.setdefault(row["fact"], {"missions": [], "stages": []})
+        consumers[row["fact"]]["missions"].append(row["task"])
+        if row["stage"]:
+            consumers[row["fact"]]["stages"].append(row["stage"])
+    for row in missions["high_water"]:
+        consumers.setdefault(row["fact"], {"missions": [], "stages": []})
+        consumers[row["fact"]].setdefault("high_water", []).append(row["task"])
+    for row in missions["entitlements"]:
+        consumers.setdefault(row["fact"], {"missions": [], "stages": []})
+        consumers[row["fact"]].setdefault("entitlements", []).append(row["task"])
+    for fact, event in adventure_events.items():
+        consumers.setdefault(fact, {"missions": [], "stages": []})
+        consumers[fact]["adventure"] = event
+    for value in consumers.values():
+        for key in ("missions", "high_water", "entitlements"):
+            if key in value:
+                value[key] = sorted(set(value[key]))
+        value["stages"] = sorted(set(value["stages"]))
+        for key in [key for key, item in value.items() if item == []]:
+            del value[key]
+    return consumers
+
+
+def typed_calls(systems, edges, store_systems):
+    calls = {system: {} for system in systems}
+    for edge in edges:
+        source = edge["from"]
+        if source not in calls:
+            continue
+        target = edge["to"]
+        if target.startswith("store:"):
+            store = target[len("store:"):]
+            candidates = store_systems.get(store, set())
+            if len(candidates) == 1:
+                target = next(iter(candidates))
+            else:
+                target = store_owner_system(store, systems)
+            if not target:
+                continue
+        if target == source:
+            continue
+        if target.startswith("interface:"):
+            name = target[len("interface:"):]
+            name = name[len(APPLICATION_PREFIX):] if name.startswith(APPLICATION_PREFIX) else name
+            target = "interface:" + name
+        method = ("*" if edge["via_port"] else "") + edge["method"]
+        calls[source].setdefault(target, set()).add(method)
+    return {system: {target: sorted(methods) for target, methods in sorted(edges.items())} for system, edges in calls.items()}
+
+
+def store_callers(edges):
+    callers = {}
+    for edge in edges:
+        store = edge.get("store")
+        if store:
+            callers.setdefault((store, edge["method"]), set()).add(edge["from"])
+    return callers
+
+
+def row_locks_by_system(systems, locks, callers):
+    rows = {system: set() for system in systems}
+    for lock in locks:
+        methods = [lock.get("method", "")] + list(lock.get("callers") or [])
+        for method in methods:
+            for system in callers.get((lock["store"], method), set()):
+                if system in rows:
+                    rows[system].add(lock["table"])
+    return {system: sorted(tables) for system, tables in rows.items()}
 
 
 def build_system_map():
@@ -787,9 +944,26 @@ def build_system_map():
         system: directory_imports(APPLICATION_DIRECTORY / system) for system in systems
     }
     system_texts = {system: system_source(system) for system in systems}
-    call_edges = cross_system_calls(systems, system_imports, system_texts)
+    typed = helper["typed"]
+    store_systems = {}
+    for mid, entries in grouped.items():
+        for entry in entries:
+            if entry.get("owner") and owners[mid] == entry["owner"]:
+                for store in entry.get("stores") or []:
+                    if store.startswith(POSTGRES_PREFIX):
+                        store_systems.setdefault(store[len(MODULE_PATH):].rstrip("/"), set()).add(entry["owner"])
+    call_edges = typed_calls(systems, typed["edges"], store_systems)
     reverse_call_edges = inverse_calls(systems, call_edges)
     fact_kinds = fact_constants()
+    emitted_by_system = {row["system"]: row["kinds"] for row in typed.get("facts", [])}
+    emitted_all = set()
+    for kinds in emitted_by_system.values():
+        emitted_all.update(kinds)
+    mission_map = mission_mappings()
+    adventure_events = adventure_fact_events(fact_kinds)
+    fact_consumer_map = fact_consumers(mission_map, adventure_events)
+    lock_callers = store_callers(typed["edges"])
+    system_row_locks = row_locks_by_system(systems, typed.get("row_locks", []), lock_callers)
     login_sets = login_contributors(systems)
     background = background_rows(systems, system_imports, system_texts)
     lock_rank_constants = lock_constants()
@@ -897,16 +1071,20 @@ def build_system_map():
             "mids": mid_rows,
             "pushes": pushes,
             "tables": {"owned": owned_tables, "read": read_tables},
-            "calls": call_edges[system],
-            "called_by": reverse_call_edges[system],
+
             "decorated_by": sorted(decorated),
             "facts": {
-                "emits": sorted(emitted_facts(system_texts[system], fact_kinds)),
-                "reads": sorted(read_facts(system, system_texts[system], fact_kinds)),
+                "emits": sorted(emitted_by_system.get(system, [])),
+                "reads": sorted(system_read_facts(system, mission_map, adventure_events)),
+                "consumers": {
+                    kind: fact_consumer_map[kind]
+                    for kind in sorted(emitted_by_system.get(system, []))
+                    if kind in fact_consumer_map
+                },
             },
             "login": sorted(login_sets.get(system, [])),
             "background": background.get(system, []),
-            "locks": lock_rows(system, system_texts[system], stores, lock_rank_constants),
+            "locks": dict(lock_rows(system, system_texts[system], stores, lock_rank_constants), row_locks=system_row_locks.get(system, [])),
             "content": content_tables(read_tables),
             "dispatcher_files": sorted({entry["dispatcher_file"] for entry in system_entries if entry["dispatcher_file"]}),
             "stores": stores,
@@ -925,8 +1103,8 @@ def build_system_map():
             "purpose": package_purpose(system),
             "mids": len(record["mids"]),
             "tables": len(record["tables"]["owned"]),
-            "callers": len(record["called_by"]),
-            "callees": len(record["calls"]),
+            "callers": len(reverse_call_edges[system]),
+            "callees": len(call_edges[system]),
         })
         for row in record["mids"]:
             mid_to_system.setdefault(str(row["mid"]), system)
@@ -1026,12 +1204,30 @@ def build_system_map():
     findings = {
         "note": "These lists are leads for a reviewer, not verdicts. Confirm each entry against the source it cites.",
         "client_mids_not_live": client_not_live,
+        "facts_without_consumer": [
+            {"fact": kind, "systems": sorted(system for system, kinds in emitted_by_system.items() if kind in kinds)}
+            for kind in sorted(emitted_all) if kind not in fact_consumer_map
+        ],
+        "facts_without_emitter": [
+            dict({"fact": kind}, **fact_consumer_map[kind])
+            for kind in sorted(fact_consumer_map)
+            if kind not in emitted_all and ("missions" in fact_consumer_map[kind] or "adventure" in fact_consumer_map[kind])
+        ],
+        "gaps": sorted(gap.replace(str(ROOT) + "/", "") for gap in typed.get("gaps", [])),
         "inactive_mids": {"count": len(inactive_mids), "mids": inactive_mids},
         "live_mids_not_covered": live_not_covered,
         "live_mids_without_client_caller": live_without_caller,
         "narrow_param_checks": narrow_param_checks(),
         "soft_refusals": soft_refusals(system_texts),
         "systems_not_wired": unwired,
+        "tables_locked_by_many": [
+            {"table": table, "systems": sorted(systems_lock)}
+            for table, systems_lock in sorted({
+                table: {system for system, tables in system_row_locks.items() if table in tables}
+                for table in {table for tables in system_row_locks.values() for table in tables}
+            }.items())
+            if len(systems_lock) >= 3
+        ],
         "tables_with_several_writers": several_writers,
         "tables_without_owner_row": without_owner,
         "unattributed_mids": unattributed,
@@ -1039,7 +1235,27 @@ def build_system_map():
     if coverage_note:
         findings["live_mids_not_covered_note"] = coverage_note
 
-    files = {"INDEX.json": json_text(index), "FINDINGS.json": findings_text(findings)}
+    wired_by_system = {}
+    for system in systems:
+        companion_files = {entry.get("construction_file", "") for entry in system_entries_by_system[system]}
+        companion_files.discard("")
+        companions = set()
+        for companion_file in sorted(companion_files):
+            companion_path = ROOT / companion_file
+            if not companion_path.is_file():
+                continue
+            for import_path in imports_of(companion_path):
+                if import_path.startswith(APPLICATION_PREFIX):
+                    companions.add(import_path[len(APPLICATION_PREFIX):].rstrip("/"))
+        companions.discard(system)
+        known = set(call_edges[system]) | set(reverse_call_edges[system])
+        wired_by_system[system] = sorted(name for name in companions if name not in known)
+    edges_document = {
+        "calls": call_edges,
+        "called_by": reverse_call_edges,
+        "wired": wired_by_system,
+    }
+    files = {"INDEX.json": json_text(index), "FINDINGS.json": findings_text(findings), "EDGES.json": json_text(edges_document)}
     for system, record in system_records.items():
         files["systems/" + system + ".json"] = json_text(record)
     return files
@@ -1089,7 +1305,42 @@ def push_system(push, systems):
     return None
 
 
+def validate_generated(files):
+    def require(relative_path, label):
+        if not (ROOT / relative_path).exists():
+            raise SystemExit("generated path missing: %s (%s)" % (relative_path, label))
+
+    for name, content in files.items():
+        data = json.loads(content)
+        if name.startswith("systems/"):
+            system = name[len("systems/"):-len(".json")]
+            for relative_path in data.get("dispatcher_files", []):
+                require(relative_path, "dispatcher_files")
+            for row in data.get("contracts", []):
+                require(row["file"], "contracts")
+            for unit in data["tests"]["unit"]:
+                if not (APPLICATION_DIRECTORY / system / unit).is_file():
+                    raise SystemExit("generated path missing: %s/%s (unit)" % (system, unit))
+            for integration in data["tests"]["integration"]:
+                if not (ROOT / "internal" / "integration" / integration).is_dir():
+                    raise SystemExit("generated path missing: internal/integration/%s" % integration)
+            for scenario in data["tests"]["scenarios_naming"]:
+                if not (ROOT / "virtualclient" / "scenarios" / scenario).is_file():
+                    raise SystemExit("generated path missing: virtualclient/scenarios/%s" % scenario)
+        else:
+            stack = [(data, "")]
+            while stack:
+                value, key = stack.pop()
+                if isinstance(value, dict):
+                    stack.extend((item, item_key) for item_key, item in value.items())
+                elif isinstance(value, list):
+                    stack.extend((item, key) for item in value)
+                elif isinstance(value, str) and key in ("file", "migrations"):
+                    require(value, key)
+
+
 def write_output(files):
+    validate_generated(files)
     OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
     SYSTEMS_DIRECTORY.mkdir(parents=True, exist_ok=True)
     expected = set(files)
@@ -1105,6 +1356,7 @@ def write_output(files):
 
 
 def check_output(files):
+    validate_generated(files)
     differences = []
     for relative_path, content in sorted(files.items()):
         path = OUTPUT_DIRECTORY / relative_path
@@ -1137,7 +1389,12 @@ def show_entry(key):
         }, indent=1, ensure_ascii=False))
         return
     if key in {row["name"] for row in index["systems"]}:
-        print(json.dumps(json.loads(read_text(SYSTEMS_DIRECTORY / (key + ".json"))), indent=1, ensure_ascii=False))
+        record = json.loads(read_text(SYSTEMS_DIRECTORY / (key + ".json")))
+        edges = json.loads(read_text(OUTPUT_DIRECTORY / "EDGES.json"))
+        record["calls"] = edges["calls"].get(key, {})
+        record["called_by"] = edges["called_by"].get(key, {})
+        record["wired"] = edges["wired"].get(key, [])
+        print(json.dumps(record, indent=1, ensure_ascii=False))
         return
     if key.isdigit():
         system = index["lookups"]["mid_to_system"].get(key)
@@ -1170,6 +1427,10 @@ def show_entry(key):
         system_record = json.loads(read_text(SYSTEMS_DIRECTORY / (system + ".json")))
         output["owned"] = key in system_record["tables"]["owned"]
         output["read"] = key in system_record["tables"]["read"]
+    output["locked_by"] = sorted(
+        path.stem for path in SYSTEMS_DIRECTORY.glob("*.json")
+        if key in json.loads(read_text(path))["locks"].get("row_locks", [])
+    )
     print(json.dumps(output, indent=1, ensure_ascii=False))
 
 

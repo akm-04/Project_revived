@@ -1,37 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "characterpet": [
-   "CreditCampaignEXPTx",
-   "LockCampaignPetTx"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "BorrowedTx",
-   "LiveGenerationTx",
-   "StartTx"
-  ],
-  "dailyconsume": [
-   "BuyTrialTx",
-   "Pipe"
-  ],
-  "i5": [
-   "CompleteAwakeningPetTx",
-   "DebitMaterialCostTx",
-   "DebitTemporalTx",
-   "FreezeAwakeningCampaignTx",
-   "FreezeAwakeningPetTx",
-   "MaxHeroColorTx",
-   "OpenStageFunctionsTx",
-   "SettleAwakeningCampaignTx",
-   "SettleGrantTx",
-   "TemporalBalanceTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -96,8 +64,37 @@
   "internal/adapters/stockruntime/campaign_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "CAMPAIGN_NORMAL_WIN": {
+    "missions": [
+     102
+    ]
+   },
+   "CAMPAIGN_SUPER_WIN": {
+    "missions": [
+     103
+    ]
+   },
+   "CAMPAIGN_SWEEP": {
+    "adventure": "EventDefense"
+   },
+   "CAMPAIGN_TRIAL_WIN": {
+    "missions": [
+     105
+    ]
+   },
+   "INFINITY_BOSS_DEFEATED": {
+    "missions": [
+     119
+    ]
+   }
+  },
   "emits": [
+   "CAMPAIGN_CHALLENGE_WIN",
+   "CAMPAIGN_NORMAL_WIN",
+   "CAMPAIGN_SUPER_WIN",
    "CAMPAIGN_SWEEP",
+   "CAMPAIGN_TRIAL_WIN",
    "INFINITY_BOSS_DEFEATED"
   ],
   "reads": []
@@ -109,7 +106,10 @@
     "name": "campaign"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "campaign_players"
+  ]
  },
  "login": [
   "OverlayMID1"

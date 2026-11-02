@@ -1,25 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestReportTx",
-   "CloseTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "ApplyMaterialExchangeTx",
-   "DebitMaterialCostTx",
-   "DebitTemporalTx",
-   "PrepareMaterialExchangeTx",
-   "SettleGrantTx",
-   "StockRepresentableBulkAwards"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -36,6 +16,7 @@
   "internal/adapters/stockruntime/memoir_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -46,7 +27,10 @@
     "name": "memoir"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "memoir_players"
+  ]
  },
  "login": [],
  "mids": [

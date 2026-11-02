@@ -1,21 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "StartTx"
-  ],
-  "i5": [
-   "DebitTemporalTx",
-   "SettleGrantTx",
-   "TemporalBalanceTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -40,6 +24,13 @@
   "internal/adapters/stockruntime/godstrial_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "GODS_TRIAL_CLEARED": {
+    "missions": [
+     132
+    ]
+   }
+  },
   "emits": [
    "GODS_TRIAL_CLEARED"
   ],
@@ -52,7 +43,11 @@
     "name": "gods-trial"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "godstrial_players",
+   "mail_namespace_counters"
+  ]
  },
  "login": [
   "OverlayMID1"

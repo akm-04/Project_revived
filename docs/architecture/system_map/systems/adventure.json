@@ -6,28 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "sharedroom": [
-   "Join",
-   "SetReady",
-   "Update"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -48,6 +26,7 @@
   "internal/adapters/stockruntime/adventure_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": [
    "CAMPAIGN_SWEEP",
@@ -63,7 +42,8 @@
     "name": "adventure"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [
   "OverlayMID1"

@@ -1,12 +1,11 @@
 {
  "background": [],
- "called_by": {},
- "calls": {},
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -17,7 +16,8 @@
     "name": "IDENTITY_LIFECYCLE_WRITE"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

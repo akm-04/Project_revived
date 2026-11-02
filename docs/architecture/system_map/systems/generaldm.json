@@ -1,15 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ],
-  "socialrelation": [
-   "CanonicalServer",
-   "ReadGeneralBlockTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -22,6 +12,7 @@
   "internal/adapters/stockruntime/general_dm.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -32,6 +23,9 @@
     "name": "generaldm.LockRank",
     "rank": 381
    }
+  ],
+  "row_locks": [
+   "player_social_presence"
   ]
  },
  "login": [],

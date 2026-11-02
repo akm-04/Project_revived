@@ -1,37 +1,11 @@
 {
  "background": [],
- "called_by": {
-  "arena": [
-   "CanonicalPlayerIDs"
-  ],
-  "frienddm": [
-   "CanonicalPlayerIDs"
-  ],
-  "generaldm": [
-   "CanonicalPlayerIDs"
-  ],
-  "guildcore": [
-   "CanonicalPlayerIDs"
-  ],
-  "occult": [
-   "CanonicalPlayerIDs"
-  ],
-  "publicprofile": [
-   "CanonicalPlayerIDs"
-  ],
-  "sharedroom": [
-   "CanonicalPlayerIDs"
-  ],
-  "socialgift": [
-   "CanonicalPlayerIDs"
-  ]
- },
- "calls": {},
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -42,7 +16,8 @@
     "name": "playerroot.LockRank",
     "rank": 315
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

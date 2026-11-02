@@ -1,19 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "achievement": [
-   "HeroInscriptionInputsTx"
-  ]
- },
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "ApplyInscriptionValueTx",
-   "PrepareInscriptionValueTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -28,6 +14,7 @@
   "internal/adapters/stockruntime/inscription_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -43,6 +30,11 @@
     "name": "inscription.RootLockRank",
     "rank": 540
    }
+  ],
+  "row_locks": [
+   "gameplay_contexts",
+   "player_currency_balances",
+   "player_economy_owners"
   ]
  },
  "login": [

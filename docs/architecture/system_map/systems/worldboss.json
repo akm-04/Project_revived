@@ -6,20 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "StartTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -40,6 +26,7 @@
   "internal/adapters/stockruntime/world_boss_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -50,7 +37,12 @@
     "name": "world-boss"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "worldboss_occurrences",
+   "worldboss_player_totals",
+   "worldboss_players"
+  ]
  },
  "login": [
   "OverlayMID1"

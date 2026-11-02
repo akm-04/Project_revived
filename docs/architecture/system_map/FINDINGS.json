@@ -1581,6 +1581,91 @@
    "stage": null
   }
  ],
+ "facts_without_consumer": [
+  {
+   "fact": "CAMPAIGN_CHALLENGE_WIN",
+   "systems": [
+    "campaign"
+   ]
+  }
+ ],
+ "facts_without_emitter": [
+  {
+   "fact": "COURSE_QUIZ",
+   "missions": [
+    104
+   ],
+   "stages": [
+    "I9-10"
+   ]
+  },
+  {
+   "fact": "EQUIPMENT_ENCHANTED",
+   "missions": [
+    108
+   ],
+   "stages": [
+    "I9-11"
+   ]
+  },
+  {
+   "fact": "GOLDEN_HAND_USED",
+   "missions": [
+    101
+   ],
+   "stages": [
+    "I9-11"
+   ]
+  },
+  {
+   "fact": "HERO_PROMOTED",
+   "missions": [
+    2
+   ],
+   "stages": [
+    "I9-11"
+   ]
+  },
+  {
+   "fact": "HERO_SKILL_UPGRADED",
+   "missions": [
+    107
+   ],
+   "stages": [
+    "I9-11"
+   ]
+  },
+  {
+   "fact": "INTIMACY_IMPROVED",
+   "missions": [
+    124
+   ],
+   "stages": [
+    "I9-10"
+   ]
+  },
+  {
+   "fact": "PET_FED",
+   "missions": [
+    121
+   ],
+   "stages": [
+    "I9-11"
+   ]
+  },
+  {
+   "fact": "VOYAGE_FINISHED",
+   "missions": [
+    125
+   ],
+   "stages": [
+    "I9-10"
+   ]
+  }
+ ],
+ "gaps": [
+  "internal/application/occult/settlement.go:111: fact kind is not a constant"
+ ],
  "inactive_mids": {
   "count": 577,
   "mids": [
@@ -2367,58 +2452,103 @@
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
    "line": 328,
    "code": 30001,
-   "kind": "dispatcher"
+   "kind": "stock_code"
   },
   {
    "file": "internal/adapters/stockruntime/http_dispatchers.go",
    "line": 226,
    "code": 20018,
-   "kind": "dispatcher"
+   "kind": "stock_code"
   },
   {
    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
    "line": 179,
    "code": 30001,
-   "kind": "dispatcher"
+   "kind": "stock_code"
   },
   {
    "file": "internal/application/awakeningbattle/mode.go",
    "line": 160,
    "code": 1,
-   "kind": "application"
+   "kind": "code_1"
   },
   {
    "file": "internal/application/godstrial/auto.go",
    "line": 55,
    "code": 1,
-   "kind": "application"
+   "kind": "code_1"
   },
   {
    "file": "internal/application/march/settle.go",
    "line": 28,
    "code": 1,
-   "kind": "application"
+   "kind": "code_1"
   },
   {
    "file": "internal/application/march/settle.go",
    "line": 49,
    "code": 1,
-   "kind": "application"
+   "kind": "code_1"
   },
   {
    "file": "internal/application/march/settle.go",
    "line": 53,
    "code": 1,
-   "kind": "application"
+   "kind": "code_1"
   },
   {
    "file": "internal/application/petcampaign/commands.go",
    "line": 249,
    "code": 1,
-   "kind": "application"
+   "kind": "code_1"
   }
  ],
  "systems_not_wired": [],
+ "tables_locked_by_many": [
+  {
+   "table": "guild_memberships",
+   "systems": [
+    "guildbroadcast",
+    "guildcampaign",
+    "guildcore",
+    "guildrental"
+   ]
+  },
+  {
+   "table": "guilds",
+   "systems": [
+    "guildbroadcast",
+    "guildcampaign",
+    "guildcore"
+   ]
+  },
+  {
+   "table": "mail_namespace_counters",
+   "systems": [
+    "dodgeball",
+    "godstrial",
+    "i5"
+   ]
+  },
+  {
+   "table": "player_economy_owners",
+   "systems": [
+    "characterhero",
+    "course",
+    "dormhouse",
+    "i5",
+    "inscription"
+   ]
+  },
+  {
+   "table": "player_progression",
+   "systems": [
+    "course",
+    "dormhouse",
+    "i5"
+   ]
+  }
+ ],
  "tables_with_several_writers": [
   {
    "table": "gameplay_context_credentials",

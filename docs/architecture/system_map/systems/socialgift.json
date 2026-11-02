@@ -1,46 +1,11 @@
 {
  "background": [],
- "called_by": {
-  "socialprojection": [
-   "Day",
-   "GiftNoticeValidityTx",
-   "GiftSnapshotTx"
-  ]
- },
- "calls": {
-  "i5": [
-   "GiftGrantIdentityExistsTx",
-   "ReadGrantEvidenceTx",
-   "SettleGrantTx",
-   "VerifyGiftBalanceTx"
-  ],
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ],
-  "socialinbox": [
-   "ApplyConsumptionTx",
-   "ApplyTx",
-   "InviteFamily",
-   "MatchGift",
-   "NoticeLockKey",
-   "PreflightConsumption",
-   "PrepareConsumptionTx",
-   "RelationFamily",
-   "RoomInviteFamily",
-   "ValidateGiftLifecycle",
-   "ValidateRelationLifecycle",
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialrelation": [
-   "CanonicalServer",
-   "PrepareFriendDMPrivacyTx"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -55,7 +20,8 @@
     "name": "socialgift.LockRankTransfer",
     "rank": 372
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

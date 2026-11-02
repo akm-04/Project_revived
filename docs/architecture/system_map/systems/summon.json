@@ -1,12 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "i5": [
-   "DebitMaterialCostTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -55,7 +48,21 @@
   "internal/adapters/stockruntime/summon_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "SUMMON": {
+    "adventure": "EventSummon",
+    "missions": [
+     17
+    ]
+   },
+   "VENDING_JUICE_PURCHASED": {
+    "missions": [
+     109
+    ]
+   }
+  },
   "emits": [
+   "SUMMON",
    "VENDING_JUICE_PURCHASED"
   ],
   "reads": []
@@ -67,7 +74,10 @@
     "name": "summon"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "summon_players"
+  ]
  },
  "login": [
   "OverlayMID1"

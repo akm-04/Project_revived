@@ -6,24 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResolveDetached",
-   "StartManyTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -36,6 +18,17 @@
   "internal/adapters/stockruntime/oneonone_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
   "emits": [
    "PVP_FIGHT"
   ],
@@ -48,7 +41,12 @@
     "name": "one-on-one"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "one_on_one_competitions",
+   "one_on_one_matches",
+   "one_on_one_players"
+  ]
  },
  "login": [],
  "mids": [

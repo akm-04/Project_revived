@@ -1,15 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "ApplyMaterialDebitTx",
-   "PrepareMaterialDebitTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -22,6 +12,7 @@
   "internal/adapters/stockruntime/evolution_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -32,7 +23,8 @@
     "name": "I7C2I_EVOLUTION_INPUTS"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [
   "OverlayRosterTx"

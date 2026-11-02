@@ -1,37 +1,11 @@
 {
  "background": [],
- "called_by": {
-  "socialfriendbase": [
-   "ReadBasePreparedTx"
-  ]
- },
- "calls": {
-  "frienddm": [
-   "Eligible"
-  ],
-  "socialgift": [
-   "Day",
-   "GiftNoticeValidityTx",
-   "GiftSnapshotTx"
-  ],
-  "socialinbox": [
-   "InviteFamily",
-   "RelationFamily",
-   "RoomInviteFamily",
-   "RoomInviteTuple",
-   "ValidateRelationDescriptor",
-   "ValidateRelationLifecycle",
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialrelation": [
-   "CanonicalServer"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -42,7 +16,8 @@
     "name": "I7A4C_SOCIAL_PROJECTION"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

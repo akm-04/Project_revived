@@ -6,33 +6,12 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {
-  "adventure": [
-   "Join",
-   "SetReady",
-   "Update"
-  ],
-  "illusion": [
-   "Join",
-   "SetReady",
-   "Update"
-  ],
-  "occult": [
-   "Join",
-   "SetReady",
-   "Update"
-  ]
- },
- "calls": {
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -43,7 +22,10 @@
     "name": "shared-room"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "shared_rooms"
+  ]
  },
  "login": [],
  "mids": [],

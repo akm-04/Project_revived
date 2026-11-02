@@ -1,23 +1,21 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "i5": [
-   "Apply",
-   "PreparePrivilegeTransitionTx"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "commerce_privilege_roots",
+   "player_directory_profiles"
+  ]
  },
  "login": [
   "BootstrapProjection",

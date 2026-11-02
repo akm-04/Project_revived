@@ -455,6 +455,7 @@ type push struct {
 type output struct {
 	Registrations []registration `json:"registrations"`
 	Pushes        []push         `json:"pushes"`
+	Typed         typedOutput    `json:"typed"`
 }
 
 type walker struct {
@@ -1263,6 +1264,7 @@ func main() {
 	walker := &walker{w: w, output: out}
 	walker.walkPackage(commandPkg)
 	out.Pushes = w.collectPushes()
+	out.Typed = collectTyped(root)
 	sort.Slice(out.Registrations, func(i, j int) bool {
 		if out.Registrations[i].MID != out.Registrations[j].MID {
 			return out.Registrations[i].MID < out.Registrations[j].MID

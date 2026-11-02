@@ -1,19 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "StartTx"
-  ],
-  "i5": [
-   "CompleteAwakeningBloodTx",
-   "FreezeAwakeningBloodTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -38,6 +24,7 @@
   "internal/adapters/stockruntime/awakening_blood_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -60,7 +47,8 @@
     "name": "spirit.RootLockRank",
     "rank": 580
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [

@@ -1,7 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {},
  "content": [],
  "contracts": [
   {
@@ -198,6 +196,7 @@
   "internal/adapters/stockruntime/http_dispatchers.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -220,7 +219,8 @@
     "name": "spirit.RootLockRank",
     "rank": 580
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [

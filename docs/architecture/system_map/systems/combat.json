@@ -1,124 +1,11 @@
 {
  "background": [],
- "called_by": {
-  "adventure": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "arena": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResolveDetached",
-   "ResultTx",
-   "StartManyTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "awakeningbattle": [
-   "AttestSummaryTx",
-   "StartTx"
-  ],
-  "campaign": [
-   "AttestSummaryTx",
-   "BorrowedTx",
-   "LiveGenerationTx",
-   "StartTx"
-  ],
-  "championsleague": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResolveDetached",
-   "ResultTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "conquerschool": [
-   "AttestSummaryTx",
-   "CloseTx",
-   "StartTx"
-  ],
-  "dodgeball": [
-   "AttestDerivedTx",
-   "StartTx"
-  ],
-  "godstrial": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "StartTx"
-  ],
-  "guildcampaign": [
-   "AttestSummaryTx",
-   "StartTx"
-  ],
-  "illusion": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "SettleMemberTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "march": [
-   "AttestReportTx",
-   "StartTx"
-  ],
-  "memoir": [
-   "AttestReportTx",
-   "CloseTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "occult": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "SettleMemberTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "oneonone": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResolveDetached",
-   "StartManyTx",
-   "TerminalTx"
-  ],
-  "petcampaign": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "StartTx"
-  ],
-  "topfloor": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResultTx",
-   "StartEvidenceTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "workplace": [
-   "StartTx",
-   "TerminalTx"
-  ],
-  "worldboss": [
-   "AttestSummaryTx",
-   "StartTx"
-  ]
- },
- "calls": {
-  "librarylocal": [
-   "PlayerCollectionInputsTx"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -129,7 +16,11 @@
     "name": "combat-resolution"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "combat_attempts",
+   "combat_locator_roots"
+  ]
  },
  "login": [],
  "mids": [],

@@ -1,111 +1,11 @@
 {
  "background": [],
- "called_by": {
-  "achievement": [
-   "NewCoherentReadScope"
-  ],
-  "adventure": [
-   "NewCoherentReadScope"
-  ],
-  "arena": [
-   "NewCoherentReadScope"
-  ],
-  "awakeningbattle": [
-   "NewCoherentReadScope"
-  ],
-  "campaign": [
-   "NewCoherentReadScope"
-  ],
-  "championsleague": [
-   "NewCoherentReadScope"
-  ],
-  "characterhero": [
-   "BuildEffectiveHeroAppearance",
-   "BuildEffectiveHeroAppearanceTx",
-   "HeroPromotionRestorationSource",
-   "HeroReferenceLockKey",
-   "ModifyRestoration",
-   "ValidateExactRevisionID"
-  ],
-  "characterpet": [
-   "BuildEffectivePetAppearance",
-   "BuildEffectivePetAppearanceTx",
-   "ModifyRestoration",
-   "PetPromotionRestorationSource",
-   "ValidateExactRevisionID"
-  ],
-  "charactersavedpreset": [
-   "HeroReferenceLockKey",
-   "PetReferenceLockKey",
-   "SavedPresetRootLockKey",
-   "SavedPresetRootPlayerFromLockKey",
-   "ValidateReferenceGuardPlan"
-  ],
-  "conquerschool": [
-   "NewCoherentReadScope"
-  ],
-  "dodgeball": [
-   "NewCoherentReadScope"
-  ],
-  "godstrial": [
-   "NewCoherentReadScope"
-  ],
-  "guildcampaign": [
-   "NewCoherentReadScope"
-  ],
-  "guildrental": [
-   "ValidateReferenceGuardPlan"
-  ],
-  "illusion": [
-   "NewCoherentReadScope"
-  ],
-  "march": [
-   "NewCoherentReadScope"
-  ],
-  "memoir": [
-   "NewCoherentReadScope"
-  ],
-  "occult": [
-   "NewCoherentReadScope"
-  ],
-  "oneonone": [
-   "NewCoherentReadScope"
-  ],
-  "petcampaign": [
-   "NewCoherentReadScope"
-  ],
-  "publicprofile": [
-   "HeroReferenceFromLockKey",
-   "HeroReferenceLockKey",
-   "NewCoherentReadScope",
-   "PetReferenceFromLockKey",
-   "PetReferenceLockKey",
-   "ValidateExactRevisionID",
-   "ValidateReferenceGuardPlan"
-  ],
-  "publicstats": [
-   "OwnedHeroTx",
-   "OwnedPetTx"
-  ],
-  "ranking": [
-   "NewCoherentReadScope"
-  ],
-  "topfloor": [
-   "NewCoherentReadScope"
-  ],
-  "workplace": [
-   "NewCoherentReadScope"
-  ],
-  "worldboss": [
-   "NewCoherentReadScope"
-  ]
- },
- "calls": {},
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -124,7 +24,8 @@
     "name": "characterasset.SavedPresetRootLockRank",
     "rank": 440
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

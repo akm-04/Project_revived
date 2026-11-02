@@ -1,19 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestReportTx",
-   "StartTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -40,6 +26,13 @@
   "internal/adapters/stockruntime/march_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "MARCH_FINISHED": {
+    "missions": [
+     114
+    ]
+   }
+  },
   "emits": [
    "MARCH_FINISHED"
   ],
@@ -52,7 +45,10 @@
     "name": "march"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "march_players"
+  ]
  },
  "login": [
   "OverlayMID1"

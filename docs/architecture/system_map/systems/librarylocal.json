@@ -1,29 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "achievement": [
-   "HeroLibraryInputsTx",
-   "MarriedHeroCountTx"
-  ],
-  "combat": [
-   "PlayerCollectionInputsTx"
-  ],
-  "publicprofile": [
-   "MarriedHeroCountTx"
-  ],
-  "publicstats": [
-   "HeroLibraryInputsTx",
-   "PlayerCollectionInputsTx"
-  ]
- },
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "DebitMaterialCostTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -56,6 +32,7 @@
   "internal/adapters/stockruntime/library_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -66,7 +43,8 @@
     "name": "I7C2B_LIBRARY_INPUTS"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [
   "BootstrapProjection",

@@ -1,53 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "profilefeedback": [
-   "ReadBasicTx"
-  ],
-  "ranking": [
-   "ReadMetricsScopeTx"
-  ]
- },
- "calls": {
-  "achievement": [
-   "TrophyCountTx"
-  ],
-  "characterasset": [
-   "HeroReferenceFromLockKey",
-   "HeroReferenceLockKey",
-   "NewCoherentReadScope",
-   "PetReferenceFromLockKey",
-   "PetReferenceLockKey",
-   "ValidateExactRevisionID",
-   "ValidateReferenceGuardPlan"
-  ],
-  "characterhero": [
-   "BookmarkTx",
-   "HeroBaseObservationTx",
-   "RawAwakeningTx"
-  ],
-  "guildcore": [
-   "ReadPublicGuildTx"
-  ],
-  "i5": [
-   "Apply"
-  ],
-  "librarylocal": [
-   "MarriedHeroCountTx"
-  ],
-  "playerdisplay": [
-   "CosmeticCountTx",
-   "ReadEffectivePlayerDisplayTx",
-   "SkinCollectionTx"
-  ],
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ],
-  "socialrelation": [
-   "BlockLockKey",
-   "CanonicalServer"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -62,6 +14,7 @@
   "internal/adapters/stockruntime/public_profile_reads.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -72,7 +25,8 @@
     "name": "publicprofile.LockRankRoot",
     "rank": 391
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [

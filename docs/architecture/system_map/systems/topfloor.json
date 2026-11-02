@@ -6,25 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResultTx",
-   "StartEvidenceTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -46,6 +27,17 @@
   "internal/adapters/stockruntime/topfloor_task_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
   "emits": [
    "PVP_FIGHT"
   ],
@@ -58,7 +50,15 @@
     "name": "top-floor"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "top_floor_fights",
+   "top_floor_ladders",
+   "top_floor_players",
+   "top_floor_task_fights",
+   "top_floor_task_periods",
+   "top_floor_task_players"
+  ]
  },
  "login": [],
  "mids": [

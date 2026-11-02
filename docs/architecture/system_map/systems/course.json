@@ -1,24 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "achievement": [
-   "HeroCourseInputsTx"
-  ],
-  "publicstats": [
-   "HeroCourseInputsTx"
-  ]
- },
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "ApplyMaterialDebitTx",
-   "ApplyMaterialExchangeTx",
-   "PrepareMaterialDebitTx",
-   "PrepareMaterialExchangeTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -33,6 +14,7 @@
   "internal/adapters/stockruntime/course_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -48,6 +30,10 @@
     "name": "course.RootLockRank",
     "rank": 520
    }
+  ],
+  "row_locks": [
+   "player_economy_owners",
+   "player_progression"
   ]
  },
  "login": [

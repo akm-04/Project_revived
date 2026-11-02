@@ -1,51 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "arena": [
-   "CanonicalServer",
-   "PrepareFriendFightPrivacyTx"
-  ],
-  "dodgeball": [
-   "PrepareFriendDMPrivacyTx"
-  ],
-  "frienddm": [
-   "CanonicalServer",
-   "PrepareFriendDMPrivacyTx"
-  ],
-  "generaldm": [
-   "CanonicalServer",
-   "ReadGeneralBlockTx"
-  ],
-  "guildinvitetarget": [
-   "ApplyChangeTx"
-  ],
-  "profilefeedback": [
-   "CanonicalServer"
-  ],
-  "publicprofile": [
-   "BlockLockKey",
-   "CanonicalServer"
-  ],
-  "roominvite": [
-   "ApplyChangeTx"
-  ],
-  "socialdismiss": [
-   "CanonicalServer"
-  ],
-  "socialgift": [
-   "CanonicalServer",
-   "PrepareFriendDMPrivacyTx"
-  ],
-  "socialprojection": [
-   "CanonicalServer"
-  ]
- },
- "calls": {
-  "socialinbox": [
-   "ApplyRelationsTx",
-   "PrepareRelationsTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -78,6 +32,7 @@
   "internal/adapters/stockruntime/social_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -109,7 +64,8 @@
     "name": "socialrelation.LockRankSocialRoot",
     "rank": 360
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [

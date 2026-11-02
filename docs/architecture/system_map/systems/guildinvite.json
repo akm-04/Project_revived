@@ -8,32 +8,12 @@
    "workers": []
   }
  ],
- "called_by": {
-  "guildcore": [
-   "ApplyIssueTx",
-   "ApplyMarkerTx",
-   "PrepareIssueTx",
-   "PrepareMarkerTx",
-   "ReadInviteSnapshotTx",
-   "ValidateCommitted",
-   "ValidateCurrentInviteTx",
-   "ValidateMembershipTx",
-   "ValidateRetirementTx"
-  ],
-  "guildinvitetarget": [
-   "ReadInviteSnapshotTx",
-   "ReadIssueDeliveryEvidenceTx",
-   "ReadIssueEvidenceTx",
-   "ReadIssueTupleEvidenceTx",
-   "ReadMarkerEvidenceTx"
-  ]
- },
- "calls": {},
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -44,7 +24,14 @@
     "name": "I7A8B_GUILD_PROGRESS"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "guild_applications",
+   "guild_invite_projection_cursors",
+   "guild_invite_projection_deliveries",
+   "guild_invite_projection_markers",
+   "guild_invites"
+  ]
  },
  "login": [],
  "mids": [],

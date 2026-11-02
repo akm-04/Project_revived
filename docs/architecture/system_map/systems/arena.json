@@ -6,34 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResolveDetached",
-   "ResultTx",
-   "StartManyTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ],
-  "socialrelation": [
-   "CanonicalServer",
-   "PrepareFriendFightPrivacyTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -84,6 +56,17 @@
   "internal/adapters/stockruntime/tournament_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
   "emits": [
    "PVP_FIGHT"
   ],
@@ -96,7 +79,16 @@
     "name": "arena"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "arena_casual_sessions",
+   "arena_competitions",
+   "arena_friend_invitations",
+   "arena_matches",
+   "arena_players",
+   "arena_tournament_periods",
+   "arena_tournament_rooms"
+  ]
  },
  "login": [],
  "mids": [

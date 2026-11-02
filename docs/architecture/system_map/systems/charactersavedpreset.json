@@ -1,15 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "HeroReferenceLockKey",
-   "PetReferenceLockKey",
-   "SavedPresetRootLockKey",
-   "SavedPresetRootPlayerFromLockKey",
-   "ValidateReferenceGuardPlan"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -22,6 +12,7 @@
   "internal/adapters/stockruntime/saved_preset_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -36,7 +27,8 @@
     "name": "character.PetInstanceLockRank",
     "rank": 430
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [

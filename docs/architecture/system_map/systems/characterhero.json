@@ -1,44 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "publicprofile": [
-   "BookmarkTx",
-   "HeroBaseObservationTx",
-   "RawAwakeningTx"
-  ]
- },
- "calls": {
-  "characterasset": [
-   "BuildEffectiveHeroAppearance",
-   "BuildEffectiveHeroAppearanceTx",
-   "HeroPromotionRestorationSource",
-   "HeroReferenceLockKey",
-   "ModifyRestoration",
-   "ValidateExactRevisionID"
-  ],
-  "characterpractice": [
-   "ReduceAppliedPracticeContribution"
-  ],
-  "i5": [
-   "ApplyHeroEquipmentResourceDebitTx",
-   "ApplyHeroPromotionResourcesTx",
-   "ApplyStrictRestorationTx",
-   "CommitAwakeningEquipmentTx",
-   "DebitHeroEvolutionTx",
-   "DebitHeroExpItemsTx",
-   "DebitMaterialCostTx",
-   "MaxHeroColorTx",
-   "OpenCharacterFunctionsTx",
-   "PlanPromotionRestoration",
-   "PlayerLevelTx",
-   "PrepareAwakeningEquipmentTx",
-   "PrepareCharacterFunctionsTx",
-   "PrepareHeroEquipmentResourcesTx",
-   "PrepareHeroPromotionResourcesTx",
-   "PrepareStrictRestorationTx",
-   "StackQuantity"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -137,6 +98,7 @@
   "internal/adapters/stockruntime/hero_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -160,6 +122,10 @@
     "name": "character.HeroRootLockRank",
     "rank": 400
    }
+  ],
+  "row_locks": [
+   "player_economy_owners",
+   "player_item_stacks"
   ]
  },
  "login": [

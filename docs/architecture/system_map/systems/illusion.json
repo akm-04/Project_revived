@@ -6,28 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "SettleMemberTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "DebitMaterialCostTx",
-   "DeliverTx"
-  ],
-  "sharedroom": [
-   "Join",
-   "SetReady",
-   "Update"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -45,7 +23,14 @@
   "internal/adapters/stockruntime/illusion_room_dispatcher.go"
  ],
  "facts": {
-  "emits": [],
+  "consumers": {
+   "FANTASY": {
+    "adventure": "EventIllusion"
+   }
+  },
+  "emits": [
+   "FANTASY"
+  ],
   "reads": []
  },
  "locks": {
@@ -55,7 +40,12 @@
     "name": "illusion"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "illusion_occurrence_results",
+   "illusion_occurrences",
+   "illusion_players"
+  ]
  },
  "login": [],
  "mids": [

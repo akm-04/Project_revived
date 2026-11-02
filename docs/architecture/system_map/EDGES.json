@@ -1,0 +1,5167 @@
+{
+ "called_by": {
+  "achievement": {
+   "arena": [
+    "*ObserveArenaWinStreakTx"
+   ],
+   "championsleague": [
+    "*ObserveLeagueDaysTx"
+   ],
+   "oneonone": [
+    "*ObserveOneOnOneWeekTx",
+    "*ObserveOneOnOneWinStreakTx"
+   ],
+   "publicprofile": [
+    "*TrophyCountTx"
+   ],
+   "topfloor": [
+    "*ObserveTopFloorDayTx"
+   ]
+  },
+  "activitydirectory": {},
+  "adventure": {
+   "i5": [
+    "*ObserveTx"
+   ]
+  },
+  "arena": {
+   "awakeningbattle": [
+    "*ActiveRevision",
+    "*FenceActorTx"
+   ],
+   "bookskill": [
+    "*Error"
+   ],
+   "clientlog": [
+    "*Error",
+    "*SQLState"
+   ],
+   "combat": [
+    "*Error"
+   ],
+   "course": [
+    "*Error"
+   ],
+   "dormhouse": [
+    "*Error"
+   ],
+   "elementequipment": [
+    "*Error"
+   ],
+   "heroevolution": [
+    "*Error"
+   ],
+   "identitylifecycle": [
+    "*Error"
+   ],
+   "inscription": [
+    "*Error"
+   ],
+   "librarylocal": [
+    "*EnsurePlayerRootTx",
+    "*Error",
+    "*ListHeroRootPlayerIDsTx",
+    "*LockRootTx"
+   ],
+   "occult": [
+    "*ReadScoresTx"
+   ],
+   "publicprofile": [
+    "*PublicHistoryTx"
+   ],
+   "spirit": [
+    "*Error"
+   ]
+  },
+  "awakeningbattle": {},
+  "bookskill": {
+   "achievement": [
+    "*BookInputsTx"
+   ],
+   "missioninputs": [
+    "*BookInputsTx"
+   ],
+   "playerdisplay": [
+    "*TitleProgressTx"
+   ],
+   "publicstats": [
+    "*HeroBookInputsTx"
+   ]
+  },
+  "bootstrap": {},
+  "campaign": {
+   "missioninputs": [
+    "*ReadTx"
+   ],
+   "workplace": [
+    "*ReadTx"
+   ]
+  },
+  "championsleague": {},
+  "channelchat": {},
+  "characterasset": {
+   "achievement": [
+    "NewCoherentReadScope",
+    "Queryer",
+    "Validate"
+   ],
+   "adventure": [
+    "NewCoherentReadScope"
+   ],
+   "arena": [
+    "NewCoherentReadScope"
+   ],
+   "awakeningbattle": [
+    "NewCoherentReadScope"
+   ],
+   "campaign": [
+    "NewCoherentReadScope"
+   ],
+   "championsleague": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*ModifyRestoration",
+    "BuildEffectiveHeroAppearance",
+    "BuildEffectiveHeroAppearanceTx",
+    "HeroPromotionRestorationSource",
+    "HeroReferenceLockKey",
+    "Queryer",
+    "Validate",
+    "ValidateExactRevisionID"
+   ],
+   "characterpet": [
+    "*ModifyRestoration",
+    "BuildEffectivePetAppearance",
+    "BuildEffectivePetAppearanceTx",
+    "PetPromotionRestorationSource",
+    "Validate",
+    "ValidateExactRevisionID"
+   ],
+   "charactersavedpreset": [
+    "SavedPresetRootLockKey",
+    "SavedPresetRootPlayerFromLockKey",
+    "Validate",
+    "ValidateReferenceGuardPlan"
+   ],
+   "combat": [
+    "Queryer",
+    "Validate"
+   ],
+   "conquerschool": [
+    "NewCoherentReadScope",
+    "Queryer",
+    "Validate"
+   ],
+   "dodgeball": [
+    "NewCoherentReadScope"
+   ],
+   "elementequipment": [
+    "Queryer",
+    "Validate"
+   ],
+   "godstrial": [
+    "NewCoherentReadScope"
+   ],
+   "guildcampaign": [
+    "NewCoherentReadScope"
+   ],
+   "guildrental": [
+    "ValidateReferenceGuardPlan"
+   ],
+   "heroevolution": [
+    "Queryer",
+    "Validate"
+   ],
+   "illusion": [
+    "NewCoherentReadScope"
+   ],
+   "inscription": [
+    "Queryer",
+    "Validate"
+   ],
+   "march": [
+    "NewCoherentReadScope"
+   ],
+   "memoir": [
+    "NewCoherentReadScope"
+   ],
+   "occult": [
+    "NewCoherentReadScope"
+   ],
+   "oneonone": [
+    "NewCoherentReadScope"
+   ],
+   "petcampaign": [
+    "NewCoherentReadScope"
+   ],
+   "playerdisplay": [
+    "Queryer",
+    "Validate"
+   ],
+   "publicprofile": [
+    "*HeroTx",
+    "*PetTx",
+    "Available",
+    "Digest",
+    "HeroReferenceFromLockKey",
+    "HeroReferenceLockKey",
+    "NewCoherentReadScope",
+    "PetReferenceFromLockKey",
+    "PetReferenceLockKey",
+    "Queryer",
+    "Validate",
+    "ValidateExactRevisionID",
+    "ValidateReferenceGuardPlan"
+   ],
+   "publicstats": [
+    "*OwnedHeroTx",
+    "*OwnedPetTx",
+    "Queryer",
+    "Validate"
+   ],
+   "ranking": [
+    "NewCoherentReadScope"
+   ],
+   "spirit": [
+    "Queryer",
+    "Validate"
+   ],
+   "topfloor": [
+    "NewCoherentReadScope"
+   ],
+   "workplace": [
+    "NewCoherentReadScope"
+   ],
+   "worldboss": [
+    "NewCoherentReadScope"
+   ]
+  },
+  "characterhero": {
+   "adventure": [
+    "*AwardStoryPartnerTx"
+   ],
+   "awakeningbattle": [
+    "*LockAwakeningHeroesTx"
+   ],
+   "campaign": [
+    "*ApplyDormEXPLockedTx",
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx"
+   ],
+   "combat": [
+    "*RawAwakeningTx"
+   ],
+   "dormhouse": [
+    "*ApplyDormEXPLockedTx"
+   ],
+   "godstrial": [
+    "*LockStoryRosterTx"
+   ],
+   "i5": [
+    "*ApplyAwakeningHeroLockedTx",
+    "*AwakeningHeroesTx",
+    "*AwardStoryPartnerTx",
+    "*HasAwakeningHeroEquipmentTx",
+    "*LockAwakeningHeroesTx",
+    "*LockStoryRosterTx"
+   ],
+   "march": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx"
+   ],
+   "memoir": [
+    "*LockStoryRosterTx"
+   ],
+   "petcampaign": [
+    "*LockStoryRosterTx"
+   ],
+   "publicprofile": [
+    "*BookmarkTx",
+    "*RawAwakeningTx"
+   ],
+   "publicstats": [
+    "*RawAwakeningTx"
+   ],
+   "summon": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
+   ],
+   "workplace": [
+    "*LockStoryRosterTx"
+   ]
+  },
+  "characterpet": {
+   "campaign": [
+    "*CreditCampaignEXPTx",
+    "*LockCampaignPetTx"
+   ],
+   "godstrial": [
+    "*LockCampaignPetTx"
+   ],
+   "i5": [
+    "*AwakeningPetsTx",
+    "*FinishAwakeningPetLockedTx",
+    "*HasAwakeningPetEquipmentTx",
+    "*LockAwakeningPetsTx"
+   ],
+   "petcampaign": [
+    "*LockCampaignPetTx"
+   ]
+  },
+  "characterpractice": {
+   "characterhero": [
+    "ReduceAppliedPracticeContribution"
+   ],
+   "characterpet": [
+    "ReduceAppliedPracticeContribution"
+   ]
+  },
+  "charactersavedpreset": {},
+  "clientlog": {},
+  "combat": {
+   "adventure": [
+    "*AttestSummaryTx",
+    "*MonsterWaves",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "arena": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*ResolveDetached",
+    "*ResultTx",
+    "*SnapshotTx",
+    "*StartManyTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "awakeningbattle": [
+    "*AttestSummaryTx",
+    "*StartTx"
+   ],
+   "campaign": [
+    "*AttestSummaryTx",
+    "*BorrowedTx",
+    "*LiveGenerationTx",
+    "*StartTx"
+   ],
+   "championsleague": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*ResolveDetached",
+    "*ResultTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "conquerschool": [
+    "*AttestSummaryTx",
+    "*CloseTx",
+    "*StartTx"
+   ],
+   "dodgeball": [
+    "*AttestDerivedTx",
+    "*StartTx"
+   ],
+   "godstrial": [
+    "*AttestSummaryTx",
+    "*StartTx",
+    "MonsterWaves"
+   ],
+   "guildcampaign": [
+    "*AttestSummaryTx",
+    "*StartTx"
+   ],
+   "illusion": [
+    "*AttestSummaryTx",
+    "*MonsterWaves",
+    "*Resolve",
+    "*SettleMemberTx",
+    "*SnapshotTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "march": [
+    "*AttestReportTx",
+    "*StartTx"
+   ],
+   "memoir": [
+    "*AttestReportTx",
+    "*CloseTx",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "occult": [
+    "*AttestSummaryTx",
+    "*MonsterWaves",
+    "*Resolve",
+    "*SettleMemberTx",
+    "*SnapshotTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "oneonone": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*ResolveDetached",
+    "*StartManyTx",
+    "*TerminalTx"
+   ],
+   "petcampaign": [
+    "*AttestSummaryTx",
+    "*StartTx",
+    "MonsterWaves"
+   ],
+   "topfloor": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*Resolve",
+    "*ResultTx",
+    "*StartEvidenceTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "workplace": [
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "worldboss": [
+    "*AttestSummaryTx",
+    "*StartTx"
+   ]
+  },
+  "commerceprivilege": {
+   "campaign": [
+    "*SnapshotTx"
+   ],
+   "characterpractice": [
+    "*SnapshotTx"
+   ],
+   "conquerschool": [
+    "*SnapshotTx"
+   ],
+   "course": [
+    "*SnapshotTx"
+   ],
+   "guildrental": [
+    "*SnapshotTx"
+   ],
+   "i5": [
+    "*SnapshotTx"
+   ],
+   "illusion": [
+    "*SnapshotTx"
+   ],
+   "missioninputs": [
+    "*SnapshotTx"
+   ],
+   "oneonone": [
+    "*SnapshotTx"
+   ],
+   "petcampaign": [
+    "*SnapshotTx"
+   ],
+   "playerdisplay": [
+    "*ReadCosmeticPrivilegeTx"
+   ],
+   "summon": [
+    "*SnapshotTx"
+   ],
+   "topfloor": [
+    "*SnapshotTx"
+   ],
+   "workplace": [
+    "*SnapshotTx"
+   ],
+   "worldboss": [
+    "*SnapshotTx"
+   ]
+  },
+  "conquerschool": {
+   "achievement": [
+    "*FactsTx"
+   ],
+   "combat": [
+    "*FactsTx"
+   ],
+   "publicprofile": [
+    "*FactsTx"
+   ],
+   "publicstats": [
+    "*HeroInputsTx"
+   ]
+  },
+  "course": {
+   "achievement": [
+    "*HeroCourseInputsTx"
+   ],
+   "bookskill": [
+    "*EnsureRootTx"
+   ],
+   "elementequipment": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "heroevolution": [
+    "*EnsureHeroTx"
+   ],
+   "inscription": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "publicstats": [
+    "*HeroCourseInputsTx"
+   ],
+   "spirit": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ]
+  },
+  "dailyconsume": {
+   "campaign": [
+    "*BuyTrialTx",
+    "*ReadTx",
+    "Pipe"
+   ]
+  },
+  "directorysync": {
+   "playerdisplay": [
+    "ReconcileDirectoryTx"
+   ]
+  },
+  "dodgeball": {},
+  "dormhouse": {
+   "achievement": [
+    "*VillaCountTx"
+   ],
+   "bookskill": [
+    "*EnsureRootTx"
+   ],
+   "playerdisplay": [
+    "*TitleProgressTx"
+   ],
+   "publicstats": [
+    "*DormHouseInputsTx"
+   ]
+  },
+  "elementequipment": {
+   "bookskill": [
+    "*EnsureRootTx"
+   ],
+   "course": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "heroevolution": [
+    "*EnsureHeroTx"
+   ],
+   "inscription": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "publicstats": [
+    "*CoherentHeroInputsTx"
+   ],
+   "spirit": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ]
+  },
+  "frienddm": {
+   "realtimewakeup": [
+    "*ReloadAndDeliver"
+   ],
+   "socialfriendbase": [
+    "ActorValid",
+    "ApplyDrainTx",
+    "LockPlanTx",
+    "Messages",
+    "Preflight",
+    "PrepareDrainTx",
+    "Profile",
+    "Retry"
+   ]
+  },
+  "generaldm": {
+   "realtimewakeup": [
+    "*ReloadAndDeliver"
+   ]
+  },
+  "generation": {
+   "achievement": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "adventure": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "arena": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "awakeningbattle": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "bookskill": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "campaign": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "championsleague": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "characterhero": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "characterpet": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "conquerschool": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "course": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "dodgeball": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "dormhouse": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "elementequipment": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "frienddm": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "generaldm": [
+    "DecisionAt",
+    "Run"
+   ],
+   "godstrial": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "guildbroadcast": [
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ],
+   "guildcampaign": [
+    "DecisionAt",
+    "NewTimedOperation",
+    "Operation",
+    "Run"
+   ],
+   "guildcore": [
+    "DecisionAt",
+    "Run"
+   ],
+   "guildinvite": [
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ],
+   "guildinvitetarget": [
+    "DecisionAt",
+    "Run"
+   ],
+   "guildrental": [
+    "NewTimedOperation"
+   ],
+   "heroevolution": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "Bind",
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ],
+   "illusion": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "inscription": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "librarylocal": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "march": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "memoir": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "occult": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "oneonone": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "petcampaign": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "profilefeedback": [
+    "Bind",
+    "DecisionAt",
+    "NewTimedOperation",
+    "Operation",
+    "Run"
+   ],
+   "publication": [
+    "DecisionAt",
+    "Run"
+   ],
+   "publicprofile": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "ranking": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "roominvite": [
+    "DecisionAt",
+    "Run"
+   ],
+   "sharedroom": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "socialdismiss": [
+    "DecisionAt",
+    "Run"
+   ],
+   "socialfriendbase": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "socialgift": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "socialpresence": [
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ],
+   "socialrelation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "spirit": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "summon": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "topfloor": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "workplace": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "worldboss": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ]
+  },
+  "godstrial": {},
+  "guildbroadcast": {
+   "generation": [
+    "*HandleObligation"
+   ],
+   "i5": [
+    "*ReadGuildBroadcastMailSourceTx"
+   ]
+  },
+  "guildcampaign": {
+   "guildcore": [
+    "*CloseGuildTx",
+    "*RemoveMemberTx"
+   ]
+  },
+  "guildcore": {
+   "guildbroadcast": [
+    "DefaultProfile",
+    "NewLockPlan"
+   ],
+   "publicprofile": [
+    "*ReadPublicGuildTx"
+   ]
+  },
+  "guildinvite": {
+   "generation": [
+    "*HandleObligation"
+   ],
+   "guildcore": [
+    "*ReadInviteSnapshotTx",
+    "Admit",
+    "ApplyIssueTx",
+    "ApplyMarkerTx",
+    "Generation",
+    "PrepareIssueTx",
+    "PrepareMarkerTx",
+    "ValidateCommitted",
+    "ValidateCurrentInviteTx",
+    "ValidateMembershipTx",
+    "ValidateRetirementTx"
+   ],
+   "guildinvitetarget": [
+    "*ReadInviteSnapshotTx",
+    "*ReadIssueDeliveryEvidenceTx",
+    "*ReadIssueEvidenceTx",
+    "*ReadIssueTupleEvidenceTx",
+    "*ReadMarkerEvidenceTx"
+   ]
+  },
+  "guildinvitetarget": {
+   "guildinvite": [
+    "*CoveredTargetPayloadsTx",
+    "*Invalidate",
+    "*Materialize",
+    "*ReadInviteInvalidationProofTx",
+    "*ReadInviteTargetProofTx",
+    "*ValidateCoveredInviteInvalidationsTx"
+   ],
+   "socialgift": [
+    "*ReadImmutableInviteNoticeTx"
+   ],
+   "socialprojection": [
+    "*ReadCurrentInviteNoticeTx"
+   ],
+   "socialreload": [
+    "*PrepareInviteReloadTx"
+   ]
+  },
+  "guildrental": {
+   "guildcore": [
+    "*CloseLenderOffersTx"
+   ],
+   "workplace": [
+    "*HeroOfferedTx"
+   ]
+  },
+  "guildtea": {},
+  "guildview": {},
+  "heroevolution": {
+   "publicstats": [
+    "*CoherentHeroInputsTx"
+   ]
+  },
+  "i5": {
+   "achievement": [
+    "*FenceActorTx",
+    "*SettleGrantTx"
+   ],
+   "adventure": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx"
+   ],
+   "arena": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadScalarTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "Validate"
+   ],
+   "awakeningbattle": [
+    "*CompleteAwakeningBloodTx",
+    "*FreezeAwakeningBloodTx",
+    "DefaultProfile"
+   ],
+   "bookskill": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadScalarTx",
+    "*SettleGrantTx"
+   ],
+   "bootstrap": [
+    "*Name",
+    "*ReconcileCharacterLogin"
+   ],
+   "campaign": [
+    "*CompleteAwakeningPetTx",
+    "*DebitMaterialCostTx",
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*FreezeAwakeningCampaignTx",
+    "*FreezeAwakeningPetTx",
+    "*MaxHeroColorTx",
+    "*OpenStageFunctionsTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*RecordTx",
+    "*SettleAwakeningCampaignTx",
+    "*SettleGrantTx",
+    "*SnapshotTx",
+    "*TemporalBalanceTx"
+   ],
+   "championsleague": [
+    "*DeliverLeagueTitleNoticeTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadDisplayEntitlementsTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*ReadSourceMailTx",
+    "*RecordTx",
+    "*SettleGrantTx"
+   ],
+   "characterhero": [
+    "*ApplyHeroEquipmentResourceDebitTx",
+    "*ApplyHeroPromotionResourcesTx",
+    "*ApplyStrictRestorationTx",
+    "*CommitAwakeningEquipmentTx",
+    "*DebitHeroEvolutionTx",
+    "*DebitHeroExpItemsTx",
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*ListStacks",
+    "*LockEconomyOwnerTx",
+    "*LockStackTx",
+    "*MaxHeroColorPolicyRevision",
+    "*MaxHeroColorTx",
+    "*OpenCharacterFunctionsTx",
+    "*PlayerLevelTx",
+    "*PrepareAwakeningEquipmentTx",
+    "*PrepareCharacterFunctionsTx",
+    "*PrepareHeroEquipmentResourcesTx",
+    "*PrepareHeroPromotionResourcesTx",
+    "*PrepareStrictRestorationTx",
+    "Blood",
+    "Complete",
+    "ItemID",
+    "Mana",
+    "PlanPromotionRestoration",
+    "PlayerLevel",
+    "PreparedStackItemIDs",
+    "StackQuantity",
+    "Validate"
+   ],
+   "characterpet": [
+    "*ApplyEquipmentResourceDebitTx",
+    "*ApplyPetExpDebitTx",
+    "*ApplyPromotionResourcesTx",
+    "*ApplyStrictRestorationTx",
+    "*CommitAwakeningEquipmentTx",
+    "*DebitMaterialCostTx",
+    "*DebitPetAcquisitionAtTx",
+    "*DebitScalarTx",
+    "*FenceActorTx",
+    "*PrepareAwakeningEquipmentTx",
+    "*PrepareEquipmentResourcesTx",
+    "*PreparePetExpDebitTx",
+    "*PreparePromotionResourcesTx",
+    "*PrepareStrictRestorationTx",
+    "Mana",
+    "PlanPromotionRestoration",
+    "PlayerLevel",
+    "PreparedStackItemIDs",
+    "StackQuantity"
+   ],
+   "characterpractice": [
+    "*ApplyLevelAndStackDebitTx",
+    "*AuthorizeLevelAndDebitScalarTx",
+    "*FenceActorTx",
+    "*PlayerLevelTx",
+    "*PrepareLevelAndStackDebitTx",
+    "*SnapshotTx"
+   ],
+   "charactersavedpreset": [
+    "*FenceActorTx"
+   ],
+   "combat": [
+    "*ListStacksTx"
+   ],
+   "commerceprivilege": [
+    "*PreparePrivilegeTransitionTx",
+    "DefaultProfile",
+    "SnapshotTx",
+    "Validate"
+   ],
+   "conquerschool": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx",
+    "*SnapshotTx"
+   ],
+   "course": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*LockCoursePlayerStateTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadScalarTx",
+    "*SnapshotTx"
+   ],
+   "dailyconsume": [
+    "*DebitMaterialCostTx"
+   ],
+   "dodgeball": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*LockMailNamespaceCounterTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx"
+   ],
+   "dormhouse": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*LockDormPlayerStateTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadDormPlayerStateTx"
+   ],
+   "elementequipment": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadProgressionTx",
+    "*SettleGrantTx"
+   ],
+   "frienddm": [
+    "*PrepareEmoticonEntitlementTx"
+   ],
+   "godstrial": [
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*LockMailNamespaceCounterTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*TemporalBalanceTx"
+   ],
+   "guildbroadcast": [
+    "*FenceActorTx",
+    "*Materialize",
+    "*ReadGuildBroadcastProofTx"
+   ],
+   "guildcampaign": [
+    "*DeliverNoticeTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "DefaultProfile"
+   ],
+   "guildcore": [
+    "*AuthorizeLevelAndDebitScalarTx",
+    "*DebitScalarTx",
+    "*FenceActorTx",
+    "*PlayerLevelTx"
+   ],
+   "guildrental": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx",
+    "DefaultProfile"
+   ],
+   "guildtea": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "DefaultProfile"
+   ],
+   "heroevolution": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx"
+   ],
+   "illusion": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SnapshotTx"
+   ],
+   "inscription": [
+    "*ApplyInscriptionValueTx",
+    "*EnsureInscriptionCertificatesTx",
+    "*FenceActorTx",
+    "*ImportInscriptionCertificatesTx",
+    "*ListStacksTx",
+    "*PrepareInscriptionValueTx",
+    "*ReadScalarTx"
+   ],
+   "librarylocal": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx"
+   ],
+   "march": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx"
+   ],
+   "memoir": [
+    "*ApplyMaterialExchangeTx",
+    "*DebitMaterialCostTx",
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx",
+    "StockRepresentableBulkAwards"
+   ],
+   "missioninputs": [
+    "*CrystalSpentOnDayTx",
+    "*ReadProgressionTx",
+    "*SnapshotTx"
+   ],
+   "occult": [
+    "*CheckAwakeningOccultMaterialTx",
+    "*DebitOccultTicketTx",
+    "*FenceActorTx",
+    "*FreezeAwakeningOccultMaterialTx",
+    "*OccultTicketsTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx"
+   ],
+   "oneonone": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadDisplayEntitlementsTx",
+    "*RecordTx",
+    "*SnapshotTx"
+   ],
+   "petcampaign": [
+    "*CheckAwakeningPetMaterialTx",
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*FreezeAwakeningPetMaterialTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx"
+   ],
+   "playerdisplay": [
+    "*FenceActorTx",
+    "*PrepareDisplayValueTx",
+    "DefaultProfile",
+    "Validate"
+   ],
+   "playerpresentation": [
+    "*PlayerType",
+    "*ReadPublicPlayerBasisTx",
+    "Validate"
+   ],
+   "profilefeedback": [
+    "*FenceActorTx",
+    "*ReadPublicPlayerBasisTx",
+    "DefaultProfile",
+    "Validate"
+   ],
+   "publication": [
+    "*FenceActorTx"
+   ],
+   "publicprofile": [
+    "*FenceActorTx",
+    "*ReadPublicPlayerBasisTx",
+    "DefaultProfile",
+    "Validate"
+   ],
+   "ranking": [
+    "*FenceActorTx",
+    "*ReadDisplayEntitlementsTx"
+   ],
+   "sharedroom": [
+    "*FenceActorTx"
+   ],
+   "socialgift": [
+    "*FenceActorTx",
+    "*GiftGrantIdentityExistsTx",
+    "*ReadGrantEvidenceTx",
+    "*SettleGrantTx",
+    "*VerifyGiftBalanceTx"
+   ],
+   "spirit": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
+    "*ReadSpiritFunctionEligibilityTx",
+    "Validate"
+   ],
+   "summon": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx"
+   ],
+   "topfloor": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SnapshotTx"
+   ],
+   "workplace": [
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx",
+    "*WorkplaceSPTx"
+   ],
+   "worldboss": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*SnapshotTx"
+   ]
+  },
+  "identitylifecycle": {},
+  "illusion": {},
+  "inscription": {
+   "achievement": [
+    "*HeroInscriptionInputsTx"
+   ],
+   "bookskill": [
+    "*EnsureRootTx"
+   ],
+   "course": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "elementequipment": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "heroevolution": [
+    "*EnsureHeroTx"
+   ],
+   "publicstats": [
+    "*CoherentHeroInputsTx"
+   ],
+   "spirit": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ]
+  },
+  "librarylocal": {
+   "achievement": [
+    "*HeroLibraryInputsTx",
+    "*MarriedHeroCountTx"
+   ],
+   "combat": [
+    "*PlayerCollectionInputsTx"
+   ],
+   "playerdisplay": [
+    "*TitleProgressTx"
+   ],
+   "publicprofile": [
+    "*MarriedHeroCountTx"
+   ],
+   "publicstats": [
+    "*HeroLibraryInputsTx",
+    "*PlayerCollectionInputsTx"
+   ]
+  },
+  "march": {},
+  "memoir": {},
+  "missioninputs": {},
+  "occult": {},
+  "oneonone": {
+   "publicprofile": [
+    "*PublicHistoryTx"
+   ]
+  },
+  "petcampaign": {},
+  "playerdirectory": {
+   "ranking": [
+    "Validate"
+   ],
+   "socialprojection": [
+    "Validate"
+   ]
+  },
+  "playerdisplay": {
+   "achievement": [
+    "*SkinCollectionTx"
+   ],
+   "championsleague": [
+    "*ReceiveOriginTx",
+    "Validate"
+   ],
+   "playerpresentation": [
+    "*ReadEffectivePlayerDisplayTx"
+   ],
+   "profilefeedback": [
+    "*ReadEffectivePlayerDisplayTx"
+   ],
+   "publicprofile": [
+    "*CosmeticCountTx",
+    "*ReadEffectivePlayerDisplayTx",
+    "*SkinCollectionTx"
+   ],
+   "ranking": [
+    "*ReceiveOriginTx",
+    "Validate"
+   ]
+  },
+  "playerpresentation": {
+   "dodgeball": [
+    "Validate"
+   ],
+   "generaldm": [
+    "Validate"
+   ],
+   "socialprojection": [
+    "Validate"
+   ],
+   "socialrelation": [
+    "Validate"
+   ]
+  },
+  "playerroot": {
+   "arena": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "commerceprivilege": [
+    "Validate"
+   ],
+   "frienddm": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "generaldm": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "guildbroadcast": [
+    "Validate"
+   ],
+   "guildcore": [
+    "CanonicalPlayerIDs",
+    "LockKey"
+   ],
+   "occult": [
+    "CanonicalPlayerIDs"
+   ],
+   "playerdisplay": [
+    "Validate"
+   ],
+   "profilefeedback": [
+    "LockKey",
+    "Validate"
+   ],
+   "publication": [
+    "LockKey"
+   ],
+   "publicprofile": [
+    "CanonicalPlayerIDs",
+    "LockKey",
+    "Validate"
+   ],
+   "ranking": [
+    "Validate"
+   ],
+   "sharedroom": [
+    "CanonicalPlayerIDs"
+   ],
+   "socialdismiss": [
+    "Validate"
+   ],
+   "socialgift": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "socialprojection": [
+    "Validate"
+   ],
+   "socialrelation": [
+    "LockKey",
+    "Validate"
+   ]
+  },
+  "profileasset": {},
+  "profilefeedback": {
+   "publicprofile": [
+    "*ObserveCommentsTx",
+    "*ObserveTx"
+   ]
+  },
+  "publication": {},
+  "publicprofile": {
+   "profilefeedback": [
+    "ReadBasicTx",
+    "Validate"
+   ]
+  },
+  "publicstats": {
+   "combat": [
+    "*HeroTx",
+    "*PetTx"
+   ],
+   "illusion": [
+    "*HeroTx"
+   ],
+   "march": [
+    "*HeroTx"
+   ],
+   "occult": [
+    "*HeroTx"
+   ],
+   "publicprofile": [
+    "*HeroTx",
+    "*PetTx"
+   ],
+   "workplace": [
+    "*HeroTx"
+   ]
+  },
+  "ranking": {},
+  "realtimeauth": {
+   "socialgift": [
+    "*ValidateActor"
+   ]
+  },
+  "realtimewakeup": {},
+  "roominvite": {
+   "adventure": [
+    "*Materialize"
+   ],
+   "illusion": [
+    "*Materialize"
+   ],
+   "occult": [
+    "*Materialize"
+   ]
+  },
+  "sharedroom": {
+   "adventure": [
+    "*ReadPlayerRoomTx",
+    "*ReadRoomTx",
+    "Join",
+    "Kick",
+    "Leave",
+    "Open",
+    "SetReady",
+    "Update"
+   ],
+   "illusion": [
+    "*ReadPlayerRoomTx",
+    "*ReadRoomTx",
+    "Join",
+    "Kick",
+    "Leave",
+    "Open",
+    "SetReady",
+    "Update"
+   ],
+   "occult": [
+    "*ReadPlayerRoomTx",
+    "*ReadRoomTx",
+    "Join",
+    "Kick",
+    "Leave",
+    "Open",
+    "Update"
+   ]
+  },
+  "socialdismiss": {},
+  "socialfriendbase": {},
+  "socialgift": {
+   "socialprojection": [
+    "*GiftNoticeValidityTx",
+    "*GiftSnapshotTx",
+    "Day"
+   ],
+   "socialreload": [
+    "*ValidateReloadTx"
+   ]
+  },
+  "socialinbox": {
+   "guildinvitetarget": [
+    "*ConsumeInviteNoticeTx",
+    "*InsertInviteInvalidationTx",
+    "*InsertInviteMaterializationTx",
+    "*InsertInviteNoticeTx",
+    "*LockNoticeSourceTx",
+    "*ReadCoveredInvitePayloadsTx",
+    "*ReadInviteInvalidationSetTx",
+    "*ReadInviteInvalidationTx",
+    "*ReadInviteMaterializationTx",
+    "*ReadInviteNoticeSourceTx",
+    "InviteTuple",
+    "MatchInvite",
+    "PreflightConsumption"
+   ],
+   "roominvite": [
+    "*DeleteAgedRoomInviteNoticesTx",
+    "*InsertRoomInviteNoticeTx",
+    "*LockNoticeSourceTx",
+    "*NextNoticeIDTx",
+    "*UpdateRoomInviteNoticeTx",
+    "SourceKey",
+    "ValidateRoomInviteLifecycle"
+   ],
+   "socialdismiss": [
+    "*DismissNoticeTx",
+    "*LockNoticeTx",
+    "RelationFamily",
+    "RoomInviteFamily",
+    "ValidateRelationLifecycle",
+    "ValidateRoomInviteLifecycle",
+    "WireSafe"
+   ],
+   "socialgift": [
+    "*ConsumeInviteNoticeTx",
+    "*DismissNoticeTx",
+    "*LockNoticeTx",
+    "*ReadNoticeEvidenceTx",
+    "ApplyConsumptionTx",
+    "ApplyTx",
+    "Existing",
+    "InviteFamily",
+    "MatchGift",
+    "NoticeLockKey",
+    "PreflightConsumption",
+    "PrepareConsumptionTx",
+    "PrepareTx",
+    "RelationFamily",
+    "RoomInviteFamily",
+    "ValidateGiftLifecycle",
+    "ValidateRelationLifecycle",
+    "ValidateRoomInviteLifecycle",
+    "WireSafe"
+   ],
+   "socialprojection": [
+    "*NoticePageTx",
+    "*RelationWindowTx",
+    "InviteFamily",
+    "RelationFamily",
+    "RoomInviteFamily",
+    "RoomInviteTuple",
+    "Validate",
+    "ValidateRelationDescriptor",
+    "ValidateRelationLifecycle",
+    "ValidateRoomInviteLifecycle",
+    "WireSafe"
+   ],
+   "socialrelation": [
+    "*ApplyRelationsTx",
+    "*PrepareRelationsTx"
+   ],
+   "socialreload": [
+    "*ReadNoticeSourceTx",
+    "ValidateRelationLifecycle"
+   ],
+   "socialreloadref": [
+    "Descriptor"
+   ]
+  },
+  "socialpresence": {
+   "guildview": [
+    "*ReadMany"
+   ],
+   "playerpresentation": [
+    "Validate"
+   ]
+  },
+  "socialprojection": {
+   "socialfriendbase": [
+    "LoadList",
+    "ReadBasePreparedTx",
+    "Recommend",
+    "Search"
+   ]
+  },
+  "socialrelation": {
+   "arena": [
+    "*PrepareFriendFightPrivacyTx",
+    "CanonicalServer"
+   ],
+   "dodgeball": [
+    "*ActiveFriendsTx",
+    "*PrepareFriendDMPrivacyTx"
+   ],
+   "frienddm": [
+    "*PrepareFriendDMPrivacyTx",
+    "CanonicalServer"
+   ],
+   "generaldm": [
+    "*ReadGeneralBlockTx",
+    "CanonicalServer"
+   ],
+   "guildinvitetarget": [
+    "ApplyChangeTx",
+    "Existing",
+    "PrepareTx",
+    "ReadTx"
+   ],
+   "profilefeedback": [
+    "CanonicalServer"
+   ],
+   "publicprofile": [
+    "*CandidateStatesTx",
+    "*LockBlockTx",
+    "*LockFriendshipTx",
+    "*LockRootTx",
+    "BlockLockKey",
+    "CanonicalServer",
+    "Validate"
+   ],
+   "roominvite": [
+    "ApplyChangeTx",
+    "PrepareTx"
+   ],
+   "socialdismiss": [
+    "*LockRootTx",
+    "*TouchRootTx",
+    "CanonicalServer",
+    "DefaultCommandProfile",
+    "Validate"
+   ],
+   "socialgift": [
+    "*LockRootTx",
+    "*PrepareFriendDMPrivacyTx",
+    "*ReadRootsTx",
+    "*TouchRootTx",
+    "CanonicalServer",
+    "DefaultCommandProfile",
+    "Validate"
+   ],
+   "socialprojection": [
+    "*ActiveBlocksForTx",
+    "*ActiveFriendsTx",
+    "*CandidateStatesTx",
+    "*InboundPendingTx",
+    "*LockRootTx",
+    "CanonicalServer",
+    "Validate"
+   ],
+   "socialreload": [
+    "*ReadRequestTx",
+    "*ReadRootTx",
+    "Validate"
+   ]
+  },
+  "socialreload": {},
+  "socialreloadref": {
+   "guildinvitetarget": [
+    "Validate"
+   ],
+   "socialgift": [
+    "Validate"
+   ],
+   "socialrelation": [
+    "DecodeReloadReference",
+    "Validate"
+   ],
+   "socialreload": [
+    "NoticeSource",
+    "ValidAt",
+    "Validate"
+   ]
+  },
+  "spirit": {
+   "bookskill": [
+    "*EnsureRootTx"
+   ],
+   "course": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "elementequipment": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "godstrial": [
+    "*LockTrialInventoryTx",
+    "*ProviderRevision"
+   ],
+   "heroevolution": [
+    "*EnsureHeroTx"
+   ],
+   "inscription": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "publicstats": [
+    "*CoherentHeroInputsTx"
+   ]
+  },
+  "summon": {},
+  "topfloor": {
+   "march": [
+    "*MarchCandidatesTx"
+   ],
+   "memoir": [
+    "*MarchCandidatesTx"
+   ],
+   "publicprofile": [
+    "*PublicHistoryTx"
+   ],
+   "workplace": [
+    "*WorkplaceOpponentTx"
+   ]
+  },
+  "workplace": {
+   "guildrental": [
+    "*BusyTx"
+   ]
+  },
+  "worldboss": {}
+ },
+ "calls": {
+  "achievement": {
+   "bookskill": [
+    "*BookInputsTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope",
+    "Queryer",
+    "Validate"
+   ],
+   "conquerschool": [
+    "*FactsTx"
+   ],
+   "course": [
+    "*HeroCourseInputsTx"
+   ],
+   "dormhouse": [
+    "*VillaCountTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*SettleGrantTx"
+   ],
+   "inscription": [
+    "*HeroInscriptionInputsTx"
+   ],
+   "librarylocal": [
+    "*HeroLibraryInputsTx",
+    "*MarriedHeroCountTx"
+   ],
+   "playerdisplay": [
+    "*SkinCollectionTx"
+   ]
+  },
+  "activitydirectory": {},
+  "adventure": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*AwardStoryPartnerTx"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*MonsterWaves",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx"
+   ],
+   "interface:adventure.Heroes": [
+    "*OverlayMID1"
+   ],
+   "roominvite": [
+    "*Materialize"
+   ],
+   "sharedroom": [
+    "*ReadPlayerRoomTx",
+    "*ReadRoomTx",
+    "Join",
+    "Kick",
+    "Leave",
+    "Open",
+    "SetReady",
+    "Update"
+   ]
+  },
+  "arena": {
+   "achievement": [
+    "*ObserveArenaWinStreakTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*ResolveDetached",
+    "*ResultTx",
+    "*SnapshotTx",
+    "*StartManyTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadScalarTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "Validate"
+   ],
+   "interface:arena.Roster": [
+    "*OverlayMID1"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "socialrelation": [
+    "*PrepareFriendFightPrivacyTx",
+    "CanonicalServer"
+   ]
+  },
+  "awakeningbattle": {
+   "arena": [
+    "*ActiveRevision",
+    "*FenceActorTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*LockAwakeningHeroesTx"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*StartTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*CompleteAwakeningBloodTx",
+    "*FreezeAwakeningBloodTx",
+    "DefaultProfile"
+   ]
+  },
+  "bookskill": {
+   "arena": [
+    "*Error"
+   ],
+   "course": [
+    "*EnsureRootTx"
+   ],
+   "dormhouse": [
+    "*EnsureRootTx"
+   ],
+   "elementequipment": [
+    "*EnsureRootTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadScalarTx",
+    "*SettleGrantTx"
+   ],
+   "inscription": [
+    "*EnsureRootTx"
+   ],
+   "spirit": [
+    "*EnsureRootTx"
+   ]
+  },
+  "bootstrap": {
+   "i5": [
+    "*Name",
+    "*ReconcileCharacterLogin"
+   ],
+   "interface:bootstrap.CharacterBootstrapPersistenceContributor": [
+    "*Name",
+    "*PersistCharacterBootstrap",
+    "*Required"
+   ],
+   "interface:bootstrap.MID1DetailContributor": [
+    "*Claims",
+    "*Name"
+   ]
+  },
+  "campaign": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*ApplyDormEXPLockedTx",
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx"
+   ],
+   "characterpet": [
+    "*CreditCampaignEXPTx",
+    "*LockCampaignPetTx"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*BorrowedTx",
+    "*LiveGenerationTx",
+    "*StartTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "dailyconsume": [
+    "*BuyTrialTx",
+    "*ReadTx",
+    "Pipe"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*CompleteAwakeningPetTx",
+    "*DebitMaterialCostTx",
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*FreezeAwakeningCampaignTx",
+    "*FreezeAwakeningPetTx",
+    "*MaxHeroColorTx",
+    "*OpenStageFunctionsTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*RecordTx",
+    "*SettleAwakeningCampaignTx",
+    "*SettleGrantTx",
+    "*SnapshotTx",
+    "*TemporalBalanceTx"
+   ]
+  },
+  "championsleague": {
+   "achievement": [
+    "*ObserveLeagueDaysTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*ResolveDetached",
+    "*ResultTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DeliverLeagueTitleNoticeTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadDisplayEntitlementsTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*ReadSourceMailTx",
+    "*RecordTx",
+    "*SettleGrantTx"
+   ],
+   "interface:championsleague.Roster": [
+    "*OverlayMID1"
+   ],
+   "playerdisplay": [
+    "*ReceiveOriginTx",
+    "Validate"
+   ]
+  },
+  "channelchat": {},
+  "characterasset": {},
+  "characterhero": {
+   "characterasset": [
+    "*ModifyRestoration",
+    "BuildEffectiveHeroAppearance",
+    "BuildEffectiveHeroAppearanceTx",
+    "HeroPromotionRestorationSource",
+    "HeroReferenceLockKey",
+    "Queryer",
+    "Validate",
+    "ValidateExactRevisionID"
+   ],
+   "characterpractice": [
+    "ReduceAppliedPracticeContribution"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyHeroEquipmentResourceDebitTx",
+    "*ApplyHeroPromotionResourcesTx",
+    "*ApplyStrictRestorationTx",
+    "*CommitAwakeningEquipmentTx",
+    "*DebitHeroEvolutionTx",
+    "*DebitHeroExpItemsTx",
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*ListStacks",
+    "*LockEconomyOwnerTx",
+    "*LockStackTx",
+    "*MaxHeroColorPolicyRevision",
+    "*MaxHeroColorTx",
+    "*OpenCharacterFunctionsTx",
+    "*PlayerLevelTx",
+    "*PrepareAwakeningEquipmentTx",
+    "*PrepareCharacterFunctionsTx",
+    "*PrepareHeroEquipmentResourcesTx",
+    "*PrepareHeroPromotionResourcesTx",
+    "*PrepareStrictRestorationTx",
+    "Blood",
+    "Complete",
+    "ItemID",
+    "Mana",
+    "PlanPromotionRestoration",
+    "PlayerLevel",
+    "PreparedStackItemIDs",
+    "StackQuantity",
+    "Validate"
+   ],
+   "interface:characterhero.HeroLocalFacetInitializer": [
+    "*InitFreshHeroTx"
+   ]
+  },
+  "characterpet": {
+   "characterasset": [
+    "*ModifyRestoration",
+    "BuildEffectivePetAppearance",
+    "BuildEffectivePetAppearanceTx",
+    "PetPromotionRestorationSource",
+    "Validate",
+    "ValidateExactRevisionID"
+   ],
+   "characterpractice": [
+    "ReduceAppliedPracticeContribution"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyEquipmentResourceDebitTx",
+    "*ApplyPetExpDebitTx",
+    "*ApplyPromotionResourcesTx",
+    "*ApplyStrictRestorationTx",
+    "*CommitAwakeningEquipmentTx",
+    "*DebitMaterialCostTx",
+    "*DebitPetAcquisitionAtTx",
+    "*DebitScalarTx",
+    "*FenceActorTx",
+    "*PrepareAwakeningEquipmentTx",
+    "*PrepareEquipmentResourcesTx",
+    "*PreparePetExpDebitTx",
+    "*PreparePromotionResourcesTx",
+    "*PrepareStrictRestorationTx",
+    "Mana",
+    "PlanPromotionRestoration",
+    "PlayerLevel",
+    "PreparedStackItemIDs",
+    "StackQuantity"
+   ]
+  },
+  "characterpractice": {
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "i5": [
+    "*ApplyLevelAndStackDebitTx",
+    "*AuthorizeLevelAndDebitScalarTx",
+    "*FenceActorTx",
+    "*PlayerLevelTx",
+    "*PrepareLevelAndStackDebitTx",
+    "*SnapshotTx"
+   ]
+  },
+  "charactersavedpreset": {
+   "characterasset": [
+    "SavedPresetRootLockKey",
+    "SavedPresetRootPlayerFromLockKey",
+    "Validate",
+    "ValidateReferenceGuardPlan"
+   ],
+   "i5": [
+    "*FenceActorTx"
+   ]
+  },
+  "clientlog": {
+   "arena": [
+    "*Error",
+    "*SQLState"
+   ]
+  },
+  "combat": {
+   "arena": [
+    "*Error"
+   ],
+   "characterasset": [
+    "Queryer",
+    "Validate"
+   ],
+   "characterhero": [
+    "*RawAwakeningTx"
+   ],
+   "conquerschool": [
+    "*FactsTx"
+   ],
+   "i5": [
+    "*ListStacksTx"
+   ],
+   "interface:combat.Roster": [
+    "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*PlayerCollectionInputsTx"
+   ],
+   "publicstats": [
+    "*HeroTx",
+    "*PetTx"
+   ]
+  },
+  "commerceprivilege": {
+   "i5": [
+    "*PreparePrivilegeTransitionTx",
+    "DefaultProfile",
+    "SnapshotTx",
+    "Validate"
+   ],
+   "playerroot": [
+    "Validate"
+   ]
+  },
+  "conquerschool": {
+   "characterasset": [
+    "NewCoherentReadScope",
+    "Queryer",
+    "Validate"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*CloseTx",
+    "*StartTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx",
+    "*SnapshotTx"
+   ],
+   "interface:conquerschool.Roster": [
+    "*OverlayMID1"
+   ]
+  },
+  "course": {
+   "arena": [
+    "*Error"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "elementequipment": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*LockCoursePlayerStateTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadScalarTx",
+    "*SnapshotTx"
+   ],
+   "inscription": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "spirit": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ]
+  },
+  "dailyconsume": {
+   "i5": [
+    "*DebitMaterialCostTx"
+   ]
+  },
+  "directorysync": {},
+  "dodgeball": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttestDerivedTx",
+    "*StartTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*LockMailNamespaceCounterTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx"
+   ],
+   "playerpresentation": [
+    "Validate"
+   ],
+   "socialrelation": [
+    "*ActiveFriendsTx",
+    "*PrepareFriendDMPrivacyTx"
+   ]
+  },
+  "dormhouse": {
+   "arena": [
+    "*Error"
+   ],
+   "characterhero": [
+    "*ApplyDormEXPLockedTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*LockDormPlayerStateTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadDormPlayerStateTx"
+   ]
+  },
+  "elementequipment": {
+   "arena": [
+    "*Error"
+   ],
+   "characterasset": [
+    "Queryer",
+    "Validate"
+   ],
+   "course": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*PrepareMaterialDebitTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadProgressionTx",
+    "*SettleGrantTx"
+   ],
+   "inscription": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "spirit": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ]
+  },
+  "frienddm": {
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*PrepareEmoticonEntitlementTx"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "socialrelation": [
+    "*PrepareFriendDMPrivacyTx",
+    "CanonicalServer"
+   ]
+  },
+  "generaldm": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "playerpresentation": [
+    "Validate"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "socialrelation": [
+    "*ReadGeneralBlockTx",
+    "CanonicalServer"
+   ]
+  },
+  "generation": {
+   "guildbroadcast": [
+    "*HandleObligation"
+   ],
+   "guildinvite": [
+    "*HandleObligation"
+   ]
+  },
+  "godstrial": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*LockStoryRosterTx"
+   ],
+   "characterpet": [
+    "*LockCampaignPetTx"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*StartTx",
+    "MonsterWaves"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*LockMailNamespaceCounterTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*TemporalBalanceTx"
+   ],
+   "spirit": [
+    "*LockTrialInventoryTx",
+    "*ProviderRevision"
+   ]
+  },
+  "guildbroadcast": {
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ],
+   "guildcore": [
+    "DefaultProfile",
+    "NewLockPlan"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*Materialize",
+    "*ReadGuildBroadcastProofTx"
+   ],
+   "playerroot": [
+    "Validate"
+   ]
+  },
+  "guildcampaign": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*StartTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "NewTimedOperation",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DeliverNoticeTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "DefaultProfile"
+   ]
+  },
+  "guildcore": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "guildcampaign": [
+    "*CloseGuildTx",
+    "*RemoveMemberTx"
+   ],
+   "guildinvite": [
+    "*ReadInviteSnapshotTx",
+    "Admit",
+    "ApplyIssueTx",
+    "ApplyMarkerTx",
+    "Generation",
+    "PrepareIssueTx",
+    "PrepareMarkerTx",
+    "ValidateCommitted",
+    "ValidateCurrentInviteTx",
+    "ValidateMembershipTx",
+    "ValidateRetirementTx"
+   ],
+   "guildrental": [
+    "*CloseLenderOffersTx"
+   ],
+   "i5": [
+    "*AuthorizeLevelAndDebitScalarTx",
+    "*DebitScalarTx",
+    "*FenceActorTx",
+    "*PlayerLevelTx"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs",
+    "LockKey"
+   ]
+  },
+  "guildinvite": {
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ],
+   "guildinvitetarget": [
+    "*CoveredTargetPayloadsTx",
+    "*Invalidate",
+    "*Materialize",
+    "*ReadInviteInvalidationProofTx",
+    "*ReadInviteTargetProofTx",
+    "*ValidateCoveredInviteInvalidationsTx"
+   ]
+  },
+  "guildinvitetarget": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "guildinvite": [
+    "*ReadInviteSnapshotTx",
+    "*ReadIssueDeliveryEvidenceTx",
+    "*ReadIssueEvidenceTx",
+    "*ReadIssueTupleEvidenceTx",
+    "*ReadMarkerEvidenceTx"
+   ],
+   "socialinbox": [
+    "*ConsumeInviteNoticeTx",
+    "*InsertInviteInvalidationTx",
+    "*InsertInviteMaterializationTx",
+    "*InsertInviteNoticeTx",
+    "*LockNoticeSourceTx",
+    "*ReadCoveredInvitePayloadsTx",
+    "*ReadInviteInvalidationSetTx",
+    "*ReadInviteInvalidationTx",
+    "*ReadInviteMaterializationTx",
+    "*ReadInviteNoticeSourceTx",
+    "InviteTuple",
+    "MatchInvite",
+    "PreflightConsumption"
+   ],
+   "socialrelation": [
+    "ApplyChangeTx",
+    "Existing",
+    "PrepareTx",
+    "ReadTx"
+   ],
+   "socialreloadref": [
+    "Validate"
+   ]
+  },
+  "guildrental": {
+   "characterasset": [
+    "ValidateReferenceGuardPlan"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "NewTimedOperation"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx",
+    "DefaultProfile"
+   ],
+   "workplace": [
+    "*BusyTx"
+   ]
+  },
+  "guildtea": {
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "DefaultProfile"
+   ]
+  },
+  "guildview": {
+   "socialpresence": [
+    "*ReadMany"
+   ]
+  },
+  "heroevolution": {
+   "arena": [
+    "*Error"
+   ],
+   "characterasset": [
+    "Queryer",
+    "Validate"
+   ],
+   "course": [
+    "*EnsureHeroTx"
+   ],
+   "elementequipment": [
+    "*EnsureHeroTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx"
+   ],
+   "inscription": [
+    "*EnsureHeroTx"
+   ],
+   "spirit": [
+    "*EnsureHeroTx"
+   ]
+  },
+  "i5": {
+   "adventure": [
+    "*ObserveTx"
+   ],
+   "characterhero": [
+    "*ApplyAwakeningHeroLockedTx",
+    "*AwakeningHeroesTx",
+    "*AwardStoryPartnerTx",
+    "*HasAwakeningHeroEquipmentTx",
+    "*LockAwakeningHeroesTx",
+    "*LockStoryRosterTx"
+   ],
+   "characterpet": [
+    "*AwakeningPetsTx",
+    "*FinishAwakeningPetLockedTx",
+    "*HasAwakeningPetEquipmentTx",
+    "*LockAwakeningPetsTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ],
+   "guildbroadcast": [
+    "*ReadGuildBroadcastMailSourceTx"
+   ]
+  },
+  "identitylifecycle": {
+   "arena": [
+    "*Error"
+   ]
+  },
+  "illusion": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*MonsterWaves",
+    "*Resolve",
+    "*SettleMemberTx",
+    "*SnapshotTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SnapshotTx"
+   ],
+   "interface:illusion.Heroes": [
+    "*OverlayMID1"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ],
+   "roominvite": [
+    "*Materialize"
+   ],
+   "sharedroom": [
+    "*ReadPlayerRoomTx",
+    "*ReadRoomTx",
+    "Join",
+    "Kick",
+    "Leave",
+    "Open",
+    "SetReady",
+    "Update"
+   ]
+  },
+  "inscription": {
+   "arena": [
+    "*Error"
+   ],
+   "characterasset": [
+    "Queryer",
+    "Validate"
+   ],
+   "course": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "elementequipment": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyInscriptionValueTx",
+    "*EnsureInscriptionCertificatesTx",
+    "*FenceActorTx",
+    "*ImportInscriptionCertificatesTx",
+    "*ListStacksTx",
+    "*PrepareInscriptionValueTx",
+    "*ReadScalarTx"
+   ],
+   "spirit": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ]
+  },
+  "librarylocal": {
+   "arena": [
+    "*EnsurePlayerRootTx",
+    "*Error",
+    "*ListHeroRootPlayerIDsTx",
+    "*LockRootTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx"
+   ],
+   "interface:librarylocal.RosterProjectionPort": [
+    "*OverlayMID1"
+   ]
+  },
+  "march": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx"
+   ],
+   "combat": [
+    "*AttestReportTx",
+    "*StartTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx"
+   ],
+   "interface:march.Roster": [
+    "*OverlayMID1"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ],
+   "topfloor": [
+    "*MarchCandidatesTx"
+   ]
+  },
+  "memoir": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*LockStoryRosterTx"
+   ],
+   "combat": [
+    "*AttestReportTx",
+    "*CloseTx",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialExchangeTx",
+    "*DebitMaterialCostTx",
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*PrepareMaterialExchangeTx",
+    "*ReadFunctionEligibilityTx",
+    "*SettleGrantTx",
+    "StockRepresentableBulkAwards"
+   ],
+   "interface:memoir.Roster": [
+    "*OverlayMID1"
+   ],
+   "topfloor": [
+    "*MarchCandidatesTx"
+   ]
+  },
+  "missioninputs": {
+   "bookskill": [
+    "*BookInputsTx"
+   ],
+   "campaign": [
+    "*ReadTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "i5": [
+    "*CrystalSpentOnDayTx",
+    "*ReadProgressionTx",
+    "*SnapshotTx"
+   ]
+  },
+  "occult": {
+   "arena": [
+    "*ReadScoresTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*MonsterWaves",
+    "*Resolve",
+    "*SettleMemberTx",
+    "*SnapshotTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*CheckAwakeningOccultMaterialTx",
+    "*DebitOccultTicketTx",
+    "*FenceActorTx",
+    "*FreezeAwakeningOccultMaterialTx",
+    "*OccultTicketsTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx"
+   ],
+   "interface:occult.Heroes": [
+    "*OverlayMID1"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ],
+   "roominvite": [
+    "*Materialize"
+   ],
+   "sharedroom": [
+    "*ReadPlayerRoomTx",
+    "*ReadRoomTx",
+    "Join",
+    "Kick",
+    "Leave",
+    "Open",
+    "Update"
+   ]
+  },
+  "oneonone": {
+   "achievement": [
+    "*ObserveOneOnOneWeekTx",
+    "*ObserveOneOnOneWinStreakTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*ResolveDetached",
+    "*StartManyTx",
+    "*TerminalTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadDisplayEntitlementsTx",
+    "*RecordTx",
+    "*SnapshotTx"
+   ],
+   "interface:oneonone.Roster": [
+    "*OverlayMID1"
+   ]
+  },
+  "petcampaign": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*LockStoryRosterTx"
+   ],
+   "characterpet": [
+    "*LockCampaignPetTx"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*StartTx",
+    "MonsterWaves"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*CheckAwakeningPetMaterialTx",
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*FreezeAwakeningPetMaterialTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx"
+   ]
+  },
+  "playerdirectory": {},
+  "playerdisplay": {
+   "bookskill": [
+    "*TitleProgressTx"
+   ],
+   "characterasset": [
+    "Queryer",
+    "Validate"
+   ],
+   "commerceprivilege": [
+    "*ReadCosmeticPrivilegeTx"
+   ],
+   "directorysync": [
+    "ReconcileDirectoryTx"
+   ],
+   "dormhouse": [
+    "*TitleProgressTx"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*PrepareDisplayValueTx",
+    "DefaultProfile",
+    "Validate"
+   ],
+   "librarylocal": [
+    "*TitleProgressTx"
+   ],
+   "playerroot": [
+    "Validate"
+   ]
+  },
+  "playerpresentation": {
+   "i5": [
+    "*PlayerType",
+    "*ReadPublicPlayerBasisTx",
+    "Validate"
+   ],
+   "playerdisplay": [
+    "*ReadEffectivePlayerDisplayTx"
+   ],
+   "socialpresence": [
+    "Validate"
+   ]
+  },
+  "playerroot": {},
+  "profileasset": {},
+  "profilefeedback": {
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "NewTimedOperation",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*ReadPublicPlayerBasisTx",
+    "DefaultProfile",
+    "Validate"
+   ],
+   "playerdisplay": [
+    "*ReadEffectivePlayerDisplayTx"
+   ],
+   "playerroot": [
+    "LockKey",
+    "Validate"
+   ],
+   "publicprofile": [
+    "ReadBasicTx",
+    "Validate"
+   ],
+   "socialrelation": [
+    "CanonicalServer"
+   ]
+  },
+  "publication": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx"
+   ],
+   "playerroot": [
+    "LockKey"
+   ]
+  },
+  "publicprofile": {
+   "achievement": [
+    "*TrophyCountTx"
+   ],
+   "arena": [
+    "*PublicHistoryTx"
+   ],
+   "characterasset": [
+    "*HeroTx",
+    "*PetTx",
+    "Available",
+    "Digest",
+    "HeroReferenceFromLockKey",
+    "HeroReferenceLockKey",
+    "NewCoherentReadScope",
+    "PetReferenceFromLockKey",
+    "PetReferenceLockKey",
+    "Queryer",
+    "Validate",
+    "ValidateExactRevisionID",
+    "ValidateReferenceGuardPlan"
+   ],
+   "characterhero": [
+    "*BookmarkTx",
+    "*RawAwakeningTx"
+   ],
+   "conquerschool": [
+    "*FactsTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "guildcore": [
+    "*ReadPublicGuildTx"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*ReadPublicPlayerBasisTx",
+    "DefaultProfile",
+    "Validate"
+   ],
+   "interface:publicprofile.Roster": [
+    "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*MarriedHeroCountTx"
+   ],
+   "oneonone": [
+    "*PublicHistoryTx"
+   ],
+   "playerdisplay": [
+    "*CosmeticCountTx",
+    "*ReadEffectivePlayerDisplayTx",
+    "*SkinCollectionTx"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs",
+    "LockKey",
+    "Validate"
+   ],
+   "profilefeedback": [
+    "*ObserveCommentsTx",
+    "*ObserveTx"
+   ],
+   "publicstats": [
+    "*HeroTx",
+    "*PetTx"
+   ],
+   "socialrelation": [
+    "*CandidateStatesTx",
+    "*LockBlockTx",
+    "*LockFriendshipTx",
+    "*LockRootTx",
+    "BlockLockKey",
+    "CanonicalServer",
+    "Validate"
+   ],
+   "topfloor": [
+    "*PublicHistoryTx"
+   ]
+  },
+  "publicstats": {
+   "bookskill": [
+    "*HeroBookInputsTx"
+   ],
+   "characterasset": [
+    "*OwnedHeroTx",
+    "*OwnedPetTx",
+    "Queryer",
+    "Validate"
+   ],
+   "characterhero": [
+    "*RawAwakeningTx"
+   ],
+   "conquerschool": [
+    "*HeroInputsTx"
+   ],
+   "course": [
+    "*HeroCourseInputsTx"
+   ],
+   "dormhouse": [
+    "*DormHouseInputsTx"
+   ],
+   "elementequipment": [
+    "*CoherentHeroInputsTx"
+   ],
+   "heroevolution": [
+    "*CoherentHeroInputsTx"
+   ],
+   "inscription": [
+    "*CoherentHeroInputsTx"
+   ],
+   "librarylocal": [
+    "*HeroLibraryInputsTx",
+    "*PlayerCollectionInputsTx"
+   ],
+   "spirit": [
+    "*CoherentHeroInputsTx"
+   ]
+  },
+  "ranking": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*ReadDisplayEntitlementsTx"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "playerdisplay": [
+    "*ReceiveOriginTx",
+    "Validate"
+   ],
+   "playerroot": [
+    "Validate"
+   ]
+  },
+  "realtimeauth": {},
+  "realtimewakeup": {
+   "frienddm": [
+    "*ReloadAndDeliver"
+   ],
+   "generaldm": [
+    "*ReloadAndDeliver"
+   ]
+  },
+  "roominvite": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "socialinbox": [
+    "*DeleteAgedRoomInviteNoticesTx",
+    "*InsertRoomInviteNoticeTx",
+    "*LockNoticeSourceTx",
+    "*NextNoticeIDTx",
+    "*UpdateRoomInviteNoticeTx",
+    "SourceKey",
+    "ValidateRoomInviteLifecycle"
+   ],
+   "socialrelation": [
+    "ApplyChangeTx",
+    "PrepareTx"
+   ]
+  },
+  "sharedroom": {
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs"
+   ]
+  },
+  "socialdismiss": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "socialinbox": [
+    "*DismissNoticeTx",
+    "*LockNoticeTx",
+    "RelationFamily",
+    "RoomInviteFamily",
+    "ValidateRelationLifecycle",
+    "ValidateRoomInviteLifecycle",
+    "WireSafe"
+   ],
+   "socialrelation": [
+    "*LockRootTx",
+    "*TouchRootTx",
+    "CanonicalServer",
+    "DefaultCommandProfile",
+    "Validate"
+   ]
+  },
+  "socialfriendbase": {
+   "frienddm": [
+    "ActorValid",
+    "ApplyDrainTx",
+    "LockPlanTx",
+    "Messages",
+    "Preflight",
+    "PrepareDrainTx",
+    "Profile",
+    "Retry"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "socialprojection": [
+    "LoadList",
+    "ReadBasePreparedTx",
+    "Recommend",
+    "Search"
+   ]
+  },
+  "socialgift": {
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "guildinvitetarget": [
+    "*ReadImmutableInviteNoticeTx"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*GiftGrantIdentityExistsTx",
+    "*ReadGrantEvidenceTx",
+    "*SettleGrantTx",
+    "*VerifyGiftBalanceTx"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "realtimeauth": [
+    "*ValidateActor"
+   ],
+   "socialinbox": [
+    "*ConsumeInviteNoticeTx",
+    "*DismissNoticeTx",
+    "*LockNoticeTx",
+    "*ReadNoticeEvidenceTx",
+    "ApplyConsumptionTx",
+    "ApplyTx",
+    "Existing",
+    "InviteFamily",
+    "MatchGift",
+    "NoticeLockKey",
+    "PreflightConsumption",
+    "PrepareConsumptionTx",
+    "PrepareTx",
+    "RelationFamily",
+    "RoomInviteFamily",
+    "ValidateGiftLifecycle",
+    "ValidateRelationLifecycle",
+    "ValidateRoomInviteLifecycle",
+    "WireSafe"
+   ],
+   "socialrelation": [
+    "*LockRootTx",
+    "*PrepareFriendDMPrivacyTx",
+    "*ReadRootsTx",
+    "*TouchRootTx",
+    "CanonicalServer",
+    "DefaultCommandProfile",
+    "Validate"
+   ],
+   "socialreloadref": [
+    "Validate"
+   ]
+  },
+  "socialinbox": {},
+  "socialpresence": {
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run",
+    "Validate"
+   ]
+  },
+  "socialprojection": {
+   "guildinvitetarget": [
+    "*ReadCurrentInviteNoticeTx"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "playerpresentation": [
+    "Validate"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "socialgift": [
+    "*GiftNoticeValidityTx",
+    "*GiftSnapshotTx",
+    "Day"
+   ],
+   "socialinbox": [
+    "*NoticePageTx",
+    "*RelationWindowTx",
+    "InviteFamily",
+    "RelationFamily",
+    "RoomInviteFamily",
+    "RoomInviteTuple",
+    "Validate",
+    "ValidateRelationDescriptor",
+    "ValidateRelationLifecycle",
+    "ValidateRoomInviteLifecycle",
+    "WireSafe"
+   ],
+   "socialrelation": [
+    "*ActiveBlocksForTx",
+    "*ActiveFriendsTx",
+    "*CandidateStatesTx",
+    "*InboundPendingTx",
+    "*LockRootTx",
+    "CanonicalServer",
+    "Validate"
+   ]
+  },
+  "socialrelation": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "playerpresentation": [
+    "Validate"
+   ],
+   "playerroot": [
+    "LockKey",
+    "Validate"
+   ],
+   "socialinbox": [
+    "*ApplyRelationsTx",
+    "*PrepareRelationsTx"
+   ],
+   "socialreloadref": [
+    "DecodeReloadReference",
+    "Validate"
+   ]
+  },
+  "socialreload": {
+   "guildinvitetarget": [
+    "*PrepareInviteReloadTx"
+   ],
+   "socialgift": [
+    "*ValidateReloadTx"
+   ],
+   "socialinbox": [
+    "*ReadNoticeSourceTx",
+    "ValidateRelationLifecycle"
+   ],
+   "socialrelation": [
+    "*ReadRequestTx",
+    "*ReadRootTx",
+    "Validate"
+   ],
+   "socialreloadref": [
+    "NoticeSource",
+    "ValidAt",
+    "Validate"
+   ]
+  },
+  "socialreloadref": {
+   "socialinbox": [
+    "Descriptor"
+   ]
+  },
+  "spirit": {
+   "arena": [
+    "*Error"
+   ],
+   "characterasset": [
+    "Queryer",
+    "Validate"
+   ],
+   "course": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "elementequipment": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*ListStacksTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
+    "*ReadSpiritFunctionEligibilityTx",
+    "Validate"
+   ],
+   "inscription": [
+    "*EnsureHeroTx",
+    "*EnsureRootTx"
+   ]
+  },
+  "summon": {
+   "characterhero": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx"
+   ]
+  },
+  "topfloor": {
+   "achievement": [
+    "*ObserveTopFloorDayTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttemptTx",
+    "*CloseTx",
+    "*ReplayTx",
+    "*Resolve",
+    "*ResultTx",
+    "*StartEvidenceTx",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SnapshotTx"
+   ],
+   "interface:topfloor.Roster": [
+    "*OverlayMID1"
+   ]
+  },
+  "workplace": {
+   "campaign": [
+    "*ReadTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "characterhero": [
+    "*LockStoryRosterTx"
+   ],
+   "combat": [
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "guildrental": [
+    "*HeroOfferedTx"
+   ],
+   "i5": [
+    "*DebitTemporalTx",
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*ReadFunctionEligibilityTx",
+    "*RecordTx",
+    "*SettleGrantTx",
+    "*SnapshotTx",
+    "*WorkplaceSPTx"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ],
+   "topfloor": [
+    "*WorkplaceOpponentTx"
+   ]
+  },
+  "worldboss": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*AttestSummaryTx",
+    "*StartTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*DebitMaterialCostTx",
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*SnapshotTx"
+   ],
+   "interface:worldboss.Heroes": [
+    "*OverlayMID1"
+   ]
+  }
+ },
+ "wired": {
+  "achievement": [
+   "realtimeauth"
+  ],
+  "activitydirectory": [
+   "achievement",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "generation",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "i5",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "adventure": [
+   "arena",
+   "realtimewakeup",
+   "topfloor"
+  ],
+  "arena": [
+   "adventure",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "commerceprivilege",
+   "conquerschool",
+   "dailyconsume",
+   "oneonone",
+   "playerdisplay",
+   "publicstats",
+   "topfloor"
+  ],
+  "awakeningbattle": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "bookskill": [
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "dailyconsume",
+   "directorysync",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "librarylocal",
+   "march",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "bootstrap": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "generation",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "campaign": [
+   "achievement",
+   "adventure",
+   "arena",
+   "bookskill",
+   "championsleague",
+   "conquerschool",
+   "course",
+   "dormhouse",
+   "elementequipment",
+   "heroevolution",
+   "inscription",
+   "librarylocal",
+   "oneonone",
+   "playerdisplay",
+   "publicstats",
+   "socialrelation",
+   "spirit",
+   "topfloor"
+  ],
+  "championsleague": [
+   "adventure",
+   "arena",
+   "bookskill",
+   "campaign",
+   "characterhero",
+   "characterpet",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "dormhouse",
+   "elementequipment",
+   "heroevolution",
+   "inscription",
+   "librarylocal",
+   "oneonone",
+   "publicstats",
+   "socialrelation",
+   "spirit",
+   "topfloor"
+  ],
+  "channelchat": [],
+  "characterasset": [],
+  "characterhero": [
+   "achievement",
+   "activitydirectory",
+   "arena",
+   "bookskill",
+   "bootstrap",
+   "championsleague",
+   "characterpet",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "playerdisplay",
+   "publication",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "topfloor",
+   "worldboss"
+  ],
+  "characterpet": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "championsleague",
+   "characterhero",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "characterpractice": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "charactersavedpreset",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "generation",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "charactersavedpreset": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "generation",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "clientlog": [],
+  "combat": [],
+  "commerceprivilege": [],
+  "conquerschool": [
+   "adventure",
+   "arena",
+   "bookskill",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "course",
+   "dailyconsume",
+   "dormhouse",
+   "elementequipment",
+   "heroevolution",
+   "inscription",
+   "librarylocal",
+   "oneonone",
+   "playerdisplay",
+   "socialrelation",
+   "spirit",
+   "topfloor"
+  ],
+  "course": [
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "conquerschool",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "identitylifecycle",
+   "illusion",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "dailyconsume": [],
+  "directorysync": [],
+  "dodgeball": [
+   "playerdisplay"
+  ],
+  "dormhouse": [
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "elementequipment": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "identitylifecycle",
+   "illusion",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "frienddm": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "generaldm": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "i5",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "generation": [],
+  "godstrial": [],
+  "guildbroadcast": [
+   "realtimeauth"
+  ],
+  "guildcampaign": [
+   "realtimewakeup"
+  ],
+  "guildcore": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "guildinvite": [],
+  "guildinvitetarget": [],
+  "guildrental": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "guildtea": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "generation",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "guildview": [],
+  "heroevolution": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "identitylifecycle",
+   "illusion",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "i5": [
+   "activitydirectory",
+   "characterasset",
+   "directorysync",
+   "generaldm",
+   "identitylifecycle",
+   "realtimeauth",
+   "roominvite",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload"
+  ],
+  "identitylifecycle": [],
+  "illusion": [
+   "adventure"
+  ],
+  "inscription": [
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "identitylifecycle",
+   "illusion",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "librarylocal": [
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "publication",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "march": [],
+  "memoir": [],
+  "missioninputs": [],
+  "occult": [],
+  "oneonone": [
+   "adventure",
+   "arena",
+   "bookskill",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "dormhouse",
+   "elementequipment",
+   "heroevolution",
+   "inscription",
+   "librarylocal",
+   "playerdisplay",
+   "publicstats",
+   "socialrelation",
+   "spirit",
+   "topfloor"
+  ],
+  "petcampaign": [],
+  "playerdirectory": [],
+  "playerdisplay": [],
+  "playerpresentation": [],
+  "playerroot": [],
+  "profileasset": [],
+  "profilefeedback": [
+   "realtimeauth"
+  ],
+  "publication": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "publicprofile": [
+   "characterpet",
+   "realtimeauth"
+  ],
+  "publicstats": [],
+  "ranking": [],
+  "realtimeauth": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "generation",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "i5",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "realtimewakeup": [],
+  "roominvite": [],
+  "sharedroom": [],
+  "socialdismiss": [],
+  "socialfriendbase": [],
+  "socialgift": [],
+  "socialinbox": [],
+  "socialpresence": [],
+  "socialprojection": [],
+  "socialrelation": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "i5",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "realtimeauth",
+   "sharedroom",
+   "socialfriendbase",
+   "spirit",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "socialreload": [],
+  "socialreloadref": [],
+  "spirit": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "awakeningbattle",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "commerceprivilege",
+   "conquerschool",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "frienddm",
+   "generaldm",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "identitylifecycle",
+   "illusion",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "summon",
+   "topfloor",
+   "worldboss"
+  ],
+  "summon": [
+   "achievement",
+   "activitydirectory",
+   "adventure",
+   "arena",
+   "awakeningbattle",
+   "bookskill",
+   "bootstrap",
+   "campaign",
+   "championsleague",
+   "characterasset",
+   "characterpet",
+   "characterpractice",
+   "charactersavedpreset",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "directorysync",
+   "dormhouse",
+   "elementequipment",
+   "frienddm",
+   "generaldm",
+   "godstrial",
+   "guildcampaign",
+   "guildcore",
+   "guildtea",
+   "heroevolution",
+   "identitylifecycle",
+   "illusion",
+   "inscription",
+   "librarylocal",
+   "march",
+   "missioninputs",
+   "occult",
+   "oneonone",
+   "petcampaign",
+   "playerdisplay",
+   "publication",
+   "publicprofile",
+   "realtimeauth",
+   "roominvite",
+   "sharedroom",
+   "socialdismiss",
+   "socialfriendbase",
+   "socialgift",
+   "socialinbox",
+   "socialprojection",
+   "socialrelation",
+   "socialreload",
+   "spirit",
+   "topfloor",
+   "worldboss"
+  ],
+  "topfloor": [
+   "adventure",
+   "arena",
+   "bookskill",
+   "campaign",
+   "championsleague",
+   "characterhero",
+   "characterpet",
+   "conquerschool",
+   "course",
+   "dailyconsume",
+   "dormhouse",
+   "elementequipment",
+   "heroevolution",
+   "inscription",
+   "librarylocal",
+   "oneonone",
+   "playerdisplay",
+   "publicstats",
+   "socialrelation",
+   "spirit"
+  ],
+  "workplace": [],
+  "worldboss": []
+ }
+}

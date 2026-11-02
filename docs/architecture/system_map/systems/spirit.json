@@ -1,15 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "generation": [
-   "Bind"
-  ],
-  "i5": [
-   "ApplyMaterialDebitTx",
-   "PrepareMaterialDebitTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -22,6 +12,7 @@
   "internal/adapters/stockruntime/spirit_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -37,7 +28,8 @@
     "name": "spirit.RootLockRank",
     "rank": 580
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [
   "OverlayRosterTx"

@@ -1,57 +1,11 @@
 {
  "background": [],
- "called_by": {
-  "guildinvitetarget": [
-   "InviteTuple",
-   "MatchInvite",
-   "PreflightConsumption"
-  ],
-  "roominvite": [
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialdismiss": [
-   "RelationFamily",
-   "RoomInviteFamily",
-   "ValidateRelationLifecycle",
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialgift": [
-   "ApplyConsumptionTx",
-   "ApplyTx",
-   "InviteFamily",
-   "MatchGift",
-   "NoticeLockKey",
-   "PreflightConsumption",
-   "PrepareConsumptionTx",
-   "RelationFamily",
-   "RoomInviteFamily",
-   "ValidateGiftLifecycle",
-   "ValidateRelationLifecycle",
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialprojection": [
-   "InviteFamily",
-   "RelationFamily",
-   "RoomInviteFamily",
-   "RoomInviteTuple",
-   "ValidateRelationDescriptor",
-   "ValidateRelationLifecycle",
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialrelation": [
-   "ApplyRelationsTx",
-   "PrepareRelationsTx"
-  ],
-  "socialreload": [
-   "ValidateRelationLifecycle"
-  ]
- },
- "calls": {},
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -62,7 +16,8 @@
     "name": "socialinbox.LockRankNotice",
     "rank": 370
    }
-  ]
+  ],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

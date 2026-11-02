@@ -1,28 +1,11 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "guildinvite": [
-   "ReadInviteSnapshotTx",
-   "ReadIssueDeliveryEvidenceTx",
-   "ReadIssueEvidenceTx",
-   "ReadIssueTupleEvidenceTx",
-   "ReadMarkerEvidenceTx"
-  ],
-  "socialinbox": [
-   "InviteTuple",
-   "MatchInvite",
-   "PreflightConsumption"
-  ],
-  "socialrelation": [
-   "ApplyChangeTx"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -33,7 +16,8 @@
     "name": "I7A8B_SOCIAL_INVITE_TARGET"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

@@ -1,17 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "playerdisplay": [
-   "ReceiveOriginTx"
-  ],
-  "publicprofile": [
-   "ReadMetricsScopeTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -32,6 +20,7 @@
   "internal/adapters/stockruntime/ranking.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -42,7 +31,10 @@
     "name": "I7C4C_GIRLS_RANKING"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "ranking_girls_roots"
+  ]
  },
  "login": [],
  "mids": [

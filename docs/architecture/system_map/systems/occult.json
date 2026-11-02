@@ -6,34 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "SettleMemberTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "CheckAwakeningOccultMaterialTx",
-   "DebitOccultTicketTx",
-   "FreezeAwakeningOccultMaterialTx",
-   "OccultTicketsTx",
-   "SettleGrantTx"
-  ],
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ],
-  "sharedroom": [
-   "Join",
-   "SetReady",
-   "Update"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -50,6 +22,7 @@
   "internal/adapters/stockruntime/occult_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -60,7 +33,10 @@
     "name": "occult"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "occult_players"
+  ]
  },
  "login": [],
  "mids": [

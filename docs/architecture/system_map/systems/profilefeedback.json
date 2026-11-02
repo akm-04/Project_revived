@@ -1,18 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "generation": [
-   "Bind",
-   "NewTimedOperation"
-  ],
-  "publicprofile": [
-   "ReadBasicTx"
-  ],
-  "socialrelation": [
-   "CanonicalServer"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -26,6 +13,7 @@
   "internal/adapters/stockruntime/profile_feedback.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -36,6 +24,9 @@
     "name": "profilefeedback.LockRankRoot",
     "rank": 392
    }
+  ],
+  "row_locks": [
+   "player_profile_feedback_roots"
   ]
  },
  "login": [],

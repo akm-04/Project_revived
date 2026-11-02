@@ -6,29 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttemptTx",
-   "CloseTx",
-   "ReplayTx",
-   "ResolveDetached",
-   "ResultTx",
-   "StartTx",
-   "TerminalTx"
-  ],
-  "i5": [
-   "DeliverLeagueTitleNoticeTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ],
-  "playerdisplay": [
-   "ReceiveOriginTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -41,6 +18,17 @@
   "internal/adapters/stockruntime/league_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
   "emits": [
    "PVP_FIGHT"
   ],
@@ -53,7 +41,8 @@
     "name": "champions-league"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [

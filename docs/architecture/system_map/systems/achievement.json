@@ -1,37 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "publicprofile": [
-   "TrophyCountTx"
-  ]
- },
- "calls": {
-  "bookskill": [
-   "BookInputsTx"
-  ],
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "course": [
-   "HeroCourseInputsTx"
-  ],
-  "dormhouse": [
-   "VillaCountTx"
-  ],
-  "i5": [
-   "SettleGrantTx"
-  ],
-  "inscription": [
-   "HeroInscriptionInputsTx"
-  ],
-  "librarylocal": [
-   "HeroLibraryInputsTx",
-   "MarriedHeroCountTx"
-  ],
-  "playerdisplay": [
-   "SkinCollectionTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -44,9 +12,8 @@
   "internal/adapters/stockruntime/achievement_dispatcher.go"
  ],
  "facts": {
-  "emits": [
-   "MARRIED_HERO_POPULATION"
-  ],
+  "consumers": {},
+  "emits": [],
   "reads": []
  },
  "locks": {
@@ -56,7 +23,8 @@
     "name": "achievement"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [

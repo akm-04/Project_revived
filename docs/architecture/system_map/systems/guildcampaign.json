@@ -6,24 +6,6 @@
    "kind": "reconcile"
   }
  ],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "StartTx"
-  ],
-  "generation": [
-   "NewTimedOperation"
-  ],
-  "i5": [
-   "DeliverNoticeTx",
-   "DeliverTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -88,12 +70,31 @@
   "internal/adapters/stockruntime/guild_campaign_dispatcher.go"
  ],
  "facts": {
-  "emits": [],
+  "consumers": {
+   "GUILD_ACTIVITY": {
+    "missions": [
+     117
+    ],
+    "stages": [
+     "I9-9"
+    ]
+   }
+  },
+  "emits": [
+   "GUILD_ACTIVITY"
+  ],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "guild_campaign_chapters",
+   "guild_campaign_copies",
+   "guild_memberships",
+   "guilds",
+   "player_guild_activity_days"
+  ]
  },
  "login": [],
  "mids": [

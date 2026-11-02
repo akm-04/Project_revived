@@ -1,29 +1,18 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "frienddm": [
-   "ActorValid",
-   "ApplyDrainTx",
-   "LockPlanTx",
-   "Preflight",
-   "PrepareDrainTx"
-  ],
-  "socialprojection": [
-   "ReadBasePreparedTx"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

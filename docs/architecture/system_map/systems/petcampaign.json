@@ -1,22 +1,5 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "characterasset": [
-   "NewCoherentReadScope"
-  ],
-  "combat": [
-   "AttestSummaryTx",
-   "MonsterWaves",
-   "StartTx"
-  ],
-  "i5": [
-   "CheckAwakeningPetMaterialTx",
-   "DebitMaterialCostTx",
-   "FreezeAwakeningPetMaterialTx",
-   "SettleGrantTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -29,6 +12,13 @@
   "internal/adapters/stockruntime/petcampaign_dispatcher.go"
  ],
  "facts": {
+  "consumers": {
+   "SKY_CITY_BATTLE": {
+    "missions": [
+     120
+    ]
+   }
+  },
   "emits": [
    "SKY_CITY_BATTLE"
   ],
@@ -41,7 +31,10 @@
     "name": "pet-campaign"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": [
+   "petcampaign_players"
+  ]
  },
  "login": [
   "OverlayMID1"

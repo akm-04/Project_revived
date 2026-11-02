@@ -1,21 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "characterhero": [
-   "ReduceAppliedPracticeContribution"
-  ],
-  "characterpet": [
-   "ReduceAppliedPracticeContribution"
-  ]
- },
- "calls": {
-  "i5": [
-   "ApplyLevelAndStackDebitTx",
-   "AuthorizeLevelAndDebitScalarTx",
-   "PlayerLevelTx",
-   "PrepareLevelAndStackDebitTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -52,6 +36,7 @@
   "internal/adapters/stockruntime/practice_dispatcher.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -70,7 +55,8 @@
     "name": "CA6_PRACTICE_DAILY_GENERATION"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [

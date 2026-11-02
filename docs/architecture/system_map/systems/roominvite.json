@@ -1,19 +1,11 @@
 {
  "background": [],
- "called_by": {},
- "calls": {
-  "socialinbox": [
-   "ValidateRoomInviteLifecycle"
-  ],
-  "socialrelation": [
-   "ApplyChangeTx"
-  ]
- },
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -24,7 +16,8 @@
     "name": "I9_8_ROOM_INVITE_MATERIALIZE"
    }
   ],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [],
  "mids": [],

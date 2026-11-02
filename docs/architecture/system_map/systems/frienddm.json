@@ -1,26 +1,5 @@
 {
  "background": [],
- "called_by": {
-  "socialfriendbase": [
-   "ActorValid",
-   "ApplyDrainTx",
-   "LockPlanTx",
-   "Preflight",
-   "PrepareDrainTx"
-  ],
-  "socialprojection": [
-   "Eligible"
-  ]
- },
- "calls": {
-  "playerroot": [
-   "CanonicalPlayerIDs"
-  ],
-  "socialrelation": [
-   "CanonicalServer",
-   "PrepareFriendDMPrivacyTx"
-  ]
- },
  "content": [],
  "contracts": [
   {
@@ -33,6 +12,7 @@
   "internal/adapters/stockruntime/friend_dm.go"
  ],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
@@ -43,6 +23,9 @@
     "name": "frienddm.LockRank",
     "rank": 380
    }
+  ],
+  "row_locks": [
+   "player_social_presence"
   ]
  },
  "login": [],

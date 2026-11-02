@@ -1,22 +1,18 @@
 {
  "background": [],
- "called_by": {
-  "playerdisplay": [
-   "ReconcileDirectoryTx"
-  ]
- },
- "calls": {},
  "content": [],
  "contracts": [],
  "decorated_by": [],
  "dispatcher_files": [],
  "facts": {
+  "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
   "profiles": [],
-  "ranks": []
+  "ranks": [],
+  "row_locks": []
  },
  "login": [
   "ReconcileDirectoryTx",
