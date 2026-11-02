@@ -1,0 +1,333 @@
+{
+  "note": "Six full-power Moppleton clones (strongest 15 girls at level 100, full star/color) and fourteen scaled clones. bots.py applies overrides before import_player. keep_heroes 0 means every hero; prove_battle runs the check_import battle proof for scaled rosters.",
+  "bots": [
+    {
+      "login": "moppleton2",
+      "display_name": "Moppleton II",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 100,
+        "player_exp": 583683,
+        "keep_heroes": 15,
+        "hero_level_cap": 100,
+        "star_cap": 5,
+        "color_cap": 16,
+        "currency_scale": 1.0,
+        "filter_functions": false
+      }
+    },
+    {
+      "login": "moppleton3",
+      "display_name": "Moppleton III",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 100,
+        "player_exp": 583683,
+        "keep_heroes": 15,
+        "hero_level_cap": 100,
+        "star_cap": 5,
+        "color_cap": 16,
+        "currency_scale": 1.0,
+        "filter_functions": false
+      }
+    },
+    {
+      "login": "moppleton4",
+      "display_name": "Moppleton IV",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 100,
+        "player_exp": 583683,
+        "keep_heroes": 15,
+        "hero_level_cap": 100,
+        "star_cap": 5,
+        "color_cap": 16,
+        "currency_scale": 1.0,
+        "filter_functions": false
+      }
+    },
+    {
+      "login": "moppleton5",
+      "display_name": "Moppleton V",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 100,
+        "player_exp": 583683,
+        "keep_heroes": 15,
+        "hero_level_cap": 100,
+        "star_cap": 5,
+        "color_cap": 16,
+        "currency_scale": 1.0,
+        "filter_functions": false
+      }
+    },
+    {
+      "login": "moppleton6",
+      "display_name": "Moppleton VI",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 100,
+        "player_exp": 583683,
+        "keep_heroes": 15,
+        "hero_level_cap": 100,
+        "star_cap": 5,
+        "color_cap": 16,
+        "currency_scale": 1.0,
+        "filter_functions": false
+      }
+    },
+    {
+      "login": "moppleton7",
+      "display_name": "Moppleton VII",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 100,
+        "player_exp": 583683,
+        "keep_heroes": 15,
+        "hero_level_cap": 100,
+        "star_cap": 5,
+        "color_cap": 16,
+        "currency_scale": 1.0,
+        "filter_functions": false
+      }
+    },
+    {
+      "login": "alderfinch",
+      "display_name": "Alder Finch",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 95,
+        "player_exp": 424615,
+        "keep_heroes": 15,
+        "hero_level_cap": 95,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.95,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "briarholt",
+      "display_name": "Briar Holt",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 92,
+        "player_exp": 343615,
+        "keep_heroes": 15,
+        "hero_level_cap": 92,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.92,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "cassianwolfe",
+      "display_name": "Cassian Wolfe",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 88,
+        "player_exp": 245615,
+        "keep_heroes": 15,
+        "hero_level_cap": 88,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.88,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "deliamarsh",
+      "display_name": "Delia Marsh",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 84,
+        "player_exp": 177615,
+        "keep_heroes": 15,
+        "hero_level_cap": 84,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.84,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "edwincole",
+      "display_name": "Edwin Cole",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 80,
+        "player_exp": 141615,
+        "keep_heroes": 15,
+        "hero_level_cap": 80,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.8,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "fayerook",
+      "display_name": "Faye Rook",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 76,
+        "player_exp": 122715,
+        "keep_heroes": 15,
+        "hero_level_cap": 76,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.76,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "gideonpike",
+      "display_name": "Gideon Pike",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 72,
+        "player_exp": 103915,
+        "keep_heroes": 15,
+        "hero_level_cap": 72,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.72,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "hazeldean",
+      "display_name": "Hazel Dean",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 68,
+        "player_exp": 85715,
+        "keep_heroes": 15,
+        "hero_level_cap": 68,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.68,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "irisvale",
+      "display_name": "Iris Vale",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 64,
+        "player_exp": 70015,
+        "keep_heroes": 15,
+        "hero_level_cap": 64,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.64,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "jonahreed",
+      "display_name": "Jonah Reed",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 60,
+        "player_exp": 56415,
+        "keep_heroes": 15,
+        "hero_level_cap": 60,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.6,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "kiralane",
+      "display_name": "Kira Lane",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 56,
+        "player_exp": 44115,
+        "keep_heroes": 15,
+        "hero_level_cap": 56,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.56,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "lucaspenn",
+      "display_name": "Lucas Penn",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 52,
+        "player_exp": 33915,
+        "keep_heroes": 15,
+        "hero_level_cap": 52,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.52,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "maraquinn",
+      "display_name": "Mara Quinn",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 48,
+        "player_exp": 24915,
+        "keep_heroes": 15,
+        "hero_level_cap": 48,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.48,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    },
+    {
+      "login": "nolonashe",
+      "display_name": "Nolan Ashe",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 40,
+        "player_exp": 11015,
+        "keep_heroes": 15,
+        "hero_level_cap": 40,
+        "star_cap": 5,
+        "color_cap": 7,
+        "currency_scale": 0.4,
+        "filter_functions": true,
+        "prove_battle": true,
+        "strip_derived": true
+      }
+    }
+  ]
+}

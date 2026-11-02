@@ -1,0 +1,23 @@
+{
+  "name": "top_floor_low_level",
+  "note": "A level-40 dummy holding the five weakest girls at level 1, star 1 and color 1, so a new player's Top Floor offers an easy opponent. Run after the roster to repopulate one weak defense slot.",
+  "players": [
+    {
+      "login": "ninastart",
+      "display_name": "Nina Start",
+      "source_save": "preserve/server_state/players/12525385/player.json",
+      "overrides": {
+        "player_level": 40,
+        "player_exp": 0,
+        "keep_heroes": 5,
+        "hero_quality": "weakest",
+        "hero_level_cap": 40,
+        "star_cap": 1,
+        "color_cap": 1,
+        "currency_scale": 0.4,
+        "filter_functions": true
+      }
+    }
+  ],
+  "modes": ["top_floor"]
+}

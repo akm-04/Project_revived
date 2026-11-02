@@ -1,0 +1,11 @@
+{
+  "name": "empty_server_defense",
+  "note": "Only born accounts: no imported save, no heroes and no defense team, so a fresh server's Top Floor and Champion matching must fall back to the source robot teams. Run this on a freshly deployed database before seed.sh imports players.",
+  "players": [],
+  "born_accounts": [
+    { "login": "newcomerone", "display_name": "Newcomer One" },
+    { "login": "newcomertwo", "display_name": "Newcomer Two" },
+    { "login": "newcomerthree", "display_name": "Newcomer Three" },
+    { "login": "newcomerfour", "display_name": "Newcomer Four" }
+  ]
+}

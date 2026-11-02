@@ -15,8 +15,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-WORKSPACE = Path(__file__).resolve().parents[3]
-PLAYTEST_HOME = Path(os.environ.get("PLAYTEST_HOME", WORKSPACE / "tmp" / "playtest"))
+WORKSPACE = Path(__file__).resolve().parents[1]
+PLAYTEST_HOME = Path(os.environ.get("PLAYTEST_HOME", Path(__file__).resolve().parent / "runtime"))
 PLAYTEST_TOOLS = Path(
     os.environ.get(
         "PLAYTEST_TOOLS",
@@ -46,6 +46,7 @@ DATABASE_NAME = "gxb_playtest"
 BINARY_NAMES = ("gxb-api", "gxb-combat-worker", "gxb-worker", "gxb-realtime")
 LOG_LINE_COUNT = 50
 API_START_TIMEOUT_SECONDS = 60
+ASSET_INDEX_TIMEOUT_SECONDS = 300
 STOP_TIMEOUT_SECONDS = 10
 
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
@@ -243,6 +244,17 @@ def asset_front_environment():
 
 
 def service_command(service):
+    if service["kind"] == "tunnel":
+        share = [
+            "zrok2",
+            "share",
+            "public",
+            f"localhost:{service['target_port']}",
+            "-n",
+            f"public:{service['share']}",
+            "--headless",
+        ]
+        return share, str(RUN_DIRECTORY)
     if service["kind"] == "binary":
         return [str(BINARY_DIRECTORY / service["name"])], str(BINARY_DIRECTORY)
     script = Path(__file__).resolve().parent / service["script"]
@@ -250,6 +262,8 @@ def service_command(service):
 
 
 def service_environment(name, secrets_value):
+    if name.startswith("zrok-"):
+        return child_environment({})
     if name == "gxb-api":
         return api_environment(secrets_value)
     if name == "gxb-realtime":
@@ -294,6 +308,22 @@ SERVICES = (
         "port": ASSET_FRONT_PORT,
         "listen_host": PLAYTEST_BIND,
     },
+    {
+        "name": "zrok-gxbv2sdk",
+        "kind": "tunnel",
+        "share": "gxbv2sdk",
+        "target_port": SDK_PORT,
+        "port": None,
+        "listen_host": None,
+    },
+    {
+        "name": "zrok-gxbv2engine",
+        "kind": "tunnel",
+        "share": "gxbv2engine",
+        "target_port": ASSET_FRONT_PORT,
+        "port": None,
+        "listen_host": None,
+    },
 )
 SERVICE_NAMES = tuple(service["name"] for service in SERVICES)
 
@@ -303,6 +333,8 @@ EXPECTED_COMMANDLINE = {
     "gxb-realtime": "gxb-realtime",
     "gxb-sdk": "sdk.py",
     "gxb-asset-front": "asset_front.py",
+    "zrok-gxbv2sdk": "public:gxbv2sdk",
+    "zrok-gxbv2engine": "public:gxbv2engine",
 }
 
 
@@ -579,22 +611,17 @@ def prepare_database(tree):
 
 def command_reset(arguments):
     if len(arguments) != 1:
-        raise SystemExit("usage: playtest.py reset <backend tree>")
+        raise SystemExit("usage: harness.py reset <backend tree>")
     tree = Path(arguments[0]).resolve()
-    if not (tree / "go.mod").is_file():
-        raise SystemExit(f"not a backend tree: {tree}")
+    if not (tree / "go.mod").is_file() or not (tree / "BACKEND_COMMIT").is_file():
+        raise SystemExit(f"not a deployed backend tree (go.mod and BACKEND_COMMIT): {tree}")
     ensure_layout()
     command_down()
     build_binaries(tree)
     start_cluster()
     prepare_database(tree)
     ACCOUNTS_PATH.unlink(missing_ok=True)
-    head = subprocess.run(
-        ["git", "-C", str(tree), "rev-parse", "HEAD"],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.strip()
+    head = (tree / "BACKEND_COMMIT").read_text(encoding="utf-8").strip()
     write_json_atomic(
         BACKEND_STATE_PATH,
         {"tree": str(tree), "commit": head, "database": DATABASE_NAME},
@@ -625,6 +652,15 @@ def wait_for_api():
     return False
 
 
+def wait_for_port(host, port, timeout_seconds):
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if port_open(host, port):
+            return
+        time.sleep(0.2)
+    raise SystemExit(f"up: nothing listening on {host}:{port}")
+
+
 def command_up():
     ensure_layout()
     secrets_value = load_secrets()
@@ -643,7 +679,9 @@ def command_up():
         start_service(service, secrets_value)
         print(f"up: {name} started")
     if not wait_for_api():
-        raise SystemExit("up: gxb-api did not answer /health/live")
+        raise SystemExit("up: gxb-api did not answer MID 20480")
+    wait_for_port(PLAYTEST_BIND, ASSET_FRONT_PORT, ASSET_INDEX_TIMEOUT_SECONDS)
+    wait_for_port(PLAYTEST_BIND, SDK_PORT, API_START_TIMEOUT_SECONDS)
     print(f"up: gxb-api answering on {API_ADDRESS}, lan host {LAN_HOST}")
 
 
@@ -674,7 +712,7 @@ def command_status():
 
 def command_logs(arguments):
     if not arguments:
-        raise SystemExit("usage: playtest.py logs <service> [-f]")
+        raise SystemExit("usage: harness.py logs <service> [-f]")
     name = arguments[0]
     if name not in SERVICE_NAMES:
         raise SystemExit(f"unknown service {name}; services: {', '.join(SERVICE_NAMES)}")
@@ -701,7 +739,7 @@ def command_logs(arguments):
 def main(arguments):
     if len(arguments) < 1:
         raise SystemExit(
-            "usage: playtest.py reset <backend tree> | up | down | status | logs <service> [-f]"
+            "usage: harness.py reset <backend tree> | up | down | status | logs <service> [-f]"
         )
     command = arguments[0]
     if command == "reset":

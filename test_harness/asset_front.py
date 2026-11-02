@@ -11,8 +11,8 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-PLAYTEST_HOME = Path(os.environ.get("PLAYTEST_HOME", Path(__file__).resolve().parents[3] / "tmp" / "playtest"))
-ASSET_TREE = Path(os.environ.get("PLAYTEST_ASSET_TREE", Path(__file__).resolve().parents[3] / "tmp" / "virtualclient" / "update-tree"))
+PLAYTEST_HOME = Path(os.environ.get("PLAYTEST_HOME", Path(__file__).resolve().parent / "runtime"))
+ASSET_TREE = Path(os.environ.get("PLAYTEST_ASSET_TREE", Path(__file__).resolve().parents[1] / "tmp" / "virtualclient" / "update-tree"))
 BIND_ADDRESS = os.environ.get("PLAYTEST_BIND", "127.0.0.1")
 ENGINE_ORIGIN = os.environ.get("PLAYTEST_ENGINE_ORIGIN", "https://gxbv2engine.shares.zrok.io").rstrip("/")
 LISTEN_PORT = 18956
@@ -230,22 +230,13 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
             self.wfile.write(data)
 
     def rewrite_download_url(self, headers, data):
-        if not data:
+        if b'"res_download_url":""' not in data:
             return data
-        content_type = ""
-        for name, value in headers:
-            if name.lower() == "content-type":
-                content_type = value.lower()
-        if "json" not in content_type and not data.lstrip().startswith(b"{"):
-            return data
-        try:
-            parsed = json.loads(data)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            return data
-        if not isinstance(parsed, dict) or parsed.get("res_download_url") != "":
-            return data
-        parsed["res_download_url"] = f"{ENGINE_ORIGIN}/res/"
-        return json.dumps(parsed, separators=(",", ":")).encode("utf-8")
+        return data.replace(
+            b'"res_download_url":""',
+            json.dumps({"res_download_url": f"{ENGINE_ORIGIN}/res/"}, separators=(",", ":"))[1:-1].encode("utf-8"),
+            1,
+        )
 
     def send_empty(self, status):
         self.send_response(status)

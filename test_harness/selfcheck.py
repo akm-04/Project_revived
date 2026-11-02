@@ -12,8 +12,8 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-WORKSPACE = Path(__file__).resolve().parents[3]
-PLAYTEST_HOME = Path(os.environ.get("PLAYTEST_HOME", WORKSPACE / "tmp" / "playtest"))
+WORKSPACE = Path(__file__).resolve().parents[1]
+PLAYTEST_HOME = Path(os.environ.get("PLAYTEST_HOME", Path(__file__).resolve().parent / "runtime"))
 PLAYTEST_TOOLS = Path(
     os.environ.get(
         "PLAYTEST_TOOLS",

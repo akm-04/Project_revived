@@ -1,7 +1,11 @@
-# Playtest harness (part 1)
+# V2 real-client test harness
 
-Temporary test tool for the v2 stock-client playtest. Not product code. It builds the backend into its own
-directory, runs an own PostgreSQL cluster, and serves the SDK and lazy assets the real APK needs.
+Temporary test tool: a real Android client plays against the v2 backend. Not product code and not the W2 operator tool. It builds
+the backend into its own directory, runs its own PostgreSQL cluster, and serves the SDK and lazy assets the real APK needs.
+
+Runs as the user service `gxb-test-harness` while the laptop is on. Stop it during strict gates and heavy tests:
+`systemctl --user stop gxb-test-harness`, then `start`. After each PassMap seal `ops/harness_deploy.sh [commit]` replaces the
+backend, wipes the database and reseeds players and bots; it keeps `runtime/state/secrets.json`.
 
 ## Ports and paths
 
@@ -12,8 +16,9 @@ directory, runs an own PostgreSQL cluster, and serves the SDK and lazy assets th
 | SDK (`sdk.py`) | `PLAYTEST_BIND`:18955 |
 | asset front (`asset_front.py`) | `PLAYTEST_BIND`:18956 |
 | PostgreSQL | unix socket in `$PLAYTEST_HOME/pg`, port 18957, `listen_addresses=''` |
+| zrok2 tunnels | `gxbv2sdk` to 18955, `gxbv2engine` to 18956, stopped by pid with the rest; a new share takes some seconds to answer |
 
-Runtime home defaults to `/home/akm/Chatgpt/EOL_Game/tmp/playtest`. Environment:
+Runtime home defaults to `test_harness/runtime`. Environment:
 
 - `PLAYTEST_HOME` - runtime home (state, logs, run, bin, pg, media).
 - `PLAYTEST_TOOLS` - bundled psql/createdb/dropdb/initdb/pg_ctl/goose bin directory
@@ -35,19 +40,19 @@ resets. They are never the virtual-client fixture values.
 Run with the bundled Python:
 
 ```
-.toolchain/bin/python3 -I -B playtest/playtest.py reset /path/to/backend
-.toolchain/bin/python3 -I -B playtest/playtest.py up
-.toolchain/bin/python3 -I -B playtest/playtest.py status
-.toolchain/bin/python3 -I -B playtest/playtest.py logs gxb-api [-f]
-.toolchain/bin/python3 -I -B playtest/playtest.py down
-.toolchain/bin/python3 -I -B playtest/selfcheck.py
+.toolchain/bin/python3 -I -B test_harness/harness.py reset /path/to/backend
+.toolchain/bin/python3 -I -B test_harness/harness.py up
+.toolchain/bin/python3 -I -B test_harness/harness.py status
+.toolchain/bin/python3 -I -B test_harness/harness.py logs gxb-api [-f]
+.toolchain/bin/python3 -I -B test_harness/harness.py down
+.toolchain/bin/python3 -I -B test_harness/selfcheck.py
 ```
 
 - `reset` stops everything, builds gxb-api, gxb-combat-worker, gxb-worker and gxb-realtime
   (`-tags postgres,river`) into `bin.new` and swaps only on success, starts the cluster, recreates
   `gxb_playtest` (goose, content deploy, publication preparation as `ops/testing/fresh_db.sh`), clears the
   SDK accounts and records the backend tree and commit in `state/backend.json`. It does not start services.
-- `up` starts the cluster and the five services as detached processes with logs in `logs/` and pids in
+- `up` starts the cluster, the five services and the two tunnels as detached processes with logs in `logs/` and pids in
   `run/`; it refuses a port held by another process and waits for `/health/live`.
 - `down` stops them by recorded pid after checking `/proc/<pid>/cmdline`, then stops the cluster.
 - `status` prints one line per service, the backend commit and the LAN host.
@@ -85,7 +90,48 @@ as the stock client observes the server directory before creating or selecting i
 - The served tree holds the `res/` files; `version.json` also lists `src_32`/`src_64` Lua entries that are
   already packaged in the APK and are not in the tree, so those requests (if any) are honest 404s.
 
+## Bots
+
+`bots.json` is the roster: six full-power Moppleton clones (level 100) and fourteen scaled
+clones (levels 40-95), each imported from the preserved Moppleton save with hero level, star,
+color, equipment and currency caps applied by `bots.py`. `seed.sh` imports the three preserved
+players first, then runs `bots.py create` and `bots.py enter`.
+
+- `bots.py create` imports the roster through `import_player` and battle-proves every scaled
+  roster with the same MID 113/114 campaign proof `check_import.py` uses.
+- `bots.py enter` logs each bot in with the stock MIDs and enters Top Floor defense (272/278),
+  Arena defense (768/770), 1 on 1 teams (2480/2481) and Champions League defense (2800/2805).
+  A closed mode (1 on 1 window, Top Floor freeze, league season) is reported as closed; rerun
+  it when the window opens. Teams are chosen by star, then level, then color, then partner id,
+  because no per-hero server power reply exists.
+- `bots.py status` prints one line per bot with player id, level and entered defenses.
+
+What the roster proves: Champion March gets real Top Floor defense snapshots at a spread of
+powers (including level-100 clones), so the last stage can be tested against a player-team
+instead of a robot; Top Floor and Arena ladders have real teams; 1 on 1 and league entries exist
+for levels that pass their composite function gates.
+
+## Operator helpers
+
+`helpers.py` is for a person testing on a phone:
+
+- `mail <login> --title T --body B [--item id:count ...]` writes one system mail. The backend has
+  no admin transport (`cmd/gxb-admin` is a stub), so this writes the I5 mail owner rows with the
+  same namespace counter, source, policy and attachment invariants as `createMailTx`.
+- `players` lists login, player id, display name, level and VIP.
+- `give <login> --currency key:amount --item id:count` adds currency or items through the same
+  economy transaction the importer uses; items are clamped to the active stack cap.
+- `fight-report <login>` prints the last 20 request-journal rows (MID, outcome, error class).
+
+`bots.py scenario <name>` runs a data file from `scenarios/`: `top_floor_low_level` creates one
+level-40 dummy with the weakest girls for an easy opponent, and `empty_server_defense` creates
+four born-only accounts (run it before seeding to prove robot fallback).
+
 ## Limits
+
+- Realtime (chat and live notices) is raw TCP and reaches clients on the LAN only: `sudo firewall-cmd --permanent --add-port=18954/tcp`.
+  A changed laptop IP needs a harness restart, no APK rebuild. On mobile data the game works without chat and live notices.
+- Champion's first load for a 123-girl account with 20 ranked bots takes about 8 s (client timeout 20-30 s); a repeat load 0.2 s.
 
 - MID 2 remains no-update; there is no delta/update-package server.
 - The served tree holds 25,420 of the 29,931 lazy `res/` files named by `version.json`; the other 4,511
