@@ -17,9 +17,20 @@
   "reads": []
  },
  "locks": {
-  "profiles": [],
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "charge-tap"
+   }
+  ],
   "ranks": [],
   "row_lock_methods": {
+   "commerce_charge_cards": [
+    "commerceprivilegestore.LockCardsTx"
+   ],
+   "commerce_charge_purchases": [
+    "commerceprivilegestore.ReadPurchaseCountTx"
+   ],
    "commerce_privilege_roots": [
     "commerceprivilegestore.ReadPrivilegeTx"
    ],
@@ -28,6 +39,8 @@
    ]
   },
   "row_locks": [
+   "commerce_charge_cards",
+   "commerce_charge_purchases",
    "commerce_privilege_roots",
    "player_directory_profiles"
   ]
@@ -43,15 +56,24 @@
   "internal/adapters/postgres/commerceprivilegestore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore"
  ],
  "tables": {
   "owned": [
-   "commerce_privilege_roots"
+   "commerce_charge_cards",
+   "commerce_charge_purchases",
+   "commerce_privilege_roots",
+   "commerce_recharge_tuning",
+   "commerce_vip_awards"
   ],
   "read": [
+   "commerce_charge_cards",
+   "commerce_charge_purchases",
    "commerce_privilege_roots",
+   "commerce_recharge_tuning",
    "content_privilege_catalogs",
+   "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
@@ -60,6 +82,8 @@
    "players"
   ],
   "written": [
+   "commerce_charge_cards",
+   "commerce_charge_purchases",
    "commerce_privilege_roots",
    "gxb_operation_receipts",
    "player_directory_profiles"

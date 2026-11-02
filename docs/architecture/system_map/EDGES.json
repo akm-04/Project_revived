@@ -612,6 +612,11 @@
     "Operation",
     "Run"
    ],
+   "commerceprivilege": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
    "conquerschool": [
     "DecisionAt",
     "Operation",
@@ -1037,7 +1042,11 @@
    ],
    "commerceprivilege": [
     "*Apply",
+    "*CrystalBalanceTx",
+    "*FenceActorTx",
     "*PreparePrivilegeTransitionTx",
+    "*PrepareTx",
+    "*SettleGrantTx",
     "DefaultProfile",
     "SnapshotTx",
     "Validate"
@@ -2796,9 +2805,18 @@
    ]
   },
   "commerceprivilege": {
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
    "i5": [
     "*Apply",
+    "*CrystalBalanceTx",
+    "*FenceActorTx",
     "*PreparePrivilegeTransitionTx",
+    "*PrepareTx",
+    "*SettleGrantTx",
     "DefaultProfile",
     "SnapshotTx",
     "Validate"

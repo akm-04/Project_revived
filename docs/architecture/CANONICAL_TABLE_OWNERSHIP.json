@@ -5105,6 +5105,80 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "commerce_charge_purchases": {
+      "owner": "commerce-privilege",
+      "allowed_query_owners": [
+        "commerce-privilege"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00109_i9_10g_charge.sql"
+    },
+    "commerce_charge_cards": {
+      "owner": "commerce-privilege",
+      "allowed_query_owners": [
+        "commerce-privilege"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00109_i9_10g_charge.sql"
+    },
+    "commerce_vip_awards": {
+      "owner": "commerce-privilege",
+      "allowed_query_owners": [
+        "commerce-privilege"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00109_i9_10g_charge.sql"
+    },
+    "commerce_recharge_tuning": {
+      "owner": "commerce-privilege",
+      "allowed_query_owners": [
+        "commerce-privilege"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/commerceprivilegestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00109_i9_10g_charge.sql"
+    },
+    "content_charge_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00109_i9_10g_charge.sql"
     }
   }
 }

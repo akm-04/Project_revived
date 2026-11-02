@@ -533,7 +533,11 @@
    "combat_resolutions": "combat",
    "combat_snapshots": "combat",
    "combat_start_packages": "combat",
+   "commerce_charge_cards": "commerceprivilege",
+   "commerce_charge_purchases": "commerceprivilege",
    "commerce_privilege_roots": "commerceprivilege",
+   "commerce_recharge_tuning": "commerceprivilege",
+   "commerce_vip_awards": "commerceprivilege",
    "dodgeball_players": "dodgeball",
    "friend_dm_delivery": "frienddm",
    "friend_dm_occurrences": "frienddm",
@@ -855,13 +859,13 @@
    "tables": 9
   },
   {
-   "callees": 6,
+   "callees": 7,
    "callers": 15,
    "mids": 0,
    "name": "commerceprivilege",
    "path": "internal/application/commerceprivilege",
    "purpose": "owns narrow canonical manual privilege facts",
-   "tables": 1
+   "tables": 5
   },
   {
    "callees": 12,
@@ -946,7 +950,7 @@
   },
   {
    "callees": 5,
-   "callers": 49,
+   "callers": 50,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",

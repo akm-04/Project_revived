@@ -88,10 +88,13 @@ type State struct {
 }
 
 func (s State) Validate() error {
-	if !s.PlayerID.Valid() || !s.LogicalServerID.Valid() || s.Charge < 0 || s.Charge > 9007199254740991 || s.VIPLevel < 0 || s.VIPLevel > 15 || s.MonthlyState != MonthlyAbsent || !RevisionValid(s.ContentRevision) || s.PolicyVersion != ManualPolicy || s.OriginClass != ManualClass || strings.TrimSpace(s.Issuer) == "" || strings.TrimSpace(s.Reason) == "" || s.StateVersion < 1 || s.CreatedAt.IsZero() || s.UpdatedAt.Before(s.CreatedAt) {
+	if !s.PlayerID.Valid() || !s.LogicalServerID.Valid() || s.Charge < 0 || s.Charge > 9007199254740991 || s.VIPLevel < 0 || s.VIPLevel > 15 || s.MonthlyState != MonthlyAbsent || !RevisionValid(s.ContentRevision) || !originPairValid(s.PolicyVersion, s.OriginClass) || strings.TrimSpace(s.Issuer) == "" || strings.TrimSpace(s.Reason) == "" || s.StateVersion < 1 || s.CreatedAt.IsZero() || s.UpdatedAt.Before(s.CreatedAt) {
 		return ErrConflict
 	}
 	return nil
+}
+func originPairValid(policy, origin string) bool {
+	return (policy == ManualPolicy && origin == ManualClass) || (policy == TapPolicy && origin == TapClass)
 }
 func (s State) ValidateCatalog(c Catalog) error {
 	if s.Validate() != nil {

@@ -50,11 +50,15 @@ const (
 	// They intentionally do not appear in app/common/network/mid.lua.
 	MIDVersionCheck    uint16 = 2
 	MIDCenterDiscovery uint16 = 20480
+	// MIDRechargeTap is private: the stock client sends nothing on a recharge tap
+	// (I9_COMMERCE_CHARGE_V1 C3), so the future OTA bridge calls this number.
+	MIDRechargeTap uint16 = 32000
 )
 
 var sourcePlaneAliases = map[uint16][]string{
 	MIDVersionCheck:    {"UPDATE_VERSION_CHECK"},
 	MIDCenterDiscovery: {"CENTER_DISCOVERY"},
+	MIDRechargeTap:     {"PRESERVATION_RECHARGE_TAP"},
 }
 
 var zlibMIDs = map[uint16]struct{}{279: {}, 2484: {}, 535: {}, 774: {}, 1412: {}, 1570: {}, 2515: {}}

@@ -113,3 +113,19 @@ func (p *preparedDisplayValue) ApplyDisplayValueTx(c context.Context, t tx.Tx) (
 	}
 	return out, nil
 }
+
+// CrystalBalanceTx reads the balance after any grant in the same transaction,
+// for a reply whose client overwrites its own balance (onRecharge_ total).
+func (s Service) CrystalBalanceTx(c context.Context, t tx.Tx, pid identity.PlayerID, at time.Time) (int64, error) {
+	if e := s.Store.LockEconomyOwnerTx(c, t, pid); e != nil {
+		return 0, e
+	}
+	b, ok, e := s.Store.LockScalarTx(c, t, pid, "crystal", at)
+	if e != nil {
+		return 0, e
+	}
+	if !ok {
+		return 0, economy.ErrUnknownResource
+	}
+	return b.Amount, nil
+}
