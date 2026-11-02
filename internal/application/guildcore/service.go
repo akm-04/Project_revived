@@ -467,7 +467,7 @@ func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, g
 			if _, err = s.Receipts.PutTx(txctx, scope.Tx, rr); err != nil {
 				return err
 			}
-			return s.emitApplicationFiledNoticeTx(txctx, scope.Tx, gid, actor.PlayerID, gen)
+			return s.emitApplicationFiledNoticeTx(txctx, scope.Tx, gid)
 
 		case guild.ApplyImmediate:
 			if err := s.checkJoinGatesTx(txctx, scope.Tx, actor.PlayerID, gid, at); err != nil {

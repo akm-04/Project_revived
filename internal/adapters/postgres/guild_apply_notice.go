@@ -15,8 +15,8 @@ import (
 // commits. Replayed receipts never reach this emitter.
 type GuildApplyNoticeEmitter struct{}
 
-func (GuildApplyNoticeEmitter) ApplicationFiledTx(c context.Context, t tx.Tx, gid guild.ID, applicant identity.PlayerID, generation int64) error {
-	ref, err := guildcore.ApplicationFiledNoticeRef(gid, applicant, generation)
+func (GuildApplyNoticeEmitter) ApplicationFiledTx(c context.Context, t tx.Tx, gid guild.ID) error {
+	ref, err := guildcore.ApplicationFiledNoticeRef(gid)
 	if err != nil {
 		return err
 	}
