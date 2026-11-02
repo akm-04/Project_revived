@@ -9,18 +9,27 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	ach "gxb.local/backend/v2/internal/application/achievement"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	appcourse "gxb.local/backend/v2/internal/application/course"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	d "gxb.local/backend/v2/internal/domain/achievement"
+	coursedomain "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/identity"
+	inscriptiondomain "gxb.local/backend/v2/internal/domain/inscription"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
+	"time"
 )
 
 type fixedCounts map[int64]int64
@@ -146,5 +155,115 @@ func TestI7C4FAOwnerCountsReadCanonicalRoster(t *testing.T) {
 	})
 	if e != nil || got[d.NormalHeroesID] != 1 {
 		t.Fatal(got, e)
+	}
+}
+
+func TestI7C4FAOwnerCountsReadWholeRosterForCoursesAndSuits(t *testing.T) {
+	p := pool(t)
+	a, rev := bornActor(t, p), installed(t, p)
+	var tables []int64
+	rows, e := p.Raw().Query(ctx, `SELECT table_id FROM gxb_content_hero_templates WHERE revision_id=$1 AND kind='NORMAL' ORDER BY table_id LIMIT 2`, rev)
+	if e != nil {
+		t.Fatal(e)
+	}
+	for rows.Next() {
+		var table int64
+		if e = rows.Scan(&table); e != nil {
+			t.Fatal(e)
+		}
+		tables = append(tables, table)
+	}
+	rows.Close()
+	if e = rows.Err(); e != nil {
+		t.Fatal(e)
+	}
+	if len(tables) != 2 {
+		t.Fatal("fixture hero templates", tables)
+	}
+	for index, table := range tables {
+		bornHero(t, p, a, rev, table, int64(index+1))
+	}
+	catalog, e := (contentstore.Store{Queryer: p}).CourseCatalogTx(ctx, p, rev)
+	if e != nil {
+		t.Fatal(e)
+	}
+	insCatalog, e := (contentstore.Store{Queryer: p}).InscriptionCatalogTx(ctx, p, rev)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var courseID int64
+	for id := range catalog.Tickets {
+		if courseID == 0 || id < courseID {
+			courseID = id
+		}
+	}
+	var slots inscriptiondomain.HeroFacts
+	for _, row := range insCatalog.Tables["suits"] {
+		for position, id := range strings.Split(row["item_id"], "|") {
+			itemID, parseErr := strconv.ParseInt(id, 10, 64)
+			if parseErr != nil || position > 2 {
+				t.Fatal("fixture suit", row, parseErr)
+			}
+			slots.Slots[position] = itemID
+		}
+		break
+	}
+	if slots.Validate(insCatalog) != nil {
+		t.Fatal("fixture suit does not validate")
+	}
+	observed := time.Now().UTC()
+	tr, e := p.Begin(ctx, tx.Options{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = (coursestore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, observed); e != nil {
+		t.Fatal(e)
+	}
+	if e = (inscriptionstore.Store{}).EnsureRootTx(ctx, tr, a.PlayerID, rev, observed); e != nil {
+		t.Fatal(e)
+	}
+	if e = tr.Commit(ctx); e != nil {
+		t.Fatal(e)
+	}
+	for partner := int64(1); partner <= 2; partner++ {
+		tr, e = p.Begin(ctx, tx.Options{})
+		if e != nil {
+			t.Fatal(e)
+		}
+		courseHero, e := (coursestore.Store{}).LockHeroTx(ctx, tr, a.PlayerID, partner)
+		if e != nil {
+			t.Fatal(e)
+		}
+		oldCourseVersion := courseHero.Version
+		courseHero.Version++
+		courseHero.Facts.Courses = []coursedomain.Record{{ID: courseID, Progress: 100, Quality: catalog.Quality(0)}}
+		if e = (coursestore.Store{}).SaveHeroTx(ctx, tr, courseHero, oldCourseVersion); e != nil {
+			t.Fatal(e)
+		}
+		insHero, e := (inscriptionstore.Store{}).LockHeroTx(ctx, tr, a.PlayerID, partner)
+		if e != nil {
+			t.Fatal(e)
+		}
+		oldInscriptionVersion := insHero.Version
+		insHero.Version++
+		insHero.Facts = slots
+		if e = (inscriptionstore.Store{}).SaveHeroTx(ctx, tr, insHero, oldInscriptionVersion); e != nil {
+			t.Fatal(e)
+		}
+		if e = tr.Commit(ctx); e != nil {
+			t.Fatal(e)
+		}
+	}
+	courses := appcourse.Service{Owner: coursestore.Store{}, Content: contentstore.Store{Queryer: p}, Heroes: characterstore.Store{Queryer: p}}
+	if n, e := courses.CompletedCourseCountTx(ctx, p, appcourse.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: observed}); e != nil || n != 2 {
+		t.Fatalf("completed courses %d %v", n, e)
+	}
+	inscriptions := appinscription.Service{Owner: inscriptionstore.Store{}, Content: contentstore.Store{Queryer: p}, Heroes: characterstore.Store{Queryer: p}}
+	if n, e := inscriptions.CompleteSuitCountTx(ctx, p, appinscription.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: observed}); e != nil || n != 2 {
+		t.Fatalf("complete suits %d %v", n, e)
+	}
+	exec(t, p, `DELETE FROM player_course_heroes WHERE player_id=$1 AND partner_id=2`, int64(a.PlayerID))
+	if _, e := courses.CompletedCourseCountTx(ctx, p, appcourse.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: observed}); e == nil {
+		t.Fatal("a missing owner row must stay unobserved, never zero")
 	}
 }

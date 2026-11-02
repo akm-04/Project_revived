@@ -37,43 +37,91 @@ type HeroInputs struct {
 
 // Caller supplies one RR/Serializable query scope with its pinned content/time.
 func (s Service) InscriptionInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
+	v, _, e := s.inputsTx(ctx, q, scope)
+	return v, e
+}
+
+func (s Service) inputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, []character.Hero, error) {
 	var out Inputs
 	if q == nil || !scope.Player.Valid() || len(scope.ContentRevision) != 64 || scope.ObservedAt.IsZero() {
-		return out, ins.ErrUnqualified
+		return out, nil, ins.ErrUnqualified
 	}
 	r, e := s.Owner.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
-		return out, e
+		return out, nil, e
 	}
 	if scope.ObservedAt.Before(r.UpdatedAt) {
-		return out, ErrStale
+		return out, nil, ErrStale
 	}
 	c, e := s.Content.InscriptionCatalogTx(ctx, q, scope.ContentRevision)
 	if e != nil {
-		return out, e
+		return out, nil, e
 	}
 	if e = r.Facts.Validate(c); e != nil {
-		return out, e
+		return out, nil, e
 	}
 	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
-		return out, e
+		return out, nil, e
 	}
 	if scope.ObservedAt.Before(pop.UpdatedAt) {
-		return out, ErrStale
+		return out, nil, ErrStale
 	}
 	hs, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
 	if e != nil {
-		return out, e
+		return out, nil, e
 	}
 	alive := map[int64]bool{}
 	for _, h := range hs {
 		if e = h.ValidatePersistent(); e != nil {
-			return out, e
+			return out, nil, e
 		}
 		alive[h.PartnerID] = true
 	}
-	return Inputs{r, c, pop.StateVersion, alive, scope.ObservedAt, scope.ContentRevision}, nil
+	return Inputs{r, c, pop.StateVersion, alive, scope.ObservedAt, scope.ContentRevision}, hs, nil
+}
+
+// CompleteSuitCountTx counts completed inscription suits over the whole roster
+// with one owner roster read instead of one projection per Hero.
+func (s Service) CompleteSuitCountTx(ctx context.Context, q tx.Queryer, scope InputScope) (int64, error) {
+	v, roster, e := s.inputsTx(ctx, q, scope)
+	if e != nil {
+		return 0, e
+	}
+	facts, e := s.Owner.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return 0, e
+	}
+	byPartner := make(map[int64]ins.HeroRoot, len(facts))
+	for _, f := range facts {
+		byPartner[f.PartnerID] = f
+	}
+	tableIDs := make([]int64, 0, len(roster))
+	for _, h := range roster {
+		tableIDs = append(tableIDs, h.TableID)
+	}
+	kinds, e := s.Content.HeroKindsTx(ctx, q, scope.ContentRevision, tableIDs)
+	if e != nil {
+		return 0, e
+	}
+	total := int64(0)
+	for _, h := range roster {
+		f, ok := byPartner[h.PartnerID]
+		if !ok {
+			return 0, ins.ErrUnqualified
+		}
+		if scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
+			return 0, ErrStale
+		}
+		if e = f.Facts.Validate(v.Catalog); e != nil {
+			return 0, e
+		}
+		if _, ok = kinds[h.TableID]; !ok {
+			return 0, ins.ErrUnqualified
+		}
+		total += int64(len(f.Facts.Suits(v.Catalog)))
+	}
+	return total, nil
 }
 func (s Service) HeroInscriptionInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, id int64) (HeroInputs, error) {
 	var out HeroInputs

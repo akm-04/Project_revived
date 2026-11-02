@@ -26,10 +26,10 @@ type Conquer interface {
 	FactsTx(context.Context, ca.CoherentReadScope, identity.PlayerID) (conquer.Observation, error)
 }
 type Courses interface {
-	HeroCourseInputsTx(context.Context, tx.Queryer, course.InputScope, int64) (course.HeroInputs, error)
+	CompletedCourseCountTx(context.Context, tx.Queryer, course.InputScope) (int64, error)
 }
 type Inscriptions interface {
-	HeroInscriptionInputsTx(context.Context, tx.Queryer, ins.InputScope, int64) (ins.HeroInputs, error)
+	CompleteSuitCountTx(context.Context, tx.Queryer, ins.InputScope) (int64, error)
 }
 type Skins interface {
 	SkinCollectionTx(context.Context, ca.CoherentReadScope, identity.PlayerID) (display.CosmeticCount, error)
@@ -111,45 +111,14 @@ func (o OwnerCounts) OwnedStateCountsTx(c context.Context, sc ca.CoherentReadSco
 		return out
 	}
 	if wanted[d.SubjectsID] {
-		if n, e := o.completedSubjects(c, q, sc, p, heroes); e == nil {
+		if n, e := o.Courses.CompletedCourseCountTx(c, q, course.InputScope{Player: p, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt}); e == nil {
 			out[d.SubjectsID] = n
 		}
 	}
 	if wanted[d.SuitsID] {
-		if n, e := o.completeSuits(c, q, sc, p, heroes); e == nil {
+		if n, e := o.Inscriptions.CompleteSuitCountTx(c, q, ins.InputScope{Player: p, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt}); e == nil {
 			out[d.SuitsID] = n
 		}
 	}
 	return out
-}
-
-// shortcut: one owner read per Hero; observe Course/Inscription only after their own commands and on 1302 load.
-func (o OwnerCounts) completedSubjects(c context.Context, q tx.Queryer, sc ca.CoherentReadScope, p identity.PlayerID, heroes ca.RosterMetricPopulation) (int64, error) {
-	scope := course.InputScope{Player: p, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt}
-	total := int64(0)
-	for _, h := range heroes.Rows {
-		v, e := o.Courses.HeroCourseInputsTx(c, q, scope, h.InstanceID)
-		if e != nil {
-			return 0, e
-		}
-		for _, r := range v.Applied.Courses {
-			if r.Progress == 100 {
-				total++
-			}
-		}
-	}
-	return total, nil
-}
-
-func (o OwnerCounts) completeSuits(c context.Context, q tx.Queryer, sc ca.CoherentReadScope, p identity.PlayerID, heroes ca.RosterMetricPopulation) (int64, error) {
-	scope := ins.InputScope{Player: p, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt}
-	total := int64(0)
-	for _, h := range heroes.Rows {
-		v, e := o.Inscriptions.HeroInscriptionInputsTx(c, q, scope, h.InstanceID)
-		if e != nil {
-			return 0, e
-		}
-		total += int64(len(v.CompleteSuits))
-	}
-	return total, nil
 }

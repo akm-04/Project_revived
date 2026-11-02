@@ -134,6 +134,7 @@ type HeroPort interface {
 }
 type OwnerPort interface {
 	ReadHeroTx(context.Context, tx.Queryer, identity.PlayerID, int64) (course.HeroRoot, error)
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]course.HeroRoot, error)
 	LockHeroTx(context.Context, tx.Tx, identity.PlayerID, int64) (course.HeroRoot, error)
 	SaveHeroTx(context.Context, tx.Tx, course.HeroRoot, int64) error
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (course.Root, error)
@@ -144,6 +145,7 @@ type OwnerPort interface {
 }
 type ContentPort interface {
 	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
+	HeroKindsTx(context.Context, tx.Queryer, string, []int64) (map[int64]character.HeroKind, error)
 	HeroSkillCatalogTx(context.Context, tx.Queryer, string, int64) (character.HeroSkillCatalog, error)
 	CourseCatalogTx(context.Context, tx.Queryer, string) (course.Catalog, error)
 	CourseInputsActive(context.Context) (string, bool, error)

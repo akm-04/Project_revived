@@ -142,6 +142,7 @@ type HeroPort interface {
 }
 type OwnerPort interface {
 	ReadHeroTx(context.Context, tx.Queryer, identity.PlayerID, int64) (inscription.HeroRoot, error)
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]inscription.HeroRoot, error)
 	LockHeroTx(context.Context, tx.Tx, identity.PlayerID, int64) (inscription.HeroRoot, error)
 	SaveHeroTx(context.Context, tx.Tx, inscription.HeroRoot, int64) error
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (inscription.Root, error)
@@ -152,6 +153,7 @@ type OwnerPort interface {
 }
 type ContentPort interface {
 	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
+	HeroKindsTx(context.Context, tx.Queryer, string, []int64) (map[int64]character.HeroKind, error)
 	InscriptionCatalogTx(context.Context, tx.Queryer, string) (inscription.Catalog, error)
 	InscriptionInputsActive(context.Context) (string, bool, error)
 	InscriptionInputsRevisionTx(context.Context, tx.Queryer, string) (bool, error)
