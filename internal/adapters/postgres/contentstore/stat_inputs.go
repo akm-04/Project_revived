@@ -19,10 +19,11 @@ import (
 var statInputCatalogs sync.Map
 
 func (s Store) StatInputCatalogTx(ctx context.Context, q tx.Queryer, revision string) (statinputs.Catalog, error) {
-	return memoCatalog(&statInputCatalogs, revision, func() (statinputs.Catalog, error) { return s.statInputCatalogTx(ctx, q, revision) })
+	return memoCatalog(&statInputCatalogs, revision, func() (statinputs.Catalog, error) { return s.ReadStatInputCatalogTx(ctx, q, revision) })
 }
 
-func (s Store) statInputCatalogTx(ctx context.Context, q tx.Queryer, revision string) (statinputs.Catalog, error) {
+// ReadStatInputCatalogTx reads and verifies the stored catalog, bypassing the per-revision cache.
+func (s Store) ReadStatInputCatalogTx(ctx context.Context, q tx.Queryer, revision string) (statinputs.Catalog, error) {
 	var out statinputs.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, statinputs.ErrUnqualified

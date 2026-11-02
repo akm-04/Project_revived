@@ -202,11 +202,11 @@ func TestI7C3BNativeCatalogTamperRejectedRollback(t *testing.T) {
 	if _, e = tr.Exec(ctx, "UPDATE content_stat_input_catalogs SET payload=jsonb_set(payload,'{policy_id}','\"tampered\"') WHERE revision_id=$1", rev); e != nil {
 		t.Fatal(e)
 	}
-	if _, e = s.StatInputCatalogTx(ctx, tr, rev); e == nil {
+	if _, e = s.ReadStatInputCatalogTx(ctx, tr, rev); e == nil {
 		t.Fatal("payload hash unchecked")
 	}
 	tr.Rollback(ctx)
-	if _, e = s.StatInputCatalogTx(ctx, p, rev); e != nil {
+	if _, e = s.ReadStatInputCatalogTx(ctx, p, rev); e != nil {
 		t.Fatal("rollback lost content", e)
 	}
 }
