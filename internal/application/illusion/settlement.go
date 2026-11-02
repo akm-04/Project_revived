@@ -105,9 +105,9 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, occurrence d.Occurren
 		if reward.Coin > 0 {
 			rewards[recipient] = append(rewards[recipient], grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "paradise_coin", Amount: reward.Coin})
 		}
-		// The person band's item rows are the boss kill bonus; the shared pool
-		// must be depleted by settlement for it to be paid.
-		if occurrence.Done() {
+		// The person band's item rows are the boss kill bonus, paid to a player
+		// whose best run killed the boss (D428).
+		if entry.Killed {
 			for itemIndex, itemID := range reward.ItemIDs {
 				if itemID > 0 && reward.ItemNums[itemIndex] > 0 {
 					rewards[recipient] = append(rewards[recipient], grant.Line{Kind: grant.StackItem, ItemID: itemID, Amount: reward.ItemNums[itemIndex]})

@@ -105,7 +105,7 @@ func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request R
 			response.Duplicate = true
 			return map[string]any{}, nil
 		}
-		star, damage := d.ClampSolo(request.Star, request.Damage, illusion.DefaultPoolHP, 0)
+		star, damage := d.ClampSolo(request.Star, request.Damage, illusion.DamageCap, 0)
 		attempt.Resolved, attempt.Damage = true, damage
 		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
 			return nil, err

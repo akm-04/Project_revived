@@ -18,14 +18,14 @@ import (
 type Store struct{}
 
 func (Store) ReadOccurrenceTx(ctx context.Context, q tx.Queryer, serverID int64) (d.Occurrence, bool, error) {
-	return readOccurrence(q.QueryRow(ctx, `SELECT logical_server_id,campaign_id,pool_hp,pool_hurt,open_day,settled_open_day FROM illusion_occurrences WHERE logical_server_id=$1`, serverID))
+	return readOccurrence(q.QueryRow(ctx, `SELECT logical_server_id,campaign_id,open_day,settled_open_day FROM illusion_occurrences WHERE logical_server_id=$1`, serverID))
 }
 
 func (Store) LockOccurrenceTx(ctx context.Context, t tx.Tx, serverID int64, at time.Time) (d.Occurrence, error) {
-	if _, err := t.Exec(ctx, `INSERT INTO illusion_occurrences(logical_server_id,campaign_id,pool_hp,pool_hurt,open_day,settled_open_day,updated_at)VALUES($1,$2,$3,0,$4,0,$5) ON CONFLICT(logical_server_id)DO NOTHING`, serverID, d.FirstCampaignID, d.DefaultPoolHP, modes.Day(at), at); err != nil {
+	if _, err := t.Exec(ctx, `INSERT INTO illusion_occurrences(logical_server_id,campaign_id,open_day,settled_open_day,updated_at)VALUES($1,$2,$3,0,$4) ON CONFLICT(logical_server_id)DO NOTHING`, serverID, d.FirstCampaignID, modes.Day(at), at); err != nil {
 		return d.Occurrence{}, err
 	}
-	occurrence, _, err := readOccurrence(t.QueryRow(ctx, `SELECT logical_server_id,campaign_id,pool_hp,pool_hurt,open_day,settled_open_day FROM illusion_occurrences WHERE logical_server_id=$1 FOR UPDATE`, serverID))
+	occurrence, _, err := readOccurrence(t.QueryRow(ctx, `SELECT logical_server_id,campaign_id,open_day,settled_open_day FROM illusion_occurrences WHERE logical_server_id=$1 FOR UPDATE`, serverID))
 	return occurrence, err
 }
 
@@ -33,7 +33,7 @@ func (Store) SaveOccurrenceTx(ctx context.Context, t tx.Tx, occurrence d.Occurre
 	if err := occurrence.Validate(); err != nil {
 		return err
 	}
-	tag, err := t.Exec(ctx, `UPDATE illusion_occurrences SET campaign_id=$2,pool_hp=$3,pool_hurt=$4,open_day=$5,settled_open_day=$6,updated_at=$7 WHERE logical_server_id=$1`, occurrence.LogicalServerID, occurrence.CampaignID, occurrence.PoolHP, occurrence.PoolHurt, occurrence.OpenDay, occurrence.SettledOpenDay, at)
+	tag, err := t.Exec(ctx, `UPDATE illusion_occurrences SET campaign_id=$2,open_day=$3,settled_open_day=$4,updated_at=$5 WHERE logical_server_id=$1`, occurrence.LogicalServerID, occurrence.CampaignID, occurrence.OpenDay, occurrence.SettledOpenDay, at)
 	if err == nil && tag.RowsAffected() != 1 {
 		return d.ErrUnavailable
 	}
@@ -65,7 +65,7 @@ func (Store) SavePlayerTx(ctx context.Context, t tx.Tx, player d.Player, at time
 
 func (Store) ReadResultTx(ctx context.Context, q tx.Queryer, serverID, openDay, campaignID int64, playerID identity.PlayerID) (d.Result, bool, error) {
 	var result d.Result
-	err := q.QueryRow(ctx, `SELECT player_id,hurt,cost_time FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 AND campaign_id=$3 AND player_id=$4`, serverID, openDay, campaignID, int64(playerID)).Scan(&result.PlayerID, &result.Hurt, &result.CostTime)
+	err := q.QueryRow(ctx, `SELECT player_id,hurt,cost_time,killed FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 AND campaign_id=$3 AND player_id=$4`, serverID, openDay, campaignID, int64(playerID)).Scan(&result.PlayerID, &result.Hurt, &result.CostTime, &result.Killed)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Result{}, false, nil
 	}
@@ -77,12 +77,12 @@ func (Store) LockResultTx(ctx context.Context, t tx.Tx, serverID, openDay, campa
 		return d.Result{}, err
 	}
 	var result d.Result
-	err := t.QueryRow(ctx, `SELECT player_id,hurt,cost_time FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 AND player_id=$3 FOR UPDATE`, serverID, openDay, int64(playerID)).Scan(&result.PlayerID, &result.Hurt, &result.CostTime)
+	err := t.QueryRow(ctx, `SELECT player_id,hurt,cost_time,killed FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 AND player_id=$3 FOR UPDATE`, serverID, openDay, int64(playerID)).Scan(&result.PlayerID, &result.Hurt, &result.CostTime, &result.Killed)
 	return result, err
 }
 
 func (Store) SaveResultTx(ctx context.Context, t tx.Tx, serverID, openDay, campaignID int64, result d.Result, at time.Time) error {
-	tag, err := t.Exec(ctx, `UPDATE illusion_occurrence_results SET hurt=$4,cost_time=$5,campaign_id=$6,updated_at=$7 WHERE logical_server_id=$1 AND open_day=$2 AND player_id=$3`, serverID, openDay, result.PlayerID, result.Hurt, result.CostTime, campaignID, at)
+	tag, err := t.Exec(ctx, `UPDATE illusion_occurrence_results SET hurt=$4,cost_time=$5,campaign_id=$6,updated_at=$7,killed=$8 WHERE logical_server_id=$1 AND open_day=$2 AND player_id=$3`, serverID, openDay, result.PlayerID, result.Hurt, result.CostTime, campaignID, at, result.Killed)
 	if err == nil && tag.RowsAffected() != 1 {
 		return d.ErrUnavailable
 	}
@@ -94,7 +94,7 @@ func (Store) ReadRankTx(ctx context.Context, q tx.Queryer, serverID, openDay, li
 		return nil, d.ErrInvalid
 	}
 	var raw string
-	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'hurt',hurt,'cost_time',cost_time) ORDER BY hurt DESC,cost_time,player_id),'[]'::jsonb)::text FROM (SELECT player_id,hurt,cost_time FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 ORDER BY hurt DESC,cost_time,player_id LIMIT $3) ranked`, serverID, openDay, limit).Scan(&raw)
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'hurt',hurt,'cost_time',cost_time,'killed',killed) ORDER BY killed DESC,CASE WHEN killed THEN 0 ELSE hurt END DESC,cost_time,player_id),'[]'::jsonb)::text FROM (SELECT player_id,hurt,cost_time,killed FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 ORDER BY killed DESC,CASE WHEN killed THEN 0 ELSE hurt END DESC,cost_time,player_id LIMIT $3) ranked`, serverID, openDay, limit).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, limit int64) (
 		return nil, d.ErrInvalid
 	}
 	var raw string
-	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('logical_server_id',logical_server_id,'campaign_id',campaign_id,'pool_hp',pool_hp,'pool_hurt',pool_hurt,'open_day',open_day,'settled_open_day',settled_open_day) ORDER BY logical_server_id),'[]'::jsonb)::text FROM (SELECT * FROM illusion_occurrences ORDER BY open_day,logical_server_id LIMIT $1) occurrence`, limit).Scan(&raw)
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('logical_server_id',logical_server_id,'campaign_id',campaign_id,'open_day',open_day,'settled_open_day',settled_open_day) ORDER BY logical_server_id),'[]'::jsonb)::text FROM (SELECT * FROM illusion_occurrences ORDER BY open_day,logical_server_id LIMIT $1) occurrence`, limit).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func (Store) SettleMemberTx(ctx context.Context, t tx.Tx, serverID, openDay int6
 
 func readOccurrence(row tx.Row) (d.Occurrence, bool, error) {
 	var occurrence d.Occurrence
-	err := row.Scan(&occurrence.LogicalServerID, &occurrence.CampaignID, &occurrence.PoolHP, &occurrence.PoolHurt, &occurrence.OpenDay, &occurrence.SettledOpenDay)
+	err := row.Scan(&occurrence.LogicalServerID, &occurrence.CampaignID, &occurrence.OpenDay, &occurrence.SettledOpenDay)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Occurrence{}, false, nil
 	}

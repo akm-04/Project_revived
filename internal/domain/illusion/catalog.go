@@ -12,24 +12,26 @@ const (
 	PolicyID      = "I9_ILLUSION_POLICY_V1"
 	PolicyVersion = 1
 
-	OpenLevel      = 65
-	FunctionID     = 43
-	FreeChances    = 5
-	ChancesPerBuy  = 5
-	DamageCap      = 12000000
-	DefaultPoolHP  = 120000000
-	OpenSecond     = 28800
-	CloseSecond    = 79080
-	SettleSecond   = 79200
-	SecondsPerDay  = 86400
-	CycleDays      = 2
-	RestDays       = 1
-	TeamSeats      = 3
-	MasterHeroes   = 1
-	MateHeroes     = 2
-	TeamHeroLimit  = 5
-	TeamPowerLimit = 30
-	TeamLevelBand  = 5
+	OpenLevel     = 65
+	FunctionID    = 43
+	FreeChances   = 5
+	ChancesPerBuy = 5
+	// ReportedDamageBound refuses an impossible report; a credible one above
+	// DamageCap is clamped, not refused.
+	ReportedDamageBound = 120000000
+	DamageCap           = 12000000
+	OpenSecond          = 28800
+	CloseSecond         = 79080
+	SettleSecond        = 79200
+	SecondsPerDay       = 86400
+	CycleDays           = 2
+	RestDays            = 1
+	TeamSeats           = 3
+	MasterHeroes        = 1
+	MateHeroes          = 2
+	TeamHeroLimit       = 5
+	TeamPowerLimit      = 30
+	TeamLevelBand       = 5
 
 	LockPlayerRank     uint16 = 605
 	LockOccurrenceRank uint16 = 606
@@ -235,17 +237,13 @@ func (c Catalog) BuyCap(vip int64) int64 {
 	return c.BuyCaps[vip]
 }
 
-// ClampDamage bounds one reported hit to the damage cap and to the pool left.
-func ClampDamage(poolHP, poolHurt, reported int64) int64 {
-	if reported <= 0 || poolHP <= poolHurt {
+// ClampDamage bounds one reported fight to the damage cap.
+func ClampDamage(reported int64) int64 {
+	if reported <= 0 {
 		return 0
 	}
-	remaining := poolHP - poolHurt
-	if remaining > DamageCap {
-		remaining = DamageCap
-	}
-	if reported > remaining {
-		return remaining
+	if reported > DamageCap {
+		return DamageCap
 	}
 	return reported
 }

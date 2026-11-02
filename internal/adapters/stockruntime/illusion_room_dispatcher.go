@@ -190,10 +190,15 @@ func illusionPartner(params map[string]any) (app.PartnerRequest, bool) {
 	if !textOK || !petOK || !onlyStockGameplayParams(params, "partner_str", "pet_id") {
 		return app.PartnerRequest{}, false
 	}
+	// IllusionSelectHeroWindow.lua:666 sends hero table ids, 0 for an empty slot,
+	// and an empty string when the master picks a pet first.
 	heroes := []int64{}
+	if text == "" {
+		return app.PartnerRequest{Heroes: heroes, PetID: pet}, true
+	}
 	for _, part := range strings.Split(text, "|") {
 		id, err := strconv.ParseInt(part, 10, 64)
-		if err != nil || id <= 0 {
+		if err != nil || id < 0 {
 			return app.PartnerRequest{}, false
 		}
 		heroes = append(heroes, id)

@@ -85,29 +85,46 @@ func TestSourceCatalog(t *testing.T) {
 	}
 }
 
-func TestClampAndPool(t *testing.T) {
-	cases := []struct {
-		pool, hurt, reported, want int64
-	}{
-		{120000000, 0, 12000000, 12000000},
-		{120000000, 0, 15000000, 12000000},
-		{120000000, 115000000, 12000000, 5000000},
-		{120000000, 120000000, 12000000, 0},
-		{120000000, 0, -1, 0},
-		{120000000, 0, 0, 0},
-	}
-	for _, item := range cases {
-		if got := ClampDamage(item.pool, item.hurt, item.reported); got != item.want {
-			t.Fatalf("pool=%d hurt=%d reported=%d got=%d want=%d", item.pool, item.hurt, item.reported, got, item.want)
+func TestClampDamage(t *testing.T) {
+	for _, item := range []struct{ reported, want int64 }{{12000000, 12000000}, {15000000, 12000000}, {500, 500}, {0, 0}, {-1, 0}} {
+		if got := ClampDamage(item.reported); got != item.want {
+			t.Fatalf("reported=%d got=%d want=%d", item.reported, got, item.want)
 		}
 	}
-	occurrence := NewOccurrence(1, 100001, 100)
-	if accepted := occurrence.Accept(13000000); accepted != 12000000 || occurrence.PoolHurt != 12000000 {
-		t.Fatal(accepted, occurrence)
+}
+
+func TestResultKeepsPersonalBest(t *testing.T) {
+	for _, item := range []struct {
+		name       string
+		hurt, cost int64
+		killed     bool
+		wantHurt   int64
+		wantCost   int64
+		wantKilled bool
+	}{
+		{"a better loss replaces", 900, 90, false, 900, 90, false},
+		{"a worse loss does not", 400, 10, false, 500, 60, false},
+		{"equal damage in less time replaces", 500, 40, false, 500, 40, false},
+		{"a kill beats a higher loss", 300, 90, true, 300, 90, true},
+	} {
+		result := Result{Hurt: 500, CostTime: 60}
+		result.Record(item.hurt, item.cost, item.killed)
+		if result.Hurt != item.wantHurt || result.CostTime != item.wantCost || result.Killed != item.wantKilled {
+			t.Fatalf("%s: %+v", item.name, result)
+		}
 	}
-	occurrence.PoolHurt = 119000000
-	if accepted := occurrence.Accept(12000000); accepted != 1000000 || !occurrence.Done() {
-		t.Fatal(accepted, occurrence)
+	killed := Result{Hurt: 800, CostTime: 45, Killed: true}
+	killed.Record(9000, 90, false)
+	if killed.Hurt != 800 || !killed.Killed {
+		t.Fatalf("a loss replaced a kill: %+v", killed)
+	}
+	killed.Record(800, 30, true)
+	if killed.CostTime != 30 {
+		t.Fatalf("a faster kill must replace a slower one: %+v", killed)
+	}
+	killed.Record(800, 50, true)
+	if killed.CostTime != 30 {
+		t.Fatalf("a slower kill replaced a faster one: %+v", killed)
 	}
 }
 
@@ -154,7 +171,6 @@ func TestSettlementDueAndAdvance(t *testing.T) {
 	open := time.Date(2026, 10, 31, 8, 0, 0, 0, zone)
 	openDay := modes.Day(open)
 	occurrence := NewOccurrence(1, 100001, openDay)
-	occurrence.PoolHurt = 500
 	if occurrence.SettlementDue(open.Add(13*time.Hour + 57*time.Minute + 59*time.Second)) {
 		t.Fatal("21:57:59 is not due")
 	}
@@ -167,7 +183,7 @@ func TestSettlementDueAndAdvance(t *testing.T) {
 		}
 	}
 	if !occurrence.Advance(sourceCatalog(t)) || occurrence.CampaignID != 100002 || occurrence.OpenDay != openDay+CycleDays ||
-		occurrence.SettledOpenDay != openDay || occurrence.PoolHurt != 0 || occurrence.PoolHP != DefaultPoolHP {
+		occurrence.SettledOpenDay != openDay {
 		t.Fatal("advance", occurrence)
 	}
 	if occurrence.SettlementDue(open.Add(48 * time.Hour)) {

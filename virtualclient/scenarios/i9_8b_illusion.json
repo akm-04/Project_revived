@@ -65,7 +65,9 @@
   "lua:if not __vc_il_rank or not __vc_il_rank.rank_list or #__vc_il_rank.rank_list~=1 then error('vc-il-board-missing') end local row=__vc_il_rank.rank_list[1] if row.rank_type~=24 or type(row.rank_info)~='table' or type(row.rank_info.my_rank)~='table' then error('vc-il-board-shape') end",
   "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:createHouse({},function(code,reply) if code~=xyd.error.OK then error('vc-il-room-'..tostring(code)) end end)",
   "wait:3",
-  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) local room=__vc_il_room and __vc_il_room.reply if not room or type(room.room_id)~='number' or room.room_id<1 then error('vc-il-room-missing') end if il:getRoomID()~=room.room_id or not il:checkIsMaster(il.selfPlayer.playerID) then error('vc-il-room-state') end"
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) local room=__vc_il_room and __vc_il_room.reply if not room or type(room.room_id)~='number' or room.room_id<1 then error('vc-il-room-missing') end if il:getRoomID()~=room.room_id or not il:checkIsMaster(il.selfPlayer.playerID) then error('vc-il-room-state') end",
+  "lua:local il=xyd.ModelManager.get():loadModel(xyd.ModelType.ILLUSION) il:setPartner({partner_str='10001062',pet_id=0},function(code,reply) if code~=xyd.error.OK then error('vc-il-pick-'..tostring(code)) end if reply.master_partner~='10001062' then error('vc-il-pick-shape-'..tostring(reply.master_partner)) end end)",
+  "wait:3"
  ],
  "settle_seconds": 10,
  "expect_ok": [
@@ -74,6 +76,7 @@
   1346,
   1347,
   1349,
+  1356,
   301
  ],
  "expect_lua_errors": [],

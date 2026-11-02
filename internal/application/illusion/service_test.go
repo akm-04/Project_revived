@@ -77,15 +77,18 @@ func TestPlayerRowCarriesSourceFields(t *testing.T) {
 	}
 }
 
-func TestClampDamageBoundedByPoolAndCap(t *testing.T) {
-	if got := d.ClampDamage(d.DefaultPoolHP, 0, d.DamageCap+1); got != d.DamageCap {
+func TestClampDamageBoundedByCap(t *testing.T) {
+	if got := d.ClampDamage(d.DamageCap + 1); got != d.DamageCap {
 		t.Fatalf("cap got=%d", got)
 	}
-	if got := d.ClampDamage(d.DefaultPoolHP, d.DefaultPoolHP-30, 100); got != 30 {
-		t.Fatalf("pool got=%d", got)
-	}
-	if got := d.ClampDamage(d.DefaultPoolHP, 0, 0); got != 0 {
+	if got := d.ClampDamage(0); got != 0 {
 		t.Fatalf("zero got=%d", got)
+	}
+}
+
+func TestReportAboveTheCapIsClampedNotRefused(t *testing.T) {
+	if summaryPolicy.MaxDamage <= d.DamageCap {
+		t.Fatalf("bound %d refuses a report the cap should clamp", summaryPolicy.MaxDamage)
 	}
 }
 

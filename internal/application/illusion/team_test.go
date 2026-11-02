@@ -70,6 +70,33 @@ func TestTeamInfoCarriesSeatsStatusPartnersAndPet(t *testing.T) {
 	}
 }
 
+func TestTeamInfoKeepsEmptySeatsPositional(t *testing.T) {
+	at := time.Unix(1_800_000_000, 0)
+	room, err := sharedroom.NewRoom(7, RoomFamily, RoomSlot, d.TeamSeats, identity.PlayerID(1), at.Add(time.Hour), []byte(`{"paradise_id":100001}`), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = room.Join(identity.PlayerID(2), at); err != nil {
+		t.Fatal(err)
+	}
+	state := d.RoomState{ParadiseID: 100001, MasterLevel: 70}
+	state.SetPick(2, d.TeamPick{Heroes: []int64{0, 202}, Force: 80})
+	info, err := Mode{Directory: teamDirectory{}, Heroes: teamRoster{}, Pets: teamRoster{}}.teamInfo(context.Background(), nil, room, state, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info["mate_1_partner"] != "0|202" {
+		t.Fatalf("partners %#v", info["mate_1_partner"])
+	}
+	details := info["mate_1_partner_detail"].([]map[string]any)
+	if len(details) != 2 || len(details[0]) != 0 || details[1]["table_id"] == nil {
+		t.Fatalf("details %#v", details)
+	}
+	if info["master_pet"] != int64(0) {
+		t.Fatalf("pet %#v", info["master_pet"])
+	}
+}
+
 func TestReportDamageSumsOnlyAAndCaps(t *testing.T) {
 	total, err := reportDamage([]byte(`{"fighter":{"A|1":{"harms":5},"B|1":{"harms":99},"A|2":{"harms":7.5}},"star":1}`))
 	if err != nil || total != 12 {

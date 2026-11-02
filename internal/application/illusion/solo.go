@@ -20,7 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-var summaryPolicy = cd.SummaryPolicy{ID: "I9_ILLUSION_SUMMARY_V1", Version: 1, MaxStar: 1, MaxDamage: d.DamageCap}
+var summaryPolicy = cd.SummaryPolicy{ID: "I9_ILLUSION_SUMMARY_V1", Version: 1, MaxStar: 1, MaxDamage: d.ReportedDamageBound}
 
 // Info answers 1344 from canonical state; paradise_id is a real campaign row and
 // count is zero only while the window is open.
@@ -196,13 +196,8 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 			return Response{}, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
 		}
 		current := attempt.Matches(st.occurrence)
-		accepted := request.Damage
-		if current {
-			accepted = st.occurrence.Accept(request.Damage)
-		} else if accepted > d.DamageCap {
-			accepted = d.DamageCap
-		}
-		if err = s.creditResult(c, sc, attempt, accepted, request.CostTime, at); err != nil {
+		accepted := d.ClampDamage(request.Damage)
+		if err = s.creditResult(c, sc, attempt, accepted, request.CostTime, request.Star > 0, at); err != nil {
 			return Response{}, err
 		}
 		attempt.Resolved, attempt.Damage = true, accepted
@@ -210,9 +205,6 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 			return Response{}, err
 		}
 		if current {
-			if err = s.Store.SaveOccurrenceTx(c, sc.Tx, st.occurrence, at); err != nil {
-				return Response{}, err
-			}
 			st.player.RecordHit(accepted, request.CostTime)
 			if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 				return Response{}, err
@@ -233,14 +225,12 @@ func generationRefForAttempt(attempt d.Attempt) string {
 	return fmt.Sprintf("ILLUSION/%d/%d/%d", attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID)
 }
 
-func (s Mode) creditResult(c context.Context, sc gen.TimedScope, attempt d.Attempt, accepted, costTime int64, at time.Time) error {
+func (s Mode) creditResult(c context.Context, sc gen.TimedScope, attempt d.Attempt, accepted, costTime int64, killed bool, at time.Time) error {
 	result, err := s.Store.LockResultTx(c, sc.Tx, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, identity.PlayerID(attempt.PlayerID), at)
 	if err != nil {
 		return err
 	}
-	if accepted > result.Hurt || accepted == result.Hurt && costTime < result.CostTime {
-		result.Hurt, result.CostTime = accepted, costTime
-	}
+	result.Record(accepted, costTime, killed)
 	return s.Store.SaveResultTx(c, sc.Tx, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, result, at)
 }
 

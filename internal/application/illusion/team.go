@@ -226,6 +226,8 @@ func (s Mode) ExitRoom(c context.Context, a identity.ActorContext, op operation.
 	return map[string]any{}, nil
 }
 
+// PartnerRequest carries the stock client's table ids: hero slots with 0 for an
+// empty one, and the pet's table id.
 type PartnerRequest struct {
 	Heroes []int64
 	PetID  int64
@@ -343,10 +345,8 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 		if request.PetID != 0 {
 			return d.TeamPick{}, fmt.Errorf("%w: mate pet", d.ErrRefused)
 		}
-	} else if request.PetID == 0 {
-		return d.TeamPick{}, fmt.Errorf("%w: master pet", d.ErrRefused)
 	}
-	if len(request.Heroes) != heroes || request.PetID < 0 {
+	if len(request.Heroes) > heroes || request.PetID < 0 {
 		return d.TeamPick{}, d.ErrInvalid
 	}
 	roster, err := s.heroRows(c, sc.Tx, seats[index], at)
@@ -376,14 +376,20 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 	}
 	force := int64(0)
 	powers := make([]int64, 0, len(request.Heroes))
-	for _, id := range request.Heroes {
-		if _, owned := roster[strconv.FormatInt(id, 10)]; !owned {
-			return d.TeamPick{}, fmt.Errorf("%w: hero %d not owned", d.ErrRefused, id)
+	picked := make([]int64, 0, len(request.Heroes))
+	for _, tableID := range request.Heroes {
+		if tableID == 0 {
+			picked = append(picked, 0)
+			continue
 		}
-		tableID := tableIDOf(roster, id)
+		id, owned := idOfTable(roster, "partner_id", tableID)
+		if !owned {
+			return d.TeamPick{}, fmt.Errorf("%w: hero %d not owned", d.ErrRefused, tableID)
+		}
 		if used[tableID] {
 			return d.TeamPick{}, fmt.Errorf("%w: duplicate hero", d.ErrRefused)
 		}
+		picked = append(picked, id)
 		used[tableID] = true
 		result, err := s.Stats.HeroTx(c, scope, character.HeroRef{PlayerID: seats[index], PartnerID: id}, publicstats.View{Kind: publicstats.Self, Viewer: seats[index]})
 		if err != nil {
@@ -398,16 +404,18 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 			return d.TeamPick{}, fmt.Errorf("%w: hero power", d.ErrRefused)
 		}
 	}
+	petID := int64(0)
 	if request.PetID > 0 {
 		pets, err := s.petRows(c, sc.Tx, seats[index], at)
 		if err != nil {
 			return d.TeamPick{}, err
 		}
-		if _, owned := pets[strconv.FormatInt(request.PetID, 10)]; !owned {
+		var owned bool
+		if petID, owned = idOfTable(pets, "pet_id", request.PetID); !owned {
 			return d.TeamPick{}, fmt.Errorf("%w: pet %d not owned", d.ErrRefused, request.PetID)
 		}
 	}
-	return d.TeamPick{Heroes: append([]int64(nil), request.Heroes...), PetID: request.PetID, Force: force}, nil
+	return d.TeamPick{Heroes: picked, PetID: petID, Force: force}, nil
 }
 
 func (s Mode) heroRows(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time) (map[string]map[string]any, error) {
@@ -445,6 +453,20 @@ func (s Mode) petRows(c context.Context, q tx.Queryer, player identity.PlayerID,
 		out[fmt.Sprint(row["pet_id"])] = row
 	}
 	return out, nil
+}
+
+// idOfTable finds the owned row of a table id; of two copies, the lowest id wins
+// so a repeated pick resolves the same way.
+func idOfTable(rows map[string]map[string]any, idField string, tableID int64) (int64, bool) {
+	best := int64(0)
+	for _, row := range rows {
+		rowTable, tableOK := numeric(row["table_id"])
+		id, idOK := numeric(row[idField])
+		if tableOK && idOK && rowTable == tableID && (best == 0 || id < best) {
+			best = id
+		}
+	}
+	return best, best > 0
 }
 
 func tableIDOf(roster map[string]map[string]any, partnerID int64) int64 {
@@ -507,10 +529,12 @@ func (s Mode) teamInfo(c context.Context, q tx.Queryer, room sharedroom.Room, st
 		details := make([]map[string]any, 0, len(pick.Heroes))
 		ids := make([]string, 0, len(pick.Heroes))
 		for _, id := range pick.Heroes {
-			ids = append(ids, strconv.FormatInt(id, 10))
-			if row, owned := roster[strconv.FormatInt(id, 10)]; owned {
-				details = append(details, row)
+			ids = append(ids, strconv.FormatInt(tableIDOf(roster, id), 10))
+			row, owned := roster[strconv.FormatInt(id, 10)]
+			if !owned {
+				row = map[string]any{}
 			}
+			details = append(details, row)
 		}
 		out[slot.idName] = int64(player)
 		out[slot.infoName] = playerInfo(profile, pick.Force)
@@ -518,13 +542,14 @@ func (s Mode) teamInfo(c context.Context, q tx.Queryer, room sharedroom.Room, st
 		out[slot.prefix+"_partner"] = strings.Join(ids, "|")
 		out[slot.prefix+"_partner_detail"] = details
 		if index == 0 {
-			out["master_pet"] = pick.PetID
 			pets, err := s.petRows(c, q, player, at)
 			if err != nil {
 				return nil, err
 			}
+			out["master_pet"] = int64(0)
 			out["master_pet_detail"] = map[string]any{}
 			if row, owned := pets[strconv.FormatInt(pick.PetID, 10)]; owned {
+				out["master_pet"] = row["table_id"]
 				out["master_pet_detail"] = row
 			}
 		}

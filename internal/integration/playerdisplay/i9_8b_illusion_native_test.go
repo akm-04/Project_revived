@@ -110,13 +110,13 @@ func illusionTime(t *testing.T) *leagueClock {
 	return &leagueClock{at: modes.DayBegins(day).Add(6 * time.Hour)}
 }
 
-func illusionRemaining(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (campaign, openDay, settled, poolHurt int64) {
+func illusionOccurrence(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (campaign, openDay, settled int64) {
 	t.Helper()
-	if err := p.QueryRow(ctx, `SELECT campaign_id,open_day,settled_open_day,pool_hurt FROM illusion_occurrences WHERE logical_server_id=$1`, int64(server)).
-		Scan(&campaign, &openDay, &settled, &poolHurt); err != nil {
+	if err := p.QueryRow(ctx, `SELECT campaign_id,open_day,settled_open_day FROM illusion_occurrences WHERE logical_server_id=$1`, int64(server)).
+		Scan(&campaign, &openDay, &settled); err != nil {
 		t.Fatal(err)
 	}
-	return campaign, openDay, settled, poolHurt
+	return campaign, openDay, settled
 }
 
 func TestI9_8BIllusionInfoBuyNative(t *testing.T) {
@@ -178,9 +178,6 @@ func TestI9_8BIllusionStartSettleDuplicateNative(t *testing.T) {
 	duplicate, err := s.Settle(ctx, a, il.ResultRequest{Star: 1, Damage: 900, CostTime: 10, Formation: formation}, op())
 	if err != nil || !duplicate.Duplicate || duplicate.Body["now_hurt"] != int64(500) || duplicate.Body["highest_hurt"] != int64(500) {
 		t.Fatalf("duplicate %+v %v", duplicate, err)
-	}
-	if _, _, _, hurt := illusionRemaining(t, p, server); hurt != 500 {
-		t.Fatal("duplicate settlement added pool damage", hurt)
 	}
 	if n := scalar(t, p, `SELECT best_hit FROM illusion_players WHERE player_id=$1`, int64(a.PlayerID)); n != 500 {
 		t.Fatal("duplicate settlement changed the best hit", n)
@@ -249,12 +246,12 @@ func TestI9_8BIllusionLateResultFrozenOccurrenceNative(t *testing.T) {
 	if _, err := s.Start(ctx, a, il.StartRequest{Formation: formation}, op()); err != nil {
 		t.Fatal(err)
 	}
-	_, openDay, _, _ := illusionRemaining(t, p, server)
+	_, openDay, _ := illusionOccurrence(t, p, server)
 	clock.Set(modes.DayBegins(modes.Day(clock.at)).Add(17 * time.Hour))
 	if _, err := (il.Reconciler{Service: s}).Reconcile(ctx, mustTimed(t, op(), clock.at), 100); err != nil {
 		t.Fatal(err)
 	}
-	if campaign, next, _, _ := illusionRemaining(t, p, server); campaign != d.FirstCampaignID+1 || next != openDay+d.CycleDays {
+	if campaign, next, _ := illusionOccurrence(t, p, server); campaign != d.FirstCampaignID+1 || next != openDay+d.CycleDays {
 		t.Fatalf("occurrence did not advance campaign=%d day=%d", campaign, next)
 	}
 	clock.Set(clock.at.Add(time.Minute))
@@ -265,8 +262,9 @@ func TestI9_8BIllusionLateResultFrozenOccurrenceNative(t *testing.T) {
 	if n := scalar(t, p, `SELECT hurt FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 AND player_id=$3`, int64(server), openDay, int64(a.PlayerID)); n != 700 {
 		t.Fatal("late result missed its frozen occurrence", n)
 	}
-	if _, _, _, hurt := illusionRemaining(t, p, server); hurt != 0 {
-		t.Fatal("late result credited the live occurrence", hurt)
+	_, live, _ := illusionOccurrence(t, p, server)
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 AND player_id=$3`, int64(server), live, int64(a.PlayerID)); n != 0 {
+		t.Fatal("late result credited the live occurrence", n)
 	}
 }
 
@@ -291,7 +289,6 @@ func TestI9_8BIllusionSettlementOnceTwoServersNative(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	exec(t, p, `UPDATE illusion_occurrences SET pool_hurt=pool_hp WHERE logical_server_id IN($1,$2)`, int64(first), int64(second))
 	clock.Set(modes.DayBegins(modes.Day(clock.at)).Add(17 * time.Hour))
 	timed := mustTimed(t, op(), clock.at)
 	if out, err := (il.Reconciler{Service: s}).Reconcile(ctx, timed, 100); err != nil || out.Settled != 2 {
@@ -306,7 +303,7 @@ func TestI9_8BIllusionSettlementOnceTwoServersNative(t *testing.T) {
 		if n := scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ILLUSION_SETTLEMENT'`, int64(entry.actor.PlayerID)); n != 1 {
 			t.Fatalf("server %d mail count %d", entry.server, n)
 		}
-		campaign, openDay, settled, _ := illusionRemaining(t, p, entry.server)
+		campaign, openDay, settled := illusionOccurrence(t, p, entry.server)
 		if campaign != d.FirstCampaignID+1 || settled != openDay-d.CycleDays {
 			t.Fatalf("server %d occurrence campaign=%d open=%d settled=%d", entry.server, campaign, openDay, settled)
 		}
@@ -457,7 +454,7 @@ func TestI9_8BIllusionSettlementSurvivesDowntimeNative(t *testing.T) {
 	if _, err := s.Settle(ctx, a, il.ResultRequest{Star: 1, Damage: 1000, CostTime: 10, Formation: formation}, op()); err != nil {
 		t.Fatal(err)
 	}
-	_, openDay, _, _ := illusionRemaining(t, p, server)
+	_, openDay, _ := illusionOccurrence(t, p, server)
 	clock.Set(modes.DayBegins(openDay + 3).Add(4 * time.Hour))
 	exec(t, p, `UPDATE account_sessions SET absolute_expires_at=$2,idle_timeout_seconds=NULL WHERE session_id=$1`, a.SessionID.UUID().String(), clock.at.Add(24*time.Hour))
 	if _, err := s.Start(ctx, a, il.StartRequest{Formation: formation}, op()); err == nil {
@@ -470,7 +467,7 @@ func TestI9_8BIllusionSettlementSurvivesDowntimeNative(t *testing.T) {
 	if n := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ILLUSION_SETTLEMENT' AND recipient_player_id=$1`, int64(a.PlayerID)); n != 1 {
 		t.Fatal("downtime lost the settlement", n)
 	}
-	if campaign, next, _, _ := illusionRemaining(t, p, server); campaign != d.FirstCampaignID+1 || next != openDay+d.CycleDays {
+	if campaign, next, _ := illusionOccurrence(t, p, server); campaign != d.FirstCampaignID+1 || next != openDay+d.CycleDays {
 		t.Fatalf("occurrence did not advance campaign=%d day=%d", campaign, next)
 	}
 }

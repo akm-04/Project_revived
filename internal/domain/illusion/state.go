@@ -21,39 +21,19 @@ const (
 type Occurrence struct {
 	LogicalServerID int64 `json:"logical_server_id"`
 	CampaignID      int64 `json:"campaign_id"`
-	PoolHP          int64 `json:"pool_hp"`
-	PoolHurt        int64 `json:"pool_hurt"`
 	OpenDay         int64 `json:"open_day"`
 	SettledOpenDay  int64 `json:"settled_open_day"`
 }
 
 func NewOccurrence(serverID, campaignID, openDay int64) Occurrence {
-	return Occurrence{LogicalServerID: serverID, CampaignID: campaignID, PoolHP: DefaultPoolHP, OpenDay: openDay}
+	return Occurrence{LogicalServerID: serverID, CampaignID: campaignID, OpenDay: openDay}
 }
 
 func (o Occurrence) Validate() error {
-	if o.LogicalServerID <= 0 || o.CampaignID < FirstCampaignID || o.CampaignID > LastCampaignID || o.PoolHP <= 0 || o.PoolHurt < 0 || o.PoolHurt > o.PoolHP || o.OpenDay < 0 || o.SettledOpenDay < 0 {
+	if o.LogicalServerID <= 0 || o.CampaignID < FirstCampaignID || o.CampaignID > LastCampaignID || o.OpenDay < 0 || o.SettledOpenDay < 0 {
 		return ErrInvalid
 	}
 	return nil
-}
-
-func (o Occurrence) RemainingPool() int64 {
-	remaining := o.PoolHP - o.PoolHurt
-	if remaining < 0 {
-		return 0
-	}
-	return remaining
-}
-
-func (o Occurrence) Done() bool { return o.PoolHurt >= o.PoolHP }
-
-// Accept clamps reported damage to the damage cap and pool left, then adds it
-// to the shared pool.
-func (o *Occurrence) Accept(reported int64) int64 {
-	accepted := ClampDamage(o.PoolHP, o.PoolHurt, reported)
-	o.PoolHurt += accepted
-	return accepted
 }
 
 // PhaseAt reports where at sits in the occurrence's two-day cycle.
@@ -112,8 +92,6 @@ func (o *Occurrence) Advance(c Catalog) bool {
 	}
 	o.SettledOpenDay = o.OpenDay
 	o.CampaignID = next
-	o.PoolHP = DefaultPoolHP
-	o.PoolHurt = 0
 	o.OpenDay += CycleDays
 	return true
 }
@@ -185,6 +163,23 @@ type Result struct {
 	PlayerID int64 `json:"player_id"`
 	Hurt     int64 `json:"hurt"`
 	CostTime int64 `json:"cost_time"`
+	Killed   bool  `json:"killed"`
+}
+
+// Record keeps only the personal best (D428): a kill beats any loss, between
+// kills the shorter time wins, and between losses the higher damage, then the
+// shorter time.
+func (r *Result) Record(hurt, costTime int64, killed bool) {
+	better := hurt > r.Hurt || hurt == r.Hurt && costTime < r.CostTime
+	if killed && r.Killed {
+		better = costTime < r.CostTime
+	}
+	if killed != r.Killed {
+		better = killed
+	}
+	if better {
+		r.Hurt, r.CostTime, r.Killed = hurt, costTime, killed
+	}
 }
 
 // Attempt is frozen to the occurrence it started against; room_id stays zero

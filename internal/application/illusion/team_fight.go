@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"time"
 
@@ -148,10 +149,7 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 			if err != nil {
 				return err
 			}
-			accepted := occurrence.Accept(damage)
-			if err := s.Store.SaveOccurrenceTx(c, sc.Tx, occurrence, at); err != nil {
-				return err
-			}
+			accepted := d.ClampDamage(damage)
 			if err := s.Store.InsertReportTx(c, sc.Tx, attemptID, int64(room.LogicalServerID), occurrence.OpenDay, occurrence.CampaignID, string(report), at); err != nil {
 				return err
 			}
@@ -162,7 +160,7 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 					Member: member, SemanticReceiptID: teamMemberReceipt(attemptID, member), At: at}); err != nil {
 					return err
 				}
-				if err := s.creditMember(c, sc, *room, occurrence, member, attemptID, accepted, costTime, at); err != nil {
+				if err := s.creditMember(c, sc, *room, occurrence, member, attemptID, accepted, costTime, terminal.Resolution.Outcome.Star > 0, at); err != nil {
 					return err
 				}
 			}
@@ -247,7 +245,7 @@ func (s Mode) teamFromRoom(c context.Context, q tx.Queryer, room sharedroom.Room
 		if index > 0 {
 			expected = d.MateHeroes
 		}
-		if len(pick.Heroes) != expected || pick.PetID < 0 {
+		if len(pick.Heroes) != expected || slices.Contains(pick.Heroes, 0) || pick.PetID < 0 {
 			return d.Team{}, fmt.Errorf("%w: member pick incomplete", d.ErrRefused)
 		}
 		roster, err := s.heroRows(c, q, player, at)
@@ -305,14 +303,12 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, actor ident
 		TrustProfile: cd.ServerReport, Members: members})
 }
 
-func (s Mode) creditMember(c context.Context, sc gen.TimedScope, room sharedroom.Room, occurrence d.Occurrence, member identity.PlayerID, attemptID string, damage, costTime int64, at time.Time) error {
+func (s Mode) creditMember(c context.Context, sc gen.TimedScope, room sharedroom.Room, occurrence d.Occurrence, member identity.PlayerID, attemptID string, damage, costTime int64, killed bool, at time.Time) error {
 	result, err := s.Store.LockResultTx(c, sc.Tx, int64(room.LogicalServerID), occurrence.OpenDay, occurrence.CampaignID, member, at)
 	if err != nil {
 		return err
 	}
-	if damage > result.Hurt || damage == result.Hurt && costTime < result.CostTime {
-		result.Hurt, result.CostTime = damage, costTime
-	}
+	result.Record(damage, costTime, killed)
 	if err := s.Store.SaveResultTx(c, sc.Tx, int64(room.LogicalServerID), occurrence.OpenDay, occurrence.CampaignID, result, at); err != nil {
 		return err
 	}

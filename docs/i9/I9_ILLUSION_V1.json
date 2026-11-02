@@ -39,9 +39,9 @@
  "clauses": [
   "C1 MID 1344 leaves LobbyDispatcher; paradise_id is always a real campaign row; never count>=1 with a terminal id",
   "C2 Function 43 level 65 refused server side. Boss cycle: open 08:00, close 21:58, settle 22:00 GMT+8, one rest day, next boss, chain cycles after the last",
-  "C3 Solo: 5 free chances per modes.Day, consumed at 1346; 1347 attested, clamped to 12,000,000 and remaining pool; duplicate 30005 with full body",
+  "C3 Solo: 5 free chances per modes.Day, consumed at 1346; 1347 attested, clamped to 12,000,000 (D428: no shared pool; each player keeps a personal best, a kill ranks above any loss and kills rank by shorter time); duplicate 30005 with full body",
   "C4 Buys 1345: buy_paradise_cost by buy_times+1, cap vip.paradise_buy_num, +5, through I5",
-  "C5 Team: 3 seats, master 1 hero and pet, mates 2 heroes, no mate pets; ownership, unique table ids, power at least force/30 and level band enforced; no attempt cost; boss bound at create",
+  "C5 Team: 3 seats, master 1 hero and pet, mates 2 heroes, no mate pets, complete at fight start (D429: picks arrive one slot at a time as table ids with 0 for an empty slot); ownership, unique table ids, power at least force/30 and level band enforced; no attempt cost; boss bound at create",
   "C6 Team fight is a server report via one attempt; master only, all ready; report[1].content is a JSON string; report id readable by 1362",
   "C7 Team score counts as each member's own result; ties by shorter time; settlement per member once",
   "C8 Rank 24, 25, 26, 27 through MID 301 from a mode-owned list; guild totals from best hits of current members",

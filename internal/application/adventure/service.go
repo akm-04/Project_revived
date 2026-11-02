@@ -36,7 +36,7 @@ const (
 	occurrenceRetention = 7 * 24 * time.Hour
 )
 
-var singleSummaryPolicy = cd.SummaryPolicy{ID: "I9_ADVENTURE_SINGLE_SUMMARY_V1", Version: 1, MaxStar: d.MaxSoloStar, MaxDamage: illusion.DefaultPoolHP}
+var singleSummaryPolicy = cd.SummaryPolicy{ID: "I9_ADVENTURE_SINGLE_SUMMARY_V1", Version: 1, MaxStar: d.MaxSoloStar, MaxDamage: illusion.ReportedDamageBound}
 
 func profile() tx.Profile {
 	return tx.Profile{Name: "adventure", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 10 * time.Second, TransactionTimeout: 30 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 10 * time.Second, OperationTimeout: 60 * time.Second}

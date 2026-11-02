@@ -296,7 +296,7 @@
   "commit_role": "PARENT_ACCEPTED_PASS643_COMMIT; exact final I7A6A product HEAD/tree/archive are bound externally in PassMap and gate evidence to avoid self-reference",
   "content_generation": 69,
   "content_revision": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
-  "current_migration_high_water": "00105_i9_9c_guild_campaign.sql",
+  "current_migration_high_water": "00106_i9_9_illusion_no_pool.sql",
   "current_stage": "I9_7B_IMPLEMENTATION_FOCUSED_GATES",
   "evidence": "Pass587 Gate-1 runtime evidence b59277c4d59a1c2622809a62f46605442232d77a380e97af7eeba2a3a75fe73e + Pass588 normal-chat I0-I6/source-oracle/release-reconciliation checks; exact Pass588 retest still required.",
   "external_audit_sha256": "a6234eaf9cd5a3f029259140a0166c0529e9b174e4572c61a102b7f0ed0c9e7f",
@@ -1024,7 +1024,7 @@
     "version": "v0.125.0"
   },
   "language_floor": "go1.26.0",
-  "migration_high_water": "00105_i9_9c_guild_campaign.sql",
+  "migration_high_water": "00106_i9_9_illusion_no_pool.sql",
   "migration_parent_backend_sha256": "73a668580d416fba4275b97898d083b9fdcb12c58773eeb9ceec2b1f3711c58d",
   "native_repair_parent_backend_sha256": "a6bf87421767c5451f69fcf359995d28d91a6c6f861f55422bcdd642583e0141",
   "native_repair_parent_implementation_revision_sha256": "0def8ffc697be0c43a40b3e447c328fee45011e76e9e87a69f17181b777e1c1b",

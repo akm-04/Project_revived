@@ -311,6 +311,7 @@ func (s Mode) ExitRoom(c context.Context, a identity.ActorContext, roomID int64,
 				return nil, err
 			}
 			left = true
+			return nil, nil
 		}
 		return nil, s.Store.FinishRunTx(c, sc.Tx, view.room.ID, view.at)
 	})
