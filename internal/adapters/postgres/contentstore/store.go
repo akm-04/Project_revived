@@ -315,6 +315,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && summonExact
+	var chargeExact bool
+	err = q.QueryRow(ctx, verifyChargeSQL, b.RevisionID(), string(b.ChargeJSON())).Scan(&chargeExact, &v.ChargeCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && chargeExact
 	var oneOnOneExact bool
 	err = q.QueryRow(ctx, verifyOneOnOneSQL, b.RevisionID(), string(b.OneOnOneJSON())).Scan(&oneOnOneExact, &v.OneOnOneCount)
 	if err != nil {

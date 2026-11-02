@@ -261,6 +261,9 @@ SOURCE_MANIFEST.append(('data/tables/avatar.lua','0a90c0296d9ddc15aeba8fbf77de4a
 SOURCE_MANIFEST.append(('data/tables/title_system.lua','a91f9afa54ceba80d1fe752f95e417a6fa22c0663fab520f73ee64262ae2ea2d','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
 SOURCE_MANIFEST.append(('data/tables/chat_bubble.lua','abed6a89251099b42345a6414265aceb6c70ed0099f4d8648386811dcb21f03e','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
 SOURCE_MANIFEST.append(('data/tables/random_name.lua','bf47c258f7be691ee2bf15df19af0e8dfb0cf5a3f86945ec27d10edbf61854cc','PLAYER_DISPLAY_SOURCE_AUTHORITY'))
+SOURCE_MANIFEST.append(('data/tables/charge.lua','abfd3d35090fd10508dd1ec9c37ed576bcd15a0f6d5528c3a77b42d4f428b7f9','I9_10G_CHARGE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ChargeTable.lua','855c97b94b02498a10d87df71fe9e1049bafdb9af3e5c6992d2f0e5a031ed21c','I9_10G_CHARGE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/VipRechargeWindow.lua','3fac657db32f5cf8804ff37d581758977cfce951aad2ec5008d878a6395ae717','I9_10G_CHARGE_SOURCE_BOUNDARY'))
 
 
 # I7C-2B source-qualified minimum Library inputs; probability remains reconstruction.
@@ -279,6 +282,7 @@ ENABLED_CAPABILITIES = [
     "MISSION_CATALOG_I9_4A",
     "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
     "SUMMON_GACHA_I9_3E",
+    "COMMERCE_CHARGE_I9_10G",
     "CAMPAIGN_MODE_I9_3A",
     "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C", "ADVENTURE_I9_8D",
     "COSMETIC_TITLE_CONDITION_I7C6",
@@ -516,6 +520,7 @@ from dodgeball_content import build_dodgeball
 from memoir_content import build_memoir
 from march_content import build_march
 from summon_content import build_summon
+from charge_content import build_charge
 from awakening_content import build_awakening
 from signin_content import build_signin
 from missions_content import build_missions
@@ -2366,6 +2371,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "summon_catalog.json":build_summon(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
+        "charge_catalog.json":build_charge(blobs,parse_generated_lua_table),
         "top_floor_catalog.json":top_floor_artifact,
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
         "arena_catalog.json":dict(build_arena(blobs,parse_generated_lua_table), tournament=build_tournament(blobs,parse_generated_lua_table)),

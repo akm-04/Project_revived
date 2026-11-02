@@ -31,14 +31,24 @@ type ChargeProduct struct {
 	CardDays          int64  `json:"card_days"`
 }
 
+// VipAward is the gift of one VIP level (C11: vip.lua reward_item through gift.lua).
+type VipAward struct {
+	Level    int64   `json:"level"`
+	GiftID   int64   `json:"gift_id"`
+	Items    []int64 `json:"items"`
+	ItemNums []int64 `json:"item_nums"`
+	Crystal  int64   `json:"crystal"`
+}
+
 type ChargeCatalog struct {
-	Policy            string          `json:"policy"`
-	PrivilegeSkillMax int64           `json:"privilege_skill_max"`
+	Policy            string      `json:"policy"`
+	PrivilegeSkillMax int64       `json:"privilege_skill_max"`
 	Products          []ChargeProduct `json:"products"`
+	VipAwards         []VipAward  `json:"vip_awards"`
 }
 
 func (c ChargeCatalog) Validate() error {
-	if c.Policy != TapPolicy || c.PrivilegeSkillMax < 0 || len(c.Products) == 0 {
+	if c.Policy != TapPolicy || c.PrivilegeSkillMax < 0 || len(c.Products) == 0 || len(c.VipAwards) != 15 {
 		return ErrUnavailable
 	}
 	seen := make(map[int64]struct{}, len(c.Products))
@@ -51,6 +61,20 @@ func (c ChargeCatalog) Validate() error {
 			return ErrUnavailable
 		}
 		seen[p.ID] = struct{}{}
+	}
+	for index, award := range c.VipAwards {
+		itemsValid := len(award.Items) == len(award.ItemNums) && len(award.Items) > 0
+		if itemsValid {
+			for i, item := range award.Items {
+				if item <= 0 || award.ItemNums[i] <= 0 {
+					itemsValid = false
+					break
+				}
+			}
+		}
+		if award.Level != int64(index+1) || award.GiftID <= 0 || award.Crystal < 0 || !itemsValid {
+			return ErrUnavailable
+		}
 	}
 	return nil
 }

@@ -2826,6 +2826,7 @@
    ],
    "store:contentstore": [
     "*ActiveRevision",
+    "*ChargeCatalogTx",
     "*PrivilegeCatalogTx"
    ],
    "store:i4store": [

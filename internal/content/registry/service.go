@@ -323,6 +323,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotSummon != 1 {
 				return errors.New("content registry summon count")
 			}
+			gotCharge, err := s.Repo.InsertCharge(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotCharge != 1 {
+				return errors.New("content registry charge count")
+			}
 			gotOneOnOne, err := s.Repo.InsertOneOnOne(tctx, scope.Tx, b)
 			if err != nil {
 				return err
