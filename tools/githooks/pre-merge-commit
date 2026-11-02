@@ -1,0 +1,16 @@
+#!/bin/bash
+# Keeps docs/architecture/system_map in step with the code in the same commit.
+set -e
+git diff --cached --name-only | grep -qv '^docs/architecture/system_map/' || exit 0
+top=$(git rev-parse --show-toplevel)
+workspace=$(cd "$(git rev-parse --git-common-dir)/../../../.." && pwd)
+index_file=$(realpath "$(git rev-parse --git-path index)")
+(
+  unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE
+  export GXB_BACKEND=$top
+  . "$workspace/ops/testing/goenv.sh" >/dev/null
+  cd "$top"
+  "$workspace/.toolchain/bin/python3" -B tools/system_map.py --write >/dev/null
+)
+cd "$top"
+GIT_INDEX_FILE=${GIT_INDEX_FILE:-$index_file} git add docs/architecture/system_map

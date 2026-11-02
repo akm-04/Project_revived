@@ -55,6 +55,8 @@ python3 tools/system_map.py trace <mid>
 python3 tools/system_map.py --refresh-client <src_64>
 python3 tools/system_map.py --refresh-coverage <one-mid-per-line-file>
 ```
+
+The hooks in `tools/githooks` run `--write` and stage the result in every commit and merge commit; turn them on once per repo with `git config core.hooksPath tools/githooks`. `--check` in `tools/check.sh` is the backstop. If a merge conflicts inside the map, resolve it by running `--write`.
 `--check` fails on stale generated files, validates every generated path exists, checks the
 campaign/clientlog attribution anchors, and re-runs `trace` for MIDs 114, 161 and 338.
 `show missions` aliases to `i5`: there is no `internal/application/missions` package.
