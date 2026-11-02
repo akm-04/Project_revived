@@ -16,14 +16,14 @@ import (
 
 type Store struct{ Queryer tx.Queryer }
 
-const rootColumns = `player_id,state_version,special_claims::text,seed_policy_id,created_at,updated_at,married_high_water`
+const rootColumns = `player_id,state_version,special_claims::text,seed_policy_id,created_at,updated_at,married_high_water,board_partner,board_card,board_model_id,bg_main,bg_room`
 const heroColumns = `player_id,partner_id,state_version,favor_degree,is_married,feed_attrs::text,collect_quality_stage,collect_star_stage,pending_candidate::text,seed_policy_id,created_at,updated_at`
 
 func scanRoot(row tx.Row) (library.PlayerFacts, error) {
 	var f library.PlayerFacts
 	var pid int64
 	var raw string
-	if e := row.Scan(&pid, &f.StateVersion, &raw, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt, &f.MarriedHighWater); e != nil {
+	if e := row.Scan(&pid, &f.StateVersion, &raw, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt, &f.MarriedHighWater, &f.BoardPartner, &f.BoardCard, &f.BoardModelID, &f.BgMain, &f.BgRoom); e != nil {
 		return f, e
 	}
 	f.PlayerID = identity.PlayerID(pid)
@@ -256,7 +256,7 @@ func (Store) SavePlayerTx(ctx context.Context, t tx.Tx, f library.PlayerFacts, o
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(ctx, `UPDATE player_library_roots SET state_version=$2,special_claims=$3::jsonb,updated_at=$4 WHERE player_id=$1 AND state_version=$5`, int64(f.PlayerID), f.StateVersion, string(bits), f.UpdatedAt.UTC(), oldVersion)
+	tag, e := t.Exec(ctx, `UPDATE player_library_roots SET state_version=$2,special_claims=$3::jsonb,board_partner=$4,board_card=$5,board_model_id=$6,bg_main=$7,bg_room=$8,updated_at=$9 WHERE player_id=$1 AND state_version=$10`, int64(f.PlayerID), f.StateVersion, string(bits), f.BoardPartner, f.BoardCard, f.BoardModelID, f.BgMain, f.BgRoom, f.UpdatedAt.UTC(), oldVersion)
 	if e != nil {
 		return e
 	}

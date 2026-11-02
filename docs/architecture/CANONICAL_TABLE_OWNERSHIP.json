@@ -2532,6 +2532,134 @@
       ],
       "write_exceptions": []
     },
+    "player_library_dialogs": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_library_partner_missions": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_library_act_awards": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_library_talk_claims": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_library_cg_claims": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_library_backgrounds": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
+    "library_forum_comments": {
+      "owner": "library-forum",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-forum"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "write_exceptions": []
+    },
+    "library_forum_reactions": {
+      "owner": "library-forum",
+      "migration": "migrations/00110_i9_10b_library.sql",
+      "allowed_query_owners": [
+        "library-forum"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "write_exceptions": []
+    },
     "player_dorm_roots": {
       "owner": "dorm-house",
       "migration": "migrations/00050_i7c2c_dorm_inputs.sql",

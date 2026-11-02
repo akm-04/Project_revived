@@ -110,6 +110,14 @@ type libraryDomainPayload struct {
 	Feeding            library.FeedRules               `json:"feeding"`
 	NormalCollections  []library.NormalCollectionRule  `json:"normal_collections"`
 	SpecialCollections []library.SpecialCollectionRule `json:"special_collections"`
+	Stages             []library.StageRule             `json:"stages"`
+	Acts               []library.ActRule               `json:"acts"`
+	Missions           []library.MissionRule           `json:"missions"`
+	Talks              []library.TalkRule              `json:"talks"`
+	CGs                []library.CGRule                `json:"cgs"`
+	Backgrounds        []library.BackgroundRule        `json:"backgrounds"`
+	DialogConfigs      []library.DialogConfigRule      `json:"dialog_configs"`
+	CourseGiftBoxes    []library.CourseGiftBoxRule     `json:"course_gift_boxes"`
 }
 
 func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) (library.Catalog, error) {
@@ -128,7 +136,7 @@ func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) 
 	if c.Feeding.Validate() != nil {
 		return out, library.ErrUnqualified
 	}
-	out = library.Catalog{ContentRevision: revision, Templates: map[int64]library.TemplateRule{}, Gifts: map[int64]library.GiftRule{}, Feeding: c.Feeding, NormalCollections: map[int64]library.NormalCollectionRule{}}
+	out = library.Catalog{ContentRevision: revision, Templates: map[int64]library.TemplateRule{}, Gifts: map[int64]library.GiftRule{}, Feeding: c.Feeding, NormalCollections: map[int64]library.NormalCollectionRule{}, Acts: map[int64]library.ActRule{}, Missions: map[int64]library.MissionRule{}, Talks: map[int64]library.TalkRule{}, CGs: map[int64]library.CGRule{}, Backgrounds: map[int64]library.BackgroundRule{}, DialogConfigs: map[int64]library.DialogConfigRule{}, CourseGiftBoxes: map[int64]library.CourseGiftBoxRule{}}
 	for _, r := range c.Templates {
 		out.Templates[r.TableID] = r
 	}
@@ -146,5 +154,37 @@ func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) 
 		r.RequiredSourceIDs = append([]int64(nil), r.RequiredSourceIDs...)
 		out.SpecialCollections[i] = r
 	}
-	return out, nil
+	for _, r := range c.Stages {
+		r.ActIDs = append([]int64(nil), r.ActIDs...)
+		r.MissionIDs = append([]int64(nil), r.MissionIDs...)
+		out.Stages = append(out.Stages, r)
+	}
+	for _, r := range c.Acts {
+		out.Acts[r.ID] = r
+	}
+	for _, r := range c.Missions {
+		out.Missions[r.ID] = r
+	}
+	for _, r := range c.Talks {
+		r.UnlockTypes = append([]int64(nil), r.UnlockTypes...)
+		r.UnlockHeroes = append([]int64(nil), r.UnlockHeroes...)
+		r.UnlockParams = append([]int64(nil), r.UnlockParams...)
+		out.Talks[r.ID] = r
+	}
+	for _, r := range c.CGs {
+		r.UnlockIDs = append([]int64(nil), r.UnlockIDs...)
+		r.UnlockTypes = append([]int64(nil), r.UnlockTypes...)
+		out.CGs[r.ID] = r
+	}
+	for _, r := range c.Backgrounds {
+		out.Backgrounds[r.ID] = r
+	}
+	for _, r := range c.DialogConfigs {
+		out.DialogConfigs[r.ID] = r
+	}
+	for _, r := range c.CourseGiftBoxes {
+		r.Rolls = append([]library.CourseDropRoll(nil), r.Rolls...)
+		out.CourseGiftBoxes[r.ItemID] = r
+	}
+	return out, out.Validate()
 }

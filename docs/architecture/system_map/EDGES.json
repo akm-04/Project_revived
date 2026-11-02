@@ -3974,7 +3974,13 @@
    "store:librarystore": [
     "*BackfillMissingHeroTx",
     "*EnsurePlayerRootTx",
+    "*ListActAwardsTx",
+    "*ListBackgroundsTx",
+    "*ListCGClaimsTx",
+    "*ListDialogsTx",
     "*ListHeroesTx",
+    "*ListMissionsTx",
+    "*ListTalkClaimsTx",
     "*LockAdmissionTx",
     "*LockHeroTx",
     "*LockRootTx",

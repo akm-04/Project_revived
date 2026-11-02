@@ -271,6 +271,13 @@ SOURCE_MANIFEST.append(('data/tables/library_feed_cost.lua','de45631b923b4c322cd
 SOURCE_MANIFEST.append(('data/tables/library_feed_attr.lua','ea208080fa6786401d646bd078702a7edf52bc637b147120c73479acd39379f9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 SOURCE_MANIFEST.append(('data/tables/library_gift.lua','966f002c019df51058e41d8e839543d2e2fb61577c02c423084ce70257eb9adc',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 SOURCE_MANIFEST.append(('data/tables/library_amour.lua','3c607e4c878d1308822d8e8fb3e89a27718ef253915e8a5966df26ab3b187534',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+# I9-10B full Library gameplay content; the four above stay the I7C-2B minimum.
+SOURCE_MANIFEST.append(('data/tables/library_act.lua','10289ca9009f092bbd87b96402e321f3d92969a3c95404d74c2062e3c5277745',"I9_10B_LIBRARY_SOURCE_BOUNDARY"))
+SOURCE_MANIFEST.append(('data/tables/library_mission.lua','9149534b92a72196dc5fc365f97eed832a252b78489be812ffed26093a8a6146',"I9_10B_LIBRARY_SOURCE_BOUNDARY"))
+SOURCE_MANIFEST.append(('data/tables/library_talk.lua','05462e1812ce00d4f76565824af43d5ac8cb29b50e622bc79b13ab96454f825e',"I9_10B_LIBRARY_SOURCE_BOUNDARY"))
+SOURCE_MANIFEST.append(('data/tables/library_cg.lua','f898a78dba1837bf5b726ac9cf6055e84ee51e66d256e10f4d4ec0d083f0328d',"I9_10B_LIBRARY_SOURCE_BOUNDARY"))
+SOURCE_MANIFEST.append(('data/tables/library_background.lua','af8c83047c1d9cea1303e1951da9ced338b5f28eaf0654075a730c442ea03aca',"I9_10B_LIBRARY_SOURCE_BOUNDARY"))
+SOURCE_MANIFEST.append(('data/tables/library_dialog_config.lua','0b74227f492a292e92b05983f32de6582402f681c65d52a8dd95e7f27dc819a2',"I9_10B_LIBRARY_SOURCE_BOUNDARY"))
 SOURCE_MANIFEST.append(('data/tables/collect_normal.lua','bfd1a9312035cf430e882d1fcda742f334f089acc6d5438a34e938d3bb43f142',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 SOURCE_MANIFEST.append(('data/tables/collect_special.lua','5c159c89f7ffcbfb698d9599539a897896ce0e9ab93e7d04875d012d59df509a',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 SOURCE_MANIFEST.append(('app/model/Library.lua','1830b7e7a5a5203dc7e9eea5bd505b5025b03b52454c69756e14549718962063',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
@@ -2333,8 +2340,47 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     library_gifts=[]
     for row in parse_generated_lua_table(blobs["data/tables/library_gift.lua"].data):
         for item_id in pipe_ints(row["item"]):
-            library_gifts.append(dict(item_id=item_id,category=int(row["type"]),base_favor=int(items_by_id[item_id]["amour"]),ring=item_id==50001112))
+            library_gifts.append(dict(item_id=item_id,category=int(row["type"]),base_favor=int(items_by_id[item_id]["amour"]),ring=item_id==50001112,price_crystal=int(items_by_id[item_id]["price_crystal"])))
     library_gifts.sort(key=lambda x:x["item_id"])
+    library_stages=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_amour.lua"].data):
+        library_stages.append(dict(id=int(row["id"]),favor=int(row["amour"]),act_ids=pipe_ints(row["act_id"]),mission_ids=pipe_ints(row["mission_id"])))
+    library_stages.sort(key=lambda x:x["id"])
+    library_acts=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_act.lua"].data):
+        library_acts.append(dict(id=int(row["id"]),dialog=int(row["dialog"]),amour=int(row["amour"])))
+    library_acts.sort(key=lambda x:x["id"])
+    library_missions=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_mission.lua"].data):
+        library_missions.append(dict(id=int(row["id"]),difficulty=int(row["difficulty"]),type=int(row["type"]),required=int(row["req"]),amour=int(row["amour"]),open_level=int(row["open_lev"])))
+    library_missions.sort(key=lambda x:x["id"])
+    library_talks=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_talk.lua"].data):
+        library_talks.append(dict(id=int(row["talk_id"]),unlock_types=pipe_ints(row["unlock"]),unlock_heroes=pipe_ints(row["unlock_hero"]),unlock_params=pipe_ints(row["unlock_param"]),item_id=int(row["item"]),item_num=int(row["item_num"]),gold=int(row["gold"]),diamond=int(row["diamond"])))
+    library_talks.sort(key=lambda x:x["id"])
+    library_cgs=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_cg.lua"].data):
+        library_cgs.append(dict(id=int(row["id"]),unlock_ids=pipe_ints(row["unlock"]),unlock_types=pipe_ints(row["unlock_type"]),item_id=int(row["item"]),num=int(row["num"])))
+    library_cgs.sort(key=lambda x:x["id"])
+    library_backgrounds=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_background.lua"].data):
+        if row["finish_time"]: raise CompileError("Library background timed row has no owner (C11)")
+        library_backgrounds.append(dict(id=int(row["id"]),limit=int(row["limit"])))
+    library_backgrounds.sort(key=lambda x:x["id"])
+    library_dialog_configs=[]
+    for row in parse_generated_lua_table(blobs["data/tables/library_dialog_config.lua"].data):
+        library_dialog_configs.append(dict(id=int(row["id"]),type=int(row["type"]),open_condition=int(row["open_condition"]),amour_reward=int(row["amour_reward"]),gift_reward=int(row["gift_reward"])))
+    library_dialog_configs.sort(key=lambda x:x["id"])
+    # D485 PRIVATE_POLICY: the daily and purchased course boxes roll dropboxes 600003 and 600004.
+    course_box_items=[misc_int("object_box_book1"),misc_int("object_box_book2")]
+    if course_box_items!=[50001418,50001419]: raise CompileError("Course gift box item source drift")
+    dropbox_rows=parse_generated_lua_table(blobs["data/tables/dropbox.lua"].data)
+    library_course_boxes=[]
+    for item_id,dropbox_id in zip(course_box_items,[600003,600004]):
+        rolls=[dict(id=int(r["id"]),item_id=int(r["item_id"]),item_num=int(r["item_num"]),rate=int(r["drop_rate"])) for r in dropbox_rows if int(r["dropbox_id"])==dropbox_id]
+        rolls.sort(key=lambda x:x["id"])
+        if len(rolls)!=4 or sum(r["rate"] for r in rolls)!=10000: raise CompileError("Course gift box dropbox source drift")
+        library_course_boxes.append(dict(item_id=item_id,dropbox_id=dropbox_id,rolls=rolls))
     normal=[]
     for row in parse_generated_lua_table(blobs["data/tables/collect_normal.lua"].data):
         normal.append(dict(source_id=int(row["id"]),attr_id=int(row["attr"]),quality_thresholds=pipe_ints(row["quality"]),quality_hundredths=[decimal100(x)for x in row["num"].split("|")],star_thresholds=pipe_ints(row["star"]),star_hundredths=[decimal100(x)for x in row["star_attr"].split("|")]))
@@ -2350,7 +2396,10 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if misc_int("library_favor_limit")!=2000 or misc_int("library_gift_right")!=5 or misc_by_key["library_gift_wrong"]!="-3": raise CompileError("Library favor preservation profile source drift")
     favor_rows=parse_generated_lua_table(blobs["data/tables/library_amour.lua"].data)
     if len(normal)!=132 or len(special)!=23 or any(x["type"]!=1 for x in special) or len(library_gifts)!=10: raise CompileError("Library selected source counts/shape drift")
-    library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special)
+    if len(favor_rows)!=5 or len(library_acts)!=4 or len(library_missions)!=6 or len(library_talks)!=23 or len(library_cgs)!=21 or len(library_backgrounds)!=12 or len(library_dialog_configs)!=19: raise CompileError("Library full source counts drift")
+    if [x["id"] for x in library_stages]!=[1,2,3,4,5] or [x["id"] for x in library_acts]!=[1,2,3,4] or [x["id"] for x in library_missions]!=[1001,1002,1003,1004,1005,1006] or [x["id"] for x in library_cgs]!=list(range(1,22)) or [x["id"] for x in library_backgrounds]!=list(range(1,13)) or [x["id"] for x in library_dialog_configs]!=list(range(1,20)): raise CompileError("Library full source identities drift")
+    if any(x["limit"] not in (0,1) for x in library_backgrounds) or any(x["item_id"]!=50001648 for x in library_cgs): raise CompileError("Library background/cg source shape drift")
+    library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special,stages=library_stages,acts=library_acts,missions=library_missions,talks=library_talks,cgs=library_cgs,backgrounds=library_backgrounds,dialog_configs=library_dialog_configs,course_gift_boxes=library_course_boxes)
     from book_content import build_book
     course_artifact=build_course(blobs,parse_generated_lua_table,items)
     book_artifact=build_book(blobs,parse_generated_lua_table,items)

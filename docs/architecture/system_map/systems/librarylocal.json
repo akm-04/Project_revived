@@ -152,9 +152,15 @@
  ],
  "tables": {
   "owned": [
+   "player_library_act_awards",
    "player_library_admissions",
+   "player_library_backgrounds",
+   "player_library_cg_claims",
+   "player_library_dialogs",
    "player_library_heroes",
-   "player_library_roots"
+   "player_library_partner_missions",
+   "player_library_roots",
+   "player_library_talk_claims"
   ],
   "read": [
    "content_library_input_catalogs",
@@ -164,9 +170,15 @@
    "gxb_operation_receipts",
    "player_hero_roots",
    "player_heroes",
+   "player_library_act_awards",
    "player_library_admissions",
+   "player_library_backgrounds",
+   "player_library_cg_claims",
+   "player_library_dialogs",
    "player_library_heroes",
+   "player_library_partner_missions",
    "player_library_roots",
+   "player_library_talk_claims",
    "players"
   ],
   "written": [

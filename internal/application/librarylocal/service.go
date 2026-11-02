@@ -141,6 +141,12 @@ type LibraryPort interface {
 	SavePlayerTx(context.Context, tx.Tx, lib.PlayerFacts, int64) error
 	LockAdmissionTx(context.Context, tx.Tx, identity.PlayerID, string) (Admission, bool, error)
 	SaveAdmissionTx(context.Context, tx.Tx, Admission) error
+	ListDialogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.DialogFact, error)
+	ListMissionsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.MissionFact, error)
+	ListActAwardsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.ActAwardFact, error)
+	ListTalkClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.TalkClaimFact, error)
+	ListCGClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.CGClaimFact, error)
+	ListBackgroundsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.BackgroundFact, error)
 }
 type ContentPort interface {
 	LibraryInputsActive(context.Context) (string, bool, error)

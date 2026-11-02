@@ -16,10 +16,18 @@ type LibraryInputCatalog struct {
 	Feeding                            LibraryFeedRules               `json:"feeding"`
 	NormalCollections                  []LibraryNormalCollectionRule  `json:"normal_collections"`
 	SpecialCollections                 []LibrarySpecialCollectionRule `json:"special_collections"`
+	Stages                             []LibraryStageRule             `json:"stages"`
+	Acts                               []LibraryActRule               `json:"acts"`
+	Missions                           []LibraryMissionRule           `json:"missions"`
+	Talks                              []LibraryTalkRule              `json:"talks"`
+	CGs                                []LibraryCGRule                `json:"cgs"`
+	Backgrounds                        []LibraryBackgroundRule        `json:"backgrounds"`
+	DialogConfigs                      []LibraryDialogConfigRule      `json:"dialog_configs"`
+	CourseGiftBoxes                    []LibraryCourseGiftBoxRule     `json:"course_gift_boxes"`
 }
 
 func (c LibraryInputCatalog) Validate() error {
-	if c.SchemaVersion != 1 || c.SeedPolicyID != "LIBRARY_NEUTRAL_SEED_V1" || c.FeedPolicyID != "LIBRARY_FEED_RECONSTRUCTION_V1" || c.OriginalServerProbabilityRecovered || c.FavorLimit != int64(2000) || len(c.Templates) != 568 || len(c.Gifts) != 10 || len(c.NormalCollections) != 132 || len(c.SpecialCollections) != 23 || c.Feeding.Validate() != nil {
+	if c.SchemaVersion != 1 || c.SeedPolicyID != "LIBRARY_NEUTRAL_SEED_V1" || c.FeedPolicyID != "LIBRARY_FEED_RECONSTRUCTION_V1" || c.OriginalServerProbabilityRecovered || c.FavorLimit != int64(2000) || len(c.Templates) != 568 || len(c.Gifts) != 10 || len(c.NormalCollections) != 132 || len(c.SpecialCollections) != 23 || len(c.Stages) != 5 || len(c.Acts) != 4 || len(c.Missions) != 6 || len(c.Talks) != 23 || len(c.CGs) != 21 || len(c.Backgrounds) != 12 || len(c.DialogConfigs) != 19 || len(c.CourseGiftBoxes) != 2 || c.Feeding.Validate() != nil {
 		return errLibraryInput
 	}
 	seen := map[int64]bool{}
@@ -31,7 +39,7 @@ func (c LibraryInputCatalog) Validate() error {
 	}
 	seen = map[int64]bool{}
 	for _, g := range c.Gifts {
-		if g.ItemID <= 0 || seen[g.ItemID] || g.Category < 1 || g.Category > 4 || (g.Ring && (g.ItemID != 50001112 || g.BaseFavor != 0)) || (!g.Ring && (g.BaseFavor <= 0 || g.BaseFavor > int64(2000))) {
+		if g.ItemID <= 0 || seen[g.ItemID] || g.Category < 1 || g.Category > 4 || g.PriceCrystal <= 0 || (g.Ring && (g.ItemID != 50001112 || g.BaseFavor != 0)) || (!g.Ring && (g.BaseFavor <= 0 || g.BaseFavor > int64(2000))) {
 			return errLibraryInput
 		}
 		seen[g.ItemID] = true
@@ -48,6 +56,48 @@ func (c LibraryInputCatalog) Validate() error {
 			return fmt.Errorf("library: selected special row %d unqualified", i+1)
 		}
 	}
+	for i, r := range c.Stages {
+		if r.ID != int64(i+1) || r.Validate() != nil || (i > 0 && r.Favor <= c.Stages[i-1].Favor) {
+			return fmt.Errorf("library: stage row %d unqualified", i+1)
+		}
+	}
+	for i, r := range c.Acts {
+		if r.ID != int64(i+1) || r.Validate() != nil {
+			return fmt.Errorf("library: act row %d unqualified", i+1)
+		}
+	}
+	for i, r := range c.Missions {
+		if r.ID != 1001+int64(i) || r.Validate() != nil {
+			return fmt.Errorf("library: mission row %d unqualified", i+1)
+		}
+	}
+	seen = map[int64]bool{}
+	for _, r := range c.Talks {
+		if r.Validate() != nil || seen[r.ID] {
+			return fmt.Errorf("library: talk row %d unqualified", r.ID)
+		}
+		seen[r.ID] = true
+	}
+	for i, r := range c.CGs {
+		if r.ID != int64(i+1) || r.Validate() != nil {
+			return fmt.Errorf("library: cg row %d unqualified", i+1)
+		}
+	}
+	for i, r := range c.Backgrounds {
+		if r.ID != int64(i+1) || r.Validate() != nil {
+			return fmt.Errorf("library: background row %d unqualified", i+1)
+		}
+	}
+	for i, r := range c.DialogConfigs {
+		if r.ID != int64(i+1) || r.Validate() != nil {
+			return fmt.Errorf("library: dialog config row %d unqualified", i+1)
+		}
+	}
+	for _, r := range c.CourseGiftBoxes {
+		if r.Validate() != nil {
+			return fmt.Errorf("library: course gift box %d unqualified", r.ItemID)
+		}
+	}
 	return nil
 }
 
@@ -62,10 +112,11 @@ type LibraryTemplateRule struct {
 	GiftDislikeType      int64 `json:"gift_dislike_type"`
 }
 type LibraryGiftRule struct {
-	ItemID    int64 `json:"item_id"`
-	Category  int64 `json:"category"`
-	BaseFavor int64 `json:"base_favor"`
-	Ring      bool  `json:"ring"`
+	ItemID       int64 `json:"item_id"`
+	Category     int64 `json:"category"`
+	BaseFavor    int64 `json:"base_favor"`
+	Ring         bool  `json:"ring"`
+	PriceCrystal int64 `json:"price_crystal"`
 }
 type LibraryFeedAxis struct {
 	AttrID   int64    `json:"attr_id"`
@@ -154,6 +205,153 @@ func (r LibraryNormalCollectionRule) Validate() error {
 				return errLibraryInput
 			}
 		}
+	}
+	return nil
+}
+
+type LibraryStageRule struct {
+	ID         int64   `json:"id"`
+	Favor      int64   `json:"favor"`
+	ActIDs     []int64 `json:"act_ids"`
+	MissionIDs []int64 `json:"mission_ids"`
+}
+
+func (r LibraryStageRule) Validate() error {
+	if r.ID <= 0 || r.Favor <= 0 || len(r.ActIDs) == 0 {
+		return errLibraryInput
+	}
+	for i, id := range r.ActIDs {
+		if id < 1 || id > 4 || (i > 0 && id <= r.ActIDs[i-1]) {
+			return errLibraryInput
+		}
+	}
+	for i, id := range r.MissionIDs {
+		if id <= 0 || (i > 0 && id <= r.MissionIDs[i-1]) {
+			return errLibraryInput
+		}
+	}
+	return nil
+}
+
+type LibraryActRule struct {
+	ID     int64 `json:"id"`
+	Dialog int64 `json:"dialog"`
+	Amour  int64 `json:"amour"`
+}
+
+func (r LibraryActRule) Validate() error {
+	if r.ID < 1 || r.ID > 4 || r.Dialog < 0 || r.Amour < 0 {
+		return errLibraryInput
+	}
+	return nil
+}
+
+type LibraryMissionRule struct {
+	ID         int64 `json:"id"`
+	Difficulty int64 `json:"difficulty"`
+	Type       int64 `json:"type"`
+	Required   int64 `json:"required"`
+	Amour      int64 `json:"amour"`
+	OpenLevel  int64 `json:"open_level"`
+}
+
+func (r LibraryMissionRule) Validate() error {
+	if r.ID <= 0 || r.Difficulty < 1 || r.Difficulty > 3 || r.Type < 1 || r.Type > 3 || r.Required <= 0 || r.Amour < 0 || r.OpenLevel < 0 {
+		return errLibraryInput
+	}
+	return nil
+}
+
+type LibraryTalkRule struct {
+	ID           int64   `json:"id"`
+	UnlockTypes  []int64 `json:"unlock_types"`
+	UnlockHeroes []int64 `json:"unlock_heroes"`
+	UnlockParams []int64 `json:"unlock_params"`
+	ItemID       int64   `json:"item_id"`
+	ItemNum      int64   `json:"item_num"`
+	Gold         int64   `json:"gold"`
+	Diamond      int64   `json:"diamond"`
+}
+
+func (r LibraryTalkRule) Validate() error {
+	if r.ID <= 0 || len(r.UnlockTypes) != len(r.UnlockHeroes) || len(r.UnlockTypes) != len(r.UnlockParams) || r.ItemID < 0 || r.ItemNum < 0 || r.Gold < 0 || r.Diamond < 0 {
+		return errLibraryInput
+	}
+	if r.ItemID > 0 && r.ItemNum <= 0 {
+		return errLibraryInput
+	}
+	return nil
+}
+
+type LibraryCGRule struct {
+	ID          int64   `json:"id"`
+	UnlockIDs   []int64 `json:"unlock_ids"`
+	UnlockTypes []int64 `json:"unlock_types"`
+	ItemID      int64   `json:"item_id"`
+	Num         int64   `json:"num"`
+}
+
+func (r LibraryCGRule) Validate() error {
+	if r.ID <= 0 || len(r.UnlockIDs) != len(r.UnlockTypes) || r.ItemID <= 0 || r.Num <= 0 {
+		return errLibraryInput
+	}
+	return nil
+}
+
+type LibraryBackgroundRule struct {
+	ID    int64 `json:"id"`
+	Limit int64 `json:"limit"`
+}
+
+func (r LibraryBackgroundRule) Validate() error {
+	if r.ID <= 0 || (r.Limit != 0 && r.Limit != 1) {
+		return errLibraryInput
+	}
+	return nil
+}
+
+type LibraryDialogConfigRule struct {
+	ID            int64 `json:"id"`
+	Type          int64 `json:"type"`
+	OpenCondition int64 `json:"open_condition"`
+	AmourReward   int64 `json:"amour_reward"`
+	GiftReward    int64 `json:"gift_reward"`
+}
+
+func (r LibraryDialogConfigRule) Validate() error {
+	if r.ID <= 0 || r.Type < 1 || r.Type > 7 || r.OpenCondition < 0 || r.AmourReward < 0 || r.GiftReward < 0 {
+		return errLibraryInput
+	}
+	return nil
+}
+
+type LibraryCourseDropRoll struct {
+	ID      int64 `json:"id"`
+	ItemID  int64 `json:"item_id"`
+	ItemNum int64 `json:"item_num"`
+	Rate    int64 `json:"rate"`
+}
+
+type LibraryCourseGiftBoxRule struct {
+	ItemID    int64                   `json:"item_id"`
+	DropboxID int64                   `json:"dropbox_id"`
+	Rolls     []LibraryCourseDropRoll `json:"rolls"`
+}
+
+func (r LibraryCourseGiftBoxRule) Validate() error {
+	if r.ItemID <= 0 || r.DropboxID <= 0 || len(r.Rolls) == 0 {
+		return errLibraryInput
+	}
+	total, seen := int64(0), map[int64]bool{}
+	for _, roll := range r.Rolls {
+		if roll.ID <= 0 || roll.ItemID <= 0 || roll.ItemNum <= 0 || roll.Rate < 0 || roll.Rate > 10000 || seen[roll.ItemID] {
+			return errLibraryInput
+		}
+		seen[roll.ItemID] = true
+		total += roll.Rate
+	}
+	if total != 10000 {
+		return errLibraryInput
 	}
 	return nil
 }

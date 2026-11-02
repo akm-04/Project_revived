@@ -185,6 +185,10 @@ func (s Service) OverlayRosterTx(ctx context.Context, q tx.Queryer, actor identi
 	if !ok {
 		return lib.ErrUnqualified
 	}
+	root, e := s.Library.ReadRootTx(ctx, q, actor.PlayerID)
+	if e != nil {
+		return e
+	}
 	for key, raw := range rows {
 		partner, e := strconv.ParseInt(key, 10, 64)
 		if e != nil {
@@ -203,6 +207,14 @@ func (s Service) OverlayRosterTx(ctx context.Context, q tx.Queryer, actor identi
 		row["feed_attrs"] = f.Facts.Applied
 		row["collect_quality_stage"] = f.Facts.QualityStage
 		row["collect_star_stage"] = f.Facts.StarStage
+		row["is_board"] = int64(0)
+		row["board_card"] = int64(1)
+		row["board_model_id"] = int64(0)
+		if root.BoardPartner == partner {
+			row["is_board"] = int64(1)
+			row["board_card"] = root.BoardCard
+			row["board_model_id"] = root.BoardModelID
+		}
 	}
 	return nil
 }
@@ -287,19 +299,121 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 	if mid != 836 {
 		return errors.New("library: unsupported read")
 	}
+	catalog, e := s.Content.LibraryCatalogTx(ctx, q, revision)
+	if e != nil {
+		return e
+	}
 	heroes, e := s.Heroes.ListHeroesTx(ctx, q, a.PlayerID)
 	if e != nil {
 		return e
 	}
+	dialogs, e := s.Library.ListDialogsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	missions, e := s.Library.ListMissionsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	awards, e := s.Library.ListActAwardsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	talkClaims, e := s.Library.ListTalkClaimsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	cgClaims, e := s.Library.ListCGClaimsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	backgrounds, e := s.Library.ListBackgroundsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	root, e := s.Library.ReadRootTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+
+	dialogsByPartner := map[int64][]any{}
+	for _, d := range dialogs {
+		dialogsByPartner[d.PartnerID] = append(dialogsByPartner[d.PartnerID], map[string]any{
+			"dialog_id": d.DialogID, "is_read": bit(d.IsRead), "is_awarded": bit(d.IsAwarded), "select_id": d.SelectID,
+		})
+	}
+	missionsByPartner := map[int64][]any{}
+	for _, m := range missions {
+		missionsByPartner[m.PartnerID] = append(missionsByPartner[m.PartnerID], map[string]any{
+			"mission_id": m.MissionID, "process": m.Process, "mission_state": m.MissionState,
+		})
+	}
+	awardedActs := map[int64]map[int64]bool{}
+	for _, award := range awards {
+		if awardedActs[award.PartnerID] == nil {
+			awardedActs[award.PartnerID] = map[int64]bool{}
+		}
+		awardedActs[award.PartnerID][award.ActID] = true
+	}
+
 	infos := map[string]any{}
 	for _, h := range heroes {
 		f, e := s.HeroLibraryInputsTx(ctx, q, scope, h.PartnerID)
 		if e != nil {
 			return e
 		}
-		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{"favor_degree": f.Facts.Favor, "is_married": bit(f.Facts.Married)}
+		partnerDialogs := dialogsByPartner[h.PartnerID]
+		if partnerDialogs == nil {
+			partnerDialogs = []any{}
+		}
+		partnerMissions := missionsByPartner[h.PartnerID]
+		if partnerMissions == nil {
+			partnerMissions = []any{}
+		}
+		partnerActs := make([]any, 0, lib.ActCount)
+		for id := int64(1); id <= lib.ActCount; id++ {
+			partnerActs = append(partnerActs, map[string]any{"is_awarded": bit(awardedActs[h.PartnerID][id])})
+		}
+		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{
+			"favor_degree":     f.Facts.Favor,
+			"is_married":       bit(f.Facts.Married),
+			"partner_dialogs":  partnerDialogs,
+			"partner_missions": partnerMissions,
+			"partner_acts":     partnerActs,
+			"partner_logs":     map[string]any{},
+		}
 	}
-	*out = map[string]any{"library_infos": infos, "library_talk_infos": map[string]any{}}
+
+	talkInfos := make(map[string]any, len(catalog.Talks))
+	for id := range catalog.Talks {
+		talkInfos[strconv.FormatInt(id, 10)] = int64(0)
+	}
+	for _, claim := range talkClaims {
+		if _, ok := catalog.Talks[claim.TalkID]; ok {
+			talkInfos[strconv.FormatInt(claim.TalkID, 10)] = int64(1)
+		}
+	}
+	cgInfos := make([]int64, 0, len(cgClaims))
+	for _, claim := range cgClaims {
+		if _, ok := catalog.CGs[claim.CGID]; ok {
+			cgInfos = append(cgInfos, claim.CGID)
+		}
+	}
+	hasBuy := make([]int64, 0, len(backgrounds))
+	for _, owned := range backgrounds {
+		if _, ok := catalog.Backgrounds[owned.BgID]; ok {
+			hasBuy = append(hasBuy, owned.BgID)
+		}
+	}
+
+	*out = map[string]any{
+		"library_infos":      infos,
+		"library_talk_infos": talkInfos,
+		"library_cg_infos":   cgInfos,
+		"library_bg_infos": map[string]any{
+			"bg_main": root.BgMain, "bg_room": root.BgRoom, "has_buy": hasBuy, "server_time": at.Unix(),
+		},
+	}
 	return nil
 }
 
