@@ -482,7 +482,7 @@ func TestRawBundleZeroFalseAndIsolation(t *testing.T) {
 		t.Fatal(zero, noMail)
 	}
 	r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	if r != 5567 || p != 100 || f != 99 || o != 0 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 || appearance != 542 {
+	if r != 5570 || p != 100 || f != 99 || o != 476 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 || appearance != 542 {
 		t.Fatal(r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance)
 	}
 	raw := b.ManifestJSON()
@@ -612,6 +612,38 @@ func (r repo) InsertCourseInputs(_ context.Context, x tx.Tx, b Bundle) (int64, e
 	return 1, nil
 }
 
+func (r repo) InsertWorkplace(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.WorkplaceCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertMarch(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.MarchCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertCampaign(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.CampaignCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertSummon(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.SummonCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
 func (r repo) InsertTopFloor(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]
@@ -711,6 +743,70 @@ func (r repo) InsertInscriptionInputs(_ context.Context, x tx.Tx, b Bundle) (int
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]
 	v.InscriptionInputsCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertPetCampaign(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.PetCampaignCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertGodsTrial(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.GodsTrialCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertWorldBoss(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.WorldBossCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertIllusion(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.IllusionCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertOccult(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.OccultCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertAdventure(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.AdventureCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertDodgeball(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.DodgeballCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertMemoir(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.MemoirCount = 1
 	t.installed[b.RevisionID()] = v
 	return 1, nil
 }

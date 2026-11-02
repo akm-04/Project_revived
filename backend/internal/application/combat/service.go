@@ -590,8 +590,9 @@ type SummaryRequest struct {
 }
 
 type SummaryAttested struct {
-	Attempt     d.Attempt
-	Attestation d.Attestation
+	Attempt        d.Attempt
+	Attestation    d.Attestation
+	ReportProgress d.ReportProgress
 	// Drained answers a RESULT matching no open attempt of this generation
 	// within its deadline (a duplicate, unmatched or late RESULT): nothing is
 	// written and the mode answers with its family replay spec (PASS120).
@@ -633,11 +634,16 @@ func (s Service) AttestReportTx(ctx context.Context, t tx.Tx, request ReportRequ
 	if !request.Policy.Valid() || !request.Report.Finite() {
 		return SummaryAttested{}, d.ErrInvalid
 	}
+	progress := d.ReportProgress{}
 	judge := func(snapshot d.Snapshot, _ d.DrawPackage) (d.Verdict, string) {
-		return request.Policy.Judge(snapshot, request.Report)
+		verdict, reason, position := request.Policy.JudgeWithProgress(snapshot, request.Report)
+		progress = position
+		return verdict, reason
 	}
-	return s.attestJudgedTx(ctx, t, judgedResult{locator: request.Locator, generation: request.GenerationRef, kind: request.TerminalKind, at: request.At,
+	result, err := s.attestJudgedTx(ctx, t, judgedResult{locator: request.Locator, generation: request.GenerationRef, kind: request.TerminalKind, at: request.At,
 		profile: d.ClientFullReportAttested, validatorID: request.Policy.ID, validatorVersion: request.Policy.Version, evidence: request.Report, judge: judge})
+	result.ReportProgress = progress
+	return result, err
 }
 
 type DerivedRequest struct {

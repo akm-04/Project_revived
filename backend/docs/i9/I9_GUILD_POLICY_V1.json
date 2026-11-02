@@ -1,0 +1,233 @@
+{
+ "policy_id": "I9_GUILD_POLICY_V1",
+ "version": 1,
+ "classification": "PRIVATE_POLICY unless a row cites a source",
+ "decisions": "D400-D419",
+ "activity": {
+  "personal_daily_cap": 1000,
+  "guild_cap": 280000,
+  "initial_vitality": 20000,
+  "leave_lifetime_multiplier": 0.5,
+  "spirit_energy_credits": false,
+  "source": "misc.lua:1528-1540, guild_core_policy.json"
+ },
+ "tea": {
+  "requests_per_day": 1,
+  "normal_need": 3,
+  "sx_need": 2,
+  "donor_friend_medal_per_scroll": 10,
+  "gift_expiry": "modes.Day boundary",
+  "source": "misc.lua:3418-3434"
+ },
+ "rental": {
+  "price_mana_per_force_divisor": 2,
+  "price_floor_mana": 1000,
+  "hourly_interest_force_divisor": 100,
+  "guild_share_percent": 0,
+  "lender_share_of_price_percent": 100,
+  "maximum_duration": null,
+  "recall_minimum_seconds": 1800,
+  "level_up_ceiling": 5,
+  "note": "tunable; numbers have no source",
+  "vip_limits": [
+   {
+    "vip": 0,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 1,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 2,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 3,
+    "lend": 2,
+    "level_up": 0
+   },
+   {
+    "vip": 4,
+    "lend": 2,
+    "level_up": 1
+   },
+   {
+    "vip": 5,
+    "lend": 2,
+    "level_up": 2
+   },
+   {
+    "vip": 6,
+    "lend": 2,
+    "level_up": 3
+   },
+   {
+    "vip": 7,
+    "lend": 2,
+    "level_up": 4
+   },
+   {
+    "vip": 8,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 9,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 10,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 11,
+    "lend": 2,
+    "level_up": 5
+   },
+   {
+    "vip": 12,
+    "lend": 3,
+    "level_up": 5
+   },
+   {
+    "vip": 13,
+    "lend": 3,
+    "level_up": 5
+   },
+   {
+    "vip": 14,
+    "lend": 4,
+    "level_up": 5
+   },
+   {
+    "vip": 15,
+    "lend": 4,
+    "level_up": 5
+   }
+  ],
+  "vip_limits_source": "client data/tables/vip.lua num_mercenary, rent_level_up",
+  "departure_mail": {
+   "sender": "Guild",
+   "title": "Lent unit returned",
+   "body": "You are no longer in the guild, so your lent unit has come back. Your earnings are attached.",
+   "source": "PRIVATE_POLICY D412",
+   "operator_tunable": "I11"
+  }
+ },
+ "borrow_modes": [
+  {
+   "key": "campaign_normal",
+   "campaign_types": [
+    1
+   ],
+   "enabled": true,
+   "star_cap": 2,
+   "source": "rule 10"
+  },
+  {
+   "key": "campaign_super",
+   "campaign_types": [
+    2
+   ],
+   "enabled": true,
+   "star_cap": 2,
+   "source": "rule 10"
+  },
+  {
+   "key": "quiz",
+   "campaign_types": [
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "enabled": true,
+   "star_cap": 2,
+   "source": "rule 10; Quiz is function 10, trial types per surface note"
+  },
+  {
+   "key": "challenge",
+   "campaign_types": [
+    24
+   ],
+   "enabled": true,
+   "star_cap": 2,
+   "source": "rule 10; MapDetailWindow.lua:565-568"
+  },
+  {
+   "key": "champion",
+   "campaign_types": [
+    5
+   ],
+   "enabled": true,
+   "star_cap": null,
+   "source": "rule 10, 13"
+  },
+  {
+   "key": "guild_campaign",
+   "campaign_types": [
+    7
+   ],
+   "enabled": true,
+   "star_cap": null,
+   "source": "user"
+  },
+  {
+   "key": "fantasy",
+   "campaign_types": [
+    32
+   ],
+   "enabled": true,
+   "star_cap": null,
+   "source": "client rule 9, translation.lua:8189"
+  },
+  {
+   "key": "gods_trial",
+   "campaign_types": [
+    79
+   ],
+   "enabled": false,
+   "star_cap": null,
+   "source": "not in rule 10; tweakable"
+  },
+  {
+   "key": "fate",
+   "campaign_types": [
+    8
+   ],
+   "enabled": false,
+   "star_cap": null,
+   "source": "not in rule 10; tweakable; CampaignType ELEMENT, domain/worldboss/catalog.go:119"
+  }
+ ],
+ "guild_campaign": {
+  "attempts_per_chapter_day": 2,
+  "prepare_seconds": 60,
+  "battle_seconds": 180,
+  "rest_seconds_of_day": [
+   18000,
+   28800
+  ],
+  "applications_per_day": 4,
+  "boss_damage_rank_multiplier": 2,
+  "last_strike_coin": 100,
+  "max_fight_damage": 10000000000,
+  "notice_mail": {
+   "enabled": true,
+   "open_title": "Guild Campaign opened",
+   "open_body": "Your guild has opened a new chapter. Registered members may attack its stages.",
+   "reset_title": "Guild Campaign reset",
+   "reset_body": "Your guild has reset the chapter. Registered members may attack its stages.",
+   "operator_tunable": "I11"
+  },
+  "guild_log_retention_days": 30,
+  "source": "misc.lua:1330-1436; translation.lua:2348-2349; retention and mail PRIVATE_POLICY"
+ }
+}

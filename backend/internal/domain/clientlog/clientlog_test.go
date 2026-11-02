@@ -138,7 +138,7 @@ func TestRetentionAndOutcomes(t *testing.T) {
 			t.Errorf("OutcomeOf(%d,%d)=%s", c.status, c.code, got)
 		}
 	}
-	if OutcomeUnknownMID.Class() != Anomaly || !OutcomeUndecodable.KeepsRawEnvelope() || OutcomeOK.KeepsRawEnvelope() {
+	if OutcomeUnknownMID.Class() != Anomaly || !OutcomeUndecodable.KeepsRawEnvelope() || OutcomeOK.KeepsRawEnvelope() || OutcomeInactiveMode.Class() != Routine || OutcomeInactiveMode.KeepsRawEnvelope() {
 		t.Fatal("anomaly outcomes")
 	}
 }

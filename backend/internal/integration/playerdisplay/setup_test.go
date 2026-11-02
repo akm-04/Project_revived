@@ -95,11 +95,21 @@ func actor(t *testing.T, p *pg.Pool) identity.ActorContext {
 	return a
 }
 
-// bornActor is a player the production birth chain wrote, as the actual API serves after MID1, with actor's values.
+// bornActor is a player the production birth chain wrote, as the actual API serves after MID1, with actor's values. Its
+// roster starts empty (no I9-3E birth companion) so fixtures place their own heroes from partner 1.
 func bornActor(t *testing.T, p *pg.Pool) identity.ActorContext {
+	return born(t, p, nativebirth.PersistBare)
+}
+
+// companionActor is bornActor through the whole production chain, owning the I9-3E birth companion as partner 1.
+func companionActor(t *testing.T, p *pg.Pool) identity.ActorContext {
+	return born(t, p, nativebirth.Persist)
+}
+
+func born(t *testing.T, p *pg.Pool, persist func(context.Context, *pg.Pool, ids.UUID, identity.LogicalServerID, identity.PlayerID) error) identity.ActorContext {
 	t.Helper()
 	a, account := playerRoot(t, p, 1)
-	if e := nativebirth.Persist(ctx, p, account, a.LogicalServerID, a.PlayerID); e != nil {
+	if e := persist(ctx, p, account, a.LogicalServerID, a.PlayerID); e != nil {
 		t.Fatalf("fixture birth: %v", e)
 	}
 	for _, statement := range []string{

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -16,7 +17,7 @@ import (
 // It is distinct from first-character persistence and may run on every login.
 type CharacterLoginReconciler interface {
 	Name() string
-	ReconcileCharacterLogin(context.Context, tx.Tx, identity.ActorContext, operation.Context) error
+	ReconcileCharacterLogin(context.Context, tx.Tx, identity.ActorContext, operation.Context, time.Time) error
 }
 
 func ValidateLoginReconcilers(rs []CharacterLoginReconciler) error {
@@ -36,7 +37,7 @@ func ValidateLoginReconcilers(rs []CharacterLoginReconciler) error {
 	}
 	return nil
 }
-func ApplyLoginReconcilers(ctx context.Context, t tx.Tx, actor identity.ActorContext, op operation.Context, rs []CharacterLoginReconciler) error {
+func ApplyLoginReconcilers(ctx context.Context, t tx.Tx, actor identity.ActorContext, op operation.Context, at time.Time, rs []CharacterLoginReconciler) error {
 	if t == nil {
 		return errors.New("character login reconciliation requires caller transaction")
 	}
@@ -44,7 +45,7 @@ func ApplyLoginReconcilers(ctx context.Context, t tx.Tx, actor identity.ActorCon
 		return err
 	}
 	for _, r := range rs {
-		if err := r.ReconcileCharacterLogin(ctx, t, actor, op); err != nil {
+		if err := r.ReconcileCharacterLogin(ctx, t, actor, op, at); err != nil {
 			return fmt.Errorf("login reconciler %s: %w", r.Name(), err)
 		}
 	}

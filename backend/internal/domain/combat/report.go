@@ -23,6 +23,7 @@ type Report struct {
 	Pet       int64         `json:"pet,omitempty"`
 	Allies    []ActorStatus `json:"allies"`
 	Enemies   []ActorStatus `json:"enemies"`
+	Round     int           `json:"round,omitempty"`
 }
 
 type ActorStatus struct {
@@ -55,19 +56,33 @@ type ReportPolicy struct {
 	Pet       bool
 	// WinClearsEnemies makes a win require every reported enemy at zero hp.
 	WinClearsEnemies bool
-	MaxHP            float64
+	// CompleteEnemies and LivingWinner are opt-in for new family policy versions.
+	CompleteEnemies bool
+	LivingWinner    bool
+	MaxHP           float64
 	// HPPerFrozen, when positive, caps an actor's hp at this multiple of its
 	// frozen HP attribute; buffs may raise the stock hp limit.
 	HPPerFrozen float64
+	// SelectFrozenRoster admits a RESULT selection when START carried only a grid.
+	SelectFrozenRoster bool
+	// ReportedWave validates the single wave carried by Memoir's status map.
+	ReportedWave bool
 }
 
 func (p ReportPolicy) Valid() bool {
-	return versionedID.MatchString(p.ID) && p.Version > 0 && p.MaxHP > 0 && p.HPPerFrozen >= 0
+	selectionValid := !p.SelectFrozenRoster || p.Formation && p.Pet && p.CompleteEnemies
+	waveValid := !p.ReportedWave || p.CompleteEnemies && p.LivingWinner && p.WinClearsEnemies
+	return versionedID.MatchString(p.ID) && p.Version > 0 && p.MaxHP > 0 && p.HPPerFrozen >= 0 && selectionValid && waveValid
 }
 
 // Judge checks the report against the attempt's frozen snapshot and returns
 // the verdict with a stable reason code for a rejection (H-42, H-43, H-41).
 func (p ReportPolicy) Judge(snapshot Snapshot, report Report) (Verdict, string) {
+	verdict, reason, _ := p.JudgeWithProgress(snapshot, report)
+	return verdict, reason
+}
+
+func (p ReportPolicy) judgeStrict(snapshot Snapshot, report Report) (Verdict, string) {
 	battle := snapshot.Battle
 	if p.Formation {
 		if verdict, reason := judgeFormation(battle, report.Formation); verdict == VerdictRejected {
@@ -93,9 +108,21 @@ func (p ReportPolicy) Judge(snapshot Snapshot, report Report) (Verdict, string) 
 	enemies := frozenEnemies(battle)
 	if verdict, reason := p.judgeStatuses(report.Enemies, func(s ActorStatus) (Actor, bool) {
 		a, ok := enemies[s.Identity]
-		return a, ok
+		return a, ok && (!p.CompleteEnemies || s.Player == a.Player)
 	}, "ENEMY"); verdict == VerdictRejected {
 		return verdict, reason
+	}
+	if p.CompleteEnemies && len(report.Enemies) != len(enemies) {
+		return VerdictRejected, "ENEMY_MISSING"
+	}
+	if p.LivingWinner && report.Win {
+		alive := false
+		for _, ally := range report.Allies {
+			alive = alive || ally.HP > 0
+		}
+		if !alive {
+			return VerdictRejected, "WIN_WITHOUT_SURVIVOR"
+		}
 	}
 	if p.WinClearsEnemies && report.Win {
 		for _, enemy := range report.Enemies {
@@ -131,14 +158,23 @@ func (p ReportPolicy) judgeStatuses(statuses []ActorStatus, frozen func(ActorSta
 	return VerdictAccepted, ""
 }
 
-// frozenHP is the actor's frozen HP attribute; an actor without battle totals
-// (a template) is bounded by the family's absolute cap only.
-func frozenHP(a Actor) float64 {
+// FrozenHP is the actor's frozen HP attribute when the battle totals carry one.
+func FrozenHP(battleTotals json.RawMessage) (float64, bool) {
 	var totals struct {
 		Total []float64 `json:"total"`
 	}
-	if json.Unmarshal(a.BattleTotals, &totals) != nil || len(totals.Total) <= stockHPAttribute {
+	if json.Unmarshal(battleTotals, &totals) != nil || len(totals.Total) <= stockHPAttribute {
+		return 0, false
+	}
+	return totals.Total[stockHPAttribute], true
+}
+
+// frozenHP is the actor's frozen HP attribute; an actor without battle totals
+// (a template) is bounded by the family's absolute cap only.
+func frozenHP(a Actor) float64 {
+	value, ok := FrozenHP(a.BattleTotals)
+	if !ok {
 		return math.Inf(1)
 	}
-	return totals.Total[stockHPAttribute]
+	return value
 }

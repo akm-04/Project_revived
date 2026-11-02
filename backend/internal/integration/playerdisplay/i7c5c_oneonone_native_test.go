@@ -40,7 +40,7 @@ func oneOnOneService(t *testing.T, p *pg.Pool) app.Service {
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: oneononestore.Store{}, Content: content,
 		Fence: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
-		Directory: i4store.PlayerDirectoryReader{}, Entitlements: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Directory: i4store.PlayerDirectoryReader{}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // oneOnOnePlayer is a genuine combat owner with level 60, 15 owned girls and an Achievement root.
@@ -108,6 +108,8 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	pool := pool(t)
 	defer pool.Close()
 	s := oneOnOneService(t, pool)
+	facts := countPVPFights(s.Facts.(i5.ObjectiveFacts))
+	s.Facts = facts
 	a, heroesA := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	b, heroesB := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	catalog := oneOnOneCatalog(t, pool)
@@ -190,6 +192,9 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	t.Logf("best-of-three START with resolution and settlement took %s (rounds %v)", time.Since(started), result.Wins)
 	if len(result.Wins) < 2 || len(result.Wins) > 3 || len(result.ReportKeys) != len(result.Wins) || result.Arena.Player.TriesLeft != 9 {
 		t.Fatalf("match %+v", result)
+	}
+	if facts.of(a.PlayerID) != 1 {
+		t.Fatal("a settled 1on1 match is one PVP_FIGHT fact", facts.of(a.PlayerID))
 	}
 	gain := catalog.Gain(4300, 4500)
 	if !result.Win {

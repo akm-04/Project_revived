@@ -1,0 +1,45 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_MODE_FRAMEWORK_V1",
+ "version": 1,
+ "node": "ROOT/I9",
+ "status": "FROZEN_I9_1",
+ "base": "owned PassMap 775; backend i8-go1273 8aaa782 (v0.138.0) migration 00078",
+ "title": "Rules every I9 game mode follows (placement, wire replies, admission, time, counters, settlement, entropy, combat binding, facts, locks, proof)",
+ "label_rule": "PRIVATE_POLICY marks a private-server invention (no stock or V1 evidence). UNKNOWN marks a stock behaviour not recovered; it is never guessed silently.",
+ "applies_to": "Every stage I9-2..I9-11 and I9-E. A stage contract may narrow a rule for its family; changing a rule needs a versioned successor of this contract with a D-number.",
+ "rules": [
+  "F1 Placement. A family has internal/domain/<family> (rules, no I/O), internal/application/<family> (transactions through ports), internal/adapters/postgres/<family>store (tables it alone owns), and internal/adapters/stockruntime/<family>_dispatcher.go exporting <Family>MIDs, registered in cmd/gxb-api/main_postgres.go with mustRegister (wrapped by observing(...) when achievement or objective facts apply). internal/domain/modes holds only the cross-family law of F5-F7 and F11; no family behaviour lives there.",
+  "F2 Content. Stock tables enter through tools/<family>_content.py -> internal/content/builtin/generated/<family>_catalog.json -> a typed profile in internal/content/builtin with exact row-count and key validation -> contentstore -> the content registry, under a newly registered compiler generation (tools/check_content_generation_policy.py). Each catalog records its source table sha256. PRIVATE_POLICY parameters live in a separate policy document with policy_id and version (V1 campaign_drop_policy split), never mixed into source facts; every receipt that used one records its id and version.",
+  "F3 Surface. Every MID of I9_MODE_SURFACE_V1 carries one disposition: ACTIVE(stage), INACTIVE_D79, LATER(I10 | I10.5 | I11 | other phase), or OUT. At I9-E no surface MID answers 501 unimplemented_mid.",
+  "F4 Replies (src_64 Backend.lua webRequest_, RESEARCH W1-W3). (a) Success: HTTP 200 with the body the stock reader consumes; events dispatch only on 200 + OK. (b) A refusal the stock UI can reach (race at a day boundary, energy spent elsewhere, limit used up on another device): HTTP 200 {\"error_code\": N} where N is the stock message.lua code when the client has one for that case, else 1; error_msg is never non-empty (a non-empty error_msg exits the game). (c) Malformed or forged parameters the stock client never sends: HTTP 400 {\"error\": \"<family>_invalid_parameter\"} (silent ERROR callback; journal CLIENT_ERROR). (d) Server failure: HTTP 503 with the cause recorded for the journal. (e) Duplicate terminal: the family's FightExist response where its reader accepts one (campaign 114 accepts error_code 30005 with a full body). Existing I7/I8 dispatchers keep their replies until an I9 stage edits them; an edited dispatcher adopts this rule.",
+  "F5 Inactive MIDs. MIDs whose disposition is INACTIVE_D79 or LATER are routed to one shared inactive dispatcher that answers HTTP 200 {\"error_code\": 1}, changes no state, and journals outcome class INACTIVE_MODE (ROUTINE retention), so the UNKNOWN_MID anomaly class keeps only real surprises. Approved as D83; it amends I85_REQUEST_JOURNAL_V1 R1 and D71 (amendment recorded with the I9-1 seal).",
+  "F6 Admission order, all inside the operation's transaction: actor and gameplay authority -> function gate (Functions.ReadFunctionEligibilityTx: function.lua open level or campaign stage) -> family prerequisites (progress, VIP column) -> counters (F8) -> costs. The server mirrors every guard the stock window applies before sending (V1 lesson: Super daily limit and energy checks mirror MapDetailWindow), so a modified client gets F4(b)/(c), never value.",
+  "F7 Time. One shared helper in internal/domain/modes: Day(t) = floor((unix + 28800 - 18000) / 86400), the GMT+8 day that starts at 05:00, and ISO weekday from that day number. Weekly resets use Monday 05:00 GMT+8 unless the family's stock table says otherwise (D84: the user confirmed this is the original server default). Counters store their day or week number and reset lazily when read; no cron job resets player rows. Families that already declare their own Day (arena, oneonone, topfloor, conquerschool, championsleague) move to the helper only when an I9 stage edits them, with an equality test.",
+  "F8 Counters and buys. Per-player daily and weekly allowances live in the family's player row. VIP-dependent allowances read i5.PrivilegeSnapshotProvider.SnapshotTx in the same transaction (D80) and add the monthly-privilege bonus where vip.lua or monthly tables give one. Buying extra attempts or resets at a fixed price goes through the I5 material/currency debiter (D76) with the price ladder taken from content (refresh_cost.lua and similar); each buy writes a receipt.",
+  "F9 Settlement. Value moves only through the I5 owners: Grants.SettleGrantTx for items, currencies and experience; the I5 temporal owner for energy and other regenerating resources; Mail.DeliverTx for overflow or deferred awards. One receipt per operation. A family never writes another owner's tables.",
+  "F10 Entropy. Every random outcome uses operation.Context.Derive(label, ordinal) with label \"<family>.<channel>/v<N>\" and a stable ordinal; never math/rand or a retry count. Outcomes a combat needs before the fight (campaign drops) are drawn at START and frozen on the attempt; replays and retries never draw again.",
+  "F11 Objective facts. A family reports what happened (clear, sweep, win, buy, count) as typed facts {family, fact_kind, refs, amount} through one I9-2 port, in the transaction that settles it. I9-4 turns facts into mission, daily and achievement progress. Families never write mission rows; the objective owner never reads family tables.",
+  "F12 Combat binding. A combat family registers the I8 registration tuple (I8_PARENT_CONTRACT_V1 registration_tuple) with its trust profile from the surface; the client-reported result is bounded by a versioned SummaryPolicy; START replay, supersede and terminal drain follow I8 generation_supersede. Borrowed heroes and pets use the I8-6A BORROWED origin.",
+  "F13 Login and lobby overlays. A family the client reads from MID1 detail registers a lobby claim computed by the same projection function as its own load MID; where two client readers expect different nesting (campaign C2) the projection writes both. Red points derive from that projection.",
+  "F14 Locks (rank order). actor fence 315 -> I4 player root -> player-scoped family rows at the shared rank 605 (an operation touches one family's player rows) -> Combat 609 -> I5 610+ -> directory 740. Shared or global family rows (boss rooms, guild war) use ranks 606-608; a family that needs more asks for a rank amendment in its stage contract. 601-604 stay with Top Floor, 1on1, Arena and Champions League. PRIVATE_POLICY layout (D86, Claude invention under D85; user review pending). D125 bounded exception: trial purchases compose Campaign605 then DailyConsumption605 then I5; no reverse writer, independent read ports and one owner per counter.",
+  "F15 Scope law. Functions above level 100 stay INACTIVE (D79). Seasonal and event content goes to I10/I10.5 (D75). Everything else in the I9 surface is present by I9-E (D77).",
+  "F17 Response decorator. src_64 Backend.lua processes these keys on every response (common hooks ~737-790): economy_ (ECONOMY event), flag_ (RELOAD), server_time, extra_drops_ (handleRewards), act_item_change_, new_funcs_ (onNewFuncOpen), redmarks_ (keyed by function id string), twice_awake_stage_, and the mission hooks daily_mission_, mainline_mission_, partner_mission_ (hero_id -> rows), awake_mission_, twice_awake_mission_, story_mission_, pet_awake_mission_. One I9-2 decorator in the stockruntime adapter layer merges what the operation's owners returned (I5 economy delta, D64 newly opened functions, objective deltas, red marks) into the family's reply body; a dispatcher never assembles them itself, and a key appears only when its owner reported a change.",
+  "F16 Proof. A stage closes with unit tests, the strict gate, and a VC scenario per family that drives the stock Lua paths (D72); the scenario's request journal shows no UNKNOWN_MID, SERVER_ERROR or UNDECODABLE row for the family's MIDs. The Android emulator check runs when screens the family serves change."
+ ],
+ "sources": [
+  "work/i9/stages/I9-1/RESEARCH.md sections W, D, F",
+  "I8_PARENT_CONTRACT_V1 registration_tuple, generation_supersede, actor_origins",
+  "I85_REQUEST_JOURNAL_V1 R1, D71",
+  "D75-D80 (records/decisions/I9.json)",
+  "D81-D86 (records/decisions/I9.json after seal 776)"
+ ],
+ "decisions": [
+  "D81 drop law",
+  "D82 client summary trust",
+  "D83 INACTIVE_MODE",
+  "D84 weekly Monday 05:00",
+  "D85 move later families into I9 when an I9 stage needs them",
+  "D86 lock ranks (F14)"
+ ]
+}

@@ -51,6 +51,7 @@ func (f PetUniqueEquipmentCommittedFact) Validate() error {
 }
 
 type EquipItemResult struct {
+	MissionChanges      map[string]any
 	PetID               int64
 	Level               int64
 	Exp                 int64
@@ -68,6 +69,7 @@ type OneKeyEquipResult struct {
 }
 
 type petEquipmentReceipt struct {
+	MissionChanges      map[string]any                   `json:"mission_changes,omitempty"`
 	ResultKind          string                           `json:"result_kind"`
 	PetID               int64                            `json:"pet_id"`
 	Level               int64                            `json:"level"`
@@ -167,7 +169,7 @@ func equipResultFromReceipt(r receipt.Receipt) (EquipItemResult, error) {
 	if decoded.ResultKind != "SUCCESS" && decoded.ResultKind != "ALREADY_EQUIPPED" {
 		return EquipItemResult{}, errors.New("character pet: wrong receipt kind for direct equip")
 	}
-	return EquipItemResult{PetID: decoded.PetID, Level: decoded.Level, Exp: decoded.Exp, Equipment: decoded.Equipment, AlreadyEquipped: decoded.ResultKind == "ALREADY_EQUIPPED", UniqueEquipmentFact: decoded.UniqueEquipmentFact}, nil
+	return EquipItemResult{PetID: decoded.PetID, Level: decoded.Level, Exp: decoded.Exp, Equipment: decoded.Equipment, AlreadyEquipped: decoded.ResultKind == "ALREADY_EQUIPPED", UniqueEquipmentFact: decoded.UniqueEquipmentFact, MissionChanges: decoded.MissionChanges}, nil
 }
 
 func oneKeyResultFromReceipt(r receipt.Receipt) (OneKeyEquipResult, error) {
@@ -278,15 +280,20 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, pet
 		if pet.Level < primitive.RequiredLevel {
 			return ErrPetEquipmentUnavailable
 		}
+		var awakePermit *appi5.AwakeningEquipmentPermit
 		if pos.Classification == character.PetEquipmentAwakening {
 			awakened, err := s.Equipment.PetTemplateAwakenedTx(txctx, scope.Tx, revision, pet.TableID)
 			if err != nil {
 				return err
 			}
 			if !awakened {
-				// The active-mission path remains activation-gated until the real
-				// Awakening owner/provider is qualified. Do not invent mission state.
-				return ErrPetAwakeningProviderUnavailable
+				if s.AwakeningEquipment == nil {
+					return ErrPetAwakeningProviderUnavailable
+				}
+				awakePermit, err = s.AwakeningEquipment.PrepareAwakeningEquipmentTx(txctx, scope.Tx, actor.PlayerID, pet.PetID, pet.TableID, 3, int64(pos.ItemID), revision)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		if _, err := s.MaterialCosts.DebitMaterialCostTx(txctx, scope.Tx, actor.PlayerID, appi5.MaterialCost{Stacks: []appi5.StackMaterialCost{{ItemID: int64(pos.ItemID), Amount: 1}}}, bound); err != nil {
@@ -308,8 +315,15 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, pet
 			}
 			fact = &f
 		}
-		out = EquipItemResult{PetID: next.PetID, Level: next.Level, Exp: next.Exp, Equipment: next.Equipment, UniqueEquipmentFact: fact}
-		return putPetEquipmentReceipt(txctx, s, scope.Tx, actor, bound, id, fp, petEquipmentReceipt{ResultKind: "SUCCESS", PetID: next.PetID, Level: next.Level, Exp: next.Exp, Equipment: next.Equipment, ContentRevision: revision, UniqueEquipmentFact: fact}, "gxb.ca4-4a.mid783.v1")
+		var missionChanges map[string]any
+		if awakePermit != nil {
+			missionChanges, err = s.AwakeningEquipment.CommitAwakeningEquipmentTx(txctx, scope.Tx, awakePermit)
+			if err != nil {
+				return err
+			}
+		}
+		out = EquipItemResult{PetID: next.PetID, Level: next.Level, Exp: next.Exp, Equipment: next.Equipment, UniqueEquipmentFact: fact, MissionChanges: missionChanges}
+		return putPetEquipmentReceipt(txctx, s, scope.Tx, actor, bound, id, fp, petEquipmentReceipt{ResultKind: "SUCCESS", PetID: next.PetID, Level: next.Level, Exp: next.Exp, Equipment: next.Equipment, ContentRevision: revision, UniqueEquipmentFact: fact, MissionChanges: missionChanges}, "gxb.ca4-4a.mid783.v1")
 	})
 	if err != nil {
 		return EquipItemResult{}, err

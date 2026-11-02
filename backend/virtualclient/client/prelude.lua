@@ -54,6 +54,9 @@ local function inherited(node, key)
 		if type(value) == "function" then
 			return value
 		end
+		if name:sub(1, 12) == "ccui.Slider." and key == "addEventListener" then
+			return function(widget, callback) widget._sliderCallback = callback end
+		end
 		if widgetMethods[key] then
 			return widgetMethods[key]
 		end
@@ -852,7 +855,15 @@ widgetMethods.setTouchEnabled = function(widget, enabled)
 			widgetEvent(widget, "began")
 			return true
 		end
-		stateOf(listener).handlers[cc.Handler.EVENT_TOUCH_ENDED] = function()
+		stateOf(listener).handlers[cc.Handler.EVENT_TOUCH_ENDED] = function(touch)
+			if widget._sliderCallback then
+				local origin = worldOrigin(widget)
+				local width = nodeMethods.getContentSize(widget).width
+				if width > 0 then
+					nodeMethods.setPercent(widget, math.max(0, math.min(100, (touch:getLocation().x - origin) * 100 / width)))
+					invoke(widget._sliderCallback, widget, 0)
+				end
+			end
 			widgetEvent(widget, "ended")
 			if state.clickCallback then
 				invoke(state.clickCallback, widget)
@@ -870,6 +881,11 @@ widgetMethods.setEnabled = function(widget, enabled) stateOf(widget).enabled = e
 widgetMethods.isEnabled = function(widget) return stateOf(widget).enabled ~= false end
 widgetMethods.addTouchEventListener = function(widget, callback) stateOf(widget).touchCallback = callback end
 widgetMethods.addClickEventListener = function(widget, callback) stateOf(widget).clickCallback = callback end
+-- fireWidget drives one widget's own touch callback, for a widget an overlapping cell covers only because the VC has no real layout.
+function __vc.fireWidget(widget)
+	widgetEvent(widget, "began")
+	widgetEvent(widget, "ended")
+end
 -- tap is a harness input: one touch began and ended at (x, y) in design coordinates.
 function __vc.tap(x, y)
 	local touch = touchAt(x, y)
@@ -894,7 +910,12 @@ function __vc.tap(x, y)
 		end
 	end
 	report.taps = (report.taps or 0) + 1
-	print("vc tap", x, y, "listeners", #listeners, "touch", #touchOrder(), "claimed", #claimed)
+	local claimedNames = {}
+	for _, listener in ipairs(claimed) do
+		local node = stateOf(listener).node
+		table.insert(claimedNames, node and tostring(stateOf(node).name) or "scene")
+	end
+	print("vc tap", x, y, "listeners", #listeners, "touch", #touchOrder(), "claimed", table.concat(claimedNames, ","))
 	return #claimed
 end
 
@@ -1168,7 +1189,7 @@ nodeBase, widgetBase = cc.Node, ccui.Widget
 -- looks children up by name sees what the device sees. An unreadable layout is recorded and yields an empty node.
 local layoutClasses = {Node = "cc.Node", SingleNode = "cc.Node", Sprite = "cc.Sprite", Panel = "ccui.Layout", Button = "ccui.Button",
 	ImageView = "ccui.ImageView", Text = "ccui.Text", LoadingBar = "ccui.LoadingBar", CheckBox = "ccui.CheckBox",
-	TextBMFont = "ccui.TextBMFont", TextField = "ccui.TextField", ListView = "ccui.ListView", PageView = "ccui.PageView"}
+	Slider = "ccui.Slider", TextBMFont = "ccui.TextBMFont", TextField = "ccui.TextField", ListView = "ccui.ListView", PageView = "ccui.PageView"}
 local function buildLayout(description)
 	local node = proxy((layoutClasses[description.class] or "cc.Node") .. ".create()")
 	local state = stateOf(node)
@@ -1217,3 +1238,28 @@ setmetatable(_G, {__index = function(_, key)
 	rawset(_G, key, value)
 	return value
 end})
+-- On a device engine objects are tolua userdata, which framework clone() hands back unchanged; proxies are tables, so the stock
+-- clone would copy them into unregistered tables. The same deep copy, passing engine objects through.
+getmetatable(_G).__newindex = function(globals, key, value)
+	if key == "clone" and type(value) == "function" then
+		value = function(object)
+			local copies = {}
+			local function copy(item)
+				if type(item) ~= "table" or names[item] then
+					return item
+				end
+				if copies[item] then
+					return copies[item]
+				end
+				local result = {}
+				copies[item] = result
+				for field, entry in pairs(item) do
+					result[copy(field)] = copy(entry)
+				end
+				return setmetatable(result, getmetatable(item))
+			end
+			return copy(object)
+		end
+	end
+	rawset(globals, key, value)
+end

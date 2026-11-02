@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -26,6 +27,8 @@ import (
 )
 
 type Store interface {
+	TaskStore
+	WeeklyChallengesTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (int64, error)
 	ReadLadderTx(context.Context, tx.Queryer, identity.LogicalServerID, bool) (d.Ladder, bool, error)
 	CreateLadderTx(context.Context, tx.Tx, d.Ladder) error
 	SaveLadderTx(context.Context, tx.Tx, d.Ladder, int64) error
@@ -92,7 +95,14 @@ type Roster interface {
 }
 
 type Directory interface {
+	ServerMaximumLevelTx(context.Context, tx.Queryer, identity.LogicalServerID) (int64, error)
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
+}
+
+// Facts is the objective fact port (I9_MODE_FOUNDATION_V1 MF3); a settled fight is a PVP_FIGHT (task_req 106, D92).
+type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
 type Guilds interface {
@@ -116,20 +126,22 @@ type Service struct {
 	Pets         Roster
 	Directory    Directory
 	Guilds       Guilds
+	Facts        Facts
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 type ArenaView struct {
-	Player     d.Player
-	Rank       int64
-	Enemies    []d.Display
-	ServerTime time.Time
+	WeeklyChallenges int64
+	Player           d.Player
+	Rank             int64
+	Enemies          []d.Display
+	ServerTime       time.Time
 }
 
 type FightView struct {
@@ -141,6 +153,7 @@ type FightView struct {
 }
 
 type RecordView struct {
+	Mode     int64
 	Record   d.Record
 	Self     d.Display
 	Opponent d.Display

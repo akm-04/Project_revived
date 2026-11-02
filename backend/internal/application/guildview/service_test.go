@@ -23,6 +23,19 @@ func (s viewStore) ReadGuild(context.Context, guild.ID) (guild.Guild, bool, erro
 	}
 	return s.g, true, nil
 }
+func (s viewStore) ReadUnfoldedActivity(context.Context, guild.ID) (int64, error) { return 0, nil }
+func (s viewStore) ReadPlayerActivity(context.Context, identity.PlayerID, int64) (guild.PlayerActivity, error) {
+	return guild.PlayerActivity{}, nil
+}
+func (s viewStore) ReadSevenDayActivity(context.Context, []identity.PlayerID, int64) (map[identity.PlayerID]int64, error) {
+	return nil, nil
+}
+func (s viewStore) ReadGuildThreeDayActivity(context.Context, guild.ID, int64) (int64, error) {
+	return 0, nil
+}
+func (s viewStore) ListActivityBoard(context.Context, identity.LogicalServerID, int64, int64) ([]guild.ActivityBoardRow, error) {
+	return nil, nil
+}
 func (s viewStore) ReadMembership(_ context.Context, p identity.PlayerID) (guild.Membership, bool, error) {
 	m, ok := s.memberships[p]
 	return m, ok, nil
@@ -81,7 +94,7 @@ func viewFixture() (Service, identity.ActorContext) {
 		100001: {PlayerID: 100001},
 		100002: {PlayerID: 100002},
 	}}
-	return Service{Store: viewStore{g: g, memberships: ms}, Directory: dir, Presence: presence}, identity.ActorContext{LogicalServerID: 1, PlayerID: 100001}
+	return Service{Store: viewStore{g: g, memberships: ms}, Directory: dir, Presence: presence, Day: func(context.Context) (int64, error) { return 1, nil }}, identity.ActorContext{LogicalServerID: 1, PlayerID: 100001}
 }
 
 func TestMembersUsesTypedPlayerDirectoryPresenceAndNeutralActivitySentinels(t *testing.T) {

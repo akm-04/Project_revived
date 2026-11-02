@@ -1,0 +1,6 @@
+{"name":"i9_2_foundation","level":45,
+ "steps":["wait:5",
+  "lua:local player = xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if not player:isFuncOpen(xyd.FunctionID.ID_PET) then error('vc-level-gate-closed') end",
+  "lua:for _, mid in ipairs({36, 560, 864}) do xyd.Backend.get():request(mid, {}) end",
+  "wait:5"],
+ "settle_seconds":10,"expect_ok":[1],"expect_inactive":[36,560,864]}

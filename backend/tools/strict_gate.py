@@ -43,6 +43,9 @@ TOOLS = ['go', 'gofmt', 'goose', 'luajit', 'initdb', 'pg_ctl', 'createdb', 'psql
 ACCEPTED35_COMMIT = '52b31f6cb83b89eda2085635b205591ca4a72e7f'
 ACCEPTED35_REVISION = '66dddbab1c548555e244c670bc994e9a17c604ba5462e38eb6610c956943b3af'
 PREVIOUS_PRODUCT_COMMIT = '79d1a26a413dd27e14f9d7557cfaf184785d17cb'
+# The last I9-4A commit: content generation 47 (5ca02bec...), schema 00086. Its mission instances pin the generation the 4B upgrade must keep.
+MISSION_CONTENT47_COMMIT = '93ae7889916a0db78e5c1ecad5da7b670a1cac6f'
+MISSION_CONTENT47_TESTS = '^(TestActivityNativePinned47ConsumersAndCanonicalSpend|TestActivityNativeMissingRequiredPayloadIsRefused)$'
 POPULATED59_SHA256 = '1423a2014caca26acbfe6fe96c11c8417bd819afbc8827cbdb9705554b364560'
 PREVIOUS_PRODUCT_POPULATE = ('^(TestI7C5ACombatOwnedStartResolveTerminalNative|TestI7C5ACombatCloseUnresolvedNative|'
                              'TestI7C5BTopFloorLadderFightSettlementNative|TestI7C5COneOnOneEntryMatchSettlementNative|'
@@ -437,6 +440,14 @@ class Gate:
         self.deploy(recipe, dsn)
         self.recipe_test(recipe, 'upgraded', './internal/integration/playerdisplay', '^TestI8_4UpgradedRowsReadableNative$',
                          {**self.every_dsn(dsn), 'GXB_I8_4_EXPECT_LEGACY': '1'})
+
+    def recipe_mission_content47_upgrade(self, recipe):
+        previous = self.export(MISSION_CONTENT47_COMMIT, 'mission-content47')
+        dsn = self.database('mission_content47_upgrade', cwd=previous, deploy=False)
+        self.deploy(recipe + '-previous', dsn, cwd=previous)
+        self.migrate_current(recipe, dsn)
+        self.deploy(recipe, dsn)
+        self.recipe_test(recipe, 'upgraded', './internal/integration/missions', MISSION_CONTENT47_TESTS, self.every_dsn(dsn))
 
     def format(self):
         self.step('format', [self.tool('gofmt'), '-l', '.'])

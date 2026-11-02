@@ -1,0 +1,45 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_GUILD_ACTIVITY_V1",
+ "node": "ROOT/I9/I9-9/I9-9A",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "guildcore owns the balance and folds; I5 only appends the player day ledger inside the energy debit",
+ "extends": [
+  "I9_PARENT_CONTRACT_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3"
+ ],
+ "mids": [
+  616,
+  1808,
+  1809,
+  1810,
+  1811
+ ],
+ "shared_mids": [
+  1,
+  612,
+  2565,
+  "LOAD_RANK_LIST type 4"
+ ],
+ "policy": "I9_GUILD_POLICY_V1 / D400-D406",
+ "design": "stages/I9-9/PLAN.md, fleet_research/01-9a-ranks-drink-tea.md",
+ "clauses": [
+  "C1 One stamina debited through i5.DebitTemporalTx with key energy credits one point (translation.lua:2244-2246). spirit_energy never credits. No path debits energy around the seam.",
+  "C2 The debit appends player_guild_activity_days(player_id,game_day,amount,folded_amount) at rank 723, after temporal 721 and stack 722, with no guild lock and no membership read. A guildless player's row exists and credits nothing. The activity row is a leaf: a fold takes nothing after it, so a debit that later takes stack 722 cannot form a cycle.",
+  "C3 Member today_huoyue = min(1000, today's amount). Credited amount of a row = min(1000, amount) - folded_amount. Reads derive; no read path writes.",
+  "C4 Guild huoyue = min(280000, guilds.vitality + sum of unfolded credited amounts of current members + sum of unfolded guild_activity_awards). Every reader of guild huoyue uses this one function: 612, 2565, chapter open, chapter reset, rank board.",
+  "C5 Fold runs only inside a guild owner transaction: guild 310, membership 320, then family shared rows if any, then the activity rows at 723 in player_id order, clamps to 280000, moves credited amounts into guilds.vitality and advances folded_amount. A clamp discards the excess. Folds happen at chapter open, chapter reset, leave and kick; a dissolved guild has no balance to keep, so dissolve neither folds nor halves. In leave, kick and join, the rows at 723 are the last player locks of the transaction: anything else the flow takes from I5 (Create's crystal debit, a mailed refund) comes first.",
+  "C6 Join and accepted invite or application set folded_amount = min(1000,amount) on all the joiner's rows, so spend made while guildless or in an earlier guild credits nothing to the new guild. Guild creation does the same.",
+  "C7 A member who leaves or is kicked: their unfolded credit folds into the old guild first; the old guild keeps it. Their lifetime huoyue_num becomes floor(huoyue_num * guild_vitality_quite 0.5) (misc.lua:1540). PRIVATE_POLICY.",
+  "C8 No periodic reset (user). Balance changes only by credit, fold clamp and chapter spend.",
+  "C9 Illusion's community band credits guild_activity_awards(guild_id,source_key,amount,folded) inside its settlement with no guild lock; source_key makes it once only. Discharges I9-8-ILLUSION-GUILD-ACTIVITY; the shortcut at illusion/settlement.go:126-128 is removed.",
+  "C10 612 and 2565 replace the zero literals at guildwire/wire.go:9,36,39 with today_huoyue, huoyue_num, seven_huoyue; guild huoyue and three_huoyue come from C4 and the day rows.",
+  "C11 616 answers 200 {} for every caller, with or without a guild (client reads no field; a non-OK suppresses the World Boss board). Discharges I9-9-GUILD-RANK-616-BOSS.",
+  "C12 The guild board is LOAD_RANK_LIST type 4: sub_type 11 orders by three_huoyue, sub_type 39 per rank.lua row 4002, scoped to the logical server, bounded, derived on read. Row fields per NewRankWindow.lua:625-636,769-770,845-854. The player ranking owner is not extended with guild state; a guild read port feeds its dispatcher.",
+  "C13 Tea: 1808 (also MID1), 1809, 1810, 1811, reply fields per fleet_research/01 ledger. Refusals 409 conflictRefusal (F4/D370). Own wish once per modes.Day, immutable, need_num 3 normal or 2 SX from misc. Item must be a scroll for a girl the requester owns (translation.lua:9640-9645).",
+  "C14 1810 runs under the donor's fence: fence 315, donor root, player rows 605 for both wish and gift ledger (wish row of the receiver and gift row keyed receiver, donor, day), then I5 in rank order: friend_medal grant (700, 720; misc.lua guild_donate_scroll_reward 10 per scroll, tunable in I9_GUILD_POLICY_V1), one shard debited (722), then fact 123 amount 1 (730), all in the same transaction. One donation per donor, receiver and day. A donor cannot give to themself or to a member of another logical server.",
+  "C15 1811 pays the receiver item by gift count and clears gifts once, idempotent. Unfulfilled wishes and unclaimed gifts expire at the day boundary, lazily on read with no write by the read path; a later command removes expired rows.",
+  "C16 Tea membership check: donor and receiver in the same guild at the moment of 1810, read without taking guild locks; a concurrent leave is harmless."
+ ]
+}

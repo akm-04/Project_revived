@@ -1,0 +1,19 @@
+{
+  "name": "i9_7a_top_floor_task_schedule_and_admission",
+  "note": "Stock Top Floor entry, special-mode admission refusal for a fresh unranked player, and the stock schedule callback data. The positive battle is i9_7a_top_floor_task_battle. The asset set lacks windows/arena/mode/schedule/schedule.csb, so ArenaModeScheduleWindow cannot open on this asset set (I9-7A-SCHEDULE-CSB); the scenario asserts the data the window would read and does not claim its rendering.",
+  "level": 60,
+  "steps": [
+    "window:sub_arena",
+    "tap:arena_node",
+    "wait:10",
+    "lua:local w=xyd.WindowManager.get():getWindow('arena') assert(w, 'vc-task-arena-window-missing') assert(not w.isShowArenaMode, 'vc-task-admission-bypassed')",
+    "lua:local w=xyd.WindowManager.get():getWindow('arena') w.arena_:loadModeSchedule(function(infos) assert(#infos==2, 'vc-task-current-next-schedule-missing') for _,slot in ipairs(infos) do assert(slot.mode>=1 and slot.mode<=6, 'vc-task-invalid-mode') assert(slot.end_time>slot.start_time, 'vc-task-invalid-slot') end __vcScheduleRead=true end)",
+    "wait:5",
+    "lua:assert(__vcScheduleRead, 'vc-task-schedule-callback-missing')"
+  ],
+  "settle_seconds": 35,
+  "expect_ok": [
+    272,
+    300
+  ]
+}

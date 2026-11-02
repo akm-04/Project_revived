@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_PVP_TOURNAMENT_CASUAL_V1",
+  "version": 1,
+  "node": "ROOT/I9/I9-7/I9-7B",
+  "status": "WORKING_IMPLEMENTATION_NOT_STAGE_QUALIFIED",
+  "owner": "Existing Arena owner, rank 603; I8 Combat, I5 value/Mail, Character and realtime retain their owners.",
+  "extends": [
+    "I9_PARENT_CONTRACT_V1",
+    "I9_MODE_FRAMEWORK_V1",
+    "I9_MODE_FOUNDATION_V2",
+    "C5D_ARENA_SEASON_MODE_V1",
+    "I8_PARENT_CONTRACT_V1",
+    "I9_PVP_REFUSAL_COMPATIBILITY_V1"
+  ],
+  "policy": "I9_PVP_TOURNAMENT_CASUAL_POLICY_V1 (D357 PRIVATE_POLICY, research/I9_7B/PREIMPLEMENTATION.md)",
+  "mids": [
+    276,
+    1281,
+    1282,
+    1283,
+    1284,
+    1285,
+    1286,
+    1287,
+    1288,
+    1289,
+    1290,
+    1291,
+    1292,
+    1294,
+    1872,
+    1873,
+    1874,
+    1875,
+    1876,
+    1877
+  ],
+  "rules": [
+    "C1 Compile and pin source calendars, stage rows, reward vectors, support coefficients and balancing identities. Preserve the original absolute rows, explicit help/table contradictions and every labelled reconstruction choice.",
+    "C2 Qualification reads immutable completed Arena settlement ranks. Enrollment and its source tie-breaking sequence are durable and idempotent. Freeze one roster and entropy-derived grouping. BYEs are not player identities, real victories or recipients.",
+    "C3 Stage, contest, selector turn, team and Combat round are distinct identities. Persist canonical ready/selection/deadline state. Validate authenticated participant, current turn, owned girl/pet identity, cumulative formation and previous-team exclusions, including source fractional turn 0.5.",
+    "C4 Scheduled offline fallback is authorized by durable enrolled match state and genuine admission-context provenance. Public commands retain live actor fencing. No fabricated context, weakened Combat check, queue authority or socket authority. Register the existing I8 trust/transform/replay tuple.",
+    "C5 Freeze legal actors under witnessed active-content scope; resolve outside locks and settle once through existing Combat terminal. The registered source helper transform changes battle projections only. Canonical awakening, character ownership and normal Arena awards remain unchanged.",
+    "C6 Casual queue matching and cancellation serialize on the same Arena fence. Competing workers consume an entry at most once. Session points/ranks and awards follow the declared policy and genuine settled battles; duplicate or pure empty-team outcomes produce no invented battle/value facts.",
+    "C7 Use exact semantic receipts and recovery predicates for enrollment, support, queue, selection, START, terminal and rewards. Lost COMMIT acknowledgements and worker restarts must recover committed outcomes rather than repeat them.",
+    "C8 Settle values only through I5 Mail/grants. Numeric rewards follow source rows. Keep manual champion SX entitlement durable and fulfill a validated selected source identity at most once through an operator application seam; I11 transport remains separately owned and must not be claimed implemented. D357 also routes permanent frame 120001078 from a settled champion fact through C6; this is private policy because alternate origin text conflicts.",
+    "C9 Source-shaped projections include bare 1291 arrays, 1874 report_list, frozen team/pet/profile maps and have_battled. 1873 unknown historical wrapping is an explicit implementation decision and stock compatibility limitation. D356 applies only to unsafe refusal callbacks.",
+    "C10 Reports are retained independently of logs. Authorize authenticated tournament spectators and Casual participants appropriately; no client result, read retry or report request can create a match or second reward.",
+    "C11 Reuse durable reference-only wakeups and validated World socket publication. Acknowledgements, polls, stale messages, offline delivery and duplicated wakeups neither create gameplay authority nor lose canonical selection state. Shared 276 composes genuine owner ranks and retains future World Boss/seasonal obligations.",
+    "C12 Preserve source tutorial paths and declare all new owner tables, migration locks and identifiers. Execute allowed layer 1, native per-mutation success/refusal/retry and D355 competing-worker/cancel-match fixtures, plus one budgeted stock UI scenario. Client gaps stay unproven/blocked. No stage acceptance, seal or qualification-only execution by the implementing agent."
+  ],
+  "research": "research/I9_7B/PREIMPLEMENTATION.md",
+  "source_bindings": "research/I9_7B/RESEARCH_BINDINGS.json",
+  "source_limits": [
+    "Current/old Casual entry methods missing; model/report paths remain.",
+    "Static client calendar labels remain absolute 2022.",
+    "Original future scheduling, queue scores, timeout fallback and some support/prize semantics are unrecovered; D357 labels choices."
+  ],
+  "qualification_owner": "Claude, split workflow section E."
+}

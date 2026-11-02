@@ -75,6 +75,7 @@ type Catalog struct {
 	Daily            []DailyReward     `json:"daily"`
 	Final            []Reward          `json:"final"`
 	Gifts            []Gift            `json:"gifts"`
+	LegacyTitles     []LegacyTitle     `json:"legacy_titles,omitempty"`
 	TitleIDs         []int64           `json:"title_ids"`
 	BubbleSeconds    int64             `json:"bubble_seconds"`
 }
@@ -82,6 +83,14 @@ type Catalog struct {
 func (c Catalog) Validate() error {
 	if c.SchemaVersion != 1 || c.ContractID != ContractID || c.PolicyID != PolicyID || c.FunctionID != 91 || c.Levels != [3]int64{70, 90, 100} || c.InitialPoints != 2000 || c.PointMax != 36 || c.PointMin != 2 || c.OpponentRadius != 10 || c.NormalProtection != 1800 || c.FrenzyProtection != 180 || c.FrenzyStart != 75600 || c.FrenzySeconds != 3600 || c.DayStart != 79200 || c.SeasonDays != 30 || c.RestDays != 3 || c.RatingScale != 400 || len(c.Schedule) != 50 || len(c.Daily) != 90 || len(c.Final) != 30 || len(c.TitleIDs) != 10 || c.BubbleSeconds != 2592000 {
 		return ErrUnavailable
+	}
+	if len(c.LegacyTitles) != 0 && len(c.LegacyTitles) != 3 {
+		return ErrUnavailable
+	}
+	for index, title := range c.LegacyTitles {
+		if title.Identifier != 100078+int64(index) || title.Name == "" {
+			return ErrUnavailable
+		}
 	}
 	var last time.Time
 	for _, s := range c.Schedule {
@@ -240,6 +249,7 @@ func (c Catalog) Transfer(winner, loser int64) int64 {
 }
 
 type Root struct {
+	LegacyTitlesSince    time.Time `json:"legacy_titles_since,omitempty"`
 	Revision             string
 	Season               int64
 	SettledSeason        int64
@@ -249,6 +259,9 @@ type Root struct {
 }
 
 func (r Root) Validate() error {
+	if !r.LegacyTitlesSince.IsZero() && (r.LegacyTitlesSince.Before(r.CreatedAt) || r.LegacyTitlesSince.After(r.UpdatedAt)) {
+		return ErrConflict
+	}
 	if len(r.Revision) != 64 || r.Season < 1 || r.SettledSeason < r.Season-1 || r.SettledSeason > r.Season || r.Version < 1 || r.CreatedAt.IsZero() || r.UpdatedAt.Before(r.CreatedAt) {
 		return ErrConflict
 	}

@@ -1,0 +1,46 @@
+{
+  "name": "i9_7a_oneonone_purchase",
+  "note": "Live 1on1 cooldown reset MID 2488 with the request shape of stock model PeakArena. A lone test account has no opponent, so the cooldown is a declared fixture; the cost debit and receipt are what this proves. Runs only inside the 1on1 window (00:00-14:00 UTC).",
+  "level": 55,
+  "heroes": [
+    10001001,
+    10001002,
+    10001003,
+    10001004,
+    10001005,
+    10001006,
+    10001007,
+    10001008,
+    10001009,
+    10001010,
+    10001011,
+    10001012,
+    10001013,
+    10001014,
+    10001015
+  ],
+  "vip": 10,
+  "grants": [
+    {
+      "Kind": "SCALAR_CURRENCY",
+      "ResourceKey": "crystal",
+      "Amount": 100000
+    }
+  ],
+  "steps": [
+    "wait:60",
+    "wait:5",
+    "window:sub_arena",
+    "tap:peak_arena_node",
+    "wait:10",
+    "fixture:one_on_one_cooling",
+    "lua:__p=xyd.ModelManager.get():loadModel(xyd.ModelType.PEAK_ARENA) __p:resetCoolTime(function() __pReset=true end)",
+    "wait:5",
+    "lua:assert(__pReset,'vc-peak-reset-refused')"
+  ],
+  "settle_seconds": 10,
+  "expect_ok": [
+    2480,
+    2488
+  ]
+}

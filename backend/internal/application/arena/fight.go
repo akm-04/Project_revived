@@ -19,6 +19,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -497,10 +498,20 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 		}
 		outcome.Win, report = settled.Resolution.Outcome.Star > 0, settled.Report
 	}
+	c, err = s.Facts.PrepareTx(c, sc.Tx, m.Attacker, sc.Operation)
+	if err != nil {
+		return err
+	}
 	// A season that turned over during the fight leaves practice and stale-season fights without effects.
 	ranked := !m.Practice && m.Season == attacker.Season
 	if ranked {
 		if err = s.applyRanked(c, sc, catalog, revision, m, &attacker, &defender, &outcome, report); err != nil {
+			return err
+		}
+	}
+	if !m.Practice && !forfeit {
+		fact := objective.Fact{PlayerID: m.Attacker, SourceDomain: "arena", SourceBusinessKey: m.ID.String(), Kind: objective.PVPFightKind, Delta: 1}
+		if err = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), fact); err != nil {
 			return err
 		}
 	}

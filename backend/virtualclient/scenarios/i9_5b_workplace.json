@@ -1,0 +1,35 @@
+{
+  "name": "i9_5b_workplace",
+  "level": 100,
+  "heroes": [],
+  "note": "Prior academy setup only; Aquaris comes from initial roster. Work Place crew selection invokes the stock cell touch listeners (unnamed virtual widget). No Work Place/job/mission state is provisioned. Dispatch, mission 10017, show-team and diary. The 10-hour collection needs a moved host clock and lives in clock/i9_5b_workplace_collect.json, outside the suite.",
+  "steps": [
+    "window:sub_dev",
+    "tap:treasure_node",
+    "wait:8",
+    "lua:local w=xyd.WindowManager.get():getWindow('treasure_window') if not w then error('vc-workplace-no-window') end local m=w.treasureModel if not m.teams[2] then error('vc-workplace-no-team') end xyd.WindowManager.get():openWindow('treasure_prepare',{locationId=2,types={2001},titleName=xyd.tables.treasureLocation:name(2),typeName=2001})",
+    "wait:3",
+    "tap:btn_add",
+    "wait:3",
+    "lua:local w=xyd.WindowManager.get():getWindow('treasure_edit') if not w then error('vc-workplace-edit') end local found=false local function walk(n) if found then return end if n:getName()=='item_bg' then for _,c in ipairs(n:getChildren()) do local ls=c._LuaListeners and c._LuaListeners[cc.NODE_TOUCH_EVENT] if ls then for _,l in ipairs(ls) do l.listener_({name='began'}) l.listener_({name='ended'}) end found=true return end end end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(w:nodeByName('list')) if not found then error('vc-workplace-no-crew-touch') end",
+    "wait:2",
+    "tap:btn_ok",
+    "wait:3",
+    "lua:local w=xyd.WindowManager.get():getWindow('treasure_prepare') if not w or #w.heroIds~=1 then error('vc-workplace-selection') end",
+    "tap:btn_send",
+    "wait:5",
+    "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.TREASURE) local r=m.teams[2] if not r or r.start_time==0 or #r.partners~=1 then error('vc-workplace-not-dispatched') end local task=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK).tasks[xyd.TaskType.DAILY][10017] if not task or task.count~=1 then error('vc-workplace-mission') end xyd.WindowManager.get():openWindow('treasure_show_team',{locationId=2,types={2001}})",
+    "wait:3",
+    "lua:local wm=xyd.WindowManager.get() local w=wm:getWindow('treasure_show_team') if not w or #w.heros~=1 then error('vc-workplace-show-team') end wm:closeWindow(w)",
+    "wait:2",
+    "tap:btn_record",
+    "wait:3",
+    "lua:local wm=xyd.WindowManager.get() local w=wm:getWindow('treasure_diary') if not w then error('vc-workplace-diary') end wm:closeWindow(w)"
+  ],
+  "settle_seconds": 3,
+  "expect_ok": [
+    530,
+    531,
+    533
+  ]
+}

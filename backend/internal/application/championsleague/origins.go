@@ -7,6 +7,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/playerdisplay"
 	d "gxb.local/backend/v2/internal/domain/championsleague"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"strconv"
 )
 
 func sameOrigin(a, b app.Origin) bool {
@@ -27,7 +28,7 @@ func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r 
 	if e != nil {
 		return out, e
 	}
-	known := r.Family == "bubble" && r.CatalogID >= 10002 && r.CatalogID <= 10007
+	known := r.Family == "title" && cat.HasLegacyTitle(r.CatalogID) || r.Family == "bubble" && r.CatalogID >= 10002 && r.CatalogID <= 10007
 	for _, id := range cat.TitleIDs {
 		known = known || r.Family == "title" && r.CatalogID == id
 	}
@@ -75,6 +76,33 @@ func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r 
 				return out, app.ErrConflict
 			}
 		case "title":
+			if d.IsLegacyTitle(o.CatalogID) {
+				leagueRoot, found, err := s.Store.RootTx(c, q, false)
+				if err != nil {
+					return out, err
+				}
+				if !found || !d.LegacyTitlePlacementEligible(a.Placement, *o.StartsAt, leagueRoot.LegacyTitlesSince) {
+					return out, app.ErrConflict
+				}
+				if !historical.HasLegacyTitle(o.CatalogID) || a.Placement.Group != 3 || a.Placement.Rank < 1 || a.Placement.Rank > 10 || row.TopSeasons != a.Count || a.Count < 1 || o.Key != fmt.Sprintf("league:legacy-title:%d", o.CatalogID) || o.EndTime != 0 {
+					return out, app.ErrConflict
+				}
+				notice, found, err := s.Entitlements.ReadSourceMailTx(c, q, r.PlayerID, "CHAMPIONS_LEAGUE_LEGACY_TITLE", strconv.FormatInt(o.CatalogID, 10))
+				if err != nil {
+					return out, err
+				}
+				titleName := ""
+				for _, title := range historical.LegacyTitles {
+					if title.Identifier == o.CatalogID {
+						titleName = title.Name
+					}
+				}
+				expectedBody := fmt.Sprintf("%s: %s", titleName, "The top 10 in the top group of the Champions League can receive")
+				if !found || notice.Validate() != nil || notice.Recipient != r.PlayerID || notice.Title != historical.Mail["CROSS_ARENA_MAIL_TITLE"] || notice.Sender != historical.Mail["CROSS_ARENA_MAIL_SENDER"] || notice.Body != expectedBody || !notice.CreatedAt.Equal(*o.StartsAt) || notice.CompatibilityPolicyVersion != d.LegacyTitlePolicy || len(notice.Attachments) != 0 {
+					return out, app.ErrConflict
+				}
+				break
+			}
 			if a.Placement.Group != 3 || a.Placement.Rank > 10 || a.Count < 1 || a.Count > int64(len(historical.TitleIDs)) || row.TopSeasons != a.Count || historical.TitleIDs[a.Count-1] != o.CatalogID || o.Key != fmt.Sprintf("league:title:%d", o.CatalogID) || o.EndTime != 0 {
 				return out, app.ErrConflict
 			}

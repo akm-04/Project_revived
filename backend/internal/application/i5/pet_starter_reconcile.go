@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -19,7 +20,7 @@ type PetStarterLoginReconciler struct {
 }
 
 func (PetStarterLoginReconciler) Name() string { return "i5.ca3-pet-starter" }
-func (r PetStarterLoginReconciler) ReconcileCharacterLogin(ctx context.Context, t tx.Tx, actor identity.ActorContext, op operation.Context) error {
+func (r PetStarterLoginReconciler) ReconcileCharacterLogin(ctx context.Context, t tx.Tx, actor identity.ActorContext, op operation.Context, _ time.Time) error {
 	if r.Store == nil || r.Content == nil || t == nil || !actor.PlayerID.Valid() || op.StartedAt.IsZero() {
 		return errors.New("i5 Pet starter reconcile unavailable")
 	}

@@ -1,0 +1,21 @@
+{
+  "name": "i9_8_rank_boards",
+  "level": 100,
+  "heroes": [
+    10001009,
+    10001012,
+    10001014,
+    10001015
+  ],
+  "steps": [
+    "lua:local types={1,2,3,4,6,15,22,24,25,26,27,37,38} __vc_rank_done={} local rl=xyd.ModelManager.get():loadModel(xyd.ModelType.RANK_LIST) for _,t in ipairs(types) do rl:loadRankList({t},true,function(code,reply) __vc_rank_done[t]={code=code,reply=reply} end) end",
+    "wait:10",
+    "lua:local bad={} for _,t in ipairs({1,2,3,4,6,15,22,24,25,26,27,37,38}) do local r=__vc_rank_done[t] if not r or r.code~=xyd.error.OK or type(r.reply.rank_list)~='table' or #r.reply.rank_list~=1 or r.reply.rank_list[1].rank_type~=t then table.insert(bad,t..':'..tostring(r and r.code)) end end if #bad>0 then error('vc-rank-boards-'..table.concat(bad,',')) end"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    301
+  ],
+  "expect_lua_errors": [],
+  "note": "Real client MID 301 for every implemented rank subtype. Backend.lua adds app_v, platform and v_ to the request; this proves the dispatcher accepts them and that each board answers its own subtype. Subtype 8 (achievement points) is left out because it recomputes every player inside one request and times out on the populated suite database (obligation I9-RANK-AP-SCALE); native tests cover its logic on a small cohort."
+}

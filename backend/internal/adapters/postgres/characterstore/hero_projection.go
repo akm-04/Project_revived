@@ -28,15 +28,17 @@ type LibraryRosterOverlay interface {
 	OverlayRosterTx(context.Context, tx.Queryer, identity.ActorContext, string, time.Time, map[string]any) error
 }
 type HeroBootstrapProjection struct {
-	Evolution   LibraryRosterOverlay
-	Course      LibraryRosterOverlay
-	Element     LibraryRosterOverlay
-	Spirit      LibraryRosterOverlay
-	Inscription LibraryRosterOverlay
-	Book        LibraryRosterOverlay
-	Dorm        LibraryRosterOverlay
-	Library     LibraryRosterOverlay
-	Content     HeroBootstrapContent
+	AwakeningPositions *apphero.AwakeningPositionResolver
+	Awakening          LibraryRosterOverlay
+	Evolution          LibraryRosterOverlay
+	Course             LibraryRosterOverlay
+	Element            LibraryRosterOverlay
+	Spirit             LibraryRosterOverlay
+	Inscription        LibraryRosterOverlay
+	Book               LibraryRosterOverlay
+	Dorm               LibraryRosterOverlay
+	Library            LibraryRosterOverlay
+	Content            HeroBootstrapContent
 }
 
 func (HeroBootstrapProjection) Name() string     { return "ca6.hero-bootstrap" }
@@ -84,7 +86,7 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 	if err != nil {
 		return err
 	}
-	views, err := apphero.BuildRosterViewsTx(ctx, q, revision, heroes, observedAt, store, p.Content)
+	views, err := apphero.BuildRosterViewsTx(ctx, q, revision, heroes, observedAt, store, p.Content, p.AwakeningPositions)
 	if err != nil {
 		return err
 	}
@@ -146,6 +148,11 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 	}
 	if p.Evolution != nil {
 		if err = p.Evolution.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
+			return err
+		}
+	}
+	if p.Awakening != nil {
+		if err = p.Awakening.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
 			return err
 		}
 	}

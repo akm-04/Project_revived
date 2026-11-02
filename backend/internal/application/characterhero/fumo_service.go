@@ -104,7 +104,7 @@ type heroFumoTargetTxReader interface {
 	HeroFumoTargetTx(context.Context, tx.Queryer, string, character.EquipmentTemplateID) (character.HeroFumoTarget, error)
 }
 
-func deriveFumoLevelsTxWith(ctx context.Context, q tx.Queryer, revision string, h character.Hero, positions heroFumoPositionTxReader, targets heroFumoTargetTxReader) (character.HeroFumoSlots, error) {
+func deriveFumoLevelsTxWith(ctx context.Context, q tx.Queryer, revision string, h character.Hero, positions heroFumoPositionTxReader, targets heroFumoTargetTxReader, awakening *AwakeningPositionResolver) (character.HeroFumoSlots, error) {
 	var out character.HeroFumoSlots
 	if q == nil || positions == nil || targets == nil || len(revision) != 64 {
 		return out, errors.New("character hero: invalid Fumo projection input")
@@ -117,6 +117,12 @@ func deriveFumoLevelsTxWith(ctx context.Context, q tx.Queryer, revision string, 
 		pos, err := positions.HeroEquipmentPositionTx(ctx, q, revision, h.TableID, h.Color, slot)
 		if err != nil {
 			return out, err
+		}
+		if awakening != nil {
+			pos, err = awakening.ResolveTx(ctx, q, h, revision, pos)
+			if err != nil {
+				return out, err
+			}
 		}
 		if !pos.ItemID.Valid() {
 			if raw != 0 {
@@ -141,7 +147,7 @@ func deriveFumoLevelsTxWith(ctx context.Context, q tx.Queryer, revision string, 
 }
 
 func (s Service) deriveFumoLevelsTx(ctx context.Context, q tx.Queryer, revision string, h character.Hero) (character.HeroFumoSlots, error) {
-	return deriveFumoLevelsTxWith(ctx, q, revision, h, s.Equipment, s.Fumo)
+	return deriveFumoLevelsTxWith(ctx, q, revision, h, s.Equipment, s.Fumo, s.AwakeningPositions)
 }
 
 func (s Service) deriveFumoLevelsRead(ctx context.Context, revision string, h character.Hero) (character.HeroFumoSlots, error) {
@@ -157,6 +163,12 @@ func (s Service) deriveFumoLevelsRead(ctx context.Context, revision string, h ch
 		pos, err := s.RosterProjection.HeroEquipmentPosition(ctx, revision, h.TableID, h.Color, slot)
 		if err != nil {
 			return out, err
+		}
+		if s.AwakeningPositions != nil {
+			pos, err = s.AwakeningPositions.ResolveTx(ctx, s.AwakeningPositions.Queryer, h, revision, pos)
+			if err != nil {
+				return out, err
+			}
 		}
 		if !pos.ItemID.Valid() {
 			if raw != 0 {
@@ -283,12 +295,17 @@ func (s Service) FeedFumo(ctx context.Context, actor identity.ActorContext, part
 		if err := validateNormalHeroForEquipment(txctx, s, scope.Tx, revision, hero); err != nil {
 			return err
 		}
-		if hero.Equipment[equipIndex-1] == 0 {
-			return ErrHeroFumoUnavailable
-		}
 		pos, err := s.Equipment.HeroEquipmentPositionTx(txctx, scope.Tx, revision, hero.TableID, hero.Color, equipIndex)
 		if err != nil {
 			return err
+		}
+		baseItem := pos.ItemID
+		pos, err = s.AwakeningPositions.ResolveTx(txctx, scope.Tx, hero, revision, pos)
+		if err != nil {
+			return err
+		}
+		if hero.Equipment[equipIndex-1] == 0 && pos.ItemID == baseItem {
+			return ErrHeroFumoUnavailable
 		}
 		if !pos.ItemID.Valid() {
 			return ErrHeroFumoUnavailable

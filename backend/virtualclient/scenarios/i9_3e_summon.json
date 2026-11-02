@@ -1,0 +1,14 @@
+{
+ "name": "i9_3e_summon",
+ "level": 10,
+ "steps": [
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local n=0 for _ in pairs(p:getHeros()) do n=n+1 end if n~=1 then error('vc-birth-companion-'..n) end p:loadSummonInfo({},function(code) if code~=xyd.error.OK then error('vc-summon-info-'..tostring(code)) end xyd.WindowManager.get():openWindow('summon',{}) end)",
+  "wait:8",
+  "lua:local w=xyd.WindowManager.get():getWindow('summon') if not w then error('vc-summon-window') end w:goldSummon(1)",
+  "wait:8",
+  "lua:local w=xyd.WindowManager.get():getWindow('summon') w:crystalSummon(1)",
+  "wait:8",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local got={} for _,h in pairs(p:getHeros()) do got[h:getTableID()]=true end if not (got[10001001] and got[10001002] and got[10001003]) then error('vc-tutorial-girls') end"],
+ "settle_seconds": 10,
+ "expect_ok": [50, 56]
+}

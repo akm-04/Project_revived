@@ -100,6 +100,10 @@ func genuinePlayer(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (i
 	cs := contentstore.Store{Queryer: p}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: cs}
 	for _, c := range characterbirth.Contributors(cs, privileges, rev) {
+		// The fixture summons genuineHeroTable (Aquaris) through MID59, so it skips the I9-3E birth companion that owns her.
+		if _, companion := c.(characterbirth.BirthCompanion); companion {
+			continue
+		}
 		if err = c.PersistCharacterBootstrap(ctx, tr, b); err != nil {
 			t.Fatal(c.Name(), err)
 		}
@@ -138,7 +142,7 @@ func grantGenuine(t *testing.T, p *pg.Pool, a identity.ActorContext, rev, name s
 	}
 }
 
-// genuineHeroService is the production Hero composition (cmd/gxb-api main_postgres).
+// genuineHeroService retains the qualified historical cap5 profile; I9 tests select V2 explicitly.
 func genuineHeroService(p *pg.Pool) hero.Service {
 	runner := tx.Runner{DB: p}
 	store, content := characterstore.Store{Queryer: p}, contentstore.Store{Queryer: p}

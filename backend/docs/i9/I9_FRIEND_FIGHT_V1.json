@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_FRIEND_FIGHT_V1",
+  "node": "ROOT/I9/I9-7/I9-7C",
+  "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+  "owner": "Existing Arena603; I4,SocialRelation,Character,Combat and realtime retain ownership",
+  "extends": [
+    "I9_PARENT_CONTRACT_V1",
+    "I9_MODE_FRAMEWORK_V1",
+    "I9_MODE_FOUNDATION_V2",
+    "I9_PVP_REFUSAL_COMPATIBILITY_V1"
+  ],
+  "mids": [
+    1312,
+    1313,
+    1314,
+    1315
+  ],
+  "shared_mids": [
+    1281,
+    1282,
+    1292,
+    1294
+  ],
+  "policy": "I9_FRIEND_FIGHT_POLICY_V1 / D358 PRIVATE_POLICY",
+  "design": "research/I9_7C/PREIMPLEMENTATION.md",
+  "clauses": [
+    "C1 Source shapes,55 gate and two modes/one-or-three teams",
+    "C2 Canonical friendship/blocks/consent/expiry and actor fence",
+    "C3 Serialized accept/reject and semantic recovery",
+    "C4 Shared selector compatibility and owned identities",
+    "C5 Server-authoritative frozen Combat and private replay",
+    "C6 No value,ladder,score,Mail,Achievement or PK objective",
+    "C7 Finite validated World notices and canonical reference generations",
+    "C8 Forward schema/ownership/version/tutorial declarations",
+    "C9 Focused leaf tests and truthful deferred stage qualification"
+  ]
+}

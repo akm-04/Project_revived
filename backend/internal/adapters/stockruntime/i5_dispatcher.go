@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	backpackproj "gxb.local/backend/v2/internal/projection/backpack"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -24,6 +26,8 @@ import (
 // easily faked in stock-wire tests.
 type I5ServicePort interface {
 	SaveStory(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) error
+	SaveGuideFunction(context.Context, identity.ActorContext, int64, operation.Context) (player.GuideReturnState, error)
+	SaveGuideReturn(context.Context, identity.ActorContext, int64, operation.Context) (player.GuideReturnState, error)
 	ListBackpack(context.Context, identity.ActorContext) ([]economy.StackState, error)
 	ListMail(context.Context, identity.ActorContext, time.Time, int) (appi5.MailListResult, error)
 	ClaimMail(context.Context, identity.ActorContext, mail.Address, operation.Context) (appi5.MID369Result, error)
@@ -36,7 +40,24 @@ type I5ServicePort interface {
 type SpiritBackpackProjector interface {
 	Backpack(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 }
+type MissionServicePort interface {
+	ClaimActivityChest(context.Context, identity.ActorContext, string, int64, operation.Context) (map[string]any, error)
+	ReadMissions(context.Context, identity.ActorContext, objective.StockFamily, operation.Context) (map[string]any, error)
+	ClaimMission(context.Context, identity.ActorContext, int64, string, operation.Context) (appi5.ObjectiveClaimResult, error)
+}
+type SignInServicePort interface {
+	ReadSignIn(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+	ClaimSignIn(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+}
+type AwakeningServicePort interface {
+	ReadAwakening(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+	ChangeAwakening(context.Context, identity.ActorContext, string, int64, int64, operation.Context) (map[string]any, error)
+	ClaimAwakening(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, bool, error)
+}
 type I5Dispatcher struct {
+	Awakening      AwakeningServicePort
+	SignIn         SignInServicePort
+	Missions       MissionServicePort
 	SpiritBackpack SpiritBackpackProjector
 	Authority      apprealtime.GameplayAuthorityPort
 	Service        I5ServicePort
@@ -51,10 +72,30 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "i5_unavailable"}}
 	}
 	switch req.Envelope.MID {
+	case 163, 164, 165, 166, 167, 168, 171, 2561, 2737, 2738:
+		return d.dispatchAwakening(ctx, actor, req)
+	case 352, 353:
+		if d.SignIn == nil {
+			return failI5(errors.New("sign-in unavailable"))
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params) {
+			return badI5("invalid_sign_in")
+		}
+		var body map[string]any
+		var err error
+		if req.Envelope.MID == 352 {
+			body, err = d.SignIn.ReadSignIn(ctx, actor, req.Envelope.Operation)
+		} else {
+			body, err = d.SignIn.ClaimSignIn(ctx, actor, req.Envelope.Operation)
+		}
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(body)
 	case 26: // SAVE_STORY
 		storyID, e1 := requiredInt64(req.Envelope.Params, "story_id")
 		storyState, e2 := requiredInt64(req.Envelope.Params, "story_state")
-		guideID, e3 := requiredInt64(req.Envelope.Params, "guide_id")
+		guideID, e3 := storyGuideID(req.Envelope.Params)
 		if e1 != nil || e2 != nil || e3 != nil || storyID < 0 || storyState < 0 || guideID < 0 {
 			return badI5("invalid_story")
 		}
@@ -62,6 +103,26 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			return failI5(err)
 		}
 		return okI5(map[string]any{})
+	case 2865: // SET_PLAYER_GUIDE_FUNCTION
+		functionID, err := requiredInt64(req.Envelope.Params, "guide_function_id")
+		if err != nil || functionID <= 0 {
+			return badI5("invalid_guide_function")
+		}
+		guide, err := d.Service.SaveGuideFunction(ctx, actor, functionID, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(map[string]any{"guide_function_ids": guide.FunctionMap(), "guide_return_id": guide.GuideReturnID})
+	case 2866: // SET_PLAYER_RETURN_ID
+		returnID, err := requiredInt64(req.Envelope.Params, "guide_return_id")
+		if err != nil || returnID < 0 {
+			return badI5("invalid_guide_return")
+		}
+		guide, err := d.Service.SaveGuideReturn(ctx, actor, returnID, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(map[string]any{"guide_return_id": guide.GuideReturnID})
 	case 81: // LOAD_BACKPACK
 		if d.SpiritBackpack != nil {
 			body, e := d.SpiritBackpack.Backpack(ctx, actor, req.Envelope.Operation)
@@ -132,10 +193,67 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		body := map[string]any{"awards": awards, "mail_list": map[string]any{"mail_list": wire, "total": got.Mail.Total, "new_mail_total": got.Mail.NewMailTotal}}
 		applySettlementProjection(body, got.Projection)
 		return okI5(body)
+	case 169, 170:
+		if d.Missions == nil {
+			return failI5(errors.New("mission runtime unavailable"))
+		}
+		index, err := requiredInt64(req.Envelope.Params, "index")
+		if err != nil {
+			return conflictRefusal(1)
+		}
+		period := "DAY"
+		if req.Envelope.MID == 170 {
+			period = "WEEK"
+		}
+		body, err := d.Missions.ClaimActivityChest(ctx, actor, period, index, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
+		return okI5(body)
+	case 160:
+		if d.Missions == nil {
+			return failI5(errors.New("mission runtime unavailable"))
+		}
+		body, err := d.Missions.ReadMissions(ctx, actor, 0, req.Envelope.Operation)
+		if err != nil {
+			return failI5(err)
+		}
+		if d.Awakening != nil {
+			awake, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
+			if e != nil {
+				return failI5(e)
+			}
+			for _, k := range []string{"awake_mission_", "twice_awake_mission_", "pet_awake_mission_"} {
+				body[k] = awake[k]
+			}
+		}
+		return okI5(body)
 	case 2736: // TASK_LOAD_BY_TYPE
 		familyRaw, err := requiredInt64(req.Envelope.Params, "mission_type")
+		// Task.loadTaskByType is also the stock timed-event listener.
+		raw := req.Envelope.Params["mission_type"]
+		if raw == nil {
+			familyRaw, err = int64(objective.Daily), nil
+		}
+		if event, ok := raw.(map[string]any); ok && len(event) == 1 && event["name"] == "__update_mission_ontime__" {
+			familyRaw, err = int64(objective.Daily), nil
+		}
 		if err != nil || familyRaw < int64(objective.Daily) || familyRaw > int64(objective.Challenge) {
 			return badI5("invalid_mission_type")
+		}
+		if familyRaw == 5 && d.Awakening != nil {
+			body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
+			if e != nil {
+				return failI5(e)
+			}
+			return okI5(body)
+		}
+		if d.Missions != nil {
+			body, err := d.Missions.ReadMissions(ctx, actor, objective.StockFamily(familyRaw), req.Envelope.Operation)
+			if err != nil {
+				return failI5(err)
+			}
+			return okI5(body)
 		}
 		instances, _, err := d.Service.ListObjectives(ctx, actor, objective.StockFamily(familyRaw), req.Envelope.ReceivedAt)
 		if err != nil {
@@ -147,6 +265,15 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		if err != nil || tableID <= 0 {
 			return badI5("invalid_mission_id")
 		}
+		if d.Awakening != nil {
+			body, handled, e := d.Awakening.ClaimAwakening(ctx, actor, tableID, req.Envelope.Operation)
+			if e != nil {
+				return failI5(e)
+			}
+			if handled {
+				return okI5(body)
+			}
+		}
 		generation := ""
 		if raw, ok := req.Envelope.Params["hero_table_id"]; ok {
 			h, err := numericValue(raw)
@@ -155,7 +282,14 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			}
 			generation = "hero:" + strconv.FormatInt(h, 10)
 		}
-		got, err := d.Service.ClaimObjectiveByID(ctx, actor, tableID, generation, req.Envelope.Operation)
+		var got appi5.ObjectiveClaimResult
+		var claimErr error
+		if d.Missions != nil {
+			got, claimErr = d.Missions.ClaimMission(ctx, actor, tableID, generation, req.Envelope.Operation)
+		} else {
+			got, claimErr = d.Service.ClaimObjectiveByID(ctx, actor, tableID, generation, req.Envelope.Operation)
+		}
+		err = claimErr
 		if err != nil {
 			return failI5(err)
 		}
@@ -284,6 +418,13 @@ func applySettlementProjection(body map[string]any, p appi5.SettlementProjection
 	}
 }
 
+// conflictRefusal answers a refusal on a mode whose success callbacks index nested
+// reply tables. Backend.lua hands a 200 body to the callback as OK, which crashes
+// them; on any other status the callback gets ERROR and the toast still shows.
+func conflictRefusal(code int64) httpedge.Response {
+	return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error_code": code}}
+}
+
 func okI5(body map[string]any) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 }
@@ -291,7 +432,12 @@ func badI5(code string) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
 }
 func failI5(err error) httpedge.Response {
+	if errors.Is(err, objective.ErrSignRefused) || errors.Is(err, objective.ErrAwakeningRefused) {
+		return conflictRefusal(1)
+	}
 	switch {
+	case errors.Is(err, appi5.ErrMissionRefused):
+		return conflictRefusal(1)
 	case errors.Is(err, appi5.ErrRedeemInvalid):
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_redeem"}}
 	case errors.Is(err, appi5.ErrMailStackFull):
@@ -301,4 +447,76 @@ func failI5(err error) httpedge.Response {
 	default:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "i5_operation_failed"}}
 	}
+}
+
+// storyGuideID floors fractional guide sub-steps (enums.lua GUIDE_SKILL_THREE =
+// 100200.1) like V1's int(); the client keeps the exact step in its local cursor.
+func storyGuideID(params map[string]any) (int64, error) {
+	raw, present := params["guide_id"]
+	if !present {
+		return 0, errors.New("missing guide_id")
+	}
+	value, err := strconv.ParseFloat(fmt.Sprint(raw), 64)
+	if err != nil || math.IsNaN(value) || math.IsInf(value, 0) || value < 0 || value > 1<<53 {
+		return 0, fmt.Errorf("invalid guide_id %v", raw)
+	}
+	return int64(math.Floor(value)), nil
+}
+
+func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.ActorContext, req httpedge.DispatchRequest) httpedge.Response {
+	if d.Awakening == nil {
+		return failI5(errors.New("awakening unavailable"))
+	}
+	mid, p := req.Envelope.MID, req.Envelope.Params
+	if mid == 2561 {
+		if !onlyStockGameplayParams(p) {
+			return badI5("invalid_awakening_read")
+		}
+		body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
+		if e != nil {
+			return failI5(e)
+		}
+		return okI5(body)
+	}
+	action := "open"
+	var id, kind int64
+	if mid == 171 {
+		n, e := requiredInt64(p, "item_num")
+		if e != nil || n != 1 || !onlyStockGameplayParams(p, "item_num") {
+			return badI5("invalid_awakening_wish")
+		}
+		action = "wish"
+	} else if mid == 2737 || mid == 2738 {
+		var e1, e2 error
+		id, e1 = requiredInt64(p, "mission_id")
+		kind, e2 = requiredInt64(p, "awake_type")
+		if e1 != nil || e2 != nil || id <= 0 || kind < 1 || kind > 3 || !onlyStockGameplayParams(p, "mission_id", "awake_type") {
+			return badI5("invalid_awakening_mission")
+		}
+		if mid == 2737 {
+			action = "cancel"
+		}
+	} else {
+		var e error
+		id, e = requiredInt64(p, "table_id")
+		if e != nil || id <= 0 || !onlyStockGameplayParams(p, "table_id") {
+			return badI5("invalid_awakening_mission")
+		}
+		switch mid {
+		case 163, 164:
+			kind = 1
+		case 165, 166:
+			kind = 3
+		case 167, 168:
+			kind = 2
+		}
+		if mid == 164 || mid == 166 || mid == 168 {
+			action = "cancel"
+		}
+	}
+	body, e := d.Awakening.ChangeAwakening(ctx, actor, action, id, kind, req.Envelope.Operation)
+	if e != nil {
+		return failI5(e)
+	}
+	return okI5(body)
 }

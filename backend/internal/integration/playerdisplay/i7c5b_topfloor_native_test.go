@@ -38,7 +38,7 @@ func topFloorService(t *testing.T, p *pg.Pool) app.Service {
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
 		Fence: values, Functions: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
-		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // topFloorPlayer is a genuine combat owner with function 4 open and an Achievement root.

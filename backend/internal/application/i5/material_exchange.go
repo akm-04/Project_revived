@@ -210,7 +210,7 @@ func (s Service) ApplyMaterialExchangeTx(ctx context.Context, t tx.Tx, prepared 
 	if err := debiter.applyPreparedMaterialDebitTx(ctx, t, prepared.preparedDebit); err != nil {
 		return MaterialExchangeResult{}, err
 	}
-	gr, err := s.applyPreparedGrantTx(ctx, t, prepared.actor, prepared.request.Restoration, prepared.op, prepared.request.AllowOverflowMail, prepared.contentRevision, prepared.grantPreflight, prepared.grantIdentity, prepared.grantFingerprint)
+	gr, err := s.applyPreparedGrantTx(ctx, t, prepared.actor, prepared.request.Restoration, prepared.op, GrantTxOptions{AllowOverflowMail: prepared.request.AllowOverflowMail}, prepared.contentRevision, prepared.grantPreflight, prepared.grantIdentity, prepared.grantFingerprint)
 	if err != nil {
 		return MaterialExchangeResult{}, err
 	}

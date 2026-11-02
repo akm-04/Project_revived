@@ -19,7 +19,7 @@ need(Path('internal/adapters/postgres/i4store/realtime_authority.go'),'ResolveGa
 need(Path('internal/projection/lobby/shapes.go'),'EmbeddedMID1Records','1304','is_enroll')
 need(Path('internal/projection/lobby/manifest.go'),'func NewBootTracker() *BootTracker','60 * time.Second','BootHeartbeat','BootLegitTimer')
 need(Path('cmd/gxb-api/main_postgres.go'),'//go:build postgres','mustRegister(18','mustRegister(1','mustRegister(192','[]uint16{2, 2864, 20480}','GXB_PUBLIC_ENGINE_URL')
-need(Path('internal/adapters/stockruntime/prelogin.go'),'MIDCenterDiscovery','MIDVersionCheck','"contents": "{\\"contents\\":[]}"','JSON: "B"','JSON: "A"')
+need(Path('internal/adapters/stockruntime/prelogin.go'),'MIDCenterDiscovery','MIDVersionCheck','"contents": "{\\"contents\\":[]}"','JSON: tutorialGroup(key)','return "B"','return "A"')
 need(Path('internal/protocol/mids/registry.go'),'MIDVersionCheck','MIDCenterDiscovery','sourcePlaneAliases')
 need(Path('cmd/gxb-realtime/main_postgres.go'),'//go:build postgres','NewConnectionRegistry','EvidenceConfigFromEnv','RunHealthPulses')
 need(Path('tools/check_i4_oracle_wave_s.py'),'I4 ORACLE WAVE-S CHECK: PASS')
@@ -41,8 +41,10 @@ if "(3,'Server 3'" in mig or "(4,'Server 4'" in mig: errs.append('fake Server 3/
 # Keep I4 bounded: deep systems must remain untouched placeholders, not routed startup facades.
 api=(root/'cmd/gxb-api/main_postgres.go').read_text()
 # I7C-4 routed the commerce privilege owner; gacha (I9 loot boxes), GuildWar and chat send stay out of the router.
+# D404: the red point 1152 alone answers while Guild War stays inactive.
+routed=api.replace('GuildWarRedPoint','')
 for forbidden in ['CombatAttempt','gacha','GuildWar','SEND_CHAT_MESSAGE']:
- if forbidden in api: errs.append(f'I4 production router expanded into forbidden deep domain: {forbidden}')
+ if forbidden in routed: errs.append(f'I4 production router expanded into forbidden deep domain: {forbidden}')
 if errs:
  print('I4 VALIDATION: FAIL'); [print(' -',x) for x in errs]; sys.exit(1)
 print('I4 VALIDATION: PASS')

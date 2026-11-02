@@ -21,12 +21,102 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i7c6-cosmetic-origins"
+COMPILER_VERSION = "i9-9c-guild-campaign"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 
 SOURCE_MANIFEST = [
+    ('data/tables/playoff_time.lua', '7e29b5cb8797c898878457ded7480f084665ca3f6d14f6e5e189ef37e92a8b49', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
+    ('data/tables/playoff_reward.lua', '7b7895ac46760679a488c0504137864541fb70a6813a98fd167c1f5fb6b8f92a', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
+    ('data/tables/region_playoff_stage.lua', '562c12cc215e71c93a97c15d1ac3cf5b691f445025a8dfa90b4b2d864e3b0131', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
+    ('data/tables/relax_match_gift.lua', '7185153b1e293110dc9ac9a7dc420811cee0ab0f6ea87dbd271a6fe6fa8984a9', 'I9_7B_TOURNAMENT_CASUAL_SOURCE_BOUNDARY'),
+    ('data/tables/arena_mode.lua', 'ac31d67aefd207e48406b9cefdfd0a9847f433a7090ff07298635ebe52e9c6bc', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
+    ('data/tables/arena_mode_schedule.lua', 'aaf4a57a1aeb5ea6bd73b0b66e02eee242528543622b5e7d7bb25fc1155802a6', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
+    ('data/tables/arena_mode_reward.lua', '985dc6f01cb909aa52bb5a915372ff0c58c6bf9196e2e653210be0534595a6de', 'I9_7A_TOP_FLOOR_TASK_SOURCE_BOUNDARY'),
+
+    ('app/model/MemoriesOfSchool.lua', '6bf59801d27aa39afc96fbab02580af7c1c5bc5c5586691459ede6b9e7181193', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/BattleTable.lua', '4b0893ef16b7908f1be8a3a0ba9427c73448fd82f275b55d8bfaf54bffe3f659', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/scenes/BattleCreateReport.lua', '397ab8c281fd713050c93592f1b37b35a5702fed45c61fc47f0bc0420d0f0326', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolBossInfoWindow.lua', '2195bede545691085e47da1e5ec955b3dab83f3565706ef1a53fbc96bf89d9b1', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolFinalRewardWindow.lua', 'df1ef8cf58d40895dfb0e420f07b759a5971a637c56e22a1a60a6a27024a4af0', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolMainWindow.lua', '70117b5bae3a875eceee8a843bea0ea13f1ba841dd14058b69dedd661f72353b', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolRebornWindow.lua', '5463bdcbd2c61caa2750cff01f94fb85213334ef1e9f286fb0b7018bd1197ebb', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolTeamInfoWindow.lua', 'ae014f3113056b1eb742863e4a39028f7d60b99b5ab34b3a86f54a8932a52ad3', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/windows/MemoriesOfSchoolWindow.lua', '4abacdeca0b2123b42a0527f951b8feb69d668cfe7c8a72f0fed6a1230177b9e', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/MazeCampaignTable.lua', '57b0cd533655dfbfd139ced65f76bd1d15f94f46cb2e9cfa06889b57a721ab0a', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/MazeFloorTable.lua', '3b16191115f8ea8f8c08bea3012576dcec0ca455d92b3f60d044af462cd386b9', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('app/common/tables/MazePartnerCampaignTable.lua', 'afb19f218f477c7036ea97240cc5dececd70c82f052d338be3276eda1bbaacb7', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze.lua', '0d0ca0246cd2896611ee2180a6c37483e81f7a8671f5c2cda9ef6ed4df96338b', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze_floor.lua', '0c1380a80c01a431a357681c397aa9e668728fef3bcbc0f1e93a7c995f23a9bf', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze_partner_campaign.lua', '2aea1b67c26d3387635bd379d66507bc0e706dc96ba1c2b30a3cb4d35817b6a5', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+    ('data/tables/maze_campaign.lua', '5970856d119b724c7491cd2ba07f2773d07e63c33436fe94b1aff34a53e5d613', 'I9_6C_MEMOIR_SOURCE_BOUNDARY'),
+
+    ('data/tables/dodge_ball.lua', '2f5d4d438a5eeb75e401c412786e6a4a98e5f899f36834b1513f5353f3858865', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('data/tables/dodge_group.lua', '9442d95bd149a45824a2e55f37d1ba43817dc9d6d7a29eb0fcb0332649431885', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('data/tables/dodge_buff.lua', '82d91d04f79b2eb4e57c9e863221d2651b905bd79053172d1e94198ce08bc2c4', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('data/tables/dodge_activity.lua', '58cebb404d0e5bfd9815e8324f61e3e17a589dd3ec34d87cd1bba8e105174802', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/model/ThrowSandbag.lua', 'c69ae35194dc33018274230debc6181f38aafd536d52c3ba55ee821e1fd57be0', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/SubExamWindow.lua', '3a3f2b54f6d52fc53da121b90809d10eac81f2cd6199c838e5aadda5f6212b92', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagWindow.lua', 'f679cb6d2b1a6c90fa559722d688e44abb0f575d342afbc8ff7e30903e10e1e1', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagMainWindow.lua', 'e4af2f8684c018a9844750650d2ba3e7fbb56bbbf9f359598c1bcc5ba95b8b11', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagGuideWindow.lua', 'f4ef44bcd1fc7ec01b2c34b02579525f795f792c0be166eef3b4a6d060ad353a', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagInviteWindow.lua', '1b61dec4d2b8325ea77c5b375455c56dbb22378846d1b47915e568dfc4fef755', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/windows/ThrowSandbagResultWindow.lua', '814809bbd9a768d982613a7c2c565aa9fbf12ba4df413ad31759e338cf1deca8', 'I9_6B_DODGEBALL_SOURCE_BOUNDARY'),
+    ('app/common/tables/PetCampaignTable.lua', '2e861f3f191a53ecc75591a2f5eff7fc8def36440cec5e80999f95d2faec231a', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetSweepingWindow.lua', 'cb7be4474630e9b3faf170f8e07fece4e06996734cb367ef4424dd76ce410d2e', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetCampaignRuleWindow.lua', 'e18ed641ecd4aff882b6f0027a36e7a9a8dacda593dfc2f1128be9a7f0bd572f', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetCampaignAwardWindow.lua', 'e4cfce539795064fe94bf32744821ff8dc744fd226ce848865109b5af29c3d81', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/windows/PetCampaignWindow.lua', '6a8eac1bd1072e9f33af4f8f3d60fc07d91f030dee796b9e53cd3465948d0162', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('app/model/PetCampaign.lua', '58e227cc064f17948343116ce5b021ab9f27bbe733be2b4a0724f1fd8845e3f0', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/pet_campaign.lua', '20ff4f17c12b2af3400abb81b8b993620614f0d501ab4e307dc4b9b544d5d74a', 'I9_5C_PET_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/awaken_mission.lua', 'fdbcaf96386a7aa775c23b071bfe9952ef6acfc57982d17300b8308417fdb123', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/bloodline_mission.lua', 'b773cd8ebb0936c76c7ad0727a5d9efa67e87b748f508c3cd66147f075b81299', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/pet_awaken_mission.lua', 'fc769406c22fbd880894cbd5b2697a3612335a19a58176486c69463913c95f0b', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/bloodline_incubus.lua', 'f94ddd675f3ba1d45f20d8c9df3e9ade37e5bc0bec50c30b66a033ffa1c79b10', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('data/tables/bloodline_incubus_monster.lua', 'c8c05e6799f896d2cbca9ccc21902963c540360da0458d73507427e6588106ec', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('app/windows/TaskAwakeCell.lua', 'ff133e4afc528f2c5a31e2ec51a88f3ac9e1d3ab6b137f8ddbdff3dec7671ff6', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('app/windows/AwakeTwiceSelectTeamWindow.lua', '5c860b0211739fb80163b2fe174c60117bd178d824fc3a4755c792b629ba19c8', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+    ('app/scenes/BattleUnlimit.lua', '18379155319fee810eb645bccf0ec299c4fe720ae0380e6c222f596a452dc6be', 'I9_4D_AWAKENING_SOURCE_BOUNDARY'),
+
+    ('data/tables/sign_in.lua', 'b1ed79e1edd36d6ee62c31281328a074abe23af86ed099128b90f6d4b50ce6c5', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('data/tables/sign_in_partner.lua', '3dcad83b72fbf3d832bc11b507eacc4a7cfc520254497daf7de43f045f2c09a7', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('app/windows/SignInWindow.lua', 'a879fb4be8e8d468f7c5bd76cfa3f0c816fa32a9d5147c0abb7c0fdc19de63d4', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('app/windows/SignInItem.lua', '24dd08f8966a88566c348e3c5f20624366b73b0ba8c20f6c250bb3180583dbac', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('app/windows/SignInDescWindow.lua', '28259123e9e7ac6909e815566b17eb611697713fc777ca9bae225d8e5438a5a5', "I9_4C_SIGNIN_SOURCE_BOUNDARY"),
+    ('data/tables/mission_reward_daily.lua', '4e7940f695e1b50f2d68c7c71430da388eeb01e4333f37c179157db64f7b7842', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('data/tables/mission_reward_week.lua', '20986d20785af114b23ad7355bb3763dd0e7d8b93ecc678fd6ea8a30472e73d4', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('app/windows/TaskWindow.lua', 'd518b80d3037924bf0eeb77542df2ddd01585253248b5f7dc562d3fad114f10c', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('app/windows/GiftTipsWindow.lua', '834288f99b1379d45352e685cd5a576b6c8751feeaa574ddc3db2673844c3a2b', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('app/windows/ThrowSandbagChooseWindow.lua', '8e23f602101027dd451ce60d589a354e4e9215df1d105404102a779e87ea3efc', "I9_4B_ACTIVITY_SOURCE_BOUNDARY"),
+    ('data/tables/mission.lua', '337cb2a66ac6963e7d2e24dcc293df02d24fca8cbb6a40d838915f60ebc436bd', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/model/Task.lua', 'd454ae7cb1e28d95d366aae30ba88d83432c974415f263991af6c4190d54bee5', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/common/tables/MissionTable.lua', '1737d7eddc2e7dfa005e43b6105305b9c6d8227d00f47bdc99fb69b96430f577', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/windows/TaskDailyCell.lua', '8cca56bc5e7ef67672c65c53708210c7cdda70cced9274b4e3099ca0158198db', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('app/windows/TaskGrowCell.lua', '0895864ee207e6d6d285289809abea083e3dc6a32d4596e5e18a8e8890960340', 'I9_4A_MISSION_SOURCE_BOUNDARY'),
+    ('data/tables/summon.lua', 'e34ac8b360d0a623b4c846251e71db939d3920e9769ab40889c656904a39183d', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/dropbox.lua', '82bcde6486b711f393bf74e54c6ac28239c04fb2d78adf3fd23ff56c1183e2cb', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/soul_casket.lua', 'ce7022526f6fe234dee67fe584c92ac18c0814c009401ca45dc254a74c9d08d6', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/magic_summon_list.lua', '14923b52552e3ff02b1bcbd733df13458f3071559dc5fd36be81d9241ab98e50', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('data/tables/magic_drop_rate.lua', '8828e1639bc07e1653fea7c86b5113e6ccfd756f3e66549a459ab8fbc3ce5c9a', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('app/windows/SummonWindow.lua', 'ff7a49683fa9d47bd031f9f2625d2901a652a4ae305486ad6c2f481f9aa214af', 'I9_3E_GACHA_SOURCE_BOUNDARY'),
+    ('app/windows/MapDetailWindow.lua', '5a137edc609f9d2082c5df6bf50ef05b6ef54642a7ba5bf6dca8fe0f1c4c3898', 'I9_3D_CLOUD_PET_SOURCE_BOUNDARY'),
+    ('app/windows/SelectPetTeamWindow.lua', 'f41b0edb1d9486969d8e14c781a7d99c8a44d96bfa13c5c4518e5260984dbab1', 'I9_3D_CLOUD_PET_SOURCE_BOUNDARY'),
+    ('data/tables/monster.lua', '44d5ca1524384c758a0f2d4f103e04b6aed6ffbe7b894c786b6cea0209164e5f', 'I9_3D_CHALLENGE_ADMISSION_SOURCE_BOUNDARY'),
+    ('data/tables/battle.lua', '73f9ebe94dea67620b343b593ae970a0f548c8962fe731924b9ac2ff6d0e8f33', 'I9_3D_CHALLENGE_ADMISSION_SOURCE_BOUNDARY'),
+    ('app/windows/SelectTeamNewWindow.lua', '0fabc7b70c2acf48765c41b414e3cae7504f567cb6fbe344b0f98456ed18667a', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/MonsterProphecyWindow.lua', 'adc456b851ebef1c9035355338c75515799ade8532833ad840cb687ddfb9ded9', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/SelectCloudDifficultWindow.lua', '8e297a978dde6192e9c5e6396bfe4f9db136f2b40eccb0364d1c6b4f63f8cccd', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/SelectTrialWindow.lua', 'c307015708cd77de9dfd298a0c609d49e91ad7b80c5fd3294d39da320cccff6d', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('app/windows/TimeTravelWindow.lua', '6b46ff69a31d24910822347e98d8b3f7c341f19ed99a2e463d7f237cd508adbe', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('data/tables/daily_consume.lua', '79f7a2bdd1495c699d8bb606606488a4b0a47d0fd87c0457469a49248be44fe6', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('data/tables/challenge_config.lua', 'c38764bddb97fc9c8153bf077a84a6fb07c94c9e628c6336d9bb7020c57b501a', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('data/tables/trial_config.lua', 'ee127f1edc7bf668b749ed34b49469cc2ff2ef4ec2ad048d7423769b75047c2b', 'I9_3D_TRIAL_SOURCE_BOUNDARY'),
+    ('data/tables/campaign.lua', '7a58e878a7171839342a856cd74b512037528438259d036009a7249472504683', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/chapter.lua', '845e255f90abdd3b9e92ab558ac84bd766f868b300f7ca2992bdce933e0ae844', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/campaign_dropbox.lua', '374b6b13bae56e2f5ac8d6b884821d2fb448d239871d1992b84bcf365e90404e', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/campaign_star_bonus.lua', 'b14321b1471c90a761177c06aee5e3d641fcb1df53a1b4c3f2c1df45d1561fe5', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
+    ('data/tables/monthly_privilege.lua', '4fdc9d5b743c530bca9e943b64a96a87f5502243653c5abdb466a39090ade77b', 'I9_3A_CAMPAIGN_SOURCE_BOUNDARY'),
     ('app/windows/ChampionsRuleWindow.lua', '920440ee43773e27b8caf791cca052b5b5ad4cc50a2ed90639a59fb5eb41f1de', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
     ('app/common/tables/CrossArenaScheduleTable.lua', 'dfbc39038f717389c7391934579f953aa4d778cb5bb1e11abf2eee1da9a05589', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
     ('data/tables/activity.lua', 'bf3234d63b44f8636132cb924752d106dc13199ed40ce5fc0c9b358a07b0e3f9', 'I7C5F_LEAGUE_SOURCE_BOUNDARY'),
@@ -186,6 +276,11 @@ SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f5820915
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 
 ENABLED_CAPABILITIES = [
+    "MISSION_CATALOG_I9_4A",
+    "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "MONTHLY_SIGNIN_I9_4C", "AWAKENING_MISSIONS_I9_4D", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B",
+    "SUMMON_GACHA_I9_3E",
+    "CAMPAIGN_MODE_I9_3A",
+    "CHAMPION_MARCH_I9_5A", "WORKPLACE_I9_5B", "PET_CAMPAIGN_I9_5C", "GODS_TRIAL_I9_6A","DODGEBALL_I9_6B", "MEMOIR_I9_6C", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C", "ADVENTURE_I9_8D",
     "COSMETIC_TITLE_CONDITION_I7C6",
     "ACHIEVEMENT_CATALOG_I7C4FA",
     "CHAMPIONS_LEAGUE_I7C5F",
@@ -385,9 +480,47 @@ from stat_content import build_stat_rules
 from stat_input_content import build_stat_inputs
 from privilege_content import build_privilege
 from achievement_content import build_achievement
-from top_floor_content import build_top_floor
+from top_floor_content import build_top_floor, build_task_modes
+SOURCE_MANIFEST.append(('data/tables/march_road.lua', '474778332bf29181e142a0560e70336596b584a81e314d938063fd3dc98d4923', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/march_advance.lua', 'efd627223ba3e7777a90f03c79b368bfc3e6dbd391764cfdbca3aa706dafd38d', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/march_recommend_hero.lua', 'ed4dd7fbb6fa11f97b31f7408e62d4510e4052eab5d803e62e67193b6eced3a9', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
+
+from campaign_content import build_campaign
+SOURCE_MANIFEST.append(('data/tables/treasure_location.lua', '809c1a781a95448c8b79e2cc9264dc4a1b166ea9d34c628b6fdcddae2436ff68', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/treasure_type.lua', '99830d9e6b0c978ce9cb0d6894b83641d0d06b763fd4252bb3a18f9fa23c4390', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/treasure_skill.lua', 'aaccec7b7555b7e4361fe9cd2bb3c204eb02be50ff101da7b9c9c9d4982f485a', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/model/Treasure.lua', 'db53340bae6cfdaa95f660340ed532286b2ee29564b138302256785d878ae2b6', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasureWindow.lua', '1d3d795cc5c60d8011c9511b9d5554917e45465c919d4c65747423ecd815d6c0', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasurePrepareWindow.lua', 'c4fb7ebc597686cc0ee5e1412cf90b39a7eec2408e10e07af32420de815e08e9', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasureRewardWindow.lua', 'e4dab2cf5caa25baff80f0c5b195772877a453e13145941f7b5b6ca132d76d38', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/TreasureDiaryWindow.lua', 'aa01854c16b0de8c49d9b08d99529b223b83910d1f0b4f62bcedde36f923bc4a', 'I9_5B_WORKPLACE_SOURCE_BOUNDARY'))
+from workplace_content import build_workplace
+from petcampaign_content import build_petcampaign
+from godstrial_content import build_godstrial
+SOURCE_MANIFEST.append(('data/tables/dungeon_campaign.lua', '93abd029cbbbd9c10142e1dcd1643019eba0d7b9805af93e668476a0152957ec', 'I9_8A_WORLD_BOSS_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/dungeon_reward.lua', 'c80da25821c8113f7a1be2588fb1806d310df513379349334faabc24ab501727', 'I9_8A_WORLD_BOSS_SOURCE_BOUNDARY'))
+from world_boss_content import build_world_boss
+SOURCE_MANIFEST.append(('data/tables/paradise_campaign.lua', '1d278f9cdb169e002fd50e7818ab2e4dae3381c4eee37597c93bd8c76c69a240', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/paradise_person_reward.lua', 'ebbff86a1b3d37b4eb66b214072ed9043838ee3ab5df45a05dff23a0b9b9720f', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/paradise_community_reward.lua', '79001034492ec5a06af1249c025cbd3609d767960841e76c4a85cf8638780104', 'I9_8B_ILLUSION_SOURCE_BOUNDARY'))
+from illusion_content import build_illusion
+SOURCE_MANIFEST.append(('data/tables/creats_chapter_select.lua', 'c4134b5ee3a9861d75f76f6c704e16345c0cb61d6b49adefcdf1f90549d26e3d', 'I9_8C_OCCULT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/creats_campaign.lua', '63be4a760e765d77f7e04d1f77a725737f91ab467a1929cdc00a0d59b7bd3275', 'I9_8C_OCCULT_SOURCE_BOUNDARY'))
+from occult_content import build_occult
+SOURCE_MANIFEST.append(('data/tables/adventure_event.lua', 'f45db938bd87f17a20fcced1b0942c09ae18c549e0309d107c97805292f627e7', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/adventure_shop.lua', 'dc2763d25dd0b4401808c891750cc6d88c884f27cd1aa55faa31632494f70a8e', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/adventure_cards_dropbox.lua', 'cc232b84af76f1bce36f397752a2d12a8936f3efc7704431f04d415c3643878f', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/adventure_campaign.lua', 'ec0e7462ef98b975c029ad0a5a34b70d96d400835e9cb5177ca109fc3ebd0e41', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+from adventure_content import build_adventure
+from dodgeball_content import build_dodgeball
+from memoir_content import build_memoir
+from march_content import build_march
+from summon_content import build_summon
+from awakening_content import build_awakening
+from signin_content import build_signin
+from missions_content import build_missions
 from one_on_one_content import build_one_on_one
-from arena_content import build_arena
+from arena_content import build_arena, build_tournament
 from league_content import build_league
 from conquer_mode_content import build_conquer_mode
 from course_content import build_course
@@ -895,7 +1028,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         else:
             cls = "SCALAR_CURRENCY"
             status = "QUALIFIED" if name in economy_names else "SOURCE_KNOWN"
-            activation = "ENABLED_R4" if name in {"mana", "crystal", "arena_coin"} else "OWNER_REQUIRED"
+            activation = "ENABLED_R4" if name in {"mana", "crystal", "arena_coin", "march_coin", "guild_coin"} else "OWNER_REQUIRED"
         resources.append({
             "catalog_status": status,
             "class": cls,
@@ -911,6 +1044,21 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
         "definition_key":"scalar_currency:friendship_coin","resource_key":"friendship_coin",
         "settlement_activation":"ENABLED_R4"})
+    # Tea Party pays friend_medal as a player scalar (SelfPlayer.lua:143,1159,
+    # misc.lua guild_donate_scroll_reward); it has no asset.lua row, so pin a
+    # synthetic negative identity outside the source asset range.
+    if "friend_medal" in asset_by_name:
+        raise CompileError("Tea Party friend_medal named scalar identity drift")
+    resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
+        "definition_key":"scalar_currency:friend_medal","resource_key":"friend_medal",
+        "settlement_activation":"ENABLED_R4","source_asset_id":-18})
+    # Guild Campaign pays team_dungeon_coin ("Guild Coin", SelfPlayer.lua:150,1199);
+    # it has no asset.lua row either.
+    if "team_dungeon_coin" in asset_by_name:
+        raise CompileError("Guild Campaign team_dungeon_coin named scalar identity drift")
+    resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
+        "definition_key":"scalar_currency:team_dungeon_coin","resource_key":"team_dungeon_coin",
+        "settlement_activation":"ENABLED_R4","source_asset_id":-19})
     # Named Workshop balances are scalar I5 facts, not asset-ID or PlayerEXP identities.
     # Current enums.ECONOMY and SelfPlayer scalar hydration plus source Book costs qualify these four.
     for key in ('magic_dust','magic_liquid','magic_energy','magic_exp','degree_cer','graduate_cer','patent_cer'):
@@ -933,6 +1081,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         ("energy", misc_int("energy_incr_time"), "PLAYER_LEVEL_ENERGY", None, "QUALIFIED", "ENABLED_R5"),
         ("spirit_energy", misc_int("spirit_energy_minute"), "STATIC", misc_int("spirit_energy_up_limit"), "QUALIFIED", "ENABLED_R5"),
         ("skill_point", misc_int("skill_point_incr_time"), "VIP_PLUS_MONTHLY_PRIVILEGE", None, "QUALIFIED", "ENABLED_R5"),
+        ("workplace_sp", misc_int("treasure_sp_interval"), "STATIC", misc_int("treasure_sp_limit"), "QUALIFIED", "ENABLED_R5"),
         ("invitation", misc_int("invitation_incr_time"), "UNRESOLVED", None, "PARTIAL", "FAIL_CLOSED"),
     ]
     for name, seconds, cap_rule, static_cap, status, activation in temporal_defs:
@@ -985,6 +1134,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
             definition["definition_key"] = f"specialized:item:{item_id}"
             definition["settlement_activation"] = "FAIL_CLOSED"
             definition["specialized_owner"] = "HORCRUX_GENERATED_OWNER_REQUIRED"
+        elif item_type == 0 and item_id == 50001979:
+            if row.get("name") != "Dodge ticket" or stack != 9999 or row.get("gifts") != "0" or row.get("compose") != "0":
+                raise CompileError("Dodge ticket custody profile drift")
+            definition["reason"] = "DODGE_TICKET_STACK_ONLY_I9_4B"
+            enabled_stack += 1
         elif item_type == 0:
             fail_closed_unknown_type += 1
             definition["catalog_status"] = "PARTIAL"
@@ -2044,11 +2198,27 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "vip_bless":vip_bless,
     }
 
-    objective_artifact = {
-        "definitions": [],
-        "schema_version": SCHEMA_VERSION,
-        "status": "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING",
-    }
+    objective_artifact = build_missions(blobs, parse_generated_lua_table)
+    objective_artifact["monthly_signin"] = build_signin(blobs, parse_generated_lua_table)
+    objective_artifact["awakening"] = build_awakening(blobs, parse_generated_lua_table)
+    # Awakening extends existing Character/value identities; it creates no alternate catalog.
+    awakening_heroes = {r["table_id"] for r in templates}
+    awakening_pets = {r["table_id"] for r in pet_templates}
+    awakening_items = {r["item_id"] for r in equipment_items}
+    awakening_stacks = {r["item_id"] for r in resources if r.get("class") == "STACK_ITEM" and r.get("settlement_activation") == "ENABLED_R4"}
+    for definition in objective_artifact["awakening"]["definitions"]:
+        identities = awakening_pets if definition["type"] == 3 else awakening_heroes
+        if definition["before"] not in identities or definition["after"] not in identities:
+            raise CompileError("Unqualified awakening Character template")
+        if definition["item"] and definition["item"] not in awakening_items:
+            raise CompileError("Unqualified awakening equipment identity")
+        if any(item and item not in awakening_stacks for item in [definition["material"], *definition["delete_items"]]):
+            raise CompileError("Unqualified awakening stack identity")
+    for month in objective_artifact["monthly_signin"]["months"]:
+        for award in month["awards"]:
+            item = award["award_item_id"]
+            if item > 0 and not any(r.get("item_id") == item and r.get("settlement_activation") == "ENABLED_R4" and r.get("class") == "STACK_ITEM" for r in resources):
+                raise CompileError(f"Unqualified sign-in reward {item}")
 
     emoticons=[]
     for row in parse_generated_lua_table(blobs["data/tables/emoticon.lua"].data):
@@ -2181,10 +2351,24 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     book_artifact=build_book(blobs,parse_generated_lua_table,items)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
+    top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table)
+    top_floor_artifact["task_modes"] = build_task_modes(blobs, parse_generated_lua_table, parse_base64_indexed_lua_table, indexed_field)
     artifacts = {
-        "top_floor_catalog.json":build_top_floor(blobs,parse_generated_lua_table),
+        "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
+        "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
+        "world_boss_catalog.json":build_world_boss(blobs,parse_generated_lua_table),
+        "illusion_catalog.json":build_illusion(blobs,parse_generated_lua_table),
+        "occult_catalog.json":build_occult(blobs,parse_generated_lua_table),
+        "adventure_catalog.json":build_adventure(blobs,parse_generated_lua_table),
+        "dodgeball_catalog.json":build_dodgeball(blobs,parse_generated_lua_table,items,hero_artifact),
+        "memoir_catalog.json":build_memoir(blobs,parse_generated_lua_table,items,hero_artifact),
+        "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
+        "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
+        "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
+        "summon_catalog.json":build_summon(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
+        "top_floor_catalog.json":top_floor_artifact,
         "one_on_one_catalog.json":build_one_on_one(blobs,parse_generated_lua_table),
-        "arena_catalog.json":build_arena(blobs,parse_generated_lua_table),
+        "arena_catalog.json":dict(build_arena(blobs,parse_generated_lua_table), tournament=build_tournament(blobs,parse_generated_lua_table)),
         "league_catalog.json":build_league(blobs,parse_generated_lua_table),
         "conquer_mode_catalog.json":build_conquer_mode(blobs,parse_generated_lua_table),
         "achievement_catalog.json":build_achievement(blobs,parse_generated_lua_table),
@@ -2233,7 +2417,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "enabled_stack_items": enabled_stack,
         "item_rows": len(items),
         "function_rows": len(function_gates),
-        "objective_builtin_rows": 0,
+        "objective_builtin_rows": len(objective_artifact["definitions"]),
         "player_rows": len(progression_rows),
         "positive_stack_items": positive_stack,
         "specialized_type24_items": specialized_type24,

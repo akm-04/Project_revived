@@ -102,16 +102,17 @@ func (r *receiptMem) Find(_ context.Context, id receipt.Identity) (receipt.Recei
 }
 
 type memStore struct {
-	next        int64
-	nextEventID int64
-	guilds      map[guild.ID]guild.Guild
-	members     map[identity.PlayerID]guild.Membership
-	apps        map[string]guild.Application
-	invites     map[string]guild.Invite
-	events      []guild.MembershipEvent
-	audits      []string
-	roleSaves   []identity.PlayerID
-	locks       []string
+	activityToFold int64
+	next           int64
+	nextEventID    int64
+	guilds         map[guild.ID]guild.Guild
+	members        map[identity.PlayerID]guild.Membership
+	apps           map[string]guild.Application
+	invites        map[string]guild.Invite
+	events         []guild.MembershipEvent
+	audits         []string
+	roleSaves      []identity.PlayerID
+	locks          []string
 }
 
 func newMemStore() *memStore {
@@ -171,6 +172,15 @@ func (s *memStore) InsertMembershipTx(_ context.Context, _ tx.Tx, m guild.Member
 func (s *memStore) SaveMembershipRoleTx(_ context.Context, _ tx.Tx, m guild.Membership, _ int64) error {
 	s.roleSaves = append(s.roleSaves, m.PlayerID)
 	s.members[m.PlayerID] = m
+	return nil
+}
+func (s *memStore) FoldActivityTx(context.Context, tx.Tx, []identity.PlayerID) (int64, error) {
+	return s.activityToFold, nil
+}
+func (s *memStore) MarkActivityFoldedTx(context.Context, tx.Tx, identity.PlayerID) error {
+	return nil
+}
+func (s *memStore) ForfeitActivityLifetimeTx(context.Context, tx.Tx, identity.PlayerID) error {
 	return nil
 }
 func (s *memStore) DeleteMembershipTx(_ context.Context, _ tx.Tx, p identity.PlayerID, _ guild.ID, _ int64) error {
@@ -1042,5 +1052,24 @@ func TestF2CreateClearsAllOutgoingApplications(t *testing.T) {
 		if a.PlayerID == pid {
 			t.Fatalf("obsolete outgoing application survived Guild Create: %+v", a)
 		}
+	}
+}
+
+func TestLeaveMovesUnfoldedActivityIntoTheOldGuild(t *testing.T) {
+	st := newMemStore()
+	gid := guild.ID(1000100)
+	fixture := guildFixture(gid)
+	fixture.Vitality = guild.ActivityGuildCap - 10
+	st.guilds[gid] = fixture
+	st.activityToFold = 25
+	pid := identity.PlayerID(110001)
+	st.seedMembership(memberFixture(pid, gid, guild.Member))
+	svc, _ := serviceFixture(t, st, levelPort{level: 50}, &combinedPort{level: 50})
+
+	if _, err := svc.Leave(context.Background(), actorFixture(t, pid), opFixtureSeed(t, time.Unix(1000, 0).UTC(), 11)); err != nil {
+		t.Fatal(err)
+	}
+	if got := st.guilds[gid].Vitality; got != guild.ActivityGuildCap {
+		t.Fatalf("vitality = %d", got)
 	}
 }

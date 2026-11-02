@@ -1,0 +1,34 @@
+{
+ "contract_id": "I9_MAX_HERO_COLOR_POLICY_V2",
+ "version": 2,
+ "classification": "PRIVATE_POLICY",
+ "authorization": "D130 prerequisite reconciliation and D131 explicit current user approval to correct the private-server policy to align with source purple7; retain original-server UNKNOWN boundaries.",
+ "source_fact": "EquipQuality.PURPLE is7, BLUE1 is5. Prophecy source PreperationBattlePreWindow requires own or rental purple. Rental-only path remains deferred.",
+ "supersedes": "Active production selection of GXB1_PRESERVATION_MAX_HERO_COLOR_V1 value5; retain immutable V1 provider and historical proof.",
+ "policy": "Current production immutable nonlocking exposed max_color7 and MID57 one-click promotion/collect split, revision GXB1_PRESERVATION_MAX_HERO_COLOR_V2. D136: chosen so MID57 one-click promotes through purple and the client shows tiers up to purple; not a Prophecy prerequisite, because stock MID51 (not gated by maxHeroColor) already reaches purple and 16 under value 5. Original server setting/schedule UNKNOWN. MID51 retains its separately qualified color<16 promotion contract; this is not a universal hard growth cap.",
+ "owner": "PlayerProgression/I5 existing MaxHeroColorPolicyProvider; same selected provider instance feeds MID17, MID122 and Character MID57 policy provenance.",
+ "boundaries": [
+  "No mutable max-color row, clock or schedule. No new migration.",
+  "I7C-2G Normal Element admission still requires the Hero own color16. This amendment does not lower that predicate or revoke existing qualified MID51-to16 paths. A color7 Hero remains ineligible.",
+  "Old V1 provider remains available for explicit historical fixture/recovery; current production usesV2. Existing receipts retain recorded revision and replay, not new promotion.",
+  "Do not patch the client purple requirement. Correct draft own-purple threshold5 to7.",
+  "Content already compiles all16 promotion colors. Validate genuine owner promotion through colors6/7, equipment debits/level gates and cap branch; retain canonical resources and typed ownership."
+ ],
+ "impact": [
+  "CA4-3B max_color_policy active selection amended; all other receipt/promotion/restoration invariants preserved.",
+  "I9-3C122 cap response changes5 to7; requalify current122 and MID1 without reopening unrelated awards.",
+  "Prophecy admission and stock path require truepurple7.",
+  "MID51 promotion through16 and Element own-color16 predicate are unchanged. D135 corrects the earlier draft claim that max_color7 globally blocks Normal16."
+ ],
+ "required_tests": [
+  "V1 immutable5/revision unchanged; V2 immutable7/revision and invalid-operation refusal",
+  "Native genuine Character promotion to7, real costs, MID57 replay/cap semantics",
+  "Native Prophecy refuses6 and accepts7; stock own-purple flow through realMID57",
+  "Current MID1/MID122 agree7; prior accepted cap5 test is historical only",
+  "Layer1, strict, fullVC and source/contract/reality gates before closure"
+ ],
+ "source_bindings": {
+  "app/common/enums.lua": "15340bd89fe7c6f150ccfd4a5cd2a2f0e8e73c89dfae9ac3388376a4799901f3",
+  "app/windows/PreperationBattlePreWindow.lua": "2d1f89ddcd0103ebfe4f4e4ae0cc282e660fc73b47ab5d58609a499d472630c7"
+ }
+}

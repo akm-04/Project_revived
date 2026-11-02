@@ -1,0 +1,52 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_GUILD_RENTAL_V1",
+ "node": "ROOT/I9/I9-9/I9-9B",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "GuildRental owns offers, uses and lender pay; Combat keeps the BORROWED origin; I5 keeps mana; Guild keeps membership",
+ "extends": [
+  "I9_PARENT_CONTRACT_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3",
+  "I9_GUILD_ACTIVITY_V1"
+ ],
+ "mids": [
+  593,
+  594,
+  595,
+  618,
+  619,
+  620,
+  621,
+  2768
+ ],
+ "shared_mids": [
+  113,
+  342,
+  604,
+  "Illusion START",
+  "Gods Trial 3092",
+  "World Boss START"
+ ],
+ "policy": "I9_GUILD_POLICY_V1 / D407-D413",
+ "design": "stages/I9-9/PLAN.md, fleet_research/02-9b-rental.md",
+ "clauses": [
+  "C1 One owner application/guildrental, one store, binds combat.Inputs.Lending in production (replaces the I8 fixture path). Provenance {GUILD_RENTAL_V1, HERO|PET/<lender>/<identity>}.",
+  "C2 Rank amendment: rental offer and use rows lock at rank 609b, after the Combat locator 609 and before I5 610. Within it: HERO before PET, then lender, then identity. Every transaction that touches them follows this: START, place, recall, leave, kick, dissolve.",
+  "C3 Combat.Loan gains the mode key the policy table needs, and Lending.LendTx takes all of a battle's loans at once, Hero before Pet (lead commit; a per-loan debit would hold the borrower's economy row 700 while waiting on a second offer at 609b, a real cycle against two lenders' recalls). Before any lender read, LendTx: reads borrower membership, VIP and level without locks; for each loan checks the policy row, locks the offer, checks same guild as the offer, the level gate and the day's use row, inserts the use and adds the price to rent_award; only then debits the total mana via I5 and records Fact 116. Failure is d.ErrLoanRefused. A replay never calls it.",
+  "C4 Borrow modes come only from I9_GUILD_POLICY_V1 borrow_modes. A mode not enabled refuses at START through Lending whatever fields the client sends. Wired call sites: campaign 113 (all campaign types), March 342, Guild Campaign 604, Illusion, Gods Trial, World Boss. Pet Campaign, Adventure and Occult keep their dispatcher refusal: enabling one needs code and a D-number.",
+  "C5 2768 and 621 always answer 200 with guild_rent_heroes shape, for guildless callers too (empty lists). A campaign_type or rent_type whose row is off returns empty partners; no caller loses its window. Absent type lists everything visible. tutor_rent_heroes is [].",
+  "C6 Root and nested rent_count are a nonzero hash of the visible rows, the type, rent_need_mana, can_rent and have_rent, because SelfGuild.lua:482 replaces its cached list only when the count changes.",
+  "C7 A lender never appears in their own 2768 or 621 list and cannot borrow themself (user).",
+  "C8 Place 594/619: lender's own hero or pet, not on a workplace, not already offered; sent cap vip num_mercenary girls, literal 1 pet; stores rent_time and force at placement. Price and hourly pay derive from stored force, so a list read does no stat read per row.",
+  "C9 Recall 595/620: refused under 1800 s (mirrors HireHeroWindow.lua:304); grants award + rent_award in mana through I5 in the same transaction and closes the offer. List replies replace the whole client list; refusals 409, since a nil list crashes HireHeroWindow.lua:182.",
+  "C10 Rule 5: one unit per borrower, lender and game day. Buying a unit lasts that day: same unit again costs nothing and reports have_rent true (BaseSelectTeamWindow.lua:2176); a different unit from that lender is refused.",
+  "C11 Rule 6 and 16: unit level <= borrower level + vip rent_level_up, never above +5. Rule 11: at most one hero and one pet, attacker side, no refund win or lose. Rule 12: a borrowed girl sharing a table id with a deployed girl is refused.",
+  "C12 Rule 13: a March run keeps its one borrowed girl to the end. The run row 605 stores the loan; later fights present it without charge, even after recall or lender leaving. hero_status.rent_list renders it flat as {health, hp, mp}, because SelectTeamWindow.lua:1259 and SelectTeamNewWindow.lua:2437 read it flat; a dead loan is refused and a START without the rent fields fights without her. Owned roster admission exempts only that partner. The run's later STARTs that bring her pass Participant.LoanHeld, which LendTx does not charge or re-check.",
+  "C13 Rule 15: a campaign, quiz or challenge win with a borrowed unit caps at 2 stars at settlement, from the frozen snapshot's BORROWED origin, not from client fields.",
+  "C14 A lent hero or pet: the lender may fight with her; consuming, deleting or workplace deployment is refused through a guard implementing the existing removal guard interfaces plus workplace admission (lead recommendation, rule 14).",
+  "C15 Lender leaves, is kicked or guild dissolves: inside that guild transaction offers close at 609b, accumulated award + rent_award are mailed through SettlementMail (610) once per offer, offers vanish from the roster (user). A borrower's already started fight stands.",
+  "C16 Fact 116 amount 1 on each paid borrow, recorded in the START transaction through I5 ObjectiveFacts; a free same-day reuse and a March run continuation record nothing. Mission 116 needs only the first.",
+  "C17 Discharges I9-3-RENT-SHORTCUT, I9-9-RENT-READ-2768, I9-5-MARCH-LENDING-2768, I9-6-GODS-TRIAL-LENDING-2768 (Gods Trial row off by default: wired and proved with the row on in a native test, stock path proves 2768 OK and an empty list)."
+ ]
+}

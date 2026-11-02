@@ -108,7 +108,11 @@ func (s Service) arena(c context.Context, a identity.ActorContext, op operation.
 					return err
 				}
 			}
-			out = ArenaView{Player: next, Rank: rank, ServerTime: at}
+			weeklyChallenges, err := s.Store.WeeklyChallengesTx(c, sc.Tx, a.PlayerID, at)
+			if err != nil {
+				return err
+			}
+			out = ArenaView{Player: next, Rank: rank, ServerTime: at, WeeklyChallenges: weeklyChallenges}
 			for _, o := range next.Offered {
 				view, err := s.display(c, sc.Tx, catalog, a.LogicalServerID, o, at)
 				if err != nil {
@@ -220,37 +224,18 @@ func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, ser
 		}
 		return view, nil
 	}
-	profile, found, err := s.Directory.ProfileTx(c, q, o.Player)
-	if err != nil || !found {
-		return d.Display{}, errors.Join(err, d.ErrUnavailable)
-	}
-	view := d.Display{Occupant: o, Rank: rank, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID}
-	if membership, member, err := s.Guilds.ReadMembershipTx(c, q, o.Player); err != nil {
+	view, err := s.playerDisplay(c, q, o)
+	if err != nil {
 		return d.Display{}, err
-	} else if member {
-		g, ok, err := s.Guilds.ReadGuildTx(c, q, membership.GuildID)
-		if err != nil {
-			return d.Display{}, err
-		}
-		if ok {
-			view.GuildID, view.GuildName = int64(g.ID), g.Name
-		}
 	}
+	view.Rank = rank
 	p, found, err := s.Store.ReadPlayerTx(c, q, o.Player, false)
 	if err != nil || !found {
 		return view, err
 	}
 	view.Wins = p.Wins
 	view.Heroes, view.Pet, err = s.team(c, q, o.Player, p.Defense, p.DefensePet, at)
-	for _, h := range view.Heroes {
-		if f, ok := h["force"].(json.Number); ok {
-			n, _ := f.Int64()
-			view.Force += n
-		}
-		if f, ok := h["force"].(int64); ok {
-			view.Force += f
-		}
-	}
+	view.Force = teamForce(view.Heroes)
 	return view, err
 }
 
@@ -367,6 +352,10 @@ func (s Service) purchase(c context.Context, a identity.ActorContext, op operati
 	if err != nil {
 		return out, err
 	}
+	op, err = s.pin(c, op)
+	if err != nil {
+		return out, err
+	}
 	_, res, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), timedReceipt{receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}}, func(c context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
 		if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
@@ -425,4 +414,37 @@ func (s Service) ResetTimer(c context.Context, a identity.ActorContext, op opera
 	return s.purchase(c, a, op, "reset-timer", func(catalog d.Catalog, p d.Player, v d.VIP, monthly bool, at time.Time) (d.Player, int64, error) {
 		return catalog.ResetTimer(p, v, monthly, at)
 	})
+}
+
+func (s Service) playerDisplay(c context.Context, q tx.Queryer, o d.Occupant) (d.Display, error) {
+	profile, found, err := s.Directory.ProfileTx(c, q, o.Player)
+	if err != nil || !found {
+		return d.Display{}, errors.Join(err, d.ErrUnavailable)
+	}
+	view := d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID}
+	if membership, member, err := s.Guilds.ReadMembershipTx(c, q, o.Player); err != nil {
+		return d.Display{}, err
+	} else if member {
+		g, ok, err := s.Guilds.ReadGuildTx(c, q, membership.GuildID)
+		if err != nil {
+			return d.Display{}, err
+		}
+		if ok {
+			view.GuildID, view.GuildName = int64(g.ID), g.Name
+		}
+	}
+	return view, nil
+}
+func teamForce(heroes []map[string]any) int64 {
+	var force int64
+	for _, h := range heroes {
+		if f, ok := h["force"].(json.Number); ok {
+			n, _ := f.Int64()
+			force += n
+		}
+		if f, ok := h["force"].(int64); ok {
+			force += f
+		}
+	}
+	return force
 }

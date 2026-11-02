@@ -15,9 +15,11 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/domain/redeem"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -80,6 +82,18 @@ func (Store) SaveStoryTx(ctx context.Context, t tx.Tx, s player.StoryCursor, old
 		return err
 	}
 	return rowsOne(tag, "story")
+}
+func (Store) LockGuideReturnTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) (player.GuideReturnState, error) {
+	var out player.GuideReturnState
+	err := t.QueryRow(ctx, `SELECT player_id,guide_return_id,guide_function_ids,state_version,updated_at FROM player_guide_return_state WHERE player_id=$1 FOR UPDATE`, int64(pid)).Scan((*int64)(&out.PlayerID), &out.GuideReturnID, &out.GuideFunctionIDs, &out.StateVersion, &out.UpdatedAt)
+	return out, err
+}
+func (Store) SaveGuideReturnTx(ctx context.Context, t tx.Tx, g player.GuideReturnState, old int64) error {
+	tag, err := t.Exec(ctx, `UPDATE player_guide_return_state SET guide_return_id=$2,guide_function_ids=$3,state_version=$4,updated_at=$5 WHERE player_id=$1 AND state_version=$6`, int64(g.PlayerID), g.GuideReturnID, g.GuideFunctionIDs, g.StateVersion, g.UpdatedAt.UTC(), old)
+	if err != nil {
+		return err
+	}
+	return rowsOne(tag, "guide return")
 }
 func (Store) ClearFirstEntryPendingTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) error {
 	_, err := t.Exec(ctx, `UPDATE players SET first_entry_pending=false,state_version=state_version+1 WHERE player_id=$1 AND first_entry_pending=true`, int64(pid))
@@ -229,13 +243,48 @@ func (Store) SaveScalarTx(ctx context.Context, t tx.Tx, b economy.ScalarBalance,
 		if err != nil {
 			return err
 		}
-		return rowsOne(tag, "scalar insert")
+		if err := rowsOne(tag, "scalar insert"); err != nil {
+			return err
+		}
+		changes.Balance(ctx, b.ResourceKey, b.Amount)
+		return nil
 	}
-	tag, err := t.Exec(ctx, `UPDATE player_currency_balances SET amount=$3,state_version=$4,updated_at=$5 WHERE player_id=$1 AND resource_key=$2 AND state_version=$6`, int64(b.PlayerID), b.ResourceKey, b.Amount, b.StateVersion, b.UpdatedAt.UTC(), b.StateVersion-1)
+	var before int64
+	err := t.QueryRow(ctx, `UPDATE player_currency_balances c SET amount=$3,state_version=$4,updated_at=$5
+		FROM (SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key=$2) o
+		WHERE c.player_id=$1 AND c.resource_key=$2 AND c.state_version=$6 RETURNING o.amount`, int64(b.PlayerID), b.ResourceKey, b.Amount, b.StateVersion, b.UpdatedAt.UTC(), b.StateVersion-1).Scan(&before)
+	if noRows(err) {
+		return fmt.Errorf("scalar update optimistic write affected 0 rows")
+	}
 	if err != nil {
 		return err
 	}
-	return rowsOne(tag, "scalar update")
+	if b.ResourceKey == crystalKey && before > b.Amount {
+		if _, err := t.Exec(ctx, `INSERT INTO player_crystal_spend_days(player_id,game_day,spent) VALUES($1,$2,$3)
+			ON CONFLICT(player_id,game_day) DO UPDATE SET spent=player_crystal_spend_days.spent+excluded.spent`, int64(b.PlayerID), modes.Day(b.UpdatedAt), before-b.Amount); err != nil {
+			return err
+		}
+	}
+	changes.Balance(ctx, b.ResourceKey, b.Amount)
+	return nil
+}
+
+const crystalKey = "crystal"
+
+func (Store) AppendGuildActivityDayTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, at time.Time, amount int64) error {
+	_, err := t.Exec(ctx, `INSERT INTO player_guild_activity_days(player_id,game_day,amount) VALUES($1,$2,$3)
+		ON CONFLICT(player_id,game_day) DO UPDATE SET amount=player_guild_activity_days.amount+excluded.amount`, int64(pid), modes.Day(at), amount)
+	return err
+}
+
+// CrystalSpentOnDayTx is the crystal total spent on a game day (I9_MODE_FOUNDATION_V1 MF4), read by daily missions 126/127.
+func (Store) CrystalSpentOnDayTx(ctx context.Context, t tx.Queryer, pid identity.PlayerID, day int64) (int64, error) {
+	var spent int64
+	err := t.QueryRow(ctx, `SELECT spent FROM player_crystal_spend_days WHERE player_id=$1 AND game_day=$2`, int64(pid), day).Scan(&spent)
+	if noRows(err) {
+		return 0, nil
+	}
+	return spent, err
 }
 func (Store) LockTemporalTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, key string) (economy.TemporalState, bool, error) {
 	var s economy.TemporalState
@@ -250,11 +299,31 @@ func (Store) SaveTemporalTx(ctx context.Context, t tx.Tx, s economy.TemporalStat
 	if s.RegenAnchorAt != nil {
 		anchor = s.RegenAnchorAt.UTC()
 	}
-	tag, err := t.Exec(ctx, `UPDATE player_temporal_resources SET stored_amount=$3,regen_anchor_at=$4,policy_version=$5,state_version=$6,updated_at=$7 WHERE player_id=$1 AND resource_key=$2 AND state_version=$8`, int64(s.PlayerID), s.ResourceKey, s.StoredAmount, anchor, s.PolicyVersion, s.StateVersion, s.UpdatedAt.UTC(), s.StateVersion-1)
+	tag, err := t.Exec(ctx, `UPDATE player_temporal_resources SET stored_amount=$3,regen_anchor_at=$4,policy_version=$5,state_version=$6,updated_at=$7,content_revision=NULLIF($9,'') WHERE player_id=$1 AND resource_key=$2 AND state_version=$8`, int64(s.PlayerID), s.ResourceKey, s.StoredAmount, anchor, s.PolicyVersion, s.StateVersion, s.UpdatedAt.UTC(), s.StateVersion-1, s.ContentRevision)
 	if err != nil {
 		return err
 	}
-	return rowsOne(tag, "temporal update")
+	if err := rowsOne(tag, "temporal update"); err != nil {
+		return err
+	}
+	// Work Place has its own sp_info/client model, not a global ECONOMY field.
+	if s.ResourceKey != appi5.WorkplaceSPKey {
+		changes.Balance(ctx, s.ResourceKey, s.StoredAmount)
+	}
+	return nil
+}
+
+// StaleTemporalPlayersTx lists the players holding an immutable temporal row pinned to a revision other than target (D98).
+func (Store) StaleTemporalPlayersTx(ctx context.Context, q tx.Queryer, target string) ([]identity.PlayerID, error) {
+	var ids []int64
+	if err := q.QueryRow(ctx, `SELECT COALESCE(array_agg(DISTINCT player_id ORDER BY player_id),'{}') FROM player_temporal_resources WHERE content_revision IS NOT NULL AND content_revision<>$1`, target).Scan(&ids); err != nil {
+		return nil, err
+	}
+	out := make([]identity.PlayerID, 0, len(ids))
+	for _, id := range ids {
+		out = append(out, identity.PlayerID(id))
+	}
+	return out, nil
 }
 func (Store) RebindTemporalTx(ctx context.Context, t tx.Tx, s economy.TemporalState, expectedVersion int64) error {
 	if s.ContentRevision == "" || s.PolicyVersion == "" || s.StateVersion != expectedVersion+1 {
@@ -334,7 +403,12 @@ func (Store) SaveProgressionTx(ctx context.Context, t tx.Tx, p player.Progressio
 	if err != nil {
 		return err
 	}
-	return rowsOne(tag, "progression")
+	if err := rowsOne(tag, "progression"); err != nil {
+		return err
+	}
+	changes.Balance(ctx, "exp", p.Exp)
+	changes.Balance(ctx, "lev", p.Level)
+	return nil
 }
 
 func (Store) LockFunctionStateTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) (int64, error) {
@@ -369,6 +443,9 @@ func (Store) InsertFunctionUnlockTx(ctx context.Context, t tx.Tx, u player.Funct
 	n := tag.RowsAffected()
 	if n < 0 || n > 1 {
 		return false, fmt.Errorf("function unlock insert affected %d rows", n)
+	}
+	if n == 1 {
+		changes.FunctionOpened(ctx, u.FunctionID)
 	}
 	return n == 1, nil
 }
@@ -519,6 +596,29 @@ FROM player_mission_instances i
 LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision
 WHERE i.player_id=$1`
 	if err := s.Queryer.QueryRow(ctx, q, int64(pid)).Scan(&raw); err != nil {
+		return nil, nil, err
+	}
+	return decodeObjectiveRows([]byte(raw))
+}
+
+// LockOpenObjectivesTx locks the player's incomplete, unclaimed objective rows for the fact port (I9_MODE_FOUNDATION_V1 MF3).
+func (Store) LockOpenObjectivesTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) ([]objective.Instance, []appi5.ObjectiveDefinition, error) {
+	var raw string
+	q := `WITH locked AS MATERIALIZED (
+ SELECT i.* FROM player_mission_instances i
+ WHERE i.player_id=$1 AND i.claim_state='UNCLAIMED' AND i.completed_at IS NULL
+ ORDER BY i.objective_id,i.generation_id
+ FOR UPDATE OF i
+)
+SELECT COALESCE(jsonb_agg(jsonb_build_object(
+'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id,
+'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL),
+'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version,
+'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0),
+'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text
+FROM locked i
+LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision`
+	if err := t.QueryRow(ctx, q, int64(pid)).Scan(&raw); err != nil {
 		return nil, nil, err
 	}
 	return decodeObjectiveRows([]byte(raw))

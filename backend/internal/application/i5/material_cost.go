@@ -182,6 +182,7 @@ func (d MaterialCostDebiter) preflightMaterialCostTx(ctx context.Context, t tx.T
 	return pf, nil
 }
 
+// Preflight already qualified each resource; a missing owned balance represents zero.
 func (d MaterialCostDebiter) acquireMaterialCostLocksTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, pf materialCostPreflight) error {
 	for _, r := range pf.Locks {
 		switch r.Kind {
@@ -193,13 +194,13 @@ func (d MaterialCostDebiter) acquireMaterialCostLocksTx(ctx context.Context, t t
 			if _, exists, err := d.Store.LockScalarTx(ctx, t, pid, r.ResourceKey, pf.Now); err != nil {
 				return err
 			} else if !exists {
-				return economy.ErrUnknownResource
+				return economy.ErrInsufficientBalance
 			}
 		case grantLockStack:
 			if _, exists, err := d.Store.LockStackTx(ctx, t, pid, r.ItemID, pf.Now); err != nil {
 				return err
 			} else if !exists {
-				return economy.ErrUnknownResource
+				return economy.ErrInsufficientBalance
 			}
 		default:
 			return errors.New("material cost contains non-material lock requirement")
@@ -219,7 +220,7 @@ func (d MaterialCostDebiter) prepareMaterialDebitStateTx(ctx context.Context, t 
 			return MaterialDebitResult{}, err
 		}
 		if !exists {
-			return MaterialDebitResult{}, economy.ErrUnknownResource
+			return MaterialDebitResult{}, economy.ErrInsufficientBalance
 		}
 		next, err := b.Debit(x.Cost.Amount, pf.Now)
 		if err != nil {
@@ -234,7 +235,7 @@ func (d MaterialCostDebiter) prepareMaterialDebitStateTx(ctx context.Context, t 
 			return MaterialDebitResult{}, err
 		}
 		if !exists {
-			return MaterialDebitResult{}, economy.ErrUnknownResource
+			return MaterialDebitResult{}, economy.ErrInsufficientBalance
 		}
 		adjusted, err := st.Adjust(-x.Cost.Amount, pf.Now)
 		if err != nil {

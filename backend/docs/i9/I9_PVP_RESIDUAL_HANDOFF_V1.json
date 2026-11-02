@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_PVP_RESIDUAL_HANDOFF_V1",
+  "node": "ROOT/I9/I9-7/I9-7D",
+  "status": "WORKING_USER_APPROVED_D359_NOT_STAGE_ACCEPTED",
+  "extends": [
+    "I9_PARENT_CONTRACT_V1",
+    "I9_MODE_FOUNDATION_V3",
+    "C5F_CHAMPIONS_LEAGUE_MODE_V1"
+  ],
+  "amendment": "D359 approved: qualify only functions16/37/45 through canonical prerequisites; preserve all other MF6 exclusions",
+  "policy": "D360 PRIVATE_POLICY legacy title criterion; no recovered original distinction",
+  "clauses": [
+    "C1 Canonical kind6/7 source predicates and existing function owner",
+    "C2 Atomic producer ordering and monotonic durable openings",
+    "C3 Receipts, rollback, concurrent threshold and reload recovery",
+    "C4 Remove VC unlock shortcut after production proof",
+    "C5 Genuine League settlement, three independent permanent legacy origins and notification Mail",
+    "C6 Preserve ten-title progression and historical catalog/origin verification",
+    "C7 Source-compatible projections, tutorial and exact candidate metadata",
+    "C8 Focused proof and stage handoff, no qualification or seal"
+  ]
+}

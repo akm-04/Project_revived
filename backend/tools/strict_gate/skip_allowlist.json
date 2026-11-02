@@ -24,6 +24,20 @@
    "reason": "I7A9 River fixture preparer; the gate runs it on the river set before the suite"
   },
   {
+   "test": "internal/integration/missions.TestActivityNativeMissingRequiredPayloadIsRefused",
+   "kind": "recipe",
+   "owner": "recipe:mission-content47-upgrade",
+   "reason": "needs generation 47 deployed before the current content; fails by design on a fresh database",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/integration/missions.TestActivityNativePinned47ConsumersAndCanonicalSpend",
+   "kind": "recipe",
+   "owner": "recipe:mission-content47-upgrade",
+   "reason": "needs generation 47 deployed before the current content; fails by design on a fresh database",
+   "excluded_from_suites": true
+  },
+  {
    "test": "internal/integration/playerdisplay.TestDisplayKillHelper",
    "kind": "child_helper",
    "owners": [

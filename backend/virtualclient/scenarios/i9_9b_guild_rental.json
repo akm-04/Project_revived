@@ -1,0 +1,66 @@
+{
+ "name": "i9_9b_guild_rental",
+ "level": 32,
+ "heroes": [
+  10001002
+ ],
+ "guild_rental_fixture": true,
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "crystal",
+   "Amount": 1000
+  },
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "mana",
+   "Amount": 10000
+  }
+ ],
+ "steps": [
+  "wait:5",
+  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.LOAD_SENT_HEROS then __vc_593={code=code,reply=reply} elseif mid==xyd.mid.RENT_HERO then __vc_594={code=code,reply=reply} elseif mid==xyd.mid.LOAD_RENT_PET then __vc_618={code=code,reply=reply} elseif mid==xyd.mid.GET_RENT_HEROS then __vc_2768={code=code,reply=reply} elseif mid==xyd.mid.FIGHT then __vc_113={code=code,reply=reply} elseif mid==xyd.mid.FIGHT_RESULT then __vc_114={code=code,reply=reply} end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:createTeam({name='vc9b',icon=20010001,icon_frame=0},function(code) if code~=xyd.error.OK then error('vc-rent-create-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadSelfGuild(function(code) if code~=xyd.error.OK then error('vc-rent-load-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) if not g.guild_id or g.guild_id==0 then error('vc-rent-no-guild') end",
+  "fixture:guild_rental_lender",
+  "wait:2",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadSentHeros(function(code,reply) if code~=xyd.error.OK then error('vc-rent-593-'..tostring(code)) end if type(reply.heroes)~='table' then error('vc-rent-593-shape') end end)",
+  "wait:3",
+  "lua:if not __vc_593 or __vc_593.code~=xyd.error.OK or type(__vc_593.reply.heroes)~='table' then error('vc-rent-593-capture') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadRentPets(function(code,reply) if code~=xyd.error.OK then error('vc-rent-618-'..tostring(code)) end if type(reply.pets)~='table' then error('vc-rent-618-shape') end end)",
+  "wait:3",
+  "lua:if not __vc_618 or __vc_618.code~=xyd.error.OK then error('vc-rent-618-capture') end local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local _,hero=next(p:getHeros()) if not hero then error('vc-rent-no-own-hero') end __vc_own=hero:getHeroID() g:rentHero({partner_id=__vc_own},function(code,reply) if code~=xyd.error.OK then error('vc-rent-594-'..tostring(code)) end if type(reply.rent_info)~='table' then error('vc-rent-594-shape') end end)",
+  "wait:3",
+  "lua:if not __vc_594 or __vc_594.code~=xyd.error.OK then error('vc-rent-594-capture') end local listed=false for _,row in ipairs(__vc_594.reply.rent_info) do if row.partner_id==__vc_own then listed=true end end if not listed then error('vc-rent-594-not-listed') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadAllTeamHeros({campaign_type=xyd.CampaignType.NORMAL},function(code,reply) if code~=xyd.error.OK then error('vc-rent-2768-'..tostring(code)) end local nested=reply.guild_rent_heroes if type(nested)~='table' or type(nested.partners)~='table' then error('vc-rent-2768-shape') end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local other=false for _,row in ipairs(nested.partners) do if row.player_id~=p.playerID then other=true end end if not other then error('vc-rent-2768-no-peer-offer') end end)",
+  "wait:3",
+  "lua:if not __vc_2768 or __vc_2768.code~=xyd.error.OK then error('vc-rent-2768-capture') end",
+  "lua:xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER):loadWorldMap(function(code) if code~=xyd.error.OK then error('vc-rent-world-map-'..tostring(code)) end xyd.WindowManager.get():openWindow('new_map_detail_window',{campaignID=100001,campaignType=xyd.CampaignType.NORMAL,star=0,dailyLimit=0,resetCount=0}) end)",
+  "wait:5",
+  "tap:start",
+  "wait:10",
+  "lua:local cards={} local function walk(n) if not n:isVisible() then return end if n:getName()=='layout' then table.insert(cards,n) return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(xyd.WindowManager.get():getWindow('battle_select_team'):nodeByName('list_layer')) for _,card in ipairs(cards) do local b=card:getCascadeBoundingBox() __vc.tap(b.x+b.width/2,b.y+b.height/2) end",
+  "wait:5",
+  "lua:xyd.db.campaignAutoStatus:setCampaignAutoStatus(xyd.CampaignType.NORMAL,true) local w=xyd.WindowManager.get():getWindow('battle_select_team') local rent for _,group in pairs(w.tmpTotalHero_[2]) do for _,list in pairs(group) do for _,hero in ipairs(list) do rent=rent or hero end end end if not rent then error('vc-rent-team-missing') end w.selectMerHero=rent w.isSelectMerHero=true w:startBattle()",
+  "wait:10",
+  "lua:local story=xyd.WindowManager.get():getWindow('story') if story then story:onEnded() end",
+  "wait:240",
+  "lua:local story=xyd.WindowManager.get():getWindow('story') if story then story:onEnded() end",
+  "wait:20",
+  "lua:if not xyd.WindowManager.get():getWindow('battle_win') then error('vc-rent-not-won') end if not __vc_114 or __vc_114.code~=xyd.error.OK then error('vc-rent-114-capture') end local star=0 for _,row in ipairs(__vc_114.reply.campaigns or {}) do if row.campaign_id==100001 then star=row.star end end if star>2 then error('vc-rent-star-cap-'..tostring(star)) end"
+ ],
+ "settle_seconds": 15,
+ "expect_ok": [
+  593,
+  594,
+  618,
+  2768,
+  113,
+  114
+ ],
+ "expect_lua_errors": [],
+ "note": "The VC is one client, so the guild peer and its offer are provisioned (`guild_rental_fixture` births a second player through stock MID1; `fixture:guild_rental_lender` joins it to the driven player's guild and places its girl). 593/594/618/2768 run through the stock SelfGuild model calls the hire window uses; FIGHT 113 is sent by the stock SelectTeamNewWindow.startBattle after the run selects the rented card in the window's rent list. The peer's borrowed table is moved to 10001009 so C11 rule 12 is not what this run proves."
+}

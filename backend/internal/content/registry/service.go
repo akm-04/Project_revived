@@ -239,6 +239,90 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotTopFloor != 1 {
 				return errors.New("content registry top floor count")
 			}
+			gotGodsTrial, err := s.Repo.InsertGodsTrial(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotGodsTrial != 1 {
+				return errors.New("content registry gods trial count")
+			}
+			gotWorldBoss, err := s.Repo.InsertWorldBoss(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotWorldBoss != 1 {
+				return errors.New("content registry world boss count")
+			}
+			gotIllusion, err := s.Repo.InsertIllusion(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotIllusion != 1 {
+				return errors.New("content registry illusion count")
+			}
+			gotOccult, err := s.Repo.InsertOccult(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotOccult != 1 {
+				return errors.New("content registry occult count")
+			}
+			gotAdventure, err := s.Repo.InsertAdventure(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotAdventure != 1 {
+				return errors.New("content registry adventure count")
+			}
+			gotMemoir, err := s.Repo.InsertMemoir(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotMemoir != 1 {
+				return errors.New("content registry memoir count")
+			}
+			gotDodgeball, err := s.Repo.InsertDodgeball(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotDodgeball != 1 {
+				return errors.New("content registry dodgeball count")
+			}
+			gotPetCampaign, err := s.Repo.InsertPetCampaign(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotPetCampaign != 1 {
+				return errors.New("content registry pet campaign count")
+			}
+			gotWorkplace, err := s.Repo.InsertWorkplace(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotWorkplace != 1 {
+				return errors.New("content registry workplace count")
+			}
+			gotMarch, err := s.Repo.InsertMarch(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotMarch != 1 {
+				return errors.New("content registry march count")
+			}
+			gotCampaign, err := s.Repo.InsertCampaign(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotCampaign != 1 {
+				return errors.New("content registry campaign count")
+			}
+			gotSummon, err := s.Repo.InsertSummon(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotSummon != 1 {
+				return errors.New("content registry summon count")
+			}
 			gotOneOnOne, err := s.Repo.InsertOneOnOne(tctx, scope.Tx, b)
 			if err != nil {
 				return err

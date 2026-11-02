@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
@@ -24,12 +25,14 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
+	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	appconquer "gxb.local/backend/v2/internal/application/conquerschool"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	appelement "gxb.local/backend/v2/internal/application/elementequipment"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applib "gxb.local/backend/v2/internal/application/librarylocal"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
@@ -127,6 +130,12 @@ func deploy() error {
 		_, e = service.ActivateBuiltin(c, op, bundle, current.Activation, "i7a8-guild-broadcast-invite-owner")
 	}
 	if e != nil {
+		return e
+	}
+	i5db := i5store.Store{Queryer: p}
+	content := contentstore.Store{Queryer: p}
+	temporal := appi5.Service{Runner: service.Runner, Store: i5db, Content: content, Privileges: commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: content}}
+	if e = appi5.RunTemporalRepin(c, gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: service.Runner}, temporal, i5db, bundle.RevisionID(), op); e != nil {
 		return e
 	}
 	if _, e = guildbroadcastworker.New(c, p); e != nil {

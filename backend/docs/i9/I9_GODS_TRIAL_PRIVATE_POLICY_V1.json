@@ -1,0 +1,20 @@
+{
+  "policy_id": "I9_GODS_TRIAL_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "decisions": [
+    "D302",
+    "D303",
+    "D304",
+    "D305"
+  ],
+  "drop_law": "Reuse campaign D81: quotient+residual Bernoulli scale10000, stable source order; first source rows guaranteed.",
+  "mint_provider": "C2H_V1_PRESERVATION_ROLL_V1",
+  "manual_deadline_seconds": 3600,
+  "persistent_weekday_progress": true,
+  "auto_reward_freeze": "admission",
+  "allow_manual_during_auto": true,
+  "capacity": "Source2000 admission softcap; never discard an admitted prepaid batch.",
+  "mission_fact": "GODS_TRIAL_CLEARED delta=committed victorious actions, manual or auto; no loss, START or replay fact.",
+  "wire_limit": "Nonce-less identical late intent is ambiguous across occurrences; current/last occurrence replay rules do not claim perfect distinction."
+}

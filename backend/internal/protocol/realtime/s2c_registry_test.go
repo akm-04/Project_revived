@@ -19,6 +19,7 @@ func TestSourceDirectRolesAreSourceBoundAndDescriptorsAreS2C(t *testing.T) {
 		{mids.MIDChatMessage, []Role{World, Guild, Service}},
 		{mids.MIDForceReload, []Role{World}},
 		{mids.MIDGuildBroadcast, []Role{Guild}},
+		{mids.MIDGuildFightNotice, []Role{World}},
 	}
 	for _, tc := range cases {
 		got, ok := SourceDirectRoles(tc.mid)

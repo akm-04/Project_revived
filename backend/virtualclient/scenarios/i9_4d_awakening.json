@@ -1,0 +1,50 @@
+{
+  "name": "i9_4d_awakening",
+  "level": 100,
+  "awakening_fixture": true,
+  "grants": [
+    {
+      "Kind": "STACK_ITEM",
+      "ItemID": 20001185,
+      "Amount": 1
+    },
+    {
+      "Kind": "STACK_ITEM",
+      "ItemID": 50005037,
+      "Amount": 2
+    }
+  ],
+  "steps": [
+    "wait:5",
+    "tap:mission",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) t:setCurTaskType(xyd.TaskType.AWAKE) t:loadTaskByType(xyd.TaskType.AWAKE,function(code) if code~=xyd.error.OK then error('awake-read') end xyd.WindowManager.get():getWindow('task'):updateRight() end)",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) local r=t.tasks[xyd.TaskType.AWAKE][1001001] if not r or r.is_going~=0 then error('awake-unopened') end local found=nil local function walk(n) if n.tableID==1001001 and n.taskInfo then found=n return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(xyd.WindowManager.get():getWindow('task')) if not found or not found.openBtn then error('awake-cell-open') end t:openAwakeTask(1001001,xyd.AwakeType.HERO)",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) local r=t.tasks[xyd.TaskType.AWAKE][1001001] if not r or r.is_open~=1 then error('awake-open-state') end t:getAwakeItem(function(code,b) if code~=xyd.error.OK or b.error_code or not b.item_id or not b.item_num then error('awake-wish') end xyd.selfPlayer:getBackpack():addItemsByID(b.item_id,b.item_num) end)",
+    "wait:5",
+    "lua:xyd.ModelManager.get():loadModel(xyd.ModelType.TASK):giveUpTask(1001001,xyd.AwakeType.HERO)",
+    "wait:5",
+    "lua:xyd.ModelManager.get():loadModel(xyd.ModelType.TASK):openAwakeTask(1001001,xyd.AwakeType.HERO)",
+    "wait:5",
+    "lua:local h=xyd.selfPlayer:getHeroByTableID(10001001) if not h then error('awake-girl') end local slot=nil for i=1,6 do if h:getEquipByIndex(i):getTableID()==20001185 then slot=i end end if not slot then error('awake-gear-slot') end h:equipItems(slot)",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) local r=t.tasks[xyd.TaskType.AWAKE][1001001] if not r or r.is_complete~=1 then error('awake-gear-incomplete') end if not xyd.ModelManager.get():loadModel(xyd.ModelType.REDMARK):isRedmark(xyd.FunctionID.ID_MISSION,xyd.redmark.AWAKE_TASK) then error('awake-ready-badge') end t:getTaskReward(1001001,xyd.TaskType.AWAKE)",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) if not t.tasks[xyd.TaskType.AWAKE][1001003] or t.tasks[xyd.TaskType.AWAKE][1001003].is_complete~=0 then error('awake-final-unearned') end if xyd.ModelManager.get():loadModel(xyd.ModelType.REDMARK):isRedmark(xyd.FunctionID.ID_MISSION,xyd.redmark.AWAKE_TASK) then error('awake-claimed-badge') end xyd.EventDispatcher.get():dispatchEvent({name=xyd.event.UPDATE_MISSION_ONTIME})",
+    "wait:5",
+    "relogin",
+    "wait:5",
+    "lua:local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) t:loadTaskByType(xyd.TaskType.AWAKE,function(code) if code~=xyd.error.OK or not t.tasks[xyd.TaskType.AWAKE][1001003] then error('awake-reload') end end)"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    2736,
+    2738,
+    2737,
+    171,
+    54,
+    161
+  ]
+}

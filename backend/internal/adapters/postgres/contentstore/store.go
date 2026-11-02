@@ -66,7 +66,45 @@ func (Store) InsertObjectives(ctx context.Context, t tx.Tx, b registry.Bundle) (
 	}
 	var n int64
 	err := t.QueryRow(ctx, contentqueries.InsertContentObjectives, b.RevisionID(), string(b.ObjectivesJSON())).Scan(&n)
-	return n, err
+	if err != nil {
+		return 0, err
+	}
+	var data struct {
+		Activity  json.RawMessage `json:"activity_chests"`
+		SignIn    json.RawMessage `json:"monthly_signin"`
+		Awakening json.RawMessage `json:"awakening"`
+	}
+	if err = json.Unmarshal(b.ObjectivesJSON(), &data); err != nil {
+		return 0, err
+	}
+	if len(data.Activity) > 0 && string(data.Activity) != "null" {
+		tag, err := t.Exec(ctx, `INSERT INTO content_mission_activity_catalogs(revision_id,payload) VALUES($1,$2::jsonb)`, b.RevisionID(), string(data.Activity))
+		if err != nil {
+			return 0, err
+		}
+		if tag.RowsAffected() != 1 {
+			return 0, errors.New("activity content insert failed")
+		}
+	}
+	if len(data.SignIn) > 0 && string(data.SignIn) != "null" {
+		tag, err := t.Exec(ctx, `INSERT INTO content_monthly_signin_catalogs(revision_id,payload) VALUES($1,$2::jsonb)`, b.RevisionID(), string(data.SignIn))
+		if err != nil {
+			return 0, err
+		}
+		if tag.RowsAffected() != 1 {
+			return 0, errors.New("sign-in content insert failed")
+		}
+	}
+	if len(data.Awakening) > 0 && string(data.Awakening) != "null" {
+		tag, err := t.Exec(ctx, `INSERT INTO content_awakening_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(data.Awakening))
+		if err != nil {
+			return 0, err
+		}
+		if tag.RowsAffected() != 1 {
+			return 0, errors.New("awakening content insert failed")
+		}
+	}
+	return n, nil
 }
 func (Store) InsertHeroCore(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
 	if t == nil {
@@ -205,6 +243,78 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && topFloorExact
+	var trialExact bool
+	err = q.QueryRow(ctx, verifyGodsTrialSQL, b.RevisionID(), string(b.GodsTrialJSON())).Scan(&trialExact, &v.GodsTrialCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && trialExact
+	var worldBossExact bool
+	err = q.QueryRow(ctx, verifyWorldBossSQL, b.RevisionID(), string(b.WorldBossJSON())).Scan(&worldBossExact, &v.WorldBossCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && worldBossExact
+	var illusionExact bool
+	err = q.QueryRow(ctx, verifyIllusionSQL, b.RevisionID(), string(b.IllusionJSON())).Scan(&illusionExact, &v.IllusionCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && illusionExact
+	var occultExact bool
+	err = q.QueryRow(ctx, verifyOccultSQL, b.RevisionID(), string(b.OccultJSON())).Scan(&occultExact, &v.OccultCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && occultExact
+	var adventureExact bool
+	err = q.QueryRow(ctx, verifyAdventureSQL, b.RevisionID(), string(b.AdventureJSON())).Scan(&adventureExact, &v.AdventureCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && adventureExact
+	var memoirExact bool
+	err = q.QueryRow(ctx, verifyMemoirSQL, b.RevisionID(), string(b.MemoirJSON())).Scan(&memoirExact, &v.MemoirCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && memoirExact
+	var dodgeballExact bool
+	err = q.QueryRow(ctx, verifyDodgeballSQL, b.RevisionID(), string(b.DodgeballJSON())).Scan(&dodgeballExact, &v.DodgeballCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && dodgeballExact
+	var petExact bool
+	err = q.QueryRow(ctx, verifyPetCampaignSQL, b.RevisionID(), string(b.PetCampaignJSON())).Scan(&petExact, &v.PetCampaignCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && petExact
+	var workplaceExact bool
+	err = q.QueryRow(ctx, verifyWorkplaceSQL, b.RevisionID(), string(b.WorkplaceJSON())).Scan(&workplaceExact, &v.WorkplaceCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && workplaceExact
+	var marchExact bool
+	err = q.QueryRow(ctx, verifyMarchSQL, b.RevisionID(), string(b.MarchJSON())).Scan(&marchExact, &v.MarchCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && marchExact
+	var campaignExact bool
+	err = q.QueryRow(ctx, verifyCampaignSQL, b.RevisionID(), string(b.CampaignJSON())).Scan(&campaignExact, &v.CampaignCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && campaignExact
+	var summonExact bool
+	err = q.QueryRow(ctx, verifySummonSQL, b.RevisionID(), string(b.SummonJSON())).Scan(&summonExact, &v.SummonCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && summonExact
 	var oneOnOneExact bool
 	err = q.QueryRow(ctx, verifyOneOnOneSQL, b.RevisionID(), string(b.OneOnOneJSON())).Scan(&oneOnOneExact, &v.OneOnOneCount)
 	if err != nil {
@@ -639,7 +749,7 @@ func (Store) ResolveObjectiveTx(ctx context.Context, q tx.Queryer, revision, pro
 	if err != nil {
 		return appi5.ObjectiveDefinition{}, err
 	}
-	plan, err := decodeContentGrantPlan([]byte(rewardJSON))
+	plan, err := decodeContentGrantPlan([]byte(rewardJSON), definitionRevision == "I9_MISSIONS_V1" && program == fmt.Sprintf("mission:%d", family))
 	if err != nil {
 		return appi5.ObjectiveDefinition{}, err
 	}
@@ -670,12 +780,12 @@ func contentObjectiveStrategy(s string) (objective.Strategy, error) {
 	}
 }
 
-func decodeContentGrantPlan(raw []byte) (grant.Plan, error) {
+func decodeContentGrantPlan(raw []byte, mission bool) (grant.Plan, error) {
 	var p grant.Plan
 	if err := json.Unmarshal(raw, &p); err != nil {
 		return grant.Plan{}, err
 	}
-	if p.Source.PolicyVersion == "" || len(p.Lines) == 0 {
+	if p.Source.PolicyVersion == "" || len(p.Lines) == 0 && !(mission && p.Source.PolicyVersion == "I9_MISSIONS_V1") {
 		return grant.Plan{}, errors.New("content store: objective reward plan incomplete")
 	}
 	for _, line := range p.Lines {

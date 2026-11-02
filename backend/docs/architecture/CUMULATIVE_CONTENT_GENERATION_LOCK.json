@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_CONTENT_GENERATION_LOCK_I7C6",
+  "status": "CUMULATIVE_CONTENT_GENERATION_LOCK_I9_7",
   "rule": "Historical validators keep their phase-specific semantic invariants. In cumulative/current mode they may accept only an explicitly registered successor compiler generation at or after their baseline. New generations are append-only review events; registering a generation does not waive capability/count/source/migration/ownership assertions.",
   "generations": [
     {
@@ -274,14 +274,253 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
       "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
+    },
+    {
+      "ordinal": 40,
+      "stage": "I9-3A (Campaign)",
+      "compiler_version": "i9-3a-campaign",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "0ca4ca72d28100afe41f4d9e8ac62218607ba7c7ddf1ba64abd5885ecdd3bce4",
+      "scope": "campaign_catalog.json under CAMPAIGN_MODE_I9_3A: campaign.lua Normal/Super/Challenge nodes (429/155/144) from chapter.lua lists, 23 chapters with event columns, 996 campaign_dropbox boxes (8135 rows), 46 star bonus rows, refresh_elite_cost, vip num_elite/quick_sweep, monthly privilege row 1, labelled I9_CAMPAIGN_PRIVATE_POLICY_V1; all other payloads unchanged."
+    },
+    {
+      "ordinal": 41,
+      "stage": "I9-3C (Campaign awards)",
+      "compiler_version": "i9-3c-campaign-awards",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "5f18b58e22b4e764b182d65b5abf6d11f0565ea57436bffaff8c9d69d1d91f7f",
+      "scope": "Twelve exact fixed chapter Gacha gift vectors from gift.lua and source map node sizes for displayed star eligibility; other source gameplay payloads unchanged."
+    },
+    {
+      "ordinal": 42,
+      "stage": "I9-3D (Campaign trials)",
+      "compiler_version": "i9-3d-campaign-trials",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "64366487ec8ed3e7574a64a002fde76b5bfe4e41ad76e019fda00733dc8c1ffa",
+      "scope": "Cumulative campaign trials catalog: Daily, Prophecy, Cloud and Challenge source admission, schedules, dropboxes and trial-consumption inputs; existing campaign awards and all unrelated payloads retained."
+    },
+    {
+      "ordinal": 43,
+      "stage": "I9-3E (Vending gacha)",
+      "compiler_version": "i9-3e-gacha",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "8522617e0568aa0dbbd7fe0232c1e532e588c8f33f8d96b2e2eb5f3a1a98fe92",
+      "scope": "Cumulative Vending catalog (I9_GACHA_V1 + I9_GACHA_PRIVATE_POLICY_V1): summon buttons, milestone counters, dropbox pools, summonable heroes, soul caskets, magic summon list and rates, vow inputs; all unrelated payloads retained."
+    },
+    {
+      "ordinal": 44,
+      "stage": "I9-3F (Premium Vending)",
+      "compiler_version": "i9-3f-premium-gacha",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "a224bed37200b154bebd09ca558d185f5e072a1ca6af4c1a05d2d40022db70ad",
+      "scope": "Cumulative Vending catalog plus I9-3F inputs: super_partner (Vows) heroes as Magic targets and MID306 scrolls (vows.table_ids), SX static pools and Magic byproduct pool ids; all unrelated payloads retained."
+    },
+    {
+      "ordinal": 45,
+      "stage": "I9-3 close (Vending showcase and juice)",
+      "compiler_version": "i9-3-vending-juice",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "4958207bed0275873a0861cafe9df2b68218d9b17b6ce34b10ec4716dd8f0d28",
+      "scope": "Cumulative Vending catalog plus per-button summon_reward juice (reward_item_id), policy juice.per_pull and the rotating Medium showcase (display.pet_id removed, D154/D155); all unrelated payloads retained."
+    },
+    {
+      "ordinal": 46,
+      "stage": "I9-4A (Mission catalog; runtime integration in progress)",
+      "compiler_version": "i9-4a-missions",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "66762c48b1fe8d159cad99fc100706d8a6d14982275a9491c38bf5fd7479e1b3",
+      "scope": "476 source mission definitions with explicit prerequisite, occurrence, deferred-producer, reward and condition metadata; 16 VIP sweep-card rows. Other gameplay payloads unchanged."
+    },
+    {
+      "ordinal": 47,
+      "stage": "I9-4A (Mission source reconciliation; runtime integration in progress)",
+      "compiler_version": "i9-4a-mission-reconciliation",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "5ca02bec78f825851fe6ec575977606a3280d15118f8c9900c7dcb66a204f62d",
+      "scope": "Correct campaign clear-count targets, pin VIP sweep quantities inside the mission definition, retain growth EXP/March Coin alternatives for claim-time selection, qualify March Coin scalar, and name unavailable commerce/source bindings. No mission runtime routes activated."
+    },
+    {
+      "ordinal": 48,
+      "stage": "I9-4B activity chests (working, unaccepted)",
+      "compiler_version": "i9-4b-activity",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "aecc10b2c89b5a8e955e76bc057bf3d2f1671109d020633631097bd5ff2eacc8",
+      "scope": "Seven source chest rules and twelve fixed gifts; explicit VIP bonus policy, exact Dodge ticket custody, Guild Coin scalar. Existing mission definitions remain pinned."
+    },
+    {
+      "ordinal": 49,
+      "stage": "I9-4B inscription mission rewards",
+      "compiler_version": "i9-4b-inscription-missions",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "d9b1c731a9efc936ab2cbadfda84d64177196d9329902d763a2b97b6c56b117d",
+      "scope": "Daily missions 10031/10032 carry their source inscription pool (inscription.lua 40001/50001: item ids and rand weights) so the row can present and grant inscript_id. Other definitions unchanged."
+    },
+    {
+      "ordinal": 50,
+      "stage": "I9-4C monthly sign-in",
+      "compiler_version": "i9-4c-signin",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "36d9c7b641e39ca8abf07b0202534f796f7c0b4be0f8849f81f508284bb6709b",
+      "scope": "D89 twelve newest source months; monthly owner and first/bonus entitlements. Existing mission and resource rows unchanged."
+    },
+    {
+      "ordinal": 51,
+      "stage": "I9-4D awakening missions",
+      "compiler_version": "i9-4d-awakening",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "c15cdd873a3a169d62a5b429d39f5b3721d26f5c5ff23db4edaf1d357981ebfe",
+      "scope": "Source-shaped ordinary/Blood/pet mission definitions, Wish blacklists, source campaign drop references and explicit reconstruction policy. Existing resource/calendar/ordinary mission definitions unchanged."
+    },
+    {
+      "ordinal": 52,
+      "stage": "I9-5A Champion March",
+      "compiler_version": "i9-5a-march",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "628b0036830f7432adc96d9f908d3e383efd3d8c7a33e349e9a2e769da81a98e",
+      "scope": "Source Champion catalog and labelled reconstruction policy; existing catalogs unchanged."
+    },
+    {
+      "ordinal": 53,
+      "stage": "I9-5B Work Place",
+      "compiler_version": "i9-5b-workplace",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "7db76b6aa867177425223bac75b4d5dfb4a2310d94f45f0afe99718cf82498cd",
+      "scope": "Current district jobs, I5 workplace_sp and labelled automatic-event policy; D257 legacy supersession."
+    },
+    {
+      "ordinal": 54,
+      "stage": "I9-5C Sky Tower",
+      "compiler_version": "i9-5c-petcampaign",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "676279251de66e199adcaca7c7b17c5e4d5458367a635b5a89ce443db02986c3",
+      "scope": "Source120 floors, starless tower lifecycle and typed pet awakening origins; user-approved D261/D262."
+    },
+    {
+      "ordinal": 55,
+      "stage": "I9-6A Gods Trial",
+      "compiler_version": "i9-6a-gods-trial",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "38afcc935cd80bfa513085c279c30dc9d8339dd77fa8455858f2bd360f3e2920",
+      "scope": "Source42 stages and84 dropboxes; existing Spirit specialized materialization and temporal LP owner."
+    },
+    {
+      "ordinal": 56,
+      "stage": "I9-6B Dodgeball",
+      "compiler_version": "i9-6b-dodgeball",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "799f000e64486b0d854879e57c73dbf196fc5625cdc0d7e4922726609e9fc7a6",
+      "scope": "Source90 targets,5 groups,6 buffs; frozen I8 entropy and private board/attestation policies D306-D309."
+    },
+    {
+      "ordinal": 57,
+      "stage": "I9-6C Memoir",
+      "compiler_version": "i9-6c-memoir",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "a5d5fc91db5fb659a4140d38b31695c30be1e1bf1f3b5a18949e77a539ce82a5",
+      "scope": "Source3 floors,11 girls,6 bosses,226 fights and75 dropboxes. Working implementation; D310 approved, D311-D315 private policy. Not stage acceptance."
+    },
+    {
+      "ordinal": 58,
+      "stage": "I9-6 stage close",
+      "compiler_version": "i9-6-memoir-report-wave",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "11271745755bc053887e1d7b1628116904a1c962d05f2178eff5d1e9e685e126",
+      "scope": "Memoir fight waves exclude summon-typed fighters, matching the stock result report; found by the stage-close stock client map walk."
+    },
+    {
+      "ordinal": 59,
+      "stage": "I9-7A Top Floor task modes",
+      "compiler_version": "i9-7a-top-floor-task",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "258e05bd8658c9ea0c9358a4bac1529c57742c6096fb01c84d124956103be84e",
+      "scope": "Source six modes,91 dated weeks,17 rewards; D351-D353 private policies. Working implementation, not stage acceptance."
+    },
+    {
+      "ordinal": 60,
+      "stage": "I9-7B Playoffs and Casual Arena",
+      "compiler_version": "i9-7b-tournament-casual",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "569bbff79e0f901b4c665ca04d3df7f42b510e5c2a904818ef9f1daa307a273e",
+      "scope": "Source calendar, stage and reward tables. D357 private reconstruction policy; unsealed working implementation."
+    },
+    {
+      "ordinal": 61,
+      "stage": "I9-7C Friend Fight",
+      "compiler_version": "i9-7c-friend-fight",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "95041090e5496a3da82479b597b44911128811ce3f81365fe441324e12715865",
+      "scope": "Source55 gate; D358 private policy; unsealed working implementation."
+    },
+    {
+      "ordinal": 62,
+      "stage": "I9-7D PvP residuals",
+      "compiler_version": "i9-7d-pvp-residuals",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "73390dd0824af3f28a294850aaedc933aa5691c038bc9c40cf736c13ab7b36af",
+      "scope": "Separate legacy League titles; existing ten-title progression retained. D359 approved, D360 private policy, unsealed working implementation."
+    },
+    {
+      "ordinal": 63,
+      "stage": "I9-7 stage merge",
+      "compiler_version": "i9-7-stage-merge",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "88e049813b349d539df386453c6db34f6859985e36b5ceae9b27a9ec14f3c960",
+      "scope": "I9-7A-D content joined with the I9-6 close Memoir wave fix. No new source rows."
+    },
+    {
+      "ordinal": 64,
+      "stage": "I9-8A World Boss",
+      "compiler_version": "i9-8a-world-boss",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "cc7a6537a0991fe1b937246bdc450a4b4104cedc3511aaca992e81d98d50c87e",
+      "scope": "Dungeon campaign, rank reward, misc and translation source facts; D364 policy is separate. Unsealed working implementation."
+    },
+    {
+      "ordinal": 65,
+      "stage": "I9-8B Illusion",
+      "compiler_version": "i9-8b-illusion",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "349bae5b49d1ed1a8c95654b080f66c4e45a9a0bc79a0c5af327854c732586cf",
+      "scope": "Paradise campaign, personal and community reward, misc window/attempt profile and vip/refresh-cost purchase inputs; D366 policy is separate. Shared room payloads unchanged. Unsealed working implementation."
+    },
+    {
+      "ordinal": 66,
+      "stage": "I9-8C Occult",
+      "compiler_version": "i9-8c-occult",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "f59ef0a2e2b15adf8287b5844dd53aed6b4d13c21ed062182db9e72b18c0de0e",
+      "scope": "Creats chapter select (reward display, awakening routes by mission id), campaign graph and misc room, timer, ticket and event profile; D367 policy is separate. Unsealed working implementation."
+    },
+    {
+      "ordinal": 67,
+      "stage": "I9-8D Adventure",
+      "compiler_version": "i9-8d-adventure",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "8bf29b9e0d1b5e1df66cef77242c898b8914a117ff2d3bb061be98cdc75858e6",
+      "scope": "Adventure event rows, shop, card dropbox, gift vectors, defense campaign bands and the trigger/timer/room misc profile; D368 policy is separate. Unsealed working implementation."
+    },
+    {
+      "ordinal": 68,
+      "stage": "I9-9A Guild Tea Party",
+      "compiler_version": "i9-9a-guild-tea",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "2ed041dba4e2f23428014f9746b465e1556c0612a20bc2197e02e37f8234bf25",
+      "scope": "Exactly one named-scalar resource row for friend_medal (I9_GUILD_ACTIVITY_V1 C14 donor reward); every other payload byte-identical."
+    },
+    {
+      "ordinal": 69,
+      "stage": "I9-9C Guild Campaign",
+      "compiler_version": "i9-9c-guild-campaign",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
+      "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
     }
   ],
   "current": {
-    "ordinal": 39,
-    "stage": "I7C-4 full stage B (I7C-6)",
-    "compiler_version": "i7c6-cosmetic-origins",
+    "stage": "I9-9C Guild Campaign",
+    "compiler_version": "i9-9c-guild-campaign",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "5f7fe83b1c358a67e1a62fdc2670b1db5c00ef8891efd886d4d6fb5a46a355b7",
-    "scope": "Player display title rows carry the title_system condition list under COSMETIC_TITLE_CONDITION_I7C6 (marriage 30/50, Bookshelf 50/80, villas 30/60/100 feed C6_SELECTED_COSMETIC_ORIGINS_V1); other cosmetic families and all other payloads unchanged."
+    "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
+    "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
   }
 }

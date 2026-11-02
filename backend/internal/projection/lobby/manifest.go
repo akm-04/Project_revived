@@ -386,7 +386,7 @@ func (t *BootTracker) S0Manifest() ManifestReport {
 	for _, mid := range EmbeddedMID1Records {
 		need = append(need, fmt.Sprintf("%s:%d", BootEmbedded, mid))
 	}
-	for _, mid := range []uint16{2784, 56, 1344, 176, 2754, 1302} {
+	for _, mid := range []uint16{2784, 56, 176, 2754, 1302} {
 		need = append(need, fmt.Sprintf("%s:%d", BootExplicitHTTP, mid))
 	}
 	for _, role := range []string{"WORLD", "SERVICE"} {

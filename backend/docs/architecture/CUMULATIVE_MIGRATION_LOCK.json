@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00078_i8_5_6_level_function_announcement.sql",
+  "highest_migration": "00106_i9_9_illusion_no_pool.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -78,9 +78,37 @@
     "00075_i8_6c_attempt_members.sql": "57a2906b3f4ee2e50f5a18fdf599c560454735c831b0bb45e31fd4e473025c88",
     "00076_i8_5_3_client_observability.sql": "2419a4d9e1ce602c84aad6e4d2095c671c92797553bc18f9f5996e729a231cc9",
     "00077_i8_5_6_player_ids_above_robot_range.sql": "fb93f11ac6e3c85580e4397eb36bc9ae62590a62c0f9e13c424d33d34fe0e0d2",
-    "00078_i8_5_6_level_function_announcement.sql": "0b03aa0d6d189cac164517280939a56a0c79cb43d727e9b41597cc7cee5b44ae"
+    "00078_i8_5_6_level_function_announcement.sql": "0b03aa0d6d189cac164517280939a56a0c79cb43d727e9b41597cc7cee5b44ae",
+    "00079_i9_2_inactive_mode_outcome.sql": "f03fea550276b9cba11cc4ab7ba1c3833e4848a9ab5f3155e69343d4517540c9",
+    "00080_i9_2_crystal_spend_days.sql": "173c5dcd6259b0372985314d132ee49ab9a18f9d48e8f44264ddd26ed04f66a3",
+    "00081_i9_3a_campaign.sql": "dfc9334ae7087697ba97589f896f9eb67652d9a069d3080387518c1976548bd1",
+    "00082_i9_3c_campaign_awards.sql": "1264ccc1a80855c891253e391c237563f0b5405d7669f5e67af8e1448f1bf3f7",
+    "00083_i9_3d_trials.sql": "f9b4bcccd9d61b9d48aa74f5a858a76ee044733a52e663faacb37f53b840fa6e",
+    "00084_i9_3e_summon.sql": "040c9554dbba9e0339164f37d6218de562a303e1a5035a0f41097c26fa2b6388",
+    "00085_i9_4_mission_root.sql": "f6c50a81a55831097e59294ee4310b5430e1579e904405b4ae4d44eb52000332",
+    "00086_i9_4_campaign_clear_counts.sql": "861d66486a860c86d802231e6ca74d5300375509ddd47c7608735966a272a2ed",
+    "00087_i9_4_mission_chests.sql": "b0964d0db83e53b6bb561aafcdbf69da65c43763ab7f5188f190da3e6777aabf",
+    "00088_i9_4_signin.sql": "a62fb3619c2dbc2555f8edf44fb5a8974fa3de132c3f3e397afe781f0616e227",
+    "00089_i9_4_awakening.sql": "ff05a5a41268990d258b5b56c2b886bf18992f0f0668183ad2b3f61cc7f7a034",
+    "00090_i9_5a_march.sql": "2fd84deb2f751aa458af28037482544b0b1f57d8bd99d421eadf53670bbe5cbf",
+    "00091_i9_5b_workplace.sql": "eb5b02a895f5fad578bf1e88cbda36431f69012e9b881522d0b46510c7755aab",
+    "00092_i9_5c_petcampaign.sql": "5e62502db7882aaad013a804559c1650ca99d39e36f7a90b43a5ac5742370b74",
+    "00093_i9_6a_gods_trial.sql": "98f1bd8b9d45230a34abeb9f50e4e1f02ba3fe7f464155082840e8dd1da1d663",
+    "00094_i9_6b_dodgeball.sql": "9b93b785293af45ca3c049b9f3f8a9ab523c206a2d41425e1c59944d4a111ea6",
+    "00095_i9_6c_memoir.sql": "276c43fe4dd2b114beef77abf5754e8bba74993d42fb70c607c7fff29d6d148d",
+    "00096_i9_7a_top_floor_task.sql": "74b1e3538b955f9292bc3155017c97db48bbeb0436e1a1f01655e360a61f16b4",
+    "00097_i9_7b_tournament_casual.sql": "1cdc40c12d9106e9354f43a50abe26d347112edab02b29b005ee10f3f48dca16",
+    "00098_i9_7c_friend_fight.sql": "9423988f327ba5343a35504f4a9c2366993034b61d349a8b1cbca8d5455c1fde",
+    "00099_i9_8a_world_boss.sql": "0037acefe7eeae300045ba3e7ea894b87e91af60157f14188eb96fbaa30dd775",
+    "00100_i9_8b_shared_room_illusion.sql": "91b127ebf29aff867e43cfbc851df37bf8509d8c39af20c843ccfa904d88f90f",
+    "00101_i9_8c_occult.sql": "df8414c6f231466627797120a5f36bc47e0a57863e2ff8324efd8f44cb99d7f9",
+    "00102_i9_8d_adventure.sql": "b6b933e69d876b54c2d8c5fb557dea2472127ec699c037faaac8582055206e3f",
+    "00103_i9_9a_guild_activity.sql": "6fdb4146225a2ec6e5d7f356fa0a8fb8c152df8b99dc6290b60d5406049326a8",
+    "00104_i9_9b_guild_rental.sql": "e83a0e78264e79dbd91e14b0c8fa35e93904af4005a06599e9a51b67180e3d45",
+    "00105_i9_9c_guild_campaign.sql": "73fa898c97f31b8839b0d13b6c9938e13d4d04cf6574c6ee0d26b6bd4942bb84",
+    "00106_i9_9_illusion_no_pool.sql": "534170a86751e9c8195dab76ccc54c20b992e569140bb7b844af9f708d5542bb"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CURRENT_CUMULATIVE_MIGRATION_LOCK_I8_5_6"
+  "status": "CUMULATIVE_MIGRATION_LOCK_I9_9"
 }

@@ -1,0 +1,79 @@
+{
+  "policy_id": "I9_OCCULT_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "decisions": [
+    "D367"
+  ],
+  "open_academy_level": 85,
+  "tickets": {
+    "accrual": "only DebitTemporalTx key energy",
+    "energy_per_ticket": 3000,
+    "cap": 2,
+    "scalar": "occult_ticket",
+    "progress_scalar": "occult_energy_progress",
+    "progress_at_cap": "dropped",
+    "challenge_cost_per_member": 1,
+    "challenge_start": "all_or_none",
+    "sweep_cost": 1,
+    "daily_counter": false
+  },
+  "timers": {
+    "room_seconds": 3000,
+    "selection_seconds": 60,
+    "fight_seconds": 150,
+    "reentry_seconds": 120,
+    "owner": "server"
+  },
+  "room": {
+    "capacity": 3,
+    "solo_capacity": 1,
+    "level_band": 5,
+    "administrator": "owner",
+    "co_op_starter": "any_member"
+  },
+  "events": {
+    "types": [1, 2, 3, 4, 5],
+    "order": "ascending event id",
+    "percent": 30,
+    "dispatch": 3,
+    "triggers": "UNKNOWN_EVERY_LISTED_EVENT_FIRES",
+    "confidence": "low"
+  },
+  "solo": {
+    "trust": "attested_and_clamped",
+    "max_star": 3,
+    "hero_status": "hp_authority_next_stage_never_heals"
+  },
+  "rewards": {
+    "source": "creats_chapter_select.item_display",
+    "quantity": 1,
+    "rates_are_probabilities": true,
+    "sweep_percent": 60,
+    "sweep_rounding": "floor_at_least_1",
+    "best_score": "per_chapter_unlocks_sweep",
+    "ranks": false
+  },
+  "awakening_fragment": {
+    "quantity": 30,
+    "quantity_source": "creats_chapter_select.awaken_nums, every route; user confirms constant",
+    "per": "clear_or_sweep",
+    "gate": "matching stage-1 ordinary awakening mission active",
+    "obligation": "I9-AWAKEN-OCCULT-ORIGINS"
+  },
+  "team_fight_carry": {
+    "source": "client rule 6, translation.lua:25889; user correction 2026-11-01",
+    "enemies": "every monster keeps its end HP and MP after a loss or timeout; a win clears them",
+    "girls": "every fielded girl keeps her end HP and MP; a dead girl cannot be selected; the dispatch limit applies",
+    "pets": "energy recalculated each battle",
+    "mechanism": "MEMOIR_CARRY_V1 enemy_status and member_status"
+  },
+  "reports": {
+    "retention_days": 7,
+    "authorized": "room members"
+  },
+  "receipt": {
+    "policy_id": "policy_id",
+    "version": "policy_version"
+  }
+}

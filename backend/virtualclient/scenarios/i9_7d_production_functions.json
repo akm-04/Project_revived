@@ -1,0 +1,39 @@
+{
+  "name": "i9_7d_production_functions",
+  "level": 60,
+  "heroes": [
+    10001001,
+    10001002,
+    10001003,
+    10001004,
+    10001005,
+    10001006,
+    10001007,
+    10001008,
+    10001009,
+    10001010,
+    10001011,
+    10001012,
+    10001013,
+    10001014,
+    10001015
+  ],
+  "note": "Production level grant and actual stock stone summons must earn functions16/37. The direct kind6/7 unlock fixture has been removed. Stock Arena menu consumes the unlocked state. No claim of a live1on1 match outside its time window, a blood awakening or a League cutoff; those have native proof. Dismiss the genuine function_show popup with its stock full-screen touch handler before opening PK; it otherwise swallows the Arena tap.",
+  "keep_function_notice": true,
+  "steps": [
+    "wait:10",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) assert(p:isFuncOpen(16),'vc-production-oneonone-closed') assert(p:isFuncOpen(37),'vc-production-arena-closed') assert(not p:isFuncOpen(45),'vc-unearned-emblem-open')",
+    "tap:640x360",
+    "wait:3",
+    "lua:assert(not xyd.WindowManager.get():getWindow('function_show'),'vc-function-notice-still-open')",
+    "window:sub_arena",
+    "tap:region_arena_node",
+    "wait:10",
+    "lua:assert(xyd.WindowManager.get():getWindow('region_arena'),'vc-production-arena-window')"
+  ],
+  "settle_seconds": 35,
+  "expect_ok": [
+    59,
+    768
+  ]
+}

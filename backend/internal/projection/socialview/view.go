@@ -35,12 +35,16 @@ type Request struct {
 	At      int64  `json:"request_time"`
 }
 type Notice struct {
-	GuildID   *int64  `json:"guild_id,omitempty"`
-	GuildName *string `json:"guild_name,omitempty"`
-	ID        int64   `json:"notice_id"`
-	Type      int16   `json:"notice_type"`
-	At        int64   `json:"notice_time"`
-	Player    Common  `json:"player_info"`
+	GuildID    *int64  `json:"guild_id,omitempty"`
+	GuildName  *string `json:"guild_name,omitempty"`
+	ParadiseID *int64  `json:"paradise_id,omitempty"`
+	RoomID     *int64  `json:"room_id,omitempty"`
+	ChapterID  *int64  `json:"chapter_id,omitempty"`
+	Force      *int64  `json:"force,omitempty"`
+	ID         int64   `json:"notice_id"`
+	Type       int16   `json:"notice_type"`
+	At         int64   `json:"notice_time"`
+	Player     Common  `json:"player_info"`
 }
 type PrivateMessage struct {
 	PlayerID int64  `json:"player_id"`
@@ -86,7 +90,17 @@ func MapBase(r Result) Base {
 	}
 	for _, p := range r.Notices {
 		row := Notice{ID: int64(p.ID), Type: p.Type, At: p.At.Unix(), Player: common(p.Player)}
-		if p.Type == 10 {
+		switch p.Type {
+		case 6:
+			paradise, room := p.ParadiseID, p.RoomID
+			row.ParadiseID, row.RoomID = &paradise, &room
+		case 7:
+			chapter, force, room := p.ChapterID, p.Force, p.RoomID
+			row.ChapterID, row.Force, row.RoomID = &chapter, &force, &room
+		case 8, 9:
+			room := p.RoomID
+			row.RoomID = &room
+		case 10:
 			gid, name := p.GuildID, p.GuildName
 			row.GuildID = &gid
 			row.GuildName = &name

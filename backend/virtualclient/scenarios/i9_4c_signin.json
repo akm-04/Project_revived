@@ -1,0 +1,20 @@
+{
+ "name": "i9_4c_signin",
+ "level": 45,
+ "steps": [
+  "wait:5",
+  "lua:local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) s.signInfoLoaded_=false s:loadSignInfo(function() if not xyd.WindowManager.get():getWindow('sign_in') then xyd.WindowManager.get():openWindow('sign_in',{}) end end)",
+  "wait:5",
+  "lua:local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if s.isSigned==0 then local w=xyd.WindowManager.get():getWindow('sign_in') if not w then error('vc-sign-window') end local found=nil local function walk(n) if n.item and n.item.dayIdx==1 then found=n return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(w.awardList_) if not found then error('vc-sign-cell') end local box=found:contentView():nodeByName('container'):getCascadeBoundingBox() __vc.tap(box.x+box.width/2,box.y+box.height/2) end",
+  "wait:6",
+  "lua:local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if s.signTimes~=1 or s.isSigned~=2 or #s.signAwards<28 then error('vc-sign-first-state') end",
+  "relogin",
+  "wait:5",
+  "lua:local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if s.signTimes~=1 or s.isSigned~=2 then error('vc-sign-reload') end"
+ ],
+ "settle_seconds": 5,
+ "expect_ok": [
+  352,
+  353
+ ]
+}

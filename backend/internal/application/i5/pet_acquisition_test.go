@@ -134,14 +134,14 @@ func TestPetStarterLoginReconcilerEnsureOneOnlyOnNewUnlock(t *testing.T) {
 	actor := identity.ActorContext{PlayerID: 7}
 	s := &starterStore{progression: player.Progression{PlayerID: 7, Level: 40, Exp: 0, StateVersion: 1, UpdatedAt: time.Unix(1, 0)}, unlockInserted: true}
 	r := PetStarterLoginReconciler{Store: s, Content: starterContent{}}
-	if err := r.ReconcileCharacterLogin(context.Background(), noopTx{}, actor, op); err != nil {
+	if err := r.ReconcileCharacterLogin(context.Background(), noopTx{}, actor, op, op.StartedAt); err != nil {
 		t.Fatal(err)
 	}
 	if !s.saved || s.stack.Quantity != 1 || !s.advanced {
 		t.Fatalf("store=%+v", s)
 	}
 	s2 := &starterStore{progression: s.progression, unlockInserted: false}
-	if err := r.ReconcileCharacterLogin(context.Background(), noopTx{}, actor, op); err != nil {
+	if err := r.ReconcileCharacterLogin(context.Background(), noopTx{}, actor, op, op.StartedAt); err != nil {
 		t.Fatal(err)
 	}
 	if s2.saved {

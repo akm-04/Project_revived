@@ -33,7 +33,7 @@ type HeroRosterTxAppearanceStore interface {
 // resolved from each row's immutable creation revision, while current Fumo and
 // appearance projection use the caller-pinned active roster revision. Timed
 // appearance is qualified once at observedAt for the whole caller operation.
-func BuildRosterViewsTx(ctx context.Context, q tx.Queryer, rosterRevision string, heroes []character.Hero, observedAt time.Time, store HeroRosterTxAppearanceStore, content HeroRosterTxContent) ([]HeroRosterView, error) {
+func BuildRosterViewsTx(ctx context.Context, q tx.Queryer, rosterRevision string, heroes []character.Hero, observedAt time.Time, store HeroRosterTxAppearanceStore, content HeroRosterTxContent, awakening *AwakeningPositionResolver) ([]HeroRosterView, error) {
 	if q == nil || store == nil || content == nil || len(rosterRevision) != 64 || observedAt.IsZero() {
 		return nil, errors.New("character hero: invalid roster projection input")
 	}
@@ -50,7 +50,7 @@ func BuildRosterViewsTx(ctx context.Context, q tx.Queryer, rosterRevision string
 		}
 		view := HeroRosterView{Hero: h}
 		if kind == character.NormalHero {
-			levels, err := deriveFumoLevelsTxWith(ctx, q, rosterRevision, h, content, content)
+			levels, err := deriveFumoLevelsTxWith(ctx, q, rosterRevision, h, content, content, awakening)
 			if err != nil {
 				return nil, err
 			}

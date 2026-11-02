@@ -1,0 +1,25 @@
+{
+ "contract_id": "I9_CAMPAIGN_PRIVATE_POLICY_V1",
+ "version": 1,
+ "classification": "IMPLEMENTATION_DECISION_PRIVATE_POLICY_NOT_ORIGINAL_SERVER_TRUTH",
+ "extends": [
+  "I9_CAMPAIGN_V1"
+ ],
+ "rules": [
+  "The original server algorithms for the choices below remain UNKNOWN. Source item vectors and probabilities are not invented by this policy.",
+  "D103: campaign result window3600 seconds. D107: exhausted Super reset only; a prior reset unexhausted row is a no-cost current-state read.",
+  "D106: crystal sweep pays1 crystal per run without using a card. Account EXP mirrors the source simulated pre-run player level:1x at levels<=10,3x afterward.",
+  "D115: each cleared indexed Gacha event_condition unlocks its indexed fixed gift; one claim, no daily reset or energy cost where source event_energy_need is0. Boss2577/2578 remain separate later owners.",
+  "D116: first durable story choice per campaign requires matching live113 before114, preserving exact claim body. Existing origin returns the canonical Hero without a duplicate or extra value. New Hero uses Serializable caller transaction, HeroRoot400, qualified catalog collection admission and all fresh facets. Persist internal admission proof; never expose it on the stock wire. Generic I5 materializer and Vows remain separately gated.",
+  "D117: a participating owned shown Pet receives partner_exp on a win under its canonical source progression cap; no loss EXP and no potion debit. Exact original Pet amount UNKNOWN.",
+  "Campaign receipts record this policy id/version and pinned content. Generation40 numeric private block remains readable in immutable historical content; new generation41 retains the same existing numeric values. This contract is a rule declaration, not a second mutable configuration.",
+  "D118: large/boss displayed map nodes contribute stars; small nodes contribute progression clears only. Strong source/table inference; original server formula remains unrecovered. Legacy generation40 with absent map size retains its old projection behavior, but new bonus claims fail closed without source eligibility metadata.",
+  "D123: Challenge24 opens at level80 after Normal1600016, with related Normal clear and cleared graph parent; seven roots. First-clear drops only.",
+  "D124: group quota consumes on wins only and resets at modes.Day; future stored counter periods refuse. Prophecy rotates one source successor per day, group16 on game day0. Both START and new RESULT enforce current eligibility; drained duplicates replay first. Source last_campaign_100 is the global-cap release ceiling. Original anchor and loss rule remain UNKNOWN.",
+  "D125: canonical DailyConsumption counters for source IDs3..10 add one purchased group use, cost20 crystals, once per game day. IDs1/2 refuse until their providers exist. Campaign605 precedes DailyConsumption605 then I5; no reverse writer. Campaign owns wins, DailyConsumption owns buys.",
+  "D126 source guard reconciliation: Chapter Challenge Protect/KillSteal excludes the supplied NPC matching Hero and before/after-awaken variants, max4 owned slots; OneHeroKillAll exactly1. Other combat objectives remain D82 client summary. Prophecy current unborrowed path requires an owned purple Hero; guild-only availability stays deferred with rentals (PRIVATE_POLICY boundary).",
+  "D128: Cloud uses source NPC placeholders with selected owned pets; RESULT omits participant echoes. CAMPAIGN_CLOUD_SUMMARY_V1 preserves frozen START and bounded star, no fabricated replay or owned EXP.",
+  "D130/D131: select immutable PlayerProgression cap7 V2 to allow true source purple; original cap/schedule UNKNOWN, V1 cap5 retained historically, MID51 and Element own-color16 paths remain unchanged (D135)."
+ ],
+ "evidence": "work/i9/stages/I9-3/RESEARCH_3C.md; D103,D106,D107,D115-D117; D118/R7"
+}

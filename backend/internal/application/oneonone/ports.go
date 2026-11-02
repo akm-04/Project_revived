@@ -18,6 +18,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/objective"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -64,6 +65,12 @@ type Mail interface {
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
+// Facts is the objective fact port (I9_MODE_FOUNDATION_V1 MF3); a settled fight is a PVP_FIGHT (task_req 106, D92).
+type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
+}
+
 type Achievements interface {
 	ObserveOneOnOneWeekTx(context.Context, tx.Tx, identity.LogicalServerID, int64, string, []identity.PlayerID, time.Time) error
 	ObserveOneOnOneWinStreakTx(context.Context, tx.Tx, identity.PlayerID, string, int64, time.Time) error
@@ -104,6 +111,7 @@ type Service struct {
 	Costs        i5.TxMaterialCostDebiter
 	Mail         Mail
 	Achievements Achievements
+	Facts        Facts
 	Combat       Combat
 	Heroes       Roster
 	Pets         Roster
@@ -115,5 +123,5 @@ type Service struct {
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Entitlements != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Entitlements != nil && s.Receipts != nil && s.ReceiptRead != nil
 }

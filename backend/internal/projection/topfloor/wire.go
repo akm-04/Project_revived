@@ -104,6 +104,7 @@ func Report(raw []byte) map[string]any {
 }
 
 type Record struct {
+	Mode     int64
 	ID       int64
 	Key      string
 	At       time.Time
@@ -125,6 +126,9 @@ func Records(records []Record) map[string]any {
 		attacker, defender := r.Self, r.Opponent
 		if !r.Attack {
 			attacker, defender = r.Opponent, r.Self
+		}
+		if r.Mode > 0 {
+			row["mode"] = r.Mode
 		}
 		side("attack", attacker, row)
 		side("defend", defender, row)

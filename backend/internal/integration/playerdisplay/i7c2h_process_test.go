@@ -118,7 +118,7 @@ func TestI7C2HActualAPIAllNineCommandsInventoryRosterRestart(t *testing.T) {
 		params map[string]any
 		status int
 	}{
-		{3090, map[string]any{"spirit_id": 1}, 200}, {3091, map[string]any{"spirit_id": 1}, 200}, {3094, map[string]any{"partner_id": 1, "spirit_id": 1, "pos": 1}, 200}, {3113, map[string]any{"name": "First", "collocation": "1|4|0|0|0|0"}, 200}, {3112, map[string]any{}, 200}, {3115, map[string]any{"id": 1, "partner_id": 2}, 200}, {3095, map[string]any{"partner_id": 2}, 200}, {3114, map[string]any{"id": 1}, 200}, {3089, map[string]any{"spirit_id": 1, "spirit_ids": []int64{6}}, 200}, {3094, map[string]any{"partner_id": 1, "spirit_id": 1, "pos": 1}, 200}, {3094, map[string]any{"partner_id": 1, "spirit_id": 1, "pos": true}, 400}, {3113, map[string]any{"name": "bad", "collocation": "1|0|0"}, 400}, {3098, map[string]any{}, 501}, {3088, map[string]any{}, 501}} {
+		{3090, map[string]any{"spirit_id": 1}, 200}, {3091, map[string]any{"spirit_id": 1}, 200}, {3094, map[string]any{"partner_id": 1, "spirit_id": 1, "pos": 1}, 200}, {3113, map[string]any{"name": "First", "collocation": "1|4|0|0|0|0"}, 200}, {3112, map[string]any{}, 200}, {3115, map[string]any{"id": 1, "partner_id": 2}, 200}, {3095, map[string]any{"partner_id": 2}, 200}, {3114, map[string]any{"id": 1}, 200}, {3089, map[string]any{"spirit_id": 1, "spirit_ids": []int64{6}}, 200}, {3094, map[string]any{"partner_id": 1, "spirit_id": 1, "pos": 1}, 200}, {3094, map[string]any{"partner_id": 1, "spirit_id": 1, "pos": true}, 400}, {3113, map[string]any{"name": "bad", "collocation": "1|0|0"}, 400}, {3098, map[string]any{}, 200}, {3088, map[string]any{}, 200}} {
 		code, out := post(step.mid, step.params)
 		if code != step.status {
 			t.Fatal(step.mid, code, out)

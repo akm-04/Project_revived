@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"gxb.local/backend/v2/internal/protocol/wire"
@@ -20,6 +22,50 @@ type i5WireFake struct {
 	claimed    mail.Address
 	batch      []mail.Address
 	projection appi5.SettlementProjection
+	guideID    int64
+	guide      player.GuideReturnState
+}
+
+func (f *i5WireFake) SaveStory(_ context.Context, _ identity.ActorContext, _, _, guideID int64, _ operation.Context) error {
+	f.guideID = guideID
+	return nil
+}
+func (f *i5WireFake) SaveGuideFunction(_ context.Context, _ identity.ActorContext, functionID int64, _ operation.Context) (player.GuideReturnState, error) {
+	f.guide.GuideFunctionIDs = append(f.guide.GuideFunctionIDs, functionID)
+	return f.guide, nil
+}
+func (f *i5WireFake) SaveGuideReturn(_ context.Context, _ identity.ActorContext, returnID int64, _ operation.Context) (player.GuideReturnState, error) {
+	f.guide.GuideReturnID = returnID
+	return f.guide, nil
+}
+
+func TestI5StoryAndWeakGuideWire(t *testing.T) {
+	now := time.Unix(703, 0).UTC()
+	svc := &i5WireFake{}
+	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
+	for raw, want := range map[any]int64{json.Number("100200.1"): 100200, json.Number("100137"): 100137, 100203.1: 100203, "0": 0} {
+		got := d.Dispatch(context.Background(), i5Req(26, map[string]any{"story_id": json.Number("3"), "story_state": json.Number("1"), "guide_id": raw}, now))
+		if got.HTTPStatus != 200 || svc.guideID != want {
+			t.Fatalf("guide_id %v: %+v stored=%d", raw, got, svc.guideID)
+		}
+	}
+	for _, raw := range []any{json.Number("-0.5"), "NaN", nil} {
+		if got := d.Dispatch(context.Background(), i5Req(26, map[string]any{"story_id": json.Number("3"), "story_state": json.Number("1"), "guide_id": raw}, now)); got.HTTPStatus == 200 {
+			t.Fatalf("guide_id %v accepted", raw)
+		}
+	}
+	got := d.Dispatch(context.Background(), i5Req(2865, map[string]any{"guide_function_id": json.Number("17")}, now))
+	ids, ok := got.Body["guide_function_ids"].(map[string]int64)
+	if got.HTTPStatus != 200 || !ok || ids["17"] != 1 || got.Body["guide_return_id"] != int64(0) {
+		t.Fatalf("2865=%+v", got)
+	}
+	if got := d.Dispatch(context.Background(), i5Req(2865, map[string]any{"guide_function_id": json.Number("0")}, now)); got.HTTPStatus == 200 {
+		t.Fatalf("zero guide function accepted: %+v", got)
+	}
+	got = d.Dispatch(context.Background(), i5Req(2866, map[string]any{"guide_return_id": json.Number("10900202")}, now))
+	if got.HTTPStatus != 200 || got.Body["guide_return_id"] != int64(10900202) {
+		t.Fatalf("2866=%+v", got)
+	}
 }
 
 func (f *i5WireFake) ListBackpack(_ context.Context, actor identity.ActorContext) ([]economy.StackState, error) {

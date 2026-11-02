@@ -1,0 +1,19 @@
+{
+  "contract_id": "I9_MARCH_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY",
+  "decisions": [
+    "D251",
+    "D252",
+    "D253"
+  ],
+  "original_algorithm": "UNKNOWN; raw source constants and weighted pools retained separately",
+  "parameters": {
+    "super_chance_per_10000": 100,
+    "mana_per_academy_level": 1000,
+    "march_coin_per_stage": 20,
+    "reagents_per_stage": 1,
+    "result_window_seconds": 600,
+    "candidate_limit": 200
+  }
+}

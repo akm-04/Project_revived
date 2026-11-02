@@ -48,6 +48,23 @@ func topFloorInteger(p map[string]any, key string, required bool) (int64, bool) 
 	return n, err == nil
 }
 
+// topFloorIdentifier reads a single rent id, which the client sends as
+// tostring(getHeroID()) or tostring(getPetID()).
+func topFloorIdentifier(raw any, required bool) (int64, bool) {
+	if raw == nil {
+		return 0, !required
+	}
+	if text, ok := raw.(string); ok {
+		if text == "" {
+			return 0, !required
+		}
+		n, err := strconv.ParseInt(text, 10, 64)
+		return n, err == nil && n >= 0
+	}
+	n, err := feedbackInteger(raw, 0, 9007199254740991)
+	return n, err == nil
+}
+
 // topFloorFormation reads getFormationStr's "id|id|..." (a single hero may arrive as a number).
 func topFloorFormation(raw any) ([]int64, bool) {
 	text, ok := raw.(string)
@@ -91,7 +108,9 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if req.Envelope.MID == 273 {
 			return okI5(projection.Enemies(v.Enemies))
 		}
-		return okI5(projection.Arena(v.Player, v.Rank, v.Enemies, v.ServerTime))
+		body := projection.Arena(v.Player, v.Rank, v.Enemies, v.ServerTime)
+		body["fight_times"] = v.WeeklyChallenges
+		return okI5(body)
 	case 278:
 		raw, ok := p["heroIDs"].([]any)
 		pet, petOK := topFloorInteger(p, "pet_id", false)
@@ -135,7 +154,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		}
 		rows := []projection.Record{}
 		for _, r := range records {
-			rows = append(rows, projection.Record{ID: r.Record.ID, Key: r.Record.AttemptID.String(), At: r.Record.At, Attack: r.Record.Attack, Win: r.Record.Win, Self: r.Self, Opponent: r.Opponent})
+			rows = append(rows, projection.Record{Mode: r.Mode, ID: r.Record.ID, Key: r.Record.AttemptID.String(), At: r.Record.At, Attack: r.Record.Attack, Win: r.Record.Win, Self: r.Self, Opponent: r.Opponent})
 		}
 		return okI5(projection.Records(rows))
 	case 290:

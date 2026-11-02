@@ -188,7 +188,7 @@ func (s Service) ApplyInscriptionValueTx(ctx context.Context, t tx.Tx, p *Prepar
 	if e != nil {
 		return GrantResult{}, e
 	}
-	return s.applyPreparedGrantTx(ctx, t, p.actor, plan, p.op, true, p.revision, pf, id, fp)
+	return s.applyPreparedGrantTx(ctx, t, p.actor, plan, p.op, GrantTxOptions{AllowOverflowMail: true}, p.revision, pf, id, fp)
 }
 
 var _ TxInscriptionValue = Service{}

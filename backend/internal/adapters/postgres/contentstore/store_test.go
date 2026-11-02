@@ -21,14 +21,16 @@ type tag int64
 func (t tag) RowsAffected() int64 { return int64(t) }
 
 type recording struct {
-	bySQL    map[string][]any
-	calls    []string
-	callArgs [][]any
-	sql      string
-	args     []any
-	values   []any
-	n        int64
-	err      error
+	execCalls []string
+	execArgs  [][]any
+	bySQL     map[string][]any
+	calls     []string
+	callArgs  [][]any
+	sql       string
+	args      []any
+	values    []any
+	n         int64
+	err       error
 }
 
 func (r *recording) QueryRow(_ context.Context, sql string, args ...any) tx.Row {
@@ -57,6 +59,8 @@ func (r *recording) Scan(dest ...any) error {
 func (r *recording) Exec(_ context.Context, sql string, args ...any) (tx.CommandTag, error) {
 	r.sql = sql
 	r.args = args
+	r.execCalls = append(r.execCalls, sql)
+	r.execArgs = append(r.execArgs, args)
 	return tag(r.n), r.err
 }
 func (r *recording) Commit(context.Context) error   { return errors.New("store must not commit") }
@@ -80,11 +84,30 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 		sql  string
 		raw  []byte
 		n    int64
-	}{{s.InsertResources, contentqueries.InsertContentResources, b.ResourcesJSON(), 5557}, {s.InsertProgression, contentqueries.InsertContentPlayerProgression, b.ProgressionJSON(), 100}, {s.InsertFunctionGates, contentqueries.InsertContentFunctionGates, b.FunctionGatesJSON(), 99}, {s.InsertObjectives, contentqueries.InsertContentObjectives, b.ObjectivesJSON(), 0}, {s.InsertHeroCore, contentqueries.InsertContentHeroCore, b.HeroCoreJSON(), 568}, {s.InsertPetCore, contentqueries.InsertContentPetCore, b.PetCoreJSON(), 54}, {s.InsertPetAcquisition, contentqueries.InsertContentPetAcquisition, b.PetAcquisitionJSON(), 27}, {s.InsertPetProgression, contentqueries.InsertContentPetProgression, b.PetProgressionJSON(), 54}, {s.InsertEquipmentPrimitives, contentqueries.InsertContentEquipmentPrimitives, b.EquipmentPrimitivesJSON(), 1176}, {s.InsertHeroEquipment, contentqueries.InsertContentHeroEquipment, b.HeroEquipmentJSON(), 53280}, {s.InsertSuperEquipment, contentqueries.InsertContentSuperEquipment, b.SuperEquipmentJSON(), 84}, {s.InsertPetEquipment, contentqueries.InsertContentPetEquipment, b.PetEquipmentJSON(), 2592}, {s.InsertPetPromotionRestoration, contentqueries.InsertContentPetPromotionRestoration, b.PetPromotionRestorationJSON(), 73}, {s.InsertPractice, contentqueries.InsertContentPractice, b.PracticeJSON(), 1889}, {s.InsertAppearance, contentqueries.InsertContentAppearance, b.AppearanceJSON(), 542}, {s.InsertEmoticons, contentqueries.InsertContentEmoticons, b.EmoticonsJSON(), 85}}
+	}{{s.InsertResources, contentqueries.InsertContentResources, b.ResourcesJSON(), 5557}, {s.InsertProgression, contentqueries.InsertContentPlayerProgression, b.ProgressionJSON(), 100}, {s.InsertFunctionGates, contentqueries.InsertContentFunctionGates, b.FunctionGatesJSON(), 99}, {s.InsertObjectives, contentqueries.InsertContentObjectives, b.ObjectivesJSON(), 476}, {s.InsertHeroCore, contentqueries.InsertContentHeroCore, b.HeroCoreJSON(), 568}, {s.InsertPetCore, contentqueries.InsertContentPetCore, b.PetCoreJSON(), 54}, {s.InsertPetAcquisition, contentqueries.InsertContentPetAcquisition, b.PetAcquisitionJSON(), 27}, {s.InsertPetProgression, contentqueries.InsertContentPetProgression, b.PetProgressionJSON(), 54}, {s.InsertEquipmentPrimitives, contentqueries.InsertContentEquipmentPrimitives, b.EquipmentPrimitivesJSON(), 1176}, {s.InsertHeroEquipment, contentqueries.InsertContentHeroEquipment, b.HeroEquipmentJSON(), 53280}, {s.InsertSuperEquipment, contentqueries.InsertContentSuperEquipment, b.SuperEquipmentJSON(), 84}, {s.InsertPetEquipment, contentqueries.InsertContentPetEquipment, b.PetEquipmentJSON(), 2592}, {s.InsertPetPromotionRestoration, contentqueries.InsertContentPetPromotionRestoration, b.PetPromotionRestorationJSON(), 73}, {s.InsertPractice, contentqueries.InsertContentPractice, b.PracticeJSON(), 1889}, {s.InsertAppearance, contentqueries.InsertContentAppearance, b.AppearanceJSON(), 542}, {s.InsertEmoticons, contentqueries.InsertContentEmoticons, b.EmoticonsJSON(), 85}}
 	for _, c := range cases {
 		q.values = []any{c.n}
+		q.n = 1
 		if got, err := c.call(ctx, q, b); err != nil || got != c.n {
 			t.Fatal(got, err)
+		}
+		if c.sql == contentqueries.InsertContentObjectives {
+			var payload struct {
+				Activity  json.RawMessage `json:"activity_chests"`
+				SignIn    json.RawMessage `json:"monthly_signin"`
+				Awakening json.RawMessage `json:"awakening"`
+			}
+			if err := json.Unmarshal(c.raw, &payload); err != nil {
+				t.Fatal(err)
+			}
+			if q.sql != "INSERT INTO content_awakening_catalogs(revision_id,payload)VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(payload.Awakening)}) {
+				t.Fatal("awakening content input mismatch")
+			}
+			if len(q.execCalls) < 3 || q.execCalls[len(q.execCalls)-2] != "INSERT INTO content_monthly_signin_catalogs(revision_id,payload) VALUES($1,$2::jsonb)" || !reflect.DeepEqual(q.execArgs[len(q.execArgs)-2], []any{b.RevisionID(), string(payload.SignIn)}) {
+				t.Fatal("sign-in content input mismatch")
+			}
+			q.sql = q.calls[len(q.calls)-1]
+			q.args = q.callArgs[len(q.callArgs)-1]
 		}
 		if q.sql != c.sql || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(c.raw)}) {
 			t.Fatal("query input mismatch")
@@ -104,10 +127,10 @@ func TestBundleQueriesUseExactRawBytes(t *testing.T) {
 	if q.sql != contentqueries.InsertContentHeroPromotionRestoration || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(b.HeroPromotionRestorationJSON())}) {
 		t.Fatal("Hero promotion restoration query input mismatch")
 	}
-	q.values = []any{true, int64(5567), int64(100), int64(99), int64(0), int64(568), int64(54), int64(27), int64(54), int64(1176), int64(53280), int64(84), int64(359), int64(516), int64(195), int64(5), int64(3), int64(2592), int64(73), int64(1889), int64(542)}
-	q.bySQL = map[string][]any{verifyLeagueSQL: {true, int64(1)}, verifyConquerModeSQL: {true, int64(1)}, verifyArenaSQL: {true, int64(1)}, verifyOneOnOneSQL: {true, int64(1)}, verifyTopFloorSQL: {true, int64(1)}, verifyAchievementSQL: {true, int64(1)}, verifyPrivilegeSQL: {true, int64(1)}, verifyStatInputsSQL: {true, int64(1)}, verifyStatRulesSQL: {true, int64(1)}, verifyConquerInputsSQL: {true, int64(1)}, verifyEvolutionInputsSQL: {true, int64(1)}, verifySpiritInputsSQL: {true, int64(1)}, verifyElementInputsSQL: {true, int64(1)}, verifyInscriptionInputsSQL: {true, int64(1)}, verifyCourseInputsSQL: {true, int64(1)}, verifyBookInputsSQL: {true, int64(1)}, verifyDormInputsSQL: {true, int64(1)}, verifyLibraryInputsSQL: {true, int64(1)}, verifyPlayerDisplaySQL: {true, int64(1)}, contentqueries.VerifyContentEmoticons: {true, int64(85)}, verifySocialGiftSQL: {true}, verifyGuildBroadcastSQL: {true, int64(1)}, verifyGuildInviteSQL: {true, int64(1)}, verifyPublicProfileSQL: {true, int64(1)}, verifyPublicShowcaseSQL: {true, int64(1)}}
+	q.values = []any{true, int64(5570), int64(100), int64(99), int64(476), int64(568), int64(54), int64(27), int64(54), int64(1176), int64(53280), int64(84), int64(359), int64(516), int64(195), int64(5), int64(3), int64(2592), int64(73), int64(1889), int64(542)}
+	q.bySQL = map[string][]any{verifyLeagueSQL: {true, int64(1)}, verifyConquerModeSQL: {true, int64(1)}, verifyArenaSQL: {true, int64(1)}, verifyOneOnOneSQL: {true, int64(1)}, verifyTopFloorSQL: {true, int64(1)}, verifyGodsTrialSQL: {true, int64(1)}, verifyWorldBossSQL: {true, int64(1)}, verifyIllusionSQL: {true, int64(1)}, verifyOccultSQL: {true, int64(1)}, verifyAdventureSQL: {true, int64(1)}, verifyDodgeballSQL: {true, int64(1)}, verifyMemoirSQL: {true, int64(1)}, verifyPetCampaignSQL: {true, int64(1)}, verifyWorkplaceSQL: {true, int64(1)}, verifyMarchSQL: {true, int64(1)}, verifyCampaignSQL: {true, int64(1)}, verifySummonSQL: {true, int64(1)}, verifyAchievementSQL: {true, int64(1)}, verifyPrivilegeSQL: {true, int64(1)}, verifyStatInputsSQL: {true, int64(1)}, verifyStatRulesSQL: {true, int64(1)}, verifyConquerInputsSQL: {true, int64(1)}, verifyEvolutionInputsSQL: {true, int64(1)}, verifySpiritInputsSQL: {true, int64(1)}, verifyElementInputsSQL: {true, int64(1)}, verifyInscriptionInputsSQL: {true, int64(1)}, verifyCourseInputsSQL: {true, int64(1)}, verifyBookInputsSQL: {true, int64(1)}, verifyDormInputsSQL: {true, int64(1)}, verifyLibraryInputsSQL: {true, int64(1)}, verifyPlayerDisplaySQL: {true, int64(1)}, contentqueries.VerifyContentEmoticons: {true, int64(85)}, verifySocialGiftSQL: {true}, verifyGuildBroadcastSQL: {true, int64(1)}, verifyGuildInviteSQL: {true, int64(1)}, verifyPublicProfileSQL: {true, int64(1)}, verifyPublicShowcaseSQL: {true, int64(1)}}
 	v, err := s.VerifyRevision(ctx, q, b)
-	if err != nil || !v.Matches(b) || q.calls[len(q.calls)-26] != contentqueries.VerifyContentRevision || len(q.callArgs[len(q.callArgs)-26]) != 22 || q.calls[len(q.calls)-5] != verifyPublicProfileSQL || !reflect.DeepEqual(q.callArgs[len(q.callArgs)-5], []any{b.RevisionID(), string(b.PublicProfileJSON())}) || q.sql != verifyGuildInviteSQL || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(b.GuildInviteJSON())}) || v.LeagueCount != 1 || v.ConquerModeCount != 1 || v.ArenaCount != 1 || v.OneOnOneCount != 1 || v.TopFloorCount != 1 || v.AchievementCount != 1 || v.PrivilegeCount != 1 || v.StatInputsCount != 1 || v.StatRulesCount != 1 || v.ConquerInputsCount != 1 || v.EvolutionInputsCount != 1 || v.PublicProfileCount != 1 || v.GuildBroadcastCount != 1 || v.EmoticonCount != 85 {
+	if err != nil || !v.Matches(b) || q.calls[len(q.calls)-38] != contentqueries.VerifyContentRevision || len(q.callArgs[len(q.callArgs)-38]) != 22 || q.calls[len(q.calls)-5] != verifyPublicProfileSQL || !reflect.DeepEqual(q.callArgs[len(q.callArgs)-5], []any{b.RevisionID(), string(b.PublicProfileJSON())}) || q.sql != verifyGuildInviteSQL || !reflect.DeepEqual(q.args, []any{b.RevisionID(), string(b.GuildInviteJSON())}) || v.LeagueCount != 1 || v.ConquerModeCount != 1 || v.ArenaCount != 1 || v.OneOnOneCount != 1 || v.TopFloorCount != 1 || v.WorldBossCount != 1 || v.IllusionCount != 1 || v.MemoirCount != 1 || v.CampaignCount != 1 || v.AchievementCount != 1 || v.PrivilegeCount != 1 || v.StatInputsCount != 1 || v.StatRulesCount != 1 || v.ConquerInputsCount != 1 || v.EvolutionInputsCount != 1 || v.PublicProfileCount != 1 || v.GuildBroadcastCount != 1 || v.EmoticonCount != 85 {
 		t.Fatal(v, err)
 	}
 }
@@ -285,5 +308,20 @@ func TestHeroKindUsesExactRevisionAndTable(t *testing.T) {
 	}
 	if q.sql != contentqueries.ReadHeroTemplateKind || !reflect.DeepEqual(q.args, []any{revision, int64(12000001)}) {
 		t.Fatalf("Hero kind lookup not exact-revision qualified: sql=%q args=%v", q.sql, q.args)
+	}
+}
+
+func TestActivityReadDistinguishesOldRevisionFromMissingRequiredPayload(t *testing.T) {
+	q := &recording{values: []any{"", false}}
+	revision := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	if got, err := (Store{}).MissionActivityCatalogTx(context.Background(), q, revision); err != nil || got != nil {
+		t.Fatalf("legacy revision: %#v %v", got, err)
+	}
+	q.values = []any{"", true}
+	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), q, revision); err == nil {
+		t.Fatal("missing required payload accepted")
+	}
+	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), nil, revision); err == nil {
+		t.Fatal("nil reader accepted")
 	}
 }

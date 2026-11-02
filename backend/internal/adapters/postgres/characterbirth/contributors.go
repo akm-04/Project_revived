@@ -42,6 +42,7 @@ func Contributors(content contentstore.Store, privileges commerceprivilege.Provi
 		elementstore.BootstrapContributor{Revision: revision},
 		spiritstore.BootstrapContributor{Revision: revision},
 		conquerstore.BootstrapContributor{Revision: revision},
+		BirthCompanion{Content: content},
 	}
 }
 

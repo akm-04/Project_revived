@@ -65,6 +65,11 @@ func (s Service) prepareInviteWindow(c context.Context, t tx.Tx, p identity.Play
 				out.invites[n.NoticeID] = snap
 			case n.Source.Kind == socialinbox.GiftSourceKind:
 				out.valid[n.NoticeID] = validity[n.NoticeID]
+			case socialinbox.RoomInviteFamily(n.Source):
+				if socialinbox.ValidateRoomInviteLifecycle(n) != nil {
+					return out, ErrInvalidRead
+				}
+				out.valid[n.NoticeID] = n.Active
 			case socialinbox.RelationFamily(n.Source):
 				if socialinbox.ValidateRelationLifecycle(n) != nil {
 					return out, ErrInvalidRead

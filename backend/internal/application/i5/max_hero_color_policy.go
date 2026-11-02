@@ -39,3 +39,23 @@ func (PreservationMaxHeroColorProvider) MaxHeroColorTx(_ context.Context, _ tx.Q
 }
 
 var _ MaxHeroColorPolicyProvider = PreservationMaxHeroColorProvider{}
+
+// CurrentMaxHeroColorProvider selects the immutable I9 prerequisite amendment.
+// Purple is source color7; the original server's maximum/schedule remains unknown.
+type CurrentMaxHeroColorProvider struct{}
+
+const CurrentMaxHeroColorPolicyRevision = "GXB1_PRESERVATION_MAX_HERO_COLOR_V2"
+const CurrentMaxHeroColor int64 = 7
+
+func (CurrentMaxHeroColorProvider) MaxHeroColor() int64 { return CurrentMaxHeroColor }
+func (CurrentMaxHeroColorProvider) MaxHeroColorPolicyRevision() string {
+	return CurrentMaxHeroColorPolicyRevision
+}
+func (CurrentMaxHeroColorProvider) MaxHeroColorTx(c context.Context, q tx.Queryer, pid identity.PlayerID, op operation.Context) (int64, error) {
+	if _, err := (PreservationMaxHeroColorProvider{}).MaxHeroColorTx(c, q, pid, op); err != nil {
+		return 0, err
+	}
+	return CurrentMaxHeroColor, nil
+}
+
+var _ MaxHeroColorPolicyProvider = CurrentMaxHeroColorProvider{}

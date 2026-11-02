@@ -63,8 +63,6 @@ func Explicit(mid uint16, v BootstrapView) (any, bool) {
 			"point_level": int64(1), "total_points": int64(0), "rank": int64(0),
 			"award_status": []any{int64(-1), int64(-1)},
 		}}, true
-	case 1344:
-		return map[string]any{"paradise_info": map[string]any{"paradise_id": int64(1), "count": int64(0)}, "challenge_times": int64(0), "buy_times": int64(0), "hurt": int64(0), "rank": int64(0)}, true
 	case 2754:
 		return map[string]any{}, true // source callback ignores response fields
 	case 2784:
@@ -120,7 +118,7 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 			"buy_mana_times": int64(0), "buy_energy_times": int64(0), "buy_spirit_energy_times": int64(0), "buy_skill_times": int64(0),
 
 			"func_ids": zeroList(), "skill_point": int64(0), "skill_time": int64(0),
-			"guide_function_ids": zeroList(), "guide_return_id": int64(0),
+			"guide_function_ids": zeroMap(), "guide_return_id": int64(0),
 			"save_team": "", "save_team_name": "", "save_pet": "", "message_pushes": zeroMap(),
 
 			"arena_beat_flag": int64(0), "month_card_start": int64(0), "month_card_end": int64(0),

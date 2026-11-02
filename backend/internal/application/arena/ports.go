@@ -14,6 +14,8 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/socialrelation"
 	d "gxb.local/backend/v2/internal/domain/arena"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -21,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -29,6 +32,31 @@ import (
 )
 
 type Store interface {
+	ReadFriendInvitationTx(context.Context, tx.Queryer, ids.UUID, bool) (d.FriendInvitation, bool, error)
+	LatestFriendInvitationTx(context.Context, tx.Queryer, identity.PlayerID, identity.PlayerID) (d.FriendInvitation, bool, error)
+	PendingFriendInvitationsForPlayersTx(context.Context, tx.Queryer, identity.PlayerID, identity.PlayerID) ([]d.FriendInvitation, error)
+	FriendFightBusyTx(context.Context, tx.Queryer, identity.PlayerID, time.Time, ids.UUID) (bool, error)
+	DueFriendInvitationsTx(context.Context, tx.Queryer, time.Time, int) ([]ids.UUID, error)
+	SaveFriendInvitationTx(context.Context, tx.Tx, d.FriendInvitation, int64) error
+
+	SettledTournamentsTx(context.Context, tx.Queryer, identity.PlayerID) ([]d.TournamentPeriod, error)
+	WakeTournamentRoomTx(context.Context, tx.Tx, ids.UUID) error
+	ReadCasualSessionTx(context.Context, tx.Queryer, int64, bool) (d.CasualSession, bool, error)
+	SaveCasualSessionTx(context.Context, tx.Tx, d.CasualSession, int64) error
+	PendingCasualSessionsTx(context.Context, tx.Queryer, time.Time, int) ([]int64, error)
+	PendingTournamentsTx(context.Context, tx.Queryer, int) ([]int64, error)
+	PreviousSeasonRanksTx(context.Context, tx.Queryer, int64) ([]d.TournamentEnrollment, error)
+	ReadTournamentTx(context.Context, tx.Queryer, int64, bool) (d.TournamentPeriod, bool, error)
+	SaveTournamentTx(context.Context, tx.Tx, d.TournamentPeriod, int64) error
+	ReadTournamentRoomTx(context.Context, tx.Queryer, ids.UUID, bool) (d.TournamentRoom, bool, error)
+	SaveTournamentRoomTx(context.Context, tx.Tx, d.TournamentRoom, int64) error
+	TournamentRoomsTx(context.Context, tx.Queryer, int64, identity.PlayerID, bool) ([]d.TournamentRoom, error)
+	DueTournamentRoomsTx(context.Context, tx.Queryer, time.Time, int) ([]ids.UUID, error)
+	ActiveCasualEntryTx(context.Context, tx.Queryer, identity.PlayerID) (d.CasualEntry, bool, error)
+	WaitingCasualEntriesTx(context.Context, tx.Queryer, int64) ([]d.CasualEntry, error)
+	SaveCasualEntryTx(context.Context, tx.Tx, d.CasualEntry, int64) error
+	CasualStandingsTx(context.Context, tx.Queryer, int64) ([]d.CasualStanding, error)
+	AddCasualResultTx(context.Context, tx.Tx, int64, identity.PlayerID, bool, time.Time) error
 	ReadCompetitionTx(context.Context, tx.Queryer, bool) (d.Competition, bool, error)
 	CreateCompetitionTx(context.Context, tx.Tx, d.Competition) error
 	SaveCompetitionTx(context.Context, tx.Tx, d.Competition, int64) error
@@ -73,11 +101,19 @@ type Values interface {
 	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
 }
 
+// Facts is the objective fact port (I9_MODE_FOUNDATION_V1 MF3); a settled fight is a PVP_FIGHT (task_req 106, D92).
+type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
+}
+
 type Achievements interface {
 	ObserveArenaWinStreakTx(context.Context, tx.Tx, identity.PlayerID, string, int64, time.Time) error
 }
 
 type Combat interface {
+	SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error)
+	StartManyTx(context.Context, tx.Tx, ca.CoherentReadScope, []combat.StartRequest) ([]combat.Started, error)
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
 	ResolveDetached(context.Context, operation.Context, ids.UUID) *combat.Flight
 	TerminalTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Settled, error)
@@ -106,6 +142,8 @@ type Servers interface {
 }
 
 type Service struct {
+	Players      playerroot.TxLocker
+	Friendships  socialrelation.FriendFightPrivacyReader
 	Timed        gen.TimedRunner
 	Fresh        tx.Queryer
 	Store        Store
@@ -116,6 +154,7 @@ type Service struct {
 	Values       Values
 	Mail         Mail
 	Achievements Achievements
+	Facts        Facts
 	Combat       Combat
 	Heroes       Roster
 	Pets         Roster
@@ -128,6 +167,6 @@ type Service struct {
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil &&
-		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
+		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
 		s.Receipts != nil && s.ReceiptRead != nil
 }

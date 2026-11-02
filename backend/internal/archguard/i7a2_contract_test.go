@@ -123,8 +123,34 @@ func TestI7A2ApplicationSeamsRemainProtocolAndPersistenceFree(t *testing.T) {
 // adds (C4F_ACHIEVEMENT_NOTICE_V1); it is not a generic bus or worker.
 const achievementNoticeRoute = "realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}"
 
+const tournamentNoticeRoute = "realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}"
+
+const friendFightNoticeRoute = "realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}"
+
+// The I9-8 family notice routes are feature-specific, each owned by its contract.
+var familyNoticeRoutes = []string{
+	"realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}",
+	"realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}",
+	"realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices}",
+	"realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms}",
+	"realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices}",
+	"realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices}",
+}
+
+var familyNoticeSchemas = map[string]bool{
+	"internal/adapters/stockruntime/illusion_room_notice.go":  true,
+	"internal/adapters/stockruntime/occult_room_notice.go":    true,
+	"internal/adapters/stockruntime/adventure_notice.go":      true,
+	"internal/adapters/stockruntime/adventure_room_notice.go": true,
+	"internal/adapters/stockruntime/guild_fight_notice.go":    true,
+}
+
 func genericWakeupRoutes(realtime string) int {
-	return strings.Count(realtime, "realtimewakeup.Registration{") - strings.Count(realtime, achievementNoticeRoute)
+	generic := strings.Count(realtime, "realtimewakeup.Registration{") - strings.Count(realtime, achievementNoticeRoute) - strings.Count(realtime, tournamentNoticeRoute) - strings.Count(realtime, friendFightNoticeRoute)
+	for _, route := range familyNoticeRoutes {
+		generic -= strings.Count(realtime, route)
+	}
+	return generic
 }
 
 func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
@@ -165,11 +191,19 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 				rel, _ := filepath.Rel(root, path)
 				// I7C-4 full stage A activates exactly one notice schema (17) and its route.
 				achievementSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/achievement_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
-				if achievementSchema {
+				tournamentSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/tournament_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
+				friendFightSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/friend_fight_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 2
+				familySchema := familyNoticeSchemas[filepath.ToSlash(rel)] && (marker == "rt.NoticeRegistration{" || marker == "rt.DirectRegistration{")
+				if achievementSchema || tournamentSchema || friendFightSchema || familySchema {
 					continue
 				}
 				if marker == "realtimewakeup.Registration{" {
+					for _, route := range familyNoticeRoutes {
+						s = strings.Replace(s, route, "", 1)
+					}
 					s = strings.Replace(s, achievementNoticeRoute, "", 1)
+					s = strings.Replace(s, tournamentNoticeRoute, "", 1)
+					s = strings.Replace(s, friendFightNoticeRoute, "", 1)
 				}
 				allowedGeneralSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/general_dm_events.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1
 				if allowedGeneralSchema && selectedGeneralDMActivation(t) {
@@ -199,5 +233,19 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 	}
 	if len(offenders) != 0 {
 		t.Fatalf("I7A-2 unexpectedly activates a deferred producer/route: %v", offenders)
+	}
+}
+
+func TestI97BFiniteTournamentNoticeDoesNotAddGenericTransport(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(repoRoot(t), "cmd/gxb-realtime/main_postgres.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(raw)
+	if strings.Count(text, tournamentNoticeRoute) != 1 || strings.Count(text, friendFightNoticeRoute) != 1 || genericWakeupRoutes(text) != 3 {
+		t.Fatal("finite route or generic transport drift")
+	}
+	if genericWakeupRoutes(text+"realtimewakeup.Registration{Route: unexpected}") != 4 {
+		t.Fatal("extra generic transport escaped guard")
 	}
 }

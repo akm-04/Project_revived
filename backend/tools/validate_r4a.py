@@ -75,31 +75,44 @@ def check_static() -> list[str]:
     expected_counts = {
         "item_rows": 5838,
         "positive_stack_items": 5540,
-        "enabled_stack_items": 5159,
+        "enabled_stack_items": 5160,
         "specialized_type24_items": 378,
         "type3_partner_scrolls": 291,
-        "unqualified_type0_stack_items": 3,
+        "unqualified_type0_stack_items": 2,
         "player_rows": 100,
-        "objective_builtin_rows": 0,
+        "objective_builtin_rows": 476,
     }
     for key, want in expected_counts.items():
         if diagnostics.get(key) != want:
             errors.append(f"diagnostic {key}={diagnostics.get(key)!r}, want {want}")
+
+    # Only the source-qualified Dodge ticket changes the former type0 boundary.
+    ticket = by_key.get("stack_item:50001979") or {}
+    if ticket.get("class") != "STACK_ITEM" or ticket.get("settlement_activation") != "ENABLED_R4" or ticket.get("reason") != "DODGE_TICKET_STACK_ONLY_I9_4B" or ticket.get("stack_cap") != 9999:
+        errors.append("exact Dodge ticket custody boundary drift")
+    qualified = [r for r in rows if r.get("reason") == "DODGE_TICKET_STACK_ONLY_I9_4B"]
+    unknown = [r for r in rows if r.get("reason") == "ITEM_TYPE_ZERO_UNQUALIFIED"]
+    if len(qualified) != 1 or len(unknown) != 2 or any(r.get("settlement_activation") != "FAIL_CLOSED" for r in unknown):
+        errors.append("type0 qualification exceeded the single audited ticket")
 
     prow = players.get("rows") or []
     if [r.get("lev") for r in prow] != list(range(1, 101)):
         errors.append("player progression levels drift/non-contiguous")
     if any(prow[i]["total_exp"] > prow[i + 1]["total_exp"] for i in range(max(0, len(prow) - 1))):
         errors.append("player total_exp is non-monotonic")
-    if objectives.get("definitions") != [] or objectives.get("status") != "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING":
-        errors.append("built-in Objective activation is not empty/fail-closed")
+    mission_rows = objectives.get("definitions") or []
+    if objectives.get("status") != "I9_4_MISSION_CATALOG" or len(mission_rows) != 476:
+        errors.append("I9-4 mission catalog profile drift")
+    families = {family: sum(row.get("stock_family") == family for row in mission_rows) for family in (1, 2, 4, 6)}
+    if families != {1: 35, 2: 184, 4: 250, 6: 7}:
+        errors.append("I9-4 mission family count drift")
 
     go = (ROOT / "internal/content/builtin/catalog.go").read_text()
     for needle in (
         "//go:embed generated/*.json",
         "ExpectedSourceArchiveSHA256",
         "canonical_manifest_without_revision_id",
-        "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING",
+        "validateMissions",
         "PLAYER_LEVEL_ENERGY",
         "VIP_PLUS_MONTHLY_PRIVILEGE",
     ):

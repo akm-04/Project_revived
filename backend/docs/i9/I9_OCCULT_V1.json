@@ -1,0 +1,57 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_OCCULT_V1",
+ "node": "ROOT/I9/I9-8/I9-8C",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "Occult: player row 605, rooms through SharedRoom; tickets stay in I5 economy; Awakening owner keeps stage rows",
+ "extends": [
+  "I9_PARENT_CONTRACT_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3",
+  "I9_SHARED_ROOM_CORE_V1"
+ ],
+ "mids": [
+  2362,
+  2363,
+  2364,
+  2365,
+  2366,
+  2367,
+  2368,
+  2369,
+  2370,
+  2371,
+  2372,
+  2373,
+  2374,
+  2375,
+  2376,
+  2377,
+  2378,
+  2379,
+  2380,
+  2382,
+  2383,
+  2384,
+  2385
+ ],
+ "shared_mids": [
+  1,
+  17
+ ],
+ "policy": "I9_OCCULT_POLICY_V1 / D367 PRIVATE_POLICY",
+ "design": "stages/I9-8/PLAN.md, research/occult.md",
+ "clauses": [
+  "C1 Function 67 level 85; 2381 is dead in stock UI and stays inactive with that reason",
+  "C2 Tickets: one hook in i5 DebitTemporalTx filtered to energy, 3000 per ticket, cap 2; occult_ticket live in MID 17 and piggyback; audit proves no other energy debit",
+  "C3 One ticket per member at challenge start, refused for all if any lacks one; sweep one ticket",
+  "C4 Rooms: 3 members and 5 level band, owner administers, any member may start a co-op and becomes start_player; duration 3000 s, selection 60 s, fight 150 s, re-entry 120 s; server owns timers; solo room_size 1",
+  "C5 in_battle elements are player ids, 0 empty. Monster HP lives in the room state",
+  "C6 Solo 2372 attested and clamped; hero_status is HP authority next stage",
+  "C7 Team 2377 server report as a JSON string; 2382 report by key authorized to members",
+  "C8 Events 1-5 applied in server order using misc creats_event_param and creats_event_dispatch; pushes via 36854 notice 32 room_type 1 and in replies",
+  "C9 Rewards item_display and item_num; sweep floor(60%) at least 1; max_points is best score per chapter and unlocks sweep",
+  "C10 I9-AWAKEN-OCCULT-ORIGINS: 22 routes compiled from creats_chapter_select into the Occult catalog (they are not in objective Drops); freeze the active stage-1 occurrence at START through the awakening owner, settle revalidates, one fragment per clear or sweep through I5 only; negative proof; relog",
+  "C11 No ranks, shops or daily counters; channelchat Occult reader filled"
+ ]
+}

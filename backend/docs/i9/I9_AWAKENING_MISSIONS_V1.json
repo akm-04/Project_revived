@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_AWAKENING_MISSIONS_V1",
+  "version": 1,
+  "node": "ROOT/I9/I9-4/I9-4D",
+  "status": "IN_FORCE_IMPLEMENTATION_PENDING_QUALIFICATION",
+  "title": "Canonical ordinary, Blood and pet awakening mission lifecycle",
+  "extends": [
+    "I9_MISSIONS_V1 M11/M12",
+    "I9_MODE_FRAMEWORK_V1 F2/F4/F9/F11/F12/F13/F14/F17",
+    "C4C_PRIVATE_CHARACTER_RAW_AWAKENING_BIRTH_V1 positive-transition extension"
+  ],
+  "research": "work/i9/stages/I9-4/I9-4D/RESEARCH.md",
+  "plan": "work/i9/stages/I9-4/I9-4D/PLAN.md",
+  "rules": [
+    "A1 Source: immutable ordinary 465 rows (137 auxiliary -1 inactive), Blood 162 and pet 40. Validate chain, template, equipment, reward, campaign and dropbox identities. Pin each active occurrence to its admitted content revision.",
+    "A2 Objective/I5 owns active occurrence, generation, completion and semantic receipts. CharacterHero/Pet owns identity, raw awakening, skill and equipment facts. No foreign-owner SQL or second value owner.",
+    "A3 Modern open 2738 and cancel 2737 take mission_id and awake_type. Legacy 163/165/167 open and 164/166/168 cancel take table_id with type selected by MID. Only stage 1 may open; one active occurrence per type. Ownership and source eligibility revalidated server-side.",
+    "A4 Read 2561, family 5 of 2736, MID160 channels and MID1 detail[2561] reuse one projection. Row table_id, awake_type, is_open, is_going, is_complete, is_reward and count. Cancellation emits inactive row; unopened eligible roots remain visible. No guide suppression.",
+    "A5 Final and intermediate claim is MID161, not171 (D190 correction). Stage 1 requires canonical exclusive equipment; source next stage follows. Final ordinary/pet commits template transition with stable identity, and final Blood commits raw stage3. Response preserves stock callback old-table lookup ordering.",
+    "A6 Wish MID171 consumes one misc.awake_item_wish and grants one allowed active ordinary stage1 intermediate through I5. Source item and mission blacklists apply. Reply item_id/item_num; no duplicate common reward projection. Exact-operation receipt; new-op repeated exchange remains possible when resources permit.",
+    "A7 Give-up removes source delete_item inventory quantities only, refunds nothing and never deletes unrelated equipment. Source event exceptions are respected by their empty/deletion list, not synthetic compensating grants. Reopen increments generation; stale attempt/proof cannot complete the new occurrence.",
+    "A8 CharacterHero retains immutable birth identity/policy while mission-produced CAS transitions extend raw0 ->1 ->2 ->3 and cancel1/2 ->0. Each transition records producer operation/mission provenance and increments canonical Hero state version atomically. Missing legacy facet stays unavailable; no read-time seed or migration backfill. Existing coherent reader/inscription/evolution/publicstat/combat consumers reuse this fact, never infer it from allocated evolution or skill level.",
+    "A9 Equipment remains Character-owned, using existing item recipe/cost/receipt infrastructure. Active mission authorizes only exact source special slot/item. Blood replacement is once per occurrence. Stage-qualified equipment and Fumo projections resolve the same target.",
+    "A10 Campaign113 freezes occurrence/generation, source goal and formation. Result114 with matching awake_mission requires win, source campaign and participant; ALONE excludes other girls and pets. Kill/damage/all-alive are CLIENT_ATTESTED, not independently observed combat telemetry. Sweep117 never completes a final fight goal.",
+    "A11 Material drops reuse D81 increase_rate/10000 and the existing frozen entropy package/receipt. Ordinary requires matching mission go_id and campaign mission/dropbox references. Blood go_id is navigation only; its source campaign mission/dropbox references define every eligible node (D195). Ordinary1122001 extra stale campaign mapping is excluded. Blood2200001 has no matching source acquisition route; no synthetic payout. D192: newly observed first clear records F7 day; acquisition begins following F7 day. Preexisting cleared nodes without timestamps are treated as already eligible without fabricated dates (PRIVATE_POLICY original handling UNKNOWN).",
+    "A12 Blood866/867 branch reuses Combat attempt lifecycle, generation supersession, summary attestation and terminal drain. Source start sends no selected team; freeze mandatory canonical guard witness and label other participants UNKNOWN, never claim exact selected formation. OmitParticipantEcho; terminal requires matching source ids, num20 and explicit empty npc_ids object/array. Unrelated generic Infinity remains I9-8.",
+    "A13 Actor fence315, Character roots/instances, Campaign605 if relevant, Combat609, objective I5 prefix, value suffix. Pre-combat objective read/freeze takes no row lock; actor fence and serializable scope protect it. Objective lock/revalidation occurs after Combat and before value. No nested transaction, live-time rebinding or lower-rank late locks.",
+    "A14 Occult materials remain I9-6, pet Sky Tower/Sky City producers I9-5, seasonal event acquisition I10. Publish named typed forward obligations and prove rejection without genuine producer. This does not waive the mission owner lifecycle tests or claim fixture resources are genuine event/mode origins.",
+    "A15 Prove each mutation success/refusal/retry/concurrency/rollback/lost reply in real PostgreSQL; default/vet/foundation, deterministic source compiler and stock UI scenario, clean candidate snapshot and independent reality. Parent I9-4 strict/fullVC/journal/emulator/upgrade/guide17/chest/PVP/rollover gates remain mandatory. Registry/document pointers must resolve in fresh restored HOT/COLD output.",
+    "A16 D197: New snapshots pin I9_AWAKENING_BATTLE_PRODUCERS_V1. It activates only the positive raw awakening producer (stages 1..3) through the coherent CharacterHero observation, with I9_AWAKENING_MISSIONS_V1 transition provenance. Unknown legacy facets remain unavailable. Preserve I8_BATTLE_PRODUCERS_V1 unchanged for stored snapshots and replay; Rune and other deferred producers remain inactive. Requalify positive Blood Combat and legacy/current snapshot validation before closure.",
+    "A17 D199: Ordinary/pet stage1 open may satisfy its equipment goal from canonical already-collected equipment with exact source item mapping. Cancellation preserves equipment and never grants a refund; a fresh occurrence never inherits old final-battle proof. Blood requires its distinct item transition."
+  ],
+  "decisions": [
+    "D190",
+    "D191",
+    "D192",
+    "D193",
+    "D194",
+    "D195",
+    "D197",
+    "D199"
+  ],
+  "authorization": "Current user explicitly authorizes 4D research/design/implementation/full I9-4 closure; earlier direct user instruction authorizes reconstructing missing original algorithms as private-server policies after complete research. Source facts remain distinguished from policy.",
+  "amendments": [
+    "D200: Awakening readiness is canonical redmark2705, composed with all other Function27 task/activity badges by the existing mission projection. Completion/claim/cancel/reload must keep this badge correct without clearing other readiness."
+  ]
+}

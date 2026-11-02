@@ -1,0 +1,23 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_SHARED_ROOM_CORE_V1",
+ "node": "ROOT/I9/I9-8/I9-8B",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "SharedRoom rank 607 (room and its seats under one row lock); families project wire shapes; Combat keeps attempts and rosters",
+ "extends": ["I9_PARENT_CONTRACT_V1", "I9_MODE_FRAMEWORK_V1", "I8_MULTI_PARTICIPANT_ATTEMPT_V1"],
+ "mids": [],
+ "shared_mids": [],
+ "policy": "D365",
+ "design": "stages/I9-8/PLAN.md, research/seams.md",
+ "clauses": [
+  "C1 One owner of membership, seats, ready, lifecycle, lease, state_version and notice_version. Family-specific data stays in a family payload; the core has no family branches.",
+  "C2 Lock order: actor fence, I4 player roots ascending for every member touched, family 605 rows, occurrence 606, room 607, Combat 609, I5 610+. Read the room unlocked to learn members, lock, then recheck state_version and retry through the abort budget (8 attempts, 20-80 ms).",
+  "C3 One active room per player per family slot, enforced by a partial unique index. Capacity, level band and throttle are refused server side; the client's checks are UI only.",
+  "C4 Numeric wire room_id, 0 means no room. Owner leave, expiry and last leave close the room idempotently; closed rooms never reopen; a kicked player cannot rejoin that room for 3 minutes (PRIVATE_POLICY, the user recalls 2-3).",
+  "C5 combat.Rooms.AdmitTx is the production binding: the roster must equal the seated members of the convener's open room in seat order, all ready, status not closed. It runs inside START, and a replayed START never calls it.",
+  "C6 Team fights are one attempt with one terminal and SettleMemberTx per member; value grants through I5 keyed by member receipt (D24). A reconnect never restarts a terminal fight.",
+  "C7 Pushes are best effort: pg_notify wakeup inside the transaction, realtime reloads and projects. Every family has a read MID which is authoritative, so a lost push cannot strand a client.",
+  "C8 Reconcile loop closes expired rooms in bounded batches and is safe beside live commands.",
+  "C9 No client value is stored as authority: partner ids are checked against owned heroes, duplicates and foreign pets refused."
+ ]
+}

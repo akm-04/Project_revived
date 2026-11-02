@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"math"
 	"strconv"
 	"strings"
@@ -167,20 +168,26 @@ func projectionGrants(explicit []GrantResult, awards []Award) []GrantResult {
 }
 
 type Service struct {
-	Runner          tx.Runner
-	Store           Store
-	Content         ContentRuntime
-	Privileges      PrivilegeSnapshotProvider
-	Functions       FunctionAnnouncementProvider
-	Directory       DirectoryLevelProjectionPort
-	Backpack        BackpackReader
-	PartnerEntities PartnerEntityMaterializer
-	Spirits         SpiritMaterializer
-	Receipts        receipt.Store
-	ReceiptRead     receipt.Reader
-	RedeemSecret    []byte
-	Audit           audit.Emitter
-	Profile         tx.Profile
+	Awakening          *AwakeningRuntime
+	SignIn             *SignInRuntime
+	Missions           *MissionMaterializer
+	MissionTime        gen.TimeAuthority
+	MissionFresh       tx.Queryer
+	Runner             tx.Runner
+	Store              Store
+	Content            ContentRuntime
+	Privileges         PrivilegeSnapshotProvider
+	Functions          FunctionAnnouncementProvider
+	CharacterFunctions CharacterFunctionReader
+	Directory          DirectoryLevelProjectionPort
+	Backpack           BackpackReader
+	PartnerEntities    PartnerEntityMaterializer
+	Spirits            SpiritMaterializer
+	Receipts           receipt.Store
+	ReceiptRead        receipt.Reader
+	RedeemSecret       []byte
+	Audit              audit.Emitter
+	Profile            tx.Profile
 }
 
 var _ TxGrantSettler = Service{}
@@ -214,6 +221,10 @@ func (s Service) SettleGrant(ctx context.Context, actor identity.ActorContext, p
 // canonical Grant contract. It never changes resource policy/content.
 type GrantTxOptions struct {
 	AllowOverflowMail bool
+	// SkipCappedStacks drops a stack line that would exceed a catalog cap with
+	// no mail overflow policy; a mode that re-pays display rewards uses it so a
+	// once-owned unique item cannot fail the whole grant.
+	SkipCappedStacks bool
 }
 
 // SettleGrantTx settles one semantic Grant inside a caller-owned Wave-A
@@ -230,7 +241,7 @@ func (s Service) SettleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 	if plan.PlayerID != actor.PlayerID {
 		return GrantResult{}, errors.New("grant actor/player mismatch")
 	}
-	return s.settleGrantTx(ctx, t, actor, plan, op, opts.AllowOverflowMail)
+	return s.settleGrantTx(ctx, t, actor, plan, op, opts)
 }
 
 func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context, fenceActor bool) (GrantResult, error) {
@@ -275,7 +286,8 @@ func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan
 	return out, nil
 }
 
-func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, allowOverflowMail bool) (GrantResult, error) {
+func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, opts GrantTxOptions) (GrantResult, error) {
+	allowOverflowMail := opts.AllowOverflowMail
 	id, _, err := plan.ReceiptIdentities()
 	if err != nil {
 		return GrantResult{}, err
@@ -326,10 +338,11 @@ func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 			}
 		}
 	}
-	return s.applyPreparedGrantTx(ctx, t, actor, plan, op, allowOverflowMail, contentRevision, pf, id, fp)
+	return s.applyPreparedGrantTx(ctx, t, actor, plan, op, opts, contentRevision, pf, id, fp)
 }
 
-func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, allowOverflowMail bool, contentRevision string, pf grantPreflight, id receipt.Identity, fp [32]byte) (GrantResult, error) {
+func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, plan grant.Plan, op operation.Context, opts GrantTxOptions, contentRevision string, pf grantPreflight, id receipt.Identity, fp [32]byte) (GrantResult, error) {
+	allowOverflowMail := opts.AllowOverflowMail
 	now := op.StartedAt.UTC()
 	materializations, err := s.materializePartnerEntityTx(ctx, t, pf, op)
 	if err != nil {
@@ -431,6 +444,9 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				st = economy.StackState{PlayerID: plan.PlayerID, ItemID: line.ItemID, Quantity: 0, StateVersion: 1, AcquiredAt: now, UpdatedAt: now}
 			}
 			cr, err := st.PlanCredit(line.Amount, *policy.Stack, now)
+			if errors.Is(err, economy.ErrStackCapacity) && opts.SkipCappedStacks {
+				continue
+			}
 			if err != nil {
 				return GrantResult{}, err
 			}
@@ -496,6 +512,13 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			eligible, err := pureLevelEligibility(*pf.FunctionPolicy, plan.PlayerID, transition.After.Level, now)
 			if err != nil {
 				return GrantResult{}, err
+			}
+			if reachesLevelAndVIPGate(*pf.FunctionPolicy, transition.After.Level) {
+				vip, err := s.vipLevelTx(ctx, t, plan.PlayerID, now)
+				if err != nil {
+					return GrantResult{}, err
+				}
+				eligible = append(eligible, levelAndVIPEligibility(*pf.FunctionPolicy, plan.PlayerID, transition.After.Level, vip, now)...)
 			}
 			newEligible := make([]player.FunctionEligibility, 0, len(eligible))
 			functionChanged := false
@@ -629,6 +652,13 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 		}
 	}
 
+	if s.CharacterFunctions != nil && (pf.Partner != nil || pf.ProgressionPolicy != nil) {
+		opened, err := s.OpenCharacterFunctionsTx(ctx, t, plan.PlayerID, contentRevision, now)
+		if err != nil {
+			return GrantResult{}, err
+		}
+		effects.NewFunctionIDs = append(effects.NewFunctionIDs, opened...)
+	}
 	out := GrantResult{Awards: awards, Effects: effects, Materializations: materializations}
 	// Fungible-only grants retain the exact accepted v2 schema. Typed entity
 	// materialization advances only those receipts to v3 so legacy stock paths
@@ -744,6 +774,80 @@ func (s Service) SaveStory(ctx context.Context, actor identity.ActorContext, sto
 		return err
 	})
 	return err
+}
+
+// SaveGuideFunction marks a weak guide finished or skipped (MID2865).
+func (s Service) SaveGuideFunction(ctx context.Context, actor identity.ActorContext, functionID int64, op operation.Context) (player.GuideReturnState, error) {
+	return s.saveGuide(ctx, actor, "save-guide-function", functionID, op, func(g player.GuideReturnState) (player.GuideReturnState, error) {
+		return player.CompleteGuideFunction(g, functionID, op.StartedAt)
+	})
+}
+
+// SaveGuideReturn stores the weak-guide resume step (MID2866).
+func (s Service) SaveGuideReturn(ctx context.Context, actor identity.ActorContext, returnID int64, op operation.Context) (player.GuideReturnState, error) {
+	return s.saveGuide(ctx, actor, "save-guide-return", returnID, op, func(g player.GuideReturnState) (player.GuideReturnState, error) {
+		return player.SetGuideReturn(g, returnID, op.StartedAt)
+	})
+}
+
+// saveGuide keys receipts by operation, not value: a later identical value
+// after a different one must apply again, while an exact retry replays.
+func (s Service) saveGuide(ctx context.Context, actor identity.ActorContext, name string, value int64, op operation.Context, apply func(player.GuideReturnState) (player.GuideReturnState, error)) (player.GuideReturnState, error) {
+	var out player.GuideReturnState
+	if err := s.validate(); err != nil {
+		return out, err
+	}
+	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "player-core", Operation: name, SemanticKey: op.ID.String()}
+	fp, err := receipt.FingerprintRequest(map[string]any{"value": value})
+	if err != nil {
+		return out, err
+	}
+	res, err := s.Runner.Run(ctx, op, s.profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: true}, receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
+		if err := s.Store.FenceActorTx(txctx, scope.Tx, actor, op.StartedAt); err != nil {
+			return err
+		}
+		if prior, ok, err := s.Receipts.FindTx(txctx, scope.Tx, id); err != nil {
+			return err
+		} else if ok {
+			if !bytes.Equal(prior.RequestFingerprint[:], fp[:]) {
+				return &receipt.ConflictError{Identity: id}
+			}
+			return json.Unmarshal(prior.ResultPayload, &out)
+		}
+		cur, err := s.Store.LockGuideReturnTx(txctx, scope.Tx, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		next, err := apply(cur)
+		if err != nil {
+			return err
+		}
+		if next.StateVersion != cur.StateVersion {
+			if err := s.Store.SaveGuideReturnTx(txctx, scope.Tx, next, cur.StateVersion); err != nil {
+				return err
+			}
+		}
+		raw, err := json.Marshal(next)
+		if err != nil {
+			return err
+		}
+		rr, err := receipt.New(op, id, "I5_PLAYER_CORE", "gxb.i5.guide.v1", raw, fp)
+		if err != nil {
+			return err
+		}
+		rr.ActorAccountUID, rr.ContextID, rr.PolicyVersion = string(actor.AccountUID), actor.ContextID.UUID(), "i9-tutorial-guide-v1"
+		_, err = s.Receipts.PutTx(txctx, scope.Tx, rr)
+		out = next
+		return err
+	})
+	if err == nil && res.Reconciled {
+		stored, ok := res.Evidence.(receipt.Receipt)
+		if !ok {
+			return out, errors.New("guide receipt evidence missing")
+		}
+		err = json.Unmarshal(stored.ResultPayload, &out)
+	}
+	return out, err
 }
 
 func (s Service) ListBackpack(ctx context.Context, actor identity.ActorContext) ([]economy.StackState, error) {
@@ -1201,11 +1305,18 @@ func (s Service) ClaimObjectiveByID(ctx context.Context, actor identity.ActorCon
 // The caller supplies a definition selected from canonical content policy; raw
 // MIDs are never facts and this function does not open a nested transaction.
 func (s Service) ApplyObjectiveFactTx(ctx context.Context, t tx.Tx, def ObjectiveDefinition, inst objective.Instance, fact objective.Fact, op operation.Context) (objective.Instance, bool, error) {
+	return s.applyObjectiveFactAtTx(ctx, t, def, inst, fact, op, op.StartedAt, "")
+}
+
+func (s Service) applyObjectiveFactAtTx(ctx context.Context, t tx.Tx, def ObjectiveDefinition, inst objective.Instance, fact objective.Fact, op operation.Context, at time.Time, missionRevision string) (objective.Instance, bool, error) {
 	key, err := fact.Key()
 	if err != nil {
 		return objective.Instance{}, false, err
 	}
 	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(fact.PlayerID), 10), Domain: "objective-fact", Operation: def.Definition.ProgramID, SemanticKey: key + ":" + strconv.FormatInt(def.Definition.ObjectiveID, 10)}
+	if missionRevision != "" {
+		id.SemanticKey += ":" + inst.GenerationID
+	}
 	fp, _ := receipt.FingerprintRequest(fact)
 	if prior, ok, err := s.Receipts.FindTx(ctx, t, id); err != nil {
 		return objective.Instance{}, false, err
@@ -1220,6 +1331,13 @@ func (s Service) ApplyObjectiveFactTx(ctx context.Context, t tx.Tx, def Objectiv
 		if err != nil {
 			return objective.Instance{}, false, err
 		}
+		if missionRevision != "" {
+			bound, ok := op.Policies.Get(missionContentPolicyRefName)
+			if !ok || bound != missionRevision || !isMissionInstance(inst, def) {
+				return objective.Instance{}, false, ErrContentRevisionConflict
+			}
+			revision = missionRevision
+		}
 		if revision != inst.ContentRevision {
 			return objective.Instance{}, false, ErrContentRevisionConflict
 		}
@@ -1228,7 +1346,7 @@ func (s Service) ApplyObjectiveFactTx(ctx context.Context, t tx.Tx, def Objectiv
 		return objective.Instance{}, false, err
 	}
 	old := inst.StateVersion
-	next, changed, err := objective.ApplyFact(inst, def.Definition, fact, op.StartedAt)
+	next, changed, err := objective.ApplyFact(inst, def.Definition, fact, at)
 	if err != nil || !changed {
 		return next, changed, err
 	}
@@ -1376,7 +1494,7 @@ func (s Service) Redeem(ctx context.Context, actor identity.ActorContext, rawCod
 			if err := s.validatePartnerEntityLockedTx(txctx, scope.Tx, grantPF); err != nil {
 				return err
 			}
-			gr, err = s.applyPreparedGrantTx(txctx, scope.Tx, actor, rewardPlan, boundOp, true, contentRevision, grantPF, grantID, grantFP)
+			gr, err = s.applyPreparedGrantTx(txctx, scope.Tx, actor, rewardPlan, boundOp, GrantTxOptions{AllowOverflowMail: true}, contentRevision, grantPF, grantID, grantFP)
 			if err != nil {
 				return err
 			}

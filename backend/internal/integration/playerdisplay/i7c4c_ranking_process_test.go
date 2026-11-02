@@ -42,14 +42,14 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	b := bornRankingActor(t, p, server)
 	// Genuine Character acquisition with the production fresh facets, under the diagnostic capacity authorizer disclosed by
 	// rankingSummon; this is not production acquisition proof.
-	normal, e := (contentstore.Store{Queryer: p}).HeroNormalSummonTx(ctx, p, rev, 10001001)
+	normal, e := (contentstore.Store{Queryer: p}).HeroNormalSummonTx(ctx, p, rev, 10001003)
 	if e != nil {
 		t.Fatal(e)
 	}
 	exec(t, p, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,$2,10000,1,clock_timestamp(),clock_timestamp())`, int64(a.PlayerID), normal.Template.FragmentItemID)
 	heroes := privateHeroService(p)
 	heroes.FreshFacets = characterbirth.FreshHeroFacets()
-	if _, e = heroes.SummonNormal(ctx, a, 10001001, normal.Template.FragmentItemID, normal.FragmentCount, op()); e != nil {
+	if _, e = heroes.SummonNormal(ctx, a, 10001003, normal.Template.FragmentItemID, normal.FragmentCount, op()); e != nil {
 		t.Fatal(e)
 	}
 	bearer := displayToken(t, p, a)
@@ -159,7 +159,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 			}
 		}
 	}
-	board(1)
+	board(2) // The I9-3E birth companion counts as an owned girl.
 	for _, fields := range []map[string]any{{"rank_types": []int{37, 38}}, {"rank_types": []int{16001}}, {"rank_types": []int{1001}}, {"rank_types": []int{37}, "player_id": int64(b.PlayerID)}} {
 		code, out := post(301, fields)
 		if code == 200 {
@@ -178,11 +178,11 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		t.Fatal("born ranking player title picker", code, out)
 	}
 	rankingSummon(t, p, a, rev, 10001002)
-	board(2) // A new menu request observes the new canonical count.
+	board(3) // A new menu request observes the new canonical count.
 	stop()
 	cmd = start()
 	running = true
-	board(2)
+	board(3)
 	// Bind all durable Ranking and recipient/receipt state across relocation.
 	snapshot, e := rankingService(p, p).RefreshBoard(ctx, d.GirlsBoard, a, original)
 	if e != nil || !reflect.DeepEqual(snapshot, first) {
@@ -235,12 +235,13 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if e != nil || !reflect.DeepEqual(first, recovered) {
 		t.Fatal("restored immutable snapshot/Kernel receipt", e)
 	}
-	if n := rankingCount(t, restored, server, "ranking_girls_awards"); n != 1 {
+	// Both rankers own the birth companion, so both titled ranks are awarded.
+	if n := rankingCount(t, restored, server, "ranking_girls_awards"); n != 2 {
 		t.Fatal("duplicate restored awards", n)
 	}
 	cmd = start()
 	running = true
-	board(2)
+	board(3)
 	code, out = post(2492, map[string]any{"title_id": 100059, "unique_id": 0})
 	if code != 200 {
 		t.Fatal("restored genuine title", code, out)
@@ -309,12 +310,12 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	}
 	bearer = newBearer
 	freshActor := identity.ActorContext{PlayerID: identity.PlayerID(born)}
-	def := collectionResources(t, restored, freshActor, rev, 10001001)
+	def := collectionResources(t, restored, freshActor, rev, 10001003)
 	const startingMana int64 = 1000000
 	exec(t, restored, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'mana',$2,1,clock_timestamp()) ON CONFLICT(player_id,resource_key)DO UPDATE SET amount=excluded.amount,state_version=player_currency_balances.state_version+1,updated_at=excluded.updated_at`, born, startingMana)
-	summon := map[string]any{"table_id": int64(10001001), "stone": def.Template.FragmentItemID, "stone_num": def.FragmentCount}
+	summon := map[string]any{"table_id": int64(10001003), "stone": def.Template.FragmentItemID, "stone_num": def.FragmentCount}
 	code, out = post(59, summon)
-	if code != 200 || out["table_id"] != float64(10001001) || out["partner_id"] == nil {
+	if code != 200 || out["table_id"] != float64(10001003) || out["partner_id"] == nil {
 		t.Fatal("production Normal59", code, out)
 	}
 	economics, ok := out["economy_"].(map[string]any)
@@ -323,7 +324,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	}
 	rawSummon, _ := json.Marshal(out)
 	t.Log("PRODUCTION_NORMAL59_SOURCE_RESPONSE", string(rawSummon))
-	code, out = post(59, map[string]any{"table_id": int64(10001001), "stone": def.Template.FragmentItemID, "stone_num": def.FragmentCount})
+	code, out = post(59, map[string]any{"table_id": int64(10001003), "stone": def.Template.FragmentItemID, "stone_num": def.FragmentCount})
 	if code == 200 {
 		t.Fatal("duplicate origin accepted", out)
 	}
@@ -349,13 +350,13 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		list := out["rank_list"].([]any)
 		info := list[0].(map[string]any)["rank_info"].(map[string]any)
 		mine := info["my_rank"].(map[string]any)
-		if mine["score"] != float64(1) || mine["rank"] != float64(2) || len(info["rank_info"].([]any)) != 3 {
+		if mine["score"] != float64(2) || mine["rank"] != float64(2) || len(info["rank_info"].([]any)) != 3 {
 			t.Fatal("production-created girl not in canonical Ranking", info)
 		}
 	}
 	freshBoard()
 	code, out = post(49, map[string]any{})
-	if code != 200 || len(out["heros"].(map[string]any)) != 1 {
+	if code != 200 || len(out["heros"].(map[string]any)) != 2 {
 		t.Fatal("production fresh facets roster reload", code, out)
 	}
 	stop()
@@ -467,12 +468,13 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	running = true
 	freshBoard()
 	code, out = post(49, map[string]any{})
-	if code != 200 || len(out["heros"].(map[string]any)) != 1 {
+	if code != 200 || len(out["heros"].(map[string]any)) != 2 {
 		t.Fatal("restored production roster", code, out)
 	}
 	for _, mid := range []int{64, 305} {
 		code, out = post(mid, map[string]any{})
-		if code == 200 {
+		inactiveAnswer := code == 200 && out["error_code"] == float64(1)
+		if code == 200 && !inactiveAnswer {
 			t.Fatal("unqualified route activated", mid, out)
 		}
 	}

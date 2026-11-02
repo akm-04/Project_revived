@@ -95,6 +95,10 @@ func TestI6BAddsNoActivityOwnedMigration(t *testing.T) {
 	}
 	for _, e := range entries {
 		name := e.Name()
+		if name == "00103_i9_9a_guild_activity.sql" {
+			// I9-9A Guild activity is Guild-owner state, not an I6B Activity table.
+			continue
+		}
 		if strings.Contains(strings.ToLower(name), "activity") {
 			t.Fatalf("I6B unexpectedly owns migration %s", name)
 		}

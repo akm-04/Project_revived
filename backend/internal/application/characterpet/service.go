@@ -64,6 +64,8 @@ type ProgressionContent interface {
 }
 
 type Service struct {
+	AwakeningEquipment      appi5.AwakeningEquipmentPort
+	Awakening               AwakeningStore
 	Runner                  tx.Runner
 	Timed                   appgeneration.TimedRunner
 	Store                   Store

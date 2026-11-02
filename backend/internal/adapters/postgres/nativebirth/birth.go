@@ -8,6 +8,7 @@ package nativebirth
 import (
 	"context"
 	"errors"
+	"slices"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres"
@@ -55,6 +56,19 @@ func NewRoots(first, last identity.PlayerID) ([]Root, error) {
 
 // PersistAll births existing player roots in one transaction.
 func PersistAll(ctx context.Context, p *postgres.Pool, roots []Root) error {
+	return persist(ctx, p, roots, true)
+}
+
+// PersistBare births one player root without the I9-3E birth companion, for fixtures that build an explicit roster from
+// partner 1 the way pre-I9-3E players were born.
+func PersistBare(ctx context.Context, p *postgres.Pool, account ids.UUID, server identity.LogicalServerID, player identity.PlayerID) error {
+	if logicalserver.PlayerRegion(player) != server {
+		return errors.New("fixture player outside its logical server band")
+	}
+	return persist(ctx, p, []Root{{Account: account, Player: player}}, false)
+}
+
+func persist(ctx context.Context, p *postgres.Pool, roots []Root, companion bool) error {
 	revision, err := install(ctx, p)
 	if err != nil {
 		return err
@@ -72,6 +86,12 @@ func PersistAll(ctx context.Context, p *postgres.Pool, roots []Root) error {
 	content := contentstore.Store{Queryer: p}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: content}
 	contributors := characterbirth.Contributors(content, privileges, revision)
+	if !companion {
+		contributors = slices.DeleteFunc(contributors, func(c appboot.CharacterBootstrapPersistenceContributor) bool {
+			_, isCompanion := c.(characterbirth.BirthCompanion)
+			return isCompanion
+		})
+	}
 	t, err := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
 	if err != nil {
 		return err

@@ -1527,6 +1527,20 @@
       "owner": "typed-economy",
       "write_exceptions": []
     },
+    "player_crystal_spend_days": {
+      "allowed_query_owners": [
+        "typed-economy"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "migration": "migrations/00080_i9_2_crystal_spend_days.sql",
+      "owner": "typed-economy",
+      "write_exceptions": []
+    },
     "player_directory_profiles": {
       "allowed_query_owners": [
         "identity/logicalserver/bootstrap",
@@ -3949,6 +3963,1148 @@
       "migration": "migrations/00076_i8_5_3_client_observability.sql",
       "owner": "clientlog",
       "write_exceptions": []
+    },
+    "content_campaign_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00081_i9_3a_campaign.sql"
+    },
+    "campaign_players": {
+      "allowed_query_owners": [
+        "Campaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "migration": "migrations/00081_i9_3a_campaign.sql",
+      "owner": "Campaign",
+      "write_exceptions": []
+    },
+    "campaign_nodes": {
+      "allowed_query_owners": [
+        "Campaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/campaignstore/"
+      ],
+      "migration": "migrations/00081_i9_3a_campaign.sql",
+      "owner": "Campaign",
+      "write_exceptions": []
+    },
+    "daily_consumption_players": {
+      "owner": "DailyConsumption",
+      "migration": "migrations/00083_i9_3d_trials.sql",
+      "allowed_query_owners": [
+        "DailyConsumption"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/dailyconsumestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/dailyconsumestore/"
+      ],
+      "write_exceptions": []
+    },
+    "content_summon_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00084_i9_3e_summon.sql"
+    },
+    "summon_players": {
+      "owner": "Summon",
+      "migration": "migrations/00084_i9_3e_summon.sql",
+      "allowed_query_owners": [
+        "Summon"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "write_exceptions": []
+    },
+    "summon_tuning": {
+      "owner": "Summon",
+      "migration": "migrations/00084_i9_3e_summon.sql",
+      "allowed_query_owners": [
+        "Summon"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/summonstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_mission_roots": {
+      "allowed_query_owners": [
+        "objective-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "migration": "migrations/00085_i9_4_mission_root.sql",
+      "owner": "objective-core",
+      "write_exceptions": []
+    },
+    "content_mission_activity_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00087_i9_4_mission_chests.sql"
+    },
+    "player_signin_roots": {
+      "owner": "objective-core",
+      "allowed_query_owners": [
+        "objective-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00088_i9_4_signin.sql"
+    },
+    "content_monthly_signin_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/",
+        "sql/content/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00088_i9_4_signin.sql"
+    },
+    "content_awakening_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/",
+        "sql/content/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00089_i9_4_awakening.sql"
+    },
+    "player_awakening_roots": {
+      "owner": "objective-core",
+      "allowed_query_owners": [
+        "objective-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00089_i9_4_awakening.sql"
+    },
+    "content_march_catalogs": {
+      "owner": "content-registry",
+      "migration": "migrations/00090_i9_5a_march.sql",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": []
+    },
+    "march_players": {
+      "owner": "march",
+      "migration": "migrations/00090_i9_5a_march.sql",
+      "allowed_query_owners": [
+        "march"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/marchstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/marchstore/"
+      ],
+      "write_exceptions": []
+    },
+    "content_workplace_catalogs": {
+      "owner": "content-registry",
+      "migration": "migrations/00091_i9_5b_workplace.sql",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": []
+    },
+    "workplace_players": {
+      "owner": "workplace",
+      "migration": "migrations/00091_i9_5b_workplace.sql",
+      "allowed_query_owners": [
+        "workplace"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/workplacestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/workplacestore/"
+      ],
+      "write_exceptions": []
+    },
+    "content_pet_campaign_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00092_i9_5c_petcampaign.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "petcampaign_players": {
+      "allowed_query_owners": [
+        "petcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/petcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/petcampaignstore/"
+      ],
+      "migration": "migrations/00092_i9_5c_petcampaign.sql",
+      "owner": "petcampaign",
+      "write_exceptions": []
+    },
+    "content_gods_trial_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00093_i9_6a_gods_trial.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "godstrial_players": {
+      "allowed_query_owners": [
+        "godstrial"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/godstrialstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/godstrialstore/"
+      ],
+      "migration": "migrations/00093_i9_6a_gods_trial.sql",
+      "owner": "godstrial",
+      "write_exceptions": []
+    },
+    "content_dodgeball_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00094_i9_6b_dodgeball.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "dodgeball_players": {
+      "allowed_query_owners": [
+        "dodgeball"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/dodgeballstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/dodgeballstore/"
+      ],
+      "migration": "migrations/00094_i9_6b_dodgeball.sql",
+      "owner": "dodgeball",
+      "write_exceptions": []
+    },
+    "content_memoir_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "migration": "migrations/00095_i9_6c_memoir.sql",
+      "owner": "content-registry",
+      "write_exceptions": []
+    },
+    "memoir_players": {
+      "allowed_query_owners": [
+        "memoir"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/memoirstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/memoirstore/"
+      ],
+      "migration": "migrations/00095_i9_6c_memoir.sql",
+      "owner": "memoir",
+      "write_exceptions": []
+    },
+    "top_floor_task_periods": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_ranks": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_players": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_preferences": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_fights": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_records": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "top_floor_task_days": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+    },
+    "arena_tournament_periods": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_tournament_rooms": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_casual_entries": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_casual_scores": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_casual_sessions": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+    },
+    "arena_friend_invitations": {
+      "owner": "Arena",
+      "allowed_query_owners": [
+        "Arena"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/arenastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00098_i9_7c_friend_fight.sql"
+    },
+    "content_world_boss_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_occurrences": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_players": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_player_totals": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "worldboss_attempts": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00099_i9_8a_world_boss.sql"
+    },
+    "shared_rooms": {
+      "owner": "sharedroom",
+      "allowed_query_owners": [
+        "sharedroom"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "shared_room_seats": {
+      "owner": "sharedroom",
+      "allowed_query_owners": [
+        "sharedroom"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/sharedroomstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "content_illusion_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_occurrences": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_players": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_occurrence_results": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_attempts": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_reports": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "illusion_settlements": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+    },
+    "content_occult_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_players": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_runs": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_reports": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "occult_logs": {
+      "owner": "occult",
+      "allowed_query_owners": [
+        "occult"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/occultstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00101_i9_8c_occult.sql"
+    },
+    "content_adventure_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/contentstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00102_i9_8d_adventure.sql"
+    },
+    "adventure_occurrences": {
+      "owner": "adventure",
+      "allowed_query_owners": [
+        "adventure"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00102_i9_8d_adventure.sql"
+    },
+    "adventure_single_attempts": {
+      "owner": "adventure",
+      "allowed_query_owners": [
+        "adventure"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00102_i9_8d_adventure.sql"
+    },
+    "adventure_reports": {
+      "owner": "adventure",
+      "allowed_query_owners": [
+        "adventure"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00102_i9_8d_adventure.sql"
+    },
+    "player_guild_activity_days": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/i5store/store.go",
+          "reason": "Energy debit credits guild activity inside the I5 debit transaction (I9_GUILD_ACTIVITY_V1); insert-or-add on amount only."
+        }
+      ],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "player_guild_activity_totals": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_activity_awards": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_tea_wishes": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_tea_gifts": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+    },
+    "guild_rental_offers": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00104_i9_9b_guild_rental.sql"
+    },
+    "guild_rental_uses": {
+      "owner": "guild-core",
+      "allowed_query_owners": [
+        "guild-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00104_i9_9b_guild_rental.sql"
+    },
+    "guild_campaign_chapters": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_registrations": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_copies": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_member_days": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_damage": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_awards": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_applications": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_application_days": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_distributions": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_log": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_server_records": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+    },
+    "guild_campaign_server_kills": {
+      "owner": "guildcampaign",
+      "allowed_query_owners": [
+        "guildcampaign"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/guildcampaignstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
     }
   }
 }

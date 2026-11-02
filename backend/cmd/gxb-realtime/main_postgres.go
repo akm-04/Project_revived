@@ -19,25 +19,37 @@ import (
 	"gxb.local/backend/v2/internal/adapters/guildinvitebundle"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/arenastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/achievement"
+	appadventure "gxb.local/backend/v2/internal/application/adventure"
+	apparena "gxb.local/backend/v2/internal/application/arena"
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
+	appillusion "gxb.local/backend/v2/internal/application/illusion"
+	appoccult "gxb.local/backend/v2/internal/application/occult"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
+	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/application/socialrelation"
@@ -208,7 +220,11 @@ func run() error {
 	if _, err = (contentstore.Store{}).ReadPlayerDisplayCatalogTx(ctx, pool, displayRevision); err != nil {
 		return err
 	}
-	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{}}, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
+	channelService := channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{},
+		Owners: channelchat.Owners{Illusion: channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
+			AdventureIllusion: channelchatread.AdventureIllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
+			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}}}}
+	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
 	if err != nil {
 		return err
 	}
@@ -249,7 +265,66 @@ func run() error {
 	}
 	achievementRuntime := &achievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Fresh: pool, Active: contentstore.Store{Queryer: pool}}
 	achievementNotices := stockruntime.AchievementNoticeHandler{Service: achievement.Service{Store: achievementstore.Store{}, Content: contentstore.Store{Queryer: pool}, Runtime: achievementRuntime}, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: achievementEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("achievement notice delivery degraded: %v", e) }}
-	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices})
+	tournamentEvents, err := stockruntime.NewTournamentNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tournamentNotices := stockruntime.TournamentNoticeHandler{Service: apparena.TournamentNoticeReader{Store: arenastore.Store{}, Queryer: pool, Time: postgres.AuthoritativeTime{Queryer: pool}}, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: tournamentEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(err error) { log.Printf("tournament notice degraded: %v", err) }}
+	friendEvents, err := stockruntime.NewFriendFightNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	friendFightDelivery := tournamentNotices
+	friendFightDelivery.Publisher = stockruntime.RealtimePublisher{Registry: friendEvents, Limits: limits.Default()}
+	friendNotices := stockruntime.FriendFightNoticeHandler{Service: apparena.FriendFightNoticeReader{Store: arenastore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: pool, Time: postgres.AuthoritativeTime{Queryer: pool}}, Delivery: friendFightDelivery}
+	illusionEvents, err := stockruntime.NewIllusionRoomNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	illusionRooms := stockruntime.IllusionRoomNoticeHandler{Service: stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: pool},
+		Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: illusionEvents, Limits: limits.Default()}, Authority: authority,
+		Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, Delivered: stockruntime.NewRoomNoticeLedger(),
+		OnDeliveryError: func(err error) { log.Printf("illusion room notice degraded: %v", err) }}
+	occultEvents, err := stockruntime.NewOccultRoomNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	occultRooms := stockruntime.OccultRoomNoticeHandler{Service: appoccult.NoticeReader{Rooms: sharedroomstore.Store{}, Content: contentstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Presence: presenceStore,
+		Scores: occultstore.Store{}, Tickets: appi5.Service{Store: i5store.Store{}}, Queryer: pool},
+		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: occultEvents, Limits: limits.Default()}, Authority: authority,
+			Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(err error) { log.Printf("occult room notice degraded: %v", err) }},
+		Delivered: stockruntime.NewRoomNoticeLedger(),
+		Online:    connectionsRegistry.HasWorldConnection}
+	adventureEvents, err := stockruntime.NewAdventureNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	adventureNotices := stockruntime.AdventureNoticeHandler{Service: appadventure.NoticeReader{Store: adventurestore.Store{}, Queryer: pool, Time: postgres.AuthoritativeTime{Queryer: pool}},
+		Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: adventureEvents, Limits: limits.Default()},
+		Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
+		Delivered: stockruntime.NewAdventureNoticeLedger(), OnDeliveryError: func(err error) { log.Printf("adventure notice degraded: %v", err) }}
+	adventureRoomEvents, err := stockruntime.NewAdventureRoomNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	adventureRooms := stockruntime.AdventureRoomNoticeHandler{Service: appadventure.Mode{Fresh: pool, RoomStore: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}},
+		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: adventureRoomEvents, Limits: limits.Default()},
+			Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
+			OnDeliveryError: func(err error) { log.Printf("adventure room notice degraded: %v", err) }},
+		Delivered: stockruntime.NewRoomNoticeLedger(), Pushes: stockruntime.NewAdventurePushLedger()}
+	guildFightEvents, err := stockruntime.NewGuildFightEventRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	guildFightNotices := stockruntime.GuildFightNoticeHandler{Registered: guildcampaignstore.Store{}, Queryer: pool, Registry: connectionsRegistry,
+		Publisher: stockruntime.RealtimePublisher{Registry: guildFightEvents, Limits: limits.Default()}, MaxHandles: runtimePolicy.MaxConnections}
+	roomInviteNotices := stockruntime.RoomInviteNoticeListHandler{Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()},
+		Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
+		OnDeliveryError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
+	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}, realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices},
+		realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms},
+		realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices},
+		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices})
 	if err != nil {
 		log.Fatal(err)
 	}

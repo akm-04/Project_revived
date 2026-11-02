@@ -96,7 +96,11 @@ func TestNativeHelpers(t *testing.T) {
 		node:setContentSize(4, 5)
 		node:setName("layer")
 		local copy = node:clone()
-		result.cloneWidth, result.cloneName = copy:getContentSize().width, copy:getName()`)
+		result.cloneWidth, result.cloneName = copy:getContentSize().width, copy:getName()
+		clone = function(object) return {} end
+		local items = clone({node, {node}})
+		result.cloneKeepsEngineObject = items[1] == node and items[2][1] == node and items[2] ~= nil`)
+	expect(t, client, "result.cloneKeepsEngineObject", lua.LTrue)
 	expect(t, client, "result.hex", lua.LNumber(255))
 	expect(t, client, "result.plainHex", lua.LNumber(255))
 	expect(t, client, "result.decimal", lua.LNumber(12))
@@ -276,4 +280,28 @@ func TestLayoutLoadsItsAtlases(t *testing.T) {
 		result.after = cache:getSpriteFrame("layout/tab.png") ~= nil`)
 	expect(t, client, "result.before", lua.LTrue)
 	expect(t, client, "result.after", lua.LTrue)
+}
+
+func TestSliderEventUsesNativeCallbackAndUserPercent(t *testing.T) {
+	client := engine(t, ``, nil)
+	run(t, client, `
+  function cc.Node.addEventListener() error("slider used NodeEx event signature") end
+  local scene, slider = cc.Scene:create(), ccui.Slider:create()
+  slider:setPosition(100,100)
+  slider:setContentSize(200,30)
+  slider:setTouchEnabled(true)
+  scene:addChild(slider)
+  cc.Director:getInstance():runWithScene(scene)
+  result={calls=0}
+  slider:addEventListener(function(sender,event)
+   result.calls=result.calls+1 result.percent=sender:getPercent() result.event=event
+  end)
+  __vc.frame(0,0)
+  __vc.tap(200,115)
+  slider:setPercent(10)
+  result.programmatic=slider:getPercent()`)
+	expect(t, client, "result.calls", lua.LNumber(1))
+	expect(t, client, "result.percent", lua.LNumber(50))
+	expect(t, client, "result.event", lua.LNumber(0))
+	expect(t, client, "result.programmatic", lua.LNumber(10))
 }

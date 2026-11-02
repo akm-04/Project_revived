@@ -4,6 +4,8 @@ package main
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
+	"gxb.local/backend/v2/internal/application/dailyconsume"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,7 +15,9 @@ import (
 	"gxb.local/backend/v2/internal/adapters/combatworker"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/arenastore"
+	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/combatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
@@ -24,10 +28,13 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	appachievement "gxb.local/backend/v2/internal/application/achievement"
+	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
+	appcampaign "gxb.local/backend/v2/internal/application/campaign"
 	appleague "gxb.local/backend/v2/internal/application/championsleague"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
@@ -46,6 +53,7 @@ import (
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/application/publicstats"
+	"gxb.local/backend/v2/internal/application/socialrelation"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/content/combatcorpus"
@@ -68,12 +76,15 @@ type topFloorOwners struct {
 
 // roster is the MID1 Heroes composer shared by Combat and public profile records.
 func (o topFloorOwners) roster(content contentstore.Store) characterstore.HeroBootstrapProjection {
-	return characterstore.HeroBootstrapProjection{Content: content, Library: o.library, Dorm: o.dorm, Book: o.book, Course: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution}
+	return characterstore.HeroBootstrapProjection{AwakeningPositions: &apphero.AwakeningPositionResolver{Raw: characterstore.RawAwakeningStore{}, Content: content}, Awakening: apphero.Service{AcquisitionStore: characterstore.Store{}, Acquisition: content, Awakening: struct {
+		characterstore.Store
+		characterstore.RawAwakeningStore
+	}{}}, Content: content, Library: o.library, Dorm: o.dorm, Book: o.book, Course: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution}
 }
 
 // canonicalCombat is the first production Combat composition. It stays
 // unavailable (false) until an entropy key ring is configured.
-func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, o topFloorOwners) (combat.Service, bool, error) {
+func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, o topFloorOwners, lending combat.Lending) (combat.Service, bool, error) {
 	spec := os.Getenv("GXB_COMBAT_ENTROPY_KEYS")
 	if spec == "" {
 		return combat.Service{}, false, nil
@@ -101,7 +112,7 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 	// so three live workers bound memory; a busy pool refuses after five seconds.
 	worker := combatworker.New(limits, 3, 5*time.Second)
 	return combat.Service{Rules: corpus, Keys: keys, Worker: worker, Store: combatstore.Store{}, Content: content, Runner: r, Fresh: p,
-		Inputs: combat.Inputs{Heroes: o.roster(content), Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}}}, true, nil
+		Inputs: combat.Inputs{Heroes: o.roster(content), Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}, Lending: lending}}, true, nil
 }
 
 func canonicalPublicStats(p *postgres.Pool, content contentstore.Store, o topFloorOwners) publicstats.Service {
@@ -110,7 +121,7 @@ func canonicalPublicStats(p *postgres.Pool, content contentstore.Store, o topFlo
 	conquer := appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: heroes, Kinds: content, Players: i4store.PlayerRootLocker{}}
 	owned := &ca.OwnedCompositeBuilder{
 		HeroBase: apphero.BaseObservationReader{Store: heroes, Content: content}, PetBase: apppet.BaseObservationReader{Store: heroes},
-		HeroEquipment: apphero.CA8EquipmentObservationAdapter{Reader: apphero.EquipmentStateReader{Store: heroes, Content: content}}, PetEquipment: apppet.CA8EquipmentObservationAdapter{Reader: apppet.EquipmentStateReader{Store: heroes, Content: content}},
+		HeroEquipment: apphero.CA8EquipmentObservationAdapter{Reader: apphero.EquipmentStateReader{Store: heroes, Content: content, Awakening: &apphero.AwakeningPositionResolver{Raw: characterstore.RawAwakeningStore{}, Content: content}}}, PetEquipment: apppet.CA8EquipmentObservationAdapter{Reader: apppet.EquipmentStateReader{Store: heroes, Content: content}},
 		HeroPractice: apphero.CA8PracticeObservationAdapter{Reader: apphero.PracticeContributionReader{Store: heroes, Content: content}}, PetPractice: apppet.CA8PracticeObservationAdapter{Reader: apppet.PracticeContributionReader{Store: heroes, Content: content}},
 		HeroAppearance: apphero.CA8AppearanceObservationAdapter{Reader: apphero.AppearanceContributionReader{Store: heroes, Content: content}}, PetAppearance: apppet.CA8AppearanceObservationAdapter{Reader: apppet.AppearanceContributionReader{Store: heroes, Content: content}},
 	}
@@ -118,18 +129,18 @@ func canonicalPublicStats(p *postgres.Pool, content contentstore.Store, o topFlo
 		Library: o.library, Dorm: o.dorm, Book: o.book, Courses: o.course, Inscription: o.inscription, Element: o.element, Spirit: o.spirit, Evolution: o.evolution, Conquer: conquer}
 }
 
-func canonicalOneOnOne(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apponeonone.Service {
+func canonicalOneOnOne(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apponeonone.Service {
 	return apponeonone.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: oneononestore.Store{}, Content: content,
 		Fence: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight,
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Entitlements: i5db, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Entitlements: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 func canonicalArena(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, fight combat.Service, o topFloorOwners) apparena.Service {
-	return apparena.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: arenastore.Store{}, Content: content,
+	return apparena.Service{Players: i4store.PlayerRootLocker{}, Friendships: socialrelation.FriendFightPrivacyProvider{Store: socialrelationstore.Store{}}, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: arenastore.Store{}, Content: content,
 		Fence: i5db, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Grants: i5svc, Values: i5db, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
-		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // canonicalConquer is the Conquer School mode (client-attested Combat attempt, I8-5D).
@@ -140,11 +151,18 @@ func canonicalConquer(p *postgres.Pool, r tx.Runner, content contentstore.Store,
 		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight, Directory: i4store.PlayerDirectoryReader{}, Projection: i4store.DirectoryLevelProjection{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
-func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apptopfloor.Service {
+func canonicalCampaign(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, heroes apphero.Service, fight combat.Service) appcampaign.Mode {
+	return appcampaign.Mode{PetAwakening: i5svc, Awakening: i5svc, Daily: dailyconsume.Service{Store: dailyconsumestore.Store{}, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}}, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: campaignstore.Store{}, Content: content,
+		Fence: i5db, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}, Heroes: characterstore.CampaignHeroPort{Store: characterstore.Store{Queryer: p}}, HeroExp: heroes, Combat: fight,
+		Privileges: i5svc.Privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Progression: i5db,
+		Energy: i5svc, Grants: i5svc, Stages: i5svc, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+}
+
+func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, privileges commerceprivilege.Provider, fight combat.Service, o topFloorOwners) apptopfloor.Service {
 	return apptopfloor.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
 		Fence: i5db, Functions: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight,
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // runReconcile runs one mode's owed settlements and abandoned matches every 30 s (in-process reconcile provider).
@@ -174,5 +192,5 @@ func runReconcile(ctx context.Context, p *postgres.Pool, provider appgeneration.
 
 // canonicalLeague reuses the full qualified owned Combat roster/stats pipeline.
 func canonicalLeague(p *postgres.Pool, r tx.Runner, content contentstore.Store, i5db i5store.Store, i5svc appi5.Service, fight combat.Service, o topFloorOwners, display playerdisplay.Service) appleague.Service {
-	return appleague.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: i5db, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: i5db, Combat: fight, Grants: i5svc, Mail: appi5.SettlementMail{Store: i5db}, Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Players: i4store.PlayerRootLocker{}, Recipient: display, Entitlements: i5db, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return appleague.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: i5db, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: i5db, Combat: fight, Grants: i5svc, Mail: appi5.SettlementMail{Store: i5db}, Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Players: i4store.PlayerRootLocker{}, Recipient: display, Entitlements: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }

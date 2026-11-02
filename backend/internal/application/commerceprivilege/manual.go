@@ -241,7 +241,7 @@ func (s Service) ImportManual(c context.Context, a Authority, q Import, op opera
 			}
 		}
 		// All touched owner keys are acquired before the FIRST durable mutation.
-		effect, e := s.Effects.PreparePrivilegeTransitionTx(c, sc.Tx, q.PlayerID, oldCap, newCap, at)
+		effect, e := s.Effects.PreparePrivilegeTransitionTx(c, sc.Tx, q.PlayerID, oldCap, newCap, next.VIPLevel, at)
 		if e != nil {
 			return e
 		}

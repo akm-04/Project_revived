@@ -310,6 +310,19 @@ func (s TemporalState) RebindLegacyPolicy(contentRevision string, now time.Time,
 	if s.ContentRevision != "" {
 		return TemporalState{}, errors.New("temporal state is not legacy")
 	}
+	return s.rebind(contentRevision, now, oldPolicy, newPolicy)
+}
+
+// RepinPolicy moves an immutable row to a newer content revision at the
+// deployment boundary (D98) under the same rule as the legacy rebind.
+func (s TemporalState) RepinPolicy(contentRevision string, now time.Time, oldPolicy, newPolicy TemporalPolicy) (TemporalState, error) {
+	if s.ContentRevision == "" || s.ContentRevision == contentRevision {
+		return TemporalState{}, errors.New("temporal state is not pinned to another revision")
+	}
+	return s.rebind(contentRevision, now, oldPolicy, newPolicy)
+}
+
+func (s TemporalState) rebind(contentRevision string, now time.Time, oldPolicy, newPolicy TemporalPolicy) (TemporalState, error) {
 	if contentRevision == "" || now.IsZero() {
 		return TemporalState{}, errors.New("temporal rebind requires exact content revision and authoritative time")
 	}
@@ -320,7 +333,7 @@ func (s TemporalState) RebindLegacyPolicy(contentRevision string, now time.Time,
 		return TemporalState{}, err
 	}
 	if s.PolicyVersion != oldPolicy.Version {
-		return TemporalState{}, errors.New("legacy temporal policy version mismatch")
+		return TemporalState{}, errors.New("temporal policy version mismatch")
 	}
 	if s.StateVersion == math.MaxInt64 {
 		return TemporalState{}, errors.New("temporal state version overflow")

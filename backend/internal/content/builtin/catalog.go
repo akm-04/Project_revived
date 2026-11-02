@@ -99,12 +99,94 @@ type FunctionGateCatalog struct {
 	Source        string         `json:"source"`
 }
 
-type ObjectiveDefinition struct{}
+type ObjectiveRewardPlan struct {
+	Source struct{ PolicyVersion string }
+	Lines  []struct {
+		Kind        string
+		ResourceKey string `json:",omitempty"`
+		ItemID      int64  `json:",omitempty"`
+		Amount      int64
+		Domain      string            `json:",omitempty"`
+		Metadata    map[string]string `json:",omitempty"`
+	}
+}
+type ObjectivePrerequisite struct {
+	Gate              []int64 `json:"gate"`
+	Previous          int64   `json:"previous"`
+	DeferredUntil     string  `json:"deferred_until"`
+	UnavailableReason string  `json:"unavailable_reason"`
+}
+type ObjectivePresentation struct {
+	DetailType      int64               `json:"detail_type"`
+	Condition       int64               `json:"condition"`
+	Parameters      []int64             `json:"parameters"`
+	Next            int64               `json:"next"`
+	DeferredUntil   string              `json:"deferred_until"`
+	BaseReward      ObjectiveRewardPlan `json:"base_reward"`
+	BattlepassScore int64               `json:"battlepass_score"`
+	VIPSweepReward  bool                `json:"vip_sweep_reward"`
+	VIPSweepItemID  int64               `json:"vip_sweep_item_id"`
+	VIPSweepByLevel []int64             `json:"vip_sweep_by_level,omitempty"`
+	InscriptionPool []struct {
+		ItemID int64 `json:"item_id"`
+		Weight int64 `json:"weight"`
+	} `json:"inscription_pool"`
+}
+type ObjectiveDefinition struct {
+	ProgramID          string                `json:"program_id"`
+	Family             int64                 `json:"stock_family"`
+	ObjectiveID        int64                 `json:"objective_id"`
+	DefinitionRevision string                `json:"definition_revision"`
+	Strategy           string                `json:"strategy"`
+	AcceptedFactKind   string                `json:"accepted_fact_kind"`
+	Target             int64                 `json:"target"`
+	GenerationKind     string                `json:"generation_kind"`
+	Prerequisite       ObjectivePrerequisite `json:"prerequisite_policy"`
+	Reward             ObjectiveRewardPlan   `json:"reward_plan"`
+	Huoyue             int64                 `json:"huoyue"`
+	Presentation       ObjectivePresentation `json:"presentation"`
+}
 
+type ActivityRule struct {
+	Period    string `json:"period"`
+	Index     int64  `json:"index"`
+	Medal     int64  `json:"medal"`
+	GiftEXP   int64  `json:"gift_exp"`
+	GiftMarch int64  `json:"gift_march"`
+}
+type ActivityGift struct {
+	ID           int64               `json:"id"`
+	Plan         ObjectiveRewardPlan `json:"plan"`
+	VIPThreshold int64               `json:"vip_threshold"`
+	VIPBonus     int64               `json:"vip_bonus"`
+}
+type ActivityCatalog struct {
+	Rules []ActivityRule `json:"rules"`
+	Gifts []ActivityGift `json:"gifts"`
+}
+type SignAward struct {
+	ItemID    int64 `json:"award_item_id"`
+	ItemNum   int64 `json:"award_item_num"`
+	Crystal   int64 `json:"award_crystal"`
+	DoubleVIP int64 `json:"double_vip_lv"`
+}
+type SignMonth struct {
+	SourceYear int64       `json:"source_year"`
+	Month      int64       `json:"month"`
+	PartnerID  int64       `json:"partner_id"`
+	IsSkin     int64       `json:"is_skin"`
+	Awards     []SignAward `json:"awards"`
+}
+type SignCatalog struct {
+	Months []SignMonth `json:"months"`
+}
 type ObjectiveCatalog struct {
-	Definitions   []ObjectiveDefinition `json:"definitions"`
-	SchemaVersion int                   `json:"schema_version"`
-	Status        string                `json:"status"`
+	Awakening      json.RawMessage       `json:"awakening,omitempty"`
+	MonthlySignIn  *SignCatalog          `json:"monthly_signin,omitempty"`
+	ActivityChests *ActivityCatalog      `json:"activity_chests,omitempty"`
+	Definitions    []ObjectiveDefinition `json:"definitions"`
+	SchemaVersion  int                   `json:"schema_version"`
+	Status         string                `json:"status"`
 }
 
 type HeroSkillSlot struct {
@@ -489,6 +571,15 @@ type EmoticonCatalog struct {
 	Source        string               `json:"source"`
 }
 type Catalog struct {
+	GodsTrial                GodsTrialCatalog
+	Adventure                AdventureCatalog
+	Dodgeball                DodgeballCatalog
+	Memoir                   MemoirCatalog
+	PetCampaign              PetCampaignCatalog
+	Workplace                WorkplaceCatalog
+	March                    MarchCatalog
+	Campaign                 CampaignCatalog
+	Summon                   SummonCatalog
 	TopFloor                 TopFloorCatalog
 	OneOnOne                 OneOnOneCatalog
 	League                   LeagueCatalog
@@ -627,6 +718,42 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 
+	var godsTrial GodsTrialCatalog
+	if err := decodeAndVerify("gods_trial_catalog.json", manifest.ArtifactSHA256s, &godsTrial); err != nil {
+		return nil, err
+	}
+	var adventure AdventureCatalog
+	if err := decodeAndVerify("adventure_catalog.json", manifest.ArtifactSHA256s, &adventure); err != nil {
+		return nil, err
+	}
+	var memoir MemoirCatalog
+	if err := decodeAndVerify("memoir_catalog.json", manifest.ArtifactSHA256s, &memoir); err != nil {
+		return nil, err
+	}
+	var dodgeball DodgeballCatalog
+	if err := decodeAndVerify("dodgeball_catalog.json", manifest.ArtifactSHA256s, &dodgeball); err != nil {
+		return nil, err
+	}
+	var petCampaign PetCampaignCatalog
+	if err := decodeAndVerify("pet_campaign_catalog.json", manifest.ArtifactSHA256s, &petCampaign); err != nil {
+		return nil, err
+	}
+	var workplace WorkplaceCatalog
+	if err := decodeAndVerify("workplace_catalog.json", manifest.ArtifactSHA256s, &workplace); err != nil {
+		return nil, err
+	}
+	var march MarchCatalog
+	if err := decodeAndVerify("march_catalog.json", manifest.ArtifactSHA256s, &march); err != nil {
+		return nil, err
+	}
+	var campaign CampaignCatalog
+	if err := decodeAndVerify("campaign_catalog.json", manifest.ArtifactSHA256s, &campaign); err != nil {
+		return nil, err
+	}
+	var summon SummonCatalog
+	if err := decodeAndVerify("summon_catalog.json", manifest.ArtifactSHA256s, &summon); err != nil {
+		return nil, err
+	}
 	var topFloor TopFloorCatalog
 	if err := decodeAndVerify("top_floor_catalog.json", manifest.ArtifactSHA256s, &topFloor); err != nil {
 		return nil, err
@@ -728,6 +855,15 @@ func Load() (*Catalog, error) {
 		return nil, err
 	}
 	catalog := &Catalog{
+		GodsTrial:                godsTrial,
+		Adventure:                adventure,
+		Dodgeball:                dodgeball,
+		Memoir:                   memoir,
+		PetCampaign:              petCampaign,
+		Workplace:                workplace,
+		March:                    march,
+		Campaign:                 campaign,
+		Summon:                   summon,
 		TopFloor:                 topFloor,
 		OneOnOne:                 oneOnOne,
 		League:                   league,
@@ -877,8 +1013,65 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i7c6-cosmetic-origins" {
 		expectedSources, expectedArtifacts = 286, 42
 	}
+	if manifest.CompilerVersion == "i9-3a-campaign" || manifest.CompilerVersion == "i9-3c-campaign-awards" {
+		expectedSources, expectedArtifacts = 291, 43
+	}
 	if manifest.CompilerVersion == "i7c5e-conquer" {
 		expectedSources, expectedArtifacts = 267, 41
+	}
+	if manifest.CompilerVersion == "i9-3d-campaign-trials" {
+		expectedSources, expectedArtifacts = 303, 43
+	}
+	if manifest.CompilerVersion == "i9-3e-gacha" || manifest.CompilerVersion == "i9-3f-premium-gacha" || manifest.CompilerVersion == "i9-3-vending-juice" {
+		expectedSources, expectedArtifacts = 309, 44
+	}
+	if manifest.CompilerVersion == "i9-4a-missions" || manifest.CompilerVersion == "i9-4a-mission-reconciliation" {
+		expectedSources, expectedArtifacts = 314, 44
+	}
+	if manifest.CompilerVersion == "i9-4b-activity" || manifest.CompilerVersion == "i9-4b-inscription-missions" {
+		expectedSources, expectedArtifacts = 319, 44
+	}
+	if manifest.CompilerVersion == "i9-4d-awakening" {
+		expectedSources, expectedArtifacts = 332, 44
+	}
+	if manifest.CompilerVersion == "i9-4c-signin" {
+		expectedSources, expectedArtifacts = 324, 44
+	}
+	if manifest.CompilerVersion == "i9-7a-top-floor-task" {
+		expectedSources, expectedArtifacts = 380, 50
+	}
+	if manifest.CompilerVersion == "i9-6-memoir-report-wave" {
+		expectedSources, expectedArtifacts = 377, 50
+	}
+	if manifest.CompilerVersion == "i9-6b-dodgeball" {
+		expectedSources, expectedArtifacts = 361, 49
+	}
+	if manifest.CompilerVersion == "i9-6a-gods-trial" {
+		expectedSources, expectedArtifacts = 350, 48
+	}
+	if manifest.CompilerVersion == "i9-5c-petcampaign" {
+		expectedSources, expectedArtifacts = 350, 47
+	}
+	if manifest.CompilerVersion == "i9-5b-workplace" {
+		expectedSources, expectedArtifacts = 343, 46
+	}
+	if manifest.CompilerVersion == "i9-5a-march" {
+		expectedSources, expectedArtifacts = 335, 45
+	}
+	if manifest.CompilerVersion == "i9-7-stage-merge" || manifest.CompilerVersion == "i9-7b-tournament-casual" || manifest.CompilerVersion == "i9-7c-friend-fight" || manifest.CompilerVersion == "i9-7d-pvp-residuals" {
+		expectedSources, expectedArtifacts = 384, 50
+	}
+	if manifest.CompilerVersion == "i9-8a-world-boss" {
+		expectedSources, expectedArtifacts = 386, 51
+	}
+	if manifest.CompilerVersion == "i9-8b-illusion" {
+		expectedSources, expectedArtifacts = 389, 52
+	}
+	if manifest.CompilerVersion == "i9-8c-occult" {
+		expectedSources, expectedArtifacts = 391, 53
+	}
+	if manifest.CompilerVersion == "i9-8d-adventure" || manifest.CompilerVersion == "i9-9a-guild-tea" || manifest.CompilerVersion == "i9-9c-guild-campaign" {
+		expectedSources, expectedArtifacts = 395, 54
 	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
@@ -904,6 +1097,33 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 }
 
 func validateCatalog(c *Catalog) error {
+	if err := c.GodsTrial.Validate(); err != nil {
+		return err
+	}
+	if err := c.Adventure.Validate(); err != nil {
+		return err
+	}
+	if err := c.Memoir.Validate(); err != nil {
+		return err
+	}
+	if err := c.Dodgeball.Validate(); err != nil {
+		return err
+	}
+	if err := c.PetCampaign.Validate(); err != nil {
+		return err
+	}
+	if err := c.Workplace.Validate(); err != nil {
+		return err
+	}
+	if err := c.March.Validate(); err != nil {
+		return err
+	}
+	if err := c.Campaign.Validate(); err != nil {
+		return err
+	}
+	if err := c.Summon.Validate(); err != nil {
+		return err
+	}
 	if err := c.TopFloor.Validate(); err != nil {
 		return err
 	}
@@ -1067,8 +1287,8 @@ func validateCatalog(c *Catalog) error {
 	if c.FunctionGates.Source != "data/tables/function.lua" {
 		return fmt.Errorf("builtin content: unexpected function source %q", c.FunctionGates.Source)
 	}
-	if c.Objectives.Status != "BUILTIN_ACTIVATION_EMPTY_UNQUALIFIED_MAPPING" || len(c.Objectives.Definitions) != 0 {
-		return errors.New("builtin content: built-in objective activation must remain empty")
+	if err := validateMissions(c.Objectives); err != nil {
+		return err
 	}
 	if c.HeroCore.Source != "CA2 exact src_64 Hero core" || len(c.HeroCore.Templates) != 568 || len(c.HeroCore.ExpItems) != 5 || len(c.HeroCore.ExpRows) != 100 || len(c.HeroCore.NormalStarRows) != 5 || len(c.HeroCore.SuperStarRows) != 10 || len(c.HeroCore.SuperPrerequisites) != 70 || len(c.HeroCore.AcquisitionItems) != 291 {
 		return errors.New("builtin content: CA2 Hero core source/count drift")
@@ -1629,7 +1849,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"COSMETIC_TITLE_CONDITION_I7C6", "ACHIEVEMENT_CATALOG_I7C4FA", "CHAMPIONS_LEAGUE_I7C5F", "CONQUER_MODE_I7C5E", "ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"MEMOIR_I9_6C", "DODGEBALL_I9_6B", "GODS_TRIAL_I9_6A", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C", "ADVENTURE_I9_8D", "PET_CAMPAIGN_I9_5C", "WORKPLACE_I9_5B", "CHAMPION_MARCH_I9_5A", "AWAKENING_MISSIONS_I9_4D", "MONTHLY_SIGNIN_I9_4C", "MISSION_CATALOG_I9_4A", "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B", "SUMMON_GACHA_I9_3E", "CAMPAIGN_MODE_I9_3A", "COSMETIC_TITLE_CONDITION_I7C6", "ACHIEVEMENT_CATALOG_I7C4FA", "CHAMPIONS_LEAGUE_I7C5F", "CONQUER_MODE_I7C5E", "ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	sort.Strings(wantCaps)
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)

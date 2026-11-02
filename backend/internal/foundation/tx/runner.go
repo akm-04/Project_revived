@@ -7,6 +7,7 @@ import (
 	mathrand "math/rand"
 	"time"
 
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
@@ -104,6 +105,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 
 	txCtx, txCancel := withMaxTimeout(ctx, profile.TransactionTimeout)
 	defer txCancel()
+	txCtx, staged := changes.Stage(txCtx)
 	if err = applyTimeouts(txCtx, dbtx, profile); err != nil {
 		_ = finalizer.rollback()
 		outcome := DefiniteAbort
@@ -126,6 +128,9 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 	err = dbtx.Commit(txCtx)
 	if err == nil {
 		finalizer.markFinalized()
+		// shortcut: a commit proven only by reconciliation keeps no changes, so its response omits F17 keys; the client
+		// reloads on its next MID1.
+		staged.Keep()
 		r.event(op, profile, attempt, "commit", DefiniteCommit, nil, time.Since(started))
 		return Result{Outcome: DefiniteCommit, Attempts: attempt}, actionReturn, nil
 	}

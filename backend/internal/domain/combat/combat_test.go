@@ -177,6 +177,7 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 			s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "rune_items", []any{})
 		},
 		func(s *Snapshot) {
+			s.ProducerProfile = LegacyProducerProfileID
 			s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "twice_awake_stage", 1)
 		},
 		func(s *Snapshot) { s.Battle.TeamA[0].Params = withoutParam(s.Battle.TeamA[0].Params, "favor_degree") },

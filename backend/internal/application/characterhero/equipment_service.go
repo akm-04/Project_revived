@@ -35,6 +35,7 @@ type EquipmentOperationContent interface {
 }
 
 type EquipItemResult struct {
+	MissionChanges  map[string]any
 	PartnerID       int64
 	Equipment       character.HeroEquipmentSlots
 	AlreadyEquipped bool
@@ -59,6 +60,7 @@ type superEquipmentEnhanceReceipt struct {
 }
 
 type heroEquipmentReceipt struct {
+	MissionChanges  map[string]any               `json:"mission_changes,omitempty"`
 	PartnerID       int64                        `json:"partner_id"`
 	Level           int64                        `json:"level"`
 	Exp             int64                        `json:"exp"`
@@ -318,7 +320,7 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, par
 			if err != nil {
 				return err
 			}
-			result = EquipItemResult{PartnerID: decoded.PartnerID, Equipment: decoded.Equipment, AlreadyEquipped: decoded.AlreadyEquipped}
+			result = EquipItemResult{PartnerID: decoded.PartnerID, Equipment: decoded.Equipment, AlreadyEquipped: decoded.AlreadyEquipped, MissionChanges: decoded.MissionChanges}
 			return nil
 		}
 
@@ -333,6 +335,8 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, par
 		if err != nil {
 			return err
 		}
+		bloodCollected := false
+		var awakePermit *appi5.AwakeningEquipmentPermit
 		var itemID character.EquipmentTemplateID
 		var receiptFamily character.HeroKind
 		var resultSchema string
@@ -352,8 +356,24 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, par
 			if err != nil {
 				return err
 			}
-			if !pos.ItemID.Valid() || !pos.OrdinaryEligible {
+			if !pos.ItemID.Valid() {
 				return ErrHeroEquipmentUnavailable
+			}
+			baseItem := pos.ItemID
+			pos, err = s.AwakeningPositions.ResolveTx(txctx, scope.Tx, hero, revision, pos)
+			if err != nil {
+				return err
+			}
+			bloodCollected = pos.ItemID != baseItem
+			if !pos.OrdinaryEligible && !bloodCollected {
+				if s.AwakeningEquipment == nil {
+					return ErrHeroEquipmentUnavailable
+				}
+				awakePermit, err = s.AwakeningEquipment.PrepareAwakeningEquipmentTx(txctx, scope.Tx, actor.PlayerID, hero.PartnerID, hero.TableID, 1, int64(pos.ItemID), revision)
+				if err != nil {
+					return err
+				}
+				pos.ItemID = character.EquipmentTemplateID(awakePermit.ItemID())
 			}
 			itemID, receiptFamily, resultSchema = pos.ItemID, character.NormalHero, heroEquipmentMID54NormalV1
 		case character.SuperHero:
@@ -385,7 +405,7 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, par
 		if primitive.ItemID != itemID || primitive.SourceItemType != 1 {
 			return ErrHeroEquipmentUnavailable
 		}
-		if hero.Equipment[equipIndex-1] != 0 {
+		if bloodCollected || hero.Equipment[equipIndex-1] != 0 && (awakePermit == nil || !awakePermit.Blood() || awakePermit.Complete()) {
 			result = EquipItemResult{PartnerID: hero.PartnerID, Equipment: hero.Equipment, AlreadyEquipped: true}
 			r := heroEquipmentReceipt{PartnerID: hero.PartnerID, Level: hero.Level, Exp: hero.Exp, Equipment: hero.Equipment, AlreadyEquipped: true}
 			if receiptFamily == character.SuperHero {
@@ -404,7 +424,11 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, par
 		if receiptFamily == character.SuperHero {
 			next, err = collectSuperEquipmentSlot(hero, equipIndex, bound)
 		} else {
-			next, err = collectNormalEquipmentSlot(hero, equipIndex, bound)
+			base := hero
+			if awakePermit != nil && awakePermit.Blood() {
+				base.Equipment[equipIndex-1] = 0
+			}
+			next, err = collectNormalEquipmentSlot(base, equipIndex, bound)
 		}
 		if err != nil {
 			return err
@@ -412,8 +436,15 @@ func (s Service) EquipItem(ctx context.Context, actor identity.ActorContext, par
 		if err := s.ProgressionStore.SaveHeroStateTx(txctx, scope.Tx, next, old); err != nil {
 			return err
 		}
-		result = EquipItemResult{PartnerID: next.PartnerID, Equipment: next.Equipment}
-		r := heroEquipmentReceipt{PartnerID: next.PartnerID, Level: next.Level, Exp: next.Exp, Equipment: next.Equipment}
+		var missionChanges map[string]any
+		if awakePermit != nil {
+			missionChanges, err = s.AwakeningEquipment.CommitAwakeningEquipmentTx(txctx, scope.Tx, awakePermit)
+			if err != nil {
+				return err
+			}
+		}
+		result = EquipItemResult{PartnerID: next.PartnerID, Equipment: next.Equipment, MissionChanges: missionChanges}
+		r := heroEquipmentReceipt{PartnerID: next.PartnerID, Level: next.Level, Exp: next.Exp, Equipment: next.Equipment, MissionChanges: missionChanges}
 		if receiptFamily == character.SuperHero {
 			r.Family = receiptFamily
 		}

@@ -22,7 +22,9 @@ else:
     body=m.group(1)
     for f in ('Token','Detail','IsNew'):
         if re.search(r'\b'+f+r'\b',body): errors.append(f'v2 receipt stores forbidden mutable/secret field {f}')
-need('return s.hydrateCommittedMID1(ctx, req, stored)')
+need('return s.hydrateCommittedMID1(ctx, req, stored, decisionAt)')
+need('decisionAt, err = s.LoginTime.Now(ctx)')
+need('s.projectMID1Detail(txctx, scope.Tx, actor, decisionAt, &out)')
 need('selectGameplayCredentialForContext')
 need('storedKeyID')
 need('key, err := s.resolveBearerKey(txctx, storedKeyID)')

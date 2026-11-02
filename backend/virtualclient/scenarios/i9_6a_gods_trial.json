@@ -1,0 +1,59 @@
+{
+  "name": "i9_6a_gods_trial",
+  "level": 100,
+  "heroes": [
+    10001009,
+    10001012,
+    10001014,
+    10001015,
+    10001062
+  ],
+  "grants": [
+    {
+      "Kind": "STACK_ITEM",
+      "ItemID": 50001005,
+      "Amount": 600
+    }
+  ],
+  "awakening_fixture": true,
+  "note": "Stock Exam Gods Trial entry, earned manual victory creates canonical Horcrux awards, return/reopen progress and begin one real timed auto job. Existing declared hero progression fixture only. No Trial progress or Spirit IDs are provisioned. Due collection/retry/restart/LP/concurrency are native realPG proof; this stock scenario proves pending timer projection, not free collection because virtual time differs from PostgreSQL. Harness names the existing first-floor button for an unambiguous stock touch; no game state or callback is replaced. Victory asserts the stock star and Horcrux list, not the window animation style.",
+  "steps": [
+    "wait:3",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do local hero=h if hero:getLevel()<xyd.tables.player:heroMaxLev(p.lev) then p:addPartnerExp({item_id=50001005,partner_id=hero:getHeroID(),item_num=100,total_num=p:getBackpack():getItemNumByID(50001005)},function(code,req,reply) if code~=xyd.error.OK or not reply.partner_exp then error('vc-training-failed') end hero:setExp(reply.partner_exp,xyd.tables.player:heroMaxLev(p.lev)) p:getBackpack():setItemNumByID(reply.item_id,reply.total_num) end) end end",
+    "wait:5",
+    "fixture:strong_team",
+    "relogin",
+    "wait:5",
+    "window:sub_exam",
+    "tap:hunqi_node",
+    "wait:8",
+    "tap:btn_start",
+    "wait:8",
+    "lua:local cards={} local function walk(n) if not n:isVisible() then return end if n:getName()=='layout' then table.insert(cards,n) return end for _,c in ipairs(n:getChildren()) do walk(c) end end walk(xyd.WindowManager.get():getWindow('battle_select_team'):nodeByName('list_layer')) for _,card in ipairs(cards) do local b=card:getCascadeBoundingBox() __vc.tap(b.x+b.width/2,b.y+b.height/2) end",
+    "wait:5",
+    "tap:button_battle",
+    "wait:120",
+    "lua:local window=xyd.WindowManager.get():getWindow('battle_win') if not window or window.star<1 then error('vc-trial-must-win') end if #window.spiritItems<1 and #window.items<1 then error('vc-trial-no-first-clear-award') end",
+    "lua:local wm=xyd.WindowManager.get() local w=wm:getWindow('battle_win') local n=w.returnBtn_ if not n then error('vc-no-battle-return') end local b=n:getCascadeBoundingBox() local e={x=b.x+b.width/2,y=b.y+b.height/2} local ls=n._LuaListeners[cc.NODE_TOUCH_EVENT] if type(ls)~='table' then error('vc-no-return-listener') end for _,l in ipairs(ls) do e.name='began' l.listener_(e) e.name='ended' l.listener_(e) end",
+    "wait:5",
+    "lua:local w=xyd.WindowManager.get():getWindow('hunqi_campaign') if w then w:close() end",
+    "wait:2",
+    "window:sub_exam",
+    "tap:hunqi_node",
+    "wait:6",
+    "lua:local w=xyd.WindowManager.get():getWindow('hunqi_campaign') if not w or w.campaignInfos[tostring(w.day*1000+1)].win_count~=1 then error('trial-reload-progress') end",
+    "lua:local window=xyd.WindowManager.get():getWindow('hunqi_campaign') window.btns[1]:setName('vc_trial_floor_one') __vc.tapNode('vc_trial_floor_one') if window.campaignID~=window.day*1000+1 then error('vc-trial-floor-selection') end",
+    "tap:btn_auto",
+    "wait:4",
+    "tap:btn_battle",
+    "wait:4",
+    "lua:local w=xyd.WindowManager.get():getWindow('hunqi_campaign') if not w or w.baseInfo.auto_campaign==0 or w.baseInfo.auto_times~=1 then error('trial-auto-not-admitted') end"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    3097,
+    3092,
+    3093,
+    3099
+  ]
+}

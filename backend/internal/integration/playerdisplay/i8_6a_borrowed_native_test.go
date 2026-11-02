@@ -37,15 +37,19 @@ type fixtureLender struct {
 	values i5.CrossOwner
 }
 
-func (l fixtureLender) LendTx(c context.Context, t tx.Tx, scope ca.CoherentReadScope, loan combat.Loan) (d.Provenance, error) {
-	cost, offered := l.offers[rentalOffer{loan.Lender, loan.Kind, loan.Identity}]
-	if !offered {
-		return d.Provenance{}, d.ErrLoanRefused
+func (l fixtureLender) LendTx(c context.Context, t tx.Tx, scope ca.CoherentReadScope, loans []combat.Loan) ([]d.Provenance, error) {
+	out := make([]d.Provenance, 0, len(loans))
+	for _, loan := range loans {
+		cost, offered := l.offers[rentalOffer{loan.Lender, loan.Kind, loan.Identity}]
+		if !offered {
+			return nil, d.ErrLoanRefused
+		}
+		if _, err := l.values.DebitScalarTx(c, t, loan.Borrower, "mana", cost, scope.ObservedAt); err != nil {
+			return nil, fmt.Errorf("%w: %w", d.ErrLoanRefused, err)
+		}
+		out = append(out, d.Provenance{Capability: fixtureRentalCapability, Reference: fmt.Sprintf("%s/%d/%d", loan.Kind, loan.Lender, loan.Identity)})
 	}
-	if _, err := l.values.DebitScalarTx(c, t, loan.Borrower, "mana", cost, scope.ObservedAt); err != nil {
-		return d.Provenance{}, fmt.Errorf("%w: %w", d.ErrLoanRefused, err)
-	}
-	return d.Provenance{Capability: fixtureRentalCapability, Reference: fmt.Sprintf("%s/%d/%d", loan.Kind, loan.Lender, loan.Identity)}, nil
+	return out, nil
 }
 
 type borrowFixture struct {
@@ -61,6 +65,9 @@ type borrowFixture struct {
 
 const heroRent, petRent = 3000, 2000
 
+// lentHeroTable differs from the borrower's own Hero: a borrowed girl cannot share a table with a deployed one.
+const lentHeroTable = 10001003
+
 // newBorrowFixture: a lender with a genuine Hero and Pet offered for rent and a
 // borrower with its own Hero and mana, both built by producer commands.
 func newBorrowFixture(t *testing.T) borrowFixture {
@@ -71,11 +78,12 @@ func newBorrowFixture(t *testing.T) borrowFixture {
 	f.borrower, _ = genuinePlayer(t, pool, server)
 	cs := contentstore.Store{Queryer: pool}
 	def := must(cs.HeroNormalSummonTx(ctx, pool, f.rev, genuineHeroTable))(t, "summon policy")
+	lent := must(cs.HeroNormalSummonTx(ctx, pool, f.rev, lentHeroTable))(t, "lent summon policy")
 	heroes := genuineHeroService(pool)
 	for _, a := range []identity.ActorContext{f.lender, f.borrower} {
-		grantGenuine(t, pool, a, f.rev, "resources", genuineResources(t, pool, f.rev, []int64{genuineHeroTable}))
+		grantGenuine(t, pool, a, f.rev, "resources", genuineResources(t, pool, f.rev, []int64{genuineHeroTable, lentHeroTable}))
 	}
-	f.hero = must(heroes.SummonNormal(ctx, f.lender, genuineHeroTable, int64(def.Template.FragmentItemID), def.FragmentCount, op()))(t, "lender summon").PartnerID
+	f.hero = must(heroes.SummonNormal(ctx, f.lender, lentHeroTable, int64(lent.Template.FragmentItemID), lent.FragmentCount, op()))(t, "lender summon").PartnerID
 	f.own = must(heroes.SummonNormal(ctx, f.borrower, genuineHeroTable, int64(def.Template.FragmentItemID), def.FragmentCount, op()))(t, "borrower summon").PartnerID
 	egg := must(cs.PetAcquisitionTx(ctx, pool, f.rev, genuinePetTable))(t, "pet policy").EggItemID
 	grantGenuine(t, pool, f.lender, f.rev, "pet egg", []grant.Line{{Kind: grant.StackItem, ItemID: egg, Amount: 1}})

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_TOP_FLOOR_TASK_MODE_V1",
+  "version": 1,
+  "status": "WORKING_IMPLEMENTATION_NOT_STAGE_QUALIFIED",
+  "extends": [
+    "C5B_TOP_FLOOR_MODE_V1",
+    "C5D_ARENA_SEASON_MODE_V1",
+    "I9_MODE_FOUNDATION_V2",
+    "I9_PARENT_CONTRACT_V1"
+  ],
+  "owner": "TopFloor 601; live Region Arena 603 preserved",
+  "rules": [
+    "C1 Source catalog: six modes, formations, pets, bans, camps, leaders, buffs, rewards and admission thresholds. Original future scheduling is UNKNOWN; D351 labels cyclic continuation as private policy.",
+    "C2 Scope: per-server and rotation special ladder under TopFloor. Normal ladder, rewards and achievement semantics remain separate. Only canonical owners access their tables.",
+    "C3 Admission: server maximum level at least 60, normal rank at most 200 and ten normal attacking admissions in the F7 week. Count canonical durable normal START facts through the TopFloor port. The normal UI displays this weekly count separately from lifetime statistics.",
+    "C4 Snapshots: owned instance IDs remain distinct from table IDs. Freeze actors, buffs and mode context through existing Combat registration, resolution, terminal settlement and replay. Phantom copies are never owned instances. Rotation rules keep their period revision; each new battle uses active Combat actor content. Frozen attempts retain their admitted snapshot.",
+    "C5 Validate source rules on defense save, admission and opponent selection. Stale or ineligible defenses are refused. No successful empty battle.",
+    "C6 The registered server transform applies source buffs, phantom copies, leader behavior and timeout metrics. Persist the report and verdict without modifying the engine corpus. D353 gives the defender an exact timeout tie.",
+    "C7 START freezes its period, content, admission and cost. Recover an admitted retry before current eligibility. One unresolved task attempt per actor; never admit a replacement while the previous attempt remains unresolved.",
+    "C8 Settle the semantic attempt once. Swap ranks only for a winning challenger attacking a better rank. Record PVP_FIGHT inside that transaction. Keep special history separate from normal, friend and casual history.",
+    "C9 Values use I5 costs and settlement Mail. Use source prices and reward vectors, with period/date/player identities for daily Mail. Receipts recover purchases before current admission. Task START, terminal and day predicates reconcile uncertain commits.",
+    "C10 Serve source fields for task routes 282 through 300 and shared history 289 and ranking 301 subtype 2. Omit mode on normal records. Return current and next schedule slots. Authorize formation, record and replay reads. Route 276 is the same-stage 7B boss/casual aggregate; its sealed I9-7 scope stays unchanged and it is not falsely implemented by an empty 7A handler.",
+    "C11 D350 and D354 explicitly supersede the fifteen listed legacy routes. Preserve the live 768-family Region Arena. No duplicate legacy ladder or local-client verdict authority.",
+    "C12 Preserve tutorials and source guides. Maintain local surface, contract and identifier drafts; run allowed layer 1, focused native and one stock UI scenario. A leaf checkpoint is not stage acceptance. No seal, strict gate, full client suite or host clock change."
+  ]
+}

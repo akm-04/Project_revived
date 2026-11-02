@@ -13,6 +13,19 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// RentalClosure ends a departing lender's rental offers and mails their payouts,
+// at rank 609b and 610, inside the departure transaction (I9_GUILD_RENTAL_V1 C15).
+type RentalClosure interface {
+	CloseLenderOffersTx(context.Context, tx.Tx, identity.PlayerID, time.Time) error
+}
+
+// CampaignClosure forfeits a leaver's Guild Campaign places, or ends a dissolved
+// guild's chapters, at rank 606 and 607 inside the departure transaction (I9_GUILD_CAMPAIGN_V1 C2, C4).
+type CampaignClosure interface {
+	RemoveMemberTx(context.Context, tx.Tx, guild.ID, identity.PlayerID) error
+	CloseGuildTx(context.Context, tx.Tx, guild.ID) error
+}
+
 type ActorFencer interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
@@ -31,6 +44,9 @@ type Store interface {
 	InsertMembershipTx(context.Context, tx.Tx, guild.Membership) error
 	SaveMembershipRoleTx(context.Context, tx.Tx, guild.Membership, int64) error
 	DeleteMembershipTx(context.Context, tx.Tx, identity.PlayerID, guild.ID, int64) error
+	FoldActivityTx(context.Context, tx.Tx, []identity.PlayerID) (int64, error)
+	MarkActivityFoldedTx(context.Context, tx.Tx, identity.PlayerID) error
+	ForfeitActivityLifetimeTx(context.Context, tx.Tx, identity.PlayerID) error
 	CountMembersTx(context.Context, tx.Queryer, guild.ID) (int64, error)
 	CountRoleTx(context.Context, tx.Queryer, guild.ID, guild.Role) (int64, error)
 	AppendMembershipEventTx(context.Context, tx.Tx, guild.MembershipEvent, ids.UUID) error

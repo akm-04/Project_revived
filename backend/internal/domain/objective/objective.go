@@ -41,6 +41,13 @@ type Fact struct {
 	Value             int64
 }
 
+// PVPFightKind is one finished fight in a lobby PK mode: Top Floor, 1on1, ranked Arena and Champion League (task_req 106, D92).
+const PVPFightKind = "PVP_FIGHT"
+
+// CampaignSweepKind is one campaign sweep action, the Raid Ticket use that can
+// trigger Adventure 10001 (D368).
+const CampaignSweepKind = "CAMPAIGN_SWEEP"
+
 func (f Fact) Validate() error {
 	if !f.PlayerID.Valid() || strings.TrimSpace(f.SourceDomain) == "" || strings.TrimSpace(f.SourceBusinessKey) == "" || strings.TrimSpace(f.Kind) == "" {
 		return errors.New("invalid objective fact")

@@ -46,7 +46,7 @@ func leagueService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority) app.Servic
 	content := contentstore.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
 	grants := i5.Service{Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c5f-league-native-fixture-secret")}
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: runner}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: values, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: values, Combat: fight, Grants: grants, Mail: i5.SettlementMail{Store: values}, Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Players: i4store.PlayerRootLocker{}, Recipient: display.Service{Store: values, Content: content}, Entitlements: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: runner}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: values, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: values, Combat: fight, Grants: grants, Mail: i5.SettlementMail{Store: values}, Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Players: i4store.PlayerRootLocker{}, Recipient: display.Service{Store: values, Content: content}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 func leagueReset(t *testing.T, p *pg.Pool) {
 	t.Helper()
@@ -129,6 +129,8 @@ func leagueScalar(t *testing.T, p *pg.Pool, sql string, args ...any) int64 {
 func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	p := pool(t)
 	s, clock, cat, a, b, ha, _ := leagueActors(t, p)
+	facts := countPVPFights(s.Facts.(i5.ObjectiveFacts))
+	s.Facts = facts
 	// A projection-only level cannot establish admission.
 	low, lowRev, _ := combatOwner(t, p, rankingServer(t, p))
 	exec(t, p, `UPDATE player_directory_profiles SET lev=100 WHERE player_id=$1`, int64(low.PlayerID))
@@ -169,6 +171,9 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	replay := leagueDo(t, s, a, app.Command{Kind: "FIGHT", Enemy: b.PlayerID, Lineup: d.Lineup{Heroes: []int64{ha}}})
 	if replay.Match.ID != fight.Match.ID || string(replay.Report) != string(fight.Report) {
 		t.Fatal("retry changed battle")
+	}
+	if facts.of(a.PlayerID) != 1 {
+		t.Fatal("a Champion League fight and its replays are one PVP_FIGHT fact", facts.of(a.PlayerID))
 	}
 	players, e := s.Store.PlayersTx(ctx, p, false)
 	if e != nil {
@@ -250,7 +255,7 @@ func TestI7C5FLeagueSeasonOriginsTenRealSeasonsNative(t *testing.T) {
 		}
 		season = cat.SeasonNumbered(season.Number + 1)
 	}
-	if leagueScalar(t, p, `SELECT count(*) FROM league_cosmetic_origins WHERE player_id=$1 AND family='title'`, int64(a.PlayerID)) != 10 {
+	if leagueScalar(t, p, `SELECT count(*) FROM league_cosmetic_origins WHERE player_id=$1 AND family='title' AND catalog_id NOT BETWEEN 100078 AND 100080`, int64(a.PlayerID)) != 10 {
 		t.Fatal("cumulative title profile")
 	}
 	// Exact mirror deletion makes the scoped provider fail closed.

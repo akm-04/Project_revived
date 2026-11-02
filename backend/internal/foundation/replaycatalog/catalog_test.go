@@ -97,3 +97,18 @@ func TestEnabledReplayFamiliesAreCompleteAndUnique(t *testing.T) {
 		}
 	}
 }
+
+func TestI9MissionAndChestReceiptFamiliesAreClassified(t *testing.T) {
+	want := map[string]IdentityClass{"mission-claim": GenerationBound, "activity-claim": GenerationBound, "mission-source-fact": CallerSemantic}
+	for _, family := range Enabled {
+		if class, ok := want[family.Operation]; ok && family.Domain == "objective" {
+			if family.IdentityClass != class || family.ReceiptSchema == "" || class == GenerationBound && family.Residual == "" {
+				t.Fatalf("incomplete mission replay family %#v", family)
+			}
+			delete(want, family.Operation)
+		}
+	}
+	if len(want) > 0 {
+		t.Fatalf("unclassified mission receipt operations %v", want)
+	}
+}

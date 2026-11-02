@@ -116,14 +116,19 @@ type Loan struct {
 	Kind     d.ActorKind
 	Identity int64
 	Locator  d.Locator
+	// CampaignType keys the capability's table of modes that allow borrowing.
+	CampaignType int64
+	// Held marks a unit the mode already holds on loan (a March run's girl).
+	Held bool
 }
 
-// Lending is the capability owner of loans (GUILD_RENTAL and activity owners;
-// I8 binds fixtures only). LendTx checks the offer, eligibility and cost under
-// its own fences and commits the use in the START transaction, or refuses with
-// d.ErrLoanRefused. A replayed START never calls it.
+// Lending is the capability owner of loans. LendTx takes all of a battle's loans,
+// the Hero before the Pet, checks each offer, eligibility and cost under its own
+// fences and commits the uses in the START transaction, or refuses with
+// d.ErrLoanRefused. It returns one provenance per loan, in order. A replayed
+// START never calls it.
 type Lending interface {
-	LendTx(context.Context, tx.Tx, ca.CoherentReadScope, Loan) (d.Provenance, error)
+	LendTx(context.Context, tx.Tx, ca.CoherentReadScope, []Loan) ([]d.Provenance, error)
 }
 
 // Admission is a START's member roster at its locator, convener first.

@@ -1,0 +1,62 @@
+{
+  "name": "i9_6b_dodgeball",
+  "level": 100,
+  "grants": [
+    {
+      "Kind": "STACK_ITEM",
+      "ItemID": 50001979,
+      "Amount": 3
+    }
+  ],
+  "note": "Stock Evaluation entry, rules, friend refresh, paid board, local three-page guide, marked selection, frozen draw START and early exit through return/confirm controls. No hit records or rewards injected. Native tests separately prove positive entitlement and concurrency. Harness names the existing confirm button for an unambiguous stock touch. The function-10 tutorial hint is advanced by a real tap at its own content hole before tapping the local picture pages. The confirm uses the existing stock button ended callback because the harness touch missed that dynamically placed button, as in the qualified Sky Tower scenario; no result records or model state are assigned.",
+  "steps": [
+    "wait:3",
+    "window:sub_exam",
+    "tap:throw_sandbag_node",
+    "wait:5",
+    "lua:local w=xyd.WindowManager.get():getWindow('throw_sandbag_main') if not w or w.ticket~=3 then error('vc-dodge-main-ticket') end",
+    "tap:btn_rule",
+    "wait:2",
+    "lua:local w=xyd.WindowManager.get():getWindow('new_text_rule') if not w then error('vc-dodge-rules') end w:close()",
+    "wait:2",
+    "tap:btn_invite",
+    "wait:3",
+    "lua:local w=xyd.WindowManager.get():getWindow('throw_sandbag_invite') if not w then error('vc-dodge-friends') end w:close()",
+    "wait:2",
+    "tap:btn_start",
+    "wait:4",
+    "lua:local w=xyd.WindowManager.get():getWindow('throw_sandbag_choose') if not w or #w.ids~=3 then error('vc-dodge-choose') end",
+    "tap:btn_guide",
+    "wait:2",
+    "lua:local g=xyd.WindowManager.get():getWindow('guide_new') if not g or g.nowFuncID~=10 or g.nowGuideID~=10900802 then error('vc-dodge-guide-hole-state-'..tostring(g and g.nowGuideID)) end __vc.tap(g.content_:getPositionX(),g.content_:getPositionY())",
+    "wait:3",
+    "tap:btn_2",
+    "tap:btn_2",
+    "lua:local w=xyd.WindowManager.get():getWindow('throw_sandbag_guide') if not w or w.picIndex~=3 then error('vc-dodge-local-guide') end w:close()",
+    "wait:2",
+    "tap:btn_start",
+    "wait:8",
+    "lua:local w=xyd.WindowManager.get():getWindow('throw_sandbag') if not w or #w.selfRds<1 then error('vc-dodge-no-frozen-start') end",
+    "tap:return_btn",
+    "wait:2",
+    "lua:local w=xyd.WindowManager.get():getWindow('common_alert') local n=w and w.rightBtn if not n or type(n.callback)~='function' then error('vc-dodge-return-confirm') end n.callback({name='ended'})",
+    "wait:5",
+    "lua:local w=xyd.WindowManager.get():getWindow('throw_sandbag_result') if not w then error('vc-dodge-no-result') end",
+    "tap:btn_ok",
+    "wait:3",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if p:getBackpack():getItemNumByID(50001979)~=2 then error('vc-dodge-ticket-double-charge') end local w=xyd.WindowManager.get():getWindow('throw_sandbag_main') if w then w:close() end",
+    "wait:2",
+    "window:sub_exam",
+    "tap:throw_sandbag_node",
+    "wait:4",
+    "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.THROW_SANDBAG) if m.baseInfo.daily_count~=1 then error('vc-dodge-count-reload') end"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    2960,
+    2961,
+    2962,
+    2963,
+    2964
+  ]
+}

@@ -79,39 +79,47 @@ type Exchange struct {
 }
 
 type Catalog struct {
-	SchemaVersion         int               `json:"schema_version"`
-	ContractID            string            `json:"contract_id"`
-	PolicyID              string            `json:"policy_id"`
-	FunctionID            int64             `json:"function_id"`
-	RequiredLevel         int64             `json:"required_level"`
-	RequiredHeroes        int64             `json:"required_heroes"`
-	SeasonAnchor          string            `json:"season_anchor"`
-	SeasonDays            int64             `json:"season_days"`
-	SeasonOpenSeconds     int64             `json:"season_open_seconds"`
-	SeasonCloseSeconds    int64             `json:"season_close_seconds"`
-	Levels                []Level           `json:"levels"`
-	Rewards               []Reward          `json:"rewards"`
-	ChampionItem          int64             `json:"champion_item"`
-	UpgradeProtect        int64             `json:"upgrade_protect"`
-	FailProtect           int64             `json:"fail_protect"`
-	StreakBonusBelowLevel int64             `json:"streak_bonus_below_level"`
-	StreakBonusAfter      int64             `json:"streak_bonus_after"`
-	DailyLimit            int64             `json:"daily_limit"`
-	DailyWinCoin          int64             `json:"daily_win_coin"`
-	DailyLossCoin         int64             `json:"daily_loss_coin"`
-	PointBase             int64             `json:"point_base"`
-	PointLimit            int64             `json:"point_limit"`
-	PointHundredths       [2]int64          `json:"point_hundredths"`
-	MatchHundredths       [3]int64          `json:"match_hundredths"`
-	HeroLevel             int64             `json:"hero_level"`
-	HeroGrade             int64             `json:"hero_grade"`
-	MissionRefillSeconds  int64             `json:"mission_refill_seconds"`
-	Missions              []MissionRule     `json:"missions"`
-	Exchanges             []Exchange        `json:"exchanges"`
-	Mail                  map[string]string `json:"mail"`
+	FriendBattleLevel     int64              `json:"friend_battle_level,omitempty"`
+	Tournament            *TournamentCatalog `json:"tournament,omitempty"`
+	SchemaVersion         int                `json:"schema_version"`
+	ContractID            string             `json:"contract_id"`
+	PolicyID              string             `json:"policy_id"`
+	FunctionID            int64              `json:"function_id"`
+	RequiredLevel         int64              `json:"required_level"`
+	RequiredHeroes        int64              `json:"required_heroes"`
+	SeasonAnchor          string             `json:"season_anchor"`
+	SeasonDays            int64              `json:"season_days"`
+	SeasonOpenSeconds     int64              `json:"season_open_seconds"`
+	SeasonCloseSeconds    int64              `json:"season_close_seconds"`
+	Levels                []Level            `json:"levels"`
+	Rewards               []Reward           `json:"rewards"`
+	ChampionItem          int64              `json:"champion_item"`
+	UpgradeProtect        int64              `json:"upgrade_protect"`
+	FailProtect           int64              `json:"fail_protect"`
+	StreakBonusBelowLevel int64              `json:"streak_bonus_below_level"`
+	StreakBonusAfter      int64              `json:"streak_bonus_after"`
+	DailyLimit            int64              `json:"daily_limit"`
+	DailyWinCoin          int64              `json:"daily_win_coin"`
+	DailyLossCoin         int64              `json:"daily_loss_coin"`
+	PointBase             int64              `json:"point_base"`
+	PointLimit            int64              `json:"point_limit"`
+	PointHundredths       [2]int64           `json:"point_hundredths"`
+	MatchHundredths       [3]int64           `json:"match_hundredths"`
+	HeroLevel             int64              `json:"hero_level"`
+	HeroGrade             int64              `json:"hero_grade"`
+	MissionRefillSeconds  int64              `json:"mission_refill_seconds"`
+	Missions              []MissionRule      `json:"missions"`
+	Exchanges             []Exchange         `json:"exchanges"`
+	Mail                  map[string]string  `json:"mail"`
 }
 
 func (c Catalog) Validate() error {
+	if c.FriendBattleLevel != 0 && c.FriendBattleLevel != 55 {
+		return ErrUnavailable
+	}
+	if c.Tournament != nil && c.Tournament.Validate() != nil {
+		return ErrUnavailable
+	}
 	_, err := time.Parse("2006-01-02", c.SeasonAnchor)
 	profile := err == nil && c.SchemaVersion == 1 && c.ContractID == ContractID && c.PolicyID == PolicyID && c.FunctionID == 37 && c.RequiredLevel == 60 &&
 		c.RequiredHeroes == 5 && c.SeasonAnchor == "2022-10-28" && c.SeasonDays == 45 && c.SeasonOpenSeconds == 18000 && c.SeasonCloseSeconds == 0 &&

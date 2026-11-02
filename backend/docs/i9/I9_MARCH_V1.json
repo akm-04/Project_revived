@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_MARCH_V1",
+  "version": 1,
+  "node": "ROOT/I9/I9-5/I9-5A",
+  "status": "WORKING_DESIGN_USER_AUTHORIZED_NOT_QUALIFIED",
+  "extends": [
+    "I9_MODE_FRAMEWORK_V1",
+    "I9_PARENT_CONTRACT_V1",
+    "I8_PARENT_CONTRACT_V1"
+  ],
+  "mids": [
+    336,
+    337,
+    338,
+    339,
+    340,
+    341,
+    342
+  ],
+  "function_id": 8,
+  "rules": [
+    "C1 Exact source catalog: 15 roads, 36 Vanguard levels, recommendation pools, source summon rows 5/12 and eight weighted boxes; every referenced hero/item resolves to canonical enabled content. Compiler manifests preserve source hashes and new cumulative generation.",
+    "C2 One March run owner at rank 605; load 336 and MID1 detail 336 share one projection. Match snapshots persist until explicit Reset; reads never reroll opponents/rewards.",
+    "C3 Actor fence and function gate precede formation, family and cost admission. Normal formation contains 1..5 owned alive girls of valid source level. Vanguard has exactly five level-65+ girls and requires academy65+, no previous manual battle, one use per run; forged force has no authority. Power comes from the qualified publicstats owner in a coherent read scope, never an optional roster/display field.",
+    "C4 D250 binds START340/RESULT338 to Combat CLIENT_FULL_REPORT_ATTESTED_V1 with a versioned March ReportPolicy, complete actor coverage, bounded HP/SP/rebirth, frozen formation, at least one living ally and all enemies dead for a win. Same START replays; no RESULT creates an attempt. Preserve partial enemy losses and own survivor HP/SP, and timeout-zero states.",
+    "C5 Daily F7 allowance refresh does not discard run progress. Explicit Reset consumes one current-day entitlement and creates new generation; first initialization is free (D251 private policy). Dead girls remain unusable until Reset. Reagents expire on F7 day and cannot be overspent.",
+    "C6 Chest339 requires its actually won current stage and settles once before advancing. Extra341 requires >=9 wins, one claim per run, cost50 through I5 and source row12 count3. No forged stage/negative amount/ineligible claim grants value.",
+    "C7 D252 matching and economics are labelled versioned private policy. Existing same-server defense snapshot read port plus qualified source robots; no cross-owner SQL or live opponent mutation. Entropy uses operation Derive, is frozen before publication and never redrawn on retry.",
+    "C8 Hero/item/scalar awards use existing typed acquisition/I5 ports. Prepare objective and hero root locks before I5 value writes. Receipts reconcile ambiguous COMMIT; exact transport retry returns original body without duplicate grants, costs or facts.",
+    "C9 Vanguard recomputes rating and recommended multiplier, chooses prefix from source clean_numb group, settles ordinary stage awards once, sacrifices the selected girls, preserves other girls, and emits correctly bounded MARCH_FINISHED facts.",
+    "C10 F17 decorator owns economy/mission changes; common hooks are not hand-built in March dispatcher. Tutorial guide18 and graphic remain enabled; native tests and one fresh-stock-UI scenario prove actual March producer progress. Future Lending and March shop obligations stay explicit.",
+    "C11 Every touched I9 F1..F17 and I8 single owner/trust/retention/origin/receipt contract is walked; surface draft records delivery without touching shared PassMap inputs. Leaf is IMPLEMENTED only after focused gates and leaf checkpoint; Claude alone performs stage qualification/seal."
+  ],
+  "registration_tuple": {
+    "mode_key": "CHAMPION_MARCH",
+    "domain_kind": "CHAMPION_MARCH",
+    "authority_scope": "server:<logical server id>",
+    "locator": "player:<player id>",
+    "trust_profile": "CLIENT_FULL_REPORT_ATTESTED_V1",
+    "validator": "MARCH_REPORT_V1",
+    "generation": "run occurrence + battle ordinal + stage",
+    "replay": "FightExist 30005 + stored terminal body",
+    "settlement_owner": "March",
+    "report_retention": "existing I8 ceiling 7 days",
+    "campaign_type": 5,
+    "instance_type": 4
+  },
+  "private_policy_decisions": [
+    "D251",
+    "D252",
+    "D253",
+    "D256"
+  ],
+  "amendments": [
+    "D250 user-approved March-only I9 parent trust-card correction"
+  ],
+  "forward_obligations": [
+    "I9-9 guild Lending for rent_formation",
+    "I9-11 March shop; no fabricated shop handler"
+  ]
+}

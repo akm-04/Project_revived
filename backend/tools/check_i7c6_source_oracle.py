@@ -5,7 +5,7 @@ sys.path.insert(0,str(Path(__file__).parent))
 from generate_builtin_content import parse_generated_lua_table as parse
 B=Path(__file__).resolve().parents[1];src=Path(sys.argv[1]);assert hashlib.file_digest(src.open('rb'),'sha256').hexdigest()=='c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf'
 m=json.loads((B/'internal/content/builtin/generated/manifest.json').read_text())
-assert m['compiler_version']=='i7c6-cosmetic-origins' and 'COSMETIC_TITLE_CONDITION_I7C6' in m['enabled_capabilities']
+assert m['compiler_version'] in ('i7c6-cosmetic-origins','i9-3a-campaign','i9-3c-campaign-awards') and 'COSMETIC_TITLE_CONDITION_I7C6' in m['enabled_capabilities']
 display=json.loads((B/'internal/content/builtin/generated/player_display_catalog.json').read_text())
 rows={(r['family'],r['id']):r for r in display['cosmetics']}
 arena=json.loads((B/'internal/content/builtin/generated/arena_catalog.json').read_text())

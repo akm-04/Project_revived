@@ -1,0 +1,433 @@
+package stockruntime
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"strconv"
+	"sync"
+	"time"
+
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/domain/identity"
+	d "gxb.local/backend/v2/internal/domain/illusion"
+	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
+	"gxb.local/backend/v2/internal/domain/sharedroom"
+	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/amf3"
+	"gxb.local/backend/v2/internal/protocol/mids"
+	rt "gxb.local/backend/v2/internal/protocol/realtime"
+)
+
+// IllusionRoomNotice is the canonical room state a 518 push projects.
+type IllusionRoomNotice struct {
+	RoomID        int64
+	Status        int64
+	Seated        []identity.PlayerID
+	Ready         map[identity.PlayerID]bool
+	Removed       []identity.PlayerID
+	TeamInfo      json.RawMessage
+	ReportID      string
+	DamageResults map[string]json.RawMessage
+	ParadiseID    int64
+	Master        playerdirectory.Profile
+}
+
+type IllusionRoomNoticeReader struct {
+	Store     sharedroomstore.Store
+	Directory i4store.PlayerDirectoryReader
+	Queryer   tx.Queryer
+}
+
+func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference string) (IllusionRoomNotice, bool, error) {
+	var out IllusionRoomNotice
+	roomID, err := strconv.ParseInt(reference, 10, 64)
+	if err != nil || roomID <= 0 {
+		return out, false, d.ErrInvalid
+	}
+	if r.Queryer == nil {
+		return out, false, d.ErrUnavailable
+	}
+	room, found, err := r.Store.ReadRoomTx(c, r.Queryer, roomID)
+	if err != nil || !found || room.Family != "illusion" || room.Slot != 1 {
+		return out, false, err
+	}
+	state, err := d.LoadRoomState(room.Payload)
+	if err != nil {
+		return out, false, d.ErrInvalid
+	}
+	out = IllusionRoomNotice{RoomID: room.ID, Status: illusionStage(room.Members()), TeamInfo: state.TeamInfo, ReportID: state.ReportID,
+		DamageResults: state.DamageResults, ParadiseID: state.ParadiseID, Ready: map[identity.PlayerID]bool{}}
+	for _, seat := range room.Seats {
+		if seat.Stage == sharedroom.SeatSeated {
+			out.Ready[seat.Player] = seat.Ready
+		}
+	}
+	if room.Status == sharedroom.StatusClosed {
+		out.Removed = seatPlayers(room)
+	} else {
+		out.Seated = room.Members()
+		for _, seat := range room.Seats {
+			if seat.Stage != sharedroom.SeatSeated {
+				out.Removed = append(out.Removed, seat.Player)
+			}
+		}
+	}
+	profile, found, err := r.Directory.ProfileTx(c, r.Queryer, room.Owner)
+	if err != nil {
+		return out, false, err
+	}
+	if found {
+		out.Master = profile
+	}
+	return out, true, nil
+}
+
+func illusionStage(members []identity.PlayerID) int64 {
+	if len(members) >= int(d.TeamSeats) {
+		return 1
+	}
+	return 0
+}
+
+func seatPlayers(room sharedroom.Room) []identity.PlayerID {
+	out := make([]identity.PlayerID, 0, len(room.Seats))
+	for _, seat := range room.Seats {
+		out = append(out, seat.Player)
+	}
+	return out
+}
+
+func ValidateIllusionRoomNotice(value any) error {
+	object, ok := value.(*amf3.Object)
+	if !ok || object == nil {
+		return rt.ErrInvalidS2CPayload
+	}
+	fields, err := object.StrictMap()
+	if err != nil || len(fields) != 1 {
+		return rt.ErrInvalidS2CPayload
+	}
+	message, ok := fields["message"].(*amf3.Object)
+	if !ok || message == nil {
+		return rt.ErrInvalidS2CPayload
+	}
+	body, err := message.StrictMap()
+	if err != nil {
+		return rt.ErrInvalidS2CPayload
+	}
+	roomID, roomOK := body["room_id"].(int64)
+	if !roomOK || roomID < 0 {
+		return rt.ErrInvalidS2CPayload
+	}
+	if roomID == 0 {
+		return nil
+	}
+	status, ok := body["status"].(int64)
+	if !ok || (status != 0 && status != 1) {
+		return rt.ErrInvalidS2CPayload
+	}
+	return nil
+}
+
+func NewIllusionRoomNoticeRegistry() (rt.EventRegistry, error) {
+	return rt.NewEventRegistry(
+		[]rt.DirectRegistration{{MID: mids.MIDIllusionNotice, Roles: []rt.Role{rt.World}, Validate: ValidateIllusionRoomNotice}},
+		nil,
+	)
+}
+
+type IllusionRoomNoticeSource interface {
+	ReadRoomNotice(context.Context, string) (IllusionRoomNotice, bool, error)
+}
+
+type IllusionRoomNoticeHandler struct {
+	Service         IllusionRoomNoticeSource
+	Registry        *ConnectionRegistry
+	Publisher       RealtimePublisher
+	Authority       realtimeauth.GameplayLivenessPort
+	Time            SocialDeliveryTime
+	MaxHandles      int
+	Delivered       *RoomNoticeLedger
+	OnDeliveryError func(error)
+}
+
+// RoomNoticeLedger remembers each room's one-shot removal notices: the wakeup
+// carries only the room, and the room keeps departed seats.
+// shortcut: in memory, so a realtime restart repeats them once for a live room;
+// persist delivery if that repeat ever reaches a player seated elsewhere.
+type RoomNoticeLedger struct {
+	mu       sync.Mutex
+	rooms    map[int64]map[roomOneShot]bool
+	observed map[int64]*roomObservation
+}
+
+type roomOneShot struct {
+	mid    uint16
+	player identity.PlayerID
+}
+
+func NewRoomNoticeLedger() *RoomNoticeLedger {
+	return &RoomNoticeLedger{rooms: map[int64]map[roomOneShot]bool{}, observed: map[int64]*roomObservation{}}
+}
+
+func (l *RoomNoticeLedger) undelivered(room int64, mid uint16, players []identity.PlayerID) []identity.PlayerID {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	out := make([]identity.PlayerID, 0, len(players))
+	for _, player := range players {
+		if !l.rooms[room][roomOneShot{mid, player}] {
+			out = append(out, player)
+		}
+	}
+	return out
+}
+
+func (l *RoomNoticeLedger) markDelivered(room int64, mid uint16, player identity.PlayerID) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.rooms[room] == nil {
+		l.rooms[room] = map[roomOneShot]bool{}
+	}
+	l.rooms[room][roomOneShot{mid, player}] = true
+}
+
+// reseat lets a player who rejoined be told of a later departure again.
+func (l *RoomNoticeLedger) reseat(room int64, mid uint16, players []identity.PlayerID) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for _, player := range players {
+		delete(l.rooms[room], roomOneShot{mid, player})
+	}
+}
+
+func (l *RoomNoticeLedger) forget(room int64) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	delete(l.rooms, room)
+	delete(l.observed, room)
+}
+
+func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference string) error {
+	if h.Service == nil || h.Registry == nil || h.Authority == nil || h.Delivered == nil || h.Time == nil || h.MaxHandles < 1 {
+		return errors.New("illusion room notice unavailable")
+	}
+	c, cancel := context.WithTimeout(c, 2*time.Second)
+	defer cancel()
+	view, found, err := h.Service.ReadRoomNotice(c, reference)
+	if err != nil || !found {
+		return err
+	}
+	h.Delivered.reseat(view.RoomID, mids.MIDIllusionNotice, view.Seated)
+	if removed := h.Delivered.undelivered(view.RoomID, mids.MIDIllusionNotice, view.Removed); len(removed) > 0 {
+		frame, err := illusionFrame(map[string]any{"room_id": int64(0)})
+		if err != nil {
+			return err
+		}
+		for _, player := range removed {
+			if err := h.deliver(c, player, mids.MIDIllusionNotice, frame); err != nil {
+				return err
+			}
+			h.Delivered.markDelivered(view.RoomID, mids.MIDIllusionNotice, player)
+		}
+	}
+	if len(view.Seated) > 0 {
+		base, err := illusionMessage(view)
+		if err != nil {
+			return err
+		}
+		for _, player := range view.Seated {
+			message := cloneMessage(base)
+			message["room_id"] = view.RoomID
+			message["status"] = view.Status
+			if view.ReportID != "" {
+				message["is_report"] = int64(1)
+				message["report_id"] = view.ReportID
+				if raw, ok := view.DamageResults[strconv.FormatInt(int64(player), 10)]; ok {
+					value, err := decodeRawNumber(raw)
+					if err != nil {
+						return err
+					}
+					message["damage_result"] = value
+				}
+			}
+			frame, err := illusionFrame(message)
+			if err != nil {
+				return err
+			}
+			if err := h.deliver(c, player, mids.MIDIllusionNotice, frame); err != nil {
+				return err
+			}
+		}
+	}
+	if len(view.Seated) == 0 {
+		h.Delivered.forget(view.RoomID)
+	}
+	return nil
+}
+
+func (h IllusionRoomNoticeHandler) deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
+	return RoomDelivery{Registry: h.Registry, Publisher: h.Publisher, Authority: h.Authority, Time: h.Time, MaxHandles: h.MaxHandles, OnDeliveryError: h.OnDeliveryError}.Deliver(c, player, mid, frame)
+}
+
+// RoomDelivery publishes one frame to every current world connection of a player.
+type RoomDelivery struct {
+	Registry        *ConnectionRegistry
+	Publisher       RealtimePublisher
+	Authority       realtimeauth.GameplayLivenessPort
+	Time            SocialDeliveryTime
+	MaxHandles      int
+	OnDeliveryError func(error)
+}
+
+func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
+	handles := delivery.Registry.ByPlayerRole(player, domainrt.World)
+	if len(handles) > delivery.MaxHandles {
+		return errors.New("room notice connection bound exceeded")
+	}
+	for _, handle := range handles {
+		metadata, valid := handle.Metadata()
+		if !valid || !delivery.Registry.IsCurrent(handle) || metadata.PlayerID != player || metadata.PhysicalRole != domainrt.World || metadata.RoomID != int64(metadata.LogicalServerID) {
+			continue
+		}
+		at, err := delivery.Time.Now(c)
+		if err != nil {
+			return err
+		}
+		actor := identity.ActorContext{AccountID: metadata.AccountID, AccountUID: metadata.AccountUID, SessionID: metadata.SessionID, ContextID: metadata.ContextID, LogicalServerID: metadata.LogicalServerID, PlayerID: metadata.PlayerID, ContextGeneration: metadata.ContextGeneration, SessionLivenessVersion: metadata.SessionLivenessVersion, ContextLivenessVersion: metadata.ContextLivenessVersion}
+		if delivery.Authority.ValidateActor(c, actor, at) != nil {
+			continue
+		}
+		if mid == mids.MIDIllusionNotice || mid == mids.MIDForceReload {
+			err = delivery.Publisher.PublishDirect(c, handle, mid, frame)
+		} else {
+			err = delivery.Publisher.PublishNotice(c, handle, mid, rt.NoticeNamespaceGeneric, frame)
+		}
+		if err != nil && delivery.OnDeliveryError != nil {
+			delivery.OnDeliveryError(err)
+		}
+	}
+	return nil
+}
+
+type illusionMessageSlot struct{ idName, infoName, prefix string }
+
+var illusionMessageSlots = []illusionMessageSlot{
+	{"master_id", "master_id_info", "master"},
+	{"mate_1", "mate_1_info", "mate_1"},
+	{"mate_2", "mate_2_info", "mate_2"},
+}
+
+// illusionMessage decodes the cached teamInfo and rebuilds each slot from the
+// authoritative seat order and ready flags. A player's cached row follows the
+// player, so a mate who changes seats keeps their own info and partners.
+func illusionMessage(view IllusionRoomNotice) (map[string]any, error) {
+	message := map[string]any{}
+	if len(view.TeamInfo) > 0 {
+		if err := json.Unmarshal(view.TeamInfo, &message); err != nil {
+			return nil, err
+		}
+	}
+	cached := map[int64]map[string]any{}
+	for _, slot := range illusionMessageSlots {
+		id, err := feedbackInteger(message[slot.idName], 0, 9007199254740991)
+		if err != nil || id <= 0 {
+			continue
+		}
+		entry := map[string]any{"info": message[slot.infoName], "partner": message[slot.prefix+"_partner"],
+			"partner_detail": message[slot.prefix+"_partner_detail"]}
+		if slot.prefix == "master" {
+			entry["pet"] = message["master_pet"]
+			entry["pet_detail"] = message["master_pet_detail"]
+		}
+		cached[id] = entry
+	}
+	for index, slot := range illusionMessageSlots {
+		id, status := int64(0), int64(0)
+		if index < len(view.Seated) {
+			id = int64(view.Seated[index])
+			if view.Ready[view.Seated[index]] {
+				status = 1
+			}
+		}
+		message[slot.idName] = id
+		message[slot.prefix+"_status"] = status
+		entry := cached[id]
+		if id == 0 || entry == nil {
+			message[slot.infoName] = int64(0)
+			message[slot.prefix+"_partner"] = ""
+			message[slot.prefix+"_partner_detail"] = []any{}
+		} else {
+			message[slot.infoName] = entry["info"]
+			message[slot.prefix+"_partner"] = entry["partner"]
+			detail := entry["partner_detail"]
+			if detail == nil {
+				detail = []any{}
+			}
+			message[slot.prefix+"_partner_detail"] = detail
+		}
+		if index != 0 {
+			continue
+		}
+		if entry == nil {
+			message["master_pet"] = int64(0)
+			message["master_pet_detail"] = map[string]any{}
+			continue
+		}
+		pet := entry["pet"]
+		if pet == nil {
+			pet = int64(0)
+		}
+		message["master_pet"] = pet
+		petDetail := entry["pet_detail"]
+		if petDetail == nil {
+			petDetail = map[string]any{}
+		}
+		message["master_pet_detail"] = petDetail
+	}
+	return message, nil
+}
+
+func cloneMessage(base map[string]any) map[string]any {
+	out := make(map[string]any, len(base))
+	for key, value := range base {
+		out[key] = value
+	}
+	return out
+}
+
+func illusionFrame(message map[string]any) (*amf3.Object, error) {
+	converted, err := amfFromValue(message)
+	if err != nil {
+		return nil, err
+	}
+	return &amf3.Object{Properties: []amf3.Property{{Name: "message", Value: converted}}}, nil
+}
+
+// amfFromValue round-trips a body through JSON so every number keeps its width.
+func amfFromValue(value any) (any, error) {
+	payload, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(payload))
+	decoder.UseNumber()
+	var raw any
+	if err := decoder.Decode(&raw); err != nil {
+		return nil, err
+	}
+	return tournamentAMF(raw)
+}
+
+func decodeRawNumber(raw json.RawMessage) (any, error) {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	var value any
+	if err := decoder.Decode(&value); err != nil {
+		return nil, err
+	}
+	return tournamentAMF(value)
+}

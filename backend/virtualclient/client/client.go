@@ -25,6 +25,9 @@ import (
 // sha256 over the sorted "path\x00sha256(file)\n" lines of its 4370 files.
 const PinnedSourceDigest = "5ad9ee3a4b51169e1a1d124168d675db91a960a30acd980c6f94bd28a415870e"
 
+// LoginPrefetchSourceDigest binds the exact D120 effective tree; immutable stock remains accepted.
+const LoginPrefetchSourceDigest = "7e3d8d390e3e4a334d2248683c5afda57da460ddab3f69d0001f647f300aba38"
+
 const (
 	androidPlatform = 3
 	versionName     = "1.631.0"
@@ -97,8 +100,8 @@ func New(options Options) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if digest != PinnedSourceDigest {
-		return nil, fmt.Errorf("src_64 at %s is not the pinned stock tree: %s", options.SourceRoot, digest)
+	if digest != PinnedSourceDigest && digest != LoginPrefetchSourceDigest {
+		return nil, fmt.Errorf("src_64 at %s is not a qualified source profile: %s", options.SourceRoot, digest)
 	}
 	if options.Log == nil {
 		options.Log = io.Discard

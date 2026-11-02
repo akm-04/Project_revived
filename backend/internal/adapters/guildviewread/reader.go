@@ -7,6 +7,7 @@ import (
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
@@ -16,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -56,7 +58,7 @@ func (r Reader) read(c context.Context, a identity.ActorContext, fn func(guildvi
 		if e != nil {
 			return e
 		}
-		return fn(guildview.Service{Store: guildstore.Store{Queryer: sc.Tx}, Directory: publicpresentation.Reader{Queryer: sc.Tx, Revision: rev, ObservedAt: at}, Presence: presenceAt{Queryer: sc.Tx, At: at}})
+		return fn(guildview.Service{Store: guildstore.Store{Queryer: sc.Tx}, Directory: publicpresentation.Reader{Queryer: sc.Tx, Revision: rev, ObservedAt: at}, Presence: presenceAt{Queryer: sc.Tx, At: at}, Campaign: campaignChallenges{Queryer: sc.Tx, Day: modes.Day(at)}, Day: func(context.Context) (int64, error) { return modes.Day(at), nil }})
 	})
 	if e != nil {
 		return e
@@ -104,4 +106,22 @@ func (r Reader) GuildForPlayer(c context.Context, a identity.ActorContext, pid i
 	var ok bool
 	e := r.read(c, a, func(v guildview.Service) error { var e error; out, ok, e = v.GuildForPlayer(c, a, pid); return e })
 	return out, ok, e
+}
+
+// ActivityRankList is the guild activity board read (C12).
+func (r Reader) ActivityRankList(c context.Context, a identity.ActorContext, limit int64) ([]guildview.GuildRank, int64, error) {
+	var out []guildview.GuildRank
+	var mine int64
+	e := r.read(c, a, func(v guildview.Service) error { var e error; out, mine, e = v.ActivityRankList(c, a, limit); return e })
+	return out, mine, e
+}
+
+// campaignChallenges reads I9-9C member-day clears for the 612 roster row.
+type campaignChallenges struct {
+	Queryer tx.Queryer
+	Day     int64
+}
+
+func (c campaignChallenges) CopyChallengeTimes(ctx context.Context, players []identity.PlayerID, _ int64) (map[identity.PlayerID]int64, error) {
+	return (guildcampaignstore.Store{}).CopyChallengeTimesTx(ctx, c.Queryer, players, c.Day)
 }

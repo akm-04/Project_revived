@@ -139,7 +139,14 @@ for tok in ['func (s Service) SkinOn(', 'func (s Service) SkinCancel(', 'func (s
 for tok in ['case 60:', 'case 61:', 'case 2979:', '"current_skin_id"', '"skin_ids"', '"illusion_skin_id"']:
     req(tok in dispatch,f'candidate CA7-3 dispatcher marker missing {tok!r}')
 req('body["server_time"]' not in dispatch,'candidate invented MID60 server_time output')
-req('58, 60, 61, 62' in main_go and '67, 68, 69, 89' in main_go and '304, 2979' in main_go,'candidate production Hero CA7-3/4 registration drift')
+# D66/D109: verify the owning route set; unrelated added MIDs do not break a literal substring.
+def hero_routes(text):
+    groups = re.findall(r'for _, mid := range \[\]uint16\{([^}]+)\}\s*\{\s*mustRegister\(mid, heroD\)', text, re.S)
+    return {int(value) for group in groups for value in re.findall(r'\d+', group)}
+required_routes = {58, 60, 61, 62, 67, 68, 69, 89, 304, 2979}
+req(required_routes <= hero_routes(main_go), 'candidate production Hero CA7-3/4 registration drift')
+assert 60 not in hero_routes('for _, mid := range []uint16{58, 59, 61} { mustRegister(mid, heroD) }')
+assert not hero_routes('for _, mid := range []uint16{60} { mustRegister(mid, petD) }')
 for required in ['case 68:', 'case 69:']:
     req(required in dispatch,f'candidate lost accepted CA7-4 route {required}')
 for owned in ['case 1893:', 'case 1894:', 'case 1895:']:

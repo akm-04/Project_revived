@@ -36,3 +36,23 @@ func TestPreservationMaxHeroColorPolicyFailsClosedOnInvalidOperationIdentity(t *
 		t.Fatal("invalid operation accepted")
 	}
 }
+
+func TestCurrentMaxHeroColorPolicyEnablesSourcePurpleAndRetainsLegacy(t *testing.T) {
+	p := CurrentMaxHeroColorProvider{}
+	op := operation.Context{ID: ids.UUID{1}, StartedAt: time.Unix(100, 0).UTC()}
+	if p.MaxHeroColor() != 7 || p.MaxHeroColorPolicyRevision() != "GXB1_PRESERVATION_MAX_HERO_COLOR_V2" {
+		t.Fatal("current policy")
+	}
+	if n, e := p.MaxHeroColorTx(context.Background(), nil, 100001, op); e != nil || n != 7 {
+		t.Fatal(n, e)
+	}
+	if _, e := p.MaxHeroColorTx(context.Background(), nil, 0, op); e == nil {
+		t.Fatal("invalid player")
+	}
+	if _, e := p.MaxHeroColorTx(context.Background(), nil, 100001, operation.Context{}); e == nil {
+		t.Fatal("invalid operation")
+	}
+	if (PreservationMaxHeroColorProvider{}).MaxHeroColor() != 5 {
+		t.Fatal("historical policy changed")
+	}
+}

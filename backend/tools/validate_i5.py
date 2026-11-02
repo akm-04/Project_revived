@@ -50,7 +50,18 @@ need(Path('internal/adapters/stockruntime/i5_dispatcher.go'),
      'stockMailNamespace','StockRepresentableBulkAwards','applySettlementProjection')
 need(Path('internal/application/bootstrap/detail_contributor.go'),'type MID1DetailContributor interface','OverlayMID1')
 need(Path('internal/adapters/postgres/i5store/bootstrap_projection.go'),'OverlayMID1','player_profiles','player_progression')
-need(Path('cmd/gxb-api/main_postgres.go'),'GXB_REDEEM_DIGEST_SECRET','i5store.Store','appi5.Service','I5Dispatcher','[]uint16{26, 81, 161, 230, 368, 369, 370, 2736}')
+need(Path('cmd/gxb-api/main_postgres.go'),'GXB_REDEEM_DIGEST_SECRET','i5store.Store','appi5.Service','I5Dispatcher')
+# Extensions may add handlers; retain every original I5 registration on its dispatcher.
+def i5_registered_mids(source):
+    lists = re.findall(r'for _, mid := range \[\]uint16\{([^}]+)\}\s*\{\s*mustRegister\(mid, i5d\)', source)
+    return {int(mid) for values in lists for mid in re.findall(r'\d+', values)}
+
+assert i5_registered_mids('for _, mid := range []uint16{81, 26, 2738} { mustRegister(mid, i5d) }') == {26, 81, 2738}
+assert not i5_registered_mids('for _, mid := range []uint16{26} { mustRegister(mid, other) }')
+required_i5_mids = {26, 81, 161, 230, 368, 369, 370, 2736, 2865, 2866}
+missing_i5_mids = required_i5_mids - i5_registered_mids((root/'cmd/gxb-api/main_postgres.go').read_text())
+if missing_i5_mids:
+    errs.append(f'I5 dispatcher registrations missing: {sorted(missing_i5_mids)}')
 need(Path('internal/application/i5/service_test.go'),
      'TestSettleGrantSemanticReplayCreditsExactlyOnce',
      'TestSettleGrantAmbiguousCommitReconcilesWithoutReplay',

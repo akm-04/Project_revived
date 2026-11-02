@@ -214,6 +214,11 @@ func (s Service) useExp(ctx context.Context, actor identity.ActorContext, partne
 		if err != nil {
 			return err
 		}
+		if s.CharacterFunctions != nil {
+			if err := s.CharacterFunctions.PrepareCharacterFunctionsTx(txctx, scope.Tx, actor.PlayerID); err != nil {
+				return err
+			}
+		}
 		debit, err := s.Economy.DebitHeroExpItemsTx(txctx, scope.Tx, actor.PlayerID, items, boundOp)
 		if err != nil {
 			return err
@@ -236,6 +241,11 @@ func (s Service) useExp(ctx context.Context, actor identity.ActorContext, partne
 		}
 		if err := s.ProgressionStore.SaveHeroProgressionTx(txctx, scope.Tx, next, old); err != nil {
 			return err
+		}
+		if s.CharacterFunctions != nil {
+			if _, err := s.CharacterFunctions.OpenCharacterFunctionsTx(txctx, scope.Tx, actor.PlayerID, revision, boundOp.StartedAt); err != nil {
+				return err
+			}
 		}
 		remaining := make(map[string]int64, len(debit.Stacks))
 		result = ExpResult{PartnerID: next.PartnerID, Level: next.Level, Exp: next.Exp, Remaining: make(map[int64]int64, len(debit.Stacks))}
