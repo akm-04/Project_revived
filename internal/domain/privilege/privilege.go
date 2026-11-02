@@ -114,6 +114,8 @@ type Snapshot struct {
 	ObservationRevision string
 	ObservedAt          time.Time
 	SkillPointCap       int64
+	MonthCardActive     bool
+	PrivilegeCardActive bool
 	ProviderRevision    string
 }
 

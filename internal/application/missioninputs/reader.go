@@ -160,6 +160,8 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 		if privilege.VIPLevel > 0 {
 			out.Value = 1
 		}
+	case kind == 110 || kind == 129 || kind == 130 || kind == 131:
+		out.Value = 1
 	default:
 		return out, errors.New("mission canonical condition reader unavailable")
 	}
@@ -195,6 +197,18 @@ func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, r
 		}
 		state, err := r.Privileges.SnapshotTx(ctx, q, scope.PlayerID, scope.DecisionAt)
 		return state.VIPLevel >= gate[1], err
+	case 4:
+		if r.Privileges == nil {
+			return false, errors.New("mission privilege reader unavailable")
+		}
+		state, err := r.Privileges.SnapshotTx(ctx, q, scope.PlayerID, scope.DecisionAt)
+		return state.MonthCardActive, err
+	case 8:
+		if r.Privileges == nil {
+			return false, errors.New("mission privilege reader unavailable")
+		}
+		state, err := r.Privileges.SnapshotTx(ctx, q, scope.PlayerID, scope.DecisionAt)
+		return state.MonthlyPrivilegeActive, err
 	case 9:
 		for _, hero := range roster {
 			if hero.OriginTableID == boundHero {

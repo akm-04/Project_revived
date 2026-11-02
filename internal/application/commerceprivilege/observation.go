@@ -14,9 +14,12 @@ import (
 type Store interface {
 	ReadPrivilegeTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.State, bool, error)
 	SavePrivilegeTx(context.Context, tx.Tx, int64, d.State) error
+	ReadCardsTx(context.Context, tx.Queryer, identity.PlayerID) (d.Cards, error)
+	ReadVIPClaimedTx(context.Context, tx.Queryer, identity.PlayerID) ([]int64, error)
 }
 type Content interface {
 	PrivilegeCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
+	ChargeCatalogTx(context.Context, tx.Queryer, string) (d.ChargeCatalog, error)
 }
 
 // Provider is shared by display and all existing VIP consumers. The old baseline
@@ -50,10 +53,22 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if e != nil {
 		return out, true, e
 	}
+	cards, e := p.Store.ReadCardsTx(c, q, pid)
+	if e != nil {
+		return out, true, e
+	}
+	chargeCatalog, e := p.Content.ChargeCatalogTx(c, q, s.ContentRevision)
+	if e != nil {
+		return out, true, e
+	}
+	privilegeActive := cards.PrivilegeCardEnd > at.Unix()
+	if privilegeActive {
+		cap += chargeCatalog.PrivilegeSkillMax
+	}
 	if revision == "" {
 		revision = s.ContentRevision
 	}
-	out = d.Snapshot{State: s, ObservationRevision: revision, ObservedAt: at.UTC(), SkillPointCap: cap, ProviderRevision: d.ManualPolicy + "/" + s.ContentRevision}
+	out = d.Snapshot{State: s, ObservationRevision: revision, ObservedAt: at.UTC(), SkillPointCap: cap, MonthCardActive: cards.MonthCardEnd > at.Unix(), PrivilegeCardActive: privilegeActive, ProviderRevision: d.ManualPolicy + "/" + s.ContentRevision}
 	return out, true, out.Validate(pid, revision, at)
 }
 func (p Provider) ReadCosmeticPrivilegeTx(c context.Context, q tx.Queryer, pid identity.PlayerID, revision string, at time.Time) (d.Snapshot, error) {
@@ -80,7 +95,7 @@ func (p Provider) SnapshotTx(c context.Context, q tx.Queryer, pid identity.Playe
 	if !ok {
 		return (i5.BaselinePrivilegeProvider{}).SnapshotTx(c, q, pid, at)
 	}
-	return i5.PrivilegeSnapshot{ProviderRevision: out.ProviderRevision, VIPLevel: out.State.VIPLevel, MonthlyPrivilegeActive: false, SkillPointNaturalCap: out.SkillPointCap}, nil
+	return i5.PrivilegeSnapshot{ProviderRevision: out.ProviderRevision, VIPLevel: out.State.VIPLevel, MonthlyPrivilegeActive: out.PrivilegeCardActive, MonthCardActive: out.MonthCardActive, SkillPointNaturalCap: out.SkillPointCap}, nil
 }
 
 var _ i5.PrivilegeSnapshotProvider = Provider{}

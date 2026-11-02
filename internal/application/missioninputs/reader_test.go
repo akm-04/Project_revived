@@ -101,6 +101,38 @@ func (b bookRows) BookInputsTx(context.Context, tx.Queryer, bookskill.InputScope
 	return b.Inputs, nil
 }
 
+type privilegeSnapshot struct {
+	snapshot i5.PrivilegeSnapshot
+}
+
+func (p privilegeSnapshot) SnapshotTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (i5.PrivilegeSnapshot, error) {
+	return p.snapshot, nil
+}
+
+func TestReaderGatesMonthCardAndPrivilegeCardEntitlements(t *testing.T) {
+	rows := definitions(t)
+	month := rows[10010]
+	privilege := rows[10036]
+	if month.Prerequisite.DeferredUntil != "" || privilege.Prerequisite.DeferredUntil != "" {
+		t.Fatalf("live entitlement rows deferred: %q %q", month.Prerequisite.DeferredUntil, privilege.Prerequisite.DeferredUntil)
+	}
+	scope := i5.MissionScope{PlayerID: 100001, DecisionAt: time.Unix(1000, 0)}
+	closed := Reader{Privileges: privilegeSnapshot{}}
+	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0); err != nil || got.GatePassed {
+		t.Fatalf("month card gate did not close: %+v %v", got, err)
+	}
+	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0); err != nil || got.GatePassed {
+		t.Fatalf("privilege gate did not close: %+v %v", got, err)
+	}
+	open := Reader{Privileges: privilegeSnapshot{snapshot: i5.PrivilegeSnapshot{MonthCardActive: true, MonthlyPrivilegeActive: true}}}
+	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0); err != nil || !got.GatePassed || got.Value != 1 {
+		t.Fatalf("month card gate: %+v %v", got, err)
+	}
+	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0); err != nil || !got.GatePassed || got.Value != 1 {
+		t.Fatalf("privilege gate: %+v %v", got, err)
+	}
+}
+
 func TestReaderCountsCompletedBooksRatherThanSummingSkillLevels(t *testing.T) {
 	rows := definitions(t)
 	var d objective.MissionDefinition

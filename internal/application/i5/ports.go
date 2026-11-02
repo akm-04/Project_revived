@@ -76,7 +76,9 @@ type PrivilegeSnapshot struct {
 	ProviderRevision       string
 	VIPLevel               int64
 	MonthlyPrivilegeActive bool
-	SkillPointNaturalCap   int64
+	// MonthCardActive is the ordinary month card; mission gate 4 reads it.
+	MonthCardActive      bool
+	SkillPointNaturalCap int64
 }
 
 type PrivilegeSnapshotProvider interface {
