@@ -7,6 +7,38 @@ Runs as the user service `gxb-test-harness` while the laptop is on. Stop it duri
 `systemctl --user stop gxb-test-harness`, then `start`. After each PassMap seal `ops/harness_deploy.sh [commit]` replaces the
 backend, wipes the database and reseeds players and bots; it keeps `runtime/state/secrets.json`, `psk/` and `logs/`.
 
+## Maintainer quick start (new lead: read this first)
+
+| Task | Command or place |
+|---|---|
+| Is it up? which commit? | `systemctl --user is-active gxb-test-harness`; `.toolchain/bin/python3 -I -B test_harness/harness.py status` |
+| Deploy a backend | `bash ops/harness_deploy.sh <branch or commit>`, default canonical HEAD. Takes 1-2 min |
+| Stop or start | `systemctl --user stop gxb-test-harness`, `start`. Stop it during a strict gate or a VC suite |
+| What the user just did | `.toolchain/bin/python3 -I -B test_harness/helpers.py report --hours 2`, add `--timeline` |
+| Why a MID failed | `helpers.py fight-report <login>`, or the journal: `sys.path.insert(0,'test_harness'); import import_legacy; import_legacy.query_text(sql)`, table `request_journal` (`error_code` is bigint; `raw_envelope` is null on most rows, so never filter on it) |
+| Service logs | `test_harness/runtime/logs/gxb-api.log`; `harness.py logs gxb-api -f` |
+| User's written reports | `test_harness/psk/user_report/` |
+| APK for phones | `test_harness/apk/gxb-v2-playtest.apk`; rebuild only when the client patch changes: `bash test_harness/build_apk.sh`. Changing the backend or the laptop's IP needs no rebuild |
+| Public URLs | `https://gxbv2sdk.shares.zrok.io`, `https://gxbv2engine.shares.zrok.io`; names are tracked in `start_zrok.sh` on workshop v2 |
+
+**What a deploy does:** archives logs, stops all services, wipes the backend copy and the database, builds the given commit, migrates, imports the preserved players and bots, starts. Logins and passwords keep working; guilds and everything played since the last deploy are gone, so tell the user before deploying. `ops/seal_passmap.sh` runs it after each seal; a failure there does not fail the seal.
+
+**A commit can be deployed from any worktree branch:** all branches share the canonical repository. If the branch's newest work is not committed it is not deployed.
+
+**Who fixes what:** a bug found by the user is reproduced from the journal and the session log, then fixed on a backend branch and redeployed, not fixed in this folder. Change this folder only for harness faults. After changing a harness file copy it to `inputs/Supplimental_Materials/gxb_workshop/test_harness` (`ops/harness_deploy.sh` goes there too) and commit on branch v2. **The user pushes; never push.** Runtime, `backend/`, `preserve/`, `apk/`, `psk/` and `logs/` stay out of git.
+
+**Secrets:** never give a worker `psk/`, `preserve/server_state`, `preserve/player_db.json` or `runtime/state/{accounts,secrets}.json`. Paste report text into prompts; give workers journal extracts, since `slim-ro` workers cannot query the database.
+
+**Rebuild from nothing** (only `test_harness/` code from workshop v2 survives):
+1. Copy `test_harness/` and `ops/harness_deploy.sh` back from workshop v2.
+2. Restore `preserve/` from the `preserve` folder inside `inputs/Supplimental_Materials/Operator-Backend-Harnesses/v1_frozen_backend-operator_harness_with-legacy-data.zip`. Extract it as untrusted data and never run anything from it.
+3. Tools: `inputs/tools/gxb-backend-v2-e2e-tools-r4-go1.27.3-linux-amd64.zip` into `tmp/tools_r4_accept/`. Assets: the tree at `tmp/virtualclient/update-tree`, built from the assets tarball in Supplimental_Materials, `ops/TESTING_GUIDE.md` line 38.
+4. Service: `~/.config/systemd/user/gxb-test-harness.service`, oneshot with `RemainAfterExit=yes`, `KillMode=none`, `TimeoutStartSec=600`, `ExecStart` = `<root>/.toolchain/bin/python3 -I -B <root>/test_harness/harness.py up`, `ExecStop` the same with `down`, `WantedBy=default.target`. Then `systemctl --user daemon-reload`, `enable --now`.
+5. `bash ops/harness_deploy.sh`, then `harness.py status`, then `selfcheck.py`.
+6. `bash test_harness/build_apk.sh` needs `inputs/client_baseline/base.apk`. Firewall (user runs it): `sudo firewall-cmd --permanent --add-port=18954/tcp`.
+
+**Known gaps:** `DIRECTORY_SERVERS_SQL` in `import_legacy.py` goes before seal 798, once migration 00107 is canonical (D435); it has `ON CONFLICT DO NOTHING`, so it is harmless meanwhile. Realtime over zrok2 is a later wish, `work/i9/PLAYTEST_HARNESS_PLAN.md`, "Later". Bots enter 1 on 1 only in its window, 00:00-14:00 UTC: rerun `bots.py enter`.
+
 ## Ports and paths
 
 | Piece | Address |
