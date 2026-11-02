@@ -111,6 +111,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "campaign_players": [
+    "campaignstore.LockTx"
+   ]
+  },
   "row_locks": [
    "campaign_players"
   ]

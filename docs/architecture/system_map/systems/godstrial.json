@@ -44,6 +44,14 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "godstrial_players": [
+    "godstrialstore.LockTx"
+   ],
+   "mail_namespace_counters": [
+    "i5store.LockMailNamespaceCounterTx"
+   ]
+  },
   "row_locks": [
    "godstrial_players",
    "mail_namespace_counters"

@@ -51,6 +51,17 @@
     "rank": 580
    }
   ],
+  "row_lock_methods": {
+   "player_spirit_admissions": [
+    "spiritstore.LockAdmissionTx"
+   ],
+   "player_spirit_heroes": [
+    "spiritstore.LockHeroTx"
+   ],
+   "player_spirit_roots": [
+    "spiritstore.LockRootTx"
+   ]
+  },
   "row_locks": [
    "player_spirit_admissions",
    "player_spirit_heroes",

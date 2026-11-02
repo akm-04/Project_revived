@@ -28,6 +28,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "shared_rooms": [
+    "sharedroomstore.LockRoomTx"
+   ]
+  },
   "row_locks": [
    "shared_rooms"
   ]

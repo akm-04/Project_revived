@@ -54,6 +54,17 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "player_library_admissions": [
+    "librarystore.LockAdmissionTx"
+   ],
+   "player_library_heroes": [
+    "librarystore.LockHeroTx"
+   ],
+   "player_library_roots": [
+    "librarystore.LockRootTx"
+   ]
+  },
   "row_locks": [
    "player_library_admissions",
    "player_library_heroes",

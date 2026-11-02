@@ -1,4 +1,36 @@
 {
+ "login_composition": {
+  "DetailContributors": [
+   "appi5.AwakeningBootstrap",
+   "appi5.SignInBootstrap",
+   "appi5.MissionBootstrap",
+   "commerceprivilege.BootstrapProjection",
+   "i5store.BootstrapProjection",
+   "activitystore.BootstrapProjection",
+   "guildprojection.BootstrapProjection",
+   "guildprojection.TeaProjection",
+   "characterstore.HeroBootstrapProjection",
+   "librarystore.BootstrapProjection",
+   "bookstore.BootstrapProjection",
+   "coursestore.BootstrapProjection",
+   "characterstore.PetBootstrapProjection",
+   "characterstore.SavedPresetBootstrapProjection",
+   "conquerstore.BootstrapProjection",
+   "campaignWorld",
+   "vending",
+   "appmarch.Mode",
+   "apppetcampaign.Mode",
+   "appgodstrial.Mode",
+   "appworldboss.Mode",
+   "appadventure.Mode"
+  ],
+  "LoginReconcilers": [
+   "appi5.AwakeningBootstrap",
+   "appi5.SignInBootstrap",
+   "appi5.MissionBootstrap",
+   "appi5.PetStarterLoginReconciler"
+  ]
+ },
  "lookups": {
   "mid_to_system": {
    "1": "bootstrap",

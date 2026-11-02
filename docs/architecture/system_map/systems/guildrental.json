@@ -42,6 +42,18 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "guild_memberships": [
+    "guildstore.LockMembershipTx"
+   ],
+   "guild_rental_offers": [
+    "guildstore.LockLenderRentalOffersTx",
+    "guildstore.LockRentalOfferTx"
+   ],
+   "guild_rental_uses": [
+    "guildstore.LockRentalUseTx"
+   ]
+  },
   "row_locks": [
    "guild_memberships",
    "guild_rental_offers",

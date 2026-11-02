@@ -60,6 +60,7 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {},
   "row_locks": []
  },
  "login": [],

@@ -31,6 +31,16 @@
     "rank": 392
    }
   ],
+  "row_lock_methods": {
+   "player_profile_comment_operations": [
+    "profilefeedbackstore.PendingAdmissionTx",
+    "profilefeedbackstore.ReadAdmissionTx"
+   ],
+   "player_profile_feedback_roots": [
+    "profilefeedbackstore.LockRootTx",
+    "profilefeedbackstore.ReadRootTx"
+   ]
+  },
   "row_locks": [
    "player_profile_comment_operations",
    "player_profile_feedback_roots"

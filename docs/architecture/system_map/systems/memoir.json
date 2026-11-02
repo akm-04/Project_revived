@@ -28,6 +28,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "memoir_players": [
+    "memoirstore.LockTx"
+   ]
+  },
   "row_locks": [
    "memoir_players"
   ]

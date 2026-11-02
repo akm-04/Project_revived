@@ -38,6 +38,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "occult_players": [
+    "occultstore.LockPlayerTx"
+   ]
+  },
   "row_locks": [
    "occult_players"
   ]

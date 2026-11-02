@@ -87,6 +87,30 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "arena_casual_sessions": [
+    "arenastore.ReadCasualSessionTx"
+   ],
+   "arena_competitions": [
+    "arenastore.ReadCompetitionTx"
+   ],
+   "arena_friend_invitations": [
+    "arenastore.ReadFriendInvitationTx"
+   ],
+   "arena_matches": [
+    "arenastore.ReadMatchTx"
+   ],
+   "arena_players": [
+    "arenastore.ReadPlayerTx"
+   ],
+   "arena_tournament_periods": [
+    "arenastore.ReadTournamentTx"
+   ],
+   "arena_tournament_rooms": [
+    "arenastore.ReadTournamentRoomTx",
+    "arenastore.SaveTournamentRoomTx"
+   ]
+  },
   "row_locks": [
    "arena_casual_sessions",
    "arena_competitions",

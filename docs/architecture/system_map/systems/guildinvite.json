@@ -36,6 +36,25 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "guild_applications": [
+    "guildstore.PrepareRetirementChildrenTx"
+   ],
+   "guild_invite_projection_cursors": [
+    "guildinvitestore.LockCursorTx"
+   ],
+   "guild_invite_projection_deliveries": [
+    "guildinvitestore.ListDueInviteForUpdateTx",
+    "guildinvitestore.LockDeliveryTx"
+   ],
+   "guild_invite_projection_markers": [
+    "guildinvitestore.ListDueInviteForUpdateTx",
+    "guildinvitestore.LockMarkerTx"
+   ],
+   "guild_invites": [
+    "guildstore.PrepareRetirementChildrenTx"
+   ]
+  },
   "row_locks": [
    "guild_applications",
    "guild_invite_projection_cursors",

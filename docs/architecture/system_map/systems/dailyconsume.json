@@ -12,6 +12,12 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "daily_consumption_players": [
+    "dailyconsumestore.LockTx",
+    "dailyconsumestore.ReadTx"
+   ]
+  },
   "row_locks": [
    "daily_consumption_players"
   ]

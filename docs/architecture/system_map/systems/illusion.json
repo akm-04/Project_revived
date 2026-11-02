@@ -49,6 +49,17 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "illusion_occurrence_results": [
+    "illusionstore.LockResultTx"
+   ],
+   "illusion_occurrences": [
+    "illusionstore.LockOccurrenceTx"
+   ],
+   "illusion_players": [
+    "illusionstore.LockPlayerTx"
+   ]
+  },
   "row_locks": [
    "illusion_occurrence_results",
    "illusion_occurrences",

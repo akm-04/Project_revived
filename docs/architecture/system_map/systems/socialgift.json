@@ -28,6 +28,14 @@
     "rank": 372
    }
   ],
+  "row_lock_methods": {
+   "social_gift_epochs": [
+    "socialgiftstore.LockEpoch"
+   ],
+   "social_gift_transfers": [
+    "socialgiftstore.LockTransfer"
+   ]
+  },
   "row_locks": [
    "social_gift_epochs",
    "social_gift_transfers"

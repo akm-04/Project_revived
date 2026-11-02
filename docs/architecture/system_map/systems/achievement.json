@@ -32,6 +32,15 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "achievement_roots": [
+    "achievementstore.ReadRootTx"
+   ],
+   "achievement_streaks": [
+    "achievementstore.ReadStreakTx",
+    "achievementstore.ReadStreaksTx"
+   ]
+  },
   "row_locks": [
    "achievement_roots",
    "achievement_streaks"

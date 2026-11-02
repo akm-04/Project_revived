@@ -42,6 +42,17 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "worldboss_occurrences": [
+    "worldbossstore.LockOccurrenceTx"
+   ],
+   "worldboss_player_totals": [
+    "worldbossstore.LockTotalTx"
+   ],
+   "worldboss_players": [
+    "worldbossstore.LockPlayerTx"
+   ]
+  },
   "row_locks": [
    "worldboss_occurrences",
    "worldboss_player_totals",

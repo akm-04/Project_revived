@@ -53,6 +53,14 @@
     "rank": 580
    }
   ],
+  "row_lock_methods": {
+   "player_book_admissions": [
+    "bookstore.LockAdmissionTx"
+   ],
+   "player_book_roots": [
+    "bookstore.LockRootTx"
+   ]
+  },
   "row_locks": [
    "player_book_admissions",
    "player_book_roots"

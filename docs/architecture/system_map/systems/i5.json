@@ -152,6 +152,81 @@
     "rank": 721
    }
   ],
+  "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.AdvanceFunctionStateTx",
+    "i5store.AdvanceRedeemCodeTx",
+    "i5store.DeleteStackTx",
+    "i5store.InsertMailTx",
+    "i5store.InsertMissionInstanceTx",
+    "i5store.InsertRedemptionTx",
+    "i5store.RebindTemporalTx",
+    "i5store.SaveAwakeningTx",
+    "i5store.SaveGuideReturnTx",
+    "i5store.SaveMailStateTx",
+    "i5store.SaveMissionRootTx",
+    "i5store.SaveObjectiveTx",
+    "i5store.SaveProgressionTx",
+    "i5store.SaveScalarTx",
+    "i5store.SaveSignInTx",
+    "i5store.SaveStackTx",
+    "i5store.SaveStoryTx",
+    "i5store.SaveTemporalTx"
+   ],
+   "mail_namespace_counters": [
+    "i5store.LockMailNamespaceCounterTx"
+   ],
+   "mail_records": [
+    "i5store.LockMailTx"
+   ],
+   "player_awakening_roots": [
+    "i5store.LockAwakeningTx",
+    "i5store.ReadAwakeningTx"
+   ],
+   "player_currency_balances": [
+    "i5store.LockScalarTx"
+   ],
+   "player_directory_profiles": [
+    "i4store.LockTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockEconomyOwnerTx"
+   ],
+   "player_function_state_owners": [
+    "i5store.LockFunctionStateTx"
+   ],
+   "player_guide_return_state": [
+    "i5store.LockGuideReturnTx"
+   ],
+   "player_item_stacks": [
+    "i5store.LockStackTx"
+   ],
+   "player_mission_instances": [
+    "i5store.LockObjectiveTx",
+    "i5store.LockOpenObjectivesTx"
+   ],
+   "player_mission_roots": [
+    "i5store.LockMissionRootTx",
+    "i5store.ReadMissionRootTx"
+   ],
+   "player_progression": [
+    "i5store.LockPlayerLevelTx",
+    "i5store.LockProgressionTx"
+   ],
+   "player_signin_roots": [
+    "i5store.LockSignInTx",
+    "i5store.ReadSignInTx"
+   ],
+   "player_story_cursors": [
+    "i5store.LockStoryTx"
+   ],
+   "player_temporal_resources": [
+    "i5store.LockTemporalTx"
+   ],
+   "redeem_codes": [
+    "i5store.LockRedeemByDigestTx"
+   ]
+  },
   "row_locks": [
    "gameplay_contexts",
    "mail_namespace_counters",

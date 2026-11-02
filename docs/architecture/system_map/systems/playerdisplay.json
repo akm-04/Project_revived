@@ -70,6 +70,18 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "player_directory_profiles": [
+    "i4store.LockOwnedDirectoryTx"
+   ],
+   "player_display_admissions": [
+    "i5store.PendingDisplayAdmissionTx",
+    "i5store.ReadDisplayAdmissionTx"
+   ],
+   "player_profiles": [
+    "i5store.ReadDisplayStateTx"
+   ]
+  },
   "row_locks": [
    "player_directory_profiles",
    "player_display_admissions",

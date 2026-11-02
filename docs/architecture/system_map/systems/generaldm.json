@@ -28,6 +28,15 @@
     "rank": 381
    }
   ],
+  "row_lock_methods": {
+   "personal_dm_intents": [
+    "generaldmstore.Find",
+    "generaldmstore.Lock"
+   ],
+   "player_social_presence": [
+    "presencestore.ReadOwnerFenceTx"
+   ]
+  },
   "row_locks": [
    "personal_dm_intents",
    "player_social_presence"

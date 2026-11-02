@@ -17,6 +17,14 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "combat_attempts": [
+    "combatstore.LockAttemptTx"
+   ],
+   "combat_locator_roots": [
+    "combatstore.LockLocatorTx"
+   ]
+  },
   "row_locks": [
    "combat_attempts",
    "combat_locator_roots"

@@ -50,6 +50,14 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "league_competitions": [
+    "leaguestore.RootTx"
+   ],
+   "league_players": [
+    "leaguestore.PlayersTx"
+   ]
+  },
   "row_locks": [
    "league_competitions",
    "league_players"

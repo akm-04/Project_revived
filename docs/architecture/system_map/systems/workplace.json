@@ -38,6 +38,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "workplace_players": [
+    "workplacestore.LockTx"
+   ]
+  },
   "row_locks": [
    "workplace_players"
   ]

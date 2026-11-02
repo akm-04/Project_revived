@@ -53,6 +53,23 @@
     "rank": 580
    }
   ],
+  "row_lock_methods": {
+   "player_course_admissions": [
+    "coursestore.LockAdmissionTx"
+   ],
+   "player_course_heroes": [
+    "coursestore.LockHeroTx"
+   ],
+   "player_course_roots": [
+    "coursestore.LockRootTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockCoursePlayerStateTx"
+   ],
+   "player_progression": [
+    "i5store.LockCoursePlayerStateTx"
+   ]
+  },
   "row_locks": [
    "player_course_admissions",
    "player_course_heroes",

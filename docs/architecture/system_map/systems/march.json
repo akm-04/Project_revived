@@ -46,6 +46,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "march_players": [
+    "marchstore.LockTx"
+   ]
+  },
   "row_locks": [
    "march_players"
   ]

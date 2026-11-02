@@ -19,6 +19,14 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "commerce_privilege_roots": [
+    "commerceprivilegestore.ReadPrivilegeTx"
+   ],
+   "player_directory_profiles": [
+    "i4store.PrepareVIPProjectionTx"
+   ]
+  },
   "row_locks": [
    "commerce_privilege_roots",
    "player_directory_profiles"

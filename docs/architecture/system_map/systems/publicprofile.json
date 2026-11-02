@@ -38,6 +38,12 @@
     "rank": 391
    }
   ],
+  "row_lock_methods": {
+   "player_public_profile_roots": [
+    "publicprofilestore.LockRootTx",
+    "publicprofilestore.ReadRootTx"
+   ]
+  },
   "row_locks": [
    "player_public_profile_roots"
   ]

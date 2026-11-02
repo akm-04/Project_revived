@@ -36,6 +36,20 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "player_dorm_admissions": [
+    "dormstore.LockAdmissionTx"
+   ],
+   "player_dorm_roots": [
+    "dormstore.LockRootTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockDormPlayerStateTx"
+   ],
+   "player_progression": [
+    "i5store.LockDormPlayerStateTx"
+   ]
+  },
   "row_locks": [
    "player_dorm_admissions",
    "player_dorm_roots",

@@ -12,6 +12,12 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "player_social_presence": [
+    "presencestore.AssertOwnerFenceTx",
+    "presencestore.DeleteExactLeaseTx"
+   ]
+  },
   "row_locks": [
    "player_social_presence"
   ]

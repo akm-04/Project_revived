@@ -35,11 +35,15 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
   followed); `consumers` maps each emitted fact to mission task kinds, high-water kinds,
   entitlements and Adventure events; `reads` for mission/Adventure owners.
   Unresolved kinds are listed in `FINDINGS.json` `gaps`.
-- `login` – MID 1 / lobby contributors and overlay functions from the bootstrap composition.
+- `login` – MID 1 / lobby contributors and overlay functions attributable to one system.
+  `INDEX.json` `login_composition` is the literal contributor list in composition order, including
+  store adapters and local variables that no single system owns; start there for "who builds login".
 - `background` – `runReconcile` loops (gxb-api) and River enqueues/workers.
 - `locks.ranks` / `locks.profiles` – referenced `*LockRank` constants and tx `LockTimeout`.
   `locks.row_locks` – tables this system's stores lock `FOR UPDATE`/`FOR SHARE`, attributed
   through the store method's callers (including store-internal caller closure).
+  `locks.row_lock_methods` – per table, the `store.method` names that reach the SQL holding the
+  clause; `trace` says whether that clause is conditional.
 - `tests.scenarios_naming` – scenarios that name a MID in text; not coverage.
 
 ## Commands
@@ -60,7 +64,9 @@ campaign/clientlog attribution anchors, and re-runs `trace` for MIDs 114, 161 an
 cross-system call names. `trace <mid>` is computed live and is the right tool for "what does this
 request touch": from the registered dispatcher it follows the MID's branch, then the
 function-level call graph (each function once), printing `file:line`, SQL tables with read,
-write and `FOR UPDATE`/`FOR SHARE`, objective fact kinds recorded, and push calls. It prints
+write and `FOR UPDATE`/`FOR SHARE` (`conditional lock` when a branch appends the clause, so the
+caller's argument decides), objective fact kinds recorded, and push calls. A repeated function that
+touches tables prints `(seen above, touches tables)`. It prints
 `UNRESOLVED <expression>` for function values and dynamic routes it will not guess, `FANOUT` naming
 the implementers of an interface with more than three (a registry or per-mode port family; which one
 runs is decided at composition, so open the construction file), and a
@@ -74,5 +80,7 @@ runs is decided at composition, so open the construction file), and a
   unexported implementation types and implementers outside `internal/application` and
   `internal/adapters/postgres` are invisible.
 - Fact kinds assigned through non-constant expressions are reported in `gaps`.
+- `FINDINGS.soft_refusals` finds literal refusal bodies only and does not state the HTTP status;
+  it misses a 200 that replays a stored or duplicate result (for example 30005, 30002). A review lead.
 - Locks are listed as taken, never as a proven order; SQL text without `FOR UPDATE`/`FOR SHARE`
   (e.g. `pgx.CopyFrom`) is not a row lock here.

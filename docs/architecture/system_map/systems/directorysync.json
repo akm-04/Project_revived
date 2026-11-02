@@ -12,6 +12,11 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "player_directory_profiles": [
+    "i4store.LockOwnedDirectoryTx"
+   ]
+  },
   "row_locks": [
    "player_directory_profiles"
   ]

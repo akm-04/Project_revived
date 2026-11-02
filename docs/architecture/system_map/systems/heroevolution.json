@@ -51,6 +51,14 @@
     "rank": 580
    }
   ],
+  "row_lock_methods": {
+   "player_hero_evolution": [
+    "characterstore.LockHeroTx"
+   ],
+   "player_hero_evolution_admissions": [
+    "characterstore.LockAdmissionTx"
+   ]
+  },
   "row_locks": [
    "player_hero_evolution",
    "player_hero_evolution_admissions"

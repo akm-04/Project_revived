@@ -45,6 +45,17 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "one_on_one_competitions": [
+    "oneononestore.ReadCompetitionTx"
+   ],
+   "one_on_one_matches": [
+    "oneononestore.ReadMatchTx"
+   ],
+   "one_on_one_players": [
+    "oneononestore.ReadPlayerTx"
+   ]
+  },
   "row_locks": [
    "one_on_one_competitions",
    "one_on_one_matches",

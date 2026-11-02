@@ -129,6 +129,14 @@
     "rank": 400
    }
   ],
+  "row_lock_methods": {
+   "player_economy_owners": [
+    "i5store.LockEconomyOwnerTx"
+   ],
+   "player_item_stacks": [
+    "i5store.LockStackTx"
+   ]
+  },
   "row_locks": [
    "player_economy_owners",
    "player_item_stacks"

@@ -61,6 +61,27 @@
     "rank": 320
    }
   ],
+  "row_lock_methods": {
+   "guild_applications": [
+    "guildstore.LockApplicationTx",
+    "guildstore.PrepareMembershipCleanupTx"
+   ],
+   "guild_invites": [
+    "guildstore.LockInviteTx"
+   ],
+   "guild_memberships": [
+    "guildstore.LockMembershipTx"
+   ],
+   "guild_server_allocators": [
+    "guildstore.LockAllocatorTx"
+   ],
+   "guilds": [
+    "guildstore.LockGuildTx"
+   ],
+   "player_guild_activity_days": [
+    "guildstore.FoldActivityTx"
+   ]
+  },
   "row_locks": [
    "guild_applications",
    "guild_invites",

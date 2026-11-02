@@ -92,6 +92,32 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "guild_campaign_awards": [
+    "guildcampaignstore.LockAwardTx"
+   ],
+   "guild_campaign_chapters": [
+    "guildcampaignstore.LockChapterTx",
+    "guildcampaignstore.LockGuildChaptersTx"
+   ],
+   "guild_campaign_copies": [
+    "guildcampaignstore.LockChapterCopiesTx",
+    "guildcampaignstore.LockCopyTx",
+    "guildcampaignstore.ReadCopyTx"
+   ],
+   "guild_campaign_member_days": [
+    "guildcampaignstore.LockMemberDayTx"
+   ],
+   "guild_memberships": [
+    "guildstore.LockMembershipTx"
+   ],
+   "guilds": [
+    "guildstore.LockGuildTx"
+   ],
+   "player_guild_activity_days": [
+    "guildstore.FoldActivityTx"
+   ]
+  },
   "row_locks": [
    "guild_campaign_awards",
    "guild_campaign_chapters",

@@ -55,6 +55,26 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "top_floor_fights": [
+    "topfloorstore.ReadFightTx"
+   ],
+   "top_floor_ladders": [
+    "topfloorstore.ReadLadderTx"
+   ],
+   "top_floor_players": [
+    "topfloorstore.ReadPlayerTx"
+   ],
+   "top_floor_task_fights": [
+    "topfloorstore.ReadTaskFightTx"
+   ],
+   "top_floor_task_periods": [
+    "topfloorstore.ReadTaskPeriodTx"
+   ],
+   "top_floor_task_players": [
+    "topfloorstore.ReadTaskPlayerTx"
+   ]
+  },
   "row_locks": [
    "top_floor_fights",
    "top_floor_ladders",

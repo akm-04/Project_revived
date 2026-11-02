@@ -32,6 +32,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "petcampaign_players": [
+    "petcampaignstore.LockTx"
+   ]
+  },
   "row_locks": [
    "petcampaign_players"
   ]

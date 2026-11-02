@@ -30,6 +30,15 @@
     "rank": 380
    }
   ],
+  "row_lock_methods": {
+   "friend_dm_roots": [
+    "frienddmstore.Snapshot"
+   ],
+   "player_social_presence": [
+    "presencestore.AssertOwnerFenceTx",
+    "presencestore.ReadOwnerFenceTx"
+   ]
+  },
   "row_locks": [
    "friend_dm_roots",
    "player_social_presence"

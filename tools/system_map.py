@@ -104,6 +104,7 @@ def self_check():
     assert duration_milliseconds("500 * time.Millisecond") == 500
     assert duration_milliseconds("5 * time.Second") == 5000
     store_edge = [{"from": "x", "to": "store:internal/adapters/postgres/i4store", "method": "FindTx", "via_port": False}]
+    assert top_level_names("a.B{X: f(1, 2)}, c.D{}, e") == ["a.B", "c.D", "e"]
     assert typed_calls(["x"], store_edge) == {"x": {"store:i4store": ["FindTx"]}}
     self_edge = [{"from": "x", "to": "x", "method": "FindTx", "via_port": False}]
     assert typed_calls(["x"], self_edge) == {"x": {}}
@@ -880,6 +881,51 @@ def store_callers(edges):
     return callers
 
 
+def login_composition():
+    path = ROOT / "cmd" / "gxb-api" / "main_postgres.go"
+    text = read_text(path)
+    start = text.find("i4store.BootstrapService{")
+    block = balanced_span(text, start + len("i4store.BootstrapService") - 1, "{", "}")
+    rows = {}
+    for field in ("LoginReconcilers", "DetailContributors"):
+        match = re.search(field + r":\s*\[\][\w.]+\{", block)
+        if not match:
+            raise SystemExit("login composition field missing: " + field)
+        rows[field] = top_level_names(balanced_span(block, match.end() - 1, "{", "}")[1:-1])
+    return rows
+
+
+def top_level_names(body):
+    names = []
+    depth = 0
+    at_start = True
+    for index, character in enumerate(body):
+        if at_start and not character.isspace():
+            names.append(re.match(r"[\w.]+", body[index:]).group(0))
+            at_start = False
+        if character in "{([":
+            depth += 1
+        elif character in "})]":
+            depth -= 1
+        elif character == "," and depth == 0:
+            at_start = True
+    return names
+
+
+def row_lock_methods_by_system(systems, locks, callers):
+    rows = {system: {} for system in systems}
+    for lock in locks:
+        store = lock["store"].rsplit("/", 1)[-1]
+        for method in [lock.get("method", "")] + list(lock.get("callers") or []):
+            for system in callers.get((lock["store"], method), set()):
+                if system in rows:
+                    rows[system].setdefault(lock["table"], set()).add(store + "." + method)
+    return {
+        system: {table: sorted(methods) for table, methods in sorted(tables.items())}
+        for system, tables in rows.items()
+    }
+
+
 def row_locks_by_system(systems, locks, callers):
     rows = {system: set() for system in systems}
     for lock in locks:
@@ -927,6 +973,7 @@ def build_system_map():
     adventure_events = adventure_fact_events(fact_kinds)
     fact_consumer_map = fact_consumers(mission_map, adventure_events)
     lock_callers = store_callers(typed["edges"])
+    system_row_lock_methods = row_lock_methods_by_system(systems, typed.get("row_locks", []), lock_callers)
     system_row_locks = row_locks_by_system(systems, typed.get("row_locks", []), lock_callers)
     login_sets = login_contributors(systems)
     background = background_rows(systems, system_imports, system_texts)
@@ -1036,7 +1083,7 @@ def build_system_map():
             },
             "login": sorted(login_sets.get(system, [])),
             "background": background.get(system, []),
-            "locks": dict(lock_rows(system, system_texts[system], stores, lock_rank_constants), row_locks=system_row_locks.get(system, [])),
+            "locks": dict(lock_rows(system, system_texts[system], stores, lock_rank_constants), row_locks=system_row_locks.get(system, []), row_lock_methods=system_row_lock_methods.get(system, {})),
             "content": content_tables(read_tables),
             "dispatcher_files": sorted({entry["dispatcher_file"] for entry in system_entries if entry["dispatcher_file"]}),
             "stores": stores,
@@ -1073,6 +1120,7 @@ def build_system_map():
 
     index = {
         "systems": index_rows,
+        "login_composition": login_composition(),
         "lookups": {"mid_to_system": mid_to_system, "table_to_system": table_to_system},
     }
 

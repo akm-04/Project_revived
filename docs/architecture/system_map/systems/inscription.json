@@ -61,6 +61,28 @@
     "rank": 580
    }
   ],
+  "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.ImportInscriptionCertificatesTx"
+   ],
+   "player_currency_balances": [
+    "i5store.EnsureInscriptionCertificatesTx",
+    "i5store.ImportInscriptionCertificatesTx"
+   ],
+   "player_economy_owners": [
+    "i5store.EnsureInscriptionCertificatesTx",
+    "i5store.ImportInscriptionCertificatesTx"
+   ],
+   "player_inscription_admissions": [
+    "inscriptionstore.LockAdmissionTx"
+   ],
+   "player_inscription_heroes": [
+    "inscriptionstore.LockHeroTx"
+   ],
+   "player_inscription_roots": [
+    "inscriptionstore.LockRootTx"
+   ]
+  },
   "row_locks": [
    "gameplay_contexts",
    "player_currency_balances",

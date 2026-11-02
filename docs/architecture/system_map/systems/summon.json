@@ -75,6 +75,12 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "summon_players": [
+    "summonstore.LockTx",
+    "summonstore.ReadTx"
+   ]
+  },
   "row_locks": [
    "summon_players"
   ]

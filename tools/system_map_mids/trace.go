@@ -50,23 +50,24 @@ type tracePackage struct {
 }
 
 type tracer struct {
-	w         *typedWorld
-	mid       int
-	pkgs      map[string]*tracePackage
-	visited   map[string]bool
-	lines     []string
-	nodes     int
-	truncated bool
-	limit     int
-	boundary  string
-	read      map[string]bool
-	written   map[string]bool
+	w             *typedWorld
+	mid           int
+	pkgs          map[string]*tracePackage
+	visited       map[string]bool
+	lines         []string
+	nodes         int
+	truncated     bool
+	touchesTables map[string]bool
+	limit         int
+	boundary      string
+	read          map[string]bool
+	written       map[string]bool
 }
 
 func newTracer(w *typedWorld, mid int) *tracer {
 	return &tracer{
 		w: w, mid: mid, pkgs: map[string]*tracePackage{}, visited: map[string]bool{},
-		read: map[string]bool{}, written: map[string]bool{},
+		read: map[string]bool{}, written: map[string]bool{}, touchesTables: map[string]bool{},
 	}
 }
 
@@ -320,7 +321,13 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 		t.line(depth, fmt.Sprintf("BOUND depth %d reached", traceDepthLimit))
 		return
 	}
-	if t.visited[target.key()] || t.outsideBoundary(target.pkgPath) {
+	if t.outsideBoundary(target.pkgPath) {
+		return
+	}
+	if t.visited[target.key()] {
+		if t.touchesTables[target.key()] {
+			t.line(depth, target.display()+" (seen above, touches tables)  at "+target.callFile+":"+strconv.Itoa(target.callLine))
+		}
 		return
 	}
 	if t.nodes >= t.nodeLimit() {
@@ -345,6 +352,15 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 		prefix += "  at " + target.callFile + ":" + strconv.Itoa(target.callLine)
 	}
 	t.line(depth, prefix)
+	first := len(t.lines)
+	defer func() {
+		for _, line := range t.lines[first:] {
+			if strings.Contains(line, "sql: ") || strings.Contains(line, "(seen above, touches tables)") {
+				t.touchesTables[target.key()] = true
+				return
+			}
+		}
+	}()
 	t.sqlAndFacts(decl, pkg.declFile[decl], pkg, depth)
 	if handler && t.mid >= 0 {
 		t.walkHandlerBody(decl.Body.List, pkg, depth)
@@ -529,7 +545,7 @@ func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePacka
 		parts = append(parts, "write "+strings.Join(write, ", "))
 	}
 	if len(locks) > 0 {
-		parts = append(parts, "lock "+strings.Join(locks, ", "))
+		parts = append(parts, lockWord(decl)+strings.Join(locks, ", "))
 	}
 	if len(parts) > 0 {
 		t.line(depth+1, "sql: "+strings.Join(parts, "; "))
@@ -537,6 +553,27 @@ func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePacka
 	if kinds := factKindsInFunction(decl, file, pkg.info); len(kinds) > 0 {
 		t.line(depth+1, "facts: "+strings.Join(kinds, ", "))
 	}
+}
+
+// lockWord says when the lock clause is appended under a branch, so the caller's
+// argument decides whether the row is really locked.
+func lockWord(decl *ast.FuncDecl) string {
+	word := "lock "
+	ast.Inspect(decl.Body, func(node ast.Node) bool {
+		branch, isBranch := node.(*ast.IfStmt)
+		if !isBranch {
+			return true
+		}
+		ast.Inspect(branch.Body, func(inner ast.Node) bool {
+			literal, isLiteral := inner.(*ast.BasicLit)
+			if isLiteral && traceLock.MatchString(literal.Value) {
+				word = "conditional lock "
+			}
+			return true
+		})
+		return true
+	})
+	return word
 }
 
 func factKindsInFunction(decl *ast.FuncDecl, file *ast.File, info *types.Info) []string {

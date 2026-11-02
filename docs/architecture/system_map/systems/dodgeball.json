@@ -28,6 +28,14 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "dodgeball_players": [
+    "dodgeballstore.LockTx"
+   ],
+   "mail_namespace_counters": [
+    "i5store.LockMailNamespaceCounterTx"
+   ]
+  },
   "row_locks": [
    "dodgeball_players",
    "mail_namespace_counters"

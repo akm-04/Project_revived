@@ -104,6 +104,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "publication_picture_reads": [
+    "publicationstore.LockMarkerTx"
+   ]
+  },
   "row_locks": [
    "publication_picture_reads"
   ]

@@ -51,6 +51,17 @@
     "rank": 580
    }
   ],
+  "row_lock_methods": {
+   "player_element_admissions": [
+    "elementstore.LockAdmissionTx"
+   ],
+   "player_element_heroes": [
+    "elementstore.LockHeroTx"
+   ],
+   "player_element_roots": [
+    "elementstore.LockRootTx"
+   ]
+  },
   "row_locks": [
    "player_element_admissions",
    "player_element_heroes",

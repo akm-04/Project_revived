@@ -42,6 +42,11 @@
  "locks": {
   "profiles": [],
   "ranks": [],
+  "row_lock_methods": {
+   "guild_tea_wishes": [
+    "guildstore.LockWishTx"
+   ]
+  },
   "row_locks": [
    "guild_tea_wishes"
   ]

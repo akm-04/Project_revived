@@ -40,6 +40,17 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "conquer_school_players": [
+    "conquerstore.ReadModeTx"
+   ],
+   "player_conquer_facts": [
+    "conquerstore.LockFactsTx"
+   ],
+   "player_directory_profiles": [
+    "i4store.ProjectConquerTx"
+   ]
+  },
   "row_locks": [
    "conquer_school_players",
    "player_conquer_facts",

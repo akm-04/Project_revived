@@ -39,6 +39,11 @@
    }
   ],
   "ranks": [],
+  "row_lock_methods": {
+   "ranking_girls_roots": [
+    "rankingstore.LockBoardRootTx"
+   ]
+  },
   "row_locks": [
    "ranking_girls_roots"
   ]
