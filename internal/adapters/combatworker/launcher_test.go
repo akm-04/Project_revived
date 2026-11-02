@@ -100,6 +100,27 @@ func TestFreshProcessesAreDeterministic(t *testing.T) {
 	t.Logf("outcome %+v report %s", first.Outcome, d.ReportHash(first.Report))
 }
 
+// Warm starts a spare before any attempt, so the first client fight does not
+// pay the worker's one-time preparation.
+func TestWarmStartsSpareBeforeFirstAttempt(t *testing.T) {
+	l := launcher(t)
+	l.Warm()
+	var pid string
+	for i := 0; i < 500 && pid == ""; i++ {
+		time.Sleep(20 * time.Millisecond)
+		entries, _ := os.ReadDir("/proc")
+		for _, e := range entries {
+			cmdline, err := os.ReadFile(filepath.Join("/proc", e.Name(), "cmdline"))
+			if err == nil && bytes.HasPrefix(cmdline, []byte(workerBinary+"\x00")) {
+				pid = e.Name()
+			}
+		}
+	}
+	if pid == "" {
+		t.Fatal("warm launcher started no spare process")
+	}
+}
+
 // A09: limits and isolation are observed on the running process, not assumed.
 func TestWorkerIsolationIsExecuted(t *testing.T) {
 	raw, hash := snapshot(t, hero(t, 10001001), hero(t, 10001002))

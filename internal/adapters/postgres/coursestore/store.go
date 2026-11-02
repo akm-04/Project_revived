@@ -87,6 +87,42 @@ const heroCols = `player_id,partner_id,state_version,facts::text,created_at,upda
 func (Store) ReadHeroTx(c context.Context, q tx.Queryer, p identity.PlayerID, id int64) (course.HeroRoot, error) {
 	return scanHero(q.QueryRow(c, `SELECT `+heroCols+` FROM player_course_heroes WHERE player_id=$1 AND partner_id=$2`, int64(p), id))
 }
+
+// ListHeroesTx returns every Hero facet of one player in one owner read.
+func (Store) ListHeroesTx(c context.Context, q tx.Queryer, p identity.PlayerID) ([]course.HeroRoot, error) {
+	if q == nil || !p.Valid() {
+		return nil, course.ErrUnqualified
+	}
+	var raw string
+	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY partner_id),'[]'::jsonb)::text FROM player_course_heroes t WHERE player_id=$1`, int64(p)).Scan(&raw); e != nil {
+		return nil, e
+	}
+	var rows []struct {
+		PlayerID     int64           `json:"player_id"`
+		PartnerID    int64           `json:"partner_id"`
+		StateVersion int64           `json:"state_version"`
+		Facts        json.RawMessage `json:"facts"`
+		CreatedAt    time.Time       `json:"created_at"`
+		UpdatedAt    time.Time       `json:"updated_at"`
+	}
+	if e := json.Unmarshal([]byte(raw), &rows); e != nil {
+		return nil, e
+	}
+	out := make([]course.HeroRoot, 0, len(rows))
+	for _, row := range rows {
+		var r course.HeroRoot
+		r.Player, r.PartnerID, r.Version = identity.PlayerID(row.PlayerID), row.PartnerID, row.StateVersion
+		r.CreatedAt, r.UpdatedAt = row.CreatedAt, row.UpdatedAt
+		if e := json.Unmarshal(row.Facts, &r.Facts); e != nil {
+			return nil, e
+		}
+		if !r.Player.Valid() || r.PartnerID <= 0 || r.Version < 1 || r.CreatedAt.IsZero() || r.UpdatedAt.Before(r.CreatedAt) {
+			return nil, course.ErrUnqualified
+		}
+		out = append(out, r)
+	}
+	return out, nil
+}
 func (Store) LockHeroTx(c context.Context, t tx.Tx, p identity.PlayerID, id int64) (course.HeroRoot, error) {
 	return scanHero(t.QueryRow(c, `SELECT `+heroCols+` FROM player_course_heroes WHERE player_id=$1 AND partner_id=$2 FOR UPDATE`, int64(p), id))
 }

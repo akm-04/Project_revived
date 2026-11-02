@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 func (Store) InsertPlayerDisplay(c context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
@@ -22,7 +23,13 @@ func (Store) InsertPlayerDisplay(c context.Context, t tx.Tx, b registry.Bundle) 
 
 const verifyPlayerDisplaySQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_player_display_catalogs WHERE revision_id=$1`
 
+var playerDisplayCatalogs sync.Map
+
 func (s Store) ReadPlayerDisplayCatalogTx(c context.Context, q tx.Queryer, rev string) (player.DisplayCatalog, error) {
+	return memoCatalog(&playerDisplayCatalogs, rev, func() (player.DisplayCatalog, error) { return s.readPlayerDisplayCatalogTx(c, q, rev) })
+}
+
+func (s Store) readPlayerDisplayCatalogTx(c context.Context, q tx.Queryer, rev string) (player.DisplayCatalog, error) {
 	var out player.DisplayCatalog
 	// This existing exact reader verifies the canonical manifest identity; it does
 	// not discover active content or time, or start a transaction.

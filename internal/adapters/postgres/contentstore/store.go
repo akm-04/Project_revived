@@ -489,6 +489,34 @@ func (Store) HeroKindTx(ctx context.Context, q tx.Queryer, revision string, tabl
 	return k, nil
 }
 
+// HeroKindsTx resolves the immutable Hero projection kind of every requested
+// template in one read. Missing tables are reported by the caller's map lookup.
+func (Store) HeroKindsTx(ctx context.Context, q tx.Queryer, revision string, tableIDs []int64) (map[int64]character.HeroKind, error) {
+	if q == nil || len(revision) != 64 || len(tableIDs) == 0 {
+		return nil, errors.New("content store: invalid Hero kind lookup")
+	}
+	var raw string
+	if err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)`, revision, tableIDs).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		TableID int64  `json:"table_id"`
+		Kind    string `json:"kind"`
+	}
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make(map[int64]character.HeroKind, len(rows))
+	for _, row := range rows {
+		kind := character.HeroKind(row.Kind)
+		if kind != character.NormalHero && kind != character.SuperHero {
+			return nil, errors.New("content store: invalid Hero kind")
+		}
+		out[row.TableID] = kind
+	}
+	return out, nil
+}
+
 // HeroCoreActive reports whether the current immutable revision explicitly
 // advertises the sealed CA2 Hero capability. Older schema-v1 revisions remain
 // startup-valid; Hero routes fail closed until explicit host activation.

@@ -120,14 +120,22 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 		out.Contributions[c.AttrID] += c.Hundredths
 		return nil
 	}
+	factsRows, e := s.Library.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return out, e
+	}
+	byPartner := make(map[int64]lib.HeroFacts, len(factsRows))
+	for _, f := range factsRows {
+		byPartner[f.Ref.PartnerID] = f
+	}
 	for _, h := range heroes {
 		rule, ok := catalog.Templates[h.TableID]
 		if !ok {
 			return out, lib.ErrUnqualified
 		}
-		f, e := s.Library.ReadHeroTx(ctx, q, h.Ref())
-		if e != nil {
-			return out, e
+		f, ok := byPartner[h.PartnerID]
+		if !ok {
+			return out, lib.ErrUnqualified
 		}
 		if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) {
 			return out, lib.ErrUnqualified

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/characterqueries"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -192,6 +193,16 @@ func (Store) ReadHeroByPartnerIDTx(ctx context.Context, q tx.Queryer, pid identi
 		return character.Hero{}, errors.New("character store: invalid Hero read")
 	}
 	return scanHero(q.QueryRow(ctx, characterqueries.ReadHeroByPartnerID, int64(pid), partnerID))
+}
+
+// FindHeroByPartnerIDTx distinguishes an absent roster row from a read error
+// for projections that must report a retired Hero.
+func (Store) FindHeroByPartnerIDTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, partnerID int64) (character.Hero, bool, error) {
+	h, e := (Store{}).ReadHeroByPartnerIDTx(ctx, q, pid, partnerID)
+	if errors.Is(e, kernelstore.ErrNoRows) {
+		return h, false, nil
+	}
+	return h, e == nil, e
 }
 
 func (Store) LockHeroByPartnerIDTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, partnerID int64) (character.Hero, error) {

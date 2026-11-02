@@ -72,7 +72,7 @@ type storageObservations struct{}
 func (storageObservations) MissionRosterTx(context.Context, tx.Queryer, i5.MissionScope) ([]character.Hero, error) {
 	return nil, nil
 }
-func (storageObservations) ObserveMissionTx(_ context.Context, _ tx.Queryer, _ i5.MissionScope, _ []character.Hero, definition objective.MissionDefinition, _ int64) (i5.MissionObservation, error) {
+func (storageObservations) ObserveMissionTx(_ context.Context, _ tx.Queryer, _ i5.MissionScope, _ []character.Hero, definition objective.MissionDefinition, _ int64, _ *i5.MissionReadMemo) (i5.MissionObservation, error) {
 	return i5.MissionObservation{GatePassed: definition.ObjectiveID == 10002 || definition.ObjectiveID == 50001 || definition.ObjectiveID == 50002, Value: 100}, nil
 }
 

@@ -111,6 +111,7 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 	// I8_WORKER_ADMISSION_V1 (private policy): a warm worker peaks near 2.7 GiB,
 	// so three live workers bound memory; a busy pool refuses after five seconds.
 	worker := combatworker.New(limits, 3, 5*time.Second)
+	worker.Warm()
 	return combat.Service{Rules: corpus, Keys: keys, Worker: worker, Store: combatstore.Store{}, Content: content, Runner: r, Fresh: p,
 		Inputs: combat.Inputs{Heroes: o.roster(content), Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}, Lending: lending}}, true, nil
 }

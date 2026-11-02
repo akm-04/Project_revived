@@ -107,6 +107,15 @@ func (l *Launcher) Resolve(ctx context.Context, snapshot []byte, snapshotHash st
 	return l.run(ctx, p, request)
 }
 
+// Warm starts the configured spare processes before the first client attempt,
+// so a resolved fight does not pay their one-time Lua preparation.
+func (l *Launcher) Warm() {
+	if !l.limits.configured() || cap(l.slots) == 0 {
+		return
+	}
+	l.fill()
+}
+
 // take hands out an idle spare, or starts a process when a slot is free, and
 // refuses once the admission wait elapses with every slot busy.
 func (l *Launcher) take(ctx context.Context) (*process, error) {

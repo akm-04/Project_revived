@@ -318,10 +318,12 @@ func TestActivityReadDistinguishesOldRevisionFromMissingRequiredPayload(t *testi
 		t.Fatalf("legacy revision: %#v %v", got, err)
 	}
 	q.values = []any{"", true}
-	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), q, revision); err == nil {
+	missingRevision := "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), q, missingRevision); err == nil {
 		t.Fatal("missing required payload accepted")
 	}
-	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), nil, revision); err == nil {
+	nilRevision := "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+	if _, err := (Store{}).MissionActivityCatalogTx(context.Background(), nil, nilRevision); err == nil {
 		t.Fatal("nil reader accepted")
 	}
 }

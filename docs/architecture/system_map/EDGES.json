@@ -492,7 +492,7 @@
   },
   "course": {
    "achievement": [
-    "*HeroCourseInputsTx"
+    "*CompletedCourseCountTx"
    ],
    "bookskill": [
     "*EnsureRootTx"
@@ -1336,7 +1336,7 @@
   "illusion": {},
   "inscription": {
    "achievement": [
-    "*HeroInscriptionInputsTx"
+    "*CompleteSuitCountTx"
    ],
    "bookskill": [
     "*EnsureRootTx"
@@ -1922,7 +1922,7 @@
     "*FactsTx"
    ],
    "course": [
-    "*HeroCourseInputsTx"
+    "*CompletedCourseCountTx"
    ],
    "dormhouse": [
     "*VillaCountTx"
@@ -1937,7 +1937,7 @@
     "*SettleGrantTx"
    ],
    "inscription": [
-    "*HeroInscriptionInputsTx"
+    "*CompleteSuitCountTx"
    ],
    "librarylocal": [
     "*HeroLibraryInputsTx",
@@ -2939,6 +2939,7 @@
     "*LockRootTx"
    ],
    "interface:course.HeroPort": [
+    "*FindHeroByPartnerIDTx",
     "*ListHeroesTx",
     "*LockHeroByPartnerIDTx",
     "*LockRootTx",
@@ -2954,6 +2955,7 @@
     "*CourseInputsActive",
     "*CourseInputsRevisionTx",
     "*HeroKindTx",
+    "*HeroKindsTx",
     "*HeroSkillCatalogTx"
    ],
    "store:elementstore": [
@@ -3886,6 +3888,7 @@
     "*LockRootTx"
    ],
    "interface:inscription.HeroPort": [
+    "*FindHeroByPartnerIDTx",
     "*ListHeroesTx",
     "*LockHeroByPartnerIDTx",
     "*LockRootTx",
@@ -3901,6 +3904,7 @@
    ],
    "store:contentstore": [
     "*HeroKindTx",
+    "*HeroKindsTx",
     "*InscriptionCatalogTx",
     "*InscriptionInputsActive",
     "*InscriptionInputsRevisionTx"
@@ -3967,6 +3971,7 @@
    "store:librarystore": [
     "*BackfillMissingHeroTx",
     "*EnsurePlayerRootTx",
+    "*ListHeroesTx",
     "*LockAdmissionTx",
     "*LockHeroTx",
     "*LockRootTx",

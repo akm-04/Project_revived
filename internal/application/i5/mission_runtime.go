@@ -279,7 +279,7 @@ func (s Service) ClaimMission(ctx context.Context, actor identity.ActorContext, 
 		if err != nil {
 			return err
 		}
-		observation, err := s.Missions.Observations.ObserveMissionTx(ctx, tr.Tx, observed, roster, definition, hero)
+		observation, err := s.Missions.Observations.ObserveMissionTx(ctx, tr.Tx, observed, roster, definition, hero, nil)
 		if err != nil {
 			return err
 		}
