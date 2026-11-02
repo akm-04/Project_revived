@@ -49,7 +49,7 @@ func TestActivityNativeMIDs160169170(t *testing.T) {
 	}
 	for _, mid := range []uint16{169, 170} {
 		refused := request(mid, int64(1))
-		if refused.HTTPStatus != 200 || refused.Body["error_code"] != int64(1) {
+		if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(1) {
 			t.Fatalf("MID%d incomplete %#v", mid, refused)
 		}
 	}
@@ -82,7 +82,7 @@ func TestActivityNativeMIDs160169170(t *testing.T) {
 		}
 	}
 	invalid := request(170, int64(3))
-	if invalid.HTTPStatus != 200 || invalid.Body["error_code"] != int64(1) {
+	if invalid.HTTPStatus != 409 || invalid.Body["error_code"] != int64(1) {
 		t.Fatalf("weekly display offset accepted %#v", invalid)
 	}
 }
