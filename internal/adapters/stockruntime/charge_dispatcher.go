@@ -50,14 +50,14 @@ func (o ChargeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		body, err = o.Service.Query(ctx, a, req.Envelope.ReceivedAt)
 	case 657:
 		level, ok := topFloorInteger(p, "id", true)
-		if !ok || !onlyStockGameplayParams(p, "id") {
+		if !ok || level < 1 || level > 15 || !onlyStockGameplayParams(p, "id") {
 			return bad
 		}
 		body, err = o.Service.ClaimVIPAward(ctx, a, level, op)
 	case mids.MIDRechargeTap:
 		chargeID, chargeOK := topFloorInteger(p, "charge_id", true)
 		intent, intentOK := p["intent_id"].(string)
-		if !chargeOK || !intentOK || !onlyStockGameplayParams(p, "charge_id", "intent_id") {
+		if !chargeOK || chargeID <= 0 || !intentOK || !validTapIntent(intent) || !onlyStockGameplayParams(p, "charge_id", "intent_id") {
 			return bad
 		}
 		body, err = o.Service.Tap(ctx, a, app.TapRequest{ChargeID: chargeID, IntentID: intent}, op)
@@ -68,6 +68,18 @@ func (o ChargeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return failCharge(err)
 	}
 	return okI5(body)
+}
+
+func validTapIntent(intent string) bool {
+	if intent == "" || len(intent) > 64 {
+		return false
+	}
+	for _, r := range intent {
+		if r < '!' || r > '~' {
+			return false
+		}
+	}
+	return true
 }
 
 // failCharge refuses business conflicts on 409 so stock callbacks see ERROR.
