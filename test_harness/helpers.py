@@ -298,7 +298,8 @@ def session_summary(session, events, journal, logins, mid_names):
         if failed:
             print(
                 f"     ERROR {clock(request['at'])} mid={entry.get('mid')} http={request['status']} "
-                f"outcome={entry.get('outcome')} {request['ms']:.0f} ms cause={str(entry.get('cause') or '-')[:160]}"
+                f"outcome={entry.get('outcome')} {request['ms']:.0f} ms reply={request.get('reply', '-')} "
+                f"cause={str(entry.get('cause') or '-')[:160]}"
             )
 
 

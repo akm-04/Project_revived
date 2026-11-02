@@ -27,6 +27,8 @@ RESOURCE_PREFIX = "/res/"
 SESSION_PATTERN = r"\d{4}-\d{6}-[0-9a-f]{4}"
 SESSION_PATH = re.compile(rf"/s/({SESSION_PATTERN})(/.*)")
 SESSION_RESOURCE = re.compile(rf"/res/({SESSION_PATTERN})/([^/]+)")
+REFUSED_STATUS = 400
+REFUSAL_REPLY_BYTES = 300
 SESSION_LOG_DIRECTORY = Path(__file__).resolve().parent / "logs" / "sessions"
 
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
@@ -313,6 +315,7 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
                 "bytes_out": len(data),
                 "request_sha256": hashlib.sha256(body).hexdigest(),
                 "delivered": delivered,
+                **({"reply": data[:REFUSAL_REPLY_BYTES].decode("utf-8", "replace")} if response.status >= REFUSED_STATUS else {}),
             },
         )
 

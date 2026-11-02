@@ -37,6 +37,8 @@ ACCOUNTS_PATH = STATE_DIRECTORY / "accounts.json"
 
 SDK_EVENT_LOG = Path(__file__).resolve().parent / "logs" / "sdk.jsonl"
 SDK_EVENT_LOCK = threading.Lock()
+# A list of what to keep, because other fields (upload_sdk_logs msg) embed the typed password.
+SDK_EVENT_FIELDS = ("login_email", "uid", "device_id", "device_type", "os_version", "sdk_version")
 REGISTER_MID = "65282"
 LOGIN_MID = "65281"
 ANONYMOUS_MID = "65284"
@@ -362,7 +364,7 @@ class SdkHandler(BaseHTTPRequestHandler):
             "mid": mid,
             "user_agent": self.headers.get("User-Agent"),
             "forwarded_for": self.headers.get("X-Forwarded-For"),
-            "fields": {name: value for name, value in fields.items() if "password" not in name.lower()},
+            "fields": {name: fields[name] for name in SDK_EVENT_FIELDS if name in fields},
         }
         SDK_EVENT_LOG.parent.mkdir(parents=True, exist_ok=True)
         with SDK_EVENT_LOCK, open(SDK_EVENT_LOG, "a", encoding="utf-8") as handle:

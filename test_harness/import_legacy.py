@@ -1288,6 +1288,17 @@ def assigned_password(login):
     return password
 
 
+# LoginWindow.lua:60 reads regions[4] of the list sorted newest first and crashes the login page when it is nil, so a fresh install
+# needs four listed servers; with exactly four it lands on Server 1.
+# shortcut: harness rows until the product migration planned before seal 798 (D435) adds them.
+DIRECTORY_SERVERS_SQL = """
+INSERT INTO logical_servers(logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at)
+VALUES
+ (3,'Server 3',CURRENT_TIMESTAMP,true,true,true,325001,399999,1,CURRENT_TIMESTAMP),
+ (4,'Server 4',CURRENT_TIMESTAMP,true,true,true,425001,499999,1,CURRENT_TIMESTAMP)
+ON CONFLICT (logical_server_id) DO NOTHING;
+"""
+
 SEEDS = (
     {"directory": "12525385", "login": "moppleton"},
     {"directory": "19700001", "login": "alpaca123"},
@@ -1296,6 +1307,7 @@ SEEDS = (
 
 
 def seed():
+    run_psql(DIRECTORY_SERVERS_SQL)
     for seed_entry in SEEDS:
         path = PRESERVE_PLAYERS / seed_entry["directory"] / "player.json"
         save = json.loads(path.read_text(encoding="utf-8"))
