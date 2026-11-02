@@ -226,7 +226,10 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 	})
 }
 func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op operation.Context) (map[string]any, error) {
-	return s.run(c, a, "result", q, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
+	// A drained or rejected result still clears r.Fight in its committed state;
+	// the refusal is answered only after that commit as a dispatcher 409.
+	var refused bool
+	out, e := s.run(c, a, "result", q, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
 		if q.Kind < 1 || q.Kind > 2 || q.Floor < 1 || q.Pet < 0 {
 			return nil, d.ErrInvalid
 		}
@@ -246,6 +249,7 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		}
 		if judged.Drained || judged.Attestation.Verdict == cd.VerdictRejected {
 			r.Fight = nil
+			refused = true
 			return map[string]any{"error_code": int64(1)}, nil
 		}
 		out := map[string]any{"awards": []map[string]any{}, "now_floor": r.Current, "max_floor": r.Max}
@@ -280,4 +284,20 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		}
 		return out, nil
 	})
+	if e == nil && (refused || refusalBody(out)) {
+		e = d.ErrRefused
+	}
+	return out, e
+}
+
+// refusalBody recognises a committed refusal replayed from its receipt.
+func refusalBody(out map[string]any) bool {
+	switch code := out["error_code"].(type) {
+	case int64:
+		return code == 1
+	case float64:
+		return code == 1
+	default:
+		return false
+	}
 }

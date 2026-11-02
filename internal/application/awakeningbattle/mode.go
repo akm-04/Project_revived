@@ -134,6 +134,9 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 		return nil, e
 	}
 	var body map[string]any
+	// The refusal body is committed and replayed from its receipt; only the
+	// answer after commit is an error, so the dispatcher can refuse with 409.
+	var refused bool
 	_, res, e := s.Timed.Run(ctx, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: true}, resolver{receipt.Resolver{Reader: s.ReceiptRead, Identity: rid, Fingerprint: fp}}, func(ctx context.Context, sc gen.TimedScope) error {
 		if e := s.Fence.FenceActorTx(ctx, sc.Tx, actor, sc.Operation.DecisionAt()); e != nil {
 			return e
@@ -157,6 +160,7 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 			return e
 		}
 		if attested.Drained && !a.Complete || !attested.Drained && attested.Attestation.Verdict == cd.VerdictRejected {
+			refused = true
 			body = map[string]any{"error_code": int64(1)}
 		} else {
 			body, e = s.Missions.CompleteAwakeningBloodTx(ctx, sc.Tx, actor.PlayerID, a)
@@ -186,5 +190,20 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 		}
 		body, e = decode(r, rid, fp)
 	}
+	if e == nil && (refused || refusalBody(body)) {
+		e = objective.ErrAwakeningRefused
+	}
 	return body, e
+}
+
+// refusalBody recognises a committed refusal replayed from its receipt.
+func refusalBody(body map[string]any) bool {
+	switch code := body["error_code"].(type) {
+	case int64:
+		return code == 1
+	case float64:
+		return code == 1
+	default:
+		return false
+	}
 }

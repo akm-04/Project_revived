@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
@@ -11,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/awakeningbattle"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
@@ -105,8 +107,13 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	fight.Inputs.Heroes = characterstore.HeroBootstrapProjection{Content: content, Awakening: heroes, AwakeningPositions: heroes.AwakeningPositions, Library: libraryService(p, p), Dorm: dormService(p, p), Book: bookService(p, p), Course: courseService(p, p), Inscription: inscriptionService(p, p), Element: elementService(p, p), Spirit: spiritService(p, p), Evolution: evolutionService(p, p)}
 	mode := awakeningbattle.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Content: content, Fence: values, Heroes: heroes, Missions: owner, Combat: fight, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 	absent, e := mode.Result(ctx, actor, 2001002, 20, op())
-	if e != nil || absent["error_code"] != int64(1) {
+	if !errors.Is(e, objective.ErrAwakeningRefused) || absent["error_code"] != int64(1) {
 		t.Fatal("unstarted result", absent, e)
+	}
+	dispatcher := stockruntime.AwakeningBloodDispatcher{Authority: playtestAuthority{actor}, Service: mode}
+	response := dispatcher.Dispatch(ctx, playtestRequest(actor, 867, map[string]any{"twice_awake_mission": json.Number("2001002"), "incubus_id": json.Number("2001002"), "num": json.Number("20"), "npc_ids": map[string]any{}}))
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+		t.Fatalf("unstarted result reached the OK callback: %+v", response)
 	}
 	// A positive number without the genuine mission producer is not an input.
 	badFight := fight
