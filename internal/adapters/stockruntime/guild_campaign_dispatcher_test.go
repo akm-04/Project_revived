@@ -206,3 +206,7 @@ func TestI9_9CDispatcherSettleBodyAndAlternativeNumbers(t *testing.T) {
 		t.Fatalf("610 request %+v", stub.settledRequest)
 	}
 }
+
+func (campaignStub) BindContent(_ context.Context, op operation.Context) (operation.Context, error) {
+	return op, nil
+}

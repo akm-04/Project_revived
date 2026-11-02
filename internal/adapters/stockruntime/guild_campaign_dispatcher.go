@@ -20,6 +20,7 @@ var GuildCampaignMIDs = []uint16{601, 602, 603, 604, 605, 606, 607, 608, 609, 61
 
 // GuildCampaignPort is the gameplay surface of the Guild Campaign owner.
 type GuildCampaignPort interface {
+	BindContent(context.Context, operation.Context) (operation.Context, error)
 	Open(context.Context, identity.ActorContext, int64, operation.Context) (int64, error)
 	Reset(context.Context, identity.ActorContext, int64, operation.Context) (int64, error)
 	Claim(context.Context, identity.ActorContext, int64, operation.Context) (guildcampaign.ClaimView, error)
@@ -49,7 +50,11 @@ func (d GuildCampaignDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 	if d.Service == nil {
 		return campaignUnavailable()
 	}
-	p, op := r.Envelope.Params, r.Envelope.Operation
+	p := r.Envelope.Params
+	op, err := d.Service.BindContent(c, r.Envelope.Operation)
+	if err != nil {
+		return campaignFailure(err)
+	}
 	switch r.Envelope.MID {
 	case 601:
 		if !onlyStockGameplayParams(p) {

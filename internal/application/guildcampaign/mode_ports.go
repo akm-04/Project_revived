@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -312,6 +313,29 @@ type Mode struct {
 	Notifier  Notifier
 	Timed     gen.TimedRunner
 	Fresh     tx.Queryer
+	Revisions ContentRevisions
+}
+
+// ContentRevisions names the installed content a live request binds.
+type ContentRevisions interface {
+	ActiveRevision(context.Context, tx.Queryer) (string, error)
+}
+
+// BindContent pins the active content revision on a request's operation; combat
+// and grants refuse an unbound one, and the HTTP edge does not bind it.
+func (m Mode) BindContent(c context.Context, op operation.Context) (operation.Context, error) {
+	if _, bound := op.Policies.Get("content"); bound {
+		return op, nil
+	}
+	if m.Revisions == nil {
+		return op, ErrUnavailable
+	}
+	revision, err := m.Revisions.ActiveRevision(c, m.Fresh)
+	if err != nil {
+		return op, err
+	}
+	op.Policies, err = policy.NewSet(append(op.Policies.Refs(), policy.Ref{Name: "content", Version: revision})...)
+	return op, err
 }
 
 func (m Mode) ready() bool {

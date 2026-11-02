@@ -252,6 +252,9 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 		if err != nil {
 			return out, err
 		}
+		if child, err = m.BindContent(c, child); err != nil {
+			return out, err
+		}
 		settled := false
 		_, _, err = m.Timed.Run(c, child, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
 			now := sc.Operation.DecisionAt()

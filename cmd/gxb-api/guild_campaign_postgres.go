@@ -7,6 +7,7 @@ import (
 
 	"gxb.local/backend/v2/internal/adapters/guildcampaigncontent"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -23,7 +24,7 @@ import (
 )
 
 // canonicalGuildCampaign builds the one Guild Campaign owner of I9-9C.
-func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, guildDB guildstore.Store, i5db i5store.Store, i5svc i5.Service,
+func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, revisions contentstore.Store, guildDB guildstore.Store, i5db i5store.Store, i5svc i5.Service,
 	catalog guildcampaigncontent.Catalog, policy guildcampaignpolicy.Policy, combatService combat.Service) (app.Mode, app.Payout) {
 	settings := guildcampaigncontent.Settings(policy, catalog.Installed.Settings)
 	tables := catalog.ChapterInfos()
@@ -39,9 +40,10 @@ func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, guildDB guildstore.Sto
 		ModeStore: store, Content: catalog, Tables: tables, Settings: settings,
 		Combat: combatService, Grants: i5svc, Facts: i5.ObjectiveFacts{Owner: i5svc, Open: i5db},
 		Directory: i4store.PlayerDirectoryReader{}, Mail: i5.SettlementMail{Store: i5db},
-		Notifier: guildCampaignNotifier{Execer: pg.AutocommitExecer(p)},
-		Timed:    gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
-		Fresh:    p,
+		Notifier:  guildCampaignNotifier{Execer: pg.AutocommitExecer(p)},
+		Timed:     gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
+		Fresh:     p,
+		Revisions: revisions,
 	}
 	return mode, payout
 }
