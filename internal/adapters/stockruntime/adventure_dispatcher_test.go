@@ -150,7 +150,7 @@ func TestAdventureDispatcherRoutesRoomMIDs(t *testing.T) {
 		params map[string]any
 	}{
 		{2410, map[string]any{"star": int64(1), "total_damage": int64(10), "monster_pos": int64(1), "formation": "11", "table_id": int64(10001)}},
-		{2411, map[string]any{}},
+		{2411, map[string]any{"table_id": int64(10006)}},
 		{2412, map[string]any{"monster_pos": int64(1), "table_id": int64(10001)}},
 		{2413, map[string]any{"monster_pos": int64(1), "table_id": int64(10001)}},
 		{2423, map[string]any{"table_id": int64(10006)}},

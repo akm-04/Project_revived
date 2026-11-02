@@ -105,7 +105,8 @@ func (o AdventureDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		response, err := o.Service.DefenseResult(ctx, a, request, position, op)
 		return adventureResponse(nil, response, err)
 	case 2411:
-		if !onlyStockGameplayParams(params) {
+		tableID, tableOK := topFloorInteger(params, "table_id", true)
+		if !tableOK || tableID != d.EventIllusion || !onlyStockGameplayParams(params, "table_id") {
 			return badAdventure()
 		}
 		body, err := o.Service.StartCoop(ctx, a, op)

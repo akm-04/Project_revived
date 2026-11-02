@@ -266,6 +266,9 @@
   "wait:3",
   "lua:local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:createTeamRoom({table_id=10006},function(code,reply) if code~=xyd.error.OK then error('vc-adv-coop-'..tostring(code)) end if type(reply.room_info)~='table' or type(reply.room_info.room_id)~='number' or reply.room_info.room_id<1 then error('vc-adv-coop-shape') end if not ae.teamInfo or ae.teamInfo.room_id~=reply.room_info.room_id then error('vc-adv-coop-model') end local wm=xyd.WindowManager.get() wm:openWindow('adventure_illusion_prepare',{table_id=10006}) if not wm:getWindow('adventure_illusion_prepare') then error('vc-adv-coop-window') end end)",
   "wait:3",
+  "lua:local ae=xyd.ModelManager.get():loadModel(xyd.ModelType.ADVENTURE_EVENT) ae:teamFight({table_id=10006},function(code) __vc_adv_team_fight=code end)",
+  "wait:3",
+  "lua:if __vc_adv_team_fight==nil or __vc_adv_team_fight==xyd.error.OK then error('vc-adv-team-fight-'..tostring(__vc_adv_team_fight)) end",
   "lua:local wm=xyd.WindowManager.get() if wm:getWindow('adventure_defense') then wm:closeWindow('adventure_defense') end if wm:getWindow('adventure_illusion_prepare') then wm:closeWindow('adventure_illusion_prepare') end",
   "lua:if not __vc_adv_bought then error('vc-adv-not-bought') end"
  ],
