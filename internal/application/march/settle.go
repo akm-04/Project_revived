@@ -19,12 +19,16 @@ import (
 )
 
 func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op operation.Context) (map[string]any, error) {
-	return s.run(c, a, "result", q, q.Report.Formation, op, func(c context.Context, sc gen.TimedScope, v view, r *d.Run) (map[string]any, error) {
+	// A drained or rejected summary still closes its attempt: the refusal flag
+	// commits that close, then ErrRefused answers the dispatcher after commit.
+	var refused bool
+	out, err := s.run(c, a, "result", q, q.Report.Formation, op, func(c context.Context, sc gen.TimedScope, v view, r *d.Run) (map[string]any, error) {
 		if !q.Report.Finite() {
 			return nil, d.ErrInvalid
 		}
 		if r.Pending == "" {
 			if len(r.LastResult) == 0 {
+				refused = true
 				return map[string]any{"error_code": 1}, nil
 			}
 			out := map[string]any{}
@@ -46,10 +50,12 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		}
 		if attested.Drained {
 			r.Pending = ""
+			refused = true
 			return map[string]any{"error_code": 1}, nil
 		}
 		if attested.Attestation.Verdict == cd.VerdictRejected {
 			r.Pending = ""
+			refused = true
 			return map[string]any{"error_code": 1}, nil
 		}
 		if err = r.ApplyReport(q.Report, q.CostDrink); err != nil {
@@ -77,7 +83,27 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		r.LastResult, err = json.Marshal(out)
 		return out, err
 	})
+	if err == nil && (refused || refusalReply(out)) {
+		err = fmt.Errorf("%w: summary rejected or no open attempt", d.ErrRefused)
+	}
+	return out, err
 }
+
+// refusalReply recognises a committed refusal replayed from its receipt; 30005
+// (FightExistCode) stays a 200 success reply.
+func refusalReply(out map[string]any) bool {
+	switch code := out["error_code"].(type) {
+	case int64:
+		return code == 1
+	case float64:
+		return code == 1
+	case json.Number:
+		return code.String() == "1"
+	default:
+		return false
+	}
+}
+
 func (s Mode) freezeReward(v view, r d.Run, sc gen.TimedScope, stage int64) []any {
 	rng := cd.NewStream(sc.Operation.Operation().Derive("march.stage-reward/v1", uint64(stage)))
 	rows := []any{}
