@@ -34,6 +34,7 @@ DATABASE_NAME = "gxb_playtest"
 FRONT_BASE = f"http://{os.environ.get('PLAYTEST_BIND', '127.0.0.1')}:18956"
 REGION = 1
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
+PET_FUNCTION_ID = 38
 ACCOUNTS_PATH = STATE_DIRECTORY / "accounts.json"
 CREDENTIALS_PATH = HARNESS_DIRECTORY / "psk" / "accounts.txt"
 FIXED_PASSWORDS = {"moppleton": "akm11111", "alpaca123": "akm22222", "campaigner": "akm33333"}
@@ -967,7 +968,8 @@ def build_statements(player, revision, player_id, report):
     guide_ids = player.get("progression", {}).get("guide_function_ids") or {}
     write("player_guide_return_state", f"UPDATE player_guide_return_state SET guide_return_id={int(progression.get('guide_return_id',0))},guide_function_ids={int_array([int(key) for key in guide_ids])},state_version=state_version+1,updated_at={now} WHERE player_id={player_id};")
 
-    function_ids = sorted({int(value) for value in progression.get("func_ids") or [] if int(value) > 0})
+    # V1 had no pets. Leaving function 38 out lets PetStarterLoginReconciler open it and grant the starter egg at first login.
+    function_ids = sorted({int(value) for value in progression.get("func_ids") or [] if int(value) > 0} - {PET_FUNCTION_ID})
     statements.append(f"DELETE FROM player_function_unlocks WHERE player_id={player_id};")
     statements.append(f"DELETE FROM player_function_eligibility WHERE player_id={player_id};")
     for function_id in function_ids:
