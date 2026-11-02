@@ -303,7 +303,10 @@ func (s Service) RefuseApplication(ctx context.Context, actor identity.ActorCont
 			return err
 		}
 		out = AckResult{GuildID: int64(gid)}
-		return s.putAckReceipt(txctx, scope.Tx, bound, actor, rid, fp, "gxb.i6c.guild.refuse_application.v1", out)
+		if err := s.putAckReceipt(txctx, scope.Tx, bound, actor, rid, fp, "gxb.i6c.guild.refuse_application.v1", out); err != nil {
+			return err
+		}
+		return s.emitApplicationResolvedNoticeTx(txctx, scope.Tx, actor.PlayerID)
 	})
 	return out, err
 }
@@ -425,6 +428,9 @@ func (s Service) AcceptApplication(ctx context.Context, actor identity.ActorCont
 		out = AckResult{GuildID: int64(gid)}
 		rr, err := s.putAckReceiptReturning(txctx, scope.Tx, bound, string(actor.AccountUID), actor.ContextID.UUID(), rid, fp, "gxb.i6c.guild.accept_application.v1", out)
 		if err != nil {
+			return err
+		}
+		if err := s.emitApplicationResolvedNoticeTx(txctx, scope.Tx, actor.PlayerID); err != nil {
 			return err
 		}
 		if projected {

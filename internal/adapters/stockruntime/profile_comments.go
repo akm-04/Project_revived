@@ -30,33 +30,26 @@ func (d ProfileCommentDispatcher) Dispatch(c context.Context, r httpedge.Dispatc
 	if e != nil || r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(http.StatusForbidden)
 	}
-	allowed := map[string]bool{"mid": true, "token": true, "region": true}
 	q := app.CommentCommand{}
 	p := r.Envelope.Params
+	var allowed []string
 	switch r.Envelope.MID {
 	case 1835:
 		q.Kind = "post"
-		allowed["to_player_id"] = true
-		allowed["content"] = true
+		allowed = []string{"to_player_id", "content"}
 	case 1836:
 		q.Kind = "react"
-		allowed["to_player_id"] = true
-		allowed["comment_id"] = true
+		allowed = []string{"to_player_id", "comment_id"}
 	case 1839:
-		allowed["to_player_id"] = true
-		allowed["start"] = true
-		allowed["offset"] = true
-		allowed["comment_num"] = true
+		allowed = []string{"to_player_id", "start", "offset", "comment_num"}
 	case 1841:
 		q.Kind = "delete"
-		allowed["comment_id"] = true
+		allowed = []string{"comment_id"}
 	default:
 		return fail(http.StatusNotImplemented)
 	}
-	for k := range p {
-		if !allowed[k] {
-			return fail(http.StatusBadRequest)
-		}
+	if !onlyStockGameplayParams(p, allowed...) {
+		return fail(http.StatusBadRequest)
 	}
 	if r.Envelope.MID != 1841 {
 		target, e := feedbackInteger(p["to_player_id"], 1, 9007199254740991)

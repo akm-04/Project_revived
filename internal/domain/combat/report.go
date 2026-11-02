@@ -13,6 +13,11 @@ const stockEnergyCap = 1000
 // (src_64 AttributeType.HP = 4; totals are indexed by type - 1).
 const stockHPAttribute = 3
 
+// ReportedHPBound is the reported/frozen HP multiple both CLIENT_FULL_REPORT
+// policies accept. Stock buffs raise the battle hp limit above its frozen
+// attribute, so 2 refused legitimate reports (hero 10083: 34318 -> 84585).
+const ReportedHPBound = 10
+
 // Report is a CLIENT_FULL_REPORT_ATTESTED RESULT as the mode adapter decoded
 // it from the stock wire: the end state of every non-summoned fighter (March
 // and Treasure hero/enemy status, Memoir heroes/enemies status). Family

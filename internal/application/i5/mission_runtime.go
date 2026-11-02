@@ -275,7 +275,11 @@ func (s Service) ClaimMission(ctx context.Context, actor identity.ActorContext, 
 		}
 		observed := scope
 		observed.ContentRevision = instance.ContentRevision
-		observation, err := s.Missions.Observations.ObserveMissionTx(ctx, tr.Tx, observed, definition, hero)
+		roster, err := s.Missions.Observations.MissionRosterTx(ctx, tr.Tx, observed)
+		if err != nil {
+			return err
+		}
+		observation, err := s.Missions.Observations.ObserveMissionTx(ctx, tr.Tx, observed, roster, definition, hero)
 		if err != nil {
 			return err
 		}

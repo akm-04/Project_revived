@@ -346,9 +346,9 @@ func TestI9_5AMarchNativeReportsDeathRollbackAndDailyManualReset(t *testing.T) {
 	// One omitted enemy must consume the rejected attempt without accepting state or a mission fact.
 	q := marchReport(marchRecord(t, p, a), int64(a.PlayerID), team, true)
 	q.Report.Enemies = q.Report.Enemies[:len(q.Report.Enemies)-1]
-	body, err := s.Result(ctx, a, q, op())
-	if err != nil || fmt.Sprint(body["error_code"]) != "1" || len(marchRecord(t, p, a).Heroes) != 0 {
-		t.Fatal("incomplete report", body, err)
+	_, err := s.Result(ctx, a, q, op())
+	if !errors.Is(err, d.ErrRefused) || len(marchRecord(t, p, a).Heroes) != 0 || marchRecord(t, p, a).Pending != "" {
+		t.Fatal("incomplete report", err, marchRecord(t, p, a))
 	}
 	if _, err = s.Start(ctx, a, app.Fight{Formation: team}, op()); err != nil {
 		t.Fatal(err)

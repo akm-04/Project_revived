@@ -41,7 +41,7 @@ type view struct {
 	level    int64
 }
 
-var reportPolicy = cd.ReportPolicy{ID: "MARCH_REPORT_V1", Version: 1, Formation: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: 2}
+var reportPolicy = cd.ReportPolicy{ID: "MARCH_REPORT_V1", Version: 2, Formation: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: cd.ReportedHPBound}
 
 func profile() tx.Profile {
 	return tx.Profile{Name: "march", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 10 * time.Second, TransactionTimeout: 30 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 10 * time.Second, OperationTimeout: 60 * time.Second}

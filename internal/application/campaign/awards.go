@@ -66,7 +66,7 @@ func itemLines(items [][2]int64) []grant.Line {
 func (s Mode) grantAwards(c context.Context, sc gen.TimedScope, a identity.ActorContext, name string, lines []grant.Line) ([]i5.Award, error) {
 	current := sc.Operation.Operation()
 	plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "campaign", Operation: name, BusinessKey: "campaign:" + name + ":" + current.ID.String(), Occurrence: current.ID.String(), PolicyVersion: d.PolicyID}, Lines: lines}
-	out, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{})
+	out, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true})
 	return out.Awards, err
 }
 

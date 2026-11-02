@@ -73,6 +73,7 @@ type Service struct {
 	InviteProjection *appinvite.SourceService
 	Rental           RentalClosure
 	Campaign         CampaignClosure
+	Notices          ApplyNoticeEmitter
 }
 
 func DefaultProfile() tx.Profile {
@@ -463,8 +464,10 @@ func (s Service) ApplyOrJoin(ctx context.Context, actor identity.ActorContext, g
 			rr.ActorAccountUID = string(actor.AccountUID)
 			rr.ContextID = actor.ContextID.UUID()
 			rr.PolicyVersion = s.Policy.Revision
-			_, err = s.Receipts.PutTx(txctx, scope.Tx, rr)
-			return err
+			if _, err = s.Receipts.PutTx(txctx, scope.Tx, rr); err != nil {
+				return err
+			}
+			return s.emitApplicationFiledNoticeTx(txctx, scope.Tx, gid)
 
 		case guild.ApplyImmediate:
 			if err := s.checkJoinGatesTx(txctx, scope.Tx, actor.PlayerID, gid, at); err != nil {

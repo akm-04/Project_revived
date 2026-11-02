@@ -34,26 +34,22 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 		return fail(http.StatusForbidden)
 	}
 	p := r.Envelope.Params
-	allowed := map[string]bool{"mid": true, "token": true, "region": true}
 	q := publicprofile.ReadRequest{MID: r.Envelope.MID, Target: a.PlayerID}
+	var allowed []string
 	switch q.MID {
 	case 1829:
-		allowed["to_player_id"] = true
-		allowed["sub_type"] = true
+		allowed = []string{"to_player_id", "sub_type"}
 		q.Subtype = 1
 	case 1838:
-		allowed["to_player_id"] = true
-		allowed["index"] = true
+		allowed = []string{"to_player_id", "index"}
 	case 1840:
 	case 1832:
-		allowed["hero_ids"] = true
+		allowed = []string{"hero_ids"}
 	default:
 		return fail(http.StatusNotImplemented)
 	}
-	for k := range p {
-		if !allowed[k] {
-			return fail(http.StatusBadRequest)
-		}
+	if !onlyStockGameplayParams(p, allowed...) {
+		return fail(http.StatusBadRequest)
 	}
 	if q.MID == 1832 {
 		if d.Showcase == nil {

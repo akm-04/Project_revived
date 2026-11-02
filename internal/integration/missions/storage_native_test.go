@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/content/builtin"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -68,10 +69,10 @@ VALUES(1,'i94-native',true,true,true,125001,199999,clock_timestamp()) ON CONFLIC
 // storageObservations isolates storage/reducer qualification; it is not proof of canonical owner-read composition.
 type storageObservations struct{}
 
-func (storageObservations) MissionPartnerTemplatesTx(context.Context, tx.Queryer, i5.MissionScope) ([]int64, error) {
+func (storageObservations) MissionRosterTx(context.Context, tx.Queryer, i5.MissionScope) ([]character.Hero, error) {
 	return nil, nil
 }
-func (storageObservations) ObserveMissionTx(_ context.Context, _ tx.Queryer, _ i5.MissionScope, definition objective.MissionDefinition, _ int64) (i5.MissionObservation, error) {
+func (storageObservations) ObserveMissionTx(_ context.Context, _ tx.Queryer, _ i5.MissionScope, _ []character.Hero, definition objective.MissionDefinition, _ int64) (i5.MissionObservation, error) {
 	return i5.MissionObservation{GatePassed: definition.ObjectiveID == 10002 || definition.ObjectiveID == 50001 || definition.ObjectiveID == 50002, Value: 100}, nil
 }
 

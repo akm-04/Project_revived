@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
@@ -81,10 +82,14 @@ func (m *missionMemory) MissionDefinitionsTx(_ context.Context, _ tx.Queryer, re
 	}
 	return m.definitions, nil
 }
-func (m *missionMemory) MissionPartnerTemplatesTx(context.Context, tx.Queryer, MissionScope) ([]int64, error) {
-	return m.heroes, nil
+func (m *missionMemory) MissionRosterTx(context.Context, tx.Queryer, MissionScope) ([]character.Hero, error) {
+	roster := make([]character.Hero, 0, len(m.heroes))
+	for _, id := range m.heroes {
+		roster = append(roster, character.Hero{OriginTableID: id})
+	}
+	return roster, nil
 }
-func (m *missionMemory) ObserveMissionTx(_ context.Context, _ tx.Queryer, scope MissionScope, _ objective.MissionDefinition, _ int64) (MissionObservation, error) {
+func (m *missionMemory) ObserveMissionTx(_ context.Context, _ tx.Queryer, scope MissionScope, _ []character.Hero, _ objective.MissionDefinition, _ int64) (MissionObservation, error) {
 	m.observedRevision = scope.ContentRevision
 	return MissionObservation{GatePassed: m.gate, Value: m.value}, nil
 }

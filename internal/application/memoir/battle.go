@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-var reportPolicy = combat.ReportPolicy{ID: "I9_MEMOIR_REPORT_V1", Version: 1, Formation: true, Pet: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: 2, SelectFrozenRoster: true, ReportedWave: true}
+var reportPolicy = combat.ReportPolicy{ID: "I9_MEMOIR_REPORT_V1", Version: 2, Formation: true, Pet: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: combat.ReportedHPBound, SelectFrozenRoster: true, ReportedWave: true}
 
 func locator(actor identity.ActorContext) combat.Locator {
 	return combat.Locator{DomainKind: "MEMOIR", AuthorityScope: fmt.Sprintf("server:%d", actor.LogicalServerID), DomainLocator: fmt.Sprint(actor.PlayerID)}
