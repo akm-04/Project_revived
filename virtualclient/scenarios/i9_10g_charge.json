@@ -1,0 +1,31 @@
+{
+ "name": "i9_10g_charge",
+ "level": 10,
+ "steps": [
+  "wait:5",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:queryChargeData(function(code, body) if code~=xyd.error.OK then error('vc-charge-query-'..tostring(code)) end if type(body.charges)~='table' then error('vc-charge-array') end xyd.WindowManager.get():openWindow('vip_recharge',{}) end)",
+  "wait:6",
+  "lua:local w=xyd.WindowManager.get():getWindow('vip_recharge') if not w then error('vc-vip-window') end",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local intent='vc-card-'..tostring(math.random(1000000000)) xyd.Backend.get():request(32000,{charge_id=80001001,intent_id=intent},function(code,body) if code~=xyd.error.OK then error('vc-tap-card-'..tostring(code)) end local re=body and body.recharge_event if not re or tonumber(re.mid)~=36857 or not re.params then error('vc-tap-card-shape') end if tonumber(re.params.left_card_day)~=30 then error('vc-tap-card-days-'..tostring(re.params.left_card_day)) end xyd.EventDispatcher.get():dispatchEvent({name=xyd.event.RECHARGE,params=re}) end)",
+  "wait:6",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.leftCardDay)~=30 then error('vc-card-self-'..tostring(p.leftCardDay)) end",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local intent='vc-diamond-'..tostring(math.random(1000000000)) xyd.Backend.get():request(32000,{charge_id=80001007,intent_id=intent},function(code,body) if code~=xyd.error.OK then error('vc-tap-diamond-'..tostring(code)) end local re=body and body.recharge_event if not re or tonumber(re.mid)~=36857 then error('vc-tap-diamond-shape') end if tonumber(re.params.delta)~=200 then error('vc-tap-diamond-delta-'..tostring(re.params.delta)) end xyd.EventDispatcher.get():dispatchEvent({name=xyd.event.RECHARGE,params=re}) end)",
+  "wait:6",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.vip)<1 or tonumber(p.charge)<30 then error('vc-vip-'..tostring(p.vip)..'/'..tostring(p.charge)) end if tonumber(p.crystal)<=0 then error('vc-crystal') end",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:queryChargeData(function(code,body) if code~=xyd.error.OK then error('vc-charge-reload-'..tostring(code)) end local seen={} for _,row in ipairs(body.charges or {}) do seen[tostring(row.charge_id)]=tonumber(row.charge_count) end if seen['80001001']~=1 or seen['80001007']~=1 then error('vc-charge-history') end end)",
+  "wait:6",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) xyd.Backend.get():request(xyd.mid.GET_VIP_AWARD,{id=1},function(code,body) if code~=xyd.error.OK then error('vc-vip-award-'..tostring(code)) end if type(body.awards)~='table' or #body.awards~=4 then error('vc-vip-awards-'..tostring(body.awards and #body.awards)) end p:handleRewards(body.awards) p.vipAwards=p.vipAwards or {} p.vipAwards[1]=1 end)",
+  "wait:6",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if not p.vipAwards or tonumber(p.vipAwards[1])~=1 then error('vc-vip-award-local') end",
+  "relogin",
+  "wait:6",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.vip)<1 or tonumber(p.charge)<30 then error('vc-mid1-vip') end if tonumber(p.leftCardDay)~=30 or tonumber(p.monthCardEnd)<=0 or tonumber(p.monthCardStart)<=0 then error('vc-mid1-card-'..tostring(p.leftCardDay)..'/'..tostring(p.monthCardEnd)) end if tonumber(p.leftWeekCardDay)~=0 or tonumber(p.leftEnergyMonthCardDay)~=0 or tonumber(p.privilegeLeftCardDay)~=0 or tonumber(p.privilegeLeftCardEnd)~=0 then error('vc-mid1-zero-cards') end if not p.vipAwards or tonumber(p.vipAwards[1])~=1 then error('vc-mid1-vip-awards') end"
+ ],
+ "settle_seconds": 20,
+ "expect_ok": [
+  354,
+  657,
+  32000
+ ],
+ "note": "Month card and diamond buys go through the contract's private MID 32000; the step dispatches xyd.event.RECHARGE with the reply's recharge_event so stock SelfPlayer.onRecharge_ runs. 354 uses stock queryChargeData and VipRechargeWindow. MID 657 uses the stock GET_VIP_AWARD reply callback body (the award button closure is not reachable from Lua) and stock handleRewards; relogin proves MID 1 card fields and vip_awards after the card."
+}
