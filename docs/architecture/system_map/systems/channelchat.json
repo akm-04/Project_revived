@@ -8,7 +8,6 @@
  "mids": [],
  "name": "channelchat",
  "path": "internal/application/channelchat",
- "purpose": "prepares ephemeral ordinary messages using existing owner ports",
  "pushes": [
   {
    "file": "internal/protocol/realtime/channel_chat.go",
@@ -25,18 +24,18 @@
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/socialactivation"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/channelchat/service_test.go",
    "internal/application/channelchat/structured_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

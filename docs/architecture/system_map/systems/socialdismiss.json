@@ -10,21 +10,20 @@
  "mids": [],
  "name": "socialdismiss",
  "path": "internal/application/socialdismiss",
- "purpose": "coordinates relation and room invite Inbox dismissal through typed owner ports",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/playerdisplay",
    "internal/integration/socialactivation"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

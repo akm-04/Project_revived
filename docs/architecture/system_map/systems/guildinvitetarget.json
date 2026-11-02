@@ -12,20 +12,19 @@
  "mids": [],
  "name": "guildinvitetarget",
  "path": "internal/application/guildinvitetarget",
- "purpose": "",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/guildinvite"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

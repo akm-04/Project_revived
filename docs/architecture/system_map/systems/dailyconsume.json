@@ -9,20 +9,19 @@
  "mids": [],
  "name": "dailyconsume",
  "path": "internal/application/dailyconsume",
- "purpose": "owns daily purchase counters",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/playerdisplay"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

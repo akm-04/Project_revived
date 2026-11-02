@@ -5,214 +5,47 @@
  "calls": [],
  "contracts": [
   {
-   "file": "docs/i9/I9_MISSIONS_V1.json",
-   "id": 121,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
   },
   {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 1152,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 121,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 192,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json",
-   "id": "players",
-   "kind": "table"
+   "count": 3,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
  "mids": [
   {
-   "client_files": [
-    "app/model/SelfPlayer.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/operation_log.go",
    "mid": 121,
-   "name": "SEND_OPERATION_LOG",
-   "wiring_file": "cmd/gxb-api/main_postgres.go"
+   "name": "SEND_OPERATION_LOG"
   },
   {
-   "client_files": [
-    "app/common/network/Backend.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/http_dispatchers.go",
    "mid": 192,
-   "name": "LOAD_CHAT_ROOM_INFO",
-   "wiring_file": "cmd/gxb-api/main_postgres.go"
+   "name": "LOAD_CHAT_ROOM_INFO"
   },
   {
-   "client_files": [
-    "app/model/SelfGuild.lua",
-    "app/model/SelfPlayer.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/guild_war_dispatcher.go",
    "mid": 1152,
-   "name": "GUILD_WAR_RED_POINT",
-   "wiring_file": "cmd/gxb-api/main_postgres.go"
+   "name": "GUILD_WAR_RED_POINT"
   }
  ],
  "name": "realtimeauth",
  "path": "internal/application/realtimeauth",
- "purpose": "orchestrates I3 gameplay-context authority for stock realtime discovery and admission",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/guildprojection",
   "internal/adapters/postgres/i4store"
  ],
  "tables": {
-  "owned": [
-   "account_provider_bindings",
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "accounts",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
-   "players"
-  ],
-  "read": [
-   "account_provider_bindings",
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "accounts",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
-   "players"
-  ],
-  "sql_touches": {
-   "account_provider_bindings": {
-    "reads": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "account_session_credentials": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "account_session_server_observations": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "account_sessions": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "accounts": {
-    "reads": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "gameplay_context_credentials": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/realtime_authority.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "gameplay_contexts": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/general_dm.go",
-     "internal/adapters/postgres/i4store/realtime_authority.go",
-     "internal/adapters/postgres/i5store/store.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "logical_servers": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/recipient_root.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "player_directory_profiles": {
-    "reads": [
-     "internal/adapters/postgres/i4store/conquer_projection.go",
-     "internal/adapters/postgres/i4store/directory_discovery.go",
-     "internal/adapters/postgres/i4store/directory_level_projection.go",
-     "internal/adapters/postgres/i4store/directory_reader.go",
-     "internal/adapters/postgres/i4store/population.go",
-     "internal/adapters/postgres/i4store/privilege_projection.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/conquer_projection.go",
-     "internal/adapters/postgres/i4store/directory_level_projection.go",
-     "internal/adapters/postgres/i4store/privilege_projection.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "players": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "internal/adapters/postgres/i4store/name_snapshot.go",
-     "internal/adapters/postgres/i4store/playerroot_crossowner.go",
-     "internal/adapters/postgres/i4store/recipient_root.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i5store/store.go",
-     "sql/i3/identity_bootstrap.sql",
-     "sql/i5/player_core.sql"
-    ]
-   }
-  }
+  "owned": [],
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/socialactivation"
   ],
-  "scenarios": [
+  "scenarios_naming": [
    "virtualclient/scenarios/i9_9d_guild_inactive.json"
   ],
   "unit": [
@@ -275,5 +108,8 @@
   "summon",
   "topfloor",
   "worldboss"
+ ],
+ "wiring_files": [
+  "cmd/gxb-api/main_postgres.go"
  ]
 }

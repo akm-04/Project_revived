@@ -505,46 +505,6 @@
    "conquer_school_players": "achievement",
    "conquer_school_report_views": "achievement",
    "conquer_school_reports": "achievement",
-   "content_achievement_catalogs": "achievement",
-   "content_adventure_catalogs": "achievement",
-   "content_arena_catalogs": "achievement",
-   "content_awakening_catalogs": "achievement",
-   "content_book_input_catalogs": "achievement",
-   "content_campaign_catalogs": "achievement",
-   "content_conquer_input_catalogs": "achievement",
-   "content_conquer_mode_catalogs": "achievement",
-   "content_course_input_catalogs": "achievement",
-   "content_dodgeball_catalogs": "achievement",
-   "content_dorm_input_catalogs": "achievement",
-   "content_element_input_catalogs": "achievement",
-   "content_emoticon_catalogs": "achievement",
-   "content_evolution_input_catalogs": "achievement",
-   "content_gods_trial_catalogs": "achievement",
-   "content_guild_broadcast_policies": "achievement",
-   "content_guild_invite_policies": "achievement",
-   "content_illusion_catalogs": "achievement",
-   "content_inscription_input_catalogs": "achievement",
-   "content_league_catalogs": "achievement",
-   "content_library_input_catalogs": "achievement",
-   "content_march_catalogs": "achievement",
-   "content_memoir_catalogs": "achievement",
-   "content_mission_activity_catalogs": "achievement",
-   "content_monthly_signin_catalogs": "achievement",
-   "content_occult_catalogs": "achievement",
-   "content_one_on_one_catalogs": "achievement",
-   "content_pet_campaign_catalogs": "achievement",
-   "content_player_display_catalogs": "achievement",
-   "content_privilege_catalogs": "achievement",
-   "content_public_profile_policies": "achievement",
-   "content_public_showcase_policies": "achievement",
-   "content_social_gift_catalogs": "achievement",
-   "content_spirit_input_catalogs": "achievement",
-   "content_stat_input_catalogs": "achievement",
-   "content_stat_rule_catalogs": "achievement",
-   "content_summon_catalogs": "achievement",
-   "content_top_floor_catalogs": "achievement",
-   "content_workplace_catalogs": "achievement",
-   "content_world_boss_catalogs": "achievement",
    "daily_consumption_players": "arena",
    "dodgeball_players": "dodgeball",
    "friend_dm_delivery": "frienddm",
@@ -585,52 +545,6 @@
    "guild_tea_gifts": "guildcore",
    "guild_tea_wishes": "guildcore",
    "guilds": "guildcore",
-   "gxb_content_activation": "achievement",
-   "gxb_content_appearance_live": "achievement",
-   "gxb_content_appearance_pet_styles": "achievement",
-   "gxb_content_appearance_skin_items": "achievement",
-   "gxb_content_appearance_skins": "achievement",
-   "gxb_content_equipment_primitives": "achievement",
-   "gxb_content_equipment_recipe_edges": "achievement",
-   "gxb_content_function_gates": "achievement",
-   "gxb_content_hero_equipment": "achievement",
-   "gxb_content_hero_exp": "achievement",
-   "gxb_content_hero_exp_items": "achievement",
-   "gxb_content_hero_fumo_materials": "achievement",
-   "gxb_content_hero_fumo_targets": "achievement",
-   "gxb_content_hero_normal_star": "achievement",
-   "gxb_content_hero_practice_thresholds": "achievement",
-   "gxb_content_hero_promotion_restoration_denominations": "achievement",
-   "gxb_content_hero_promotion_restoration_equipment": "achievement",
-   "gxb_content_hero_promotion_restoration_fractions": "achievement",
-   "gxb_content_hero_super_star": "achievement",
-   "gxb_content_hero_templates": "achievement",
-   "gxb_content_objective_definitions": "achievement",
-   "gxb_content_pet_acquisition": "achievement",
-   "gxb_content_pet_acquisition_policy": "achievement",
-   "gxb_content_pet_equipment": "achievement",
-   "gxb_content_pet_evolution": "achievement",
-   "gxb_content_pet_exp": "achievement",
-   "gxb_content_pet_exp_items": "achievement",
-   "gxb_content_pet_practice_thresholds": "achievement",
-   "gxb_content_pet_progression": "achievement",
-   "gxb_content_pet_progression_policy": "achievement",
-   "gxb_content_pet_promotion_restoration_equipment": "achievement",
-   "gxb_content_pet_skill_books": "achievement",
-   "gxb_content_pet_skill_slot_policy": "achievement",
-   "gxb_content_pet_skill_slots": "achievement",
-   "gxb_content_pet_templates": "achievement",
-   "gxb_content_player_progression": "achievement",
-   "gxb_content_practice_locks": "achievement",
-   "gxb_content_practice_methods": "achievement",
-   "gxb_content_practice_policy_facts": "achievement",
-   "gxb_content_practice_vip_bless": "achievement",
-   "gxb_content_resource_definitions": "achievement",
-   "gxb_content_revisions": "achievement",
-   "gxb_content_super_equipment_caps": "achievement",
-   "gxb_content_super_equipment_positions": "achievement",
-   "gxb_content_super_equipment_tiers": "achievement",
-   "gxb_content_super_hero_prerequisites": "achievement",
    "illusion_attempts": "illusion",
    "illusion_occurrence_results": "illusion",
    "illusion_occurrences": "illusion",
@@ -643,9 +557,9 @@
    "league_players": "championsleague",
    "league_settlements": "championsleague",
    "logical_servers": "bootstrap",
-   "mail_attachments": "achievement",
-   "mail_namespace_counters": "achievement",
-   "mail_records": "achievement",
+   "mail_attachments": "i5",
+   "mail_namespace_counters": "i5",
+   "mail_records": "i5",
    "march_players": "march",
    "memoir_players": "memoir",
    "occult_logs": "occult",
@@ -664,31 +578,31 @@
    "personal_dm_intents": "generaldm",
    "personal_dm_payloads": "generaldm",
    "petcampaign_players": "petcampaign",
-   "player_awakening_roots": "achievement",
+   "player_awakening_roots": "i5",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
    "player_conquer_facts": "achievement",
-   "player_cosmetic_entitlements": "achievement",
+   "player_cosmetic_entitlements": "i5",
    "player_course_admissions": "course",
    "player_course_heroes": "course",
    "player_course_roots": "course",
-   "player_crystal_spend_days": "achievement",
-   "player_currency_balances": "achievement",
+   "player_crystal_spend_days": "i5",
+   "player_currency_balances": "i5",
    "player_directory_profiles": "playerdirectory",
-   "player_display_admissions": "achievement",
-   "player_display_selections": "achievement",
+   "player_display_admissions": "i5",
+   "player_display_selections": "i5",
    "player_dorm_admissions": "dormhouse",
    "player_dorm_heroes": "dormhouse",
    "player_dorm_rooms": "dormhouse",
    "player_dorm_roots": "dormhouse",
-   "player_economy_owners": "achievement",
+   "player_economy_owners": "i5",
    "player_element_admissions": "elementequipment",
    "player_element_heroes": "elementequipment",
    "player_element_roots": "elementequipment",
-   "player_function_eligibility": "achievement",
-   "player_function_state_owners": "achievement",
-   "player_function_unlocks": "achievement",
-   "player_guide_return_state": "achievement",
+   "player_function_eligibility": "i5",
+   "player_function_state_owners": "i5",
+   "player_function_unlocks": "i5",
+   "player_guide_return_state": "i5",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
    "player_hero_evolution": "characterhero",
@@ -703,12 +617,12 @@
    "player_inscription_heroes": "inscription",
    "player_inscription_imports": "inscription",
    "player_inscription_roots": "inscription",
-   "player_item_stacks": "achievement",
+   "player_item_stacks": "i5",
    "player_library_admissions": "librarylocal",
    "player_library_heroes": "librarylocal",
    "player_library_roots": "librarylocal",
-   "player_mission_instances": "achievement",
-   "player_mission_roots": "achievement",
+   "player_mission_instances": "i5",
+   "player_mission_roots": "i5",
    "player_pet_practice_candidates": "characterpractice",
    "player_pet_roots": "characterpet",
    "player_pet_style_entitlements": "characterpet",
@@ -719,8 +633,8 @@
    "player_profile_comments": "profilefeedback",
    "player_profile_feedback_roots": "profilefeedback",
    "player_profile_praises": "profilefeedback",
-   "player_profiles": "achievement",
-   "player_progression": "achievement",
+   "player_profiles": "i5",
+   "player_progression": "i5",
    "player_public_profile_media_current": "publicprofile",
    "player_public_profile_media_history": "publicprofile",
    "player_public_profile_roots": "publicprofile",
@@ -728,14 +642,14 @@
    "player_saved_preset_heroes": "charactersavedpreset",
    "player_saved_preset_lanes": "charactersavedpreset",
    "player_saved_preset_roots": "charactersavedpreset",
-   "player_signin_roots": "achievement",
+   "player_signin_roots": "i5",
    "player_social_presence": "socialpresence",
    "player_social_roots": "socialrelation",
    "player_spirit_admissions": "spirit",
    "player_spirit_heroes": "spirit",
    "player_spirit_roots": "spirit",
-   "player_story_cursors": "achievement",
-   "player_temporal_resources": "achievement",
+   "player_story_cursors": "i5",
+   "player_temporal_resources": "i5",
    "players": "bootstrap",
    "publication_items": "publication",
    "publication_picture_reads": "publication",
@@ -747,10 +661,10 @@
    "ranking_girls_snapshots": "ranking",
    "realtime_presence_leases": "socialpresence",
    "realtime_presence_owner_state": "socialpresence",
-   "redeem_campaigns": "achievement",
-   "redeem_codes": "achievement",
-   "redeem_redemptions": "achievement",
-   "redeem_reward_bundle_revisions": "achievement",
+   "redeem_campaigns": "i5",
+   "redeem_codes": "i5",
+   "redeem_redemptions": "i5",
+   "redeem_reward_bundle_revisions": "i5",
    "request_journal": "clientlog",
    "shared_room_seats": "sharedroom",
    "shared_rooms": "sharedroom",
@@ -796,7 +710,7 @@
    "name": "achievement",
    "path": "internal/application/achievement",
    "purpose": "owns earned tier facts",
-   "tables": 148
+   "tables": 9
   },
   {
    "callees": 1,
@@ -805,7 +719,7 @@
    "name": "activitydirectory",
    "path": "internal/application/activitydirectory",
    "purpose": "",
-   "tables": 10
+   "tables": 0
   },
   {
    "callees": 8,
@@ -814,7 +728,7 @@
    "name": "adventure",
    "path": "internal/application/adventure",
    "purpose": "converts objective facts into Adventure event occurrences",
-   "tables": 128
+   "tables": 5
   },
   {
    "callees": 8,
@@ -823,7 +737,7 @@
    "name": "arena",
    "path": "internal/application/arena",
    "purpose": "composes the Arena owner (C5D_ARENA_SEASON_MODE_V1): entry, defense, matching, START/FIGHT/STOP through the Combat foundation, terminal star/point settlement, missions, exchanges, season settlement mail and history facts",
-   "tables": 223
+   "tables": 62
   },
   {
    "callees": 4,
@@ -832,7 +746,7 @@
    "name": "awakeningbattle",
    "path": "internal/application/awakeningbattle",
    "purpose": "orchestrates only the source Blood branch of 866/867",
-   "tables": 176
+   "tables": 18
   },
   {
    "callees": 3,
@@ -841,7 +755,7 @@
    "name": "bookskill",
    "path": "internal/application/bookskill",
    "purpose": "",
-   "tables": 146
+   "tables": 2
   },
   {
    "callees": 0,
@@ -850,7 +764,7 @@
    "name": "bootstrap",
    "path": "internal/application/bootstrap",
    "purpose": "",
-   "tables": 181
+   "tables": 43
   },
   {
    "callees": 7,
@@ -859,7 +773,7 @@
    "name": "campaign",
    "path": "internal/application/campaign",
    "purpose": "composes the Campaign mode (I9_CAMPAIGN_V1): the world map (112, MID1 detail[\"112\"]), FIGHT (113) and FIGHT_RESULT (114) for Normal and Super nodes",
-   "tables": 223
+   "tables": 62
   },
   {
    "callees": 7,
@@ -868,7 +782,7 @@
    "name": "championsleague",
    "path": "internal/application/championsleague",
    "purpose": "composes the canonical League owner through existing I4, I5, Combat, Character, Achievement and display ports",
-   "tables": 223
+   "tables": 62
   },
   {
    "callees": 2,
@@ -895,7 +809,7 @@
    "name": "characterhero",
    "path": "internal/application/characterhero",
    "purpose": "",
-   "tables": 144
+   "tables": 7
   },
   {
    "callees": 4,
@@ -904,7 +818,7 @@
    "name": "characterpet",
    "path": "internal/application/characterpet",
    "purpose": "",
-   "tables": 144
+   "tables": 3
   },
   {
    "callees": 2,
@@ -913,7 +827,7 @@
    "name": "characterpractice",
    "path": "internal/application/characterpractice",
    "purpose": "",
-   "tables": 135
+   "tables": 3
   },
   {
    "callees": 1,
@@ -922,7 +836,7 @@
    "name": "charactersavedpreset",
    "path": "internal/application/charactersavedpreset",
    "purpose": "",
-   "tables": 134
+   "tables": 3
   },
   {
    "callees": 0,
@@ -958,7 +872,7 @@
    "name": "conquerschool",
    "path": "internal/application/conquerschool",
    "purpose": "",
-   "tables": 223
+   "tables": 62
   },
   {
    "callees": 3,
@@ -967,7 +881,7 @@
    "name": "course",
    "path": "internal/application/course",
    "purpose": "",
-   "tables": 147
+   "tables": 3
   },
   {
    "callees": 1,
@@ -994,7 +908,7 @@
    "name": "dodgeball",
    "path": "internal/application/dodgeball",
    "purpose": "",
-   "tables": 129
+   "tables": 1
   },
   {
    "callees": 3,
@@ -1003,7 +917,7 @@
    "name": "dormhouse",
    "path": "internal/application/dormhouse",
    "purpose": "",
-   "tables": 144
+   "tables": 4
   },
   {
    "callees": 5,
@@ -1012,7 +926,7 @@
    "name": "elementequipment",
    "path": "internal/application/elementequipment",
    "purpose": "",
-   "tables": 147
+   "tables": 3
   },
   {
    "callees": 4,
@@ -1021,7 +935,7 @@
    "name": "frienddm",
    "path": "internal/application/frienddm",
    "purpose": "",
-   "tables": 156
+   "tables": 7
   },
   {
    "callees": 4,
@@ -1030,7 +944,7 @@
    "name": "generaldm",
    "path": "internal/application/generaldm",
    "purpose": "",
-   "tables": 155
+   "tables": 6
   },
   {
    "callees": 0,
@@ -1048,7 +962,7 @@
    "name": "godstrial",
    "path": "internal/application/godstrial",
    "purpose": "",
-   "tables": 131
+   "tables": 1
   },
   {
    "callees": 3,
@@ -1057,7 +971,7 @@
    "name": "guildbroadcast",
    "path": "internal/application/guildbroadcast",
    "purpose": "",
-   "tables": 139
+   "tables": 2
   },
   {
    "callees": 6,
@@ -1066,7 +980,7 @@
    "name": "guildcampaign",
    "path": "internal/application/guildcampaign",
    "purpose": "is the application owner of I9_GUILD_CAMPAIGN_V1",
-   "tables": 149
+   "tables": 12
   },
   {
    "callees": 4,
@@ -1075,7 +989,7 @@
    "name": "guildcore",
    "path": "internal/application/guildcore",
    "purpose": "",
-   "tables": 141
+   "tables": 15
   },
   {
    "callees": 2,
@@ -1102,7 +1016,7 @@
    "name": "guildrental",
    "path": "internal/application/guildrental",
    "purpose": "owns guild hero and pet rental (I9_GUILD_RENTAL_V1): open offers and day uses at lock rank 609b, the mana price paid inside a battle START, and the lender's payout on recall or departure",
-   "tables": 176
+   "tables": 18
   },
   {
    "callees": 3,
@@ -1111,7 +1025,7 @@
    "name": "guildtea",
    "path": "internal/application/guildtea",
    "purpose": "is the Guild-owned Tea Party mode (I9_GUILD_ACTIVITY_V1 C13-C16): day-stable wishes, gifts, their claim, and the MID1 red-point embed",
-   "tables": 158
+   "tables": 0
   },
   {
    "callees": 2,
@@ -1129,7 +1043,7 @@
    "name": "heroevolution",
    "path": "internal/application/heroevolution",
    "purpose": "",
-   "tables": 144
+   "tables": 0
   },
   {
    "callees": 2,
@@ -1138,7 +1052,7 @@
    "name": "i5",
    "path": "internal/application/i5",
    "purpose": "implements Wave-E transactional orchestration",
-   "tables": 128
+   "tables": 28
   },
   {
    "callees": 0,
@@ -1156,7 +1070,7 @@
    "name": "illusion",
    "path": "internal/application/illusion",
    "purpose": "",
-   "tables": 148
+   "tables": 8
   },
   {
    "callees": 4,
@@ -1165,7 +1079,7 @@
    "name": "inscription",
    "path": "internal/application/inscription",
    "purpose": "",
-   "tables": 148
+   "tables": 4
   },
   {
    "callees": 3,
@@ -1174,7 +1088,7 @@
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
    "purpose": "",
-   "tables": 147
+   "tables": 3
   },
   {
    "callees": 6,
@@ -1183,7 +1097,7 @@
    "name": "march",
    "path": "internal/application/march",
    "purpose": "composes the Champion owner through existing owner ports",
-   "tables": 140
+   "tables": 1
   },
   {
    "callees": 4,
@@ -1192,7 +1106,7 @@
    "name": "memoir",
    "path": "internal/application/memoir",
    "purpose": "",
-   "tables": 131
+   "tables": 1
   },
   {
    "callees": 2,
@@ -1210,7 +1124,7 @@
    "name": "occult",
    "path": "internal/application/occult",
    "purpose": "is the Sorcery War application: solo rooms on the shared room core, tickets and rewards through I5, and awakening fragments by mission",
-   "tables": 132
+   "tables": 9
   },
   {
    "callees": 6,
@@ -1219,7 +1133,7 @@
    "name": "oneonone",
    "path": "internal/application/oneonone",
    "purpose": "composes the 1 on 1 owner (C5C_ONE_ON_ONE_MODE_V1): entry, teams, candidates, multi-round START through the Combat foundation, terminal slot/points settlement, promotion, Wednesday/Sunday mail settlement, titles and history facts",
-   "tables": 223
+   "tables": 62
   },
   {
    "callees": 5,
@@ -1228,7 +1142,7 @@
    "name": "petcampaign",
    "path": "internal/application/petcampaign",
    "purpose": "",
-   "tables": 140
+   "tables": 1
   },
   {
    "callees": 0,
@@ -1246,7 +1160,7 @@
    "name": "playerdisplay",
    "path": "internal/application/playerdisplay",
    "purpose": "owns Player display composition under I5",
-   "tables": 86
+   "tables": 0
   },
   {
    "callees": 3,
@@ -1282,7 +1196,7 @@
    "name": "profilefeedback",
    "path": "internal/application/profilefeedback",
    "purpose": "",
-   "tables": 137
+   "tables": 9
   },
   {
    "callees": 2,
@@ -1291,7 +1205,7 @@
    "name": "publication",
    "path": "internal/application/publication",
    "purpose": "",
-   "tables": 130
+   "tables": 3
   },
   {
    "callees": 12,
@@ -1300,7 +1214,7 @@
    "name": "publicprofile",
    "path": "internal/application/publicprofile",
    "purpose": "",
-   "tables": 167
+   "tables": 9
   },
   {
    "callees": 9,
@@ -1318,7 +1232,7 @@
    "name": "ranking",
    "path": "internal/application/ranking",
    "purpose": "owns canonical Ranking snapshots and their title settlements",
-   "tables": 128
+   "tables": 5
   },
   {
    "callees": 0,
@@ -1327,7 +1241,7 @@
    "name": "realtimeauth",
    "path": "internal/application/realtimeauth",
    "purpose": "orchestrates I3 gameplay-context authority for stock realtime discovery and admission",
-   "tables": 10
+   "tables": 0
   },
   {
    "callees": 0,
@@ -1417,7 +1331,7 @@
    "name": "socialrelation",
    "path": "internal/application/socialrelation",
    "purpose": "",
-   "tables": 162
+   "tables": 18
   },
   {
    "callees": 4,
@@ -1444,7 +1358,7 @@
    "name": "spirit",
    "path": "internal/application/spirit",
    "purpose": "",
-   "tables": 147
+   "tables": 3
   },
   {
    "callees": 2,
@@ -1453,7 +1367,7 @@
    "name": "summon",
    "path": "internal/application/summon",
    "purpose": "composes Vending (I9_GACHA_V1): LOAD_SUMMON_INFO (56, also MID1 detail[\"56\"]), SUMMON_HERO (50, classic and SX), Magic (70, 71) and the Vows scroll exchange (306)",
-   "tables": 149
+   "tables": 2
   },
   {
    "callees": 5,
@@ -1462,7 +1376,7 @@
    "name": "topfloor",
    "path": "internal/application/topfloor",
    "purpose": "composes the Top Floor owner (C5B_TOP_FLOOR_MODE_V1): ladder entry, opponents, tickets, START through the Combat foundation, terminal rank settlement, daily mail settlement and history facts",
-   "tables": 223
+   "tables": 62
   },
   {
    "callees": 6,
@@ -1471,7 +1385,7 @@
    "name": "workplace",
    "path": "internal/application/workplace",
    "purpose": "",
-   "tables": 142
+   "tables": 3
   },
   {
    "callees": 7,
@@ -1480,7 +1394,7 @@
    "name": "worldboss",
    "path": "internal/application/worldboss",
    "purpose": "",
-   "tables": 127
+   "tables": 4
   }
  ]
 }

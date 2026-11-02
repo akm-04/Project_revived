@@ -14,7 +14,6 @@
  "mids": [],
  "name": "socialgift",
  "path": "internal/application/socialgift",
- "purpose": "owns canonical daily gift entitlements",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -23,34 +22,7 @@
    "social_gift_epochs",
    "social_gift_transfers"
   ],
-  "read": [],
-  "sql_touches": {
-   "social_gift_claim_operations": {
-    "reads": [
-     "internal/adapters/postgres/socialgiftstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/socialgiftstore/store.go"
-    ]
-   },
-   "social_gift_epochs": {
-    "reads": [
-     "internal/adapters/postgres/socialgiftstore/epoch_evidence.go",
-     "internal/adapters/postgres/socialgiftstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/socialgiftstore/store.go"
-    ]
-   },
-   "social_gift_transfers": {
-    "reads": [
-     "internal/adapters/postgres/socialgiftstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/socialgiftstore/store.go"
-    ]
-   }
-  }
+  "read": []
  },
  "tests": {
   "integration": [
@@ -58,10 +30,11 @@
    "internal/integration/playerdisplay",
    "internal/integration/socialactivation"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/socialgift/types_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

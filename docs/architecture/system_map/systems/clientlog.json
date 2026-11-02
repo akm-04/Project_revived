@@ -5,7 +5,6 @@
  "mids": [],
  "name": "clientlog",
  "path": "internal/application/clientlog",
- "purpose": "ingests stock client log uploads and keeps the per-uid request journal (I85_CLIENT_LOG_INGEST_V1, I85_REQUEST_JOURNAL_V1, I85_LOG_RETENTION_V1)",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -15,47 +14,17 @@
    "client_log_uploads",
    "request_journal"
   ],
-  "read": [],
-  "sql_touches": {
-   "client_log_capabilities": {
-    "reads": [
-     "internal/adapters/postgres/clientlogstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/clientlogstore/store.go"
-    ]
-   },
-   "client_log_rows": {
-    "reads": [
-     "internal/adapters/postgres/clientlogstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/clientlogstore/store.go"
-    ]
-   },
-   "client_log_uploads": {
-    "reads": [
-     "internal/adapters/postgres/clientlogstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/clientlogstore/store.go"
-    ]
-   },
-   "request_journal": {
-    "reads": [
-     "internal/adapters/postgres/clientlogstore/store.go"
-    ]
-   }
-  }
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/clientlog"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/clientlog/service_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

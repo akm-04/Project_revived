@@ -49,22 +49,14 @@ func (s *scope) lookup(name string) (binding, bool) {
 	return binding{}, false
 }
 
-type typeDef struct {
-	file *fileContext
-	node *ast.TypeSpec
-}
-
 type funcDef struct {
 	file *fileContext
 	node *ast.FuncDecl
 }
 
 type packageInfo struct {
-	name    string
-	path    string
-	dir     string
 	files   []*fileContext
-	types   map[string]typeDef
+	types   map[string]*fileContext
 	funcs   map[string]funcDef
 	methods map[string]funcDef
 	vars    map[string]binding
@@ -83,7 +75,7 @@ func (w *world) packageAt(path string) *packageInfo {
 	dir := filepath.Join(w.root, strings.TrimPrefix(path, modulePath))
 	pkg, err := w.loadPackage(path, dir)
 	if err != nil {
-		pkg = &packageInfo{name: filepath.Base(dir), path: path, dir: dir, types: map[string]typeDef{}, funcs: map[string]funcDef{}, methods: map[string]funcDef{}, vars: map[string]binding{}}
+		pkg = &packageInfo{types: map[string]*fileContext{}, funcs: map[string]funcDef{}, methods: map[string]funcDef{}, vars: map[string]binding{}}
 	}
 	w.packages[path] = pkg
 	return pkg
@@ -94,7 +86,7 @@ func (w *world) loadPackage(path, dir string) (*packageInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	pkg := &packageInfo{name: filepath.Base(dir), path: path, dir: strings.TrimPrefix(filepath.ToSlash(dir), strings.TrimSuffix(filepath.ToSlash(w.root), "/")+"/"), types: map[string]typeDef{}, funcs: map[string]funcDef{}, methods: map[string]funcDef{}, vars: map[string]binding{}}
+	pkg := &packageInfo{types: map[string]*fileContext{}, funcs: map[string]funcDef{}, methods: map[string]funcDef{}, vars: map[string]binding{}}
 	names := []string{}
 	for _, entry := range entries {
 		name := entry.Name()
@@ -133,7 +125,7 @@ func (w *world) loadPackage(path, dir string) (*packageInfo, error) {
 				for _, raw := range typed.Specs {
 					switch spec := raw.(type) {
 					case *ast.TypeSpec:
-						pkg.types[spec.Name.Name] = typeDef{file: fc, node: spec}
+						pkg.types[spec.Name.Name] = fc
 					case *ast.ValueSpec:
 						for index, ident := range spec.Names {
 							value := binding{file: fc}
@@ -414,8 +406,6 @@ func (w *world) collectRefs(expr ast.Expr, sc *scope, fc *fileContext, pkg *pack
 	case *ast.MapType:
 		w.collectRefs(typed.Key, sc, fc, pkg, depth+1, seen, r)
 		w.collectRefs(typed.Value, sc, fc, pkg, depth+1, seen, r)
-	case *ast.TypeAssertExpr:
-		w.collectRefs(typed.X, sc, fc, pkg, depth+1, seen, r)
 	}
 }
 
@@ -464,7 +454,6 @@ type push struct {
 type output struct {
 	Registrations []registration `json:"registrations"`
 	Pushes        []push         `json:"pushes"`
-	Unresolved    []string       `json:"unresolved"`
 }
 
 type walker struct {
@@ -570,29 +559,9 @@ func (v *walker) walkStmt(stmt ast.Stmt, sc *scope, fc *fileContext, pkg *packag
 			v.walkStmt(typed.Init, child, fc, pkg, wiringFile)
 		}
 		v.walkStmt(typed.Body, child, fc, pkg, wiringFile)
-	case *ast.TypeSwitchStmt:
-		child := newScope(sc)
-		if typed.Init != nil {
-			v.walkStmt(typed.Init, child, fc, pkg, wiringFile)
-		}
-		v.walkStmt(typed.Body, child, fc, pkg, wiringFile)
 	case *ast.CaseClause:
 		for _, inner := range typed.Body {
 			v.walkStmt(inner, sc, fc, pkg, wiringFile)
-		}
-	case *ast.CommClause:
-		for _, inner := range typed.Body {
-			v.walkStmt(inner, sc, fc, pkg, wiringFile)
-		}
-	case *ast.LabeledStmt:
-		v.walkStmt(typed.Stmt, sc, fc, pkg, wiringFile)
-	case *ast.GoStmt:
-		if call, ok := unwrap(typed.Call).(*ast.CallExpr); ok {
-			v.maybeRegister(call, sc, fc, pkg, wiringFile)
-		}
-	case *ast.DeferStmt:
-		if call, ok := unwrap(typed.Call).(*ast.CallExpr); ok {
-			v.maybeRegister(call, sc, fc, pkg, wiringFile)
 		}
 	case *ast.ReturnStmt:
 		for _, result := range typed.Results {
@@ -774,25 +743,15 @@ func (w *world) attribute(dispatcherExpr ast.Expr, sc *scope, fc *fileContext, p
 	dispatcherFile := ""
 	var literalFields []*ast.KeyValueExpr
 	if literal != nil {
-		dispatcherType = qualifiedName(literal.Type, literalFile)
-		if path, name, ok := w.resolveTypeRef(literal.Type, literalFile); ok && path == modulePath+"internal/adapters/stockruntime" {
+		if path, name, ok := w.resolveTypeRef(literal.Type, literalFile); ok {
 			dispatcherType = name
-			if def, exists := w.packageAt(path).types[name]; exists {
-				dispatcherFile = def.file.rel
+			if file, exists := w.packageAt(path).types[name]; exists {
+				dispatcherFile = file.rel
 			}
 		}
-		if structType, ok := literal.Type.(*ast.StructType); ok {
-			for _, element := range literal.Elts {
-				if pair, isPair := element.(*ast.KeyValueExpr); isPair {
-					literalFields = append(literalFields, pair)
-				}
-			}
-			_ = structType
-		} else {
-			for _, element := range literal.Elts {
-				if pair, isPair := element.(*ast.KeyValueExpr); isPair {
-					literalFields = append(literalFields, pair)
-				}
+		for _, element := range literal.Elts {
+			if pair, isPair := element.(*ast.KeyValueExpr); isPair {
+				literalFields = append(literalFields, pair)
 			}
 		}
 	}
@@ -800,8 +759,8 @@ func (w *world) attribute(dispatcherExpr ast.Expr, sc *scope, fc *fileContext, p
 		if typeExpr, typeFile := w.typeExprOf(dispatcherExpr, 0, sc, fc, pkg, 0); typeExpr != nil {
 			if path, name, ok := w.resolveTypeRef(typeExpr, typeFile); ok && path == modulePath+"internal/adapters/stockruntime" {
 				dispatcherType = name
-				if def, exists := w.packageAt(path).types[name]; exists {
-					dispatcherFile = def.file.rel
+				if file, exists := w.packageAt(path).types[name]; exists {
+					dispatcherFile = file.rel
 				}
 			}
 		}
@@ -1265,7 +1224,7 @@ func main() {
 	}
 	w := &world{fset: token.NewFileSet(), root: root, packages: map[string]*packageInfo{}}
 	commandPkg := w.packageAt(modulePath + "cmd/gxb-api")
-	out := &output{Registrations: []registration{}, Pushes: []push{}, Unresolved: []string{}}
+	out := &output{Registrations: []registration{}, Pushes: []push{}}
 	walker := &walker{w: w, output: out}
 	walker.walkPackage(commandPkg)
 	out.Pushes = w.collectPushes()

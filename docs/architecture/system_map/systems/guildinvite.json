@@ -11,7 +11,6 @@
  "mids": [],
  "name": "guildinvite",
  "path": "internal/application/guildinvite",
- "purpose": "coordinates the finite Guild Invite presentation source and target commands",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -21,60 +20,16 @@
    "guild_invite_projection_markers",
    "guild_invite_projection_sources"
   ],
-  "read": [],
-  "sql_touches": {
-   "guild_invite_projection_cursors": {
-    "reads": [
-     "internal/adapters/postgres/guildinvitestore/schema.go",
-     "internal/adapters/postgres/guildinvitestore/store.go",
-     "internal/adapters/postgres/guildinvitestore/validity.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/guildinvitestore/store.go"
-    ]
-   },
-   "guild_invite_projection_deliveries": {
-    "reads": [
-     "internal/adapters/postgres/guildinvitestore/reconcile.go",
-     "internal/adapters/postgres/guildinvitestore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/guildinvitestore/reconcile.go",
-     "internal/adapters/postgres/guildinvitestore/store.go"
-    ]
-   },
-   "guild_invite_projection_markers": {
-    "reads": [
-     "internal/adapters/postgres/guildinvitestore/cursor.go",
-     "internal/adapters/postgres/guildinvitestore/event_reference.go",
-     "internal/adapters/postgres/guildinvitestore/reconcile.go",
-     "internal/adapters/postgres/guildinvitestore/store.go",
-     "internal/adapters/postgres/guildinvitestore/validity.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/guildinvitestore/cursor.go",
-     "internal/adapters/postgres/guildinvitestore/reconcile.go",
-     "internal/adapters/postgres/guildinvitestore/store.go"
-    ]
-   },
-   "guild_invite_projection_sources": {
-    "reads": [
-     "internal/adapters/postgres/guildinvitestore/cursor.go",
-     "internal/adapters/postgres/guildinvitestore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/guildinvitestore/store.go"
-    ]
-   }
-  }
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/guildinvite",
    "internal/integration/publicshowcase"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

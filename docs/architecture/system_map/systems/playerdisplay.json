@@ -16,1222 +16,121 @@
  ],
  "contracts": [
   {
-   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json",
-   "id": 100,
-   "kind": "mid"
+   "count": 2,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
   },
   {
-   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json",
-   "id": 23,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
   },
   {
-   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json",
-   "id": 100,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
-   "file": "docs/i9/I9_GACHA_V1.json",
-   "id": 100,
-   "kind": "mid"
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
   },
   {
-   "file": "docs/i9/I9_GACHA_V1.json",
-   "id": "content_summon_catalogs",
-   "kind": "table"
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
   },
   {
-   "file": "docs/i9/I9_GUILD_POLICY_V1.json",
-   "id": 100,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_PRIVATE_POLICY_V1.json"
   },
   {
-   "file": "docs/i9/I9_GUILD_POLICY_V1.json",
-   "id": 119,
-   "kind": "mid"
+   "count": 2,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
   },
   {
-   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md",
-   "id": 100,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
   },
   {
-   "file": "docs/i9/I9_MARCH_PRIVATE_POLICY_V1.json",
-   "id": 100,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
-   "file": "docs/i9/I9_MISSIONS_V1.json",
-   "id": 119,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json"
   },
   {
-   "file": "docs/i9/I9_MISSIONS_V1.json",
-   "id": 23,
-   "kind": "mid"
+   "count": 9,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
-   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json",
-   "id": 23,
-   "kind": "mid"
+   "count": 2,
+   "file": "docs/i9/I9_PET_CAMPAIGN_V1.json"
   },
   {
-   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json",
-   "id": 23,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json",
-   "id": 100,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 100,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 119,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 23,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 2490,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 2492,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 2493,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 2494,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 656,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 98,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_PET_CAMPAIGN_V1.json",
-   "id": 100,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_PET_CAMPAIGN_V1.json",
-   "id": 23,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json",
-   "id": 100,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "mids": [
   {
-   "client_files": [
-    "app/common/network/Backend.lua",
-    "app/model/EditPlayerName.lua",
-    "app/model/SelfPlayer.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 23,
-   "name": "EDIT_PLAYER_NAME",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "EDIT_PLAYER_NAME"
   },
   {
-   "client_files": [
-    "app/common/network/Backend.lua",
-    "app/model/ChangeAvatar.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 98,
-   "name": "SET_AVATAR_ID",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "SET_AVATAR_ID"
   },
   {
-   "client_files": [
-    "app/model/ChangeAvatar.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 100,
-   "name": "EDIT_AVATAR_RRAME",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "EDIT_AVATAR_RRAME"
   },
   {
-   "client_files": [
-    "app/common/network/Backend.lua",
-    "app/model/EditPlayerName.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 119,
-   "name": "GENERATE_PLAYER_NAME",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "GENERATE_PLAYER_NAME"
   },
   {
-   "client_files": [
-    "app/model/ChangeAvatar.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 656,
-   "name": "BUY_AVATAR",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "BUY_AVATAR"
   },
   {
-   "client_files": [
-    "app/windows/NewChangeAvatarWindow.lua",
-    "app/windows/PersonDisplayWindow.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2490,
-   "name": "GET_TITLE_INFO",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "GET_TITLE_INFO"
   },
   {
-   "client_files": [
-    "app/windows/NewChangeAvatarWindow.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2492,
-   "name": "CHANGE_TITLE",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "CHANGE_TITLE"
   },
   {
-   "client_files": [
-    "app/model/ChatBubble.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2493,
-   "name": "GET_BUBBLE_INFO",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "GET_BUBBLE_INFO"
   },
   {
-   "client_files": [
-    "app/model/ChatBubble.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/player_display.go",
    "mid": 2494,
-   "name": "CHANGE_BUBBLE",
-   "wiring_file": "cmd/gxb-api/player_display_postgres.go"
+   "name": "CHANGE_BUBBLE"
   }
  ],
  "name": "playerdisplay",
  "path": "internal/application/playerdisplay",
- "purpose": "owns Player display composition under I5",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore"
  ],
  "tables": {
-  "owned": [
-   "content_achievement_catalogs",
-   "content_adventure_catalogs",
-   "content_arena_catalogs",
-   "content_awakening_catalogs",
-   "content_book_input_catalogs",
-   "content_campaign_catalogs",
-   "content_conquer_input_catalogs",
-   "content_conquer_mode_catalogs",
-   "content_course_input_catalogs",
-   "content_dodgeball_catalogs",
-   "content_dorm_input_catalogs",
-   "content_element_input_catalogs",
-   "content_emoticon_catalogs",
-   "content_evolution_input_catalogs",
-   "content_gods_trial_catalogs",
-   "content_guild_broadcast_policies",
-   "content_guild_invite_policies",
-   "content_illusion_catalogs",
-   "content_inscription_input_catalogs",
-   "content_league_catalogs",
-   "content_library_input_catalogs",
-   "content_march_catalogs",
-   "content_memoir_catalogs",
-   "content_mission_activity_catalogs",
-   "content_monthly_signin_catalogs",
-   "content_occult_catalogs",
-   "content_one_on_one_catalogs",
-   "content_pet_campaign_catalogs",
-   "content_player_display_catalogs",
-   "content_privilege_catalogs",
-   "content_public_profile_policies",
-   "content_public_showcase_policies",
-   "content_social_gift_catalogs",
-   "content_spirit_input_catalogs",
-   "content_stat_input_catalogs",
-   "content_stat_rule_catalogs",
-   "content_summon_catalogs",
-   "content_top_floor_catalogs",
-   "content_workplace_catalogs",
-   "content_world_boss_catalogs",
-   "gxb_content_activation",
-   "gxb_content_appearance_live",
-   "gxb_content_appearance_pet_styles",
-   "gxb_content_appearance_skin_items",
-   "gxb_content_appearance_skins",
-   "gxb_content_equipment_primitives",
-   "gxb_content_equipment_recipe_edges",
-   "gxb_content_function_gates",
-   "gxb_content_hero_equipment",
-   "gxb_content_hero_exp",
-   "gxb_content_hero_exp_items",
-   "gxb_content_hero_fumo_materials",
-   "gxb_content_hero_fumo_targets",
-   "gxb_content_hero_normal_star",
-   "gxb_content_hero_practice_thresholds",
-   "gxb_content_hero_promotion_restoration_denominations",
-   "gxb_content_hero_promotion_restoration_equipment",
-   "gxb_content_hero_promotion_restoration_fractions",
-   "gxb_content_hero_super_star",
-   "gxb_content_hero_templates",
-   "gxb_content_objective_definitions",
-   "gxb_content_pet_acquisition",
-   "gxb_content_pet_acquisition_policy",
-   "gxb_content_pet_equipment",
-   "gxb_content_pet_evolution",
-   "gxb_content_pet_exp",
-   "gxb_content_pet_exp_items",
-   "gxb_content_pet_practice_thresholds",
-   "gxb_content_pet_progression",
-   "gxb_content_pet_progression_policy",
-   "gxb_content_pet_promotion_restoration_equipment",
-   "gxb_content_pet_skill_books",
-   "gxb_content_pet_skill_slot_policy",
-   "gxb_content_pet_skill_slots",
-   "gxb_content_pet_templates",
-   "gxb_content_player_progression",
-   "gxb_content_practice_locks",
-   "gxb_content_practice_methods",
-   "gxb_content_practice_policy_facts",
-   "gxb_content_practice_vip_bless",
-   "gxb_content_resource_definitions",
-   "gxb_content_revisions",
-   "gxb_content_super_equipment_caps",
-   "gxb_content_super_equipment_positions",
-   "gxb_content_super_equipment_tiers",
-   "gxb_content_super_hero_prerequisites"
-  ],
-  "read": [
-   "content_achievement_catalogs",
-   "content_adventure_catalogs",
-   "content_arena_catalogs",
-   "content_awakening_catalogs",
-   "content_book_input_catalogs",
-   "content_campaign_catalogs",
-   "content_conquer_input_catalogs",
-   "content_conquer_mode_catalogs",
-   "content_course_input_catalogs",
-   "content_dodgeball_catalogs",
-   "content_dorm_input_catalogs",
-   "content_element_input_catalogs",
-   "content_emoticon_catalogs",
-   "content_evolution_input_catalogs",
-   "content_gods_trial_catalogs",
-   "content_guild_broadcast_policies",
-   "content_guild_invite_policies",
-   "content_illusion_catalogs",
-   "content_inscription_input_catalogs",
-   "content_league_catalogs",
-   "content_library_input_catalogs",
-   "content_march_catalogs",
-   "content_memoir_catalogs",
-   "content_mission_activity_catalogs",
-   "content_monthly_signin_catalogs",
-   "content_occult_catalogs",
-   "content_one_on_one_catalogs",
-   "content_pet_campaign_catalogs",
-   "content_player_display_catalogs",
-   "content_privilege_catalogs",
-   "content_public_profile_policies",
-   "content_public_showcase_policies",
-   "content_social_gift_catalogs",
-   "content_spirit_input_catalogs",
-   "content_stat_input_catalogs",
-   "content_stat_rule_catalogs",
-   "content_summon_catalogs",
-   "content_top_floor_catalogs",
-   "content_workplace_catalogs",
-   "content_world_boss_catalogs",
-   "gxb_content_activation",
-   "gxb_content_appearance_live",
-   "gxb_content_appearance_pet_styles",
-   "gxb_content_appearance_skin_items",
-   "gxb_content_appearance_skins",
-   "gxb_content_equipment_primitives",
-   "gxb_content_equipment_recipe_edges",
-   "gxb_content_function_gates",
-   "gxb_content_hero_equipment",
-   "gxb_content_hero_exp",
-   "gxb_content_hero_exp_items",
-   "gxb_content_hero_fumo_materials",
-   "gxb_content_hero_fumo_targets",
-   "gxb_content_hero_normal_star",
-   "gxb_content_hero_practice_thresholds",
-   "gxb_content_hero_promotion_restoration_denominations",
-   "gxb_content_hero_promotion_restoration_equipment",
-   "gxb_content_hero_promotion_restoration_fractions",
-   "gxb_content_hero_super_star",
-   "gxb_content_hero_templates",
-   "gxb_content_objective_definitions",
-   "gxb_content_pet_acquisition",
-   "gxb_content_pet_acquisition_policy",
-   "gxb_content_pet_equipment",
-   "gxb_content_pet_evolution",
-   "gxb_content_pet_exp",
-   "gxb_content_pet_exp_items",
-   "gxb_content_pet_practice_thresholds",
-   "gxb_content_pet_progression",
-   "gxb_content_pet_progression_policy",
-   "gxb_content_pet_promotion_restoration_equipment",
-   "gxb_content_pet_skill_books",
-   "gxb_content_pet_skill_slot_policy",
-   "gxb_content_pet_skill_slots",
-   "gxb_content_pet_templates",
-   "gxb_content_player_progression",
-   "gxb_content_practice_locks",
-   "gxb_content_practice_methods",
-   "gxb_content_practice_policy_facts",
-   "gxb_content_practice_vip_bless",
-   "gxb_content_resource_definitions",
-   "gxb_content_revisions",
-   "gxb_content_super_equipment_caps",
-   "gxb_content_super_equipment_positions",
-   "gxb_content_super_equipment_tiers",
-   "gxb_content_super_hero_prerequisites"
-  ],
-  "sql_touches": {
-   "content_achievement_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/achievement.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/achievement.go"
-    ]
-   },
-   "content_adventure_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/adventure.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/adventure.go"
-    ]
-   },
-   "content_arena_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/arena.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/arena.go"
-    ]
-   },
-   "content_awakening_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "internal/adapters/postgres/contentstore/awakening.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/store.go"
-    ]
-   },
-   "content_book_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/book_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/book_inputs.go"
-    ]
-   },
-   "content_campaign_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/campaign.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/campaign.go"
-    ]
-   },
-   "content_conquer_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/conquer_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/conquer_inputs.go"
-    ]
-   },
-   "content_conquer_mode_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/conquer_mode.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/conquer_mode.go"
-    ]
-   },
-   "content_course_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/course_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/course_inputs.go"
-    ]
-   },
-   "content_dodgeball_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/dodgeball.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/dodgeball.go"
-    ]
-   },
-   "content_dorm_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/dorm_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/dorm_inputs.go"
-    ]
-   },
-   "content_element_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/element_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/element_inputs.go"
-    ]
-   },
-   "content_emoticon_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "content_evolution_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/evolution_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/evolution_inputs.go"
-    ]
-   },
-   "content_gods_trial_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/godstrial.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/godstrial.go"
-    ]
-   },
-   "content_guild_broadcast_policies": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/guild_broadcast.go",
-     "internal/adapters/postgres/contentstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/store.go"
-    ]
-   },
-   "content_guild_invite_policies": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/guild_invite.go",
-     "internal/adapters/postgres/contentstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/store.go"
-    ]
-   },
-   "content_illusion_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/illusion.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/illusion.go"
-    ]
-   },
-   "content_inscription_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/inscription_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/inscription_inputs.go"
-    ]
-   },
-   "content_league_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/league.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/league.go"
-    ]
-   },
-   "content_library_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/library_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/library_inputs.go"
-    ]
-   },
-   "content_march_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/march.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/march.go"
-    ]
-   },
-   "content_memoir_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/memoir.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/memoir.go"
-    ]
-   },
-   "content_mission_activity_catalogs": {
-    "writes": [
-     "internal/adapters/postgres/contentstore/store.go"
-    ]
-   },
-   "content_monthly_signin_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "internal/adapters/postgres/contentstore/signin.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/store.go"
-    ]
-   },
-   "content_occult_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/occult.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/occult.go"
-    ]
-   },
-   "content_one_on_one_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/one_on_one.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/one_on_one.go"
-    ]
-   },
-   "content_pet_campaign_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/petcampaign.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/petcampaign.go"
-    ]
-   },
-   "content_player_display_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/player_display.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/player_display.go"
-    ]
-   },
-   "content_privilege_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/privilege.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/privilege.go"
-    ]
-   },
-   "content_public_profile_policies": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/public_profile.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/public_profile.go"
-    ]
-   },
-   "content_public_showcase_policies": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/public_showcase.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/public_showcase.go"
-    ]
-   },
-   "content_social_gift_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/social_gift.go",
-     "internal/adapters/postgres/contentstore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/store.go"
-    ]
-   },
-   "content_spirit_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/spirit_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/spirit_inputs.go"
-    ]
-   },
-   "content_stat_input_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/stat_inputs.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/stat_inputs.go"
-    ]
-   },
-   "content_stat_rule_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/stat_rules.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/stat_rules.go"
-    ]
-   },
-   "content_summon_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/summon.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/summon.go"
-    ]
-   },
-   "content_top_floor_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/top_floor.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/top_floor.go"
-    ]
-   },
-   "content_workplace_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/workplace.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/workplace.go"
-    ]
-   },
-   "content_world_boss_catalogs": {
-    "reads": [
-     "internal/adapters/postgres/contentstore/worldboss.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentstore/worldboss.go"
-    ]
-   },
-   "gxb_content_activation": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_appearance_live": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_appearance_pet_styles": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_appearance_skin_items": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_appearance_skins": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_equipment_primitives": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_equipment_recipe_edges": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_function_gates": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_equipment": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_exp": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_exp_items": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_fumo_materials": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_fumo_targets": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_normal_star": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_practice_thresholds": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_promotion_restoration_denominations": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_promotion_restoration_equipment": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_promotion_restoration_fractions": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_super_star": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_hero_templates": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "internal/adapters/postgres/contentstore/arena.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_objective_definitions": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "internal/adapters/postgres/contentstore/missions.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_acquisition": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_acquisition_policy": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_equipment": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_evolution": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_exp": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_exp_items": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_practice_thresholds": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_progression": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_progression_policy": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_promotion_restoration_equipment": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_skill_books": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_skill_slot_policy": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_skill_slots": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_pet_templates": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_player_progression": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_practice_locks": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_practice_methods": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_practice_policy_facts": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_practice_vip_bless": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_resource_definitions": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_revisions": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "internal/adapters/postgres/contentstore/achievement.go",
-     "internal/adapters/postgres/contentstore/book_inputs.go",
-     "internal/adapters/postgres/contentstore/conquer_inputs.go",
-     "internal/adapters/postgres/contentstore/course_inputs.go",
-     "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "internal/adapters/postgres/contentstore/element_inputs.go",
-     "internal/adapters/postgres/contentstore/evolution_inputs.go",
-     "internal/adapters/postgres/contentstore/inscription_inputs.go",
-     "internal/adapters/postgres/contentstore/library_inputs.go",
-     "internal/adapters/postgres/contentstore/missions.go",
-     "internal/adapters/postgres/contentstore/mode_catalog.go",
-     "internal/adapters/postgres/contentstore/player_display.go",
-     "internal/adapters/postgres/contentstore/privilege.go",
-     "internal/adapters/postgres/contentstore/spirit_inputs.go",
-     "internal/adapters/postgres/contentstore/stat_inputs.go",
-     "internal/adapters/postgres/contentstore/stat_rules.go",
-     "internal/adapters/postgres/contentstore/store.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_super_equipment_caps": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_super_equipment_positions": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_super_equipment_tiers": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   },
-   "gxb_content_super_hero_prerequisites": {
-    "reads": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/contentqueries/querytext_gen.go",
-     "sql/content/content.sql"
-    ]
-   }
-  }
+  "owned": [],
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/playerdisplay",
    "internal/integration/publicshowcase"
   ],
-  "scenarios": [
+  "scenarios_naming": [
    "virtualclient/scenarios/i9_4_real_pk.json",
    "virtualclient/scenarios/topfloor_battle.json"
   ],
@@ -1240,5 +139,8 @@
    "internal/application/playerdisplay/hero_predicate_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": [
+  "cmd/gxb-api/player_display_postgres.go"
+ ]
 }

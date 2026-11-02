@@ -7,229 +7,47 @@
  ],
  "contracts": [
   {
-   "file": "docs/i9/I9_MISSIONS_V1.json",
-   "id": 234,
-   "kind": "mid"
+   "count": 1,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
   },
   {
-   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json",
-   "id": 229,
-   "kind": "mid"
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
   },
   {
-   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json",
-   "id": 234,
-   "kind": "mid"
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
-   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json",
-   "id": 229,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json",
-   "id": 234,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 229,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_MODE_SURFACE_V1.json",
-   "id": 234,
-   "kind": "mid"
-  },
-  {
-   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json",
-   "id": "players",
-   "kind": "table"
+   "count": 2,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
  ],
  "mids": [
   {
-   "client_files": [
-    "app/common/network/Backend.lua",
-    "app/model/Activities.lua",
-    "app/model/SelfPlayer.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/activity_dispatcher.go",
    "mid": 229,
-   "name": "ACTIVITIES",
-   "wiring_file": "cmd/gxb-api/main_postgres.go"
+   "name": "ACTIVITIES"
   },
   {
-   "client_files": [
-    "app/common/network/Backend.lua",
-    "app/model/Activities.lua",
-    "app/model/CvLink.lua",
-    "app/model/DragonBoat2017.lua",
-    "app/model/Garden.lua",
-    "app/model/Sakura.lua",
-    "app/model/Sakura2018.lua",
-    "app/model/SnowBall.lua",
-    "app/model/Summer.lua",
-    "app/model/Tutor.lua",
-    "app/windows/HeroCollectWindow.lua",
-    "app/windows/HeroListCell.lua"
-   ],
    "dispatcher_file": "internal/adapters/stockruntime/activity_dispatcher.go",
    "mid": 234,
-   "name": "LOAD_SINGLE_ACTIVITY",
-   "wiring_file": "cmd/gxb-api/main_postgres.go"
+   "name": "LOAD_SINGLE_ACTIVITY"
   }
  ],
  "name": "activitydirectory",
  "path": "internal/application/activitydirectory",
- "purpose": "",
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/i4store"
  ],
  "tables": {
-  "owned": [
-   "account_provider_bindings",
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "accounts",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
-   "players"
-  ],
-  "read": [
-   "account_provider_bindings",
-   "account_session_credentials",
-   "account_session_server_observations",
-   "account_sessions",
-   "accounts",
-   "gameplay_context_credentials",
-   "gameplay_contexts",
-   "logical_servers",
-   "player_directory_profiles",
-   "players"
-  ],
-  "sql_touches": {
-   "account_provider_bindings": {
-    "reads": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "account_session_credentials": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "account_session_server_observations": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "account_sessions": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "accounts": {
-    "reads": [
-     "internal/adapters/postgres/identitystore/store.go"
-    ]
-   },
-   "gameplay_context_credentials": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/realtime_authority.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "gameplay_contexts": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/general_dm.go",
-     "internal/adapters/postgres/i4store/realtime_authority.go",
-     "internal/adapters/postgres/i5store/store.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/identitystore/store.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "logical_servers": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/recipient_root.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "player_directory_profiles": {
-    "reads": [
-     "internal/adapters/postgres/i4store/conquer_projection.go",
-     "internal/adapters/postgres/i4store/directory_discovery.go",
-     "internal/adapters/postgres/i4store/directory_level_projection.go",
-     "internal/adapters/postgres/i4store/directory_reader.go",
-     "internal/adapters/postgres/i4store/population.go",
-     "internal/adapters/postgres/i4store/privilege_projection.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/conquer_projection.go",
-     "internal/adapters/postgres/i4store/directory_level_projection.go",
-     "internal/adapters/postgres/i4store/privilege_projection.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   },
-   "players": {
-    "reads": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "internal/adapters/postgres/i4store/name_snapshot.go",
-     "internal/adapters/postgres/i4store/playerroot_crossowner.go",
-     "internal/adapters/postgres/i4store/recipient_root.go",
-     "sql/i3/identity_bootstrap.sql"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i5store/store.go",
-     "sql/i3/identity_bootstrap.sql",
-     "sql/i5/player_core.sql"
-    ]
-   }
-  }
+  "owned": [],
+  "read": []
  },
  "tests": {
   "integration": [],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/activitydirectory/service_test.go"
   ]
@@ -290,5 +108,8 @@
   "summon",
   "topfloor",
   "worldboss"
+ ],
+ "wiring_files": [
+  "cmd/gxb-api/main_postgres.go"
  ]
 }

@@ -10,7 +10,6 @@
  "mids": [],
  "name": "socialpresence",
  "path": "internal/application/socialpresence",
- "purpose": "",
  "pushes": [],
  "stores": [],
  "tables": {
@@ -19,41 +18,15 @@
    "realtime_presence_leases",
    "realtime_presence_owner_state"
   ],
-  "read": [],
-  "sql_touches": {
-   "player_social_presence": {
-    "reads": [
-     "internal/adapters/postgres/presencestore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/presencestore/store.go"
-    ]
-   },
-   "realtime_presence_leases": {
-    "reads": [
-     "internal/adapters/postgres/presencestore/general_dm.go",
-     "internal/adapters/postgres/presencestore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/presencestore/store.go"
-    ]
-   },
-   "realtime_presence_owner_state": {
-    "reads": [
-     "internal/adapters/postgres/presencestore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/presencestore/store.go"
-    ]
-   }
-  }
+  "read": []
  },
  "tests": {
   "integration": [],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/socialpresence/service_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

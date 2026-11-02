@@ -40,20 +40,18 @@
  "mids": [],
  "name": "characterasset",
  "path": "internal/application/characterasset",
- "purpose": "contains shared cross-family Character Asset contracts",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/playerdisplay",
    "internal/integration/publicshowcase"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/characterasset/appearance_projection_test.go",
    "internal/application/characterasset/battle_contribution_test.go",
@@ -69,5 +67,6 @@
    "internal/application/characterasset/synthetic_projection_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

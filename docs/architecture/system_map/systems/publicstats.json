@@ -22,22 +22,21 @@
  "mids": [],
  "name": "publicstats",
  "path": "internal/application/publicstats",
- "purpose": "composes canonical owned facts in a caller-witnessed CA8 snapshot",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/playerdisplay"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/publicstats/service_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

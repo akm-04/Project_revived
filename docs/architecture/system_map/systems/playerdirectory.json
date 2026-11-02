@@ -27,40 +27,21 @@
  "mids": [],
  "name": "playerdirectory",
  "path": "internal/application/playerdirectory",
- "purpose": "",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [
    "player_directory_profiles"
   ],
-  "read": [],
-  "sql_touches": {
-   "player_directory_profiles": {
-    "reads": [
-     "internal/adapters/postgres/i4store/conquer_projection.go",
-     "internal/adapters/postgres/i4store/directory_discovery.go",
-     "internal/adapters/postgres/i4store/directory_level_projection.go",
-     "internal/adapters/postgres/i4store/directory_reader.go",
-     "internal/adapters/postgres/i4store/population.go",
-     "internal/adapters/postgres/i4store/privilege_projection.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "internal/adapters/postgres/i4store/conquer_projection.go",
-     "internal/adapters/postgres/i4store/directory_level_projection.go",
-     "internal/adapters/postgres/i4store/privilege_projection.go",
-     "sql/i3/identity_bootstrap.sql"
-    ]
-   }
-  }
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/socialprojection"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

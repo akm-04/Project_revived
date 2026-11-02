@@ -9,20 +9,19 @@
  "mids": [],
  "name": "socialfriendbase",
  "path": "internal/application/socialfriendbase",
- "purpose": "composes typed Social projection and FriendDM ports",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/socialactivation"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

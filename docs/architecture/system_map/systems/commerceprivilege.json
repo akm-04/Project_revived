@@ -10,32 +10,22 @@
  "mids": [],
  "name": "commerceprivilege",
  "path": "internal/application/commerceprivilege",
- "purpose": "owns narrow canonical manual privilege facts",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [
    "commerce_privilege_roots"
   ],
-  "read": [],
-  "sql_touches": {
-   "commerce_privilege_roots": {
-    "reads": [
-     "internal/adapters/postgres/commerceprivilegestore/store.go"
-    ],
-    "writes": [
-     "internal/adapters/postgres/commerceprivilegestore/store.go"
-    ]
-   }
-  }
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/missions",
    "internal/integration/playerdisplay"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

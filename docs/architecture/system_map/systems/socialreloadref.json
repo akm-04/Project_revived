@@ -12,23 +12,22 @@
  "mids": [],
  "name": "socialreloadref",
  "path": "internal/application/socialreloadref",
- "purpose": "owns only the finite Social wakeup reference syntax",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/guildinvite",
    "internal/integration/socialactivation"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": [
    "internal/application/socialreloadref/codec_test.go"
   ]
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

@@ -7,20 +7,19 @@
  "mids": [],
  "name": "profileasset",
  "path": "internal/application/profileasset",
- "purpose": "supplies physical storage ports; it owns no gameplay SQL",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
    "internal/integration/profilemedia"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }

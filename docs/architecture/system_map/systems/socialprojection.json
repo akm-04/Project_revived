@@ -15,13 +15,11 @@
  "mids": [],
  "name": "socialprojection",
  "path": "internal/application/socialprojection",
- "purpose": "composes typed owner reads in one caller transaction",
  "pushes": [],
  "stores": [],
  "tables": {
   "owned": [],
-  "read": [],
-  "sql_touches": {}
+  "read": []
  },
  "tests": {
   "integration": [
@@ -30,8 +28,9 @@
    "internal/integration/socialactivation",
    "internal/integration/socialprojection"
   ],
-  "scenarios": [],
+  "scenarios_naming": [],
   "unit": []
  },
- "wired_with": []
+ "wired_with": [],
+ "wiring_files": []
 }
