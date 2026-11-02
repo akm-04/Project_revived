@@ -42,43 +42,64 @@ func (s Service) InscriptionInputsTx(ctx context.Context, q tx.Queryer, scope In
 }
 
 func (s Service) inputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, []character.Hero, error) {
-	var out Inputs
-	if q == nil || !scope.Player.Valid() || len(scope.ContentRevision) != 64 || scope.ObservedAt.IsZero() {
-		return out, nil, ins.ErrUnqualified
-	}
-	r, e := s.Owner.ReadRootTx(ctx, q, scope.Player)
+	v, e := s.rootInputsTx(ctx, q, scope)
 	if e != nil {
-		return out, nil, e
-	}
-	if scope.ObservedAt.Before(r.UpdatedAt) {
-		return out, nil, ErrStale
-	}
-	c, e := s.Content.InscriptionCatalogTx(ctx, q, scope.ContentRevision)
-	if e != nil {
-		return out, nil, e
-	}
-	if e = r.Facts.Validate(c); e != nil {
-		return out, nil, e
-	}
-	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
-	if e != nil {
-		return out, nil, e
-	}
-	if scope.ObservedAt.Before(pop.UpdatedAt) {
-		return out, nil, ErrStale
+		return v, nil, e
 	}
 	hs, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
 	if e != nil {
-		return out, nil, e
+		return v, nil, e
 	}
 	alive := map[int64]bool{}
 	for _, h := range hs {
 		if e = h.ValidatePersistent(); e != nil {
-			return out, nil, e
+			return v, nil, e
 		}
 		alive[h.PartnerID] = true
 	}
-	return Inputs{r, c, pop.StateVersion, alive, scope.ObservedAt, scope.ContentRevision}, hs, nil
+	v.Alive = alive
+	return v, hs, nil
+}
+
+// rootInputsTx reads the player inscription root and catalog without the roster.
+func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
+	var out Inputs
+	if q == nil || !scope.Player.Valid() || len(scope.ContentRevision) != 64 || scope.ObservedAt.IsZero() {
+		return out, ins.ErrUnqualified
+	}
+	r, e := s.Owner.ReadRootTx(ctx, q, scope.Player)
+	if e != nil {
+		return out, e
+	}
+	if scope.ObservedAt.Before(r.UpdatedAt) {
+		return out, ErrStale
+	}
+	c, e := s.Content.InscriptionCatalogTx(ctx, q, scope.ContentRevision)
+	if e != nil {
+		return out, e
+	}
+	if e = r.Facts.Validate(c); e != nil {
+		return out, e
+	}
+	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
+	if e != nil {
+		return out, e
+	}
+	if scope.ObservedAt.Before(pop.UpdatedAt) {
+		return out, ErrStale
+	}
+	return Inputs{r, c, pop.StateVersion, map[int64]bool{}, scope.ObservedAt, scope.ContentRevision}, nil
+}
+
+// heroInputsTx reads the roster only for the shared validation path; a single
+// Hero projection reads that Hero alone and checks it in the caller.
+func (s Service) heroInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, partner int64) (Inputs, error) {
+	v, e := s.rootInputsTx(ctx, q, scope)
+	if e != nil {
+		return v, e
+	}
+	v.Alive = map[int64]bool{partner: true}
+	return v, nil
 }
 
 // CompleteSuitCountTx counts completed inscription suits over the whole roster
@@ -125,16 +146,19 @@ func (s Service) CompleteSuitCountTx(ctx context.Context, q tx.Queryer, scope In
 }
 func (s Service) HeroInscriptionInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, id int64) (HeroInputs, error) {
 	var out HeroInputs
-	v, e := s.InscriptionInputsTx(ctx, q, scope)
+	v, e := s.heroInputsTx(ctx, q, scope, id)
 	if e != nil {
 		return out, e
 	}
 	if !v.Alive[id] {
 		return out, ErrRetired
 	}
-	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, scope.Player, id)
+	h, found, e := s.Heroes.FindHeroByPartnerIDTx(ctx, q, scope.Player, id)
 	if e != nil {
 		return out, e
+	}
+	if !found {
+		return out, ErrRetired
 	}
 	f, e := s.Owner.ReadHeroTx(ctx, q, scope.Player, id)
 	if e != nil {

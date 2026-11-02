@@ -41,45 +41,85 @@ func (s Service) CourseInputsTx(ctx context.Context, q tx.Queryer, scope InputSc
 }
 
 func (s Service) inputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, []character.Hero, error) {
-	var out Inputs
-	if q == nil || !scope.Player.Valid() || len(scope.ContentRevision) != 64 || scope.ObservedAt.IsZero() {
-		return out, nil, course.ErrUnqualified
-	}
-	r, e := s.Owner.ReadRootTx(ctx, q, scope.Player)
+	v, e := s.rootInputsTx(ctx, q, scope)
 	if e != nil {
-		return out, nil, e
-	}
-	if scope.ObservedAt.Before(r.UpdatedAt) {
-		return out, nil, ErrStale
-	}
-	c, e := s.Content.CourseCatalogTx(ctx, q, scope.ContentRevision)
-	if e != nil {
-		return out, nil, e
-	}
-	if e = r.Facts.Validate(c); e != nil {
-		return out, nil, e
-	}
-	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
-	if e != nil {
-		return out, nil, e
+		return v, nil, e
 	}
 	heroes, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
 	if e != nil {
-		return out, nil, e
+		return v, nil, e
 	}
 	alive := map[int64]bool{}
 	for _, h := range heroes {
 		if e = h.ValidatePersistent(); e != nil {
-			return out, nil, e
+			return v, nil, e
 		}
 		alive[h.PartnerID] = true
 	}
-	for p := range r.Facts.Attendance {
+	for p := range v.Root.Facts.Attendance {
 		if !alive[p] {
-			return out, nil, course.ErrUnqualified
+			return v, nil, course.ErrUnqualified
 		}
 	}
-	return Inputs{Root: r, Catalog: c, PopulationVersion: pop.StateVersion, Alive: alive, ObservedAt: scope.ObservedAt, ContentRevision: scope.ContentRevision}, heroes, nil
+	v.Alive = alive
+	return v, heroes, nil
+}
+
+// rootInputsTx reads the player course root and catalog without the roster.
+func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
+	var out Inputs
+	if q == nil || !scope.Player.Valid() || len(scope.ContentRevision) != 64 || scope.ObservedAt.IsZero() {
+		return out, course.ErrUnqualified
+	}
+	r, e := s.Owner.ReadRootTx(ctx, q, scope.Player)
+	if e != nil {
+		return out, e
+	}
+	if scope.ObservedAt.Before(r.UpdatedAt) {
+		return out, ErrStale
+	}
+	c, e := s.Content.CourseCatalogTx(ctx, q, scope.ContentRevision)
+	if e != nil {
+		return out, e
+	}
+	if e = r.Facts.Validate(c); e != nil {
+		return out, e
+	}
+	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
+	if e != nil {
+		return out, e
+	}
+	return Inputs{Root: r, Catalog: c, PopulationVersion: pop.StateVersion, ObservedAt: scope.ObservedAt, ContentRevision: scope.ContentRevision}, nil
+}
+
+// heroInputsTx validates the roster only when the course root names an
+// attendance partner; a single-Hero projection otherwise reads that Hero alone.
+func (s Service) heroInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, partner int64) (Inputs, error) {
+	v, e := s.rootInputsTx(ctx, q, scope)
+	if e != nil {
+		return v, e
+	}
+	v.Alive = map[int64]bool{partner: true}
+	if len(v.Root.Facts.Attendance) == 0 {
+		return v, nil
+	}
+	heroes, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return v, e
+	}
+	v.Alive = map[int64]bool{}
+	for _, h := range heroes {
+		if e = h.ValidatePersistent(); e != nil {
+			return v, e
+		}
+		v.Alive[h.PartnerID] = true
+	}
+	for p := range v.Root.Facts.Attendance {
+		if !v.Alive[p] {
+			return v, course.ErrUnqualified
+		}
+	}
+	return v, nil
 }
 
 // CompletedCourseCountTx counts finished course records over the whole roster
@@ -134,16 +174,19 @@ func (s Service) CompletedCourseCountTx(ctx context.Context, q tx.Queryer, scope
 }
 func (s Service) HeroCourseInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, partner int64) (HeroInputs, error) {
 	var out HeroInputs
-	v, e := s.CourseInputsTx(ctx, q, scope)
+	v, e := s.heroInputsTx(ctx, q, scope, partner)
 	if e != nil {
 		return out, e
 	}
 	if !v.Alive[partner] {
 		return out, ErrRetired
 	}
-	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, scope.Player, partner)
+	h, found, e := s.Heroes.FindHeroByPartnerIDTx(ctx, q, scope.Player, partner)
 	if e != nil {
 		return out, e
+	}
+	if !found {
+		return out, ErrRetired
 	}
 	f, e := s.Owner.ReadHeroTx(ctx, q, scope.Player, partner)
 	if e != nil {
