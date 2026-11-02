@@ -35,10 +35,11 @@ FRONT_BASE = f"http://{os.environ.get('PLAYTEST_BIND', '127.0.0.1')}:18956"
 REGION = 1
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
 ACCOUNTS_PATH = STATE_DIRECTORY / "accounts.json"
-CREDENTIALS_PATH = STATE_DIRECTORY / "credentials.txt"
+CREDENTIALS_PATH = HARNESS_DIRECTORY / "psk" / "accounts.txt"
+FIXED_PASSWORDS = {"moppleton": "akm11111", "alpaca123": "akm22222", "campaigner": "akm33333"}
+FIRST_ASSIGNED_PASSWORD_NUMBER = 10001
 REPORT_DIRECTORY = STATE_DIRECTORY
 PRESERVE_PLAYERS = HARNESS_DIRECTORY / "preserve" / "server_state" / "players"
-PRESERVE_ACCOUNTS = HARNESS_DIRECTORY / "preserve" / "server_state" / "accounts"
 PASSWORD_ALGORITHM = "pbkdf2-sha256"
 PBKDF2_ITERATIONS = 200_000
 
@@ -362,20 +363,6 @@ def password_record(password):
         "salt": salt.hex(),
         "hash": digest.hex(),
     }
-
-
-def record_parses(record):
-    if not isinstance(record, dict):
-        return False
-    try:
-        if record.get("algorithm") != PASSWORD_ALGORITHM:
-            return False
-        int(record.get("iterations", 0))
-        bytes.fromhex(str(record["salt"]))
-        bytes.fromhex(str(record["hash"]))
-    except (KeyError, TypeError, ValueError):
-        return False
-    return True
 
 
 def credential_digest(secret, label, raw):
@@ -1203,17 +1190,7 @@ def import_summon(player, player_id, statements, write, now):
     return state
 
 
-def read_password_record(account_uid):
-    path = PRESERVE_ACCOUNTS / f"{account_uid}.json"
-    try:
-        record = json.loads(path.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
-        return None
-    password = record.get("password")
-    return password if record_parses(password) else None
-
-
-def import_player(save, login, display_name, password_record_value, overrides):
+def import_player(save, login, display_name, overrides):
     player = deep_merge(player_state(save), overrides)
     report = {
         "login": login,
@@ -1226,13 +1203,11 @@ def import_player(save, login, display_name, password_record_value, overrides):
         "notes": [
             "not_imported lists every unmapped second-level field; per-hero unmapped fields are listed when the save carries a non-default value",
         ],
-        "password_generated": False,
     }
     accounts = load_accounts()
     normalized = normalize_login(login)
     uid = accounts["logins"].get(normalized)
     account = accounts["accounts"].get(uid) if uid else None
-    generated_password = None
     if account is None:
         uid = str(uuid.uuid4())
         account = {
@@ -1246,12 +1221,7 @@ def import_player(save, login, display_name, password_record_value, overrides):
         }
         accounts["accounts"][uid] = account
         accounts["logins"][normalized] = uid
-    if password_record_value is None or not record_parses(password_record_value):
-        generated_password = secrets.token_urlsafe(18)
-        account["password"] = password_record(generated_password)
-        report["password_generated"] = True
-    else:
-        account["password"] = password_record_value
+    account["password"] = password_record(assigned_password(login))
     account["login"] = login
     account["username"] = login
     account["account_type"] = "normal"
@@ -1270,7 +1240,6 @@ def import_player(save, login, display_name, password_record_value, overrides):
         report["content_refused"].append({"kind": "collected-hero", "id": int(table_id), "reason": "collected in v1 but not owned; no v2 collected-only owner"})
     report_unmapped(player, save, report)
     report["rows_written"] = {table: count for table, count in sorted(report["rows_written"].items())}
-    write_credential_entry(login, generated_password or "v1-password-record-copied")
     write_report(login, report)
     return report
 
@@ -1286,8 +1255,7 @@ def write_report(login, report):
     os.replace(temporary, path)
 
 
-def write_credential_entry(login, value):
-    STATE_DIRECTORY.mkdir(parents=True, exist_ok=True)
+def read_credentials():
     lines = {}
     try:
         for line in CREDENTIALS_PATH.read_text(encoding="utf-8").splitlines():
@@ -1297,18 +1265,33 @@ def write_credential_entry(login, value):
             lines[name] = existing
     except FileNotFoundError:
         pass
-    lines[login] = value
-    body = ["# login\tpassword-source"] + [f"{name}\t{lines[name]}" for name in sorted(lines)]
+    return lines
+
+
+def assigned_password(login):
+    """The login's test password. psk/accounts.txt survives resets, so a login keeps its password across redeploys."""
+    lines = read_credentials()
+    if login in lines:
+        return lines[login]
+    password = FIXED_PASSWORDS.get(login)
+    number = FIRST_ASSIGNED_PASSWORD_NUMBER
+    while password is None or password in lines.values():
+        password = f"akm{number}"
+        number += 1
+    lines[login] = password
+    CREDENTIALS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    body = ["# login\tpassword"] + [f"{name}\t{lines[name]}" for name in sorted(lines)]
     descriptor = os.open(CREDENTIALS_PATH, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
         handle.write("\n".join(body) + "\n")
     os.chmod(CREDENTIALS_PATH, 0o600)
+    return password
 
 
 SEEDS = (
-    {"directory": "12525385", "login": "moppleton", "password": "generate"},
-    {"directory": "19700001", "login": "alpaca123", "password": "copy"},
-    {"directory": "19700002", "login": "campaigner", "password": "copy"},
+    {"directory": "12525385", "login": "moppleton"},
+    {"directory": "19700001", "login": "alpaca123"},
+    {"directory": "19700002", "login": "campaigner"},
 )
 
 
@@ -1319,12 +1302,7 @@ def seed():
         player = player_state(save)
         login = seed_entry["login"]
         display_name = str((player.get("identity") or {}).get("player_name") or login)
-        if seed_entry["password"] == "copy":
-            account_uid = str((player.get("identity") or {}).get("account_uid") or "")
-            record = read_password_record(account_uid)
-        else:
-            record = None
-        report = import_player(save, login, display_name, record, None)
+        report = import_player(save, login, display_name, None)
         print(
             f"seed: {login} player {report['player_id']} rows={sum(report['rows_written'].values())} "
             f"refused={len(report['content_refused'])}"
@@ -1338,7 +1316,7 @@ def main(arguments):
     if arguments[:1] == ["import"] and len(arguments) >= 4:
         path = Path(arguments[1])
         save = json.loads(path.read_text(encoding="utf-8"))
-        report = import_player(save, arguments[2], arguments[3], None, None)
+        report = import_player(save, arguments[2], arguments[3], None)
         print(json.dumps({"login": report["login"], "player_id": report["player_id"]}, sort_keys=True))
         return 0
     fail("usage: import_legacy.py seed | import <save.json> <login> <display_name>")

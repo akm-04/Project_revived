@@ -5,8 +5,11 @@ import hashlib
 import http.client
 import json
 import os
+import re
+import secrets
 import sys
 import threading
+import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -20,6 +23,11 @@ API_HOST = "127.0.0.1"
 API_PORT = 18953
 FORWARD_TIMEOUT_SECONDS = 60
 RESOURCE_PREFIX = "/res/"
+# One id per game launch, handed out in the MID 20480 reply and carried in every later URL of that launch.
+SESSION_PATTERN = r"\d{4}-\d{6}-[0-9a-f]{4}"
+SESSION_PATH = re.compile(rf"/s/({SESSION_PATTERN})(/.*)")
+SESSION_RESOURCE = re.compile(rf"/res/({SESSION_PATTERN})/([^/]+)")
+SESSION_LOG_DIRECTORY = Path(__file__).resolve().parent / "logs" / "sessions"
 
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
 ASSET_INDEX_PATH = STATE_DIRECTORY / "asset_index.json"
@@ -101,6 +109,7 @@ def build_index():
 INDEX = build_index()
 INDEX_LOCK = threading.Lock()
 MISSING_LOCK = threading.Lock()
+SESSION_LOG_LOCK = threading.Lock()
 
 
 def load_missing_assets():
@@ -122,6 +131,24 @@ def record_missing(key):
         with open(MISSING_ASSETS_PATH, "a", encoding="utf-8") as handle:
             handle.write(key + "\n")
         log(f"asset missing: {key}")
+
+
+def new_session():
+    return time.strftime("%m%d-%H%M%S", time.gmtime()) + "-" + secrets.token_hex(2)
+
+
+def record_session_event(session, event):
+    if session is None:
+        return
+    line = json.dumps({"at": round(time.time(), 3), **event}, ensure_ascii=False)
+    with SESSION_LOG_LOCK:
+        SESSION_LOG_DIRECTORY.mkdir(parents=True, exist_ok=True)
+        with open(SESSION_LOG_DIRECTORY / f"{session}.jsonl", "a", encoding="utf-8") as handle:
+            handle.write(line + "\n")
+
+
+def elapsed_milliseconds(started):
+    return round((time.monotonic() - started) * 1000, 1)
 
 
 def filtered_headers(headers, dropped):
@@ -161,12 +188,22 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
 
     def handle_request(self, send_body):
         path = urllib.parse.urlsplit(self.path).path
-        if path.startswith(RESOURCE_PREFIX):
-            self.serve_asset(path[len(RESOURCE_PREFIX):], send_body)
+        session_resource = SESSION_RESOURCE.fullmatch(path)
+        if session_resource:
+            self.serve_asset(session_resource[2], send_body, session_resource[1])
             return
-        self.forward_request(send_body)
+        if path.startswith(RESOURCE_PREFIX):
+            self.serve_asset(path[len(RESOURCE_PREFIX):], send_body, None)
+            return
+        session_path = SESSION_PATH.fullmatch(path)
+        if session_path:
+            prefix_length = len("/s/") + len(session_path[1])
+            self.forward_request(send_body, self.path[prefix_length:], session_path[1])
+            return
+        self.forward_request(send_body, self.path, None)
 
-    def serve_asset(self, key, send_body):
+    def serve_asset(self, key, send_body, session):
+        started = time.monotonic()
         if not key or "/" in key or key in (".", ".."):
             self.send_empty(404)
             return
@@ -174,6 +211,7 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
             path = INDEX.get(key)
         if path is None or not os.path.isfile(path):
             record_missing(key)
+            record_session_event(session, {"event": "asset", "file": key, "status": 404})
             self.send_empty(404)
             return
         size = os.path.getsize(path)
@@ -181,14 +219,33 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/octet-stream")
         self.send_header("Content-Length", str(size))
         self.end_headers()
+        sent = 0
+        delivered = True
         if send_body:
-            with open(path, "rb") as handle:
-                while True:
-                    block = handle.read(1024 * 1024)
-                    if not block:
-                        break
-                    self.wfile.write(block)
-        log(f"asset served: {key} {size}")
+            try:
+                with open(path, "rb") as handle:
+                    while True:
+                        block = handle.read(1024 * 1024)
+                        if not block:
+                            break
+                        self.wfile.write(block)
+                        sent += len(block)
+            except OSError:
+                delivered = False
+                self.close_connection = True
+        record_session_event(
+            session,
+            {
+                "event": "asset",
+                "file": key,
+                "status": 200,
+                "size": size,
+                "bytes": sent,
+                "ms": elapsed_milliseconds(started),
+                "delivered": delivered,
+            },
+        )
+        log(f"asset {'served' if delivered else 'aborted'}: {session or '-'} {key} {sent}/{size}")
 
     def read_body(self):
         length = self.headers.get("Content-Length")
@@ -199,23 +256,35 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
         except (ValueError, OSError):
             return b""
 
-    def forward_request(self, send_body):
+    def forward_request(self, send_body, target, session):
+        started = time.monotonic()
         body = self.read_body()
         headers = dict(filtered_headers(self.headers.items(), REQUEST_DROP_HEADERS))
         headers["Content-Length"] = str(len(body))
         connection = http.client.HTTPConnection(API_HOST, API_PORT, timeout=FORWARD_TIMEOUT_SECONDS)
         try:
-            connection.request(self.command, self.path, body=body, headers=headers)
+            connection.request(self.command, target, body=body, headers=headers)
             response = connection.getresponse()
             data = response.read()
             response_headers = filtered_headers(response.getheaders(), HOP_BY_HOP_HEADERS)
         except (OSError, http.client.HTTPException) as error:
             log(f"asset front: cannot reach gxb-api: {error}")
+            record_session_event(session, {"event": "request", "path": target, "status": 502, "ms": elapsed_milliseconds(started)})
             self.send_empty(502)
             return
         finally:
             connection.close()
-        data = self.rewrite_download_url(response_headers, data)
+        data, launch = self.claim_launch(data)
+        if launch:
+            session = launch
+            record_session_event(
+                session,
+                {
+                    "event": "launch",
+                    "user_agent": self.headers.get("User-Agent"),
+                    "forwarded_for": self.headers.get("X-Forwarded-For"),
+                },
+            )
         self.send_response(response.status)
         content_length = str(len(data))
         for name, value in response_headers:
@@ -226,17 +295,35 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
             self.send_header(name, value)
         self.send_header("Content-Length", content_length)
         self.end_headers()
+        delivered = True
         if send_body and data:
-            self.wfile.write(data)
-
-    def rewrite_download_url(self, headers, data):
-        if b'"res_download_url":""' not in data:
-            return data
-        return data.replace(
-            b'"res_download_url":""',
-            json.dumps({"res_download_url": f"{ENGINE_ORIGIN}/res/"}, separators=(",", ":"))[1:-1].encode("utf-8"),
-            1,
+            try:
+                self.wfile.write(data)
+            except OSError:
+                delivered = False
+                self.close_connection = True
+        record_session_event(
+            session,
+            {
+                "event": "request",
+                "path": target,
+                "status": response.status,
+                "ms": elapsed_milliseconds(started),
+                "bytes_in": len(body),
+                "bytes_out": len(data),
+                "request_sha256": hashlib.sha256(body).hexdigest(),
+                "delivered": delivered,
+            },
         )
+
+    def claim_launch(self, data):
+        if b'"res_download_url"' not in data:
+            return data, None
+        session = new_session()
+        reply = json.loads(data)
+        reply["res_download_url"] = f"{ENGINE_ORIGIN}/res/{session}/"
+        reply["url"] = f"{ENGINE_ORIGIN}/s/{session}{urllib.parse.urlsplit(reply['url']).path}"
+        return json.dumps(reply, separators=(",", ":")).encode("utf-8"), session
 
     def send_empty(self, status):
         self.send_response(status)

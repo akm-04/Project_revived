@@ -8,7 +8,6 @@ Temporary test tool, not product code.
 
 import argparse
 import json
-import secrets
 import sys
 import urllib.error
 import urllib.parse
@@ -275,7 +274,7 @@ def import_roster_entry(entry, content):
     # save's map before the merge instead of being merged into it.
     save["player"]["heroes"]["heroes"] = overrides.pop("heroes")["heroes"]
     report = import_legacy.import_player(
-        save, entry["login"], entry["display_name"], None, overrides
+        save, entry["login"], entry["display_name"], overrides
     )
     refused_heroes = [
         row
@@ -585,11 +584,9 @@ def create_born_player(accounts, login, display_name):
         }
         accounts["logins"][normalized] = uid
     account = accounts["accounts"][uid]
-    password = secrets.token_urlsafe(18)
-    account["password"] = import_legacy.password_record(password)
+    account["password"] = import_legacy.password_record(import_legacy.assigned_password(login))
     import_legacy.save_accounts(accounts)
     player_id, _ = import_legacy.birth_player(accounts, account)
-    import_legacy.write_credential_entry(login, password)
     print(f"born {login} pid={player_id} name={display_name}")
     return player_id
 

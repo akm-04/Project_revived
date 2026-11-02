@@ -35,6 +35,8 @@ AUTH_PROFILE = "SID_LOGIN_TOKEN_PAIR"
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
 ACCOUNTS_PATH = STATE_DIRECTORY / "accounts.json"
 
+SDK_EVENT_LOG = Path(__file__).resolve().parent / "logs" / "sdk.jsonl"
+SDK_EVENT_LOCK = threading.Lock()
 REGISTER_MID = "65282"
 LOGIN_MID = "65281"
 ANONYMOUS_MID = "65284"
@@ -336,6 +338,7 @@ class SdkHandler(BaseHTTPRequestHandler):
             return
         mid = str(body.get("mid", ""))
         log(f"sdk mid={mid}")
+        self.record_sdk_event(mid, body.get("payload"))
         base_mid = mid[:-2] if mid.endswith(".0") else mid
         payload = body.get("payload")
         if not isinstance(payload, dict):
@@ -351,6 +354,19 @@ class SdkHandler(BaseHTTPRequestHandler):
                 self.handle_anonymous(payload)
                 return
         self.write_json(success())
+
+    def record_sdk_event(self, mid, payload):
+        fields = payload if isinstance(payload, dict) else {}
+        event = {
+            "at": round(time.time(), 3),
+            "mid": mid,
+            "user_agent": self.headers.get("User-Agent"),
+            "forwarded_for": self.headers.get("X-Forwarded-For"),
+            "fields": {name: value for name, value in fields.items() if "password" not in name.lower()},
+        }
+        SDK_EVENT_LOG.parent.mkdir(parents=True, exist_ok=True)
+        with SDK_EVENT_LOCK, open(SDK_EVENT_LOG, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event, ensure_ascii=False) + "\n")
 
     def handle_register(self, payload):
         login = str(payload.get("login_email", ""))

@@ -108,7 +108,7 @@ def check_prelogin():
     )
     reply = json.loads(body)
     expected = f"{ENGINE_ORIGIN}/res/"
-    if reply.get("res_download_url") != expected:
+    if not str(reply.get("res_download_url")).startswith(expected):
         raise AssertionError(
             f"MID20480 res_download_url is {reply.get('res_download_url')!r}, expected {expected!r}"
         )

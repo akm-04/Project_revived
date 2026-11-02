@@ -11,6 +11,7 @@ source_tree=$root/work/backend_i7c4_full/backend
 commit=$(git -C "$source_tree" rev-parse "${1:-HEAD}")
 exec 9> "$root/tmp/harness_deploy.lock"
 flock -w 3600 9
+"$python" -I -B "$harness/helpers.py" archive || echo "harness_deploy: log archive failed, continuing" >&2
 "$python" -I -B "$harness/harness.py" down
 rm -rf "$harness/backend"
 mkdir "$harness/backend"

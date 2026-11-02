@@ -13,7 +13,7 @@ for login in moppleton alpaca123 campaigner; do
   "$python" -I -B -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["player_id"] and "rows_written" in d and "content_refused" in d' "$report"
 done
 
-test -s "$harness/runtime/state/credentials.txt" || { echo "seed: missing credentials" >&2; exit 1; }
+test -s "$harness/psk/accounts.txt" || { echo "seed: missing credentials" >&2; exit 1; }
 
 "$python" -I -B "$harness/bots.py" create
 "$python" -I -B "$harness/bots.py" enter

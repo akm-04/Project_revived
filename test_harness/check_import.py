@@ -21,7 +21,7 @@ PLAYTEST_TOOLS = Path(
 )
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
 ACCOUNTS_PATH = STATE_DIRECTORY / "accounts.json"
-CREDENTIALS_PATH = STATE_DIRECTORY / "credentials.txt"
+CREDENTIALS_PATH = Path(__file__).resolve().parent / "psk" / "accounts.txt"
 PRESERVE_PLAYERS = HARNESS_DIRECTORY / "preserve" / "server_state" / "players"
 FRONT_BASE = f"http://{os.environ.get('PLAYTEST_BIND', '127.0.0.1')}:18956"
 SDK_BASE = f"http://{os.environ.get('PLAYTEST_BIND', '127.0.0.1')}:18955"
@@ -104,7 +104,7 @@ def load_credentials():
 def login_session(login, account, credentials):
     stored = account.get("session")
     password = credentials.get(login)
-    if not stored or not password or password == "v1-password-record-copied":
+    if not stored or not password:
         if not stored:
             fail(f"{login} has no stored SDK session")
         return stored, "stored SDK session"

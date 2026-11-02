@@ -5,7 +5,7 @@ the backend into its own directory, runs its own PostgreSQL cluster, and serves 
 
 Runs as the user service `gxb-test-harness` while the laptop is on. Stop it during strict gates and heavy tests:
 `systemctl --user stop gxb-test-harness`, then `start`. After each PassMap seal `ops/harness_deploy.sh [commit]` replaces the
-backend, wipes the database and reseeds players and bots; it keeps `runtime/state/secrets.json`.
+backend, wipes the database and reseeds players and bots; it keeps `runtime/state/secrets.json`, `psk/` and `logs/`.
 
 ## Ports and paths
 
@@ -126,6 +126,28 @@ for levels that pass their composite function gates.
 `bots.py scenario <name>` runs a data file from `scenarios/`: `top_floor_low_level` creates one
 level-40 dummy with the weakest girls for an easy opponent, and `empty_server_defense` creates
 four born-only accounts (run it before seeding to prove robot fallback).
+
+## Accounts and passwords
+
+`psk/accounts.txt` lists every seeded login with its short password and is the source of those passwords: a redeploy keeps them. A login
+not listed gets the next `akmNNNNN` when it is seeded. Discardable test accounts only; `psk/` stays out of git. `psk/user_report/` is the
+user's own session notes.
+
+## Logs per device
+
+Each game launch gets its own session id. The asset front puts it in the two MID 20480 reply URLs (`/s/<id>/engine`, `/res/<id>/`), so
+the client carries it in every later request with no APK change. Same public IP on one Wi-Fi does not matter.
+
+| Where | What | Survives redeploy |
+|---|---|---|
+| `logs/sessions/<id>.jsonl` | launch (user agent, forwarded IP); each asset (file, bytes, ms, delivered or aborted, 404); each request (status, ms, bytes, body SHA-256) | yes |
+| `logs/sdk.jsonl` | each SDK call, password fields removed | yes |
+| database `request_journal`, `client_log_*` | per account: MID, outcome, server latency, cause; the client's own error logs. ROUTINE journal rows last 7 days | archived |
+| `logs/archive/<UTC time>/` | journal, client logs and service logs, saved by `ops/harness_deploy.sh` before the wipe, or by `helpers.py archive` | yes |
+
+`helpers.py report [--hours N] [--session ID] [--timeline]` prints per launch: login, assets, latency by MID, errors. The login comes
+from joining a request's SHA-256 to the journal, so a launch shows it only after its first logged-in request. `--timeline` lists every
+event with the gap before it; a fight's length is the gap between its start and result MIDs. Realtime (chat) is not in the session logs.
 
 ## Limits
 

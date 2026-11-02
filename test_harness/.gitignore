@@ -3,3 +3,5 @@ backend/
 preserve/
 apk/
 __pycache__/
+psk/
+logs/

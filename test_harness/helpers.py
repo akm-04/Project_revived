@@ -9,11 +9,22 @@ the importer's economy transaction.
 
 import argparse
 import json
+import re
+import shutil
+import statistics
 import sys
+import time
 import uuid
 from pathlib import Path
 
 HARNESS_DIRECTORY = Path(__file__).resolve().parent
+LOG_DIRECTORY = HARNESS_DIRECTORY / "logs"
+SESSION_DIRECTORY = LOG_DIRECTORY / "sessions"
+SDK_EVENT_LOG = LOG_DIRECTORY / "sdk.jsonl"
+CLIENT_MID_TABLE = HARNESS_DIRECTORY.parent / "tmp" / "virtualclient" / "src_64" / "app" / "common" / "network" / "mid.lua"
+ARCHIVED_TABLES = ("request_journal", "client_log_uploads", "client_log_rows")
+SLOWEST_MIDS_SHOWN = 15
+REFUSED_STATUS = 400
 sys.path.insert(0, str(HARNESS_DIRECTORY))
 
 import import_legacy
@@ -205,6 +216,153 @@ def command_fight_report(arguments):
     return 0
 
 
+def read_jsonl(path):
+    if not path.exists():
+        return []
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+
+
+def clock(epoch):
+    return time.strftime("%H:%M:%S", time.gmtime(epoch))
+
+
+def milliseconds_summary(values):
+    ordered = sorted(values)
+    if not ordered:
+        return "-"
+    p95 = ordered[min(len(ordered) - 1, int(len(ordered) * 0.95))]
+    return f"p50 {statistics.median(ordered):.0f} p95 {p95:.0f} max {ordered[-1]:.0f} ms"
+
+
+def client_mid_names():
+    if not CLIENT_MID_TABLE.exists():
+        return {}
+    pairs = re.findall(r"xyd\.mid\.(\w+) = (\d+)", CLIENT_MID_TABLE.read_text(encoding="utf-8"))
+    return {int(number): name for name, number in pairs}
+
+
+def journal_by_request_hash():
+    """Links a front request to its account and MID: the backend journals the SHA-256 of the same raw body."""
+    sql = (
+        "SELECT COALESCE(json_agg(row_to_json(t)),'[]'::json)::text FROM ("
+        " SELECT encode(request_sha256,'hex') AS request_sha256,mid,account_uid,outcome,error_class,cause"
+        " FROM request_journal WHERE request_sha256 IS NOT NULL) t"
+    )
+    return {row["request_sha256"]: row for row in json.loads(import_legacy.query_text(sql) or "[]")}
+
+
+def logins_by_uid():
+    return {uid: account.get("login") or account.get("username") for uid, account in accounts()["accounts"].items()}
+
+
+def session_summary(session, events, journal, logins, mid_names):
+    requests = [event for event in events if event["event"] == "request"]
+    assets = [event for event in events if event["event"] == "asset"]
+    launch = next((event for event in events if event["event"] == "launch"), {})
+    for request in requests:
+        request["journal"] = journal.get(request.get("request_sha256"))
+    players = sorted({
+        logins.get(request["journal"]["account_uid"], request["journal"]["account_uid"])
+        for request in requests
+        if request["journal"] and request["journal"]["account_uid"]
+    })
+    print(f"== session {session}  {clock(events[0]['at'])}-{clock(events[-1]['at'])} UTC  login: {', '.join(players) or 'none yet'}")
+    print(f"   user agent: {launch.get('user_agent')}  from: {launch.get('forwarded_for')}")
+
+    served = [asset for asset in assets if asset["status"] == 200 and asset["delivered"]]
+    aborted = [asset for asset in assets if asset["status"] == 200 and not asset["delivered"]]
+    missing = [asset for asset in assets if asset["status"] == 404]
+    megabytes = sum(asset["bytes"] for asset in served) / 1_000_000
+    print(
+        f"   assets: {len(served)} served ({megabytes:.1f} MB), {len(aborted)} aborted, {len(missing)} missing; "
+        f"{milliseconds_summary([asset['ms'] for asset in served])}"
+    )
+    for asset in aborted + missing:
+        print(f"     {clock(asset['at'])} {asset['file']} status={asset['status']} sent={asset.get('bytes', 0)}/{asset.get('size', 0)}")
+
+    undelivered = [request for request in requests if not request.get("delivered", True)]
+    print(
+        f"   requests: {len(requests)}, {len(undelivered)} undelivered to the client; "
+        f"{milliseconds_summary([request['ms'] for request in requests])}"
+    )
+    by_mid = {}
+    for request in requests:
+        by_mid.setdefault(request["journal"]["mid"] if request["journal"] else None, []).append(request["ms"])
+    slowest_first = sorted(by_mid.items(), key=lambda pair: -sum(pair[1]))
+    for mid, values in slowest_first[:SLOWEST_MIDS_SHOWN]:
+        label = f"{mid_names.get(mid, 'mid')} {mid}" if mid is not None else "not journaled"
+        print(f"     {label}: {len(values)}x {milliseconds_summary(values)}")
+    for request in requests:
+        entry = request["journal"] or {}
+        failed = request["status"] >= REFUSED_STATUS or entry.get("error_class") or not request.get("delivered", True)
+        if failed:
+            print(
+                f"     ERROR {clock(request['at'])} mid={entry.get('mid')} http={request['status']} "
+                f"outcome={entry.get('outcome')} {request['ms']:.0f} ms cause={str(entry.get('cause') or '-')[:160]}"
+            )
+
+
+def print_timeline(events, mid_names):
+    previous = events[0]["at"]
+    for event in events:
+        entry = event.get("journal") or {}
+        name = mid_names.get(entry.get("mid"), "")
+        detail = event.get("file") or f"mid={entry.get('mid')} {name}"
+        print(f"     {clock(event['at'])} +{event['at'] - previous:7.1f}s {event['event']:8} {event.get('status', '')} {event.get('ms', '')} ms {detail}")
+        previous = event["at"]
+
+
+def print_client_logs(logins):
+    sql = (
+        "SELECT COALESCE(json_agg(row_to_json(t)),'[]'::json)::text FROM ("
+        " SELECT account_uid,count(*) AS rows,count(*) FILTER (WHERE is_crash) AS crashes"
+        " FROM client_log_rows GROUP BY account_uid) t"
+    )
+    for row in json.loads(import_legacy.query_text(sql) or "[]"):
+        print(f"client logs {logins.get(row['account_uid'], row['account_uid'])}: {row['rows']} rows, {row['crashes']} crashes")
+
+
+def print_sdk_devices():
+    latest = {}
+    for event in read_jsonl(SDK_EVENT_LOG):
+        fields = event["fields"]
+        latest[fields.get("login_email") or fields.get("device_id") or "-"] = event
+    for name, event in sorted(latest.items()):
+        print(f"sdk {name}: last {clock(event['at'])} user agent {event['user_agent']} device fields {sorted(event['fields'])}")
+
+
+def command_report(arguments):
+    journal = journal_by_request_hash()
+    logins = logins_by_uid()
+    mid_names = client_mid_names()
+    since = time.time() - arguments.hours * 3600
+    for path in sorted(SESSION_DIRECTORY.glob("*.jsonl")):
+        if arguments.session and path.stem != arguments.session:
+            continue
+        events = read_jsonl(path)
+        if not events or events[-1]["at"] < since:
+            continue
+        session_summary(path.stem, events, journal, logins, mid_names)
+        if arguments.timeline:
+            print_timeline(events, mid_names)
+    print_client_logs(logins)
+    print_sdk_devices()
+    return 0
+
+
+def command_archive(arguments):
+    """Copies what a redeploy wipes (journal, client logs, service logs) to logs/archive/<UTC time>."""
+    target = LOG_DIRECTORY / "archive" / time.strftime("%Y%m%d-%H%M%S", time.gmtime())
+    target.mkdir(parents=True)
+    for table in ARCHIVED_TABLES:
+        rows = import_legacy.query_text(f"SELECT row_to_json(t) FROM {table} t")
+        (target / f"{table}.jsonl").write_text(rows + "\n", encoding="utf-8")
+    service_logs = import_legacy.PLAYTEST_HOME / "logs"
+    shutil.copytree(service_logs, target / "service_logs", ignore=shutil.ignore_patterns("postgres.log"))
+    print(f"archived to {target}")
+    return 0
+
+
 def main(arguments):
     parser = argparse.ArgumentParser(description=__doc__)
     subcommands = parser.add_subparsers(dest="command", required=True)
@@ -229,6 +387,15 @@ def main(arguments):
     report = subcommands.add_parser("fight-report", help="last 20 journal rows")
     report.add_argument("login")
     report.set_defaults(handler=command_fight_report)
+
+    session_report = subcommands.add_parser("report", help="per launch: assets, request latency, errors, login")
+    session_report.add_argument("--session", help="only this session id")
+    session_report.add_argument("--hours", type=float, default=24, help="sessions active in the last N hours")
+    session_report.add_argument("--timeline", action="store_true", help="also print every event in order")
+    session_report.set_defaults(handler=command_report)
+
+    archive = subcommands.add_parser("archive", help="save journal, client logs and service logs before a wipe")
+    archive.set_defaults(handler=command_archive)
 
     parsed = parser.parse_args(arguments)
     return parsed.handler(parsed)
