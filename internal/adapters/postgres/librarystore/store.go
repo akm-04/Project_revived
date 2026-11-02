@@ -91,6 +91,67 @@ func (Store) ReadHeroTx(ctx context.Context, q tx.Queryer, ref character.HeroRef
 	}
 	return scanHero(q.QueryRow(ctx, `SELECT `+heroColumns+` FROM player_library_heroes WHERE player_id=$1 AND partner_id=$2`, int64(ref.PlayerID), ref.PartnerID))
 }
+
+// ListHeroesTx returns every Library Hero facet of one player in one owner read.
+func (Store) ListHeroesTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) ([]library.HeroFacts, error) {
+	if q == nil || !pid.Valid() {
+		return nil, library.ErrInvalidFacts
+	}
+	var raw string
+	if e := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY partner_id),'[]'::jsonb)::text FROM player_library_heroes t WHERE player_id=$1`, int64(pid)).Scan(&raw); e != nil {
+		return nil, e
+	}
+	var rows []struct {
+		PlayerID            int64           `json:"player_id"`
+		PartnerID           int64           `json:"partner_id"`
+		StateVersion        int64           `json:"state_version"`
+		FavorDegree         int64           `json:"favor_degree"`
+		IsMarried           bool            `json:"is_married"`
+		FeedAttrs           json.RawMessage `json:"feed_attrs"`
+		CollectQualityStage int64           `json:"collect_quality_stage"`
+		CollectStarStage    int64           `json:"collect_star_stage"`
+		PendingCandidate    *string         `json:"pending_candidate"`
+		SeedPolicyID        string          `json:"seed_policy_id"`
+		CreatedAt           time.Time       `json:"created_at"`
+		UpdatedAt           time.Time       `json:"updated_at"`
+	}
+	if e := json.Unmarshal([]byte(raw), &rows); e != nil {
+		return nil, e
+	}
+	out := make([]library.HeroFacts, 0, len(rows))
+	for _, row := range rows {
+		var f library.HeroFacts
+		f.Ref.PlayerID, f.Ref.PartnerID, f.StateVersion = identity.PlayerID(row.PlayerID), row.PartnerID, row.StateVersion
+		f.Favor, f.Married, f.QualityStage, f.StarStage, f.SeedPolicy = row.FavorDegree, row.IsMarried, row.CollectQualityStage, row.CollectStarStage, row.SeedPolicyID
+		f.CreatedAt, f.UpdatedAt = row.CreatedAt.UTC(), row.UpdatedAt.UTC()
+		var attrs []int64
+		if e := json.Unmarshal(row.FeedAttrs, &attrs); e != nil {
+			return nil, e
+		}
+		if len(attrs) != library.AxisCount {
+			return nil, library.ErrInvalidFacts
+		}
+		copy(f.Applied[:], attrs)
+		if row.PendingCandidate != nil {
+			var c library.Candidate
+			d := json.NewDecoder(bytes.NewBufferString(*row.PendingCandidate))
+			d.DisallowUnknownFields()
+			if e := d.Decode(&c); e != nil {
+				return nil, e
+			}
+			var extra any
+			if d.Decode(&extra) != io.EOF {
+				return nil, library.ErrInvalidFacts
+			}
+			f.Pending = &c
+		}
+		if e := f.Validate(); e != nil {
+			return nil, e
+		}
+		out = append(out, f)
+	}
+	return out, nil
+}
 func (Store) LockHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef) (library.HeroFacts, error) {
 	if t == nil || ref.Validate() != nil {
 		return library.HeroFacts{}, library.ErrInvalidFacts

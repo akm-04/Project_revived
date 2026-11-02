@@ -135,6 +135,7 @@ type LibraryPort interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (lib.PlayerFacts, error)
 	LockRootTx(context.Context, tx.Tx, identity.PlayerID) (lib.PlayerFacts, error)
 	ReadHeroTx(context.Context, tx.Queryer, character.HeroRef) (lib.HeroFacts, error)
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.HeroFacts, error)
 	LockHeroTx(context.Context, tx.Tx, character.HeroRef) (lib.HeroFacts, error)
 	SaveHeroTx(context.Context, tx.Tx, lib.HeroFacts, int64) error
 	SavePlayerTx(context.Context, tx.Tx, lib.PlayerFacts, int64) error
