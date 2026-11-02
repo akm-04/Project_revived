@@ -1,0 +1,30 @@
+{
+ "called_by": [],
+ "calls": [
+  "bookskill",
+  "i5"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "missioninputs",
+ "path": "internal/application/missioninputs",
+ "purpose": "composes canonical owner reads for the I5 objective owner",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/missions",
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/missioninputs/reader_test.go"
+  ]
+ },
+ "wired_with": []
+}

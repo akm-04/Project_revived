@@ -1,0 +1,29 @@
+{
+ "called_by": [],
+ "calls": [
+  "playerdirectory",
+  "socialpresence"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "guildview",
+ "path": "internal/application/guildview",
+ "purpose": "",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/guildview/service_test.go"
+  ]
+ },
+ "wired_with": []
+}

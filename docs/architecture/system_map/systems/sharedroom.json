@@ -1,0 +1,55 @@
+{
+ "called_by": [
+  "adventure",
+  "illusion",
+  "occult"
+ ],
+ "calls": [
+  "characterasset",
+  "combat",
+  "generation",
+  "playerroot"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "sharedroom",
+ "path": "internal/application/sharedroom",
+ "purpose": "",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "shared_room_seats",
+   "shared_rooms"
+  ],
+  "read": [],
+  "sql_touches": {
+   "shared_room_seats": {
+    "reads": [
+     "internal/adapters/postgres/sharedroomstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/sharedroomstore/store.go"
+    ]
+   },
+   "shared_rooms": {
+    "reads": [
+     "internal/adapters/postgres/sharedroomstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/sharedroomstore/store.go"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/sharedroom/commands_test.go"
+  ]
+ },
+ "wired_with": []
+}

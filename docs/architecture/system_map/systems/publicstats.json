@@ -1,0 +1,43 @@
+{
+ "called_by": [
+  "combat",
+  "illusion",
+  "march",
+  "occult",
+  "publicprofile",
+  "workplace"
+ ],
+ "calls": [
+  "bookskill",
+  "characterasset",
+  "course",
+  "dormhouse",
+  "elementequipment",
+  "heroevolution",
+  "inscription",
+  "librarylocal",
+  "spirit"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "publicstats",
+ "path": "internal/application/publicstats",
+ "purpose": "composes canonical owned facts in a caller-witnessed CA8 snapshot",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/publicstats/service_test.go"
+  ]
+ },
+ "wired_with": []
+}

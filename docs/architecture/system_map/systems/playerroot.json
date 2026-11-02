@@ -1,0 +1,69 @@
+{
+ "called_by": [
+  "arena",
+  "bookskill",
+  "championsleague",
+  "characterhero",
+  "commerceprivilege",
+  "conquerschool",
+  "course",
+  "dodgeball",
+  "dormhouse",
+  "elementequipment",
+  "frienddm",
+  "generaldm",
+  "guildbroadcast",
+  "guildcampaign",
+  "guildcore",
+  "guildinvite",
+  "guildinvitetarget",
+  "guildrental",
+  "guildtea",
+  "heroevolution",
+  "i5",
+  "illusion",
+  "inscription",
+  "librarylocal",
+  "occult",
+  "playerdisplay",
+  "profilefeedback",
+  "publication",
+  "publicprofile",
+  "ranking",
+  "roominvite",
+  "sharedroom",
+  "socialdismiss",
+  "socialgift",
+  "socialprojection",
+  "socialrelation",
+  "spirit",
+  "worldboss"
+ ],
+ "calls": [],
+ "contracts": [],
+ "mids": [],
+ "name": "playerroot",
+ "path": "internal/application/playerroot",
+ "purpose": "",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay",
+   "internal/integration/profilefeedback",
+   "internal/integration/socialactivation",
+   "internal/integration/socialprojection",
+   "internal/integration/socialrelation"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/playerroot/ports_test.go"
+  ]
+ },
+ "wired_with": []
+}

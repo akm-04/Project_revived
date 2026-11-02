@@ -1,0 +1,28 @@
+{
+ "called_by": [
+  "campaign"
+ ],
+ "calls": [
+  "i5"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "dailyconsume",
+ "path": "internal/application/dailyconsume",
+ "purpose": "owns daily purchase counters",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": []
+ },
+ "wired_with": []
+}

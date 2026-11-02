@@ -1,0 +1,129 @@
+{
+ "called_by": [
+  "adventure",
+  "arena",
+  "awakeningbattle",
+  "campaign",
+  "championsleague",
+  "conquerschool",
+  "dodgeball",
+  "godstrial",
+  "guildcampaign",
+  "guildrental",
+  "illusion",
+  "march",
+  "memoir",
+  "occult",
+  "oneonone",
+  "petcampaign",
+  "sharedroom",
+  "topfloor",
+  "workplace",
+  "worldboss"
+ ],
+ "calls": [
+  "characterasset",
+  "librarylocal",
+  "publicstats"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "combat",
+ "path": "internal/application/combat",
+ "purpose": "composes the Combat owner: START freezes an immutable snapshot and durable attempt inside the mode's caller transaction, Resolve runs the isolated worker outside locks and persists the resolution once, and TerminalTx settles the attempt once inside the mode's terminal transaction",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "combat_attempt_members",
+   "combat_attempts",
+   "combat_attestations",
+   "combat_locator_roots",
+   "combat_member_settlements",
+   "combat_report_blobs",
+   "combat_resolutions",
+   "combat_snapshots",
+   "combat_start_packages"
+  ],
+  "read": [],
+  "sql_touches": {
+   "combat_attempt_members": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_attempts": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_attestations": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_locator_roots": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_member_settlements": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_report_blobs": {
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_resolutions": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_snapshots": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   },
+   "combat_start_packages": {
+    "reads": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/combatstore/store.go"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": []
+ },
+ "wired_with": []
+}

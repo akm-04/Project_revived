@@ -1,0 +1,67 @@
+{
+ "called_by": [
+  "socialprojection"
+ ],
+ "calls": [
+  "generation",
+  "i5",
+  "playerroot",
+  "socialinbox",
+  "socialrelation",
+  "socialreloadref"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "socialgift",
+ "path": "internal/application/socialgift",
+ "purpose": "owns canonical daily gift entitlements",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "social_gift_claim_operations",
+   "social_gift_epochs",
+   "social_gift_transfers"
+  ],
+  "read": [],
+  "sql_touches": {
+   "social_gift_claim_operations": {
+    "reads": [
+     "internal/adapters/postgres/socialgiftstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/socialgiftstore/store.go"
+    ]
+   },
+   "social_gift_epochs": {
+    "reads": [
+     "internal/adapters/postgres/socialgiftstore/epoch_evidence.go",
+     "internal/adapters/postgres/socialgiftstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/socialgiftstore/store.go"
+    ]
+   },
+   "social_gift_transfers": {
+    "reads": [
+     "internal/adapters/postgres/socialgiftstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/socialgiftstore/store.go"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/guildinvite",
+   "internal/integration/playerdisplay",
+   "internal/integration/socialactivation"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/socialgift/types_test.go"
+  ]
+ },
+ "wired_with": []
+}

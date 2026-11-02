@@ -1,0 +1,59 @@
+{
+ "called_by": [
+  "guildview",
+  "playerpresentation"
+ ],
+ "calls": [
+  "generation"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "socialpresence",
+ "path": "internal/application/socialpresence",
+ "purpose": "",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "player_social_presence",
+   "realtime_presence_leases",
+   "realtime_presence_owner_state"
+  ],
+  "read": [],
+  "sql_touches": {
+   "player_social_presence": {
+    "reads": [
+     "internal/adapters/postgres/presencestore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/presencestore/store.go"
+    ]
+   },
+   "realtime_presence_leases": {
+    "reads": [
+     "internal/adapters/postgres/presencestore/general_dm.go",
+     "internal/adapters/postgres/presencestore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/presencestore/store.go"
+    ]
+   },
+   "realtime_presence_owner_state": {
+    "reads": [
+     "internal/adapters/postgres/presencestore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/presencestore/store.go"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "integration": [],
+  "scenarios": [],
+  "unit": [
+   "internal/application/socialpresence/service_test.go"
+  ]
+ },
+ "wired_with": []
+}

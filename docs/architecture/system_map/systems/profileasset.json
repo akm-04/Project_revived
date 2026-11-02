@@ -1,0 +1,26 @@
+{
+ "called_by": [
+  "publicprofile"
+ ],
+ "calls": [],
+ "contracts": [],
+ "mids": [],
+ "name": "profileasset",
+ "path": "internal/application/profileasset",
+ "purpose": "supplies physical storage ports; it owns no gameplay SQL",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/profilemedia"
+  ],
+  "scenarios": [],
+  "unit": []
+ },
+ "wired_with": []
+}

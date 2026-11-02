@@ -1,0 +1,66 @@
+{
+ "called_by": [
+  "achievement",
+  "adventure",
+  "arena",
+  "campaign",
+  "championsleague",
+  "conquerschool",
+  "guildcampaign",
+  "guildrental",
+  "guildtea",
+  "guildview",
+  "illusion",
+  "march",
+  "occult",
+  "oneonone",
+  "petcampaign",
+  "playerpresentation",
+  "ranking",
+  "socialprojection",
+  "topfloor",
+  "workplace",
+  "worldboss"
+ ],
+ "calls": [],
+ "contracts": [],
+ "mids": [],
+ "name": "playerdirectory",
+ "path": "internal/application/playerdirectory",
+ "purpose": "",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "player_directory_profiles"
+  ],
+  "read": [],
+  "sql_touches": {
+   "player_directory_profiles": {
+    "reads": [
+     "internal/adapters/postgres/i4store/conquer_projection.go",
+     "internal/adapters/postgres/i4store/directory_discovery.go",
+     "internal/adapters/postgres/i4store/directory_level_projection.go",
+     "internal/adapters/postgres/i4store/directory_reader.go",
+     "internal/adapters/postgres/i4store/population.go",
+     "internal/adapters/postgres/i4store/privilege_projection.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/i4store/bootstrap_runtime.go",
+     "internal/adapters/postgres/i4store/conquer_projection.go",
+     "internal/adapters/postgres/i4store/directory_level_projection.go",
+     "internal/adapters/postgres/i4store/privilege_projection.go",
+     "sql/i3/identity_bootstrap.sql"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/socialprojection"
+  ],
+  "scenarios": [],
+  "unit": []
+ },
+ "wired_with": []
+}

@@ -1,0 +1,42 @@
+{
+ "called_by": [],
+ "calls": [
+  "playerpresentation",
+  "realtimeauth"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "channelchat",
+ "path": "internal/application/channelchat",
+ "purpose": "prepares ephemeral ordinary messages using existing owner ports",
+ "pushes": [
+  {
+   "file": "internal/protocol/realtime/channel_chat.go",
+   "kind": "direct",
+   "line": 85,
+   "mid": 32783,
+   "roles": [
+    "Guild",
+    "Service",
+    "World"
+   ]
+  }
+ ],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/socialactivation"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/channelchat/service_test.go",
+   "internal/application/channelchat/structured_test.go"
+  ]
+ },
+ "wired_with": []
+}

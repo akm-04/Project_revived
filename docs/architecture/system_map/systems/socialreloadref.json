@@ -1,0 +1,34 @@
+{
+ "called_by": [
+  "guildinvitetarget",
+  "socialgift",
+  "socialrelation",
+  "socialreload"
+ ],
+ "calls": [
+  "socialinbox"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "socialreloadref",
+ "path": "internal/application/socialreloadref",
+ "purpose": "owns only the finite Social wakeup reference syntax",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/guildinvite",
+   "internal/integration/socialactivation"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/socialreloadref/codec_test.go"
+  ]
+ },
+ "wired_with": []
+}

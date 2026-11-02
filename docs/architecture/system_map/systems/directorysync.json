@@ -1,0 +1,29 @@
+{
+ "called_by": [
+  "commerceprivilege",
+  "playerdisplay"
+ ],
+ "calls": [],
+ "contracts": [],
+ "mids": [],
+ "name": "directorysync",
+ "path": "internal/application/directorysync",
+ "purpose": "",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/directorysync/service_test.go"
+  ]
+ },
+ "wired_with": []
+}

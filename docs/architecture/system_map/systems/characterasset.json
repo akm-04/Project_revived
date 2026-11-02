@@ -1,0 +1,73 @@
+{
+ "called_by": [
+  "achievement",
+  "adventure",
+  "arena",
+  "awakeningbattle",
+  "campaign",
+  "championsleague",
+  "characterhero",
+  "characterpet",
+  "characterpractice",
+  "charactersavedpreset",
+  "combat",
+  "conquerschool",
+  "dodgeball",
+  "elementequipment",
+  "godstrial",
+  "guildcampaign",
+  "guildrental",
+  "heroevolution",
+  "illusion",
+  "inscription",
+  "march",
+  "memoir",
+  "occult",
+  "oneonone",
+  "petcampaign",
+  "playerdisplay",
+  "publicprofile",
+  "publicstats",
+  "ranking",
+  "sharedroom",
+  "spirit",
+  "topfloor",
+  "workplace",
+  "worldboss"
+ ],
+ "calls": [],
+ "contracts": [],
+ "mids": [],
+ "name": "characterasset",
+ "path": "internal/application/characterasset",
+ "purpose": "contains shared cross-family Character Asset contracts",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/playerdisplay",
+   "internal/integration/publicshowcase"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/characterasset/appearance_projection_test.go",
+   "internal/application/characterasset/battle_contribution_test.go",
+   "internal/application/characterasset/borrowed_composite_test.go",
+   "internal/application/characterasset/ca8_foundation_test.go",
+   "internal/application/characterasset/contracts_test.go",
+   "internal/application/characterasset/mode_guild_test.go",
+   "internal/application/characterasset/owned_composite_test.go",
+   "internal/application/characterasset/practice_contribution_test.go",
+   "internal/application/characterasset/public_showcase_test.go",
+   "internal/application/characterasset/references_test.go",
+   "internal/application/characterasset/saved_preset_reference_state_test.go",
+   "internal/application/characterasset/synthetic_projection_test.go"
+  ]
+ },
+ "wired_with": []
+}

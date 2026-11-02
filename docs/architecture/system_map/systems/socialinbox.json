@@ -1,0 +1,84 @@
+{
+ "called_by": [
+  "adventure",
+  "guildinvitetarget",
+  "illusion",
+  "occult",
+  "roominvite",
+  "socialdismiss",
+  "socialgift",
+  "socialprojection",
+  "socialrelation",
+  "socialreload",
+  "socialreloadref"
+ ],
+ "calls": [],
+ "contracts": [],
+ "mids": [],
+ "name": "socialinbox",
+ "path": "internal/application/socialinbox",
+ "purpose": "",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "social_guild_invite_invalidations",
+   "social_guild_invite_materializations",
+   "social_notices"
+  ],
+  "read": [],
+  "sql_touches": {
+   "social_guild_invite_invalidations": {
+    "reads": [
+     "internal/adapters/postgres/socialinboxstore/guild_invite.go",
+     "internal/adapters/postgres/socialinboxstore/guild_invite_payloads.go",
+     "internal/adapters/postgres/socialinboxstore/guild_invite_set.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/socialinboxstore/guild_invite.go"
+    ]
+   },
+   "social_guild_invite_materializations": {
+    "reads": [
+     "internal/adapters/postgres/socialinboxstore/guild_invite.go",
+     "internal/adapters/postgres/socialinboxstore/guild_invite_schema.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/socialinboxstore/guild_invite.go"
+    ]
+   },
+   "social_notices": {
+    "reads": [
+     "internal/adapters/postgres/socialinboxstore/dismissal.go",
+     "internal/adapters/postgres/socialinboxstore/guild_invite.go",
+     "internal/adapters/postgres/socialinboxstore/reads.go",
+     "internal/adapters/postgres/socialinboxstore/relation_notices.go",
+     "internal/adapters/postgres/socialinboxstore/room_invite.go",
+     "internal/adapters/postgres/socialinboxstore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/socialinboxstore/dismissal.go",
+     "internal/adapters/postgres/socialinboxstore/gift.go",
+     "internal/adapters/postgres/socialinboxstore/guild_invite.go",
+     "internal/adapters/postgres/socialinboxstore/relation_notices.go",
+     "internal/adapters/postgres/socialinboxstore/room_invite.go"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/guildinvite",
+   "internal/integration/playerdisplay",
+   "internal/integration/socialactivation",
+   "internal/integration/socialprojection",
+   "internal/integration/socialrelation"
+  ],
+  "scenarios": [],
+  "unit": [
+   "internal/application/socialinbox/locks_test.go",
+   "internal/application/socialinbox/room_invite_notice_test.go"
+  ]
+ },
+ "wired_with": []
+}

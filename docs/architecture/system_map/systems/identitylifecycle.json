@@ -1,0 +1,24 @@
+{
+ "called_by": [],
+ "calls": [],
+ "contracts": [],
+ "mids": [],
+ "name": "identitylifecycle",
+ "path": "internal/application/identitylifecycle",
+ "purpose": "owns the transactional application boundary for durable account/provider/session lifecycle",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "sql_touches": {}
+ },
+ "tests": {
+  "integration": [],
+  "scenarios": [],
+  "unit": [
+   "internal/application/identitylifecycle/service_test.go"
+  ]
+ },
+ "wired_with": []
+}

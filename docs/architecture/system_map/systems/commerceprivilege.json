@@ -1,0 +1,41 @@
+{
+ "called_by": [],
+ "calls": [
+  "directorysync",
+  "generation",
+  "i5",
+  "playerroot"
+ ],
+ "contracts": [],
+ "mids": [],
+ "name": "commerceprivilege",
+ "path": "internal/application/commerceprivilege",
+ "purpose": "owns narrow canonical manual privilege facts",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "commerce_privilege_roots"
+  ],
+  "read": [],
+  "sql_touches": {
+   "commerce_privilege_roots": {
+    "reads": [
+     "internal/adapters/postgres/commerceprivilegestore/store.go"
+    ],
+    "writes": [
+     "internal/adapters/postgres/commerceprivilegestore/store.go"
+    ]
+   }
+  }
+ },
+ "tests": {
+  "integration": [
+   "internal/integration/missions",
+   "internal/integration/playerdisplay"
+  ],
+  "scenarios": [],
+  "unit": []
+ },
+ "wired_with": []
+}
