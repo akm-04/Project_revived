@@ -48,8 +48,8 @@ func (r Reader) MissionRosterTx(ctx context.Context, q tx.Queryer, scope i5.Miss
 	return r.Heroes.ListHeroesTx(ctx, q, scope.PlayerID)
 }
 
-func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.MissionScope, roster []character.Hero, definition objective.MissionDefinition, boundHero int64) (i5.MissionObservation, error) {
-	passed, err := r.gate(ctx, q, scope, roster, definition, boundHero)
+func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.MissionScope, roster []character.Hero, definition objective.MissionDefinition, boundHero int64, memo *i5.MissionReadMemo) (i5.MissionObservation, error) {
+	passed, err := r.gate(ctx, q, scope, roster, definition, boundHero, memo)
 	if err != nil || !passed {
 		return i5.MissionObservation{}, err
 	}
@@ -63,24 +63,18 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 		if r.Spending == nil {
 			return out, errors.New("mission spend reader unavailable")
 		}
-		out.Value, err = r.Spending.CrystalSpentOnDayTx(ctx, q, scope.PlayerID, modes.Day(scope.DecisionAt))
+		out.Value, err = r.crystalSpent(ctx, q, scope, memo)
 		if err != nil {
 			return out, err
 		}
 	case kind == 15:
-		if r.Campaigns == nil {
-			return out, errors.New("mission campaign reader unavailable")
-		}
-		state, err := r.Campaigns.ReadTx(ctx, q, scope.PlayerID)
+		state, err := r.campaignState(ctx, q, scope, memo)
 		if err != nil {
 			return out, err
 		}
 		out.Value = state.Progress.State(parameters[0]).ClearCountFloor
 	case kind == 16:
-		if r.Progression == nil {
-			return out, errors.New("mission progression reader unavailable")
-		}
-		state, err := r.Progression.ReadProgressionTx(ctx, q, scope.PlayerID)
+		state, err := r.progression(ctx, q, scope, memo)
 		if err != nil {
 			return out, err
 		}
@@ -118,10 +112,7 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 			}
 		}
 	case kind == 19 || kind == 20:
-		if r.Books == nil {
-			return out, errors.New("mission book reader unavailable")
-		}
-		inputs, err := r.Books.BookInputsTx(ctx, q, bookskill.InputScope{Player: scope.PlayerID, ContentRevision: scope.ContentRevision, ObservedAt: scope.DecisionAt})
+		inputs, err := r.bookInputs(ctx, q, scope, memo)
 		if err != nil {
 			return out, err
 		}
@@ -150,10 +141,7 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 			out.Value = 1
 		}
 	case kind == 113:
-		if r.Privileges == nil {
-			return out, errors.New("mission privilege reader unavailable")
-		}
-		privilege, err := r.Privileges.SnapshotTx(ctx, q, scope.PlayerID, scope.DecisionAt)
+		privilege, err := r.privilege(ctx, q, scope, memo)
 		if err != nil {
 			return out, err
 		}
@@ -166,7 +154,7 @@ func (r Reader) ObserveMissionTx(ctx context.Context, q tx.Queryer, scope i5.Mis
 	return out, nil
 }
 
-func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, roster []character.Hero, definition objective.MissionDefinition, boundHero int64) (bool, error) {
+func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, roster []character.Hero, definition objective.MissionDefinition, boundHero int64, memo *i5.MissionReadMemo) (bool, error) {
 	if err := definition.Validate(); err != nil {
 		return false, err
 	}
@@ -178,23 +166,23 @@ func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, r
 	case 0:
 		return true, nil
 	case 1, 5:
-		if r.Progression == nil {
-			return false, errors.New("mission progression reader unavailable")
+		state, err := r.progression(ctx, q, scope, memo)
+		if err != nil {
+			return false, err
 		}
-		state, err := r.Progression.ReadProgressionTx(ctx, q, scope.PlayerID)
-		return state.Level >= gate[1], err
+		return state.Level >= gate[1], nil
 	case 2:
-		if r.Campaigns == nil {
-			return false, errors.New("mission campaign reader unavailable")
+		state, err := r.campaignState(ctx, q, scope, memo)
+		if err != nil {
+			return false, err
 		}
-		state, err := r.Campaigns.ReadTx(ctx, q, scope.PlayerID)
-		return state.Progress.State(gate[1]).Star > 0, err
+		return state.Progress.State(gate[1]).Star > 0, nil
 	case 3:
-		if r.Privileges == nil {
-			return false, errors.New("mission privilege reader unavailable")
+		state, err := r.privilege(ctx, q, scope, memo)
+		if err != nil {
+			return false, err
 		}
-		state, err := r.Privileges.SnapshotTx(ctx, q, scope.PlayerID, scope.DecisionAt)
-		return state.VIPLevel >= gate[1], err
+		return state.VIPLevel >= gate[1], nil
 	case 9:
 		for _, hero := range roster {
 			if hero.OriginTableID == boundHero {
@@ -205,6 +193,78 @@ func (r Reader) gate(ctx context.Context, q tx.Queryer, scope i5.MissionScope, r
 	default:
 		return false, errors.New("mission gate reader unavailable")
 	}
+}
+
+func (r Reader) progression(ctx context.Context, q tx.Queryer, scope i5.MissionScope, memo *i5.MissionReadMemo) (player.Progression, error) {
+	if memo != nil && memo.Progression != nil {
+		return *memo.Progression, nil
+	}
+	if r.Progression == nil {
+		return player.Progression{}, errors.New("mission progression reader unavailable")
+	}
+	state, err := r.Progression.ReadProgressionTx(ctx, q, scope.PlayerID)
+	if err == nil && memo != nil {
+		memo.Progression = &state
+	}
+	return state, err
+}
+
+func (r Reader) campaignState(ctx context.Context, q tx.Queryer, scope i5.MissionScope, memo *i5.MissionReadMemo) (campaign.Record, error) {
+	if memo != nil && memo.Campaign != nil {
+		return *memo.Campaign, nil
+	}
+	if r.Campaigns == nil {
+		return campaign.Record{}, errors.New("mission campaign reader unavailable")
+	}
+	state, err := r.Campaigns.ReadTx(ctx, q, scope.PlayerID)
+	if err == nil && memo != nil {
+		memo.Campaign = &state
+	}
+	return state, err
+}
+
+func (r Reader) privilege(ctx context.Context, q tx.Queryer, scope i5.MissionScope, memo *i5.MissionReadMemo) (i5.PrivilegeSnapshot, error) {
+	if memo != nil && memo.Privilege != nil {
+		return *memo.Privilege, nil
+	}
+	if r.Privileges == nil {
+		return i5.PrivilegeSnapshot{}, errors.New("mission privilege reader unavailable")
+	}
+	state, err := r.Privileges.SnapshotTx(ctx, q, scope.PlayerID, scope.DecisionAt)
+	if err == nil && memo != nil {
+		memo.Privilege = &state
+	}
+	return state, err
+}
+
+func (r Reader) crystalSpent(ctx context.Context, q tx.Queryer, scope i5.MissionScope, memo *i5.MissionReadMemo) (int64, error) {
+	if memo != nil && memo.CrystalSpent != nil {
+		return *memo.CrystalSpent, nil
+	}
+	if r.Spending == nil {
+		return 0, errors.New("mission spend reader unavailable")
+	}
+	value, err := r.Spending.CrystalSpentOnDayTx(ctx, q, scope.PlayerID, modes.Day(scope.DecisionAt))
+	if err == nil && memo != nil {
+		memo.CrystalSpent = &value
+	}
+	return value, err
+}
+
+func (r Reader) bookInputs(ctx context.Context, q tx.Queryer, scope i5.MissionScope, memo *i5.MissionReadMemo) (bookskill.Inputs, error) {
+	if memo != nil {
+		if cached, ok := memo.Books.(bookskill.Inputs); ok {
+			return cached, nil
+		}
+	}
+	if r.Books == nil {
+		return bookskill.Inputs{}, errors.New("mission book reader unavailable")
+	}
+	inputs, err := r.Books.BookInputsTx(ctx, q, bookskill.InputScope{Player: scope.PlayerID, ContentRevision: scope.ContentRevision, ObservedAt: scope.DecisionAt})
+	if err == nil && memo != nil {
+		memo.Books = inputs
+	}
+	return inputs, err
 }
 
 var _ i5.MissionObservations = Reader{}

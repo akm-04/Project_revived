@@ -20,6 +20,8 @@ type preparedMission struct {
 	scope       MissionScope
 	transaction tx.Tx
 	operation   operation.Context
+	view        MissionView
+	viewReady   bool
 }
 
 func (f ObjectiveFacts) PrepareTx(ctx context.Context, t tx.Tx, player identity.PlayerID, timed gen.TimedOperation) (context.Context, error) {
@@ -41,11 +43,12 @@ func (f ObjectiveFacts) PrepareTx(ctx context.Context, t tx.Tx, player identity.
 		return ctx, err
 	}
 	changes.Missions(ctx, MissionProjection(view, scope.DecisionAt, 0))
-	return context.WithValue(ctx, preparedMissionKey{}, preparedMission{scope: scope, transaction: t, operation: timed.Operation()}), nil
+	prepared := &preparedMission{scope: scope, transaction: t, operation: timed.Operation(), view: view, viewReady: true}
+	return context.WithValue(ctx, preparedMissionKey{}, prepared), nil
 }
 
 func (f ObjectiveFacts) recordMission(ctx context.Context, t tx.Tx, op operation.Context, fact objective.Fact) error {
-	prepared, ok := ctx.Value(preparedMissionKey{}).(preparedMission)
+	prepared, ok := ctx.Value(preparedMissionKey{}).(*preparedMission)
 	if !ok || prepared.transaction != t || prepared.operation.ID != op.ID || prepared.scope.PlayerID != fact.PlayerID {
 		return errors.New("mission fact was not prepared in this transaction")
 	}
@@ -73,9 +76,13 @@ func (f ObjectiveFacts) recordMission(ctx context.Context, t tx.Tx, op operation
 		}
 		return nil
 	}
-	view, err := f.Owner.Missions.MaterializeTx(ctx, t, prepared.scope)
-	if err != nil {
-		return err
+	view := prepared.view
+	if !prepared.viewReady {
+		view, err = f.Owner.Missions.MaterializeTx(ctx, t, prepared.scope)
+		if err != nil {
+			return err
+		}
+		prepared.view, prepared.viewReady = view, true
 	}
 	catalogs := map[string][]objective.MissionDefinition{}
 	for _, instance := range view.Instances {
@@ -126,6 +133,7 @@ func (f ObjectiveFacts) recordMission(ctx context.Context, t tx.Tx, op operation
 	if err != nil {
 		return err
 	}
+	prepared.view, prepared.viewReady = view, true
 	changes.Missions(ctx, MissionProjection(view, prepared.scope.DecisionAt, 0))
 	return nil
 }

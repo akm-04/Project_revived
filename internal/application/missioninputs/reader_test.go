@@ -52,15 +52,15 @@ func TestReaderUsesCampaignClearsAndExplicitUnavailableSource(t *testing.T) {
 	rows := definitions(t)
 	r := Reader{Campaigns: campaignRows{campaign.Record{Progress: campaign.Progress{Nodes: map[int64]campaign.NodeState{100019: {CampaignID: 100019, Star: 3, ClearCountFloor: 2}}}}}}
 	scope := i5.MissionScope{PlayerID: 100001, DecisionAt: time.Unix(1000, 0)}
-	got, err := r.ObserveMissionTx(context.Background(), nil, scope, nil, rows[30001], 0)
+	got, err := r.ObserveMissionTx(context.Background(), nil, scope, nil, rows[30001], 0, nil)
 	if err != nil || !got.GatePassed || got.Value != 2 {
 		t.Fatalf("story clear count: %+v %v", got, err)
 	}
-	got, err = Reader{}.ObserveMissionTx(context.Background(), nil, scope, nil, rows[30014], 0)
+	got, err = Reader{}.ObserveMissionTx(context.Background(), nil, scope, nil, rows[30014], 0, nil)
 	if err != nil || got.GatePassed {
 		t.Fatalf("source-unavailable mission should stay closed: %+v %v", got, err)
 	}
-	if _, err = (Reader{}).ObserveMissionTx(context.Background(), nil, scope, nil, rows[30001], 0); err == nil {
+	if _, err = (Reader{}).ObserveMissionTx(context.Background(), nil, scope, nil, rows[30001], 0, nil); err == nil {
 		t.Fatal("missing canonical reader treated as zero progress")
 	}
 }
@@ -80,16 +80,16 @@ func TestReaderCountsQualifyingHeroesAndBindsPartnerTemplate(t *testing.T) {
 		}
 	}
 	quality.Prerequisite = objective.MissionPrerequisite{Gate: []int64{0}}
-	got, err := r.ObserveMissionTx(context.Background(), nil, scope, roster, quality, 0)
+	got, err := r.ObserveMissionTx(context.Background(), nil, scope, roster, quality, 0, nil)
 	if err != nil || got.Value != 2 {
 		t.Fatalf("quality count is not maximum color: %+v %v", got, err)
 	}
 	partner.Prerequisite = objective.MissionPrerequisite{Gate: []int64{9}}
-	got, err = r.ObserveMissionTx(context.Background(), nil, scope, roster, partner, 11)
+	got, err = r.ObserveMissionTx(context.Background(), nil, scope, roster, partner, 11, nil)
 	if err != nil || !got.GatePassed || got.Value != 30 {
 		t.Fatalf("partner template binding: %+v %v", got, err)
 	}
-	got, err = r.ObserveMissionTx(context.Background(), nil, scope, roster, partner, 99)
+	got, err = r.ObserveMissionTx(context.Background(), nil, scope, roster, partner, 99, nil)
 	if err != nil || got.GatePassed {
 		t.Fatalf("unowned partner admitted: %+v %v", got, err)
 	}
@@ -112,7 +112,7 @@ func TestReaderCountsCompletedBooksRatherThanSummingSkillLevels(t *testing.T) {
 	}
 	d.Prerequisite = objective.MissionPrerequisite{Gate: []int64{0}}
 	r := Reader{Books: bookRows{bookskill.Inputs{Catalog: book.Catalog{Books: map[int64]book.BookRule{1: {Star: 2, Skills: []int64{10, 11}}, 2: {Star: 3, Skills: []int64{20, 21}}}}, Applied: book.State{Skills: map[int64]int64{10: 2, 11: 2, 20: 3, 21: 2}}}}}
-	got, err := r.ObserveMissionTx(context.Background(), nil, i5.MissionScope{}, nil, d, 0)
+	got, err := r.ObserveMissionTx(context.Background(), nil, i5.MissionScope{}, nil, d, 0, nil)
 	if err != nil || got.Value != 1 {
 		t.Fatalf("completed books: %+v %v", got, err)
 	}

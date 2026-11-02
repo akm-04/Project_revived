@@ -89,7 +89,7 @@ func (m *missionMemory) MissionRosterTx(context.Context, tx.Queryer, MissionScop
 	}
 	return roster, nil
 }
-func (m *missionMemory) ObserveMissionTx(_ context.Context, _ tx.Queryer, scope MissionScope, _ []character.Hero, _ objective.MissionDefinition, _ int64) (MissionObservation, error) {
+func (m *missionMemory) ObserveMissionTx(_ context.Context, _ tx.Queryer, scope MissionScope, _ []character.Hero, _ objective.MissionDefinition, _ int64, _ *MissionReadMemo) (MissionObservation, error) {
 	m.observedRevision = scope.ContentRevision
 	return MissionObservation{GatePassed: m.gate, Value: m.value}, nil
 }

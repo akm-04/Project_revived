@@ -2,6 +2,7 @@ package characterstore
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"time"
@@ -105,4 +106,52 @@ func (s RawAwakeningStore) FindRawAwakeningTx(c context.Context, q tx.Queryer, r
 		return f, false, nil
 	}
 	return f, e == nil, e
+}
+
+// ListRawAwakeningsTx returns the requested Hero facets of one player in one read.
+func (RawAwakeningStore) ListRawAwakeningsTx(c context.Context, q tx.Queryer, player identity.PlayerID, partnerIDs []int64) (map[int64]character.RawAwakeningBirth, error) {
+	if q == nil || !player.Valid() {
+		return nil, character.ErrRawAwakeningUnavailable
+	}
+	out := make(map[int64]character.RawAwakeningBirth, len(partnerIDs))
+	if len(partnerIDs) == 0 {
+		return out, nil
+	}
+	var raw string
+	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY partner_id),'[]'::jsonb)::text FROM player_hero_raw_awakening t WHERE player_id=$1 AND partner_id=ANY($2)`, int64(player), partnerIDs).Scan(&raw); e != nil {
+		return nil, e
+	}
+	var rows []struct {
+		PlayerID                int64     `json:"player_id"`
+		PartnerID               int64     `json:"partner_id"`
+		StateVersion            int64     `json:"state_version"`
+		RawStage                int64     `json:"raw_stage"`
+		BirthPolicy             string    `json:"birth_policy"`
+		CreationContentRevision string    `json:"creation_content_revision"`
+		BirthAt                 time.Time `json:"birth_at"`
+		CreatedAt               time.Time `json:"created_at"`
+		UpdatedAt               time.Time `json:"updated_at"`
+		ProducerReference       string    `json:"producer_reference"`
+	}
+	if e := json.Unmarshal([]byte(raw), &rows); e != nil {
+		return nil, e
+	}
+	for _, row := range rows {
+		f := character.RawAwakeningBirth{
+			Ref:                     character.HeroRef{PlayerID: identity.PlayerID(row.PlayerID), PartnerID: row.PartnerID},
+			Version:                 row.StateVersion,
+			RawStage:                row.RawStage,
+			BirthPolicy:             row.BirthPolicy,
+			CreationContentRevision: row.CreationContentRevision,
+			BirthAt:                 row.BirthAt,
+			CreatedAt:               row.CreatedAt,
+			UpdatedAt:               row.UpdatedAt,
+			ProducerReference:       row.ProducerReference,
+		}
+		if f.Ref.PlayerID != player || f.Validate() != nil {
+			return nil, character.ErrRawAwakeningUnavailable
+		}
+		out[f.Ref.PartnerID] = f
+	}
+	return out, nil
 }

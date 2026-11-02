@@ -12,7 +12,7 @@ import (
 type FunctionPrerequisites struct {
 	Store
 	Content interface {
-		HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
+		HeroKindsTx(context.Context, tx.Queryer, string, []int64) (map[int64]character.HeroKind, error)
 	}
 }
 
@@ -33,10 +33,28 @@ func (reader FunctionPrerequisites) ReadCharacterFunctionPrerequisitesTx(request
 	if err != nil {
 		return result, err
 	}
+	tableIDs := make([]int64, 0, len(heroes))
 	for _, hero := range heroes {
-		kind, err := reader.Content.HeroKindTx(requestContext, query, revision, hero.TableID)
-		if err != nil {
-			return result, err
+		tableIDs = append(tableIDs, hero.TableID)
+	}
+	kinds, err := reader.Content.HeroKindsTx(requestContext, query, revision, tableIDs)
+	if err != nil {
+		return result, err
+	}
+	awakeningPartners := make([]int64, 0, len(heroes))
+	for _, hero := range heroes {
+		if kind, ok := kinds[hero.TableID]; ok && (kind == character.NormalHero || kind == character.SuperHero) && hero.Level >= 100 {
+			awakeningPartners = append(awakeningPartners, hero.PartnerID)
+		}
+	}
+	awakenings, err := (RawAwakeningStore{}).ListRawAwakeningsTx(requestContext, query, player, awakeningPartners)
+	if err != nil {
+		return result, err
+	}
+	for _, hero := range heroes {
+		kind, ok := kinds[hero.TableID]
+		if !ok {
+			return result, character.ErrRawAwakeningUnavailable
 		}
 		hero.Kind = kind
 		if hero.PlayerID != player || hero.Validate() != nil || at.Before(hero.UpdatedAt) {
@@ -49,10 +67,7 @@ func (reader FunctionPrerequisites) ReadCharacterFunctionPrerequisitesTx(request
 		if hero.Level < 100 {
 			continue
 		}
-		raw, found, err := (RawAwakeningStore{}).FindRawAwakeningTx(requestContext, query, hero.Ref())
-		if err != nil {
-			return result, err
-		}
+		raw, found := awakenings[hero.PartnerID]
 		if !found {
 			continue
 		}
