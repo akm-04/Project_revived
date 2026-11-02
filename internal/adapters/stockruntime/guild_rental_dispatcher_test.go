@@ -18,6 +18,7 @@ import (
 type rentalProbe struct {
 	list     guildrental.List
 	own      []guildrental.Row
+	used     []int64
 	placeErr error
 	lastMid  uint16
 }
@@ -36,6 +37,10 @@ func (p *rentalProbe) OwnOffers(_ context.Context, _ identity.ActorContext, _ gu
 
 func (p *rentalProbe) GuildOffers(_ context.Context, _ identity.ActorContext, _ guild.RentalKind, _ int64, _ operation.Context) (guildrental.List, error) {
 	return p.list, nil
+}
+
+func (p *rentalProbe) UsedPartners(_ context.Context, _ identity.ActorContext, _ operation.Context) ([]int64, error) {
+	return p.used, nil
 }
 
 func rentalRow(lender identity.PlayerID, kind guild.RentalKind, unit int64) guildrental.Row {
@@ -74,6 +79,19 @@ func exactJSON(t *testing.T, body map[string]any, want string) {
 
 func playerProfile(lender identity.PlayerID) playerdirectory.Profile {
 	return playerdirectory.Profile{PlayerID: lender, Name: "lender", Level: 9, AvatarID: 110001001, AvatarFrameID: 0, ConquerLevel: 0, ConquerLoopID: 1}
+}
+
+func TestGuildRentalUsedPartnersWireShape(t *testing.T) {
+	probe := &rentalProbe{used: []int64{31, 42}}
+	d := GuildRentalDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: probe}
+	got := d.Dispatch(context.Background(), heroReq(t, 623, nil))
+	if got.HTTPStatus != 200 {
+		t.Fatalf("623 status %+v", got)
+	}
+	exactJSON(t, got.Body, `{"used_partners":[31,42]}`)
+	probe.used = nil
+	got = d.Dispatch(context.Background(), heroReq(t, 623, nil))
+	exactJSON(t, got.Body, `{"used_partners":[]}`)
 }
 
 func TestGuildRentalWireShapes(t *testing.T) {

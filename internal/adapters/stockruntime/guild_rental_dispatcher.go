@@ -16,13 +16,14 @@ import (
 )
 
 // GuildRentalMIDs are the stock guild hero and pet rental callbacks.
-var GuildRentalMIDs = []uint16{593, 594, 595, 618, 619, 620, 621, 2768}
+var GuildRentalMIDs = []uint16{593, 594, 595, 618, 619, 620, 621, 623, 2768}
 
 type GuildRentalPort interface {
 	Place(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) error
 	Recall(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) (int64, int64, error)
 	OwnOffers(context.Context, identity.ActorContext, guild.RentalKind, operation.Context) ([]guildrental.Row, error)
 	GuildOffers(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) (guildrental.List, error)
+	UsedPartners(context.Context, identity.ActorContext, operation.Context) ([]int64, error)
 }
 
 type GuildRentalDispatcher struct {
@@ -76,6 +77,18 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 			return rentalFailure(err)
 		}
 		return okI5(map[string]any{"rent_list": rentalSentHeroes(rows), "award": interest, "rent_award": rentAward})
+	case 623:
+		if !onlyStockGameplayParams(p) {
+			return rentalBad()
+		}
+		ids, err := d.Service.UsedPartners(c, a, op)
+		if err != nil {
+			return rentalFailure(err)
+		}
+		if ids == nil {
+			ids = []int64{}
+		}
+		return okI5(map[string]any{"used_partners": ids})
 	case 618:
 		if !onlyStockGameplayParams(p) {
 			return rentalBad()

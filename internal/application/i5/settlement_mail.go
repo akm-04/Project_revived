@@ -88,8 +88,13 @@ func (m SettlementMail) deliverTx(ctx context.Context, t tx.Tx, r SettlementMail
 		}
 		return prior, true, nil
 	}
-	created, err := createMailTx(ctx, t, m.Store, r.Recipient, mail.Normal, r.SourceKind, r.SourceKey, r.Title, r.Sender, r.Body, r.Lines, r.At, nil, r.PolicyVersion)
+	created, err := createMailTx(ctx, t, m.Store, r.Recipient, mail.Normal, r.SourceKind, r.SourceKey, r.Title, r.Sender, r.Body, r.Lines, r.At, expiryAt(r.At, mailTuning(ctx, t, m.Store).Ordinary()), r.PolicyVersion)
 	return created, false, err
+}
+
+func expiryAt(at time.Time, lifetime time.Duration) *time.Time {
+	expires := at.Add(lifetime)
+	return &expires
 }
 
 func sameSettlementMail(m mail.Record, r SettlementMailRequest) bool {

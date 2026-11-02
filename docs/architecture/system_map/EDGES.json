@@ -1863,6 +1863,7 @@
     "*Now"
    ],
    "guildrental": [
+    "*BusyPartnersTx",
     "*BusyTx"
    ],
    "illusion": [
@@ -3324,6 +3325,7 @@
    "store:guildstore": [
     "*FoldActivityAwardsTx",
     "*FoldActivityTx",
+    "*ListMemberLogTx",
     "*ListMembershipsTx",
     "*LockGuildTx",
     "*LockMembershipTx",
@@ -3560,6 +3562,7 @@
     "*ProfileTx"
    ],
    "workplace": [
+    "*BusyPartnersTx",
     "*BusyTx"
    ]
   },

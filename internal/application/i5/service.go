@@ -221,6 +221,9 @@ func (s Service) SettleGrant(ctx context.Context, actor identity.ActorContext, p
 // canonical Grant contract. It never changes resource policy/content.
 type GrantTxOptions struct {
 	AllowOverflowMail bool
+	// DropOverflow saves what fits and discards the rest. A mail claim uses it
+	// because the client warns that collecting at capacity loses the excess.
+	DropOverflow bool
 	// SkipCappedStacks drops a stack line that would exceed a catalog cap with
 	// no mail overflow policy; a mode that re-pays display rewards uses it so a
 	// once-owned unique item cannot fail the whole grant.
@@ -450,7 +453,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			if err != nil {
 				return GrantResult{}, err
 			}
-			if cr.Overflow > 0 && !allowOverflowMail {
+			if cr.Overflow > 0 && !allowOverflowMail && !opts.DropOverflow {
 				return GrantResult{}, ErrMailStackFull
 			}
 			if cr.Fit > 0 {
@@ -459,16 +462,23 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				}
 			}
 			if cr.Overflow > 0 {
-				sourceKey, err := plan.OverflowMailSourceKey(line.ItemID, ordinal)
-				if err != nil {
-					return GrantResult{}, err
-				}
-				over := line
-				over.Amount = cr.Overflow
-				if _, err := s.createMailTx(ctx, t, plan.PlayerID, mail.Normal, "GRANT_OVERFLOW", sourceKey, "", "System", "", []grant.Line{over}, now, nil, plan.Source.PolicyVersion); err != nil {
-					return GrantResult{}, err
-				}
 				award.ItemNum = cr.Fit
+				if allowOverflowMail {
+					sourceKey, err := plan.OverflowMailSourceKey(line.ItemID, ordinal)
+					if err != nil {
+						return GrantResult{}, err
+					}
+					over := line
+					over.Amount = cr.Overflow
+					var expires *time.Time
+					if plan.PlayerID == actor.PlayerID {
+						at := now.Add(mailTuning(ctx, t, s.Store).OverflowAfterLogin())
+						expires = &at
+					}
+					if _, err := s.createMailTx(ctx, t, plan.PlayerID, mail.Normal, "GRANT_OVERFLOW", sourceKey, overflowMailTitle, overflowMailSender, overflowMailBody, []grant.Line{over}, now, expires, plan.Source.PolicyVersion); err != nil {
+						return GrantResult{}, err
+					}
+				}
 			}
 
 		case grant.PlayerExp:
@@ -702,6 +712,9 @@ type mailWriter interface {
 }
 
 func createMailTx(ctx context.Context, t tx.Tx, store mailWriter, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, policyVersion string) (mail.Record, error) {
+	if strings.TrimSpace(title) == "" || strings.TrimSpace(body) == "" {
+		return mail.Record{}, errors.New("i5: mail title and body required")
+	}
 	wireID, err := store.AllocateMailWireIDTx(ctx, t, playerID, ns)
 	if err != nil {
 		return mail.Record{}, err
@@ -916,7 +929,7 @@ func (s Service) ClaimMail(ctx context.Context, actor identity.ActorContext, add
 				return err
 			}
 			boundOp = prepared
-			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: false})
+			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{DropOverflow: true})
 			if err != nil {
 				return err
 			}
@@ -1029,7 +1042,7 @@ func (s Service) ClaimMailBatch(ctx context.Context, actor identity.ActorContext
 				return err
 			}
 			boundOp = prepared
-			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: false})
+			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{DropOverflow: true})
 			if err != nil {
 				return err
 			}

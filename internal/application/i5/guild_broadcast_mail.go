@@ -229,7 +229,7 @@ func (v GuildBroadcastMailService) Materialize(c context.Context, id ids.UUID, p
 			if e != nil {
 				return e
 			}
-			m := mail.Record{MailUUID: mid, Recipient: pid, Address: mail.Address{Namespace: mail.Normal, WireID: wire}, SourceKind: "GUILD_BROADCAST", SourceKey: id.String(), Category: 0, Title: source.Request.Title, Sender: source.LeaderName, Body: source.Request.Content, CreatedAt: source.DecisionAt, Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: source.PolicyID, StateVersion: 1}
+			m := mail.Record{MailUUID: mid, Recipient: pid, Address: mail.Address{Namespace: mail.Normal, WireID: wire}, SourceKind: "GUILD_BROADCAST", SourceKey: id.String(), Category: 0, Title: source.Request.Title, Sender: source.LeaderName, Body: source.Request.Content, CreatedAt: source.DecisionAt, ExpiresAt: expiryAt(source.DecisionAt, mailTuning(c, sc.Tx, v.Mail).Ordinary()), Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: source.PolicyID, StateVersion: 1}
 			if e = v.Mail.InsertMailTx(c, sc.Tx, m); e != nil {
 				return e
 			}

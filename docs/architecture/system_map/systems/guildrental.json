@@ -11,7 +11,7 @@
    "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
   },
   {
-   "count": 8,
+   "count": 9,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -65,7 +65,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 593,
    "name": "LOAD_SENT_HEROS"
@@ -73,7 +73,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 594,
    "name": "RENT_HERO"
@@ -81,7 +81,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 595,
    "name": "CANCEL_RENT_HERO"
@@ -89,7 +89,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 618,
    "name": "LOAD_RENT_PET"
@@ -97,7 +97,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 619,
    "name": "RENT_PET"
@@ -105,7 +105,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 620,
    "name": "CANCEL_RENT_PET"
@@ -113,7 +113,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 621,
    "name": "LOAD_CAN_RENT_PET_LIST"
@@ -121,7 +121,15 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 33
+    "line": 34
+   },
+   "mid": 623,
+   "name": "LOAD_USED_PARTNER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 34
    },
    "mid": 2768,
    "name": "GET_RENT_HEROS"
@@ -162,7 +170,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [
-   "i9_9b_guild_rental.json"
+   "i9_9b_guild_rental.json",
+   "playtest4_fixes.json"
   ],
   "unit": [
    "guard_test.go",

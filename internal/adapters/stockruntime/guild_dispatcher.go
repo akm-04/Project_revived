@@ -293,21 +293,25 @@ func guildMutationResult(err error) httpedge.Response {
 
 // sourceGuildProtocolError exposes only Guild application codes whose semantics
 // are present in the hash-bound effective-client message table. SOURCE_FACT:
-// Backend.lua treats HTTP 200 as a successful transport callback while the body
-// may still carry error_code. Fields beyond the recovered message semantics are
-// intentionally not invented.
+// Backend.lua treats any HTTP 200 as a successful transport callback; a stock
+// callback therefore runs its success branch even though the body carries an
+// error_code. These refusals answer 409 so the callback takes its error branch
+// while Backend.lua still shows the message table's toast for error_code.
 func sourceGuildProtocolError(err error) (httpedge.Response, bool) {
 	body := map[string]any{}
+	refuse := func() httpedge.Response {
+		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: body}
+	}
 	var wait *guildcore.CantJoinError
 	if errors.As(err, &wait) {
 		switch wait.Kind {
 		case guildcore.JoinCooldownOtherGuild:
 			body["error_code"] = int64(30010)
 			body["time"] = wait.RemainingSeconds
-			return okGuild(body), true
+			return refuse(), true
 		case guildcore.JoinCooldownSameGuild:
 			body["error_code"] = int64(30011)
-			return okGuild(body), true
+			return refuse(), true
 		default:
 			return httpedge.Response{}, false
 		}
@@ -336,7 +340,7 @@ func sourceGuildProtocolError(err error) (httpedge.Response, bool) {
 		return httpedge.Response{}, false
 	}
 	body["error_code"] = code
-	return okGuild(body), true
+	return refuse(), true
 }
 
 func failGuild(err error) httpedge.Response {

@@ -578,16 +578,6 @@
    "stage": "I9-8"
   },
   {
-   "mid": 623,
-   "name": "LOAD_USED_PARTNER",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 657,
    "name": "GET_VIP_AWARD",
    "files": [
