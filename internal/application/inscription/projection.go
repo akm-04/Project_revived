@@ -174,7 +174,9 @@ func (s Service) Response(ctx context.Context, a identity.ActorContext, r Result
 				if key == "mana" || key == "crystal" {
 					continue
 				}
-				return ins.ErrUnqualified
+				// SelfPlayer.lua:201-203 defaults an absent certificate field to 0.
+				values[key] = int64(0)
+				continue
 			}
 			if e = b.Validate(); e != nil {
 				return e
