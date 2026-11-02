@@ -350,8 +350,8 @@ func battleRequest(a identity.ActorContext, info CopyInfo, formation []int64, re
 }
 
 // Settle is 610 (C1, C8, C9, C10, C11) in C2's order: member day 605, chapter
-// 606, copy 607, server records 608, Combat 609, payout mail 610, grants 700+,
-// then the fact.
+// 606, copy 607, Combat 609, damage and server records, payout mail 610, grants
+// 700+, then the fact.
 func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result, op operation.Context) (Settled, error) {
 	if !m.ready() || request.CopyID <= 0 || request.ChapterID <= 0 {
 		return Settled{}, ErrUnavailable
