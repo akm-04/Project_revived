@@ -67,10 +67,8 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 	params := r.Envelope.Params
 	switch r.Envelope.MID {
 	case 1830:
-		for k := range params {
-			if k != "mid" && k != "token" && k != "region" && k != "to_player_id" {
-				return fail(http.StatusBadRequest)
-			}
+		if !onlyStockGameplayParams(params, "to_player_id") {
+			return fail(http.StatusBadRequest)
 		}
 		target, e := feedbackInteger(params["to_player_id"], 1, 9007199254740991)
 		if e != nil {
@@ -89,10 +87,8 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: out.Wire()}
 	case 1842:
-		for k := range params {
-			if k != "mid" && k != "token" && k != "region" && k != "start" && k != "offset" && k != "total_num" {
-				return fail(http.StatusBadRequest)
-			}
+		if !onlyStockGameplayParams(params, "start", "offset", "total_num") {
+			return fail(http.StatusBadRequest)
 		}
 		start, e := feedbackInteger(params["start"], 0, 9007199254740991)
 		if e != nil {
