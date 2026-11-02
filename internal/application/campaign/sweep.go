@@ -97,7 +97,7 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 			}
 		}
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "campaign", Operation: "sweep", BusinessKey: "campaign:sweep:" + current.ID.String(), Occurrence: current.ID.String(), PolicyVersion: d.PolicyID}, Lines: lines}
-		if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{}); err != nil {
+		if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 			return nil, err
 		}
 		kind := NormalWinKind

@@ -855,7 +855,7 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	level := profile.Level
 	if len(lines) > 0 {
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "campaign", Operation: "result", BusinessKey: "campaign:attempt:" + attempt, Occurrence: current.ID.String(), PolicyVersion: d.ContractID}, Lines: lines}
-		granted, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{})
+		granted, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true})
 		if err != nil {
 			return err
 		}
