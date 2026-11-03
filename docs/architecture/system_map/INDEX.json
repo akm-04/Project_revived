@@ -593,6 +593,8 @@
    "league_matches": "championsleague",
    "league_players": "championsleague",
    "league_settlements": "championsleague",
+   "library_forum_comments": "libraryforum",
+   "library_forum_reactions": "libraryforum",
    "logical_servers": "bootstrap",
    "march_players": "march",
    "memoir_players": "memoir",
@@ -961,7 +963,7 @@
   },
   {
    "callees": 5,
-   "callers": 50,
+   "callers": 51,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1060,7 +1062,7 @@
   },
   {
    "callees": 12,
-   "callers": 51,
+   "callers": 52,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1093,6 +1095,15 @@
    "path": "internal/application/inscription",
    "purpose": "",
    "tables": 4
+  },
+  {
+   "callees": 8,
+   "callers": 0,
+   "mids": 0,
+   "name": "libraryforum",
+   "path": "internal/application/libraryforum",
+   "purpose": "",
+   "tables": 2
   },
   {
    "callees": 12,
@@ -1159,7 +1170,7 @@
   },
   {
    "callees": 0,
-   "callers": 2,
+   "callers": 3,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1393,7 +1404,7 @@
   },
   {
    "callees": 15,
-   "callers": 18,
+   "callers": 19,
    "mids": 5,
    "name": "workplace",
    "path": "internal/application/workplace",

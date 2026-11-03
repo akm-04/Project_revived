@@ -707,6 +707,10 @@
     "DecisionAt",
     "Run"
    ],
+   "libraryforum": [
+    "Bind",
+    "DecisionAt"
+   ],
    "librarylocal": [
     "Bind",
     "DecisionAt",
@@ -1181,6 +1185,9 @@
     "*PrepareInscriptionValueTx",
     "*ReadScalarTx"
    ],
+   "libraryforum": [
+    "*FenceActorTx"
+   ],
    "librarylocal": [
     "*DebitMaterialCostTx",
     "*FenceActorTx",
@@ -1364,6 +1371,7 @@
     "*EnsureRootTx"
    ]
   },
+  "libraryforum": {},
   "librarylocal": {
    "achievement": [
     "*HeroLibraryInputsTx",
@@ -1402,6 +1410,9 @@
   },
   "petcampaign": {},
   "playerdirectory": {
+   "libraryforum": [
+    "Validate"
+   ],
    "ranking": [
     "Validate"
    ],
@@ -1880,6 +1891,9 @@
     "*BusyTx"
    ],
    "illusion": [
+    "*Now"
+   ],
+   "libraryforum": [
     "*Now"
    ],
    "occult": [
@@ -3928,6 +3942,38 @@
     "*PutTx"
    ]
   },
+  "libraryforum": {
+   "generation": [
+    "Bind",
+    "DecisionAt"
+   ],
+   "i5": [
+    "*FenceActorTx"
+   ],
+   "interface:libraryforum.CharacterPort": [
+    "*FindHeroByPartnerIDTx",
+    "*FindPetByIDTx",
+    "*ListHeroesTx",
+    "*ListPetsTx"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ],
+   "workplace": [
+    "*Now"
+   ]
+  },
   "librarylocal": {
    "achievement": [
     "*ApplyMarriageTx",
@@ -5306,6 +5352,7 @@
   "inscription": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "libraryforum": [],
   "librarylocal": [
    "cmd/gxb-api/main_postgres.go"
   ],
