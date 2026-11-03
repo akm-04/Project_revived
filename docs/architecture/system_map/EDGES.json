@@ -5362,7 +5362,9 @@
   "inscription": [
    "cmd/gxb-api/main_postgres.go"
   ],
-  "libraryforum": [],
+  "libraryforum": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "librarylocal": [
    "cmd/gxb-api/main_postgres.go"
   ],

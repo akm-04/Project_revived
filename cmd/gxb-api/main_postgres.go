@@ -51,6 +51,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/libraryforumstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/marchstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
@@ -95,6 +96,7 @@ import (
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
+	applibraryforum "gxb.local/backend/v2/internal/application/libraryforum"
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	appmarch "gxb.local/backend/v2/internal/application/march"
 	"gxb.local/backend/v2/internal/application/missioninputs"
@@ -258,6 +260,9 @@ func main() {
 	petTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
 	librarySvc := applibrary.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Library: librarystore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Receipts: receipts}
 	librarySvc.Achievements = appachievement.Service{Store: achievementstore.Store{}, Content: contentDB, Population: librarySvc}
+	librarySvc.Stacks = i5db
+	librarySvc.Skins = heroDB
+	forumSvc := applibraryforum.Service{Timed: heroSvc.Timed, Reads: runner, Store: libraryforumstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Directory: i4store.PlayerDirectoryReader{}, Characters: heroDB}
 	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts}
 	bookSvc := appbook.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: bookstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
 	courseSvc := appcourse.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.CourseHeroPort{Store: heroDB}, Owner: coursestore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts, Privileges: privileges}
@@ -652,7 +657,7 @@ func main() {
 		mustRegister(mid, observing(authority, achievements, "Inscription", inscriptionD))
 	}
 	courseD := stockruntime.CourseDispatcher{Authority: authority, Service: courseSvc}
-	for _, mid := range []uint16{2128, 2129, 2130, 2131, 2132, 2133, 2134, 2135, 2136, 2137, 2138, 2139, 2140, 2142} {
+	for _, mid := range []uint16{2128, 2129, 2130, 2131, 2132, 2133, 2134, 2135, 2136, 2137, 2138, 2139, 2140, 2141, 2142, 2500} {
 		mustRegister(mid, observing(authority, achievements, "Course", courseD))
 	}
 	bookD := stockruntime.BookDispatcher{Authority: authority, Service: bookSvc}
@@ -664,8 +669,12 @@ func main() {
 		mustRegister(mid, observing(authority, achievements, "Dorm", dormD))
 	}
 	libraryD := stockruntime.LibraryDispatcher{Authority: authority, Service: librarySvc}
-	for _, mid := range []uint16{72, 836, 840, 852, 853, 854, 2784, 2785} {
+	for _, mid := range []uint16{72, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 851, 852, 853, 854, 855, 856, 857, 2784, 2785} {
 		mustRegister(mid, libraryD)
+	}
+	forumD := stockruntime.LibraryForumDispatcher{Authority: authority, Service: forumSvc}
+	for _, mid := range []uint16{832, 833, 834} {
+		mustRegister(mid, forumD)
 	}
 	petD := observing(authority, achievements, "Pet", stockruntime.PetDispatcher{Authority: authority, Service: petSvc, Economy: petEconomyProjection})
 	for _, mid := range []uint16{134, 780, 781, 782, 783, 785, 786, 787, 789, 790, 791, 792, 1893, 1894, 1895} {

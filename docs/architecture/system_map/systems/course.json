@@ -10,7 +10,7 @@
    "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
-   "count": 14,
+   "count": 16,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -192,8 +192,24 @@
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
     "line": 25
    },
+   "mid": 2141,
+   "name": "OPEN_GIFT_BOX"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 25
+   },
    "mid": 2142,
    "name": "CONTINUE_STUDY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 25
+   },
+   "mid": 2500,
+   "name": "GET_COURSES_RECOMMEND"
   }
  ],
  "name": "course",
@@ -244,7 +260,9 @@
   "integration": [
    "playerdisplay"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_10b_library.json"
+  ],
   "unit": []
  }
 }
