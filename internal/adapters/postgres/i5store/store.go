@@ -137,6 +137,22 @@ func (Store) ListStacksTx(ctx context.Context, q tx.Queryer, pid identity.Player
 	return out, nil
 }
 
+func (Store) ReadStackTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, itemID int64) (economy.StackState, bool, error) {
+	if q == nil || !pid.Valid() || itemID <= 0 {
+		return economy.StackState{}, false, errors.New("invalid stack read")
+	}
+	var s economy.StackState
+	err := q.QueryRow(ctx, `SELECT player_id,item_id,quantity,state_version,acquired_at,updated_at FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, int64(pid), itemID).Scan((*int64)(&s.PlayerID), &s.ItemID, &s.Quantity, &s.StateVersion, &s.AcquiredAt, &s.UpdatedAt)
+	if noRows(err) {
+		return economy.StackState{}, false, nil
+	}
+	if err != nil {
+		return economy.StackState{}, false, err
+	}
+	s.AcquiredAt, s.UpdatedAt = s.AcquiredAt.UTC(), s.UpdatedAt.UTC()
+	return s, true, s.Validate()
+}
+
 func (Store) ReadScalarTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, key string) (economy.ScalarBalance, bool, error) {
 	if q == nil {
 		return economy.ScalarBalance{}, false, errors.New("nil scalar queryer")

@@ -5,6 +5,7 @@ import (
 	"errors"
 	app "gxb.local/backend/v2/internal/application/librarylocal"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	library "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -54,6 +55,16 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		allowed = []string{"talk_id"}
 	case 840:
 		allowed = []string{"partner_id", "gift_id", "gift_num"}
+	case 839:
+		allowed = []string{"gift_id", "gift_num"}
+	case 835:
+		allowed = []string{"partner_id", "card_status", "board_model_id"}
+	case 855:
+		allowed = []string{"index"}
+	case 856:
+		allowed = []string{"bg_id"}
+	case 857:
+		allowed = []string{"_type", "bg_id"}
 	case 852:
 		allowed = []string{"partner_id", "cost_id"}
 	case 2785:
@@ -64,7 +75,7 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	if !onlyStockGameplayParams(params, allowed...) {
 		return badHero("invalid_library_params")
 	}
-	if mid != 836 && mid != 851 && mid != 2784 && mid != 2785 {
+	if mid != 836 && mid != 839 && mid != 851 && mid != 855 && mid != 856 && mid != 857 && mid != 2784 && mid != 2785 {
 		c.PartnerID, e = requiredInt64(params, "partner_id")
 		if e != nil || c.PartnerID <= 0 {
 			return badHero("invalid_library_partner")
@@ -102,6 +113,33 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		n, err := requiredInt64(params, "gift_num")
 		if err != nil || n != 1 {
 			return badHero("invalid_library_gift_num")
+		}
+	case 839:
+		c.Family = app.BuyGift
+		c.Value, e = requiredInt64(params, "gift_id")
+		n, err := requiredInt64(params, "gift_num")
+		if err != nil || n != 1 {
+			return badHero("invalid_library_gift_num")
+		}
+	case 835:
+		c.Family = app.Board
+		c.Value, e = requiredInt64(params, "card_status")
+		if e == nil {
+			c.SelectID, e = requiredInt64(params, "board_model_id")
+			c.HasSelect = true
+		}
+	case 855:
+		c.Family = app.CGClaim
+		c.Value, e = requiredInt64(params, "index")
+	case 856:
+		c.Family = app.Background
+		c.Value, e = requiredInt64(params, "bg_id")
+	case 857:
+		c.Family = app.Background
+		c.Value, e = requiredInt64(params, "bg_id")
+		if e == nil {
+			c.SelectID, e = requiredInt64(params, "_type")
+			c.HasSelect = true
 		}
 	case 852:
 		c.Family = app.Feed
@@ -150,6 +188,12 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		body["feed_add"] = out.Delta
 	case 854:
 		body["feed_attrs"] = out.Applied
+	case 835:
+		body = map[string]any{"board_partner": out.BoardPartner, "board_card": out.BoardCard, "board_model_id": out.BoardModelID}
+	case 839:
+		body = map[string]any{"gift_id": out.GiftID, "gift_num": out.GiftNum}
+	case 855:
+		body["awards"] = app.StockAwardRows(out.Awards)
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: body}
 }
@@ -164,7 +208,7 @@ func failLibrary(e error) httpedge.Response {
 // failLibraryMode refuses business conflicts on 409 so the stock Library
 // callbacks see ERROR instead of an OK body they would index.
 func failLibraryMode(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, library.ErrUnqualified) || errors.Is(e, library.ErrDialogClosed) || errors.Is(e, library.ErrActLocked) || errors.Is(e, library.ErrActAwarded) {
+	if errors.Is(e, app.ErrRejected) || errors.Is(e, app.ErrRetired) || errors.Is(e, library.ErrUnqualified) || errors.Is(e, library.ErrDialogClosed) || errors.Is(e, library.ErrActLocked) || errors.Is(e, library.ErrActAwarded) || errors.Is(e, library.ErrCGClaimed) || errors.Is(e, library.ErrBgOwned) || errors.Is(e, economy.ErrInsufficientBalance) {
 		return conflictRefusal(1)
 	}
 	return failLibrary(e)

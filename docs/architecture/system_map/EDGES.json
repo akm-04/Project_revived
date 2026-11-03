@@ -1192,6 +1192,7 @@
     "*DebitMaterialCostTx",
     "*FenceActorTx",
     "*PrepareTx",
+    "*ReadStackTx",
     "*RecordTx",
     "*SettleGrantTx"
    ],
@@ -3989,6 +3990,7 @@
     "*DebitMaterialCostTx",
     "*FenceActorTx",
     "*PrepareTx",
+    "*ReadStackTx",
     "*RecordTx",
     "*SettleGrantTx"
    ],
@@ -4011,6 +4013,9 @@
    "interface:librarylocal.RosterProjectionPort": [
     "*OverlayMID1"
    ],
+   "interface:librarylocal.SkinPort": [
+    "*ListHeroSkinEntitlementsTx"
+   ],
    "store:contentstore": [
     "*AchievementRevisionTx",
     "*HeroCoreActiveTx",
@@ -4030,6 +4035,7 @@
     "*EnsureMissionTx",
     "*EnsurePlayerRootTx",
     "*InsertActAwardTx",
+    "*InsertCGClaimTx",
     "*InsertTalkClaimTx",
     "*ListActAwardsTx",
     "*ListBackgroundsTx",
@@ -4048,7 +4054,8 @@
     "*SaveDialogTx",
     "*SaveHeroTx",
     "*SaveMissionTx",
-    "*SavePlayerTx"
+    "*SavePlayerTx",
+    "*UnlockBackgroundTx"
    ]
   },
   "march": {

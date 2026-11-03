@@ -21,8 +21,14 @@ const (
 	FavorLimit        = 2000
 	DefaultBgMain     = 1
 	DefaultBgRoom     = 2
-	SeedPolicyV1      = "LIBRARY_NEUTRAL_SEED_V1"
-	FeedPolicyV1      = "LIBRARY_FEED_RECONSTRUCTION_V1"
+	MaxWireInt        = 9007199254740991
+	CardNormal        = 1
+	CardSkin          = 2
+	CardAwake         = 3
+	// BackgroundUnlockItemID is the stock paid-background currency (LibraryBGWindow.lua:14).
+	BackgroundUnlockItemID = 50001648
+	SeedPolicyV1           = "LIBRARY_NEUTRAL_SEED_V1"
+	FeedPolicyV1           = "LIBRARY_FEED_RECONSTRUCTION_V1"
 )
 
 var (
@@ -36,6 +42,8 @@ var (
 	ErrActLocked    = errors.New("library: act not unlocked")
 	ErrActAwarded   = errors.New("library: act award already claimed")
 	ErrTalkClaimed  = errors.New("library: school story reward already claimed")
+	ErrCGClaimed    = errors.New("library: memory CG reward already claimed")
+	ErrBgOwned      = errors.New("library: background already owned")
 )
 
 type FeedAttrs [AxisCount]int64
@@ -118,6 +126,57 @@ func (f PlayerFacts) validBoard() bool {
 		return f.BoardCard == 0 && f.BoardModelID == 0
 	}
 	return f.BoardCard >= 1
+}
+
+// SetBoard stores one board selection. A request equal to the current
+// selection clears the board (TuJianHeroDetailWindow.lua:1400-1407).
+func (f PlayerFacts) SetBoard(partner, card, model int64, now time.Time) (PlayerFacts, bool, error) {
+	if err := f.Validate(); err != nil {
+		return PlayerFacts{}, false, err
+	}
+	if partner <= 0 || partner > MaxWireInt || card < CardNormal || card > CardAwake || model <= 0 || model > MaxWireInt {
+		return f, false, ErrUnqualified
+	}
+	if f.BoardPartner == partner && f.BoardCard == card && f.BoardModelID == model {
+		f.BoardPartner, f.BoardCard, f.BoardModelID = 0, 0, 0
+	} else {
+		f.BoardPartner, f.BoardCard, f.BoardModelID = partner, card, model
+	}
+	f.StateVersion++
+	f.UpdatedAt = now
+	return f, true, f.Validate()
+}
+
+// SetBackground stores one main (slot 1) or room (slot 2) selection. Selecting
+// the current background again restores the stock default, matching
+// LibraryBGWindow.lua:372-450.
+func (f PlayerFacts) SetBackground(slot, bgID int64, now time.Time) (PlayerFacts, bool, error) {
+	if err := f.Validate(); err != nil {
+		return PlayerFacts{}, false, err
+	}
+	if bgID <= 0 || bgID > MaxWireInt || (slot != 1 && slot != 2) {
+		return f, false, ErrUnqualified
+	}
+	next := f
+	if slot == 1 {
+		if next.BgMain == bgID {
+			next.BgMain = DefaultBgMain
+		} else {
+			next.BgMain = bgID
+		}
+	} else {
+		if next.BgRoom == bgID {
+			next.BgRoom = DefaultBgRoom
+		} else {
+			next.BgRoom = bgID
+		}
+	}
+	if next.BgMain == f.BgMain && next.BgRoom == f.BgRoom {
+		return f, false, nil
+	}
+	next.StateVersion++
+	next.UpdatedAt = now
+	return next, true, next.Validate()
 }
 func (f HeroFacts) Validate() error {
 	if f.Ref.Validate() != nil || f.StateVersion <= 0 || f.Favor < 0 || f.Favor > FavorLimit || (f.Married && f.Favor != FavorLimit) || f.QualityStage < 0 || f.StarStage < 0 || f.SeedPolicy != SeedPolicyV1 || f.CreatedAt.IsZero() || f.UpdatedAt.Before(f.CreatedAt) {

@@ -46,6 +46,13 @@ var ErrActor = errors.New("library: retained actor no longer live")
 var ErrRejected = errors.New("library: command rejected")
 var ErrProof = errors.New("library: invalid operation proof")
 
+const (
+	BuyGift    = "LIBRARY_BUY_GIFT"
+	Board      = "LIBRARY_BOARD"
+	CGClaim    = "LIBRARY_CG"
+	Background = "LIBRARY_BG"
+)
+
 type Command struct {
 	Family    string
 	PartnerID int64
@@ -89,10 +96,32 @@ func (c Command) Validate() error {
 		if c.PartnerID != 0 || c.Value <= 0 || c.SelectID != 0 || c.HasSelect {
 			return lib.ErrUnqualified
 		}
+	case BuyGift:
+		if c.PartnerID != 0 || c.Value <= 0 || c.SelectID != 0 || c.HasSelect {
+			return lib.ErrUnqualified
+		}
+	case CGClaim:
+		if c.PartnerID != 0 || c.Value <= 0 || c.SelectID != 0 || c.HasSelect {
+			return lib.ErrUnqualified
+		}
+	case Board:
+		if c.PartnerID <= 0 || c.Value < lib.CardNormal || c.Value > lib.CardAwake || !c.HasSelect || c.SelectID <= 0 || c.SelectID > lib.MaxWireInt {
+			return lib.ErrUnqualified
+		}
+	case Background:
+		if c.PartnerID != 0 || c.Value <= 0 || c.Value > lib.MaxWireInt {
+			return lib.ErrUnqualified
+		}
+		if c.HasSelect && (c.SelectID != 1 && c.SelectID != 2) {
+			return lib.ErrUnqualified
+		}
+		if !c.HasSelect && c.SelectID != 0 {
+			return lib.ErrUnqualified
+		}
 	default:
 		return lib.ErrUnqualified
 	}
-	if c.PartnerID > 9007199254740991 {
+	if c.PartnerID > lib.MaxWireInt {
 		return lib.ErrUnqualified
 	}
 	return nil
@@ -151,6 +180,11 @@ type Result struct {
 	Dialog          lib.DialogFact
 	HasDialog       bool
 	Awards          []i5.Award
+	GiftID          int64
+	GiftNum         int64
+	BoardPartner    int64
+	BoardCard       int64
+	BoardModelID    int64
 }
 type HeroPort interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
@@ -180,7 +214,9 @@ type LibraryPort interface {
 	ListTalkClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.TalkClaimFact, error)
 	InsertTalkClaimTx(context.Context, tx.Tx, lib.TalkClaimFact) (bool, error)
 	ListCGClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.CGClaimFact, error)
+	InsertCGClaimTx(context.Context, tx.Tx, lib.CGClaimFact) (bool, error)
 	ListBackgroundsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.BackgroundFact, error)
+	UnlockBackgroundTx(context.Context, tx.Tx, lib.BackgroundFact) (bool, error)
 }
 type ContentPort interface {
 	LibraryInputsActive(context.Context) (string, bool, error)
@@ -198,6 +234,16 @@ type FactsPort interface {
 	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
+
+// StackReader is the I5 stack owner's post-settlement count.
+type StackReader interface {
+	ReadStackTx(context.Context, tx.Queryer, identity.PlayerID, int64) (economy.StackState, bool, error)
+}
+
+// SkinPort is the Character owner's Hero skin ownership.
+type SkinPort interface {
+	ListHeroSkinEntitlementsTx(context.Context, tx.Queryer, identity.PlayerID, int64) ([]character.HeroSkinEntitlement, error)
+}
 type Service struct {
 	Achievements MarriageFactConsumer
 	Timed        gen.TimedRunner
@@ -212,6 +258,8 @@ type Service struct {
 	Roster       RosterProjectionPort
 	Grants       GrantPort
 	Facts        FactsPort
+	Stacks       StackReader
+	Skins        SkinPort
 }
 
 func Profile() tx.Profile {
@@ -225,8 +273,9 @@ func receiptID(d Admission) receipt.Identity {
 }
 func fingerprint(c Command) ([32]byte, error) {
 	request := map[string]any{"family": c.Family, "partner_id": c.PartnerID, "value": c.Value, "policy": LifecyclePolicy}
-	// Keep the existing families' proof hashes stable; only 843 carries a choice.
-	if c.Family == TalkAward {
+	// Keep the existing families' proof hashes stable; only choice-bearing
+	// families include their extra selection.
+	if c.Family == TalkAward || c.Family == Board || c.Family == Background {
 		request["select_id"] = c.SelectID
 		request["is_reward"] = c.IsReward
 		request["has_select"] = c.HasSelect
@@ -527,6 +576,47 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				return e
 			}
 			out.Changed = true
+		} else if d.Command.Family == BuyGift {
+			out.GiftID, out.GiftNum, e = s.buyGiftTx(ctx, sc.Tx, a, d, catalog, costOp)
+			if e != nil {
+				return e
+			}
+			out.Changed = true
+			out.StateVersion = root.StateVersion
+		} else if d.Command.Family == CGClaim {
+			out.Awards, e = s.claimCGTx(ctx, sc.Tx, a, d, catalog)
+			if e != nil {
+				return e
+			}
+			out.Changed = true
+			out.StateVersion = root.StateVersion
+		} else if d.Command.Family == Background {
+			if d.Command.HasSelect {
+				next, e := s.setBackgroundTx(ctx, sc.Tx, a, d, catalog, root)
+				if e != nil {
+					return e
+				}
+				out.Changed = true
+				out.StateVersion = next.StateVersion
+			} else {
+				if e = s.unlockBackgroundTx(ctx, sc.Tx, a, d, catalog, costOp); e != nil {
+					return e
+				}
+				out.Changed = true
+				out.StateVersion = root.StateVersion
+			}
+		} else if d.Command.Family == Board {
+			h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, sc.Tx, a.PlayerID, d.Command.PartnerID)
+			if e != nil {
+				return e
+			}
+			next, e := s.boardTx(ctx, sc.Tx, a, d, h, root)
+			if e != nil {
+				return e
+			}
+			out.Changed = true
+			out.StateVersion = next.StateVersion
+			out.BoardPartner, out.BoardCard, out.BoardModelID = next.BoardPartner, next.BoardCard, next.BoardModelID
 		} else {
 			h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, sc.Tx, a.PlayerID, d.Command.PartnerID)
 			if e != nil {
@@ -717,7 +807,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 // Infrastructure/proof/unknown failures retain PENDING; only definite domain or
 // lifecycle rejection may advance a lane without its economic effect.
 func terminalRejection(e error) bool {
-	for _, x := range []error{lib.ErrNotMarried, lib.ErrAtCap, lib.ErrInvalidGift, lib.ErrMarriageGate, lib.ErrUnqualified, lib.ErrDialogClosed, lib.ErrActLocked, lib.ErrActAwarded, lib.ErrTalkClaimed, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
+	for _, x := range []error{lib.ErrNotMarried, lib.ErrAtCap, lib.ErrInvalidGift, lib.ErrMarriageGate, lib.ErrUnqualified, lib.ErrDialogClosed, lib.ErrActLocked, lib.ErrActAwarded, lib.ErrTalkClaimed, lib.ErrCGClaimed, lib.ErrBgOwned, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
 		if errors.Is(e, x) {
 			return true
 		}
