@@ -241,6 +241,11 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if !active {
 			return ErrUnavailable
 		}
+		if mid == 841 {
+			if e := s.ensurePartnerMissionsTx(ctx, sc.Tx, a.PlayerID, partner, revision, sc.Operation.DecisionAt()); e != nil {
+				return e
+			}
+		}
 		return s.ReadBodyTx(ctx, sc.Tx, a, revision, sc.Operation.DecisionAt(), mid, partner, &body)
 	})
 	if e != nil {
@@ -296,6 +301,9 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		}
 		*out = map[string]any{"is_award": bits}
 		return nil
+	}
+	if mid == 841 {
+		return s.readPartnerMissions(ctx, q, a.PlayerID, partner, out)
 	}
 	if mid == 838 || mid == 842 {
 		return s.readPartnerDialogsOrActs(ctx, q, a, scope, partner, mid, out)
@@ -418,6 +426,36 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 			"bg_main": root.BgMain, "bg_room": root.BgRoom, "has_buy": hasBuy, "server_time": at.Unix(),
 		},
 	}
+	return nil
+}
+
+func (s Service) readPartnerMissions(ctx context.Context, q tx.Queryer, player identity.PlayerID, partnerID int64, out *map[string]any) error {
+	heroes, e := s.Heroes.ListHeroesTx(ctx, q, player)
+	if e != nil {
+		return e
+	}
+	owned := false
+	for _, hero := range heroes {
+		if hero.PartnerID == partnerID {
+			owned = true
+			break
+		}
+	}
+	if !owned {
+		return lib.ErrUnqualified
+	}
+	missions, e := s.Library.ListMissionsTx(ctx, q, player)
+	if e != nil {
+		return e
+	}
+	rows := make([]any, 0, len(missions))
+	for _, mission := range missions {
+		if mission.PartnerID != partnerID {
+			continue
+		}
+		rows = append(rows, map[string]any{"mission_id": mission.MissionID, "process": mission.Process, "mission_state": mission.MissionState})
+	}
+	*out = map[string]any{"mission_list": rows}
 	return nil
 }
 

@@ -710,6 +710,7 @@
    "librarylocal": [
     "Bind",
     "DecisionAt",
+    "NewTimedOperation",
     "Run"
    ],
    "march": [
@@ -1182,7 +1183,10 @@
    ],
    "librarylocal": [
     "*DebitMaterialCostTx",
-    "*FenceActorTx"
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx"
    ],
    "march": [
     "*DebitMaterialCostTx",
@@ -3932,11 +3936,15 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "NewTimedOperation",
     "Run"
    ],
    "i5": [
     "*DebitMaterialCostTx",
-    "*FenceActorTx"
+    "*FenceActorTx",
+    "*PrepareTx",
+    "*RecordTx",
+    "*SettleGrantTx"
    ],
    "interface:anonymous@internal/application/librarylocal/backfill.go:68": [
     "*ListHeroRootPlayerIDsTx"
@@ -3973,8 +3981,10 @@
    ],
    "store:librarystore": [
     "*BackfillMissingHeroTx",
+    "*EnsureMissionTx",
     "*EnsurePlayerRootTx",
     "*InsertActAwardTx",
+    "*InsertTalkClaimTx",
     "*ListActAwardsTx",
     "*ListBackgroundsTx",
     "*ListCGClaimsTx",
@@ -3991,6 +4001,7 @@
     "*SaveAdmissionTx",
     "*SaveDialogTx",
     "*SaveHeroTx",
+    "*SaveMissionTx",
     "*SavePlayerTx"
    ]
   },

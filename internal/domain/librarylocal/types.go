@@ -35,6 +35,7 @@ var (
 	ErrDialogClosed = errors.New("library: dialog not opened")
 	ErrActLocked    = errors.New("library: act not unlocked")
 	ErrActAwarded   = errors.New("library: act award already claimed")
+	ErrTalkClaimed  = errors.New("library: school story reward already claimed")
 )
 
 type FeedAttrs [AxisCount]int64

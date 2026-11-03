@@ -24,6 +24,12 @@ func (c Catalog) DialogOpened(id, favor int64, married bool) bool {
 	}
 }
 
+// Contextual dialogs open from a trigger the client attests (event push, a
+// choice inside another dialog, or a gift reaction), not from a favor stage.
+func (r DialogConfigRule) Contextual() bool {
+	return r.Type == 4 || r.Type == 6 || r.Type == 7
+}
+
 func (c Catalog) actDialogUnlocked(dialogID, favor int64) bool {
 	for _, act := range c.Acts {
 		if act.Dialog == dialogID {

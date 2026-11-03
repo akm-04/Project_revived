@@ -11,8 +11,10 @@ import (
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/economy"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	lib "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -33,6 +35,8 @@ const (
 	SpecialClaim = "LIBRARY_SPECIAL_CLAIM"
 	ReadDialog   = "LIBRARY_READ_DIALOG"
 	ActAward     = "LIBRARY_ACT_AWARD"
+	TalkAward    = "LIBRARY_TALK_AWARD"
+	SchoolStory  = "LIBRARY_SCHOOL_STORY"
 )
 
 var ErrUnavailable = errors.New("library: unavailable or unresolved admission")
@@ -46,6 +50,9 @@ type Command struct {
 	Family    string
 	PartnerID int64
 	Value     int64
+	SelectID  int64 `json:",omitempty"`
+	IsReward  bool  `json:",omitempty"`
+	HasSelect bool  `json:",omitempty"`
 }
 
 func (c Command) Validate() error {
@@ -72,6 +79,14 @@ func (c Command) Validate() error {
 		}
 	case ActAward:
 		if c.PartnerID <= 0 || c.Value < 1 || c.Value > lib.ActCount {
+			return lib.ErrUnqualified
+		}
+	case TalkAward:
+		if c.PartnerID <= 0 || c.Value <= 0 || c.SelectID < 0 || (c.HasSelect && c.SelectID <= 0) {
+			return lib.ErrUnqualified
+		}
+	case SchoolStory:
+		if c.PartnerID != 0 || c.Value <= 0 || c.SelectID != 0 || c.HasSelect {
 			return lib.ErrUnqualified
 		}
 	default:
@@ -135,6 +150,7 @@ type Result struct {
 	Rejected        string
 	Dialog          lib.DialogFact
 	HasDialog       bool
+	Awards          []i5.Award
 }
 type HeroPort interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
@@ -157,9 +173,12 @@ type LibraryPort interface {
 	ReadDialogTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (lib.DialogFact, bool, error)
 	SaveDialogTx(context.Context, tx.Tx, lib.DialogFact) error
 	ListMissionsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.MissionFact, error)
+	EnsureMissionTx(context.Context, tx.Tx, lib.MissionFact) (bool, error)
+	SaveMissionTx(context.Context, tx.Tx, lib.MissionFact) error
 	ListActAwardsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.ActAwardFact, error)
 	InsertActAwardTx(context.Context, tx.Tx, lib.ActAwardFact) (bool, error)
 	ListTalkClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.TalkClaimFact, error)
+	InsertTalkClaimTx(context.Context, tx.Tx, lib.TalkClaimFact) (bool, error)
 	ListCGClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.CGClaimFact, error)
 	ListBackgroundsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.BackgroundFact, error)
 }
@@ -171,6 +190,13 @@ type ContentPort interface {
 }
 type ActorFence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
+}
+type GrantPort interface {
+	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
+}
+type FactsPort interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 type Service struct {
 	Achievements MarriageFactConsumer
@@ -184,6 +210,8 @@ type Service struct {
 	Costs        i5.TxMaterialCostDebiter
 	Receipts     receipt.Store
 	Roster       RosterProjectionPort
+	Grants       GrantPort
+	Facts        FactsPort
 }
 
 func Profile() tx.Profile {
@@ -196,7 +224,14 @@ func receiptID(d Admission) receipt.Identity {
 	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(d.Actor.Player, 10), Domain: "library-local", Operation: d.Command.Family, SemanticKey: d.Operation.ID.String()}
 }
 func fingerprint(c Command) ([32]byte, error) {
-	return receipt.FingerprintRequest(map[string]any{"family": c.Family, "partner_id": c.PartnerID, "value": c.Value, "policy": LifecyclePolicy})
+	request := map[string]any{"family": c.Family, "partner_id": c.PartnerID, "value": c.Value, "policy": LifecyclePolicy}
+	// Keep the existing families' proof hashes stable; only 843 carries a choice.
+	if c.Family == TalkAward {
+		request["select_id"] = c.SelectID
+		request["is_reward"] = c.IsReward
+		request["has_select"] = c.HasSelect
+	}
+	return receipt.FingerprintRequest(request)
 }
 func (s Service) proof(ctx context.Context, q tx.Queryer, d Admission) (Result, bool, error) {
 	var out Result
@@ -486,6 +521,12 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 					return e
 				}
 			}
+		} else if d.Command.Family == SchoolStory {
+			out.Awards, e = s.claimSchoolStoryTx(ctx, sc.Tx, a, d, catalog)
+			if e != nil {
+				return e
+			}
+			out.Changed = true
 		} else {
 			h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, sc.Tx, a.PlayerID, d.Command.PartnerID)
 			if e != nil {
@@ -503,6 +544,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				return ErrStale
 			}
 			old := facts.StateVersion
+			oldFavor := facts.Favor
 			wasMarried := facts.Married
 			var achievement PreparedMarriageFact
 			changed := false
@@ -523,7 +565,15 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 							return e
 						}
 					}
+					if ctx, e = s.prepareFacts(ctx, sc.Tx, a.PlayerID, d); e != nil {
+						return e
+					}
 					_, e = s.Costs.DebitMaterialCostTx(ctx, sc.Tx, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: gift.ItemID, Amount: 1}}}, costOp)
+					if e == nil && facts.Favor > oldFavor {
+						if e = s.ensureMissionSetTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, facts.Favor, d.DecisionAt); e == nil {
+							e = s.advanceGiftMissionTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, d.DecisionAt)
+						}
+					}
 				}
 			case Feed:
 				candidate, err := RollFeedingV1(costOp, catalog, facts, rule, d.Command.Value)
@@ -564,7 +614,19 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 					out.Dialog, out.HasDialog = dialog, true
 				}
 			case ActAward:
+				if ctx, e = s.prepareFacts(ctx, sc.Tx, a.PlayerID, d); e != nil {
+					return e
+				}
 				facts, changed, e = s.awardActTx(ctx, sc.Tx, d, catalog, rule, facts)
+			case TalkAward:
+				if ctx, e = s.prepareFacts(ctx, sc.Tx, a.PlayerID, d); e != nil {
+					return e
+				}
+				var dialog lib.DialogFact
+				facts, changed, dialog, e = s.talkAwardTx(ctx, sc.Tx, d, catalog, rule, facts)
+				if e == nil {
+					out.Dialog, out.HasDialog = dialog, true
+				}
 			}
 			if e != nil {
 				return e
@@ -576,6 +638,11 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			}
 			if achievement != nil {
 				if e = achievement.ApplyMarriageTx(ctx, sc.Tx); e != nil {
+					return e
+				}
+			}
+			if facts.Favor > oldFavor {
+				if e = s.recordIntimacy(ctx, sc.Tx, d.Operation, a.PlayerID); e != nil {
 					return e
 				}
 			}
@@ -650,7 +717,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 // Infrastructure/proof/unknown failures retain PENDING; only definite domain or
 // lifecycle rejection may advance a lane without its economic effect.
 func terminalRejection(e error) bool {
-	for _, x := range []error{lib.ErrNotMarried, lib.ErrAtCap, lib.ErrInvalidGift, lib.ErrMarriageGate, lib.ErrUnqualified, lib.ErrDialogClosed, lib.ErrActLocked, lib.ErrActAwarded, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
+	for _, x := range []error{lib.ErrNotMarried, lib.ErrAtCap, lib.ErrInvalidGift, lib.ErrMarriageGate, lib.ErrUnqualified, lib.ErrDialogClosed, lib.ErrActLocked, lib.ErrActAwarded, lib.ErrTalkClaimed, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
 		if errors.Is(e, x) {
 			return true
 		}

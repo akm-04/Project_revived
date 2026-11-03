@@ -1616,15 +1616,6 @@
    ]
   },
   {
-   "fact": "INTIMACY_IMPROVED",
-   "missions": [
-    124
-   ],
-   "stages": [
-    "I9-10"
-   ]
-  },
-  {
    "fact": "PET_FED",
    "missions": [
     121

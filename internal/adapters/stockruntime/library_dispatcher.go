@@ -10,6 +10,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type LibraryPort interface {
@@ -40,10 +42,16 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		allowed = []string{"partner_id"}
 	case 837:
 		allowed = []string{"partner_id", "dialog_id"}
-	case 838, 842:
+	case 838, 841, 842:
 		allowed = []string{"partner_id"}
+	case 843:
+		allowed = []string{"partner_id", "dialog_id", "select_info"}
 	case 844:
 		allowed = []string{"partner_id", "act_id"}
+	case 845, 846, 847:
+		allowed = []string{"partner_id", "mission_id"}
+	case 851:
+		allowed = []string{"talk_id"}
 	case 840:
 		allowed = []string{"partner_id", "gift_id", "gift_num"}
 	case 852:
@@ -56,13 +64,13 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	if !onlyStockGameplayParams(params, allowed...) {
 		return badHero("invalid_library_params")
 	}
-	if mid != 836 && mid != 2784 && mid != 2785 {
+	if mid != 836 && mid != 851 && mid != 2784 && mid != 2785 {
 		c.PartnerID, e = requiredInt64(params, "partner_id")
 		if e != nil || c.PartnerID <= 0 {
 			return badHero("invalid_library_partner")
 		}
 	}
-	if mid == 836 || mid == 838 || mid == 842 || mid == 2784 || mid == 853 {
+	if mid == 836 || mid == 838 || mid == 841 || mid == 842 || mid == 2784 || mid == 853 {
 		body, e := d.Service.Read(ctx, actor, req.Envelope.Operation, mid, c.PartnerID)
 		if e != nil {
 			return failLibraryMode(e)
@@ -73,9 +81,21 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	case 837:
 		c.Family = app.ReadDialog
 		c.Value, e = requiredInt64(params, "dialog_id")
+	case 843:
+		c.Family = app.TalkAward
+		c.Value, e = requiredInt64(params, "dialog_id")
+		if e == nil {
+			c.SelectID, c.IsReward, c.HasSelect, e = librarySelectInfo(params)
+		}
 	case 844:
 		c.Family = app.ActAward
 		c.Value, e = requiredInt64(params, "act_id")
+	case 845, 846, 847:
+		// No stock caller and no recovered reply shape (C14/B7).
+		return conflictRefusal(1)
+	case 851:
+		c.Family = app.SchoolStory
+		c.Value, e = requiredInt64(params, "talk_id")
 	case 840:
 		c.Family = app.Gift
 		c.Value, e = requiredInt64(params, "gift_id")
@@ -108,8 +128,17 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 			return failLibrary(app.ErrUnavailable)
 		}
 		body["dialog"] = map[string]any{"dialog_id": out.Dialog.DialogID, "is_read": libraryBit(out.Dialog.IsRead), "is_awarded": libraryBit(out.Dialog.IsAwarded), "select_id": out.Dialog.SelectID}
+	case 843:
+		if !out.HasDialog {
+			return failLibrary(app.ErrUnavailable)
+		}
+		body["dialog_info"] = map[string]any{"is_awarded": libraryBit(out.Dialog.IsAwarded), "select_id": out.Dialog.SelectID}
+		body["favor_degree"] = out.Favor
+		body["awards"] = []any{}
 	case 844:
 		body["favor_degree"] = out.Favor
+	case 851:
+		body["awards"] = app.StockAwardRows(out.Awards)
 	case 840:
 		body = map[string]any{"gift_id": c.Value, "favor_degree": out.Favor, "is_married": func() int64 {
 			if out.Married {
@@ -146,4 +175,26 @@ func libraryBit(v bool) int64 {
 		return 1
 	}
 	return 0
+}
+
+// librarySelectInfo parses 843's "<is_reward>|<option>" without inventing a
+// default when the field is absent (the dialog-end call).
+func librarySelectInfo(params map[string]any) (selectID int64, isReward, present bool, err error) {
+	raw, ok := params["select_info"]
+	if !ok {
+		return 0, false, false, nil
+	}
+	text, ok := raw.(string)
+	if !ok {
+		return 0, false, false, errors.New("invalid select_info")
+	}
+	parts := strings.Split(text, "|")
+	if len(parts) != 2 || (parts[0] != "0" && parts[0] != "1") {
+		return 0, false, false, errors.New("invalid select_info")
+	}
+	option, e := strconv.ParseInt(parts[1], 10, 64)
+	if e != nil || option <= 0 {
+		return 0, false, false, errors.New("invalid select_info")
+	}
+	return option, parts[0] == "1", true, nil
 }
