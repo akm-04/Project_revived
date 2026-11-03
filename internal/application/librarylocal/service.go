@@ -31,6 +31,8 @@ const (
 	Save         = "LIBRARY_SAVE"
 	NormalClaim  = "LIBRARY_NORMAL_CLAIM"
 	SpecialClaim = "LIBRARY_SPECIAL_CLAIM"
+	ReadDialog   = "LIBRARY_READ_DIALOG"
+	ActAward     = "LIBRARY_ACT_AWARD"
 )
 
 var ErrUnavailable = errors.New("library: unavailable or unresolved admission")
@@ -62,6 +64,14 @@ func (c Command) Validate() error {
 		}
 	case SpecialClaim:
 		if c.PartnerID != 0 || c.Value < 1 || c.Value > 23 {
+			return lib.ErrUnqualified
+		}
+	case ReadDialog:
+		if c.PartnerID <= 0 || c.Value <= 0 {
+			return lib.ErrUnqualified
+		}
+	case ActAward:
+		if c.PartnerID <= 0 || c.Value < 1 || c.Value > lib.ActCount {
 			return lib.ErrUnqualified
 		}
 	default:
@@ -123,6 +133,8 @@ type Result struct {
 	Delta           lib.FeedAttrs
 	HasPreview      bool
 	Rejected        string
+	Dialog          lib.DialogFact
+	HasDialog       bool
 }
 type HeroPort interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
@@ -142,8 +154,11 @@ type LibraryPort interface {
 	LockAdmissionTx(context.Context, tx.Tx, identity.PlayerID, string) (Admission, bool, error)
 	SaveAdmissionTx(context.Context, tx.Tx, Admission) error
 	ListDialogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.DialogFact, error)
+	ReadDialogTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (lib.DialogFact, bool, error)
+	SaveDialogTx(context.Context, tx.Tx, lib.DialogFact) error
 	ListMissionsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.MissionFact, error)
 	ListActAwardsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.ActAwardFact, error)
+	InsertActAwardTx(context.Context, tx.Tx, lib.ActAwardFact) (bool, error)
 	ListTalkClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.TalkClaimFact, error)
 	ListCGClaimsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.CGClaimFact, error)
 	ListBackgroundsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.BackgroundFact, error)
@@ -542,6 +557,14 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 					return lib.ErrUnqualified
 				}
 				facts, changed, e = facts.ClaimNormal(normal, h.Color, h.Star, d.DecisionAt)
+			case ReadDialog:
+				var dialog lib.DialogFact
+				dialog, e = s.readDialogTx(ctx, sc.Tx, d, catalog, rule, facts)
+				if e == nil {
+					out.Dialog, out.HasDialog = dialog, true
+				}
+			case ActAward:
+				facts, changed, e = s.awardActTx(ctx, sc.Tx, d, catalog, rule, facts)
 			}
 			if e != nil {
 				return e
@@ -627,7 +650,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 // Infrastructure/proof/unknown failures retain PENDING; only definite domain or
 // lifecycle rejection may advance a lane without its economic effect.
 func terminalRejection(e error) bool {
-	for _, x := range []error{lib.ErrNotMarried, lib.ErrAtCap, lib.ErrInvalidGift, lib.ErrMarriageGate, lib.ErrUnqualified, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
+	for _, x := range []error{lib.ErrNotMarried, lib.ErrAtCap, lib.ErrInvalidGift, lib.ErrMarriageGate, lib.ErrUnqualified, lib.ErrDialogClosed, lib.ErrActLocked, lib.ErrActAwarded, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
 		if errors.Is(e, x) {
 			return true
 		}

@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"math"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -296,6 +297,9 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		*out = map[string]any{"is_award": bits}
 		return nil
 	}
+	if mid == 838 || mid == 842 {
+		return s.readPartnerDialogsOrActs(ctx, q, a, scope, partner, mid, out)
+	}
 	if mid != 836 {
 		return errors.New("library: unsupported read")
 	}
@@ -414,6 +418,90 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 			"bg_main": root.BgMain, "bg_room": root.BgRoom, "has_buy": hasBuy, "server_time": at.Unix(),
 		},
 	}
+	return nil
+}
+
+func (s Service) readPartnerDialogsOrActs(ctx context.Context, q tx.Queryer, a identity.ActorContext, scope InputScope, partnerID int64, mid uint16, out *map[string]any) error {
+	catalog, e := s.Content.LibraryCatalogTx(ctx, q, scope.ContentRevision)
+	if e != nil {
+		return e
+	}
+	heroes, e := s.Heroes.ListHeroesTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	var tableID int64
+	found := false
+	for _, h := range heroes {
+		if h.PartnerID == partnerID {
+			tableID, found = h.TableID, true
+			break
+		}
+	}
+	if !found {
+		return lib.ErrUnqualified
+	}
+	rule, ok := catalog.Templates[tableID]
+	if !ok {
+		return lib.ErrUnqualified
+	}
+	inputs, e := s.HeroLibraryInputsTx(ctx, q, scope, partnerID)
+	if e != nil {
+		return e
+	}
+	if mid == 842 {
+		awards, e := s.Library.ListActAwardsTx(ctx, q, a.PlayerID)
+		if e != nil {
+			return e
+		}
+		awarded := map[int64]bool{}
+		for _, award := range awards {
+			if award.PartnerID == partnerID {
+				awarded[award.ActID] = true
+			}
+		}
+		slots := make([]any, 0, lib.ActCount)
+		for id := int64(1); id <= lib.ActCount; id++ {
+			slots = append(slots, map[string]any{"is_awarded": bit(awarded[id])})
+		}
+		*out = map[string]any{"partner_acts": slots}
+		return nil
+	}
+	dialogs := []any{}
+	if rule.DialogEnabled {
+		stored, e := s.Library.ListDialogsTx(ctx, q, a.PlayerID)
+		if e != nil {
+			return e
+		}
+		byID := map[int64]lib.DialogFact{}
+		for _, row := range stored {
+			if row.PartnerID == partnerID {
+				byID[row.DialogID] = row
+			}
+		}
+		ids := map[int64]bool{}
+		for _, id := range catalog.OpenDialogIDs(inputs.Facts.Favor, inputs.Facts.Married) {
+			ids[id] = true
+		}
+		for id := range byID {
+			if _, known := catalog.DialogConfigs[id]; known {
+				ids[id] = true
+			}
+		}
+		ordered := make([]int64, 0, len(ids))
+		for id := range ids {
+			ordered = append(ordered, id)
+		}
+		slices.Sort(ordered)
+		for _, id := range ordered {
+			row, ok := byID[id]
+			if !ok {
+				row = lib.DialogFact{PlayerID: a.PlayerID, PartnerID: partnerID, DialogID: id}
+			}
+			dialogs = append(dialogs, map[string]any{"dialog_id": row.DialogID, "is_read": bit(row.IsRead), "is_awarded": bit(row.IsAwarded), "select_id": row.SelectID})
+		}
+	}
+	*out = map[string]any{"partner_dialogs": dialogs}
 	return nil
 }
 

@@ -3974,6 +3974,7 @@
    "store:librarystore": [
     "*BackfillMissingHeroTx",
     "*EnsurePlayerRootTx",
+    "*InsertActAwardTx",
     "*ListActAwardsTx",
     "*ListBackgroundsTx",
     "*ListCGClaimsTx",
@@ -3984,9 +3985,11 @@
     "*LockAdmissionTx",
     "*LockHeroTx",
     "*LockRootTx",
+    "*ReadDialogTx",
     "*ReadHeroTx",
     "*ReadRootTx",
     "*SaveAdmissionTx",
+    "*SaveDialogTx",
     "*SaveHeroTx",
     "*SavePlayerTx"
    ]

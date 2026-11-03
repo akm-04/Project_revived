@@ -79,7 +79,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 72,
    "name": "ALBUM_PARTNER_UNLOCK"
@@ -87,7 +87,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 836,
    "name": "GET_LIBRARY_INFOS"
@@ -95,7 +95,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 840,
    "name": "ADD_FAVOR"
@@ -103,7 +103,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 852,
    "name": "HERO_FEED"
@@ -111,7 +111,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 853,
    "name": "GET_FEED_INFO"
@@ -119,7 +119,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 854,
    "name": "SAVE_HERO_FEED"
@@ -127,7 +127,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 2784,
    "name": "ALBUM_SPECIAL_COLLECT_INFO"
@@ -135,7 +135,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 23
+    "line": 24
    },
    "mid": 2785,
    "name": "ALBUM_SPECIAL_COLLECT_REWARD"
@@ -183,7 +183,9 @@
   ],
   "written": [
    "gxb_operation_receipts",
+   "player_library_act_awards",
    "player_library_admissions",
+   "player_library_dialogs",
    "player_library_heroes",
    "player_library_roots"
   ]

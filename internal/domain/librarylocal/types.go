@@ -32,6 +32,9 @@ var (
 	ErrAtCap        = errors.New("library: all feeding attributes at cap")
 	ErrInvalidGift  = errors.New("library: invalid gift")
 	ErrMarriageGate = errors.New("library: marriage requires maximum favor")
+	ErrDialogClosed = errors.New("library: dialog not opened")
+	ErrActLocked    = errors.New("library: act not unlocked")
+	ErrActAwarded   = errors.New("library: act award already claimed")
 )
 
 type FeedAttrs [AxisCount]int64
