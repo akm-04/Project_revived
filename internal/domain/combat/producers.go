@@ -9,7 +9,8 @@ import (
 // snapshot pins (D05: an unsupported enabled producer blocks START; an absent
 // feature is declared inactive). A registry change takes a new ID.
 const LegacyProducerProfileID = "I8_BATTLE_PRODUCERS_V1"
-const ProducerProfileID = "I9_AWAKENING_BATTLE_PRODUCERS_V1"
+const AwakeningProducerProfileID = "I9_AWAKENING_BATTLE_PRODUCERS_V1"
+const ProducerProfileID = "I9_LIBRARY_BATTLE_PRODUCERS_V1"
 
 type ProducerStatus string
 
@@ -72,7 +73,23 @@ func init() {
 			current.Producers[i].Owner = "I9_AWAKENING_MISSIONS_V1 through coherent CharacterHero raw observation"
 		}
 	}
-	producerProfiles[ProducerProfileID] = current
+	producerProfiles[AwakeningProducerProfileID] = current
+	producerProfiles[ProducerProfileID] = libraryBoardProfile(current)
+}
+
+// libraryBoardProfile moves the I9_LIBRARY_V1 board keys, which the roster
+// carries for every hero, from the inactive display producer to Library.
+func libraryBoardProfile(awakening ProducerProfile) ProducerProfile {
+	board := []string{"is_board", "board_card", "board_model_id"}
+	current := ProducerProfile{ID: ProducerProfileID}
+	for _, producer := range awakening.Producers {
+		if producer.ID == "HERO_DISPLAY" {
+			producer.HeroKeys = []string{"force", "region_arena_times"}
+			current.Producers = append(current.Producers, Producer{ID: "LIBRARY_BOARD", Status: ProducerActive, Owner: "I9_LIBRARY_V1 board partner, card and model (836/835)", HeroKeys: board})
+		}
+		current.Producers = append(current.Producers, producer)
+	}
+	return current
 }
 
 // LookupProducerProfile returns a registered profile; pinned IDs stay registered.

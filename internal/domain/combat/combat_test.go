@@ -172,7 +172,11 @@ func TestSnapshotCanonicalRoundTripAndNegatives(t *testing.T) {
 		func(s *Snapshot) { s.ProducerProfile = "I8_BATTLE_PRODUCERS_V0" },
 		func(s *Snapshot) { s.Schema = LegacySnapshotSchema },
 		func(s *Snapshot) { s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "buffs", []any{}) },
-		func(s *Snapshot) { s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "is_board", 1) },
+		func(s *Snapshot) { s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "force", 1) },
+		func(s *Snapshot) {
+			s.ProducerProfile = AwakeningProducerProfileID
+			s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "is_board", 1)
+		},
 		func(s *Snapshot) {
 			s.Battle.TeamA[0].Params = withParam(s.Battle.TeamA[0].Params, "rune_items", []any{})
 		},

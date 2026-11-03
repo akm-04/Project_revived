@@ -11,7 +11,7 @@ func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	if current.ID == legacy.ID {
 		t.Fatal("producer activation must version snapshots")
 	}
-	for _, id := range []string{LegacyProducerProfileID, ProducerProfileID} {
+	for _, id := range []string{LegacyProducerProfileID, AwakeningProducerProfileID, ProducerProfileID} {
 		s := fixtureSnapshot()
 		s.ProducerProfile = id
 		raw, hash, err := s.Canonical()
@@ -43,6 +43,17 @@ func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	}
 	if current.CheckOwned(HeroActor, withParam(params, "buffs", []int64{})) == nil {
 		t.Fatal("unrelated inactive producer activated")
+	}
+	awakening, _ := LookupProducerProfile(AwakeningProducerProfileID)
+	board := withParam(withParam(withParam(params, "is_board", 1), "board_card", 2), "board_model_id", 7)
+	if awakening.CheckOwned(HeroActor, board) == nil {
+		t.Fatal("awakening profile admitted board keys")
+	}
+	if err := current.CheckOwned(HeroActor, board); err != nil {
+		t.Fatal(err)
+	}
+	if current.CheckOwned(HeroActor, withParam(board, "force", 1)) == nil {
+		t.Fatal("display producer activated")
 	}
 	for _, p := range current.Producers {
 		if p.ID == "CHAR_RUNE" && p.Status != ProducerDeclaredInactive {
