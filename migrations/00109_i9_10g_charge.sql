@@ -38,12 +38,3 @@ CREATE TABLE commerce_recharge_tuning(
  payload jsonb NOT NULL CHECK(jsonb_typeof(payload)='object'),
  updated_at timestamptz NOT NULL
 );
--- +goose Down
-DROP TABLE commerce_recharge_tuning;
-DROP TABLE commerce_vip_awards;
-DROP TABLE commerce_charge_cards;
-DROP TABLE commerce_charge_purchases;
-ALTER TABLE commerce_privilege_roots DROP CONSTRAINT commerce_privilege_roots_origin_pair_check;
-ALTER TABLE commerce_privilege_roots ADD CONSTRAINT commerce_privilege_roots_policy_version_check CHECK(policy_version='C4A_MANUAL_PRIVILEGE_SNAPSHOT_V1');
-ALTER TABLE commerce_privilege_roots ADD CONSTRAINT commerce_privilege_roots_origin_class_check CHECK(origin_class='MANUAL_PRESERVATION');
-DROP TABLE content_charge_catalogs;
