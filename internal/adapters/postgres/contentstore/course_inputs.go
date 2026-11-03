@@ -83,6 +83,28 @@ func courseCatalogDomain(d builtin.CourseInputCatalog) (course.Catalog, error) {
 	}
 	return out, out.Validate()
 }
+
+// CourseGiftBoxRuleTx resolves the box-to-dropbox rule from the Library
+// content artifact, where the accepted compiler stores the D485 policy.
+func (s Store) CourseGiftBoxRuleTx(ctx context.Context, q tx.Queryer, revision string, itemID int64) (course.GiftBoxRule, bool, error) {
+	catalog, e := s.LibraryCatalogTx(ctx, q, revision)
+	if e != nil {
+		return course.GiftBoxRule{}, false, e
+	}
+	source, ok := catalog.CourseGiftBoxes[itemID]
+	if !ok {
+		return course.GiftBoxRule{}, false, nil
+	}
+	out := course.GiftBoxRule{ItemID: source.ItemID, DropboxID: source.DropboxID, Rolls: make([]course.GiftBoxDrop, 0, len(source.Rolls))}
+	for _, roll := range source.Rolls {
+		out.Rolls = append(out.Rolls, course.GiftBoxDrop{ID: roll.ID, ItemID: roll.ItemID, ItemNum: roll.ItemNum, Rate: roll.Rate})
+	}
+	if e = out.Validate(); e != nil {
+		return course.GiftBoxRule{}, false, e
+	}
+	return out, true, nil
+}
+
 func (Store) InsertCourseInputs(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
 	tag, e := t.Exec(ctx, `INSERT INTO content_course_input_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.CourseInputsJSON()))
 	if e != nil {

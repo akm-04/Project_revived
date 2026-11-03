@@ -1073,6 +1073,7 @@
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
     "*ReadScalarTx",
+    "*SettleGrantTx",
     "*SnapshotTx"
    ],
    "dailyconsume": [
@@ -2947,6 +2948,7 @@
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
     "*ReadScalarTx",
+    "*SettleGrantTx",
     "*SnapshotTx"
    ],
    "inscription": [
@@ -2972,6 +2974,7 @@
    ],
    "store:contentstore": [
     "*CourseCatalogTx",
+    "*CourseGiftBoxRuleTx",
     "*CourseInputsActive",
     "*CourseInputsRevisionTx",
     "*HeroKindTx",

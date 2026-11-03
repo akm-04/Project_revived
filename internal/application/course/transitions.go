@@ -7,6 +7,7 @@ import (
 	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"reflect"
 	"sort"
@@ -42,6 +43,9 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	r, e := s.Owner.ReadRootTx(ctx, t, a.PlayerID)
 	if e != nil {
 		return nil, e
+	}
+	if cmd.Family == GiftBox {
+		return s.applyGiftBox(ctx, t, a, d, r)
 	}
 	f, e := s.Owner.ReadHeroTx(ctx, t, a.PlayerID, cmd.PartnerID)
 	if e != nil {
@@ -319,7 +323,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	}
 	body["partner_courses"] = course.HeroWire(facts)
 	body["study_infos"] = attendanceWire(st, c)
-	body["is_has_gift"] = 0
+	body["is_has_gift"] = giftBoxFlag(r.GiftBoxDay != modes.Day(at))
 	if i := facts.Index(cmd.CourseID); i >= 0 {
 		body["course_info"] = course.RecordWire(facts.Courses[i])
 	}

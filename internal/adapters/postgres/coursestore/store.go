@@ -18,19 +18,19 @@ func scan(row tx.Row) (Root, error) {
 	var r Root
 	var p int64
 	var raw string
-	e := row.Scan(&p, &r.Version, &r.Revision, &raw, &r.CreatedAt, &r.UpdatedAt)
+	e := row.Scan(&p, &r.Version, &r.Revision, &raw, &r.CreatedAt, &r.UpdatedAt, &r.GiftBoxDay)
 	if e != nil {
 		return r, e
 	}
 	r.Player = identity.PlayerID(p)
 	e = json.Unmarshal([]byte(raw), &r.Facts)
-	if e != nil || !r.Player.Valid() || r.Version < 1 || len(r.Revision) != 64 || r.CreatedAt.IsZero() || r.UpdatedAt.Before(r.CreatedAt) {
+	if e != nil || !r.Player.Valid() || r.Version < 1 || len(r.Revision) != 64 || r.GiftBoxDay < 0 || r.CreatedAt.IsZero() || r.UpdatedAt.Before(r.CreatedAt) {
 		return r, course.ErrUnqualified
 	}
 	return r, nil
 }
 
-const cols = `player_id,state_version,creation_revision,facts::text,created_at,updated_at`
+const cols = `player_id,state_version,creation_revision,facts::text,created_at,updated_at,gift_box_day`
 
 func (Store) ReadRootTx(c context.Context, q tx.Queryer, p identity.PlayerID) (Root, error) {
 	return scan(q.QueryRow(c, `SELECT `+cols+` FROM player_course_roots WHERE player_id=$1`, int64(p)))

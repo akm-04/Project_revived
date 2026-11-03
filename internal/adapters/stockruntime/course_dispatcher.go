@@ -36,6 +36,8 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	var allowed []string
 	switch mid {
 	case 2130, 2137, 2139:
+	case 2500:
+		allowed = []string{"table_id"}
 	case 2129, 2135, 2136, 2138:
 		allowed = []string{"partner_id"}
 		c.Family = map[uint16]string{2129: app.Collect, 2135: app.Enter, 2136: app.Leave, 2138: app.Cancel}[mid]
@@ -48,6 +50,9 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	case 2140:
 		allowed = []string{"partner_id", "course_id", "item_id", "item_num", "total_num"}
 		c.Family = app.Proficiency
+	case 2141:
+		allowed = []string{"item_id"}
+		c.Family = app.GiftBox
 	default:
 		return badHero("unsupported_course_mid")
 	}
@@ -55,6 +60,11 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return badHero("invalid_course_parameter")
 	}
 	if c.Family == "" {
+		if mid == 2500 {
+			if tableID, e := requiredInt64(p, "table_id"); e != nil || tableID <= 0 {
+				return badHero("invalid_course_parameter")
+			}
+		}
 		body, e := d.Service.Read(ctx, a, mid, req.Envelope.Operation)
 		if e != nil {
 			return failCourse(e)
@@ -62,22 +72,26 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return okI5(body)
 	}
 	var e error
-	c.PartnerID, e = requiredInt64(p, "partner_id")
-	if e == nil {
-		if _, ok := p["course_id"]; ok {
-			c.CourseID, e = requiredInt64(p, "course_id")
-		}
-	}
-	if e == nil && c.Family == app.Bind {
-		c.SkillID, e = requiredInt64(p, "skill_index")
-	}
-	if e == nil && c.Family == app.Proficiency {
+	if c.Family == app.GiftBox {
 		c.ItemID, e = requiredInt64(p, "item_id")
+	} else {
+		c.PartnerID, e = requiredInt64(p, "partner_id")
 		if e == nil {
-			c.Amount, e = requiredInt64(p, "item_num")
+			if _, ok := p["course_id"]; ok {
+				c.CourseID, e = requiredInt64(p, "course_id")
+			}
 		}
-		if e == nil {
-			c.Total, e = requiredInt64(p, "total_num")
+		if e == nil && c.Family == app.Bind {
+			c.SkillID, e = requiredInt64(p, "skill_index")
+		}
+		if e == nil && c.Family == app.Proficiency {
+			c.ItemID, e = requiredInt64(p, "item_id")
+			if e == nil {
+				c.Amount, e = requiredInt64(p, "item_num")
+			}
+			if e == nil {
+				c.Total, e = requiredInt64(p, "total_num")
+			}
 		}
 	}
 	if e != nil || c.Validate() != nil {
@@ -90,8 +104,8 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	return okI5(r.Body)
 }
 func failCourse(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, course.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return badHero("course_command_rejected")
+	if errors.Is(e, app.ErrRejected) || errors.Is(e, app.ErrStale) || errors.Is(e, app.ErrRetired) || errors.Is(e, app.ErrActor) || errors.Is(e, course.ErrInvalid) || errors.Is(e, course.ErrUnqualified) || errors.Is(e, course.ErrStaleTime) || errors.Is(e, economy.ErrInsufficientBalance) {
+		return conflictRefusal(1)
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "course_unavailable_or_unresolved"}}
 }

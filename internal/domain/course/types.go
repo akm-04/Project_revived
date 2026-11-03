@@ -216,6 +216,7 @@ type Root struct {
 	Version              int64
 	Revision             string
 	Facts                State
+	GiftBoxDay           int64
 	CreatedAt, UpdatedAt time.Time
 }
 type HeroRoot struct {

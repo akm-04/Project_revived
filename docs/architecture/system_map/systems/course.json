@@ -1,7 +1,8 @@
 {
  "background": [],
  "content": [
-  "content_course_input_catalogs"
+  "content_course_input_catalogs",
+  "content_library_input_catalogs"
  ],
  "contracts": [
   {
@@ -215,6 +216,7 @@
   ],
   "read": [
    "content_course_input_catalogs",
+   "content_library_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_hero_templates",

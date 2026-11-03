@@ -6,6 +6,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"strconv"
@@ -240,10 +241,16 @@ func (s Service) RoomWireTx(ctx context.Context, q tx.Queryer, scope InputScope)
 	if e != nil {
 		return nil, e
 	}
-	return map[string]any{"study_infos": attendanceWire(v.Root.Facts, v.Catalog), "log_infos": logWire(v.Root.Facts, v.Alive), "is_has_gift": int64(0)}, nil
+	return map[string]any{"study_infos": attendanceWire(v.Root.Facts, v.Catalog), "log_infos": logWire(v.Root.Facts, v.Alive), "is_has_gift": giftBoxFlag(v.Root.GiftBoxDay != modes.Day(v.ObservedAt))}, nil
 }
 func (s Service) Read(ctx context.Context, a identity.ActorContext, mid uint16, op operation.Context) (map[string]any, error) {
-	if !s.complete() || (mid != 2130 && mid != 2137 && mid != 2139) {
+	if !s.complete() {
+		return nil, ErrUnavailable
+	}
+	if mid == 2500 {
+		return s.recommendRead(ctx, a, op)
+	}
+	if mid != 2130 && mid != 2137 && mid != 2139 {
 		return nil, ErrUnavailable
 	}
 	rev, on, e := s.Content.CourseInputsActive(ctx)
