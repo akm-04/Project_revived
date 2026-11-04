@@ -311,7 +311,7 @@ def _validate_items(products, gifts, dropboxes, source_item_ids, gift_ids, error
         raise error(f'referenced items missing from item.lua: {sorted(missing)}')
 
 
-def build_social(blobs, parse_table, error):
+def _compile_social(blobs, parse_table, error):
     products = _exchange_products(
         parse_table(blobs['data/tables/friend_shop_item.lua'].data), error
     )
@@ -352,3 +352,10 @@ def build_social(blobs, parse_table, error):
         gifts=gifts,
         invitation_missions=missions,
     )
+
+
+def build_social(blobs, parse_table, error):
+    try:
+        return _compile_social(blobs, parse_table, error)
+    except (KeyError, TypeError, AttributeError) as exc:
+        raise error(f'social source fields are missing or mistyped: {exc}') from exc

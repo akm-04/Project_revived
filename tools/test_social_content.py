@@ -298,6 +298,17 @@ class SocialCompilerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.build(self.parse_modified('invitation_mission', cycle))
 
+    def test_missing_and_mistyped_required_fields_refused(self):
+        mutations = [
+            ('friend_shop_item', lambda rows: rows[0].pop('id')),
+            ('gift', lambda rows: next(row for row in rows if row['id'] == '90070005').update(items=None)),
+            ('invitation_mission', lambda rows: rows[0].update(task_num=None)),
+        ]
+        for table_name, mutate in mutations:
+            with self.subTest(table=table_name):
+                with self.assertRaises(gen.CompileError):
+                    self.build(self.parse_modified(table_name, mutate))
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
