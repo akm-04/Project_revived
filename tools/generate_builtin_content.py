@@ -375,6 +375,8 @@ SOURCE_MANIFEST.append(('data/tables/event_centre_cabinet.lua', '2bb59560151405d
 SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetbook.lua', '5a56863298b9ad883bbf684548d24c6e0124811b31d8447231d1415fc392b5b3', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetskill.lua', 'dddaa9ff5889a2803b0b42330399fd8d10509c69e34efe6de19eade300a31365', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_skillcost.lua', 'f224e7ab52da1cb0a1fd533e4c9fd4abba3590e9851ce8fac6fa7fb02b2df73a', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_conversion.lua', '44d50e00cb9865f7f2275e580cc69fac2149dca920572f4176c50160d6e07cac', 'I9_10A_ADMIN_CONVERSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ConversionTable.lua', '7d33a78f57d5e2bce884eb765f731e113b4ff1699e602e0da692322ddc9a259a', 'I9_10A_ADMIN_CONVERSION_SOURCE_BOUNDARY'))
 
 
 SOURCE_MANIFEST.append(('app/common/tables/ObjectBookColorTable.lua', '07f54c2c629c0dab488d719641b61bd6c50deabffcfba93d918d07c153b248a6', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
