@@ -164,6 +164,18 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 		t.Fatalf("adventure 10002 occurrences %d", count)
 	}
 
+	// The same operation replays its saved receipt: no second fact or occurrence.
+	replay := libraryDispatchService(t, a, factService, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, giftOperation)
+	if replay.HTTPStatus != 200 || replay.Body["favor_degree"] != int64(113) {
+		t.Fatalf("gift replay status %d body %+v", replay.HTTPStatus, replay.Body)
+	}
+	if progress := missionProgress(t, p, a.PlayerID, 10029); progress != 1 {
+		t.Fatalf("replay mission 10029 progress %d", progress)
+	}
+	if count := adventureOccurrences(t, p, a, d.EventFavor); count != 1 {
+		t.Fatalf("replay adventure 10002 occurrences %d", count)
+	}
+
 	// A gift that crosses the 100-favor boundary materializes and advances 1001
 	// in the same transaction, before any 841 read.
 	bornHero(t, p, a, rev, 10001002, 2)
@@ -205,42 +217,45 @@ func TestI9_10B843TalkAwardChoiceAndEnd(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
 	a := bornActor(t, p)
-	bornHero(t, p, a, rev, 10001001, 1)
+	// 203001 is a type-2 choice in the source dialogue rows: is_reward 1 for
+	// table 10001013 and is_reward 0 for table 10001001.
+	bornHero(t, p, a, rev, 10001013, 1)
+	bornHero(t, p, a, rev, 10001001, 2)
 	setLibraryFavor(t, p, a, 1, 100)
 	service := libraryService(p, p)
 
 	choiceOperation := op()
-	response := libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|42"}, choiceOperation)
+	response := libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|203001"}, choiceOperation)
 	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(102) {
 		t.Fatalf("choice status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	info := response.Body["dialog_info"].(map[string]any)
-	if info["is_awarded"] != int64(1) || info["select_id"] != int64(42) {
+	if info["is_awarded"] != int64(1) || info["select_id"] != int64(203001) {
 		t.Fatalf("choice dialog_info %+v", info)
 	}
 	if awards, ok := response.Body["awards"].([]any); !ok || len(awards) != 0 {
 		t.Fatalf("choice awards %T %+v", response.Body["awards"], response.Body["awards"])
 	}
 
-	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|42"}, choiceOperation)
+	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|203001"}, choiceOperation)
 	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(102) {
 		t.Fatalf("choice replay status %d body %+v", response.HTTPStatus, response.Body)
 	}
 
-	setLibraryFavor(t, p, a, 1, 200)
-	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(3), "select_info": "0|7"}, op())
+	setLibraryFavor(t, p, a, 2, 200)
+	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(2), "dialog_id": int64(2), "select_info": "0|203001"}, op())
 	info = response.Body["dialog_info"].(map[string]any)
-	if response.HTTPStatus != 200 || info["is_awarded"] != int64(0) || info["select_id"] != int64(7) || response.Body["favor_degree"] != int64(200) {
+	if response.HTTPStatus != 200 || info["is_awarded"] != int64(0) || info["select_id"] != int64(203001) || response.Body["favor_degree"] != int64(200) {
 		t.Fatalf("select status %d body %+v", response.HTTPStatus, response.Body)
 	}
 
 	endOperation := op()
-	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(3)}, endOperation)
+	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(2), "dialog_id": int64(2)}, endOperation)
 	info = response.Body["dialog_info"].(map[string]any)
-	if response.HTTPStatus != 200 || info["is_awarded"] != int64(1) || info["select_id"] != int64(7) || response.Body["favor_degree"] != int64(202) {
+	if response.HTTPStatus != 200 || info["is_awarded"] != int64(1) || info["select_id"] != int64(203001) || response.Body["favor_degree"] != int64(202) {
 		t.Fatalf("end status %d body %+v", response.HTTPStatus, response.Body)
 	}
-	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(3)}, endOperation)
+	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(2), "dialog_id": int64(2)}, endOperation)
 	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(202) {
 		t.Fatalf("end replay status %d body %+v", response.HTTPStatus, response.Body)
 	}

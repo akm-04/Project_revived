@@ -11,6 +11,7 @@ import (
 	"os"
 	osexec "os/exec"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -93,6 +94,10 @@ func (process *i9Process) post(mid uint16, fields map[string]any) (int, map[stri
 	fields["mid"] = mid
 	fields["token"] = process.bearer
 	fields["region"] = 1
+	// Backend.lua:576-585 adds these to every stock request.
+	fields["v_"] = "1.631.0"
+	fields["app_v"] = "1.631.0"
+	fields["platform"] = int64(3)
 	raw, _ := json.Marshal(fields)
 	resp, e := http.Post(process.origin+"/engine", "application/x-www-form-urlencoded", bytes.NewBufferString(url.Values{"payload": {string(raw)}}.Encode()))
 	if e != nil {
@@ -125,6 +130,27 @@ func i9Number(t *testing.T, value any) int64 {
 	}
 	t.Fatalf("not a number: %T %+v", value, value)
 	return 0
+}
+
+// i9IntimacyFacts counts the durable objective receipts one favor move writes.
+func i9IntimacyFacts(t *testing.T, p *pg.Pool, actor identity.ActorContext) int64 {
+	t.Helper()
+	var count int64
+	query := `SELECT count(*) FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain='objective' AND operation='mission-source-fact'`
+	if e := p.Raw().QueryRow(ctx, query, strconv.FormatInt(int64(actor.PlayerID), 10)).Scan(&count); e != nil {
+		t.Fatal(e)
+	}
+	return count
+}
+
+func i9MissionProgress(t *testing.T, p *pg.Pool, actor identity.ActorContext, objectiveID int64) int64 {
+	t.Helper()
+	var progress int64
+	query := `SELECT COALESCE((SELECT progress FROM player_mission_instances WHERE player_id=$1 AND objective_id=$2 AND definition_revision='I9_MISSIONS_V1' ORDER BY generation_id LIMIT 1),0)`
+	if e := p.Raw().QueryRow(ctx, query, int64(actor.PlayerID), objectiveID).Scan(&progress); e != nil {
+		t.Fatal(e)
+	}
+	return progress
 }
 
 // assertI9Journal waits for the asynchronous request journal and rejects the
@@ -178,7 +204,7 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 	revision := installed(t, p)
 	resetForumBoards(t, p)
 	actor := bornActor(t, p)
-	hero := bornHero(t, p, actor, revision, 10001001, 1)
+	hero := bornHero(t, p, actor, revision, 10001013, 1)
 	setLibraryFavor(t, p, actor, 1, 100)
 	seedStack(t, p, actor, revision, 50005011, 1)
 	seedStack(t, p, actor, revision, lib.BackgroundUnlockItemID, 1)
@@ -221,8 +247,9 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 	if code != 200 || i9Number(t, body["comments"].([]any)[0].(map[string]any)["like"]) != 1 || i9Number(t, body["comments"].([]any)[0].(map[string]any)["is_commented"]) != 1 {
 		t.Fatalf("833 status %d body %+v", code, body)
 	}
-	code, body = api.post(835, map[string]any{"partner_id": int64(1), "card_status": int64(1), "board_model_id": int64(41001)})
-	if code != 200 || i9Number(t, body["board_partner"]) != 1 || i9Number(t, body["board_card"]) != 1 || i9Number(t, body["board_model_id"]) != 41001 {
+	// 10001013 is partner.lua modelid for the fixture hero (source: data/tables/partner.lua).
+	code, body = api.post(835, map[string]any{"partner_id": int64(1), "card_status": int64(1), "board_model_id": int64(10001013)})
+	if code != 200 || i9Number(t, body["board_partner"]) != 1 || i9Number(t, body["board_card"]) != 1 || i9Number(t, body["board_model_id"]) != 10001013 {
 		t.Fatalf("835 status %d body %+v", code, body)
 	}
 
@@ -231,16 +258,47 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 		t.Fatalf("839 status %d body %+v", code, body)
 	}
 	code, body = api.post(840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)})
-	if code != 200 || i9Number(t, body["favor_degree"]) <= 100 {
+	if code != 200 || i9Number(t, body["favor_degree"]) != 113 {
 		t.Fatalf("840 status %d body %+v", code, body)
 	}
-	code, body = api.post(843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|42"})
-	if code != 200 || i9Number(t, body["dialog_info"].(map[string]any)["is_awarded"]) != 1 {
+	dialogs, ok := body["partner_dialogs"].([]any)
+	if !ok || len(dialogs) != 3 {
+		t.Fatalf("840 partner_dialogs %T %+v", body["partner_dialogs"], body["partner_dialogs"])
+	}
+	for index, wantID := range []int64{1, 2, 12} {
+		if got := i9Number(t, dialogs[index].(map[string]any)["dialog_id"]); got != wantID {
+			t.Fatalf("840 dialog %d id %d want %d", index, got, wantID)
+		}
+	}
+	if acts, ok := body["partner_acts"].([]any); !ok || len(acts) != 4 {
+		t.Fatalf("840 partner_acts %T %+v", body["partner_acts"], body["partner_acts"])
+	}
+	if facts := i9IntimacyFacts(t, p, actor); facts != 1 {
+		t.Fatalf("gift intimacy facts %d want 1", facts)
+	}
+	if progress := i9MissionProgress(t, p, actor, 10029); progress != 1 {
+		t.Fatalf("gift mission 10029 progress %d want 1", progress)
+	}
+	// 203001 is a type-2 choice row with is_reward=1 in data/tables/10001013.lua.
+	code, body = api.post(843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|203001"})
+	if code != 200 || i9Number(t, body["dialog_info"].(map[string]any)["is_awarded"]) != 1 || i9Number(t, body["dialog_info"].(map[string]any)["select_id"]) != 203001 || i9Number(t, body["favor_degree"]) != 115 {
 		t.Fatalf("843 status %d body %+v", code, body)
 	}
+	if facts := i9IntimacyFacts(t, p, actor); facts != 2 {
+		t.Fatalf("talk intimacy facts %d want 2", facts)
+	}
+	if progress := i9MissionProgress(t, p, actor, 10029); progress != 2 {
+		t.Fatalf("talk mission 10029 progress %d want 2", progress)
+	}
 	code, body = api.post(844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
-	if code != 200 || i9Number(t, body["favor_degree"]) <= 0 {
+	if code != 200 || i9Number(t, body["favor_degree"]) != 120 {
 		t.Fatalf("844 status %d body %+v", code, body)
+	}
+	if facts := i9IntimacyFacts(t, p, actor); facts != 3 {
+		t.Fatalf("act intimacy facts %d want 3", facts)
+	}
+	if progress := i9MissionProgress(t, p, actor, 10029); progress != 3 {
+		t.Fatalf("act mission 10029 progress %d want 3", progress)
 	}
 	code, body = api.post(851, map[string]any{"talk_id": int64(1001)})
 	if code != 200 || len(body["awards"].([]any)) != 1 {
@@ -267,6 +325,28 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 	code, body = api.post(836, map[string]any{"partner_id": int64(1)})
 	if code != 400 {
 		t.Fatalf("836 extra param status %d body %+v", code, body)
+	}
+	// Representative D426 business refusals on existing live routes.
+	code, body = api.post(837, map[string]any{"partner_id": int64(1), "dialog_id": int64(9)})
+	if code != 409 || body["error_code"] != float64(1) {
+		t.Fatalf("837 closed dialog status %d body %+v", code, body)
+	}
+	code, body = api.post(851, map[string]any{"talk_id": int64(1001)})
+	if code != 409 || body["error_code"] != float64(1) {
+		t.Fatalf("851 replay status %d body %+v", code, body)
+	}
+	code, body = api.post(839, map[string]any{"gift_id": int64(50001112), "gift_num": int64(1)})
+	if code != 409 || body["error_code"] != float64(1) {
+		t.Fatalf("839 insufficient crystal status %d body %+v", code, body)
+	}
+	// Malformed requests stay 400.
+	code, body = api.post(838, map[string]any{})
+	if code != 400 {
+		t.Fatalf("838 missing partner status %d body %+v", code, body)
+	}
+	code, body = api.post(843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "bad"})
+	if code != 400 {
+		t.Fatalf("843 malformed select status %d body %+v", code, body)
 	}
 
 	api.stop()

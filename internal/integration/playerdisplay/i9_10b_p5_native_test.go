@@ -154,8 +154,8 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 	service := libraryP5Service(p)
 
 	setOperation := op()
-	response := libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(1), "board_model_id": int64(41001)}, setOperation)
-	if response.HTTPStatus != 200 || response.Body["board_partner"] != int64(1) || response.Body["board_card"] != int64(1) || response.Body["board_model_id"] != int64(41001) {
+	response := libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(1), "board_model_id": int64(10001001)}, setOperation)
+	if response.HTTPStatus != 200 || response.Body["board_partner"] != int64(1) || response.Body["board_card"] != int64(1) || response.Body["board_model_id"] != int64(10001001) {
 		t.Fatalf("835 set status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	body, e := service.Read(ctx, a, op(), 49, 0)
@@ -164,7 +164,7 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 	}
 	heros := body["heros"].(map[string]any)
 	board := heros["1"].(map[string]any)
-	if board["is_board"] != int64(1) || board["board_card"] != int64(1) || board["board_model_id"] != int64(41001) {
+	if board["is_board"] != int64(1) || board["board_card"] != int64(1) || board["board_model_id"] != int64(10001001) {
 		t.Fatalf("MID1 board row %+v", board)
 	}
 	plain := heros["2"].(map[string]any)
@@ -172,7 +172,7 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 		t.Fatalf("MID1 plain row %+v", plain)
 	}
 
-	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(1), "board_model_id": int64(41001)}, op())
+	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(1), "board_model_id": int64(10001001)}, op())
 	if response.HTTPStatus != 200 || response.Body["board_partner"] != int64(0) || response.Body["board_card"] != int64(0) || response.Body["board_model_id"] != int64(0) {
 		t.Fatalf("835 reset status %d body %+v", response.HTTPStatus, response.Body)
 	}
@@ -181,7 +181,7 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 		t.Fatalf("stored reset %+v %v", root, e)
 	}
 
-	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(3), "board_model_id": int64(41001)}, op())
+	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(3), "board_model_id": int64(11001001)}, op())
 	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
 		t.Fatalf("unawakened card status %d body %+v", response.HTTPStatus, response.Body)
 	}
@@ -194,11 +194,11 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 	if response.HTTPStatus != 200 || response.Body["board_card"] != int64(2) || response.Body["board_model_id"] != int64(40001001) {
 		t.Fatalf("owned skin status %d body %+v", response.HTTPStatus, response.Body)
 	}
-	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(99), "card_status": int64(1), "board_model_id": int64(41001)}, op())
+	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(99), "card_status": int64(1), "board_model_id": int64(10001001)}, op())
 	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
 		t.Fatalf("unowned hero status %d body %+v", response.HTTPStatus, response.Body)
 	}
-	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(4), "board_model_id": int64(41001)}, op())
+	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(4), "board_model_id": int64(10001001)}, op())
 	if response.HTTPStatus != 400 {
 		t.Fatalf("card 4 status %d body %+v", response.HTTPStatus, response.Body)
 	}
