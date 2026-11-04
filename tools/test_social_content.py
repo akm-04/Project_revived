@@ -52,6 +52,7 @@ class SocialCompilerTests(unittest.TestCase):
 
         catalog = self.build()
         self.assertEqual(catalog['schema_version'], 1)
+        self.assertEqual(catalog['exchange_limit'], 10)
 
         products = catalog['exchange_products']
         self.assertEqual([row['id'] for row in products], [1, 2, 3])
@@ -135,6 +136,24 @@ class SocialCompilerTests(unittest.TestCase):
         }
         self.assertFalse(reward_item_ids - source_item_ids)
         self.assertFalse({row['show_item'] for row in catalog['exchange_products']} - source_item_ids)
+
+    def test_exchange_limit_source_refused(self):
+        def missing_limit(rows):
+            rows[:] = [row for row in rows if row['key'] != 'friend_buy_limit']
+
+        def drifted_limit(rows):
+            for row in rows:
+                if row['key'] == 'friend_buy_limit':
+                    row['value'] = '11'
+
+        def mistyped_limit(rows):
+            for row in rows:
+                if row['key'] == 'friend_buy_limit':
+                    row['value'] = 'ten'
+
+        for mutate in (missing_limit, drifted_limit, mistyped_limit):
+            with self.assertRaises(ValueError):
+                self.build(self.parse_modified('misc', mutate))
 
     def test_old_course_catalog_is_unchanged(self):
         items = gen.parse_encoded_item_table(self.blobs['data/tables/item.lua'].data)

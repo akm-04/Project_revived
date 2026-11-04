@@ -10,6 +10,7 @@ _EXPECTED_REWARD_ITEMS = 59
 _DROPBOX_WEIGHT_TOTAL = 10000
 _MAX_DROPBOX_WEIGHT = 10000
 _MAX_REQUIRED_COUNT = 10
+_EXPECTED_EXCHANGE_LIMIT = 10
 _INVITATION_TYPE_COUNTS = {1: 10, 2: 40, 3: 50, 4: 150}
 _RECALL_TYPE_COUNTS = {1: 4, 2: 2, 3: 4, 4: 15}
 _SUPPORTED_GIFT_FIELDS = frozenset({'id', 'desc', 'items', 'item_nums', 'drops', 'crystal'})
@@ -182,6 +183,17 @@ def _dropboxes(rows, referenced_dropbox_ids, error):
     return dropboxes
 
 
+def _exchange_limit(rows, error):
+    values = {row['key']: row['value'] for row in rows}
+    raw = values.get('friend_buy_limit')
+    if raw is None:
+        raise error('misc.lua missing friend_buy_limit')
+    limit = _integer(raw, 'misc.lua friend_buy_limit', error, minimum=1)
+    if limit != _EXPECTED_EXCHANGE_LIMIT:
+        raise error(f'misc.lua friend_buy_limit drift: {limit}')
+    return limit
+
+
 def _invitation_missions(rows, error):
     if len(rows) != _EXPECTED_INVITATION_MISSIONS:
         raise error(f'invitation mission source count drift: {len(rows)}')
@@ -346,6 +358,9 @@ def _compile_social(blobs, parse_table, error):
     )
     return dict(
         schema_version=1,
+        exchange_limit=_exchange_limit(
+            parse_table(blobs['data/tables/misc.lua'].data), error
+        ),
         exchange_products=products,
         dropboxes=dropboxes,
         recall_milestones=recalls,
