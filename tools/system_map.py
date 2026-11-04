@@ -1404,21 +1404,21 @@ SHOW_ALIASES = {"missions": "i5"}
 
 def show_entry(key):
     index = json.loads(read_text(OUTPUT_DIRECTORY / "INDEX.json"))
-    if key in SHOW_ALIASES:
-        target = SHOW_ALIASES[key]
-        print(json.dumps({
-            "alias": key,
-            "system": target,
-            "note": "no internal/application/missions package; mission ownership lives in " + target,
-            "record": json.loads(read_text(SYSTEMS_DIRECTORY / (target + ".json"))),
-        }, indent=1, ensure_ascii=False))
-        return
+    requested_key = key
+    key = SHOW_ALIASES.get(key, key)
     if key in {row["name"] for row in index["systems"]}:
         record = json.loads(read_text(SYSTEMS_DIRECTORY / (key + ".json")))
         edges = json.loads(read_text(OUTPUT_DIRECTORY / "EDGES.json"))
         record["calls"] = edges["calls"].get(key, {})
         record["called_by"] = edges["called_by"].get(key, {})
         record["composition"] = edges["composition"].get(key, [])
+        if requested_key in SHOW_ALIASES:
+            record = {
+                "alias": requested_key,
+                "system": key,
+                "note": "no internal/application/missions package; mission ownership lives in " + key,
+                "record": record,
+            }
         print(json.dumps(record, indent=1, ensure_ascii=False))
         return
     if key.isdigit():
