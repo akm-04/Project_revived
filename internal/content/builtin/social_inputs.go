@@ -133,7 +133,7 @@ func (c SocialInputCatalog) Validate() error {
 	if err := validateSocialRecallMilestones(c.RecallMilestones, gifts); err != nil {
 		return err
 	}
-	if err := validateSocialGiftReferences(c.ExchangeProducts, c.RecallMilestones, gifts); err != nil {
+	if err := validateSocialGiftReferences(c.ExchangeProducts, c.RecallMilestones, gifts, dropboxes); err != nil {
 		return err
 	}
 	if err := validateSocialInvitationMissions(c.InvitationMissions); err != nil {
@@ -390,7 +390,8 @@ func validateSocialMissionGraph(identifiers map[int64]struct{}, previous, follow
 	return nil
 }
 
-func validateSocialGiftReferences(products []SocialExchangeProduct, milestones []SocialRecallMilestone, gifts map[int64]SocialGift) error {
+func validateSocialGiftReferences(products []SocialExchangeProduct, milestones []SocialRecallMilestone, gifts map[int64]SocialGift, dropboxes map[int64]SocialDropbox) error {
+	referencedDropboxes := make(map[int64]struct{}, len(dropboxes))
 	productGifts := make(map[int64]struct{}, len(products))
 	referenced := make(map[int64]struct{}, len(products)+len(milestones))
 	for _, product := range products {
@@ -404,6 +405,12 @@ func validateSocialGiftReferences(products []SocialExchangeProduct, milestones [
 		return socialError("gift reference count")
 	}
 	for giftID, gift := range gifts {
+		for _, dropboxID := range gift.Drops {
+			if _, found := dropboxes[dropboxID]; !found {
+				return socialError("gift %d references missing dropbox %d", giftID, dropboxID)
+			}
+			referencedDropboxes[dropboxID] = struct{}{}
+		}
 		if _, found := referenced[giftID]; !found {
 			return socialError("unreferenced gift %d", giftID)
 		}
@@ -412,6 +419,9 @@ func validateSocialGiftReferences(products []SocialExchangeProduct, milestones [
 				return socialError("gift %d drops outside an exchange product", giftID)
 			}
 		}
+	}
+	if len(referencedDropboxes) != len(dropboxes) {
+		return socialError("unreferenced exchange dropbox")
 	}
 	return nil
 }

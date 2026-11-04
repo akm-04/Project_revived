@@ -30,17 +30,19 @@ func TestDecodeSocialInputCatalogRejectsMalformedPayload(t *testing.T) {
 
 func TestSocialInputCatalogValidationRefusesDrift(t *testing.T) {
 	cases := map[string]func(*builtin.SocialInputCatalog){
-		"schema version":      func(c *builtin.SocialInputCatalog) { c.SchemaVersion = 2 },
-		"exchange limit":      func(c *builtin.SocialInputCatalog) { c.ExchangeLimit = 11 },
-		"product count":       func(c *builtin.SocialInputCatalog) { c.ExchangeProducts = c.ExchangeProducts[:2] },
-		"product gift":        func(c *builtin.SocialInputCatalog) { c.ExchangeProducts[0].GiftID = 99999999 },
-		"dropbox weight":      func(c *builtin.SocialInputCatalog) { c.Dropboxes[0].Rolls[0].DropRate++ },
-		"dropbox roll id":     func(c *builtin.SocialInputCatalog) { c.Dropboxes[0].Rolls[1].ID = c.Dropboxes[0].Rolls[0].ID },
-		"recall gift dropbox": func(c *builtin.SocialInputCatalog) { c.RecallMilestones[0].GiftID = 90032001 },
-		"mission threshold":   func(c *builtin.SocialInputCatalog) { c.InvitationMissions[0].Threshold = 1 },
-		"mission reference":   func(c *builtin.SocialInputCatalog) { c.InvitationMissions[0].NextTaskIDs = []int64{999999} },
-		"mission self cycle":  func(c *builtin.SocialInputCatalog) { c.InvitationMissions[0].NextTaskIDs = []int64{100001} },
-		"mission type count":  func(c *builtin.SocialInputCatalog) { c.InvitationMissions[len(c.InvitationMissions)-1].Type = 3 },
+		"gift dropbox":         func(c *builtin.SocialInputCatalog) { c.Gifts[0].Drops = []int64{999999} },
+		"unreferenced dropbox": func(c *builtin.SocialInputCatalog) { c.Gifts[1].Drops = append([]int64(nil), c.Gifts[0].Drops...) },
+		"schema version":       func(c *builtin.SocialInputCatalog) { c.SchemaVersion = 2 },
+		"exchange limit":       func(c *builtin.SocialInputCatalog) { c.ExchangeLimit = 11 },
+		"product count":        func(c *builtin.SocialInputCatalog) { c.ExchangeProducts = c.ExchangeProducts[:2] },
+		"product gift":         func(c *builtin.SocialInputCatalog) { c.ExchangeProducts[0].GiftID = 99999999 },
+		"dropbox weight":       func(c *builtin.SocialInputCatalog) { c.Dropboxes[0].Rolls[0].DropRate++ },
+		"dropbox roll id":      func(c *builtin.SocialInputCatalog) { c.Dropboxes[0].Rolls[1].ID = c.Dropboxes[0].Rolls[0].ID },
+		"recall gift dropbox":  func(c *builtin.SocialInputCatalog) { c.RecallMilestones[0].GiftID = 90032001 },
+		"mission threshold":    func(c *builtin.SocialInputCatalog) { c.InvitationMissions[0].Threshold = 1 },
+		"mission reference":    func(c *builtin.SocialInputCatalog) { c.InvitationMissions[0].NextTaskIDs = []int64{999999} },
+		"mission self cycle":   func(c *builtin.SocialInputCatalog) { c.InvitationMissions[0].NextTaskIDs = []int64{100001} },
+		"mission type count":   func(c *builtin.SocialInputCatalog) { c.InvitationMissions[len(c.InvitationMissions)-1].Type = 3 },
 		"reward gift collision": func(c *builtin.SocialInputCatalog) {
 			for index := range c.Gifts {
 				if len(c.Gifts[index].Items) != 0 {
