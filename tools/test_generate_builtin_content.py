@@ -77,6 +77,15 @@ class DialogCompilerTests(unittest.TestCase):
         )
         self.assertEqual((by_node_id[3001]["dialog_group"], by_node_id[3002]["dialog_group"]), (1, 2))
 
+    def test_out_of_order_source_first_node_fails_entry_min_guard(self) -> None:
+        data = b'''return { keys = {"id", "type", "is_reward", "turn_id"}, rows = {
+            {"2001", "1", "0", "-1"},
+            {"1001", "1", "0", "-1"},
+        } }'''
+        with self.assertRaises(gen.CompileError) as ctx:
+            gen.compile_dialog_relationship(10000001, data, {1})
+        self.assertIn("is not smallest surviving node", str(ctx.exception))
+
     def test_multi_target_option_with_absent_reward_fails_closed(self) -> None:
         data = b'''return { keys = {"id", "type", "is_reward", "turn_id"}, rows = {
             {"1001", "1", "0", "2001|2002"},

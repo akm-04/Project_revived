@@ -1015,6 +1015,7 @@ def compile_dialog_relationship(
     # DialogueTable indexes each file by node id across all groups, so the last source row wins.
     nodes_by_node_id: dict[int, dict[str, Any]] = {}
     duplicate_node_keys: set[tuple[int, int, int]] = set()
+    source_first_by_group: dict[int, int] = {}
     placeholders = 0
     for source_row in parse_generated_lua_table(data):
         dialog_group = int(source_row["type"])
@@ -1026,6 +1027,7 @@ def compile_dialog_relationship(
             continue
         if dialog_group not in dialog_config_ids:
             raise CompileError(f"dialog node group {dialog_group} is not a library dialog config id ({relationship_id})")
+        source_first_by_group.setdefault(dialog_group, node_id)
         raw_reward = source_row.get("is_reward", "")
         if raw_reward != "" and int(raw_reward) < 0:
             raise CompileError(f"dialog node reward shape {relationship_id}")
@@ -1044,6 +1046,18 @@ def compile_dialog_relationship(
         if raw_reward != "":
             node["is_reward"] = int(raw_reward)
         nodes_by_node_id[node_id] = node
+    # The catalog keeps no source order, so entry = min surviving id is safe only
+    # while the source's first row per group is that same id.
+    for dialog_group, source_first_id in source_first_by_group.items():
+        group_node_ids = {node_id for node_id, node in nodes_by_node_id.items() if node["dialog_group"] == dialog_group}
+        if not group_node_ids:
+            raise CompileError(f"dialog source group {dialog_group} has no surviving node ({relationship_id})")
+        smallest_node_id = min(group_node_ids)
+        if source_first_id != smallest_node_id:
+            raise CompileError(
+                f"dialog source first node {source_first_id} is not smallest surviving node {smallest_node_id} "
+                f"for group {dialog_group} ({relationship_id})"
+            )
     unresolved_edges: set[tuple[int, int, int]] = set()
     for node in nodes_by_node_id.values():
         for target in node["turn_ids"]:
