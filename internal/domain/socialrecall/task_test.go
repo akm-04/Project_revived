@@ -139,11 +139,17 @@ func TestCanStartUsesSuppliedLimitsAndFacts(t *testing.T) {
 		LogicalServerID: 1,
 		IsFriend:        true,
 		TargetAvailable: true,
-		OfflineSince:    testStart.Add(-7 * 24 * time.Hour),
+		OfflineSince:    testStart.Add(-7*24*time.Hour - time.Second),
 	}
 	allowed, err := CanStart(facts, 2, limits, testStart)
 	if err != nil || !allowed {
 		t.Fatalf("eligible start refused: %v %v", allowed, err)
+	}
+
+	exact := facts
+	exact.OfflineSince = testStart.Add(-7 * 24 * time.Hour)
+	if allowed, err = CanStart(exact, 2, limits, testStart); err != nil || allowed {
+		t.Fatalf("exact offline boundary accepted: %v %v", allowed, err)
 	}
 
 	short := facts

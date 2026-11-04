@@ -207,7 +207,7 @@ func CanStart(facts StartFacts, activeTasks int, limits Limits, at time.Time) (b
 	if !facts.IsFriend || !facts.TargetAvailable || facts.TargetReserved || facts.AlreadyCompleted || activeTasks >= limits.MaxActiveTasks {
 		return false, nil
 	}
-	return observedAt.Sub(offlineSince) >= limits.RequiredOffline, nil
+	return observedAt.Sub(offlineSince) > limits.RequiredOffline, nil
 }
 
 type Milestone struct {
