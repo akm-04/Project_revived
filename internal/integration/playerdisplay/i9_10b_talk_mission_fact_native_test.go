@@ -252,11 +252,11 @@ func TestI9_10B843TalkAwardChoiceAndEnd(t *testing.T) {
 	endOperation := op()
 	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(2), "dialog_id": int64(2)}, endOperation)
 	info = response.Body["dialog_info"].(map[string]any)
-	if response.HTTPStatus != 200 || info["is_awarded"] != int64(1) || info["select_id"] != int64(203001) || response.Body["favor_degree"] != int64(202) {
+	if response.HTTPStatus != 200 || info["is_awarded"] != int64(0) || info["select_id"] != int64(203001) || response.Body["favor_degree"] != int64(200) {
 		t.Fatalf("end status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(2), "dialog_id": int64(2)}, endOperation)
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(202) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(200) {
 		t.Fatalf("end replay status %d body %+v", response.HTTPStatus, response.Body)
 	}
 

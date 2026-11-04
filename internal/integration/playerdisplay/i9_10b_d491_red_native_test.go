@@ -1,18 +1,32 @@
 //go:build postgres
 
-// WIP D491 regression tests. Expected RED at 84dfab039e988a935613748a5001a7a431b2881b:
-// the dispatcher still accepts only select_info 0|1 and the end-call still claims.
+// D491 regressions recovered from the expected-RED pass at 84dfab0. They are
+// green only with the fdceb60 raw seam plus source-graph talk validation.
 package playerdisplay_test
 
 import (
+	"context"
 	"testing"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
+	app "gxb.local/backend/v2/internal/application/librarylocal"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	lib "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+type graphLessLibraryContent struct{ app.ContentPort }
+
+func (m graphLessLibraryContent) LibraryCatalogTx(ctx context.Context, q tx.Queryer, revision string) (lib.Catalog, error) {
+	catalog, err := m.ContentPort.LibraryCatalogTx(ctx, q, revision)
+	if err != nil {
+		return catalog, err
+	}
+	catalog.DialogNodes = nil
+	return catalog, nil
+}
 
 func d491StoredFavor(t *testing.T, p *pg.Pool, actor identity.ActorContext, partner int64) int64 {
 	t.Helper()
@@ -143,5 +157,100 @@ func TestI9_10BD491NoSelectEndNonPositivePathNoFavor(t *testing.T) {
 	}
 	if found && fact.IsAwarded {
 		t.Fatalf("no-select end stored dialog awarded %+v", fact)
+	}
+}
+
+func TestI9_10BD491RejectsForgedSourceSelection(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	for _, tc := range []struct {
+		name       string
+		table      int64
+		favor      int64
+		dialogID   int64
+		selectInfo string
+	}{
+		{"wrong source flag", 10001006, 100, 2, "2|202001"},
+		{"choice node not an option", 10001006, 100, 2, "3|202002"},
+		{"foreign hero option", 10001001, 100, 2, "2|203004"},
+		{"option from another group", 10001006, 200, 3, "3|202001"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			actor := bornActor(t, p)
+			bornHero(t, p, actor, rev, tc.table, 1)
+			setLibraryFavor(t, p, actor, 1, tc.favor)
+			service := libraryService(p, p)
+			before := d491StoredFavor(t, p, actor, 1)
+			response := libraryDispatchService(t, actor, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": tc.dialogID, "select_info": tc.selectInfo}, op())
+			t.Logf("forged select_info=%q status=%d body=%+v before=%d", tc.selectInfo, response.HTTPStatus, response.Body, before)
+			if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+				t.Fatalf("forged select_info %q status %d body %+v", tc.selectInfo, response.HTTPStatus, response.Body)
+			}
+			if after := d491StoredFavor(t, p, actor, 1); after != before {
+				t.Fatalf("forged select_info %q moved favor %d -> %d", tc.selectInfo, before, after)
+			}
+			if fact, found := d491StoredDialog(t, p, actor, 1, tc.dialogID); found && fact.IsAwarded {
+				t.Fatalf("forged select_info %q stored awarded dialog %+v", tc.selectInfo, fact)
+			}
+		})
+	}
+}
+
+func TestI9_10BD491MissingSourceGraphRefusesMutation(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	actor := bornActor(t, p)
+	// 11001209 is dialog-enabled, but its relationship source file is the known
+	// unknown 11001209, so the catalog carries no graph for it.
+	bornHero(t, p, actor, rev, 11001209, 1)
+	setLibraryFavor(t, p, actor, 1, 100)
+	service := libraryService(p, p)
+	before := d491StoredFavor(t, p, actor, 1)
+	response := libraryDispatchService(t, actor, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|202001"}, op())
+	t.Logf("missing source status=%d body=%+v before=%d", response.HTTPStatus, response.Body, before)
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+		t.Fatalf("missing source status %d body %+v", response.HTTPStatus, response.Body)
+	}
+	if after := d491StoredFavor(t, p, actor, 1); after != before {
+		t.Fatalf("missing source moved favor %d -> %d", before, after)
+	}
+}
+
+func TestI9_10BD491LegacyReceiptAndReadsSurviveMissingGraph(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	actor := bornActor(t, p)
+	bornHero(t, p, actor, rev, 10001006, 1)
+	setLibraryFavor(t, p, actor, 1, 100)
+	service := libraryService(p, p)
+	request := op()
+	params := map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "3|202001"}
+
+	first := libraryDispatchService(t, actor, service, 843, params, request)
+	if first.HTTPStatus != 200 {
+		t.Fatalf("first status %d body %+v", first.HTTPStatus, first.Body)
+	}
+	t.Logf("first status=%d body=%+v", first.HTTPStatus, first.Body)
+
+	service.Content = graphLessLibraryContent{ContentPort: service.Content}
+	replay := libraryDispatchService(t, actor, service, 843, params, request)
+	t.Logf("missing-graph receipt replay status=%d body=%+v", replay.HTTPStatus, replay.Body)
+	if replay.HTTPStatus != 200 || replay.Body["favor_degree"] != int64(102) {
+		t.Fatalf("receipt replay status %d body %+v", replay.HTTPStatus, replay.Body)
+	}
+	info, ok := replay.Body["dialog_info"].(map[string]any)
+	if !ok || info["is_awarded"] != int64(1) || info["select_id"] != int64(202001) {
+		t.Fatalf("receipt replay dialog_info %T %+v", replay.Body["dialog_info"], replay.Body["dialog_info"])
+	}
+
+	fresh := libraryDispatchService(t, actor, service, 843, params, op())
+	t.Logf("missing-graph fresh operation status=%d body=%+v", fresh.HTTPStatus, fresh.Body)
+	if fresh.HTTPStatus != 409 || fresh.Body["error_code"] != int64(1) {
+		t.Fatalf("missing-graph fresh operation status %d body %+v", fresh.HTTPStatus, fresh.Body)
+	}
+
+	read := libraryDispatchService(t, actor, service, 836, nil, op())
+	if read.HTTPStatus != 200 || read.Body["library_infos"] == nil || read.Body["library_talk_infos"] == nil {
+		t.Fatalf("read with missing graph status %d body %+v", read.HTTPStatus, read.Body)
 	}
 }

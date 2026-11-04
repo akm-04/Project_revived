@@ -40,6 +40,25 @@ func TestTalkCommandPreservesLegacyRewardIdentity(t *testing.T) {
 	}
 }
 
+func TestTalkRawRewardSelectsSourceDiscriminator(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		command Command
+		want    int64
+	}{
+		{"zero", Command{IsReward: false}, 0},
+		{"legacy one", Command{IsReward: true}, 1},
+		{"raw two", Command{IsReward: true, RawReward: 2}, 2},
+		{"raw three", Command{IsReward: true, RawReward: 3}, 3},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := talkRawReward(tc.command); got != tc.want {
+				t.Fatalf("talkRawReward(%+v)=%d want %d", tc.command, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestTalkCommandRawRewardIsBoundToProof(t *testing.T) {
 	command := Command{Family: TalkAward, PartnerID: 1, Value: 2, SelectID: 203001, IsReward: true, HasSelect: true}
 	previous, err := fingerprint(command)
