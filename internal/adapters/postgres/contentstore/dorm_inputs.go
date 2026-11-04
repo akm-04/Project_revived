@@ -110,6 +110,22 @@ func dormCatalogDomain(d builtin.DormInputCatalog) (dorm.Catalog, error) {
 	for _, r := range d.Furniture {
 		out.Furniture[r.ItemID] = dorm.FurnitureRule{ItemID: r.ItemID, Comfort: r.Comfort, Floor: r.Floor, PaperItem: r.PaperItem, SpecialType: r.SpecialType, Length: r.Length, Width: r.Width, Height: r.Height, CanRotate: r.CanRotate, CanPile: r.CanPile, CanBePile: r.CanBePile, PileLimit: r.PileLimit, Panels: append([]int64(nil), r.Panels...), PileStart: append([]int64(nil), r.PileStart...), PileEnd: append([]int64(nil), r.PileEnd...)}
 	}
+	if d.Glue != nil {
+		glue := dorm.GlueRules{DailyFloor: d.Glue.DailyFloor, PurchaseAmount: d.Glue.PurchaseAmount, PurchaseStartLimit: d.Glue.PurchaseStartLimit, VIPDailyCaps: map[int64]int64{}, PurchaseCosts: map[int64]int64{}}
+		for _, r := range d.Glue.VIPDailyCaps {
+			if _, exists := glue.VIPDailyCaps[r.VIP]; exists {
+				return out, dorm.ErrUnqualified
+			}
+			glue.VIPDailyCaps[r.VIP] = r.Cap
+		}
+		for _, r := range d.Glue.PurchaseCosts {
+			if _, exists := glue.PurchaseCosts[r.Ordinal]; exists {
+				return out, dorm.ErrUnqualified
+			}
+			glue.PurchaseCosts[r.Ordinal] = r.Cost
+		}
+		out.Glue = &glue
+	}
 	return out, nil
 }
 
