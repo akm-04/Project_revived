@@ -112,8 +112,9 @@ func TestI9_10BProductionWakeManualProbe(t *testing.T) {
 	}
 	t.Logf("OCCURRENCE event=10002 source=%q end_occurred=%s finished=%v", sourceKey, endTime.Sub(occurredAt), finished != nil)
 
-	// A second successful favor fact must not create or wake a duplicate while
-	// the first occurrence is active. The objective receipt proves the fact.
+	// Observation only, not deterministic guard proof: in this one run a second
+	// successful favor fact produced no duplicate wake while the first
+	// occurrence was active. The observer unit covers suppression deterministically.
 	factsBefore := i9IntimacyFacts(t, p, actor)
 	partner := int64(commands)%partners + 1
 	gift := productionWakeGifts[int64(commands)/productionWakeGiftStack]
@@ -137,7 +138,7 @@ func TestI9_10BProductionWakeManualProbe(t *testing.T) {
 	if e = p.Raw().QueryRow(ctx, `SELECT count(*) FROM adventure_occurrences WHERE player_id=$1 AND event_type=10002`, int64(actor.PlayerID)).Scan(&occurrences); e != nil || occurrences != 1 {
 		t.Fatalf("occurrence count %d err %v want 1", occurrences, e)
 	}
-	t.Logf("SUPPRESSION fact=%d occurrences=%d no_duplicate_wake=true", factsBefore+1, occurrences)
+	t.Logf("SUPPRESSION_OBSERVED fact=%d occurrences=%d duplicate_wake=false", factsBefore+1, occurrences)
 
 	api.stop()
 	assertI9Journal(t, p, actor, []int{840})
