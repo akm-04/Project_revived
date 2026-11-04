@@ -7,7 +7,6 @@ def build_book(blobs,parse,items):
  def costs(ids,nums):
   out={};pages=0
   a=[int(x)for x in ids.split('|')];b=[int(x)for x in nums.split('|')]
-  if b==[0]:return out,pages
   assert len(a)==len(b)
   for rid,num in zip(a,b):
    if num==0:continue
@@ -20,7 +19,11 @@ def build_book(blobs,parse,items):
   for r in rows(name):
    key=(typ,int(r['id']));assert key not in buildingKeys
    buildingKeys.add(key)
-   cost,page=costs(r['resources_id'],r['resources_num']);assert page==0
+   resource_quantities=r['resources_num']
+   if key==(2,8):
+    assert (r['resources_id'],resource_quantities,r['time'],r['type_request'],r['function_request_level'])==('11|12|13','0','0','0','0')
+    resource_quantities='0|0|0'
+   cost,page=costs(r['resources_id'],resource_quantities);assert page==0
    attr=r.get('attribute','0|0|0').split('|');assert len(attr)==3
    buildings.append(dict(Type=typ,Level=int(r['id']),Duration=int(r['time']),RequiresType=int(r.get('type_request',r.get('function_request','0'))),RequiresLevel=int(r['function_request_level']),CutTime=int(r.get('cut_time','0')),UpperLimit=int(r.get('upper_limit','0')),Resources=cost,Attributes=attr))
  books=[]

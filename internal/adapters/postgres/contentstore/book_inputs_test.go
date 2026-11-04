@@ -1,7 +1,9 @@
 package contentstore
 
 import (
+	"bytes"
 	"encoding/json"
+	"os"
 	"testing"
 
 	"gxb.local/backend/v2/internal/content/builtin"
@@ -64,5 +66,36 @@ func TestBookCatalogDomainRejectsDuplicateSchema2Building(t *testing.T) {
 	catalogDTO.Buildings[len(catalogDTO.Buildings)-1].Level = 1
 	if _, err := bookCatalogDomain(catalogDTO); err == nil {
 		t.Fatal("duplicate schema2 building key qualified")
+	}
+}
+
+func TestBookCatalogDomainCompilerPayload(t *testing.T) {
+	payloadPath := os.Getenv("GXB_BOOK_COMPILER_PAYLOAD")
+	if payloadPath == "" {
+		t.Skip("compiler-produced payload not supplied")
+	}
+	raw, err := os.ReadFile(payloadPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input builtin.BookInputCatalog
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&input); err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := bookCatalogDomain(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if input.SchemaVersion != 2 || len(catalog.Buildings) != 135 {
+		t.Fatalf("unexpected compiler payload: schema %d, buildings %d", input.SchemaVersion, len(catalog.Buildings))
+	}
+	terminal := catalog.Buildings[[2]int64{2, 8}]
+	if terminal.Duration != 0 || terminal.CutTime != 0 || len(terminal.Resources) != 0 {
+		t.Fatalf("terminal workbench binding = %+v", terminal)
+	}
+	if catalog.Buildings[[2]int64{2, 3}].Resources["magic_energy"] != 1000 || catalog.Buildings[[2]int64{7, 1}].RequiresType != 2 {
+		t.Fatal("source building facts changed at binding")
 	}
 }

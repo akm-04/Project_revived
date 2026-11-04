@@ -63,6 +63,25 @@ class BookContentCompilerTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.build(parse)
 
+    def test_zero_quantity_does_not_waive_cost_shape(self):
+        mutations = [
+            ("table", 0, {"resources_num": "0"}),
+            ("table", 7, {"resources_id": "99|12|13"}),
+            ("table", 7, {"time": "60"}),
+            ("skillcost", 0, {"cost_res_type1": "11|12|13", "cost_res_num1": "0"}),
+        ]
+        for table_name, row_index, changes in mutations:
+            with self.subTest(table=table_name, row=row_index, changes=changes):
+                source = self.blobs["data/tables/event_centre_" + table_name + ".lua"].data
+                rows = compiler.parse_generated_lua_table(source)
+                rows[row_index].update(changes)
+
+                def parse(data):
+                    return rows if data == source else compiler.parse_generated_lua_table(data)
+
+                with self.assertRaises(AssertionError):
+                    self.build(parse)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
