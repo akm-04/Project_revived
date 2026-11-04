@@ -71,7 +71,7 @@ func (s Service) advanceGiftMissionTx(ctx context.Context, t tx.Tx, catalog lib.
 
 func (s Service) prepareFacts(ctx context.Context, t tx.Tx, player identity.PlayerID, d Admission) (context.Context, error) {
 	if s.Facts == nil {
-		return ctx, nil
+		return ctx, ErrUnavailable
 	}
 	timed, e := gen.NewTimedOperation(d.Operation, d.DecisionAt)
 	if e != nil {
@@ -81,9 +81,10 @@ func (s Service) prepareFacts(ctx context.Context, t tx.Tx, player identity.Play
 }
 
 // recordIntimacy emits fact 124 once per settling command that raised favor.
+// A missing port refuses the command so its transaction rolls back the value.
 func (s Service) recordIntimacy(ctx context.Context, t tx.Tx, op operation.Context, player identity.PlayerID) error {
 	if s.Facts == nil {
-		return nil
+		return ErrUnavailable
 	}
 	return s.Facts.RecordTx(ctx, t, op, objective.Fact{PlayerID: player, SourceDomain: "library", SourceBusinessKey: op.ID.String(), Kind: objective.IntimacyImprovedKind, Delta: 1})
 }

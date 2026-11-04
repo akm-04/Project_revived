@@ -63,7 +63,7 @@ var producerProfiles = map[string]ProducerProfile{LegacyProducerProfileID: {ID: 
 
 func init() {
 	legacy := producerProfiles[LegacyProducerProfileID]
-	current := ProducerProfile{ID: ProducerProfileID, Producers: append([]Producer(nil), legacy.Producers...)}
+	current := ProducerProfile{ID: AwakeningProducerProfileID, Producers: append([]Producer(nil), legacy.Producers...)}
 	for i := range current.Producers {
 		switch current.Producers[i].ID {
 		case "RAW_AWAKENING":

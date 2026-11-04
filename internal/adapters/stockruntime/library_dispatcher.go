@@ -184,6 +184,14 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 			}
 			return 0
 		}()}
+		// Replay of a receipt saved before these projections existed omits the
+		// keys, so the client keeps its stored partner state.
+		if out.PartnerDialogs != nil {
+			body["partner_dialogs"] = out.PartnerDialogs
+		}
+		if out.PartnerActs != nil {
+			body["partner_acts"] = out.PartnerActs
+		}
 	case 852:
 		body["feed_add"] = out.Delta
 	case 854:

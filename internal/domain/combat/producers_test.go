@@ -44,7 +44,20 @@ func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	if current.CheckOwned(HeroActor, withParam(params, "buffs", []int64{})) == nil {
 		t.Fatal("unrelated inactive producer activated")
 	}
-	awakening, _ := LookupProducerProfile(AwakeningProducerProfileID)
+	awakening, ok := LookupProducerProfile(AwakeningProducerProfileID)
+	if !ok || awakening.ID != AwakeningProducerProfileID {
+		t.Fatalf("awakening profile identity %+v", awakening)
+	}
+	registered, found := LookupProducerProfile(ProducerProfileID)
+	if !found || registered.ID != ProducerProfileID || current.ID != ProducerProfileID {
+		t.Fatalf("current profile identity %+v / %s", registered, current.ID)
+	}
+	if status := current.Keys(HeroActor)["is_board"]; status != ProducerActive {
+		t.Fatalf("current profile board producer %v", status)
+	}
+	if status, ok := awakening.Keys(HeroActor)["is_board"]; !ok || status != ProducerDeclaredInactive {
+		t.Fatalf("awakening profile board producer %v %v", status, ok)
+	}
 	board := withParam(withParam(withParam(params, "is_board", 1), "board_card", 2), "board_model_id", 7)
 	if awakening.CheckOwned(HeroActor, board) == nil {
 		t.Fatal("awakening profile admitted board keys")

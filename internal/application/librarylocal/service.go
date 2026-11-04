@@ -161,6 +161,19 @@ type Admission struct {
 	ContentRevision string
 	State           string
 }
+
+// DialogRow and ActSlot are the typed 836/838/840 projections. Concrete field
+// types keep a receipt replay byte-identical to the committing reply.
+type DialogRow struct {
+	DialogID  int64 `json:"dialog_id"`
+	IsRead    int64 `json:"is_read"`
+	IsAwarded int64 `json:"is_awarded"`
+	SelectID  int64 `json:"select_id"`
+}
+type ActSlot struct {
+	IsAwarded int64 `json:"is_awarded"`
+}
+
 type Result struct {
 	Schema          string
 	Command         Command
@@ -185,6 +198,8 @@ type Result struct {
 	BoardPartner    int64
 	BoardCard       int64
 	BoardModelID    int64
+	PartnerDialogs  []DialogRow
+	PartnerActs     []ActSlot
 }
 type HeroPort interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
@@ -741,6 +756,18 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			out.Favor = facts.Favor
 			out.Married = facts.Married
 			out.Applied = facts.Applied
+			if d.Command.Family == Gift {
+				storedDialogs, readErr := s.Library.ListDialogsTx(ctx, sc.Tx, a.PlayerID)
+				if readErr != nil {
+					return readErr
+				}
+				actAwards, readErr := s.Library.ListActAwardsTx(ctx, sc.Tx, a.PlayerID)
+				if readErr != nil {
+					return readErr
+				}
+				out.PartnerDialogs = projectPartnerDialogs(catalog, rule.DialogEnabled, facts.Favor, facts.Married, d.Command.PartnerID, storedDialogs)
+				out.PartnerActs = projectPartnerActs(d.Command.PartnerID, actAwards)
+			}
 		}
 		if e = s.putReceipt(ctx, sc.Tx, d, out); e != nil {
 			return e

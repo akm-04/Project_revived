@@ -348,24 +348,15 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		return e
 	}
 
-	dialogsByPartner := map[int64][]any{}
+	dialogsByPartner := map[int64][]lib.DialogFact{}
 	for _, d := range dialogs {
-		dialogsByPartner[d.PartnerID] = append(dialogsByPartner[d.PartnerID], map[string]any{
-			"dialog_id": d.DialogID, "is_read": bit(d.IsRead), "is_awarded": bit(d.IsAwarded), "select_id": d.SelectID,
-		})
+		dialogsByPartner[d.PartnerID] = append(dialogsByPartner[d.PartnerID], d)
 	}
 	missionsByPartner := map[int64][]any{}
 	for _, m := range missions {
 		missionsByPartner[m.PartnerID] = append(missionsByPartner[m.PartnerID], map[string]any{
 			"mission_id": m.MissionID, "process": m.Process, "mission_state": m.MissionState,
 		})
-	}
-	awardedActs := map[int64]map[int64]bool{}
-	for _, award := range awards {
-		if awardedActs[award.PartnerID] == nil {
-			awardedActs[award.PartnerID] = map[int64]bool{}
-		}
-		awardedActs[award.PartnerID][award.ActID] = true
 	}
 
 	infos := map[string]any{}
@@ -374,24 +365,20 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		if e != nil {
 			return e
 		}
-		partnerDialogs := dialogsByPartner[h.PartnerID]
-		if partnerDialogs == nil {
-			partnerDialogs = []any{}
+		rule, ok := catalog.Templates[h.TableID]
+		if !ok {
+			return lib.ErrUnqualified
 		}
 		partnerMissions := missionsByPartner[h.PartnerID]
 		if partnerMissions == nil {
 			partnerMissions = []any{}
 		}
-		partnerActs := make([]any, 0, lib.ActCount)
-		for id := int64(1); id <= lib.ActCount; id++ {
-			partnerActs = append(partnerActs, map[string]any{"is_awarded": bit(awardedActs[h.PartnerID][id])})
-		}
 		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{
 			"favor_degree":     f.Facts.Favor,
 			"is_married":       bit(f.Facts.Married),
-			"partner_dialogs":  partnerDialogs,
+			"partner_dialogs":  projectPartnerDialogs(catalog, rule.DialogEnabled, f.Facts.Favor, f.Facts.Married, h.PartnerID, dialogsByPartner[h.PartnerID]),
 			"partner_missions": partnerMissions,
-			"partner_acts":     partnerActs,
+			"partner_acts":     projectPartnerActs(h.PartnerID, awards),
 			"partner_logs":     map[string]any{},
 		}
 	}
@@ -492,55 +479,68 @@ func (s Service) readPartnerDialogsOrActs(ctx context.Context, q tx.Queryer, a i
 		if e != nil {
 			return e
 		}
-		awarded := map[int64]bool{}
-		for _, award := range awards {
-			if award.PartnerID == partnerID {
-				awarded[award.ActID] = true
-			}
-		}
-		slots := make([]any, 0, lib.ActCount)
-		for id := int64(1); id <= lib.ActCount; id++ {
-			slots = append(slots, map[string]any{"is_awarded": bit(awarded[id])})
-		}
-		*out = map[string]any{"partner_acts": slots}
+		*out = map[string]any{"partner_acts": projectPartnerActs(partnerID, awards)}
 		return nil
 	}
-	dialogs := []any{}
-	if rule.DialogEnabled {
-		stored, e := s.Library.ListDialogsTx(ctx, q, a.PlayerID)
-		if e != nil {
-			return e
-		}
-		byID := map[int64]lib.DialogFact{}
-		for _, row := range stored {
-			if row.PartnerID == partnerID {
-				byID[row.DialogID] = row
-			}
-		}
-		ids := map[int64]bool{}
-		for _, id := range catalog.OpenDialogIDs(inputs.Facts.Favor, inputs.Facts.Married) {
-			ids[id] = true
-		}
-		for id := range byID {
-			if _, known := catalog.DialogConfigs[id]; known {
-				ids[id] = true
-			}
-		}
-		ordered := make([]int64, 0, len(ids))
-		for id := range ids {
-			ordered = append(ordered, id)
-		}
-		slices.Sort(ordered)
-		for _, id := range ordered {
-			row, ok := byID[id]
-			if !ok {
-				row = lib.DialogFact{PlayerID: a.PlayerID, PartnerID: partnerID, DialogID: id}
-			}
-			dialogs = append(dialogs, map[string]any{"dialog_id": row.DialogID, "is_read": bit(row.IsRead), "is_awarded": bit(row.IsAwarded), "select_id": row.SelectID})
+	stored, e := s.Library.ListDialogsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	*out = map[string]any{"partner_dialogs": projectPartnerDialogs(catalog, rule.DialogEnabled, inputs.Facts.Favor, inputs.Facts.Married, partnerID, stored)}
+	return nil
+}
+
+// projectPartnerDialogs is the one sorted view 836, 838 and the saved 840 reply
+// share: statically open catalog dialogs plus retained known rows, with the
+// stored read/award/select bits preserved. It writes nothing.
+func projectPartnerDialogs(catalog lib.Catalog, enabled bool, favor int64, married bool, partnerID int64, stored []lib.DialogFact) []DialogRow {
+	if !enabled {
+		return []DialogRow{}
+	}
+	byID := map[int64]lib.DialogFact{}
+	for _, row := range stored {
+		if row.PartnerID == partnerID {
+			byID[row.DialogID] = row
 		}
 	}
-	*out = map[string]any{"partner_dialogs": dialogs}
-	return nil
+	ids := map[int64]bool{}
+	for _, id := range catalog.OpenDialogIDs(favor, married) {
+		ids[id] = true
+	}
+	for id := range byID {
+		if _, known := catalog.DialogConfigs[id]; known {
+			ids[id] = true
+		}
+	}
+	ordered := make([]int64, 0, len(ids))
+	for id := range ids {
+		ordered = append(ordered, id)
+	}
+	slices.Sort(ordered)
+	dialogs := make([]DialogRow, 0, len(ordered))
+	for _, id := range ordered {
+		row, ok := byID[id]
+		if !ok {
+			row = lib.DialogFact{PartnerID: partnerID, DialogID: id}
+		}
+		dialogs = append(dialogs, DialogRow{DialogID: row.DialogID, IsRead: bit(row.IsRead), IsAwarded: bit(row.IsAwarded), SelectID: row.SelectID})
+	}
+	return dialogs
+}
+
+// projectPartnerActs returns the dense 4-slot act view the client indexes.
+func projectPartnerActs(partnerID int64, awards []lib.ActAwardFact) []ActSlot {
+	awarded := map[int64]bool{}
+	for _, award := range awards {
+		if award.PartnerID == partnerID {
+			awarded[award.ActID] = true
+		}
+	}
+	slots := make([]ActSlot, 0, lib.ActCount)
+	for id := int64(1); id <= lib.ActCount; id++ {
+		slots = append(slots, ActSlot{IsAwarded: bit(awarded[id])})
+	}
+	return slots
 }
 
 // TitleProgressTx is the marriage title progress (C6_SELECTED_COSMETIC_ORIGINS_V1):
