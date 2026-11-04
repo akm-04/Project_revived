@@ -377,6 +377,18 @@ SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetskill.lua', 'dddaa9ff58
 SOURCE_MANIFEST.append(('data/tables/event_centre_skillcost.lua', 'f224e7ab52da1cb0a1fd533e4c9fd4abba3590e9851ce8fac6fa7fb02b2df73a', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_conversion.lua', '44d50e00cb9865f7f2275e580cc69fac2149dca920572f4176c50160d6e07cac', 'I9_10A_ADMIN_CONVERSION_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('app/common/tables/ConversionTable.lua', '7d33a78f57d5e2bce884eb765f731e113b4ff1699e602e0da692322ddc9a259a', 'I9_10A_ADMIN_CONVERSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_mission.lua', '4d26b4850fd97f5f92cbc29f1c11d50cd53d54677dc4ec7cdb50346b80c5aed5', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_hero.lua', 'ac685ab80b40aeec36a7eb32c8801f4e5416e6be7a73e1eef06f2fbcb9b84b45', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_mission_award.lua', 'c3e04644e0b7b7a89ff090758f30c962c7f570cdadc95af38ddeb28d565ea9ca', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreProductionTable.lua', 'ec6fa4bafd34e7d81c7133b55f15eb68eb89297b1d8732fbf8f11d1e4318dc14', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreNoticeBoardTable.lua', 'c81e2fb5b566482b6279992d6c552350708ab9ed028f6965a1cd9a380df468c1', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreMissionTable.lua', 'bc0898bd3c0afc1053bb9f4412c12f090b57f384e37ca84cc2d1510ca6abfbb5', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreHeroTable.lua', 'a609785e971b0f0bd26f75ac527a49806699316853dff107f544b943c917c61e', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreMissionAwardTable.lua', '5b8c9a2eea610524dafa617575682225529aff25114fe62785a8e4ac9b3390b3', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentrePetRoomTable.lua', '11a83d174d7af3142e4b970bd874465ac278794e8e7824a26d3f7d026095ff14', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/PetRoomWindow.lua', '729e8c517847a568c2e500ca0eb1c6c39a58c893a04e5fb3081c5b8645642f2e', 'I9_10A_WORKSHOP_PET_SELECTION_CALLER'))
+SOURCE_MANIFEST.append(('app/windows/MakeAccelerateWindow.lua', '468cff690fcd39fdc26446b9d18d89679ac76a9d8f82a7ea89ac18985106863c', 'I9_10A_WORKSHOP_MISC_CONSUMER'))
+SOURCE_MANIFEST.append(('app/windows/RecycleWindow.lua', 'fb77a6d778ac0c72a7544180f56554971939c99335b007a6b1f8dbb5675bf0d6', 'I9_10A_WORKSHOP_MISC_CONSUMER'))
 
 
 SOURCE_MANIFEST.append(('app/common/tables/ObjectBookColorTable.lua', '07f54c2c629c0dab488d719641b61bd6c50deabffcfba93d918d07c153b248a6', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
