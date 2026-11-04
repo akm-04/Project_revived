@@ -15,7 +15,8 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 
 ## Fields
 - `mids` – registered stock HTTP MIDs, client names, and the handler `file:line`
-  (the dispatcher's `Dispatch` method); dispatcher files once per system.
+  (the dispatcher's `Dispatch` method); dispatcher files once per system. Registration
+  does not imply positive gameplay support: a route can deliberately refuse a legacy MID.
 - `pushes` – realtime S2C registrations attributable to the system.
 - `tables.owned` – tables whose ownership `owner` names this system.
 - `tables.read` / `tables.written` – tables in the SQL of this system's own package and of the
@@ -30,6 +31,11 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
   A store target is `store:<package>` unless `<x>store` names an application system `<x>`;
   `i4store`, `kernelstore`, `contentstore` and similar stay explicit store targets.
 - `composition` (in `EDGES.json`) – construction files that register the system's MIDs.
+- `contracts` – documents mentioning the system's MID numbers or touched table names,
+  matched lexically. A match is a reading lead, not a selected contract or proof of
+  applicability. It can include historical versions and miss a new stage contract
+  until that contract is published into `docs/i9`; consult the PassMap registry and
+  the active stage's contracts before changing behaviour.
 - `decorated_by` – registration wrappers such as `observing`.
 - `facts` – `emits` resolved through `go/types` constants (simple same-function assignments
   followed); `consumers` maps each emitted fact to mission task kinds, high-water kinds,
@@ -59,12 +65,15 @@ python3 tools/system_map.py --refresh-coverage <one-mid-per-line-file>
 The hooks in `tools/githooks` run `--write` and stage the result in every commit and merge commit; turn them on once per repo with `git config core.hooksPath tools/githooks`. `--check` in `tools/check.sh` is the backstop. If a merge conflicts inside the map, resolve it by running `--write`.
 `--check` fails on stale generated files, validates every generated path exists, checks the
 campaign/clientlog attribution anchors, and re-runs `trace` for MIDs 114, 161 and 338.
+Trace assertions match symbols, source paths and required tables; source line numbers
+remain navigation metadata and may move without changing a relationship.
 `show missions` aliases to `i5`: there is no `internal/application/missions` package.
 
 ## trace versus show
 `show <system>` is the generated, committed view: attribution, tables, stores, composition and
 cross-system call names. `trace <mid>` is computed live and is the right tool for "what does this
-request touch": from the registered dispatcher it follows the MID's branch, then the
+request touch": a system's own table list is not the complete cross-owner write set.
+From the registered dispatcher it follows the MID's branch, then the
 function-level call graph (each function once), printing `file:line`, SQL tables with read,
 write and `FOR UPDATE`/`FOR SHARE` (`conditional lock` when a branch appends the clause, so the
 caller's argument decides), objective fact kinds recorded, and push calls. A repeated function that

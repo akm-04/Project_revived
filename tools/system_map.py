@@ -109,6 +109,13 @@ def self_check():
     self_edge = [{"from": "x", "to": "x", "method": "FindTx", "via_port": False}]
     assert typed_calls(["x"], self_edge) == {"x": {}}
     assert json_text({"b": 1, "a": [2, 1]}) == '{\n "a": [\n  2,\n  1\n ],\n "b": 1\n}\n'
+    trace = "Service.SettleGrantTx internal/application/i5/service.go:240\n  sql: write mail_records"
+    anchors = ["Service.SettleGrantTx internal/application/i5/service.go:", "mail_records"]
+    assert missing_trace_anchors(trace, anchors) == []
+    assert missing_trace_anchors(trace.replace(":240", ":999"), anchors) == []
+    assert missing_trace_anchors(trace.replace("Service.SettleGrantTx", "Service.Other"), anchors) == anchors[:1]
+    assert missing_trace_anchors(trace.replace("application/i5/", "application/other/"), anchors) == anchors[:1]
+    assert missing_trace_anchors(trace.replace("mail_records", "other_table"), anchors) == anchors[1:]
 
 
 def read_text(path):
@@ -1326,30 +1333,34 @@ def validate_generated(files):
 
 TRACE_ANCHORS = {
     114: [
-        "internal/application/campaign/mode.go:858",
-        "SettleGrantTx internal/application/i5/service.go:237",
+        "Mode.Result internal/application/campaign/mode.go:",
+        "Service.SettleGrantTx internal/application/i5/service.go:",
         "mail_records",
         "player_item_stacks",
     ],
     161: [
-        "MaterializeTx internal/application/i5/missions.go:63",
-        "LockMissionRootTx internal/adapters/postgres/i5store/missions.go:14",
+        "MissionMaterializer.MaterializeTx internal/application/i5/missions.go:",
+        "Store.LockMissionRootTx internal/adapters/postgres/i5store/missions.go:",
         "player_mission_roots",
         "FOR UPDATE",
     ],
     338: [
-        "Mode.Result internal/application/march/settle.go:21",
-        "AttestReportTx internal/application/combat/service.go:633",
+        "Mode.Result internal/application/march/settle.go:",
+        "Service.AttestReportTx internal/application/combat/service.go:",
     ],
 }
+
+
+def missing_trace_anchors(output, anchors):
+    return [anchor for anchor in anchors if anchor not in output]
 
 
 def validate_trace_anchors():
     for mid, anchors in sorted(TRACE_ANCHORS.items()):
         output = helper_trace(mid)
-        for anchor in anchors:
-            if anchor not in output:
-                raise SystemExit("trace %d is missing %s" % (mid, anchor))
+        missing = missing_trace_anchors(output, anchors)
+        if missing:
+            raise SystemExit("trace %d is missing %s" % (mid, missing[0]))
 
 
 def write_output(files):
