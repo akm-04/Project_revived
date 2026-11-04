@@ -3,6 +3,8 @@
 package playerdisplay_test
 
 import (
+	"context"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -205,6 +207,106 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(1)}, op())
 	if response.HTTPStatus != 400 {
 		t.Fatalf("missing model status %d body %+v", response.HTTPStatus, response.Body)
+	}
+}
+
+func TestI9_10B835BoardCardModelSource(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	expect := func(a identity.ActorContext, service app.Service, partner, card, model int64, status int) {
+		t.Helper()
+		response := libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": partner, "card_status": card, "board_model_id": model}, op())
+		if response.HTTPStatus != status {
+			t.Fatalf("board partner %d card %d model %d status %d body %+v", partner, card, model, response.HTTPStatus, response.Body)
+		}
+	}
+
+	base := bornActor(t, p)
+	bornHero(t, p, base, rev, 10001001, 1)
+	baseService := libraryP5Service(p)
+	expect(base, baseService, 1, 1, 10001001, 200)
+	expect(base, baseService, 1, 1, 10001002, 409)
+	expect(base, baseService, 1, 3, 11001001, 409)
+
+	transformed := bornActor(t, p)
+	bornHeroCard(t, p, transformed, rev, 11001001, 10001001, 1)
+	transformedService := libraryP5Service(p)
+	expect(transformed, transformedService, 1, 1, 10001001, 200)
+	expect(transformed, transformedService, 1, 1, 11001001, 409)
+	expect(transformed, transformedService, 1, 3, 11001001, 200)
+	expect(transformed, transformedService, 1, 3, 10001001, 409)
+
+	// 10001042 has an awake target row but raw awaken 0, so the awake card is closed.
+	noAwaken := bornActor(t, p)
+	bornHeroCard(t, p, noAwaken, rev, 11001042, 10001042, 1)
+	expect(noAwaken, libraryP5Service(p), 1, 3, 11001042, 409)
+
+	super := bornActor(t, p)
+	bornHero(t, p, super, rev, 11001, 1)
+	superService := libraryP5Service(p)
+	expect(super, superService, 1, 1, 11001, 200)
+	expect(super, superService, 1, 3, 11001, 409)
+	expect(super, superService, 1, 1, 11002, 409)
+}
+
+type metadataLessLibraryContent struct{ app.ContentPort }
+
+func (m metadataLessLibraryContent) LibraryCatalogTx(ctx context.Context, q tx.Queryer, revision string) (lib.Catalog, error) {
+	catalog, e := m.ContentPort.LibraryCatalogTx(ctx, q, revision)
+	if e != nil {
+		return catalog, e
+	}
+	for tableID, template := range catalog.Templates {
+		template.ModelID, template.AwakenTableID, template.Awaken = 0, 0, 0
+		catalog.Templates[tableID] = template
+	}
+	return catalog, nil
+}
+
+func TestI9_10B835BoardReceiptSurvivesMissingCardMetadata(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	bornHero(t, p, a, rev, 10001001, 1)
+	service := libraryFactService(p)
+	command := map[string]any{"partner_id": int64(1), "card_status": int64(1), "board_model_id": int64(10001001)}
+
+	setOperation := op()
+	first := libraryDispatchService(t, a, service, 835, command, setOperation)
+	if first.HTTPStatus != 200 || first.Body["board_partner"] != int64(1) || first.Body["board_card"] != int64(1) || first.Body["board_model_id"] != int64(10001001) {
+		t.Fatalf("set status %d body %+v", first.HTTPStatus, first.Body)
+	}
+
+	service.Content = metadataLessLibraryContent{ContentPort: service.Content}
+	replay := libraryDispatchService(t, a, service, 835, command, setOperation)
+	if replay.HTTPStatus != 200 || !reflect.DeepEqual(first.Body, replay.Body) {
+		t.Fatalf("replay status %d body %+v want %+v", replay.HTTPStatus, replay.Body, first.Body)
+	}
+
+	failed := libraryDispatchService(t, a, service, 835, command, op())
+	if failed.HTTPStatus != 409 || failed.Body["error_code"] != int64(1) {
+		t.Fatalf("missing metadata mutation status %d body %+v", failed.HTTPStatus, failed.Body)
+	}
+	root, e := (librarystore.Store{}).ReadRootTx(ctx, p, a.PlayerID)
+	if e != nil || root.BoardPartner != 1 || root.BoardCard != 1 || root.BoardModelID != 10001001 {
+		t.Fatalf("stored board after refusal %+v %v", root, e)
+	}
+
+	read := libraryDispatchService(t, a, service, 836, nil, op())
+	if read.HTTPStatus != 200 || read.Body["library_infos"] == nil || read.Body["library_talk_infos"] == nil {
+		t.Fatalf("836 with old metadata status %d body %+v", read.HTTPStatus, read.Body)
+	}
+
+	exec(t, p, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,50005011,1,1,clock_timestamp()-interval '1 hour',clock_timestamp()-interval '1 hour') ON CONFLICT(player_id,item_id) DO UPDATE SET quantity=1,updated_at=clock_timestamp()-interval '1 hour'`, int64(a.PlayerID))
+	gift := libraryDispatchService(t, a, service, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, op())
+	if gift.HTTPStatus != 200 {
+		t.Fatalf("840 with old metadata status %d body %+v", gift.HTTPStatus, gift.Body)
+	}
+
+	setLibraryFavor(t, p, a, 1, 100)
+	talk := libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "0|203001"}, op())
+	if talk.HTTPStatus != 200 {
+		t.Fatalf("843 with old metadata status %d body %+v", talk.HTTPStatus, talk.Body)
 	}
 }
 

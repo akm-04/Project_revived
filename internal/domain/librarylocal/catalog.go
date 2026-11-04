@@ -8,6 +8,9 @@ type TemplateRule struct {
 	DialogEnabled        bool  `json:"dialog_enabled"`
 	GiftLikeType         int64 `json:"gift_like_type"`
 	GiftDislikeType      int64 `json:"gift_dislike_type"`
+	ModelID              int64 `json:"model_id"`
+	AwakenTableID        int64 `json:"awaken_table_id"`
+	Awaken               int64 `json:"awaken"`
 }
 type GiftRule struct {
 	ItemID       int64 `json:"item_id"`

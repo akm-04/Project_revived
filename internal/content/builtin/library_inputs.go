@@ -32,7 +32,7 @@ func (c LibraryInputCatalog) Validate() error {
 	}
 	seen := map[int64]bool{}
 	for _, r := range c.Templates {
-		if r.TableID <= 0 || r.RelationshipSourceID <= 0 || r.CollectionSourceID <= 0 || seen[r.TableID] {
+		if r.TableID <= 0 || r.RelationshipSourceID <= 0 || r.CollectionSourceID <= 0 || seen[r.TableID] || r.ModelID < 0 || r.AwakenTableID < 0 || (r.Awaken != 0 && r.Awaken != 1) {
 			return errLibraryInput
 		}
 		seen[r.TableID] = true
@@ -110,6 +110,9 @@ type LibraryTemplateRule struct {
 	DialogEnabled        bool  `json:"dialog_enabled"`
 	GiftLikeType         int64 `json:"gift_like_type"`
 	GiftDislikeType      int64 `json:"gift_dislike_type"`
+	ModelID              int64 `json:"model_id"`
+	AwakenTableID        int64 `json:"awaken_table_id"`
+	Awaken               int64 `json:"awaken"`
 }
 type LibraryGiftRule struct {
 	ItemID       int64 `json:"item_id"`

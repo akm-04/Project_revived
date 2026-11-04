@@ -70,6 +70,31 @@ class ExactArchiveTests(unittest.TestCase):
         for name, value in a.items():
             self.assertEqual(output.joinpath(name).read_bytes(), gen.canonical_json_bytes(value), name)
 
+    @unittest.skipUnless(os.environ.get("GXB_R4A_SOURCE_ARCHIVE"), "exact source archive not supplied")
+    def test_library_template_card_metadata_is_parsed_from_source(self) -> None:
+        a = gen.compile_archive(Path(os.environ["GXB_R4A_SOURCE_ARCHIVE"]))
+        templates = {row["table_id"]: row for row in a["library_input_catalog.json"]["templates"]}
+        self.assertEqual(len(templates), 568)
+        self.assertEqual(
+            (templates[10001001]["model_id"], templates[10001001]["awaken"], templates[10001001]["awaken_table_id"]),
+            (10001001, 1, 11001001),
+        )
+        self.assertEqual(
+            (templates[11001001]["model_id"], templates[11001001]["awaken"], templates[11001001]["awaken_table_id"]),
+            (11001001, 1, 0),
+        )
+        self.assertEqual(
+            (templates[10001042]["model_id"], templates[10001042]["awaken"], templates[10001042]["awaken_table_id"]),
+            (10001042, 0, 11001042),
+        )
+        for table_id in range(11001, 11015):
+            row = templates[table_id]
+            self.assertEqual((row["model_id"], row["awaken"], row["awaken_table_id"]), (table_id, 0, 0))
+        for row in templates.values():
+            self.assertGreater(row["model_id"], 0)
+            self.assertIn(row["awaken"], (0, 1))
+            self.assertGreaterEqual(row["awaken_table_id"], 0)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

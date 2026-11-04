@@ -625,7 +625,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if e != nil {
 				return e
 			}
-			next, e := s.boardTx(ctx, sc.Tx, a, d, h, root)
+			next, e := s.boardTx(ctx, sc.Tx, a, d, h, catalog, root)
 			if e != nil {
 				return e
 			}

@@ -11,13 +11,29 @@ import (
 
 // boardTx validates the selected card and model against the actor's Hero and
 // skin ownership, then stores the board selection on the player root.
-func (s Service) boardTx(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, hero character.Hero, root lib.PlayerFacts) (lib.PlayerFacts, error) {
+func (s Service) boardTx(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, hero character.Hero, catalog lib.Catalog, root lib.PlayerFacts) (lib.PlayerFacts, error) {
 	card, model := d.Command.Value, d.Command.SelectID
 	if hero.PlayerID != a.PlayerID || hero.PartnerID != d.Command.PartnerID {
 		return root, lib.ErrUnqualified
 	}
-	if card == lib.CardAwake && hero.TableID == hero.OriginTableID {
-		return root, lib.ErrUnqualified
+	if card == lib.CardNormal {
+		template, ok := catalog.Templates[hero.OriginTableID]
+		if !ok || template.ModelID <= 0 || template.ModelID != model {
+			return root, lib.ErrUnqualified
+		}
+	}
+	if card == lib.CardAwake {
+		if hero.TableID == hero.OriginTableID {
+			return root, lib.ErrUnqualified
+		}
+		origin, ok := catalog.Templates[hero.OriginTableID]
+		if !ok || origin.Awaken != 1 || origin.AwakenTableID <= 0 || hero.TableID != origin.AwakenTableID {
+			return root, lib.ErrUnqualified
+		}
+		target, ok := catalog.Templates[origin.AwakenTableID]
+		if !ok || target.ModelID <= 0 || target.ModelID != model {
+			return root, lib.ErrUnqualified
+		}
 	}
 	if card == lib.CardSkin {
 		if s.Skins == nil {

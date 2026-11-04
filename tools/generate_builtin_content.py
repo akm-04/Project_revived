@@ -2328,6 +2328,10 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         values=rows[table_id]
         def field(name): return indexed_field(keys,values,name,row_id=table_id) or "0"
         first=int(field("first_table_id"))
+        model_id=int(field("modelid"))
+        awaken_table_id=int(field("awaken_table_id"))
+        awaken=int(field("awaken"))
+        if model_id<=0 or awaken not in (0,1): raise CompileError(f"Library card source shape {table_id}")
         relationship_id=first if first>0 else table_id
         origin_values=rows.get(relationship_id)
         if origin_values is None: raise CompileError("Library relationship source row absent")
@@ -2335,7 +2339,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         dislike=int(indexed_field(keys,origin_values,"gift_dislike_type",row_id=relationship_id) or "0")
         enabled=int(field("is_open_dialog"))
         if enabled not in [0,1]: raise CompileError("Library dialog eligibility shape")
-        library_templates.append(dict(table_id=table_id,relationship_source_id=relationship_id,collection_source_id=core["origin_table_id"] if core["hero_kind"]=="NORMAL" else table_id,dialog_enabled=bool(enabled),gift_like_type=like,gift_dislike_type=dislike))
+        library_templates.append(dict(table_id=table_id,relationship_source_id=relationship_id,collection_source_id=core["origin_table_id"] if core["hero_kind"]=="NORMAL" else table_id,dialog_enabled=bool(enabled),gift_like_type=like,gift_dislike_type=dislike,model_id=model_id,awaken_table_id=awaken_table_id,awaken=awaken))
     items_by_id={int(x["id"]):x for x in items}
     library_gifts=[]
     for row in parse_generated_lua_table(blobs["data/tables/library_gift.lua"].data):

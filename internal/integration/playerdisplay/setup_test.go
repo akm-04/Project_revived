@@ -127,8 +127,13 @@ func born(t *testing.T, p *pg.Pool, persist func(context.Context, *pg.Pool, ids.
 // actual API roster reads them.
 func bornHero(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string, table int64, partner int64) character.Hero {
 	t.Helper()
+	return bornHeroCard(t, p, a, rev, table, table, partner)
+}
+
+func bornHeroCard(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string, table, origin, partner int64) character.Hero {
+	t.Helper()
 	at := time.Now().UTC().Add(-time.Hour)
-	h := character.Hero{PlayerID: a.PlayerID, PartnerID: partner, TableID: table, OriginTableID: table, Star: 5, Level: 1, Color: 1, CreationContentRevision: rev, RawSkills: character.NewHeroRawSkillSeed(), IllusionSkinID: character.DefaultIllusionSkinID, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
+	h := character.Hero{PlayerID: a.PlayerID, PartnerID: partner, TableID: table, OriginTableID: origin, Star: 5, Level: 1, Color: 1, CreationContentRevision: rev, RawSkills: character.NewHeroRawSkillSeed(), IllusionSkinID: character.DefaultIllusionSkinID, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 	tr, e := p.Begin(ctx, tx.Options{})
 	if e != nil {
 		t.Fatal(e)
