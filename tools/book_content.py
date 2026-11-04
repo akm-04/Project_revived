@@ -6,16 +6,20 @@ def build_book(blobs,parse,items):
  def vec(s):return [int(x)for x in s.split('|')if x and x!='0']
  def costs(ids,nums):
   out={};pages=0
-  a=[int(x)for x in ids.split('|')];b=[int(x)for x in nums.split('|')];assert len(a)==len(b)
+  a=[int(x)for x in ids.split('|')];b=[int(x)for x in nums.split('|')]
+  if b==[0]:return out,pages
+  assert len(a)==len(b)
   for rid,num in zip(a,b):
    if num==0:continue
    assert num>0
    if rid==-1:pages+=num
    else:out[RESOURCE_KEYS[rid]]=out.get(RESOURCE_KEYS[rid],0)+num
   return out,pages
- buildings=[]
- for name,typ in [('cabinet',1),('recycle',3),('bookshelf',4)]:
+ buildings=[];buildingKeys=set()
+ for name,typ in [('cabinet',1),('table',2),('recycle',3),('bookshelf',4),('administrator',5),('notice_board',6),('pet_table',7)]:
   for r in rows(name):
+   key=(typ,int(r['id']));assert key not in buildingKeys
+   buildingKeys.add(key)
    cost,page=costs(r['resources_id'],r['resources_num']);assert page==0
    attr=r.get('attribute','0|0|0').split('|');assert len(attr)==3
    buildings.append(dict(Type=typ,Level=int(r['id']),Duration=int(r['time']),RequiresType=int(r.get('type_request',r.get('function_request','0'))),RequiresLevel=int(r['function_request_level']),CutTime=int(r.get('cut_time','0')),UpperLimit=int(r.get('upper_limit','0')),Resources=cost,Attributes=attr))
@@ -40,4 +44,4 @@ def build_book(blobs,parse,items):
   for cls in range(1,5):
    costs0,page=costs(r['cost_res_type'+str(cls)],r['cost_res_num'+str(cls)])
    costrows.append(dict(Level=int(r['id']),Class=cls,Resources=costs0,Pages=page))
- return dict(schema_version=1,recipe_policy_id='C2D_FRAGMENT_RECIPES_V1',policy_id='C2D_V1_BUILDING_SEEDS_AND_JOB_REFUNDS_V1',buildings=buildings,books=books,skills=skills,costs=costrows)
+ return dict(schema_version=2,recipe_policy_id='C2D_FRAGMENT_RECIPES_V1',policy_id='C2D_V1_BUILDING_SEEDS_AND_JOB_REFUNDS_V1',buildings=buildings,books=books,skills=skills,costs=costrows)
