@@ -302,6 +302,63 @@ func TestI7C5BTopFloorReconcileAbandonedNative(t *testing.T) {
 	}
 }
 
+// A retried START while the resolver withholds the result replays the original
+// admission: same attempt, one ticket, then one settlement when it resolves.
+func TestI9_10TopFloorPendingStartReplayNative(t *testing.T) {
+	pool := pool(t)
+	defer pool.Close()
+	s := topFloorService(t, pool)
+	server := rankingServer(t, pool)
+	a, _, ref := topFloorPlayer(t, pool, server)
+	view, err := s.Load(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	command := app.StartCommand{Formation: []int64{ref.PartnerID}, Enemy: view.Enemies[0].Occupant.TableID()}
+	stalled := s
+	stalled.Combat = stalledCombat{s.Combat}
+	tickets := func() int64 {
+		return scalar(t, pool, `SELECT tickets_left FROM top_floor_players WHERE player_id=$1`, int64(a.PlayerID))
+	}
+	latest := func() d.Fight {
+		fight, found, readErr := (topfloorstore.Store{}).LatestFightTx(ctx, pool, a.PlayerID)
+		if readErr != nil || !found {
+			t.Fatalf("latest fight found=%v err=%v", found, readErr)
+		}
+		return fight
+	}
+	first, err := stalled.Start(ctx, a, command, op())
+	if err != nil || first.Report != nil {
+		t.Fatalf("pending START report=%v err=%v", first.Report, err)
+	}
+	pending := latest()
+	if pending.Status != d.StatusStarted || tickets() != 4 {
+		t.Fatalf("first admission status=%s tickets=%d", pending.Status, tickets())
+	}
+	second, err := stalled.Start(ctx, a, command, op())
+	if err != nil || second.Report != nil {
+		t.Fatalf("pending retry report=%v err=%v", second.Report, err)
+	}
+	replayed := latest()
+	if replayed.AttemptID != pending.AttemptID || replayed.Status != d.StatusStarted || tickets() != 4 {
+		t.Fatalf("retry attempt=%s want=%s status=%s tickets=%d", replayed.AttemptID, pending.AttemptID, replayed.Status, tickets())
+	}
+	if scalar(t, pool, `SELECT count(*) FROM top_floor_fights WHERE challenger_id=$1`, int64(a.PlayerID)) != 1 {
+		t.Fatal("retry admitted a second fight")
+	}
+	resolved, err := s.Start(ctx, a, command, op())
+	if err != nil || resolved.Report == nil {
+		t.Fatalf("resolved retry report=%v err=%v", resolved.Report, err)
+	}
+	settled := latest()
+	if settled.AttemptID != pending.AttemptID || settled.Status != d.StatusSettled || tickets() != 4 {
+		t.Fatalf("settled attempt=%s want=%s status=%s tickets=%d", settled.AttemptID, pending.AttemptID, settled.Status, tickets())
+	}
+	if scalar(t, pool, `SELECT count(*) FROM top_floor_records WHERE owner_player_id=$1`, int64(a.PlayerID)) != 1 {
+		t.Fatal("retry settled a second record")
+	}
+}
+
 func formValue(t *testing.T, row map[string]any, key string) int64 {
 	t.Helper()
 	switch value := row[key].(type) {
@@ -492,8 +549,11 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	if formValue(t, ownRow, "table_id") != int64(actor.PlayerID)%d.RegionStride || formValue(t, ownRow, "rank") != selfRank || formValue(t, ownRow, "win") != self.Player.Wins {
 		t.Fatalf("player projection %+v", ownRow)
 	}
-	if formValue(t, ownRow, "force") != own.Force {
-		t.Fatalf("player force %d want %d", formValue(t, ownRow, "force"), own.Force)
+	// The returned hero rows carry no qualified force, so teamForce yields exactly
+	// zero; this is not a power proof (the client-side getZhandouli power is
+	// proven only by the stock scenario).
+	if formValue(t, ownRow, "force") != 0 {
+		t.Fatalf("player force %d, want the exact unqualified 0", formValue(t, ownRow, "force"))
 	}
 	ownHeroes, ok := ownRow["heros"].([]map[string]any)
 	if !ok || len(ownHeroes) != 1 {
@@ -697,6 +757,47 @@ func TestI9_10TopFloorInvalidTaskDefensePropagatesNative(t *testing.T) {
 	}
 	invalidPlayer := catalog.NewPlayer(invalid.PlayerID, server, revision, d.RobotTeams+2, clock.at)
 	invalidPlayer.Defense = []int64{invalidHero.PartnerID, summoned.Ref().PartnerID}
+	invalidTaskPlayer := d.TaskModePlayer{Player: invalidPlayer, PeriodNumber: period.Rotation.Number}
+	rule, found := catalog.TaskModes.Rule(view.Rotation.Mode)
+	if !found {
+		t.Fatal("rotation rule")
+	}
+	firstHero, err := (characterstore.Store{}).ReadHeroByPartnerIDTx(ctx, database, invalid.PlayerID, invalidHero.PartnerID)
+	if err != nil {
+		t.Fatal("first invalid-defense hero", err)
+	}
+	fixtureHeroes := []character.Hero{firstHero, summoned}
+	fixtureParts := make([]int64, 0, len(fixtureHeroes))
+	fixtureTables := make([]int64, 0, len(fixtureHeroes))
+	for _, hero := range fixtureHeroes {
+		camp, known := catalog.TaskModes.HeroCamps[hero.TableID]
+		if !known || camp < 1 || camp > 4 {
+			t.Fatalf("fixture hero %d has no known 1..4 source camp (camp=%d known=%v)", hero.TableID, camp, known)
+		}
+		if slices.Contains(rule.BannedTables, hero.TableID) {
+			t.Fatalf("fixture hero %d is banned in the selected rotation", hero.TableID)
+		}
+		fixtureParts = append(fixtureParts, hero.PartnerID)
+		fixtureTables = append(fixtureTables, hero.TableID)
+	}
+	if !slices.Equal(invalidPlayer.Defense, fixtureParts) {
+		t.Fatalf("invalid defense %v differs from fixture %v", invalidPlayer.Defense, fixtureParts)
+	}
+	formation, err := catalog.TaskModes.Heroes(fixtureParts, fixtureTables)
+	if err != nil {
+		t.Fatal("fixture formation", err)
+	}
+	if rule.LeaderAllowed {
+		invalidTaskPlayer.Leader = firstHero.PartnerID
+	}
+	widened := rule
+	widened.HeroSlots = len(formation)
+	if err = widened.ValidateFormation(formation, invalidPlayer.DefensePet, invalidTaskPlayer.Leader, view.Rotation.Submode); err != nil {
+		t.Fatalf("fixture heroes violate a non-slot constraint: %v", err)
+	}
+	if len(invalidPlayer.Defense) <= rule.HeroSlots {
+		t.Fatalf("invalid defense %d does not overflow rule slots %d", len(invalidPlayer.Defense), rule.HeroSlots)
+	}
 	probes := catalog.OfferRanks(server, actor.PlayerID, selfRank, self.Player.TicketDay, self.Player.RefreshCount)
 	if len(probes) == 0 || len(probes[0]) == 0 {
 		t.Fatal("no offer probe")
@@ -710,7 +811,7 @@ func TestI9_10TopFloorInvalidTaskDefensePropagatesNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = store.InsertTaskPlayerTx(ctx, transaction, d.TaskModePlayer{Player: invalidPlayer, PeriodNumber: period.Rotation.Number}, period); err != nil {
+	if err = store.InsertTaskPlayerTx(ctx, transaction, invalidTaskPlayer, period); err != nil {
 		t.Fatal("insert invalid-defense task player", err)
 	}
 	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, d.RobotTeams+2, invalid.PlayerID); err != nil {
