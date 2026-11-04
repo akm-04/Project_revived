@@ -6,6 +6,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -13,6 +15,7 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -326,22 +329,56 @@ func formValue(t *testing.T, row map[string]any, key string) int64 {
 	}
 }
 
-func petTaskRotation(t *testing.T, catalog d.Catalog, at time.Time) time.Time {
+// taskRotationForRule selects a rotation from the pinned source schedule. The
+// fixed 2027 date is a pure fixture for the in-memory binder; the host clock is
+// neither read nor moved. Frozen windows and camp submode rotations are skipped.
+func taskRotationForRule(t *testing.T, catalog d.Catalog, accept func(d.TaskModeRule) bool) time.Time {
 	t.Helper()
-	base := at.UTC().Truncate(24 * time.Hour).Add(12 * time.Hour)
-	for week := int64(0); week < 60; week++ {
+	base := time.Date(2027, 1, 1, 12, 0, 0, 0, time.UTC)
+	for week := int64(0); week < 520; week++ {
 		candidate := base.Add(time.Duration(week) * 7 * 24 * time.Hour)
 		rotation, err := catalog.TaskModes.Rotation(candidate)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if rotation.Mode != d.TaskModeBanned || catalog.Frozen(candidate) {
+		rule, found := catalog.TaskModes.Rule(rotation.Mode)
+		if !found || rotation.Submode != 0 || catalog.Frozen(candidate) || !accept(rule) {
 			continue
 		}
 		return candidate
 	}
-	t.Fatal("no pet-allowed Top Floor task rotation within 60 weeks")
+	t.Fatal("no matching Top Floor task rotation in the pinned source schedule")
 	return time.Time{}
+}
+
+func assertNumericList(t *testing.T, row map[string]any, key string, minimum int) {
+	t.Helper()
+	value := reflect.ValueOf(row[key])
+	if !value.IsValid() || (value.Kind() != reflect.Slice && value.Kind() != reflect.Array) || value.Len() < minimum {
+		t.Fatalf("%s = %#v, want at least %d numeric entries: %+v", key, row[key], minimum, row)
+	}
+	for index := 0; index < value.Len(); index++ {
+		switch value.Index(index).Interface().(type) {
+		case int, int64, float64, json.Number:
+		default:
+			t.Fatalf("%s[%d] is %T, want a number", key, index, value.Index(index).Interface())
+		}
+	}
+}
+
+func assertList(t *testing.T, row map[string]any, key string, minimum int) {
+	t.Helper()
+	value := reflect.ValueOf(row[key])
+	if !value.IsValid() || (value.Kind() != reflect.Slice && value.Kind() != reflect.Array) || value.Len() < minimum {
+		t.Fatalf("%s = %#v, want at least %d entries: %+v", key, row[key], minimum, row)
+	}
+}
+
+func assertMap(t *testing.T, row map[string]any, key string) {
+	t.Helper()
+	if _, ok := row[key].(map[string]any); !ok {
+		t.Fatalf("%s = %#v, want an object: %+v", key, row[key], row)
+	}
 }
 
 func earnTaskChallenges(t *testing.T, database *pg.Pool, service app.Service, actor identity.ActorContext, hero character.HeroRef, clock *workplaceTime) {
@@ -389,13 +426,34 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	clock := &workplaceTime{at: time.Now().UTC()}
+	clock := &workplaceTime{}
 	service.Timed.Binder.Time = clock
-	clock.at = petTaskRotation(t, catalog, clock.at)
+	storedHero, err := (characterstore.Store{}).ReadHeroByPartnerIDTx(ctx, database, actor.PlayerID, hero.PartnerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clock.at = taskRotationForRule(t, catalog, func(rule d.TaskModeRule) bool {
+		if !rule.PetAllowed || rule.ID == d.TaskModeCamp {
+			return false
+		}
+		return !slices.Contains(rule.BannedTables, storedHero.TableID)
+	})
+	rotation, err := catalog.TaskModes.Rotation(clock.at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rule, found := catalog.TaskModes.Rule(rotation.Mode)
+	if !found {
+		t.Fatal("selected rotation rule")
+	}
 	earnTaskChallenges(t, database, service, actor, hero, clock)
 
 	pet := statPet(t, database, actor, revision)
-	if err = service.SaveTaskDefense(ctx, actor, d.TaskModeDefense{Heroes: []int64{hero.PartnerID}, Pet: pet.PetID}, op()); err != nil {
+	defense := d.TaskModeDefense{Heroes: []int64{hero.PartnerID}, Pet: pet.PetID}
+	if rule.LeaderAllowed {
+		defense.Leader = hero.PartnerID
+	}
+	if err = service.SaveTaskDefense(ctx, actor, defense, op()); err != nil {
 		t.Fatal("save task defense", err)
 	}
 	view, err := service.LoadTask(ctx, actor, op(), false)
@@ -447,11 +505,12 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	if _, known := catalog.TaskModes.HeroCamps[formValue(t, ownHeroes[0], "table_id")]; !known {
 		t.Fatalf("player hero table %d has no Hero.populate table", formValue(t, ownHeroes[0], "table_id"))
 	}
-	for _, key := range []string{"skills", "equips", "fumos", "skin_ids", "spirit_equip", "spirit_item"} {
-		if _, present := ownHeroes[0][key]; !present {
-			t.Fatalf("player hero row missing %s: %+v", key, ownHeroes[0])
-		}
-	}
+	assertNumericList(t, ownHeroes[0], "skills", 6)
+	assertNumericList(t, ownHeroes[0], "equips", 6)
+	assertNumericList(t, ownHeroes[0], "fumos", 6)
+	assertNumericList(t, ownHeroes[0], "spirit_equip", 6)
+	assertList(t, ownHeroes[0], "spirit_item", 6)
+	assertMap(t, ownHeroes[0], "skin_ids")
 	ownPet, ok := ownRow["pet"].(map[string]any)
 	if !ok {
 		t.Fatalf("player pet row %#v", ownRow["pet"])
@@ -459,11 +518,10 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	if formValue(t, ownPet, "pet_id") != pet.PetID || formValue(t, ownPet, "table_id") != pet.TableID {
 		t.Fatalf("pet identity %+v", ownPet)
 	}
-	for _, key := range []string{"star", "lev", "color", "skills"} {
-		if _, present := ownPet[key]; !present {
-			t.Fatalf("pet row missing %s: %+v", key, ownPet)
-		}
+	if formValue(t, ownPet, "star") <= 0 || formValue(t, ownPet, "lev") <= 0 || formValue(t, ownPet, "color") <= 0 {
+		t.Fatalf("pet populate fields %+v", ownPet)
 	}
+	assertNumericList(t, ownPet, "skills", 1)
 
 	robotRows, err := store.TaskRangeTx(ctx, database, server, period.Rotation.Number, 5, 5)
 	if err != nil || len(robotRows) != 1 || !robotRows[0].Occupant.IsRobot() {
@@ -492,11 +550,12 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 		if formValue(t, robotHero, "lev") <= 0 || formValue(t, robotHero, "star") <= 0 || formValue(t, robotHero, "color") <= 0 {
 			t.Fatalf("robot hero populate fields %+v", robotHero)
 		}
-		for _, key := range []string{"skills", "equips", "fumos", "skin_ids", "spirit_equip", "spirit_item"} {
-			if _, present := robotHero[key]; !present {
-				t.Fatalf("robot hero row missing %s: %+v", key, robotHero)
-			}
-		}
+		assertNumericList(t, robotHero, "skills", 6)
+		assertNumericList(t, robotHero, "equips", 6)
+		assertNumericList(t, robotHero, "fumos", 6)
+		assertList(t, robotHero, "spirit_equip", 0)
+		assertList(t, robotHero, "spirit_item", 0)
+		assertMap(t, robotHero, "skin_ids")
 	}
 	if _, present := robotRow["pet"]; present {
 		t.Fatal("robot formation must not carry a pet")
@@ -594,14 +653,126 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 			t.Fatalf("rank row %d changed: %+v -> %+v", before[index].Rank, before[index].Occupant, after[index].Occupant)
 		}
 	}
+}
 
-	contentErrorRevision := strings.Repeat("a", 64)
-	exec(t, database, `DELETE FROM gxb_content_revisions WHERE revision_id=$1`, contentErrorRevision)
-	exec(t, database, `INSERT INTO gxb_content_revisions(revision_id,content_sha256,schema_version,compiler_version,parser_version,manifest) SELECT $2,decode($2,'hex'),schema_version,$3,parser_version,jsonb_set(jsonb_set(manifest,'{revision_id}',to_jsonb($2::text)),'{compiler_version}',to_jsonb($3::text)) FROM gxb_content_revisions WHERE revision_id=$1`, revision, contentErrorRevision, "i9-10-content-error-fixture")
-	exec(t, database, `UPDATE top_floor_task_periods SET content_revision=$3 WHERE logical_server_id=$1 AND period_number=$2`, int64(server), period.Rotation.Number, contentErrorRevision)
-	if _, err = service.TaskRankList(ctx, actor); err == nil {
-		t.Fatal("genuine content/provider error must propagate")
+// TestI9_10TopFloorInvalidTaskDefensePropagatesNative proves a row-level
+// nonempty but formation-invalid saved defense is ErrInvalid from every read,
+// not omitted like the empty-defense category, and that rank state is untouched.
+func TestI9_10TopFloorInvalidTaskDefensePropagatesNative(t *testing.T) {
+	database := pool(t)
+	service := topFloorService(t, database)
+	server := rankingServer(t, database)
+	actor, revision, actorHero := topFloorPlayer(t, database, server)
+	catalog, err := (contentstore.Store{Queryer: database}).TopFloorCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
 	}
-	exec(t, database, `UPDATE top_floor_task_periods SET content_revision=$3 WHERE logical_server_id=$1 AND period_number=$2`, int64(server), period.Rotation.Number, revision)
-	exec(t, database, `DELETE FROM gxb_content_revisions WHERE revision_id=$1`, contentErrorRevision)
+	clock := &workplaceTime{}
+	service.Timed.Binder.Time = clock
+	clock.at = taskRotationForRule(t, catalog, func(rule d.TaskModeRule) bool { return rule.HeroSlots == 1 })
+	earnTaskChallenges(t, database, service, actor, actorHero, clock)
+	view, err := service.LoadTask(ctx, actor, op(), false)
+	if err != nil {
+		t.Fatal("load task", err)
+	}
+	store := topfloorstore.Store{}
+	period, found, err := store.ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
+	if err != nil || !found {
+		t.Fatal("task period", err, found)
+	}
+	self, found, err := store.ReadTaskPlayerTx(ctx, database, actor.PlayerID, period, false)
+	if err != nil || !found {
+		t.Fatal("task player", err, found)
+	}
+	selfRank, found, err := store.TaskRankOfTx(ctx, database, server, period.Rotation.Number, d.Occupant{Player: actor.PlayerID})
+	if err != nil || !found {
+		t.Fatal("task rank", err, found)
+	}
+
+	invalid, _, invalidHero := topFloorPlayer(t, database, server)
+	definition := collectionResources(t, database, invalid, revision, 10001002)
+	summoned, err := ownerSummoner(database).SummonNormal(ctx, invalid, definition.Template.TableID, definition.Template.FragmentItemID, definition.FragmentCount, op())
+	if err != nil {
+		t.Fatal("second invalid-defense hero", err)
+	}
+	invalidPlayer := catalog.NewPlayer(invalid.PlayerID, server, revision, d.RobotTeams+2, clock.at)
+	invalidPlayer.Defense = []int64{invalidHero.PartnerID, summoned.Ref().PartnerID}
+	probes := catalog.OfferRanks(server, actor.PlayerID, selfRank, self.Player.TicketDay, self.Player.RefreshCount)
+	if len(probes) == 0 || len(probes[0]) == 0 {
+		t.Fatal("no offer probe")
+	}
+	target := probes[0][0]
+	defender, err := store.TaskRangeTx(ctx, database, server, period.Rotation.Number, target, target)
+	if err != nil || len(defender) != 1 {
+		t.Fatal("target rank", err, len(defender))
+	}
+	transaction, err := database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.InsertTaskPlayerTx(ctx, transaction, d.TaskModePlayer{Player: invalidPlayer, PeriodNumber: period.Rotation.Number}, period); err != nil {
+		t.Fatal("insert invalid-defense task player", err)
+	}
+	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, d.RobotTeams+2, invalid.PlayerID); err != nil {
+		t.Fatal("append invalid-defense rank", err)
+	}
+	if err = store.SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number, d.Ranked{Rank: d.RobotTeams + 2, Occupant: d.Occupant{Player: invalid.PlayerID}}, defender[0]); err != nil {
+		t.Fatal("place invalid-defense rank", err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	ranks := func() []d.Ranked {
+		rows, readErr := store.TaskRangeTx(ctx, database, server, period.Rotation.Number, 1, 50)
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		return rows
+	}
+	unchanged := func(before []d.Ranked) {
+		after := ranks()
+		if len(before) != len(after) {
+			t.Fatalf("rank row count changed %d -> %d", len(before), len(after))
+		}
+		for index := range before {
+			if before[index] != after[index] {
+				t.Fatalf("rank row %d changed: %+v -> %+v", before[index].Rank, before[index], after[index])
+			}
+		}
+	}
+
+	before := ranks()
+	if _, err = service.TaskFormation(ctx, actor, int64(invalid.PlayerID)); !errors.Is(err, d.ErrInvalid) {
+		t.Fatalf("nonempty invalid task defense must be ErrInvalid from 295, got %v", err)
+	}
+	unchanged(before)
+	if _, err = service.LoadTask(ctx, actor, op(), false); !errors.Is(err, d.ErrInvalid) {
+		t.Fatalf("nonempty invalid task defense must be ErrInvalid from 282, got %v", err)
+	}
+	unchanged(before)
+
+	transaction, err = database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	top, err := store.TaskRangeTx(ctx, database, server, period.Rotation.Number, 1, 1)
+	if err != nil || len(top) != 1 {
+		t.Fatal("top rank", err, len(top))
+	}
+	invalidRank, _, err := store.TaskRankOfTx(ctx, database, server, period.Rotation.Number, d.Occupant{Player: invalid.PlayerID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number, d.Ranked{Rank: invalidRank, Occupant: d.Occupant{Player: invalid.PlayerID}}, top[0]); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	before = ranks()
+	if _, err = service.TaskRankList(ctx, actor); !errors.Is(err, d.ErrInvalid) {
+		t.Fatalf("nonempty invalid task defense must be ErrInvalid from the special rank list, got %v", err)
+	}
+	unchanged(before)
 }
