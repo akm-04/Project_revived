@@ -27,6 +27,7 @@
  },
  "tests": {
   "integration": [
+   "playerdisplay",
    "socialactivation"
   ],
   "scenarios_naming": [],
