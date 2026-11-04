@@ -1009,6 +1009,55 @@ def source_record(blob: SourceBlob) -> dict[str, str]:
     return {"path": blob.path, "role": blob.role, "sha256": blob.sha256}
 
 
+def compile_dialog_relationship(
+    relationship_id: int, data: bytes, dialog_config_ids: set[int]
+) -> tuple[list[dict[str, Any]], set[tuple[int, int, int]], int, set[tuple[int, int, int]]]:
+    # DialogueTable indexes each file by node id across all groups, so the last source row wins.
+    nodes_by_node_id: dict[int, dict[str, Any]] = {}
+    duplicate_node_keys: set[tuple[int, int, int]] = set()
+    placeholders = 0
+    for source_row in parse_generated_lua_table(data):
+        dialog_group = int(source_row["type"])
+        node_id = int(source_row["id"])
+        if dialog_group == 0 or node_id == 0:
+            if dialog_group != 0 or node_id != 0:
+                raise CompileError(f"dialog node sentinel shape {relationship_id}")
+            placeholders += 1
+            continue
+        if dialog_group not in dialog_config_ids:
+            raise CompileError(f"dialog node group {dialog_group} is not a library dialog config id ({relationship_id})")
+        raw_reward = source_row.get("is_reward", "")
+        if raw_reward != "" and int(raw_reward) < 0:
+            raise CompileError(f"dialog node reward shape {relationship_id}")
+        raw_turn_ids = source_row.get("turn_id", "")
+        turn_ids = [int(value) for value in raw_turn_ids.split("|")] if raw_turn_ids else []
+        if not turn_ids or any(value == 0 or value < -1 for value in turn_ids) or (-1 in turn_ids and len(turn_ids) != 1):
+            raise CompileError(f"dialog node edge sentinel shape {relationship_id}")
+        if node_id in nodes_by_node_id:
+            duplicate_node_keys.add((relationship_id, dialog_group, node_id))
+        node = dict(
+            relationship_source_id=relationship_id,
+            dialog_group=dialog_group,
+            node_id=node_id,
+            turn_ids=turn_ids,
+        )
+        if raw_reward != "":
+            node["is_reward"] = int(raw_reward)
+        nodes_by_node_id[node_id] = node
+    unresolved_edges: set[tuple[int, int, int]] = set()
+    for node in nodes_by_node_id.values():
+        for target in node["turn_ids"]:
+            if target == -1:
+                continue
+            target_node = nodes_by_node_id.get(target)
+            if target_node is None:
+                unresolved_edges.add((relationship_id, node["node_id"], target))
+                continue
+            if len(node["turn_ids"]) > 1 and "is_reward" not in target_node:
+                raise CompileError(f"dialog option target {target} has no is_reward ({relationship_id})")
+    return list(nodes_by_node_id.values()), duplicate_node_keys, placeholders, unresolved_edges
+
+
 def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[str, Any]:
     items = parse_encoded_item_table(blobs["data/tables/item.lua"].data)
     players = parse_generated_lua_table(blobs["data/tables/player.lua"].data)
@@ -2524,40 +2573,22 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     for row in parse_generated_lua_table(blobs["data/tables/library_dialog_config.lua"].data):
         library_dialog_configs.append(dict(id=int(row["id"]),type=int(row["type"]),open_condition=int(row["open_condition"]),amour_reward=int(row["amour_reward"]),gift_reward=int(row["gift_reward"])))
     library_dialog_configs.sort(key=lambda x:x["id"])
-    # DialogueTable indexes each file by node id, so repeated source ids resolve to their last row.
     dialog_duplicate_node_keys=set()
     dialog_unresolved_edges=set()
     dialog_placeholders=0
     dialog_nodes=[]
     dialog_source_unknowns=[]
+    dialog_config_ids={config["id"] for config in library_dialog_configs}
     for relationship_id in sorted({row["relationship_source_id"] for row in library_templates if row["dialog_enabled"]}):
         blob=blobs.get(f"data/tables/{relationship_id}.lua")
         if blob is None:
             dialog_source_unknowns.append(relationship_id)
             continue
-        nodes_by_key={}
-        for source_row in parse_generated_lua_table(blob.data):
-            dialog_group=int(source_row["type"])
-            node_id=int(source_row["id"])
-            if dialog_group==0 or node_id==0:
-                if dialog_group!=0 or node_id!=0: raise CompileError(f"dialog node sentinel shape {relationship_id}")
-                dialog_placeholders+=1
-                continue
-            raw_reward=source_row.get("is_reward","")
-            if raw_reward!="" and int(raw_reward)<0: raise CompileError(f"dialog node reward shape {relationship_id}")
-            raw_turn_ids=source_row.get("turn_id","")
-            turn_ids=[int(x) for x in raw_turn_ids.split("|")] if raw_turn_ids else []
-            if not turn_ids or any(x==0 or x< -1 for x in turn_ids) or (-1 in turn_ids and len(turn_ids)!=1): raise CompileError(f"dialog node edge sentinel shape {relationship_id}")
-            key=(dialog_group,node_id)
-            if key in nodes_by_key: dialog_duplicate_node_keys.add((relationship_id,dialog_group,node_id))
-            node=dict(relationship_source_id=relationship_id,dialog_group=dialog_group,node_id=node_id,turn_ids=turn_ids)
-            if raw_reward!="": node["is_reward"]=int(raw_reward)
-            nodes_by_key[key]=node
-        node_ids={node_id for _,node_id in nodes_by_key}
-        for node in nodes_by_key.values():
-            for target in node["turn_ids"]:
-                if target!=-1 and target not in node_ids: dialog_unresolved_edges.add((relationship_id,node["node_id"],target))
-        dialog_nodes.extend(nodes_by_key.values())
+        relationship_nodes, relationship_duplicates, relationship_placeholders, relationship_unresolved = compile_dialog_relationship(relationship_id, blob.data, dialog_config_ids)
+        dialog_duplicate_node_keys |= relationship_duplicates
+        dialog_placeholders += relationship_placeholders
+        dialog_unresolved_edges |= relationship_unresolved
+        dialog_nodes.extend(relationship_nodes)
     dialog_nodes.sort(key=lambda node:(node["relationship_source_id"],node["dialog_group"],node["node_id"]))
     if dialog_source_unknowns!=[11001209]: raise CompileError("dialog source availability drift")
     if dialog_duplicate_node_keys!=DIALOG_DUPLICATE_NODE_KEYS: raise CompileError("dialog source duplicate node key drift")

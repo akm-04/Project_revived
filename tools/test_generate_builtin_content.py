@@ -56,6 +56,68 @@ class ParserTests(unittest.TestCase):
             self.assertIn("source SHA-256 mismatch", str(ctx.exception))
 
 
+class DialogCompilerTests(unittest.TestCase):
+    def test_cross_group_duplicate_collapses_on_node_id_and_last_row_wins(self) -> None:
+        data = b'''return { keys = {"id", "type", "is_reward", "turn_id"}, rows = {
+            {"1001", "1", "0", "2001"},
+            {"2001", "1", "1", "3001"},
+            {"2001", "2", "5", "3002"},
+            {"3001", "1", "0", "-1"},
+            {"3002", "2", "0", "-1"},
+        } }'''
+        nodes, duplicates, placeholders, unresolved = gen.compile_dialog_relationship(10000001, data, {1, 2})
+        self.assertEqual(duplicates, {(10000001, 2, 2001)})
+        self.assertEqual(placeholders, 0)
+        self.assertEqual(unresolved, set())
+        by_node_id = {node["node_id"]: node for node in nodes}
+        self.assertEqual(len(by_node_id), 4)
+        self.assertEqual(
+            (by_node_id[2001]["dialog_group"], by_node_id[2001]["is_reward"], by_node_id[2001]["turn_ids"]),
+            (2, 5, [3002]),
+        )
+        self.assertEqual((by_node_id[3001]["dialog_group"], by_node_id[3002]["dialog_group"]), (1, 2))
+
+    def test_multi_target_option_with_absent_reward_fails_closed(self) -> None:
+        data = b'''return { keys = {"id", "type", "is_reward", "turn_id"}, rows = {
+            {"1001", "1", "0", "2001|2002"},
+            {"2001", "1", "1", "-1"},
+            {"2002", "1", "", "-1"},
+        } }'''
+        with self.assertRaises(gen.CompileError) as ctx:
+            gen.compile_dialog_relationship(10000001, data, {1})
+        self.assertIn("no is_reward", str(ctx.exception))
+
+    def test_single_target_absent_reward_stays_absent(self) -> None:
+        data = b'''return { keys = {"id", "type", "is_reward", "turn_id"}, rows = {
+            {"1001", "1", "0", "2001|2002"},
+            {"2001", "1", "1", "2003"},
+            {"2002", "1", "5", "-1"},
+            {"2003", "1", "", "-1"},
+        } }'''
+        nodes, duplicates, placeholders, unresolved = gen.compile_dialog_relationship(10000001, data, {1})
+        by_node_id = {node["node_id"]: node for node in nodes}
+        self.assertEqual((duplicates, placeholders, unresolved), (set(), 0, set()))
+        self.assertNotIn("is_reward", by_node_id[2003])
+        self.assertEqual((by_node_id[2001]["is_reward"], by_node_id[2002]["is_reward"]), (1, 5))
+
+    def test_self_target_and_unknown_target_are_preserved_raw(self) -> None:
+        data = b'''return { keys = {"id", "type", "is_reward", "turn_id"}, rows = {
+            {"1001", "1", "0", "1001|2001"},
+        } }'''
+        nodes, duplicates, placeholders, unresolved = gen.compile_dialog_relationship(10000001, data, {1})
+        self.assertEqual((duplicates, placeholders), (set(), 0))
+        self.assertEqual([(node["node_id"], node["turn_ids"]) for node in nodes], [(1001, [1001, 2001])])
+        self.assertEqual(unresolved, {(10000001, 1001, 2001)})
+
+    def test_dialog_group_outside_config_ids_fails(self) -> None:
+        data = b'''return { keys = {"id", "type", "is_reward", "turn_id"}, rows = {
+            {"1001", "20", "0", "-1"},
+        } }'''
+        with self.assertRaises(gen.CompileError) as ctx:
+            gen.compile_dialog_relationship(10000001, data, {1, 2})
+        self.assertIn("not a library dialog config id", str(ctx.exception))
+
+
 class ExactArchiveTests(unittest.TestCase):
     @unittest.skipUnless(os.environ.get("GXB_R4A_SOURCE_ARCHIVE"), "exact source archive not supplied")
     def test_exact_archive_is_deterministic_and_matches_checked_in(self) -> None:
