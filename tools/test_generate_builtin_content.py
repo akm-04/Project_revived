@@ -95,6 +95,27 @@ class ExactArchiveTests(unittest.TestCase):
             self.assertIn(row["awaken"], (0, 1))
             self.assertGreaterEqual(row["awaken_table_id"], 0)
 
+    @unittest.skipUnless(os.environ.get("GXB_R4A_SOURCE_ARCHIVE"), "exact source archive not supplied")
+    def test_library_dialog_graph_is_parsed_from_source(self) -> None:
+        a = gen.compile_archive(Path(os.environ["GXB_R4A_SOURCE_ARCHIVE"]))
+        catalog = a["library_input_catalog.json"]
+        nodes = {(row["relationship_source_id"], row["dialog_group"], row["node_id"]): row for row in catalog["dialog_nodes"]}
+        self.assertEqual(len(nodes), 13281)
+        self.assertEqual(catalog["dialog_source_unknowns"], [11001209])
+        self.assertFalse(any(group == 0 or node == 0 for _, group, node in nodes))
+
+        branch = nodes[(10001006, 2, 201004)]
+        self.assertEqual(branch["turn_ids"], [202001, 203001])
+        self.assertEqual(nodes[(10001006, 2, 202001)]["is_reward"], 3)
+        self.assertEqual(nodes[(10001006, 2, 203001)]["is_reward"], 2)
+
+        self.assertEqual(nodes[(10001006, 4, 403001)]["is_reward"], 0)
+        terminal = nodes[(10001001, 12, 1201001)]
+        self.assertEqual((terminal["is_reward"], terminal["turn_ids"]), (5, [-1]))
+        self.assertEqual(nodes[(10001100, 2, 203003)]["turn_ids"], [203005])
+        self.assertNotIn("is_reward", nodes[(10001044, 7, 701005)])
+        self.assertEqual(sum(1 for row in nodes.values() if len(row["turn_ids"]) > 1), 403)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

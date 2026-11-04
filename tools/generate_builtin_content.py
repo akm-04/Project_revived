@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-9c-guild-campaign"
+COMPILER_VERSION = "i9-10b-dialog-metadata"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -284,6 +284,155 @@ SOURCE_MANIFEST.append(('app/model/Library.lua','1830b7e7a5a5203dc7e9eea5bd505b5
 SOURCE_MANIFEST.append(('app/windows/LibraryFeedWindow.lua','f9d84b4fe134a63f697e9f0e58f768d5e803f2b827e68e0d85fc1675858ba69e',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 SOURCE_MANIFEST.append(('app/windows/HeroGiftBoxWindow.lua','d6065c3d601f582091546d77225c352be0ba83900d71fc294dbe26a7425a32c5',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
 SOURCE_MANIFEST.append(('app/windows/WhiteAlbumWindow.lua','851a53f588b59d95cfe460f3399ab1a6904fff7714131c358f3c3a73910b6bb9',"LIBRARY_INPUT_SOURCE_AUTHORITY"))
+SOURCE_MANIFEST.append(('data/tables/10001001.lua','114f7dab60d8f9ea93811a5efabe0d74610c81f295c4f4364d5f00dca6a6f4bb','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001002.lua','9a0ecd93cbd0d3bdce4f629ee90973ab9a4ebb306b9fe2724017f00f5a04007d','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001003.lua','67b82e3f3680106353aa9b8f5d6e953129e032170df1c614d40f15f80428b6c0','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001004.lua','20f69572ec7316bee3454327c535db42d2856c81d2eb4d4a91f2201dbe2e172a','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001005.lua','daf8ab72650b474f04a86731389729733f47c8efdb9783376e9c584162165abf','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001006.lua','cc36d1f27656cbb27158a816597efa064a487422711ee1e654559d9c0ac6c124','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001007.lua','5c435f719eaa295cd20d956dd354d269b9b4c2ee5ffc2a7e38e1814dc72c8764','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001008.lua','60ca6c7bd45737b7dacb6b87dfc7fb7238e905532d7fd9931df3a8033346c11f','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001010.lua','a80d1dcac259397bceb417ca3364df202d9f6caa6b6dc7d58bcbaec7b58aba68','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001012.lua','5e711ce33755aeafb189b5af4c3eb9a871e95a0cbac2dccd05bdbf22e7696f1d','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001013.lua','7d9a901e071914cec68a1db52afa0e35a65cb3f80b07b1f7eaa75428f23433bb','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001014.lua','b379753d9cdc36ebc0875e82f7ea4d18caeaf4c16f66c19d5223d57e191d5d63','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001015.lua','0ec6070e80179e11222ff584fbc9e0ee9ba5af1708e8ca729f8ea00aa9bb3e2d','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001016.lua','4a549cd0aa1e5bc0783b6f366b9a2b0224bc9e5198b469705f5258d910bbd339','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001017.lua','e56d7c64e709a700341a56a3ec913d89d8ff99fb77e19f4852dc321dcf2b2352','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001018.lua','ba6cdf881bb6b8c31834c87f3c85689e7afbd6176edc5fd731cd21c8a173c14f','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001019.lua','d94a3e39de6da6d53346d78ddb6d3a9aa5cd71db3e054dabcc2da170edd02f64','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001021.lua','a1ae4699e09e6234e609ed3674c3e01f73e05257220340e4c6f82ae0c25dac0e','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001022.lua','ee0cdc905b9af200475147744cb15093a203fd4a9b595e78d89590e16ef14bc1','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001023.lua','0138208c141563a1a118b2da4a0810188ff9259246c926a7a96e95089218fb15','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001024.lua','b94327485deb46ed95739894465709b3872d8fc49973bf9fef632cac904c74dd','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001025.lua','72421e0596a92c824a1c65dc5fa212f18307f342648b3cd30553eb15501a0df4','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001028.lua','34a40e7c030749155eae5c43c550f3a06dffe76e331e98616fe7f68536e157bf','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001029.lua','d18acb80fd3d5ee37c2bb399a5a73677f24f07bf9a1ba0167a03b879d0d55f2e','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001030.lua','1f38f3ee9def455fbdb1b9dcf360184536ef3a437f4e42ab5691df5e64d30340','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001032.lua','deaed4eacd0335b4f0fe1400a3d649839d93db0a8ae8251a7c676296b130faa8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001033.lua','f90e66253bac821659d3a12cea6d5f2ec8b146fe3cc3333c183b084403b29ec5','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001034.lua','0f0a1f64519b9ec9327a62bc751edb5ac5d92d14758358be97ba83ab53f90704','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001036.lua','7fa565cc9efe7a6c2fd6e3fbe1484e6b6b9126627befc7a3bb7ab3aca8d56202','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001038.lua','13202d5ef2b29068947b4a1091c98ec199cb3780c56947f9397a361def070fa8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001039.lua','c009e531099b1f5b833652ab0f96114c8ad842c9a41bdcb77ad1be69743ca2a4','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001040.lua','2dac72282abf0365e3ea28f4bead17e5c8ffcf02c5d9b94ec4d9cc9846eae44b','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001041.lua','b68231d17c249c3de816a175702e3cd2218a7fc505d887fab56c9b68252056b4','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001042.lua','b24e60f1102e1bab4b0a3af243e0098fd4697360e67f38a09c3b90e325a6c14b','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001043.lua','0ce7be10102a349f3bde5787e2ace2791f371c274d61820c80261d60ae450a43','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001044.lua','6bb56d9969eda2da13a4fa44645c65558d07fef628eb875d25dea5609663ae48','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001045.lua','292ea29a309e52089bb396741b6ebcf25ae33a4a1bdb4fe488dd1a34a51fee6e','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001048.lua','b94fa3949f35e9c579f95b026ef874060a2fd41a99b48ca05387f0462516ab94','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001049.lua','d31dfbba712957dc21b2e8f0b4de64d5d421db890700e01cd552200b8e86f05b','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001050.lua','fc98965b66c39b12c12c331e983c463e183c93eab7cecc36bc0e866ded11c253','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001051.lua','7703342fd83804d7742f6c7b24f981a49f1b61c462efea80f8522e682fbc199c','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001053.lua','be33135c5dfcc644c15889e30187cb9a4ef371843b08dcd236899e1cb61f4b3f','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001055.lua','15f7cba8d382f804c0cf9d3acc6cc80cc39bcd37e7e85c680e3abe5082acc64b','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001056.lua','243afa6fcbde25c110dddc53d73f913e040bf33ea123961de071f01ed6e7b7d4','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001057.lua','f43b2c57cb2ce6692bb39dcb813804ea5a00bc6532a3ee4b5f02516d7a3a5740','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001058.lua','fd7eb62bcf90d4160bb1049d6ea5326018980fffb7a0448ce153bb5ec0a640bb','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001061.lua','6347c19af67b3ed0855681de52776ca77feef08bc1b84b534ca839cfca80c919','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001062.lua','3c8a645551e947e0bfd8f178e9ee58aa9fc1c2c97464249152087ac49110bcf0','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001063.lua','c06064f89cc421a8a275eedc46a78454f17920ca4ddf2a9a842289bcb2097a38','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001064.lua','73d11b3f53afdb29b5a74bb2adcb196a9b238498003104b9139115279f9f4ea6','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001066.lua','dfe6f55de6132c771016b38c11dcbe991628050499b3b74b6439b9aeee46fced','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001067.lua','8e1b47623130429ab52d6c3b96ee90e4367795694421aba5ac99f2c5423d81dc','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001068.lua','e9fa08875452db6c00d84bf3339fdb502206ea77ac1087dba51fc79aec2a136b','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001069.lua','7eff910fe7143cfa27baf85c6a7cde832514a2f9275e19fdbfbd0419b6cccbe8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001070.lua','18656f68e5b2598ccda0c42092d8460b0ec320cad96d4d846c9afee26c48db4a','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001071.lua','01f850feb24c3fcfa4231f53873dd2cd22a0c44ef6413330ab3292dca1f664fc','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001073.lua','9c2d840e22ead2844ad41a0b86af170a71724cbd03855f44d160d17de6e52c51','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001074.lua','6bcea102d4371076b8233897bd3c7a735018c1c1732f91841f03216686025871','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001075.lua','918787c867633aa7bad9516595b2c53f78d4bff1bea7958c84019c6352b372dd','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001077.lua','50ce38dc1f26c686563597d71d48789751b6c606ba710a4eb6804403a74be34f','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001079.lua','0b4dd2a19d221dda900cf52f56cf2562992a0c436adfd63850f8a1ec912acd40','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001083.lua','de70a6c4801155f644ea58c190aa7871efb8a16b23f97712ba65f1d3d05dd733','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001087.lua','34b266a5a999a45877d6cf72cb1d04615720dfe81b69a63fd7c041ed991c2eb8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001088.lua','8f00d7c96d218f516476a098b3caf1095dcc49e42534dc04782a5a7e7a8164cd','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001089.lua','5812d39574122907477023320dd24a8e8e3fff0e782710cd5c47fc5276876486','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001092.lua','6b3b42821eea98040e47ebb9650e4dd97390d166d9b89bd0572d61e0fed3998d','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001093.lua','6327015aeb5dba91f6e31aa722c8e091623f594736cd2f32c90fb98198c7618e','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001094.lua','e313d429c0acb99c4548cee9e6d51201960c57db231c8e23edfb61e4c971388a','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001095.lua','04858de631ed81c4244e2c09cc03e000245aca811d7e7c7773ab585a4e8e8f29','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001097.lua','12197357e51fc298e8fb18f0470eb0a8a2e8a2ce76be04cd0edd4603afbc869c','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001100.lua','79a942c61ed359cc8705c54317d0de824cf7fc939cc30323643d2554eb48ad7c','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001102.lua','18832d8c167da24dfa849d3aad335432a9ea9ac400c96dcb139b2a0d7ad49d96','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001103.lua','6678611a334fa7a9ffe7c65bc2889f6617b4ef7af5758942016711114e1cee12','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001104.lua','4b1e5d942b572a7c2942dc09389a1391dfd329b486ea047ca400c2f044901d27','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001105.lua','3a6653fe4a466daf9dc8bb84c56c11aa98f3151329c8947c52e31ca11e2ca738','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001106.lua','987641a8f2fec7c1d8eae2b9d4fc0ed087c4dad04ca2edec84530ab391bf20db','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001109.lua','e0dc3b52d78241ab91aed56b2aa6dd8cab9c8efb81481494b0f37147d18fbaff','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001111.lua','089e799c322020f3cf64b2157e6bc02230f60f2a2f3dbd88dabf4144fa887c79','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001113.lua','124590bf44492922e9a64862fee8bb6f4878e46bd04d68df24dc273f789c7163','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001117.lua','8faea64cb1dfc986e45c3b6a0b4a9cb5e58491e7ca0020a2fadf53074bdeec3e','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001118.lua','b26659fde07ded9604b410d8995581a71801806978578537b30ca2f067ba9017','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001122.lua','34ac16dd4e7c90e9aed9cf7bd2e9d9e0678b7e6c3252d872fc341623f9f903c8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001128.lua','b924f356a209f43a22393d1993229775deb12dc00595845deaa9721a6d1fb073','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001137.lua','af8720fa21d4dc2515854510667b364c077ce333ebd73dd030a0041c219ba652','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001139.lua','a72af941e36b5527472af9332e0f8e25a902411418e9a124398acea683c6344f','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001140.lua','b12dd6465145837b67e378e6a71f69cc2a65ac210ac5c06039f2ff3adf2a9ed8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001143.lua','1c4915d47107b990b5172335d537163ad11f503b24b9a2e744046ed1dd57aa54','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001144.lua','be18a33d1b3b565af941231279de59694995aeda9368a48cb87211700384a699','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001145.lua','ada21a1a26c4d7aa1ab92e91fc475395720aa03c32c008770385c3c2f8e0e9b5','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001146.lua','13ae2e792d35635086862f5afcbc76ea4290acc8de28eb9910de46905a0d2987','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001147.lua','32ba43d5dc6d5e383aad8d83a2fd7d0acdd4022ba3627835176de812d01c5d6b','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001148.lua','7a9782431790c56288f3746672796e1c7ff49b403e70b12a3920802c594ef2ce','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001149.lua','cb7a1d172b3bf65f2e54990814f693732e1efc65928ba857e603e792ad1fe398','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001150.lua','4a58cb36ebdd017e081926a8f6126707f6ba1a1dd5678d9cd20668b07f6553da','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001151.lua','975b7190cf960ede57bc5de04c8897abc04dcb315f59d3edbe07be2506a580de','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001152.lua','e9794cb1df6e3274b2226db5390abedd050c1ec7693d0ce604a39015ee203eda','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001153.lua','89fca86edead8a6d4e3d7d893c4a37dbf4791d6ffa754c69484e664c573c8d46','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001155.lua','c561b7ca8e7f36d05b691f588f8650f35f4afdfe0de8c001f97f67feb1cfbe10','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001156.lua','988d64a74f7668c0eeb2e9573c107d66747ae04ad1121356d2cf4b2038a393ed','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001157.lua','7821498d62851582823737508174bf03c3f093d7c7ec6b265fbca77469ff15d3','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001158.lua','482430b91b79d69f4bf87d0ed9ebec2b6bb99469e3a4edfa5e459e3579ceb28d','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001160.lua','22c12d2566d04de8586eec51d73dad2d7d1ac598c5ab7b971de9ce8b8f709e2e','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001161.lua','69129d67a91444929a9c65b581bfea92b5f4665e98238b496636d73bade7cfd4','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001162.lua','962a62173d086ba655cf76fcce73a10b831c35c37694ec62572447343b1a3e83','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001164.lua','85393424f3952e6cafd8c9cf79d36c7f5ee9c1f7a0bc1ce5bc0d2fca07b568e8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001165.lua','9fd852a008798995d1b84e1cfbedc6a6d708020152fd0c3698634739c3a3a810','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001166.lua','0caad46532301f935a44910ecba35a9943d2116778eedc1253070cf5ba053ce7','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001167.lua','d93624ab006ba61a84ca700daa317ee128a861370a6c347a47ee3b05e6fe79ec','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001168.lua','f9ac8a57d6cad73d8e6dfb3c9ef9312a882a6adf67b9fc1ba2951eba9b35f862','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001171.lua','a240089d05d8e58acab09dd91799f647bc52c77ff869b591ce400312ed1a54c6','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001174.lua','a445ab75d0a19ca3ea3682f97423618385f40de46b1d0a504027c85a73eb8255','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001175.lua','735c8eeed33670974dc3e6f5330087c0ca9e7aecd42b615c16d3463fdf170cba','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001178.lua','a1eca120943b3491696e3f9a0768043710c553b0fa76e8c82badd02ff594c460','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001179.lua','a2c614e7c6bdb3e6debcba0db4af5da41fee6835820a1634999f0ea35eceaf4b','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001180.lua','27eec470092c54983703bfeed2fc19e32d8925abc0f6b5bbc9ee9c1c23a84bc7','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001181.lua','46ec874c6253916ceec21084e29c21aaa3792ef40796f187e4f8e87ecadfc673','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001183.lua','219ed5cf122afc0772e7a7223f72a41f7d9ba04c64657807c991cf31c4d15322','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001184.lua','6f2b60395cc8ecf50f90e261cd7aeac53e921945e63f65c2782315c365114431','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001186.lua','22e358e585d444e1e6f1bf364e19e39feaa98cfc1cd42430bff279c4a82e2778','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001187.lua','bedcbbacfc3762d221c12dc2d1a529fc0ae8e78ef1ab9612fe7280a5d5da6a76','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001190.lua','20f9bea77effa8c8465670614407614a1c2b9d5a02b98f7935ae6d0db4b6b2b3','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001192.lua','18af49b5a5b517ac9df4d13ac557923aeb5ac65138473f35e6c30c01cd270573','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001195.lua','f66ddfff64e0351e5dd1255adca69ae38eb8e0144783cf9ce02be66d6712ed8e','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001197.lua','52d9b2aeae6fd3bf6660fc905b095768e679660969bab4557d6e27f213398e5d','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001198.lua','ab2c1a7bbc2805cfca8edbd0ddc08c319a4dca0f6b56567b85745857556dba0f','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001199.lua','1a94bcda64300fb57e39dc252f3be9b0898a97f6b427a02029ac649de5a729c2','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001200.lua','3754a22ce1c3c6b634689c0fa1e7afd7aa1ebe4a9bb05584f26a0598bc6127b1','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001201.lua','006c1beb74afa194058d51ca3a7c58fe65f30b48e63a3f0e490ac23a87807809','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001206.lua','9ebd27e3ef4d4db3c56931833d562b7e8732ee2625f92b9b52d5db314f1dffca','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001209.lua','af79a2fcf5049e084eae5b31d57a59a7df4f3adaae74e6fb351a8d8d0311b329','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001210.lua','ed7fefbf4463f5fa31fe862abec487321b95ada8560c599de46e8b227dad4c0c','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001211.lua','36935c0593845e9bddf9adeac1d0eb3ce50ef2f6d3b9055be0391e4862be9d34','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001213.lua','99e0146415c2d1b195dae034d46bf1eddef4922aa544ba071545397fe342328f','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001215.lua','08308adec39ae30307af1a5861f6b402c9ddd06d2b798c82ccae1d783bf87e46','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001219.lua','800724e95ed434b037d6b1438e92e8bfb4e5f88743dcfef14f6b3c2cdb34cd90','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001245.lua','1f67ce5808b3533cf9af937a0635c072896f8ca718e9e232e0c93054b93ccdd8','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001251.lua','443cf7ea4b8f22dbff77b6fbf914b6b97e1a39bdfc8e2f4bf533d6a36e0b0310','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001258.lua','eacd22085391b67495362c85d20dab9d7c7af4c3cac08b61fd48a9c7af95f849','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001259.lua','ebc8bbf1c11f5ebabafbc9a34b56f7cf4a06e2a196cea19ce7ce2de32fbec4f0','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001273.lua','3f9a4d3f890d75d15e8b6fffa910952e068b403027df62a31c62815678a0f4a0','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/10001277.lua','08f56922d23ad71a646a1c0979aa723cc01baec452133e383b880c3ec6c761ca','I9_10B_DIALOG_SOURCE_BOUNDARY'))
+
+DIALOG_DUPLICATE_NODE_KEYS = {
+    (10001007, 7, 701002),
+    (10001032, 4, 403004),
+    (10001092, 6, 601003),
+    (10001258, 10, 1001006),
+}
+DIALOG_UNRESOLVED_EDGES = {(10001100, 203003, 203005)}
 
 ENABLED_CAPABILITIES = [
     "MISSION_CATALOG_I9_4A",
@@ -2375,6 +2524,46 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     for row in parse_generated_lua_table(blobs["data/tables/library_dialog_config.lua"].data):
         library_dialog_configs.append(dict(id=int(row["id"]),type=int(row["type"]),open_condition=int(row["open_condition"]),amour_reward=int(row["amour_reward"]),gift_reward=int(row["gift_reward"])))
     library_dialog_configs.sort(key=lambda x:x["id"])
+    # DialogueTable indexes each file by node id, so repeated source ids resolve to their last row.
+    dialog_duplicate_node_keys=set()
+    dialog_unresolved_edges=set()
+    dialog_placeholders=0
+    dialog_nodes=[]
+    dialog_source_unknowns=[]
+    for relationship_id in sorted({row["relationship_source_id"] for row in library_templates if row["dialog_enabled"]}):
+        blob=blobs.get(f"data/tables/{relationship_id}.lua")
+        if blob is None:
+            dialog_source_unknowns.append(relationship_id)
+            continue
+        nodes_by_key={}
+        for source_row in parse_generated_lua_table(blob.data):
+            dialog_group=int(source_row["type"])
+            node_id=int(source_row["id"])
+            if dialog_group==0 or node_id==0:
+                if dialog_group!=0 or node_id!=0: raise CompileError(f"dialog node sentinel shape {relationship_id}")
+                dialog_placeholders+=1
+                continue
+            raw_reward=source_row.get("is_reward","")
+            if raw_reward!="" and int(raw_reward)<0: raise CompileError(f"dialog node reward shape {relationship_id}")
+            raw_turn_ids=source_row.get("turn_id","")
+            turn_ids=[int(x) for x in raw_turn_ids.split("|")] if raw_turn_ids else []
+            if not turn_ids or any(x==0 or x< -1 for x in turn_ids) or (-1 in turn_ids and len(turn_ids)!=1): raise CompileError(f"dialog node edge sentinel shape {relationship_id}")
+            key=(dialog_group,node_id)
+            if key in nodes_by_key: dialog_duplicate_node_keys.add((relationship_id,dialog_group,node_id))
+            node=dict(relationship_source_id=relationship_id,dialog_group=dialog_group,node_id=node_id,turn_ids=turn_ids)
+            if raw_reward!="": node["is_reward"]=int(raw_reward)
+            nodes_by_key[key]=node
+        node_ids={node_id for _,node_id in nodes_by_key}
+        for node in nodes_by_key.values():
+            for target in node["turn_ids"]:
+                if target!=-1 and target not in node_ids: dialog_unresolved_edges.add((relationship_id,node["node_id"],target))
+        dialog_nodes.extend(nodes_by_key.values())
+    dialog_nodes.sort(key=lambda node:(node["relationship_source_id"],node["dialog_group"],node["node_id"]))
+    if dialog_source_unknowns!=[11001209]: raise CompileError("dialog source availability drift")
+    if dialog_duplicate_node_keys!=DIALOG_DUPLICATE_NODE_KEYS: raise CompileError("dialog source duplicate node key drift")
+    if dialog_unresolved_edges!=DIALOG_UNRESOLVED_EDGES: raise CompileError("dialog source unresolved edge drift")
+    if dialog_placeholders!=142-len(dialog_source_unknowns): raise CompileError("dialog placeholder shape drift")
+    if len(dialog_nodes)!=13281 or sum(1 for node in dialog_nodes if len(node["turn_ids"])>1)!=403: raise CompileError("dialog graph census drift")
     # D485 PRIVATE_POLICY: the daily and purchased course boxes roll dropboxes 600003 and 600004.
     course_box_items=[misc_int("object_box_book1"),misc_int("object_box_book2")]
     if course_box_items!=[50001418,50001419]: raise CompileError("Course gift box item source drift")
@@ -2403,7 +2592,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if len(favor_rows)!=5 or len(library_acts)!=4 or len(library_missions)!=6 or len(library_talks)!=23 or len(library_cgs)!=21 or len(library_backgrounds)!=12 or len(library_dialog_configs)!=19: raise CompileError("Library full source counts drift")
     if [x["id"] for x in library_stages]!=[1,2,3,4,5] or [x["id"] for x in library_acts]!=[1,2,3,4] or [x["id"] for x in library_missions]!=[1001,1002,1003,1004,1005,1006] or [x["id"] for x in library_cgs]!=list(range(1,22)) or [x["id"] for x in library_backgrounds]!=list(range(1,13)) or [x["id"] for x in library_dialog_configs]!=list(range(1,20)): raise CompileError("Library full source identities drift")
     if any(x["limit"] not in (0,1) for x in library_backgrounds) or any(x["item_id"]!=50001648 for x in library_cgs): raise CompileError("Library background/cg source shape drift")
-    library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special,stages=library_stages,acts=library_acts,missions=library_missions,talks=library_talks,cgs=library_cgs,backgrounds=library_backgrounds,dialog_configs=library_dialog_configs,course_gift_boxes=library_course_boxes)
+    library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special,stages=library_stages,acts=library_acts,missions=library_missions,talks=library_talks,cgs=library_cgs,backgrounds=library_backgrounds,dialog_configs=library_dialog_configs,dialog_nodes=dialog_nodes,dialog_source_unknowns=dialog_source_unknowns,course_gift_boxes=library_course_boxes)
     from book_content import build_book
     course_artifact=build_course(blobs,parse_generated_lua_table,items)
     book_artifact=build_book(blobs,parse_generated_lua_table,items)

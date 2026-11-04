@@ -1076,6 +1076,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-9c-guild-campaign" {
 		expectedSources, expectedArtifacts = 404, 55
 	}
+	if manifest.CompilerVersion == "i9-10b-dialog-metadata" {
+		expectedSources, expectedArtifacts = 545, 55
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
