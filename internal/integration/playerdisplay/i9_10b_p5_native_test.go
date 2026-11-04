@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"maps"
 	"reflect"
 	"strconv"
 	"testing"
@@ -219,6 +220,9 @@ func TestI9_10B835BoardCardModelSource(t *testing.T) {
 		if response.HTTPStatus != status {
 			t.Fatalf("board partner %d card %d model %d status %d body %+v", partner, card, model, response.HTTPStatus, response.Body)
 		}
+		if status == 200 && (response.Body["board_partner"] != partner || response.Body["board_card"] != card || response.Body["board_model_id"] != model) {
+			t.Fatalf("board reply does not match selection: %+v", response.Body)
+		}
 	}
 
 	base := bornActor(t, p)
@@ -251,11 +255,34 @@ func TestI9_10B835BoardCardModelSource(t *testing.T) {
 
 type metadataLessLibraryContent struct{ app.ContentPort }
 
+func TestI9_10BBoardMetadataFixturePreservesCachedCatalog(t *testing.T) {
+	database := pool(t)
+	revision := installed(t, database)
+	content := libraryP5Service(database).Content
+	original, err := content.LibraryCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := original.Templates[10001001]
+	if expected.ModelID == 0 {
+		t.Fatal("fixture requires source card metadata")
+	}
+	legacy, err := (metadataLessLibraryContent{ContentPort: content}).LibraryCatalogTx(ctx, database, revision)
+	if err != nil || legacy.Templates[10001001].ModelID != 0 {
+		t.Fatalf("legacy metadata %+v: %v", legacy.Templates[10001001], err)
+	}
+	reloaded, err := content.LibraryCatalogTx(ctx, database, revision)
+	if err != nil || reloaded.Templates[10001001] != expected {
+		t.Fatalf("canonical cached metadata changed: %+v, expected %+v: %v", reloaded.Templates[10001001], expected, err)
+	}
+}
+
 func (m metadataLessLibraryContent) LibraryCatalogTx(ctx context.Context, q tx.Queryer, revision string) (lib.Catalog, error) {
 	catalog, e := m.ContentPort.LibraryCatalogTx(ctx, q, revision)
 	if e != nil {
 		return catalog, e
 	}
+	catalog.Templates = maps.Clone(catalog.Templates)
 	for tableID, template := range catalog.Templates {
 		template.ModelID, template.AwakenTableID, template.Awaken = 0, 0, 0
 		catalog.Templates[tableID] = template
