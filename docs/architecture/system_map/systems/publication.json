@@ -105,13 +105,22 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
    "publication_picture_reads": [
     "publicationstore.LockMarkerTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
+   "players",
    "publication_picture_reads"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -162,6 +171,8 @@
    "publication_sets"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "players",
    "publication_items",

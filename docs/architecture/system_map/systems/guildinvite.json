@@ -53,6 +53,9 @@
    ],
    "guild_invites": [
     "guildstore.PrepareRetirementChildrenTx"
+   ],
+   "players": [
+    "i4store.LockBoundRecipientTx"
    ]
   },
   "row_locks": [
@@ -60,8 +63,10 @@
    "guild_invite_projection_cursors",
    "guild_invite_projection_deliveries",
    "guild_invite_projection_markers",
-   "guild_invites"
-  ]
+   "guild_invites",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],

@@ -63,7 +63,7 @@
   ],
   "row_lock_methods": {
    "gameplay_contexts": [
-    "i5store.ImportInscriptionCertificatesTx"
+    "i5store.FenceActorTx"
    ],
    "player_currency_balances": [
     "i5store.EnsureInscriptionCertificatesTx",
@@ -81,6 +81,9 @@
    ],
    "player_inscription_roots": [
     "inscriptionstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
@@ -89,8 +92,10 @@
    "player_economy_owners",
    "player_inscription_admissions",
    "player_inscription_heroes",
-   "player_inscription_roots"
-  ]
+   "player_inscription_roots",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayRosterTx"
@@ -182,6 +187,8 @@
    "player_inscription_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_inscription_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

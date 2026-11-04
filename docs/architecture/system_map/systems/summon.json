@@ -76,14 +76,19 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "summon_players": [
     "summonstore.LockTx",
     "summonstore.ReadTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "summon_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayMID1"
@@ -144,6 +149,8 @@
    "summon_tuning"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_revisions",

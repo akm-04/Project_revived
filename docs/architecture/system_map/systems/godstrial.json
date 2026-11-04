@@ -45,6 +45,9 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "godstrial_players": [
     "godstrialstore.LockTx"
    ],
@@ -53,9 +56,11 @@
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "godstrial_players",
    "mail_namespace_counters"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayMID1"
@@ -123,6 +128,8 @@
    "godstrial_players"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "godstrial_players",
    "gxb_content_activation",

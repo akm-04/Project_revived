@@ -17,8 +17,15 @@
     "rank": 370
    }
   ],
-  "row_lock_methods": {},
-  "row_locks": []
+  "row_lock_methods": {
+   "social_notices": [
+    "socialinboxstore.LockNoticeSourceTx"
+   ]
+  },
+  "row_locks": [
+   "social_notices"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],

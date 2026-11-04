@@ -29,13 +29,18 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "memoir_players": [
     "memoirstore.LockTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "memoir_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -149,6 +154,8 @@
    "memoir_players"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_revisions",

@@ -39,12 +39,17 @@
    "achievement_streaks": [
     "achievementstore.ReadStreakTx",
     "achievementstore.ReadStreaksTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
    ]
   },
   "row_locks": [
    "achievement_roots",
-   "achievement_streaks"
-  ]
+   "achievement_streaks",
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -98,6 +103,8 @@
    "achievement_streaks"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "achievement_award_claims",
    "achievement_events",
    "achievement_notices",

@@ -39,13 +39,22 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "occult_players": [
     "occultstore.LockPlayerTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
-   "occult_players"
-  ]
+   "gameplay_contexts",
+   "occult_players",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -267,6 +276,8 @@
    "occult_runs"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_revisions",
@@ -276,7 +287,9 @@
    "occult_reports",
    "player_directory_profiles",
    "player_function_eligibility",
+   "player_social_presence",
    "players",
+   "realtime_presence_leases",
    "shared_room_seats",
    "shared_rooms"
   ],

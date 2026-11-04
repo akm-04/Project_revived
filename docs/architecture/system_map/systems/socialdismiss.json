@@ -17,8 +17,23 @@
  "locks": {
   "profiles": [],
   "ranks": [],
-  "row_lock_methods": {},
-  "row_locks": []
+  "row_lock_methods": {
+   "player_social_roots": [
+    "socialrelationstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "social_notices": [
+    "socialinboxstore.LockNoticeTx"
+   ]
+  },
+  "row_locks": [
+   "player_social_roots",
+   "players",
+   "social_notices"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],

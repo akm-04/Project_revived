@@ -114,11 +114,16 @@
   "row_lock_methods": {
    "campaign_players": [
     "campaignstore.LockTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
    ]
   },
   "row_locks": [
-   "campaign_players"
-  ]
+   "campaign_players",
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayMID1"
@@ -245,6 +250,8 @@
    "campaign_players"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "campaign_nodes",
    "campaign_players",
    "gameplay_contexts",

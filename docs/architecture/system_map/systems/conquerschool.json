@@ -44,18 +44,27 @@
    "conquer_school_players": [
     "conquerstore.ReadModeTx"
    ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_conquer_facts": [
     "conquerstore.LockFactsTx"
    ],
    "player_directory_profiles": [
     "i4store.ProjectConquerTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
    "conquer_school_players",
+   "gameplay_contexts",
    "player_conquer_facts",
-   "player_directory_profiles"
-  ]
+   "player_directory_profiles",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -129,6 +138,8 @@
  "tables": {
   "owned": [],
   "read": [
+   "account_sessions",
+   "accounts",
    "conquer_school_players",
    "conquer_school_reports",
    "content_conquer_input_catalogs",
@@ -149,8 +160,7 @@
    "conquer_school_report_views",
    "conquer_school_reports",
    "gxb_operation_receipts",
-   "player_conquer_facts",
-   "player_directory_profiles"
+   "player_conquer_facts"
   ]
  },
  "tests": {

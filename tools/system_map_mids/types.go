@@ -54,11 +54,12 @@ type typedLock struct {
 }
 
 type typedOutput struct {
-	Edges    []typedEdge            `json:"edges"`
-	Facts    []typedFact            `json:"facts"`
-	RowLocks []typedLock            `json:"row_locks"`
-	Gaps     []string               `json:"gaps"`
-	Tables   map[string]typedTables `json:"tables"`
+	AnalysisErrors []string               `json:"analysis_errors,omitempty"`
+	Edges          []typedEdge            `json:"edges"`
+	Facts          []typedFact            `json:"facts"`
+	RowLocks       []typedLock            `json:"row_locks"`
+	Gaps           []string               `json:"gaps"`
+	Tables         map[string]typedTables `json:"tables"`
 }
 
 type typedTables struct {
@@ -88,6 +89,7 @@ type sourceImporter struct {
 	world    *typedWorld
 	packages map[string]*checkedPackage
 	loading  map[string]bool
+	errors   []string
 }
 
 // Import type-checks module packages from source so an interface and its
@@ -115,9 +117,9 @@ func (s *sourceImporter) load(path string) *checkedPackage {
 	defer delete(s.loading, path)
 	info := newTypeInfo()
 	files := parseListed(s.world.fset, listed)
-	config := types.Config{Importer: s, Error: func(error) {}}
-	pkg, _ := config.Check(path, s.world.fset, files, info)
-	if pkg == nil {
+	config := types.Config{Importer: s, Error: func(err error) { s.errors = append(s.errors, err.Error()) }}
+	pkg, checkErr := config.Check(path, s.world.fset, files, info)
+	if pkg == nil || checkErr != nil {
 		s.packages[path] = nil
 		return nil
 	}
@@ -199,6 +201,8 @@ func collectTyped(root string) typedOutput {
 		output.Facts = append(output.Facts, typedFact{System: system, Kinds: kinds})
 	}
 	output.RowLocks = world.rowLocks()
+	output.Gaps = append(output.Gaps, world.source.errors...)
+	output.AnalysisErrors = append(output.AnalysisErrors, world.source.errors...)
 	sort.Slice(output.Edges, func(i, j int) bool {
 		a, b := output.Edges[i], output.Edges[j]
 		if a.From != b.From {
@@ -616,43 +620,44 @@ func constStrings(expr ast.Expr, assignments map[string][]ast.Expr, info *types.
 }
 
 var (
-	lockStatement = regexp.MustCompile(`(?is)for\s+(update|share)`)
-	lockTable     = regexp.MustCompile(`(?i)(?:from|update|into)\s+([a-zA-Z0-9_".]+)`)
+	lockTable = regexp.MustCompile(`(?i)(?:from|update|into)\s+([a-zA-Z0-9_".]+)`)
 )
 
 func (w *typedWorld) rowLocks() []typedLock {
-	base := filepath.Join(w.root, "internal", "adapters", "postgres")
 	locks := map[string]typedLock{}
-	filepath.WalkDir(base, func(path string, entry os.DirEntry, err error) error {
-		if err != nil || entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") || strings.HasSuffix(entry.Name(), "_test.go") {
-			return nil
+	paths := []string{}
+	for path := range w.packages {
+		if strings.HasPrefix(path, modulePath+"internal/adapters/postgres/") {
+			paths = append(paths, path)
 		}
-		raw, readErr := os.ReadFile(path)
-		if readErr != nil {
-			return nil
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		info, files := w.check(w.packages[path])
+		if info == nil {
+			continue
 		}
-		text := string(raw)
-		store := strings.TrimPrefix(filepath.ToSlash(filepath.Dir(path)), strings.TrimSuffix(filepath.ToSlash(w.root), "/")+"/")
-		for _, location := range lockStatement.FindAllStringIndex(text, -1) {
-			start := location[0] - 800
-			if start < 0 {
-				start = 0
+		store := strings.TrimPrefix(path, modulePath)
+		for _, file := range files {
+			for _, declaration := range file.Decls {
+				function, ok := declaration.(*ast.FuncDecl)
+				if !ok || function.Body == nil {
+					continue
+				}
+				text := functionSQLText(function, info)
+				_, _, clauses := traceSQLTables(text)
+				if len(clauses) == 0 && traceLock.MatchString(text) {
+					key := store + "\x00" + function.Name.Name + "\x00"
+					locks[key] = typedLock{Store: store, Method: function.Name.Name}
+				}
+				for _, clause := range clauses {
+					table := strings.Split(clause, " FOR ")[0]
+					key := store + "\x00" + function.Name.Name + "\x00" + table
+					locks[key] = typedLock{Table: table, Store: store, Method: function.Name.Name}
+				}
 			}
-			window := text[start:location[0]]
-			tables := lockTable.FindAllStringSubmatch(window, -1)
-			if len(tables) == 0 {
-				continue
-			}
-			table := normalizeTableName(tables[len(tables)-1][1])
-			if table == "" {
-				continue
-			}
-			method := storeFunction(text, location[0])
-			key := store + "\x00" + method + "\x00" + table
-			locks[key] = typedLock{Table: table, Store: store, Method: method}
 		}
-		return nil
-	})
+	}
 	callerCache := map[string][]string{}
 	result := []typedLock{}
 	for _, lock := range locks {
@@ -664,16 +669,6 @@ func (w *typedWorld) rowLocks() []typedLock {
 		result = append(result, lock)
 	}
 	return result
-}
-
-var storeFunctionRE = regexp.MustCompile(`(?m)^func\s+(?:\([^)]*\)\s*)?([A-Za-z0-9_]+)\s*\(`)
-
-func storeFunction(text string, position int) string {
-	matches := storeFunctionRE.FindAllStringSubmatch(text[:position], -1)
-	if len(matches) == 0 {
-		return ""
-	}
-	return matches[len(matches)-1][1]
 }
 
 func (w *typedWorld) lockCallers(store, method string) []string {

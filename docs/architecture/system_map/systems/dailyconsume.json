@@ -20,7 +20,8 @@
   },
   "row_locks": [
    "daily_consumption_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],

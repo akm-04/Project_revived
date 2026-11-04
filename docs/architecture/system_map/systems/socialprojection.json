@@ -22,8 +22,19 @@
    }
   ],
   "ranks": [],
-  "row_lock_methods": {},
-  "row_locks": []
+  "row_lock_methods": {
+   "player_social_roots": [
+    "socialrelationstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "player_social_roots",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],

@@ -43,6 +43,9 @@
   "profiles": [],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "guild_memberships": [
     "guildstore.LockMembershipTx"
    ],
@@ -52,13 +55,19 @@
    ],
    "guild_rental_uses": [
     "guildstore.LockRentalUseTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "guild_memberships",
    "guild_rental_offers",
-   "guild_rental_uses"
-  ]
+   "guild_rental_uses",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -147,6 +156,8 @@
  "tables": {
   "owned": [],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "guild_memberships",
    "guild_rental_offers",

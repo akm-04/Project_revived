@@ -50,8 +50,15 @@
    }
   ],
   "ranks": [],
-  "row_lock_methods": {},
-  "row_locks": []
+  "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -190,6 +197,8 @@
    "player_pets"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_appearance_pet_styles",
@@ -221,6 +230,7 @@
   ],
   "written": [
    "gxb_operation_receipts",
+   "player_pet_roots",
    "player_pet_style_entitlements",
    "player_pets"
   ]

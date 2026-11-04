@@ -40,13 +40,22 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
    "ranking_girls_roots": [
     "rankingstore.LockBoardRootTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
+   "players",
    "ranking_girls_roots"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -78,6 +87,8 @@
    "ranking_girls_snapshots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_player_display_catalogs",
    "content_public_profile_policies",
    "gameplay_contexts",

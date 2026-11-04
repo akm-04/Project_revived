@@ -13,7 +13,8 @@
   "profiles": [],
   "ranks": [],
   "row_lock_methods": {},
-  "row_locks": []
+  "row_locks": [],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],
@@ -28,7 +29,8 @@
   "read": [
    "player_directory_profiles",
    "player_function_unlocks",
-   "player_profiles"
+   "player_profiles",
+   "player_progression"
   ],
   "written": []
  },

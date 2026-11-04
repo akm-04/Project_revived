@@ -33,13 +33,22 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "library_forum_comments": [
-    "libraryforumstore.DeleteReactionTx"
+    "libraryforumstore.LockCommentTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
-   "library_forum_comments"
-  ]
+   "gameplay_contexts",
+   "library_forum_comments",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -83,6 +92,8 @@
    "library_forum_reactions"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_operation_receipts",
    "library_forum_comments",

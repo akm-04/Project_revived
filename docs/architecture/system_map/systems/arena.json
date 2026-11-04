@@ -109,6 +109,12 @@
    "arena_tournament_rooms": [
     "arenastore.ReadTournamentRoomTx",
     "arenastore.SaveTournamentRoomTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
@@ -118,8 +124,11 @@
    "arena_matches",
    "arena_players",
    "arena_tournament_periods",
-   "arena_tournament_rooms"
-  ]
+   "arena_tournament_rooms",
+   "gameplay_contexts",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -489,6 +498,8 @@
    "arena_tournament_rooms"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "arena_casual_entries",
    "arena_casual_scores",
    "arena_casual_sessions",
@@ -499,6 +510,7 @@
    "arena_players",
    "arena_records",
    "arena_settlement_ranks",
+   "arena_settlements",
    "arena_tournament_periods",
    "arena_tournament_rooms",
    "content_player_display_catalogs",

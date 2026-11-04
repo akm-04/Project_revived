@@ -46,6 +46,9 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "one_on_one_competitions": [
     "oneononestore.ReadCompetitionTx"
    ],
@@ -57,10 +60,12 @@
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "one_on_one_competitions",
    "one_on_one_matches",
    "one_on_one_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -167,6 +172,8 @@
    "one_on_one_settlements"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_player_display_catalogs",
    "content_public_profile_policies",
    "gameplay_contexts",

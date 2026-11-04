@@ -13,7 +13,8 @@
   "profiles": [],
   "ranks": [],
   "row_lock_methods": {},
-  "row_locks": []
+  "row_locks": [],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],
@@ -31,8 +32,11 @@
    "request_journal"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "client_log_capabilities",
-   "gameplay_context_credentials"
+   "gameplay_context_credentials",
+   "gameplay_contexts"
   ],
   "written": [
    "client_log_capabilities",

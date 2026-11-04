@@ -52,6 +52,9 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_element_admissions": [
     "elementstore.LockAdmissionTx"
    ],
@@ -60,13 +63,19 @@
    ],
    "player_element_roots": [
     "elementstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_element_admissions",
    "player_element_heroes",
-   "player_element_roots"
-  ]
+   "player_element_roots",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayRosterTx"
@@ -132,6 +141,8 @@
    "player_element_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_element_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

@@ -43,6 +43,9 @@
   "profiles": [],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "guild_broadcast_recipients": [
     "guildbroadcaststore.ListDuePendingForUpdateTx",
     "guildbroadcaststore.LockBindingTx"
@@ -52,13 +55,19 @@
    ],
    "guilds": [
     "guildstore.LockGuildTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "guild_broadcast_recipients",
    "guild_memberships",
-   "guilds"
-  ]
+   "guilds",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -87,6 +96,8 @@
    "guild_broadcast_sources"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_guild_broadcast_policies",
    "gameplay_contexts",
    "guild_audit_log",
@@ -98,6 +109,7 @@
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
+   "player_directory_profiles",
    "players"
   ],
   "written": [

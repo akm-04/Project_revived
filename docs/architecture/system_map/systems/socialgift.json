@@ -29,17 +29,35 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_social_roots": [
+    "socialrelationstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
    "social_gift_epochs": [
     "socialgiftstore.LockEpoch"
    ],
    "social_gift_transfers": [
     "socialgiftstore.LockTransfer"
+   ],
+   "social_notices": [
+    "socialinboxstore.LockNoticeTx",
+    "socialinboxstore.ReadNoticeEvidenceTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
+   "player_social_roots",
+   "players",
    "social_gift_epochs",
-   "social_gift_transfers"
-  ]
+   "social_gift_transfers",
+   "social_notices"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],
@@ -60,6 +78,8 @@
    "social_gift_transfers"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_social_gift_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

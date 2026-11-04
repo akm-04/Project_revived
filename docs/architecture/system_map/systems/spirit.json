@@ -52,6 +52,9 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_spirit_admissions": [
     "spiritstore.LockAdmissionTx"
    ],
@@ -60,13 +63,19 @@
    ],
    "player_spirit_roots": [
     "spiritstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_spirit_admissions",
    "player_spirit_heroes",
-   "player_spirit_roots"
-  ]
+   "player_spirit_roots",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayRosterTx"
@@ -164,6 +173,8 @@
    "player_spirit_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_spirit_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

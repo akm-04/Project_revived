@@ -51,17 +51,26 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "league_competitions": [
     "leaguestore.RootTx"
    ],
    "league_players": [
     "leaguestore.PlayersTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "league_competitions",
-   "league_players"
-  ]
+   "league_players",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -150,6 +159,8 @@
    "league_settlements"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "guild_memberships",
    "guilds",

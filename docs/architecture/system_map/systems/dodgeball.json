@@ -32,14 +32,23 @@
    "dodgeball_players": [
     "dodgeballstore.LockTx"
    ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "mail_namespace_counters": [
     "i5store.LockMailNamespaceCounterTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
    "dodgeball_players",
-   "mail_namespace_counters"
-  ]
+   "gameplay_contexts",
+   "mail_namespace_counters",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -99,6 +108,8 @@
    "dodgeball_players"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "dodgeball_players",
    "gameplay_contexts",
    "gxb_content_activation",

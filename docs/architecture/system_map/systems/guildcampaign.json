@@ -93,6 +93,9 @@
   "profiles": [],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "guild_campaign_awards": [
     "guildcampaignstore.LockAwardTx"
    ],
@@ -116,17 +119,23 @@
    ],
    "player_guild_activity_days": [
     "guildstore.FoldActivityTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "guild_campaign_awards",
    "guild_campaign_chapters",
    "guild_campaign_copies",
    "guild_campaign_member_days",
    "guild_memberships",
    "guilds",
-   "player_guild_activity_days"
-  ]
+   "player_guild_activity_days",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -268,6 +277,8 @@
    "guild_campaign_server_records"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "guild_audit_log",
    "guild_campaign_application_days",

@@ -54,17 +54,26 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_book_admissions": [
     "bookstore.LockAdmissionTx"
    ],
    "player_book_roots": [
     "bookstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_book_admissions",
-   "player_book_roots"
-  ]
+   "player_book_roots",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "BootstrapProjection",
@@ -180,6 +189,8 @@
    "player_book_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_book_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

@@ -39,14 +39,35 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_public_profile_roots": [
     "publicprofilestore.LockRootTx",
     "publicprofilestore.ReadRootTx"
+   ],
+   "player_social_roots": [
+    "socialrelationstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "social_blocks": [
+    "socialrelationstore.LockBlockTx"
+   ],
+   "social_friendships": [
+    "socialrelationstore.LockFriendshipTx"
    ]
   },
   "row_locks": [
-   "player_public_profile_roots"
-  ]
+   "gameplay_contexts",
+   "player_public_profile_roots",
+   "player_social_roots",
+   "players",
+   "social_blocks",
+   "social_friendships"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -134,6 +155,8 @@
    "player_public_profile_showcase_slots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_player_display_catalogs",
    "content_public_profile_policies",
    "content_public_showcase_policies",
@@ -147,6 +170,7 @@
    "player_pet_roots",
    "player_pets",
    "player_profiles",
+   "player_progression",
    "player_public_profile_media_current",
    "player_public_profile_media_history",
    "player_public_profile_roots",

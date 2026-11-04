@@ -32,6 +32,9 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_profile_comment_operations": [
     "profilefeedbackstore.PendingAdmissionTx",
     "profilefeedbackstore.ReadAdmissionTx"
@@ -39,12 +42,18 @@
    "player_profile_feedback_roots": [
     "profilefeedbackstore.LockRootTx",
     "profilefeedbackstore.ReadRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_profile_comment_operations",
-   "player_profile_feedback_roots"
-  ]
+   "player_profile_feedback_roots",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -115,6 +124,8 @@
    "player_profile_praises"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_public_profile_policies",
    "gameplay_contexts",
    "gxb_content_activation",
@@ -128,6 +139,7 @@
    "player_profile_feedback_roots",
    "player_profile_praises",
    "player_profiles",
+   "player_progression",
    "players"
   ],
   "written": [

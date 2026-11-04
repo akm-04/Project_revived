@@ -56,6 +56,9 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "top_floor_fights": [
     "topfloorstore.ReadFightTx"
    ],
@@ -76,13 +79,15 @@
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "top_floor_fights",
    "top_floor_ladders",
    "top_floor_players",
    "top_floor_task_fights",
    "top_floor_task_periods",
    "top_floor_task_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -300,6 +305,8 @@
    "top_floor_task_records"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "guild_memberships",
    "guilds",

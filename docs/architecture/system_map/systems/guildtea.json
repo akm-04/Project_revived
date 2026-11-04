@@ -43,13 +43,22 @@
   "profiles": [],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "guild_tea_wishes": [
     "guildstore.LockWishTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
-   "guild_tea_wishes"
-  ]
+   "gameplay_contexts",
+   "guild_tea_wishes",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -98,11 +107,14 @@
  "tables": {
   "owned": [],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "guild_memberships",
    "guild_tea_gifts",
    "guild_tea_wishes",
    "gxb_content_activation",
+   "gxb_content_hero_templates",
    "gxb_content_resource_definitions",
    "player_directory_profiles",
    "player_heroes",

@@ -47,13 +47,18 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "march_players": [
     "marchstore.LockTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "march_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayMID1"
@@ -131,6 +136,8 @@
    "march_players"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_revisions",

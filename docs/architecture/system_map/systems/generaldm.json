@@ -33,14 +33,15 @@
     "generaldmstore.Find",
     "generaldmstore.Lock"
    ],
-   "player_social_presence": [
-    "presencestore.ReadOwnerFenceTx"
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
    "personal_dm_intents",
-   "player_social_presence"
-  ]
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [

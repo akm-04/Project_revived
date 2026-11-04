@@ -2256,6 +2256,56 @@
  "systems_not_wired": [],
  "tables_locked_by_many": [
   {
+   "table": "gameplay_contexts",
+   "systems": [
+    "achievement",
+    "arena",
+    "awakeningbattle",
+    "bookskill",
+    "campaign",
+    "championsleague",
+    "characterhero",
+    "characterpet",
+    "characterpractice",
+    "charactersavedpreset",
+    "commerceprivilege",
+    "conquerschool",
+    "course",
+    "dodgeball",
+    "dormhouse",
+    "elementequipment",
+    "godstrial",
+    "guildbroadcast",
+    "guildcampaign",
+    "guildcore",
+    "guildrental",
+    "guildtea",
+    "heroevolution",
+    "i5",
+    "illusion",
+    "inscription",
+    "libraryforum",
+    "librarylocal",
+    "march",
+    "memoir",
+    "occult",
+    "oneonone",
+    "petcampaign",
+    "playerdisplay",
+    "profilefeedback",
+    "publication",
+    "publicprofile",
+    "ranking",
+    "sharedroom",
+    "socialgift",
+    "spirit",
+    "summon",
+    "topfloor",
+    "workplace",
+    "worldboss"
+   ]
+  },
+  {
    "table": "guild_memberships",
    "systems": [
     "guildbroadcast",
@@ -2309,11 +2359,67 @@
    ]
   },
   {
-   "table": "player_social_presence",
+   "table": "player_social_roots",
    "systems": [
+    "publicprofile",
+    "socialdismiss",
+    "socialgift",
+    "socialprojection",
+    "socialrelation"
+   ]
+  },
+  {
+   "table": "players",
+   "systems": [
+    "arena",
+    "bookskill",
+    "championsleague",
+    "characterhero",
+    "commerceprivilege",
+    "conquerschool",
+    "course",
+    "dodgeball",
+    "dormhouse",
+    "elementequipment",
     "frienddm",
     "generaldm",
-    "socialpresence"
+    "guildbroadcast",
+    "guildcampaign",
+    "guildcore",
+    "guildinvite",
+    "guildinvitetarget",
+    "guildrental",
+    "guildtea",
+    "heroevolution",
+    "i5",
+    "illusion",
+    "inscription",
+    "libraryforum",
+    "librarylocal",
+    "occult",
+    "playerdisplay",
+    "profilefeedback",
+    "publication",
+    "publicprofile",
+    "ranking",
+    "roominvite",
+    "sharedroom",
+    "socialdismiss",
+    "socialgift",
+    "socialprojection",
+    "socialrelation",
+    "spirit",
+    "worldboss"
+   ]
+  },
+  {
+   "table": "social_notices",
+   "systems": [
+    "guildinvitetarget",
+    "roominvite",
+    "socialdismiss",
+    "socialgift",
+    "socialinbox"
    ]
   }
  ],
@@ -2396,6 +2502,47 @@
    "name": "",
    "client_files": [],
    "reason": "no application package resolves from the dispatcher or its wiring"
+  }
+ ],
+ "unattributed_pushes": [
+  {
+   "kind": "direct",
+   "mid": 36855,
+   "roles": [
+    "Role",
+    "World"
+   ],
+   "file": "internal/adapters/stockruntime/social_reload.go",
+   "line": 64,
+   "app_imports": [
+    "socialrelation",
+    "socialreload",
+    "socialreloadref"
+   ]
+  },
+  {
+   "kind": "direct",
+   "mid": 36853,
+   "roles": [
+    "Role",
+    "World"
+   ],
+   "file": "internal/adapters/stockruntime/guild_fight_notice.go",
+   "line": 28,
+   "app_imports": []
+  },
+  {
+   "kind": "notice",
+   "parent_mid": 36854,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 13,
+   "roles": [
+    "Role",
+    "World"
+   ],
+   "file": "internal/adapters/stockruntime/tournament_notice.go",
+   "line": 63,
+   "app_imports": []
   }
  ],
  "live_mids_not_covered_note": "scenario_coverage.json absent; run --refresh-coverage <file> after a full suite"

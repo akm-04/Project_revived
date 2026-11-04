@@ -37,6 +37,9 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_dorm_admissions": [
     "dormstore.LockAdmissionTx"
    ],
@@ -48,14 +51,20 @@
    ],
    "player_progression": [
     "i5store.LockDormPlayerStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_dorm_admissions",
    "player_dorm_roots",
    "player_economy_owners",
-   "player_progression"
-  ]
+   "player_progression",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayRosterTx"
@@ -151,6 +160,8 @@
    "player_dorm_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_dorm_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

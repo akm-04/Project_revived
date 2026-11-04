@@ -39,13 +39,18 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "workplace_players": [
     "workplacestore.LockTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "workplace_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -106,6 +111,8 @@
    "workplace_players"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "campaign_nodes",
    "campaign_players",
    "gameplay_contexts",

@@ -43,6 +43,12 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
    "worldboss_occurrences": [
     "worldbossstore.LockOccurrenceTx"
    ],
@@ -54,10 +60,13 @@
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
+   "players",
    "worldboss_occurrences",
    "worldboss_player_totals",
    "worldboss_players"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayMID1"
@@ -122,6 +131,8 @@
    "worldboss_players"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_revisions",

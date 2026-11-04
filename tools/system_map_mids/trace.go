@@ -371,30 +371,84 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 
 // walkHandlerBody follows only the MID case of a handler's MID switch, so a
 // trace answers what the requested MID touches rather than every sibling MID.
-func (t *tracer) walkHandlerBody(statements []ast.Stmt, pkg *tracePackage, depth int) {
+func (t *tracer) walkHandlerBody(statements []ast.Stmt, pkg *tracePackage, depth int) bool {
 	for _, statement := range statements {
-		switch typed := statement.(type) {
-		case *ast.SwitchStmt:
-			if typed.Tag == nil || !strings.Contains(t.expressionText(pkg, typed.Tag), "MID") {
-				t.inspectCalls(statement, pkg, depth)
+		switch branch := statement.(type) {
+		case *ast.ReturnStmt:
+			t.inspectCalls(branch, pkg, depth)
+			return true
+		case *ast.IfStmt:
+			matches, known := t.midCondition(branch.Cond, pkg)
+			if !known {
+				t.inspectCalls(branch, pkg, depth)
 				continue
 			}
-			if typed.Init != nil {
-				t.inspectCalls(typed.Init, pkg, depth)
+			if branch.Init != nil {
+				t.inspectCalls(branch.Init, pkg, depth)
 			}
-			for _, raw := range typed.Body.List {
-				clause, isClause := raw.(*ast.CaseClause)
-				if !isClause || !t.clauseMatchesMID(clause, pkg) {
-					continue
+			if matches {
+				if t.walkHandlerBody(branch.Body.List, pkg, depth) {
+					return true
 				}
-				for _, inner := range clause.Body {
-					t.inspectCalls(inner, pkg, depth)
+			} else if block, ok := branch.Else.(*ast.BlockStmt); ok {
+				if t.walkHandlerBody(block.List, pkg, depth) {
+					return true
+				}
+			} else if branch.Else != nil {
+				if t.walkHandlerBody([]ast.Stmt{branch.Else}, pkg, depth) {
+					return true
+				}
+			}
+		case *ast.SwitchStmt:
+			if branch.Tag == nil || !strings.Contains(t.expressionText(pkg, branch.Tag), "MID") {
+				t.inspectCalls(branch, pkg, depth)
+				continue
+			}
+			if branch.Init != nil {
+				t.inspectCalls(branch.Init, pkg, depth)
+			}
+			for _, raw := range branch.Body.List {
+				clause, ok := raw.(*ast.CaseClause)
+				if ok && t.clauseMatchesMID(clause, pkg) {
+					if t.walkHandlerBody(clause.Body, pkg, depth) {
+						return true
+					}
 				}
 			}
 		default:
 			t.inspectCalls(statement, pkg, depth)
 		}
 	}
+	return false
+}
+
+func (t *tracer) midCondition(expression ast.Expr, pkg *tracePackage) (bool, bool) {
+	comparison, ok := expression.(*ast.BinaryExpr)
+	if !ok || (comparison.Op != token.EQL && comparison.Op != token.NEQ) {
+		return false, false
+	}
+	left, right := comparison.X, comparison.Y
+	selector, ok := left.(*ast.SelectorExpr)
+	if !ok || selector.Sel.Name != "MID" {
+		left, right = right, left
+		selector, ok = left.(*ast.SelectorExpr)
+	}
+	if !ok || selector.Sel.Name != "MID" {
+		return false, false
+	}
+	value := pkg.info.Types[right].Value
+	if value == nil || value.Kind() != constant.Int {
+		return false, false
+	}
+	mid, exact := constant.Int64Val(value)
+	if !exact {
+		return false, false
+	}
+	matches := mid == int64(t.mid)
+	if comparison.Op == token.NEQ {
+		matches = !matches
+	}
+	return matches, true
 }
 
 func (t *tracer) clauseMatchesMID(clause *ast.CaseClause, pkg *tracePackage) bool {
@@ -438,7 +492,7 @@ var (
 	traceInsert = regexp.MustCompile(`(?i)\binsert\s+into\s+([a-zA-Z0-9_".]+)`)
 	traceUpdate = regexp.MustCompile(`(?i)\bupdate\s+([a-zA-Z0-9_".]+)(?:\s+(?:as\s+)?[a-z][a-zA-Z0-9_]*)?\s+set\b`)
 	traceDelete = regexp.MustCompile(`(?i)\bdelete\s+from\s+([a-zA-Z0-9_".]+)`)
-	traceRead   = regexp.MustCompile(`(?i)\bfrom\s+([a-zA-Z0-9_".]+)`)
+	traceRead   = regexp.MustCompile(`(?i)\b(?:from|join)\s+([a-zA-Z0-9_".]+)`)
 	traceLock   = regexp.MustCompile(`(?is)for\s+(update|share)`)
 )
 
@@ -464,10 +518,27 @@ func traceSkipFunction(text string, match []int) bool {
 	return false
 }
 
+var sqlFragment = regexp.MustCompile(`(?i)^\s*(?:select\b|insert\b|update\b|delete\b|with\b|from\b|join\b|for\s+(?:update|share)\b)`)
+
+var sqlLeadingComments = regexp.MustCompile(`(?s)^(?:\s|--[^\n]*(?:\n|$)|/\*.*?\*/)*`)
+
+func isSQLFragment(text string) bool {
+	return sqlFragment.MatchString(sqlLeadingComments.ReplaceAllString(text, ""))
+}
+
+var traceCTEAlias = regexp.MustCompile(`(?i)(?:\bwith\s+(?:recursive\s+)?|,)\s*([a-zA-Z0-9_"]+)\s*(?:\([^)]*\)\s*)?as\s+(?:(?:not\s+)?materialized\s*)?\(`)
+
 func traceSQLTables(text string) ([]string, []string, []string) {
+	if !isSQLFragment(text) {
+		return nil, nil, nil
+	}
 	read := map[string]bool{}
 	write := map[string]bool{}
 	locks := map[string]bool{}
+	aliases := map[string]bool{}
+	for _, match := range traceCTEAlias.FindAllStringSubmatch(text, -1) {
+		aliases[traceTableName(match[1])] = true
+	}
 	for _, pattern := range []*regexp.Regexp{traceInsert, traceUpdate, traceDelete} {
 		for _, match := range pattern.FindAllStringSubmatchIndex(text, -1) {
 			if table := traceTableName(text[match[2]:match[3]]); table != "" {
@@ -479,7 +550,9 @@ func traceSQLTables(text string) ([]string, []string, []string) {
 		if traceSkipFunction(text, match) {
 			continue
 		}
-		if table := traceTableName(text[match[2]:match[3]]); table != "" {
+		raw := text[match[2]:match[3]]
+		table := traceTableName(raw)
+		if table != "" && (!aliases[table] || strings.Contains(raw, ".")) {
 			read[table] = true
 		}
 	}
@@ -510,13 +583,26 @@ func sortedKeys(values map[string]bool) []string {
 	return keys
 }
 
-func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePackage, depth int) {
+func functionSQLText(decl *ast.FuncDecl, info *types.Info) string {
 	literals := []string{}
 	ast.Inspect(decl.Body, func(node ast.Node) bool {
+		if expression, ok := node.(ast.Expr); ok {
+			value := info.Types[expression].Value
+			if value != nil && value.Kind() == constant.String {
+				text := constant.StringVal(value)
+				if isSQLFragment(text) {
+					literals = append(literals, text)
+					return false
+				}
+			}
+		}
 		if identifier, isIdentifier := node.(*ast.Ident); isIdentifier {
-			named, isConstant := pkg.info.Uses[identifier].(*types.Const)
+			named, isConstant := info.Uses[identifier].(*types.Const)
 			if isConstant && named.Val().Kind() == constant.String {
-				literals = append(literals, constant.StringVal(named.Val()))
+				value := constant.StringVal(named.Val())
+				if isSQLFragment(value) {
+					literals = append(literals, value)
+				}
 			}
 			return true
 		}
@@ -525,12 +611,20 @@ func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePacka
 			return true
 		}
 		value, err := strconv.Unquote(literal.Value)
-		if err == nil {
+		if err == nil && isSQLFragment(value) {
 			literals = append(literals, value)
 		}
 		return true
 	})
-	read, write, locks := traceSQLTables(strings.Join(literals, "\n"))
+	return strings.Join(literals, "\n")
+}
+
+func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePackage, depth int) {
+	text := functionSQLText(decl, pkg.info)
+	read, write, locks := traceSQLTables(text)
+	if len(locks) == 0 && traceLock.MatchString(text) {
+		t.line(depth+1, "UNRESOLVED SQL lock target; clause passed or assembled outside this function")
+	}
 	for _, table := range read {
 		t.read[table] = true
 	}
@@ -629,7 +723,11 @@ func traceMID(out *output, w *typedWorld, mid int) (string, error) {
 	handler.walk(traceTarget{pkgPath: chosen.DispatcherPackage, receiver: chosen.DispatcherType, name: "Dispatch"}, 0, true)
 	header := fmt.Sprintf("MID %d handler %s.%s %s:%d",
 		mid, pathBase(chosen.DispatcherPackage), chosen.DispatcherType, chosen.HandlerFile, chosen.HandlerLine)
-	lines := append([]string{header}, handler.lines...)
+	lines := []string{header}
+	for _, wrapper := range chosen.Wrappers {
+		lines = append(lines, fmt.Sprintf("UNRESOLVED registered wrapper %s at %s:%d; inner-dispatcher trace omits wrapper effects", wrapper, chosen.RegistrationFile, chosen.RegistrationLine))
+	}
+	lines = append(lines, handler.lines...)
 	if handler.truncated {
 		lines = append(lines, fmt.Sprintf("BOUND stopped after %d functions", traceNodeLimit))
 	}

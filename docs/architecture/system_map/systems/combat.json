@@ -28,7 +28,8 @@
   "row_locks": [
    "combat_attempts",
    "combat_locator_roots"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],
@@ -57,6 +58,7 @@
    "combat_attestations",
    "combat_locator_roots",
    "combat_member_settlements",
+   "combat_report_blobs",
    "combat_resolutions",
    "combat_snapshots",
    "combat_start_packages",

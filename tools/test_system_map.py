@@ -39,6 +39,25 @@ class SystemMapViewTests(unittest.TestCase):
             self.assertEqual(canonical['calls'], {'grant_owner': ['SettleTx']})
             self.assertEqual(canonical['called_by'], {'campaign': ['PrepareTx']})
 
+    def test_generation_refuses_type_analysis_errors_before_writing(self):
+        with patch.object(system_map, 'run_helper', return_value={'typed': {'analysis_errors': ['fixture: unresolved type']}}):
+            with self.assertRaisesRegex(SystemExit, 'unresolved type'):
+                system_map.build_system_map()
+
+    def test_push_attribution_retains_unknown_registrations(self):
+        known = {'file': 'internal/adapters/stockruntime/channelchat_notice.go', 'kind': 'notice', 'line': 1, 'app_imports': []}
+        unknown = {'file': 'internal/adapters/stockruntime/tournament_notice.go', 'kind': 'notice', 'line': 2, 'notice_type': 13, 'app_imports': []}
+        grouped, unattributed = system_map.partition_pushes([known, unknown], ['channelchat'])
+        self.assertEqual(len(grouped['channelchat']), 1)
+        self.assertEqual(unattributed, [unknown])
+        self.assertEqual(sum(map(len, grouped.values())) + len(unattributed), 2)
+
+    def test_unresolved_lock_target_is_not_an_empty_table(self):
+        lock = {'table': '', 'store': 'store/example', 'method': 'LockTx'}
+        callers = {('store/example', 'LockTx'): {'owner'}}
+        self.assertEqual(system_map.row_lock_methods_by_system(['owner'], [lock], callers), {'owner': {}})
+        self.assertEqual(system_map.row_locks_by_system(['owner'], [lock], callers), {'owner': []})
+
     def test_inverse_calls_preserve_opposite_methods(self):
         outgoing = {'library': {'achievement': ['PrepareMarriageTx']}, 'achievement': {'library': ['HeroInputsTx']}}
         incoming = system_map.inverse_calls(['library', 'achievement'], outgoing)

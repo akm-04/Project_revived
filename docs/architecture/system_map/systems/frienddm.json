@@ -34,15 +34,19 @@
    "friend_dm_roots": [
     "frienddmstore.Snapshot"
    ],
-   "player_social_presence": [
-    "presencestore.AssertOwnerFenceTx",
-    "presencestore.ReadOwnerFenceTx"
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "realtime_presence_owner_state": [
+    "presencestore.AssertOwnerFenceTx"
    ]
   },
   "row_locks": [
    "friend_dm_roots",
-   "player_social_presence"
-  ]
+   "players",
+   "realtime_presence_owner_state"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [

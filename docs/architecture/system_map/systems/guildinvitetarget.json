@@ -22,8 +22,20 @@
    }
   ],
   "ranks": [],
-  "row_lock_methods": {},
-  "row_locks": []
+  "row_lock_methods": {
+   "players": [
+    "i4store.LockBoundRecipientTx"
+   ],
+   "social_notices": [
+    "socialinboxstore.LockNoticeSourceTx",
+    "socialinboxstore.ReadInviteNoticeSourceTx"
+   ]
+  },
+  "row_locks": [
+   "players",
+   "social_notices"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],

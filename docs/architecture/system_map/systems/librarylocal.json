@@ -66,6 +66,9 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_library_admissions": [
     "librarystore.LockAdmissionTx"
    ],
@@ -74,13 +77,19 @@
    ],
    "player_library_roots": [
     "librarystore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_library_admissions",
    "player_library_heroes",
-   "player_library_roots"
-  ]
+   "player_library_roots",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "BootstrapProjection",
@@ -294,6 +303,8 @@
    "player_library_talk_claims"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_library_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

@@ -130,17 +130,26 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_economy_owners": [
     "i5store.LockEconomyOwnerTx"
    ],
    "player_item_stacks": [
     "i5store.LockStackTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_economy_owners",
-   "player_item_stacks"
-  ]
+   "player_item_stacks",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayRosterTx"
@@ -335,6 +344,8 @@
    "player_heroes"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_awakening_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",
@@ -376,6 +387,7 @@
   "written": [
    "gxb_operation_receipts",
    "player_hero_live_entitlements",
+   "player_hero_roots",
    "player_hero_skin_entitlements",
    "player_heroes"
   ]

@@ -62,6 +62,9 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "guild_applications": [
     "guildstore.LockApplicationTx",
     "guildstore.PrepareMembershipCleanupTx"
@@ -80,16 +83,22 @@
    ],
    "player_guild_activity_days": [
     "guildstore.FoldActivityTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "guild_applications",
    "guild_invites",
    "guild_memberships",
    "guild_server_allocators",
    "guilds",
-   "player_guild_activity_days"
-  ]
+   "player_guild_activity_days",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -294,6 +303,8 @@
    "player_guild_activity_totals"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "guild_applications",
    "guild_audit_log",

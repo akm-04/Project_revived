@@ -52,17 +52,26 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_hero_evolution": [
     "characterstore.LockHeroTx"
    ],
    "player_hero_evolution_admissions": [
     "characterstore.LockAdmissionTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_hero_evolution",
-   "player_hero_evolution_admissions"
-  ]
+   "player_hero_evolution_admissions",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayRosterTx"
@@ -101,6 +110,8 @@
  "tables": {
   "owned": [],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_evolution_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",

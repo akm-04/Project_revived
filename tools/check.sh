@@ -48,6 +48,7 @@ run python3 tools/generate_content_querytext.py --check
 run python3 tools/generate_character_querytext.py --check
 run python3 tools/check_schema_query_ownership.py
 run python3 tools/test_system_map.py
+run go test ./tools/system_map_mids
 run python3 tools/system_map.py --check
 run python3 tools/validate_foundation_trace.py
 

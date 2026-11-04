@@ -60,8 +60,15 @@
    }
   ],
   "ranks": [],
-  "row_lock_methods": {},
-  "row_locks": []
+  "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -160,6 +167,8 @@
    "player_practice_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_hero_templates",
@@ -181,7 +190,8 @@
    "player_hero_practice_candidates",
    "player_heroes",
    "player_pet_practice_candidates",
-   "player_pets"
+   "player_pets",
+   "player_practice_roots"
   ]
  },
  "tests": {

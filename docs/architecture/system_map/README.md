@@ -22,7 +22,8 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
   plus `mid_to_system` and `table_to_system`.
 - `EDGES.json` – `calls`, `called_by`, `composition` for every system.
 - `systems/<system>.json` – one system; `show <system>` joins its edge detail without reading all of `EDGES.json`.
-- `FINDINGS.json` – review leads, not verdicts.
+- `FINDINGS.json` – review leads, not verdicts. `unattributed_pushes` retains
+  registrations whose owner cannot be resolved instead of silently discarding them.
 - `client_mid_callers.json` – MIDs, names, files, `senders` (same-line `request(`), `other`.
 
 ## Fields
@@ -63,6 +64,8 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
   through the store method's callers (including store-internal caller closure).
   `locks.row_lock_methods` – per table, the `store.method` names that reach the SQL holding the
   clause; `trace` says whether that clause is conditional.
+  `locks.unresolved_methods` names lock clauses whose table cannot be resolved locally,
+  such as a suffix passed to another function; an empty table name is never invented.
 - `tests.scenarios_naming` – scenarios that name a MID in text; not coverage.
 
 ## Commands
@@ -81,6 +84,8 @@ campaign/clientlog attribution anchors, and re-runs `trace` for MIDs 114, 161 an
 Trace assertions match symbols, source paths and required tables; source line numbers
 remain navigation metadata and may move without changing a relationship.
 `show missions` aliases to `i5`: there is no `internal/application/missions` package.
+Type-check errors stop generation before files are written; they cannot silently replace
+the last good map with a partial package analysis. Client/coverage refreshes remain explicit.
 
 ## trace versus show
 `show <system>` joins the generated, committed view: attribution, tables, stores, composition and
@@ -95,6 +100,9 @@ touches tables prints `(seen above, touches tables)`. It prints
 the implementers of an interface with more than three (a registry or per-mode port family; which one
 runs is decided at composition, so open the construction file), and a
 `BOUND` line when its node or depth limit stops the walk.
+Registered wrappers that are not traversed are named in an `UNRESOLVED registered wrapper`
+line: the inner dispatcher walk omits their effects. SQL relation extraction remains lexical;
+it handles common CTE aliases and joins but is not a full PostgreSQL parser.
 
 ## Limits
 - Interfaces declared outside this module (including the universe `error`) and anonymous

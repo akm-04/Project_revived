@@ -32,8 +32,15 @@
     "rank": 430
    }
   ],
-  "row_lock_methods": {},
-  "row_locks": []
+  "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -59,6 +66,8 @@
    "player_saved_preset_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "gxb_operation_receipts",
    "player_heroes",

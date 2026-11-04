@@ -14,13 +14,17 @@
   "ranks": [],
   "row_lock_methods": {
    "player_social_presence": [
-    "presencestore.AssertOwnerFenceTx",
-    "presencestore.DeleteExactLeaseTx"
+    "presencestore.EnsureAndLockRootTx"
+   ],
+   "realtime_presence_owner_state": [
+    "presencestore.AssertOwnerFenceTx"
    ]
   },
   "row_locks": [
-   "player_social_presence"
-  ]
+   "player_social_presence",
+   "realtime_presence_owner_state"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],

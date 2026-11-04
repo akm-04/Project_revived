@@ -71,6 +71,9 @@
   "profiles": [],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_directory_profiles": [
     "i4store.LockOwnedDirectoryTx"
    ],
@@ -78,15 +81,29 @@
     "i5store.PendingDisplayAdmissionTx",
     "i5store.ReadDisplayAdmissionTx"
    ],
+   "player_hero_roots": [
+    "characterstore.PrepareDisplayHeroesTx"
+   ],
+   "player_heroes": [
+    "characterstore.PrepareDisplayHeroesTx"
+   ],
    "player_profiles": [
     "i5store.ReadDisplayStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_directory_profiles",
    "player_display_admissions",
-   "player_profiles"
-  ]
+   "player_hero_roots",
+   "player_heroes",
+   "player_profiles",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [
@@ -175,6 +192,8 @@
  "tables": {
   "owned": [],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_player_display_catalogs",
    "content_public_profile_policies",
    "gameplay_contexts",
@@ -194,6 +213,7 @@
    "player_heroes",
    "player_item_stacks",
    "player_profiles",
+   "player_progression",
    "players"
   ],
   "written": [

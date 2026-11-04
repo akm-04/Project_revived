@@ -919,6 +919,8 @@ def top_level_names(body):
 def row_lock_methods_by_system(systems, locks, callers):
     rows = {system: {} for system in systems}
     for lock in locks:
+        if not lock["table"]:
+            continue
         store = lock["store"].rsplit("/", 1)[-1]
         for method in [lock.get("method", "")] + list(lock.get("callers") or []):
             for system in callers.get((lock["store"], method), set()):
@@ -933,6 +935,8 @@ def row_lock_methods_by_system(systems, locks, callers):
 def row_locks_by_system(systems, locks, callers):
     rows = {system: set() for system in systems}
     for lock in locks:
+        if not lock["table"]:
+            continue
         methods = [lock.get("method", "")] + list(lock.get("callers") or [])
         for method in methods:
             for system in callers.get((lock["store"], method), set()):
@@ -943,6 +947,9 @@ def row_locks_by_system(systems, locks, callers):
 
 def build_system_map():
     helper = run_helper()
+    typed = helper["typed"]
+    if typed.get("analysis_errors"):
+        raise SystemExit("typed analysis incomplete: " + "; ".join(typed["analysis_errors"]))
     client = load_client_callers()
     registrations = helper["registrations"]
     grouped = group_registrations(registrations)
@@ -965,7 +972,6 @@ def build_system_map():
         system: directory_imports(APPLICATION_DIRECTORY / system) for system in systems
     }
     system_texts = {system: system_source(system) for system in systems}
-    typed = helper["typed"]
     call_edges = typed_calls(systems, typed["edges"])
     reverse_call_edges = inverse_calls(systems, call_edges)
     fact_kinds = fact_constants()
@@ -979,6 +985,14 @@ def build_system_map():
     lock_callers = store_callers(typed["edges"])
     system_row_lock_methods = row_lock_methods_by_system(systems, typed.get("row_locks", []), lock_callers)
     system_row_locks = row_locks_by_system(systems, typed.get("row_locks", []), lock_callers)
+    unresolved_lock_methods = {system: set() for system in systems}
+    for lock in typed.get("row_locks", []):
+        if lock["table"]:
+            continue
+        for method in [lock["method"]] + list(lock.get("callers") or []):
+            for system in lock_callers.get((lock["store"], method), set()):
+                if system in unresolved_lock_methods:
+                    unresolved_lock_methods[system].add(lock["store"].rsplit("/", 1)[-1] + "." + method)
     login_sets = login_contributors(systems)
     background = background_rows(systems, system_imports, system_texts)
     lock_rank_constants = lock_constants()
@@ -1007,6 +1021,7 @@ def build_system_map():
         for system in systems
     }
 
+    system_pushes, unattributed_pushes = partition_pushes(helper["pushes"], systems)
     system_records = {}
     for system in systems:
         directory = APPLICATION_DIRECTORY / system
@@ -1047,12 +1062,7 @@ def build_system_map():
             if count:
                 contract_files.append({"file": document, "count": count})
 
-        pushes = []
-        for push in helper["pushes"]:
-            if push_system(push, systems) != system:
-                continue
-            row = {key: value for key, value in push.items() if key != "app_imports"}
-            pushes.append(row)
+        pushes = system_pushes[system]
         pushes.sort(key=lambda row: (row["kind"], row.get("mid", 0), row.get("parent_mid", 0), row["file"], row["line"], row.get("notice_type", 0)))
 
         unit_tests = sorted(path.name for path in directory.glob("*_test.go"))
@@ -1087,7 +1097,7 @@ def build_system_map():
             },
             "login": sorted(login_sets.get(system, [])),
             "background": background.get(system, []),
-            "locks": dict(lock_rows(system, system_texts[system], stores, lock_rank_constants), row_locks=system_row_locks.get(system, []), row_lock_methods=system_row_lock_methods.get(system, {})),
+            "locks": dict(lock_rows(system, system_texts[system], stores, lock_rank_constants), row_locks=system_row_locks.get(system, []), row_lock_methods=system_row_lock_methods.get(system, {}), unresolved_methods=sorted(unresolved_lock_methods[system])),
             "content": content_tables(read_tables),
             "dispatcher_files": sorted({entry["dispatcher_file"] for entry in system_entries if entry["dispatcher_file"]}),
             "stores": stores,
@@ -1235,6 +1245,7 @@ def build_system_map():
         "tables_with_several_writers": several_writers,
         "tables_without_owner_row": without_owner,
         "unattributed_mids": unattributed,
+        "unattributed_pushes": unattributed_pushes,
     }
     if coverage_note:
         findings["live_mids_not_covered_note"] = coverage_note
@@ -1287,6 +1298,18 @@ def push_system(push, systems):
     return None
 
 
+def partition_pushes(pushes, systems):
+    grouped = {system: [] for system in systems}
+    unattributed = []
+    for push in pushes:
+        owner = push_system(push, systems)
+        if owner not in grouped:
+            unattributed.append(push)
+            continue
+        grouped[owner].append({key: value for key, value in push.items() if key != "app_imports"})
+    return grouped, sorted(unattributed, key=json_text)
+
+
 def validate_generated(files):
     def require(relative_path, label):
         if not (ROOT / relative_path).exists():
@@ -1298,6 +1321,8 @@ def validate_generated(files):
             system = name[len("systems/"):-len(".json")]
             for relative_path in data.get("dispatcher_files", []):
                 require(relative_path, "dispatcher_files")
+            for push in data.get("pushes", []):
+                require(push["file"], "pushes")
             for row in data.get("contracts", []):
                 require(row["file"], "contracts")
             for unit in data["tests"]["unit"]:

@@ -55,6 +55,9 @@
    }
   ],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_course_admissions": [
     "coursestore.LockAdmissionTx"
    ],
@@ -69,15 +72,21 @@
    ],
    "player_progression": [
     "i5store.LockCoursePlayerStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
    "player_course_admissions",
    "player_course_heroes",
    "player_course_roots",
    "player_economy_owners",
-   "player_progression"
-  ]
+   "player_progression",
+   "players"
+  ],
+  "unresolved_methods": []
  },
  "login": [
   "OverlayRosterTx"
@@ -231,6 +240,8 @@
    "player_course_roots"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_course_input_catalogs",
    "content_library_input_catalogs",
    "gameplay_contexts",
@@ -243,6 +254,7 @@
    "player_course_roots",
    "player_currency_balances",
    "player_economy_owners",
+   "player_function_unlocks",
    "player_hero_roots",
    "player_heroes",
    "player_item_stacks",

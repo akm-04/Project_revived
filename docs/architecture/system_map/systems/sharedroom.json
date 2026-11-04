@@ -29,13 +29,22 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
    "shared_rooms": [
     "sharedroomstore.LockRoomTx"
    ]
   },
   "row_locks": [
+   "gameplay_contexts",
+   "players",
    "shared_rooms"
-  ]
+  ],
+  "unresolved_methods": []
  },
  "login": [],
  "mids": [],
@@ -52,6 +61,8 @@
    "shared_rooms"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "players",
    "shared_room_seats",

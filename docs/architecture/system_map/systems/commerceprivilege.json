@@ -31,24 +31,31 @@
   ],
   "ranks": [],
   "row_lock_methods": {
-   "commerce_charge_cards": [
-    "commerceprivilegestore.LockCardsTx"
-   ],
    "commerce_charge_purchases": [
     "commerceprivilegestore.ReadPurchaseCountTx"
    ],
    "commerce_privilege_roots": [
     "commerceprivilegestore.ReadPrivilegeTx"
    ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
    "player_directory_profiles": [
     "i4store.PrepareVIPProjectionTx"
+   ],
+   "players": [
+    "i4store.LockBoundRecipientTx"
    ]
   },
   "row_locks": [
-   "commerce_charge_cards",
    "commerce_charge_purchases",
    "commerce_privilege_roots",
-   "player_directory_profiles"
+   "gameplay_contexts",
+   "player_directory_profiles",
+   "players"
+  ],
+  "unresolved_methods": [
+   "commerceprivilegestore.LockCardsTx"
   ]
  },
  "login": [
@@ -99,6 +106,8 @@
    "commerce_vip_awards"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "commerce_charge_cards",
    "commerce_charge_purchases",
    "commerce_privilege_roots",
