@@ -6,14 +6,17 @@ package playerdisplay_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	app "gxb.local/backend/v2/internal/application/librarylocal"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	lib "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -26,6 +29,110 @@ func (m graphLessLibraryContent) LibraryCatalogTx(ctx context.Context, q tx.Quer
 	}
 	catalog.DialogNodes = nil
 	return catalog, nil
+}
+
+func d491Catalog(t *testing.T, p *pg.Pool, revision string) lib.Catalog {
+	t.Helper()
+	catalog, e := (contentstore.Store{Queryer: p}).LibraryCatalogTx(ctx, p, revision)
+	if e != nil {
+		t.Fatal(e)
+	}
+	return catalog
+}
+
+// Source: data/tables/10001001.lua group 11 is the single node 1101001 with
+// is_reward = 1 and turn_id = -1. It is reachable from the group entry, so a
+// dialog-end call claims the dialog; library_dialog_config id 11 has
+// amour_reward = 0, so the configured favor delta is zero.
+func TestI9_10BD491NoSelectPositiveEndOnCatalog(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	catalog := d491Catalog(t, p, rev)
+	config, ok := catalog.DialogConfigs[11]
+	if !ok {
+		t.Fatal("dialog config 11 missing")
+	}
+	if grant, e := catalog.TalkEnd(10001001, 11, 0); e != nil || !grant {
+		t.Fatalf("catalog positive terminal grant=%v err=%v", grant, e)
+	}
+
+	actor := bornActor(t, p)
+	bornHero(t, p, actor, rev, 10001001, 1)
+	setLibraryFavor(t, p, actor, 1, 100)
+	service := libraryService(p, p)
+	before := d491StoredFavor(t, p, actor, 1)
+	want := before + config.AmourReward
+	params := map[string]any{"partner_id": int64(1), "dialog_id": int64(11)}
+	request := op()
+
+	first := libraryDispatchService(t, actor, service, 843, params, request)
+	t.Logf("positive end status=%d body=%+v before=%d amour_reward=%d", first.HTTPStatus, first.Body, before, config.AmourReward)
+	if first.HTTPStatus != 200 || first.Body["favor_degree"] != want {
+		t.Fatalf("positive end status %d body %+v want favor %d", first.HTTPStatus, first.Body, want)
+	}
+	info, ok := first.Body["dialog_info"].(map[string]any)
+	if !ok || info["is_awarded"] != int64(1) || info["select_id"] != int64(0) {
+		t.Fatalf("positive end dialog_info %T %+v", first.Body["dialog_info"], first.Body["dialog_info"])
+	}
+	if awards, ok := first.Body["awards"].([]any); !ok || len(awards) != 0 {
+		t.Fatalf("positive end awards %T %+v", first.Body["awards"], first.Body["awards"])
+	}
+	fact, found := d491StoredDialog(t, p, actor, 1, 11)
+	if !found || !fact.IsAwarded || fact.SelectID != 0 {
+		t.Fatalf("positive end stored dialog %+v found=%v", fact, found)
+	}
+	firstUpdated := fact.UpdatedAt
+
+	for _, replay := range []struct {
+		name      string
+		operation func() operation.Context
+	}{
+		{"same-operation retry", func() operation.Context { return request }},
+		{"fresh operation", op},
+	} {
+		response := libraryDispatchService(t, actor, service, 843, params, replay.operation())
+		t.Logf("%s status=%d body=%+v", replay.name, response.HTTPStatus, response.Body)
+		if response.HTTPStatus != 200 || response.Body["favor_degree"] != want {
+			t.Fatalf("%s status %d body %+v want favor %d", replay.name, response.HTTPStatus, response.Body, want)
+		}
+		repeat, found := d491StoredDialog(t, p, actor, 1, 11)
+		if !found || !repeat.IsAwarded || repeat.SelectID != 0 || !repeat.UpdatedAt.Equal(firstUpdated) {
+			t.Fatalf("%s stored dialog %+v found=%v, want unchanged award", replay.name, repeat, found)
+		}
+	}
+}
+
+// Source: data/tables/10001175.lua has the two real cross-group edges
+// 1001006 (group 10) -> 1001007 (group 11) -> 1001008 (group 10); the positive
+// node 1101001 in group 11 is disconnected. A group-scoped walk would fail,
+// while the relationship-global walk ends on the nonpositive terminal.
+func TestI9_10BD491CrossGroupCatalogWalk(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	catalog := d491Catalog(t, p, rev)
+	for _, dialogID := range []int64{10, 11} {
+		if grant, e := catalog.TalkEnd(10001175, dialogID, 0); e != nil || grant {
+			t.Fatalf("cross-group dialog %d grant=%v err=%v", dialogID, grant, e)
+		}
+	}
+
+	actor := bornActor(t, p)
+	bornHero(t, p, actor, rev, 10001175, 1)
+	setLibraryFavor(t, p, actor, 1, 100)
+	service := libraryService(p, p)
+	before := d491StoredFavor(t, p, actor, 1)
+	response := libraryDispatchService(t, actor, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(11)}, op())
+	t.Logf("cross-group dialog 11 status=%d body=%+v before=%d", response.HTTPStatus, response.Body, before)
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != before {
+		t.Fatalf("cross-group dialog 11 status %d body %+v", response.HTTPStatus, response.Body)
+	}
+	info, ok := response.Body["dialog_info"].(map[string]any)
+	if !ok || info["is_awarded"] != int64(0) || info["select_id"] != int64(0) {
+		t.Fatalf("cross-group dialog 11 dialog_info %T %+v", response.Body["dialog_info"], response.Body["dialog_info"])
+	}
+	if after := d491StoredFavor(t, p, actor, 1); after != before {
+		t.Fatalf("cross-group dialog 11 moved favor %d -> %d", before, after)
+	}
 }
 
 func d491StoredFavor(t *testing.T, p *pg.Pool, actor identity.ActorContext, partner int64) int64 {
@@ -138,8 +245,8 @@ func TestI9_10BD491NoSelectEndNonPositivePathNoFavor(t *testing.T) {
 	t.Logf("before no-select end stored_favor=%d", before)
 	response := libraryDispatchService(t, actor, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2)}, op())
 	t.Logf("no-select end status=%d body=%+v", response.HTTPStatus, response.Body)
-	if response.HTTPStatus != 200 && response.HTTPStatus != 409 {
-		t.Fatalf("no-select end transport status %d body %+v", response.HTTPStatus, response.Body)
+	if response.HTTPStatus != 200 {
+		t.Fatalf("source-valid no-op end status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	after := d491StoredFavor(t, p, actor, 1)
 	fact, found := d491StoredDialog(t, p, actor, 1, 2)
@@ -147,13 +254,11 @@ func TestI9_10BD491NoSelectEndNonPositivePathNoFavor(t *testing.T) {
 	if after != before {
 		t.Fatalf("no-select end on 10001001 dialog 2 moved stored favor %d -> %d", before, after)
 	}
-	if response.HTTPStatus == 200 {
-		if got := response.Body["favor_degree"]; got != before {
-			t.Fatalf("no-select end favor_degree %v want %d", got, before)
-		}
-		if info, ok := response.Body["dialog_info"].(map[string]any); ok && info["is_awarded"] != int64(0) {
-			t.Fatalf("no-select end dialog_info awarded %+v", info)
-		}
+	if got := response.Body["favor_degree"]; got != before {
+		t.Fatalf("no-select end favor_degree %v want %d", got, before)
+	}
+	if info, ok := response.Body["dialog_info"].(map[string]any); !ok || info["is_awarded"] != int64(0) {
+		t.Fatalf("no-select end dialog_info %T %+v", response.Body["dialog_info"], response.Body["dialog_info"])
 	}
 	if found && fact.IsAwarded {
 		t.Fatalf("no-select end stored dialog awarded %+v", fact)
@@ -216,41 +321,60 @@ func TestI9_10BD491MissingSourceGraphRefusesMutation(t *testing.T) {
 	}
 }
 
-func TestI9_10BD491LegacyReceiptAndReadsSurviveMissingGraph(t *testing.T) {
+// Each case first writes a new receipt, then removes the source graph before
+// replaying the same operation. The replay must return the stored result bytes;
+// a different operation must still fail closed without the graph.
+func TestI9_10BD491NewChoiceReceiptAndReadsSurviveMissingGraph(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
-	actor := bornActor(t, p)
-	bornHero(t, p, actor, rev, 10001006, 1)
-	setLibraryFavor(t, p, actor, 1, 100)
-	service := libraryService(p, p)
-	request := op()
-	params := map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "3|202001"}
-
-	first := libraryDispatchService(t, actor, service, 843, params, request)
-	if first.HTTPStatus != 200 {
-		t.Fatalf("first status %d body %+v", first.HTTPStatus, first.Body)
+	cases := []struct {
+		name        string
+		table       int64
+		selectInfo  string
+		wantFavor   int64
+		wantAwarded int64
+		wantSelect  int64
+	}{
+		{"raw3-new-receipt", 10001006, "3|202001", 102, 1, 202001},
+		{"zero-option", 10001001, "0|203001", 100, 0, 203001},
+		{"positive-option", 10001013, "1|203001", 102, 1, 203001},
 	}
-	t.Logf("first status=%d body=%+v", first.HTTPStatus, first.Body)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			actor := bornActor(t, p)
+			bornHero(t, p, actor, rev, tc.table, 1)
+			setLibraryFavor(t, p, actor, 1, 100)
+			service := libraryService(p, p)
+			request := op()
+			params := map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": tc.selectInfo}
 
-	service.Content = graphLessLibraryContent{ContentPort: service.Content}
-	replay := libraryDispatchService(t, actor, service, 843, params, request)
-	t.Logf("missing-graph receipt replay status=%d body=%+v", replay.HTTPStatus, replay.Body)
-	if replay.HTTPStatus != 200 || replay.Body["favor_degree"] != int64(102) {
-		t.Fatalf("receipt replay status %d body %+v", replay.HTTPStatus, replay.Body)
-	}
-	info, ok := replay.Body["dialog_info"].(map[string]any)
-	if !ok || info["is_awarded"] != int64(1) || info["select_id"] != int64(202001) {
-		t.Fatalf("receipt replay dialog_info %T %+v", replay.Body["dialog_info"], replay.Body["dialog_info"])
-	}
+			first := libraryDispatchService(t, actor, service, 843, params, request)
+			t.Logf("first select_info=%q status=%d body=%+v", tc.selectInfo, first.HTTPStatus, first.Body)
+			if first.HTTPStatus != 200 || first.Body["favor_degree"] != tc.wantFavor {
+				t.Fatalf("first select_info %q status %d body %+v", tc.selectInfo, first.HTTPStatus, first.Body)
+			}
+			info, ok := first.Body["dialog_info"].(map[string]any)
+			if !ok || info["is_awarded"] != tc.wantAwarded || info["select_id"] != tc.wantSelect {
+				t.Fatalf("first select_info %q dialog_info %T %+v", tc.selectInfo, first.Body["dialog_info"], first.Body["dialog_info"])
+			}
 
-	fresh := libraryDispatchService(t, actor, service, 843, params, op())
-	t.Logf("missing-graph fresh operation status=%d body=%+v", fresh.HTTPStatus, fresh.Body)
-	if fresh.HTTPStatus != 409 || fresh.Body["error_code"] != int64(1) {
-		t.Fatalf("missing-graph fresh operation status %d body %+v", fresh.HTTPStatus, fresh.Body)
-	}
+			service.Content = graphLessLibraryContent{ContentPort: service.Content}
+			replay := libraryDispatchService(t, actor, service, 843, params, request)
+			t.Logf("missing-graph receipt replay select_info=%q status=%d body=%+v", tc.selectInfo, replay.HTTPStatus, replay.Body)
+			if replay.HTTPStatus != 200 || !reflect.DeepEqual(first.Body, replay.Body) {
+				t.Fatalf("receipt replay select_info %q status %d body %+v want %+v", tc.selectInfo, replay.HTTPStatus, replay.Body, first.Body)
+			}
 
-	read := libraryDispatchService(t, actor, service, 836, nil, op())
-	if read.HTTPStatus != 200 || read.Body["library_infos"] == nil || read.Body["library_talk_infos"] == nil {
-		t.Fatalf("read with missing graph status %d body %+v", read.HTTPStatus, read.Body)
+			fresh := libraryDispatchService(t, actor, service, 843, params, op())
+			t.Logf("missing-graph fresh operation select_info=%q status=%d body=%+v", tc.selectInfo, fresh.HTTPStatus, fresh.Body)
+			if fresh.HTTPStatus != 409 || fresh.Body["error_code"] != int64(1) {
+				t.Fatalf("missing-graph fresh operation select_info %q status %d body %+v", tc.selectInfo, fresh.HTTPStatus, fresh.Body)
+			}
+
+			read := libraryDispatchService(t, actor, service, 836, nil, op())
+			if read.HTTPStatus != 200 || read.Body["library_infos"] == nil || read.Body["library_talk_infos"] == nil {
+				t.Fatalf("read with missing graph select_info %q status %d body %+v", tc.selectInfo, read.HTTPStatus, read.Body)
+			}
+		})
 	}
 }

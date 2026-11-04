@@ -270,6 +270,65 @@ func TestI9_10B843TalkAwardChoiceAndEnd(t *testing.T) {
 	}
 }
 
+// Source: data/tables/10001006.lua dialog 2, 201004.turn_id = 202001|203001,
+// 202001.is_reward = 3, 203001.is_reward = 2; library_dialog_config id 2
+// amour_reward = 2. Each raw choice raises favor through the objective port, so
+// mission 10029 advances exactly once even across receipt retry and a fresh op.
+func TestI9_10B843RawChoiceAdvanceMission10029(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	const wantAmourReward = int64(2)
+	for _, tc := range []struct {
+		name       string
+		selectInfo string
+		option     int64
+	}{
+		{"raw3-202001", "3|202001", 202001},
+		{"raw2-203001", "2|203001", 203001},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := bornActor(t, p)
+			bornHero(t, p, a, rev, 10001006, 1)
+			setLibraryFavor(t, p, a, 1, 100)
+			service := libraryFactService(p)
+			params := map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": tc.selectInfo}
+			request := op()
+
+			before := d491StoredFavor(t, p, a, 1)
+			response := libraryDispatchService(t, a, service, 843, params, request)
+			t.Logf("first select_info=%q status=%d body=%+v before=%d", tc.selectInfo, response.HTTPStatus, response.Body, before)
+			if response.HTTPStatus != 200 || response.Body["favor_degree"] != before+wantAmourReward {
+				t.Fatalf("select_info %q status %d body %+v", tc.selectInfo, response.HTTPStatus, response.Body)
+			}
+			info, ok := response.Body["dialog_info"].(map[string]any)
+			if !ok || info["is_awarded"] != int64(1) || info["select_id"] != tc.option {
+				t.Fatalf("select_info %q dialog_info %T %+v", tc.selectInfo, response.Body["dialog_info"], response.Body["dialog_info"])
+			}
+			if progress := missionProgress(t, p, a.PlayerID, 10029); progress != 1 {
+				t.Fatalf("select_info %q mission 10029 progress %d want 1", tc.selectInfo, progress)
+			}
+
+			response = libraryDispatchService(t, a, service, 843, params, request)
+			t.Logf("exact retry select_info=%q status=%d body=%+v", tc.selectInfo, response.HTTPStatus, response.Body)
+			if response.HTTPStatus != 200 || response.Body["favor_degree"] != before+wantAmourReward {
+				t.Fatalf("select_info %q exact retry status %d body %+v", tc.selectInfo, response.HTTPStatus, response.Body)
+			}
+			if progress := missionProgress(t, p, a.PlayerID, 10029); progress != 1 {
+				t.Fatalf("select_info %q retry mission 10029 progress %d want 1", tc.selectInfo, progress)
+			}
+
+			response = libraryDispatchService(t, a, service, 843, params, op())
+			t.Logf("fresh operation select_info=%q status=%d body=%+v", tc.selectInfo, response.HTTPStatus, response.Body)
+			if response.HTTPStatus != 200 || response.Body["favor_degree"] != before+wantAmourReward {
+				t.Fatalf("select_info %q fresh operation status %d body %+v", tc.selectInfo, response.HTTPStatus, response.Body)
+			}
+			if progress := missionProgress(t, p, a.PlayerID, 10029); progress != 1 {
+				t.Fatalf("select_info %q fresh operation mission 10029 progress %d want 1", tc.selectInfo, progress)
+			}
+		})
+	}
+}
+
 func TestI9_10B851SchoolStoryClaimOnce(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
