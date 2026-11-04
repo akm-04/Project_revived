@@ -1262,7 +1262,7 @@ def build_system_map():
         "called_by": reverse_call_edges,
         "composition": composition_by_system,
     }
-    files = {"INDEX.json": json_text(index), "FINDINGS.json": findings_text(findings), "EDGES.json": json_text(edges_document)}
+    files = {"README.md": read_text(ROOT / "tools" / "system_map_readme.md"), "INDEX.json": json_text(index), "FINDINGS.json": findings_text(findings), "EDGES.json": json_text(edges_document)}
     for system, record in system_records.items():
         files["systems/" + system + ".json"] = json_text(record)
     return files
@@ -1316,6 +1316,8 @@ def validate_generated(files):
             raise SystemExit("generated path missing: %s (%s)" % (relative_path, label))
 
     for name, content in files.items():
+        if name == "README.md":
+            continue
         data = json.loads(content)
         if name.startswith("systems/"):
             system = name[len("systems/"):-len(".json")]
