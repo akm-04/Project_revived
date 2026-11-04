@@ -60,9 +60,13 @@ type Command struct {
 	SelectID  int64 `json:",omitempty"`
 	IsReward  bool  `json:",omitempty"`
 	HasSelect bool  `json:",omitempty"`
+	RawReward int64 `json:",omitempty"`
 }
 
 func (c Command) Validate() error {
+	if c.RawReward != 0 && (c.Family != TalkAward || c.RawReward < 2 || c.RawReward > lib.MaxWireInt || !c.HasSelect || !c.IsReward) {
+		return lib.ErrUnqualified
+	}
 	switch c.Family {
 	case Gift:
 		if c.PartnerID <= 0 || c.Value <= 0 {
@@ -294,6 +298,9 @@ func fingerprint(c Command) ([32]byte, error) {
 		request["select_id"] = c.SelectID
 		request["is_reward"] = c.IsReward
 		request["has_select"] = c.HasSelect
+	}
+	if c.RawReward != 0 {
+		request["raw_reward"] = c.RawReward
 	}
 	return receipt.FingerprintRequest(request)
 }

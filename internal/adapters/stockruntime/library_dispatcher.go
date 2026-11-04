@@ -96,7 +96,12 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		c.Family = app.TalkAward
 		c.Value, e = requiredInt64(params, "dialog_id")
 		if e == nil {
-			c.SelectID, c.IsReward, c.HasSelect, e = librarySelectInfo(params)
+			var rawReward int64
+			c.SelectID, rawReward, c.HasSelect, e = librarySelectInfo(params)
+			c.IsReward = rawReward > 0
+			if rawReward > 1 {
+				c.RawReward = rawReward
+			}
 		}
 	case 844:
 		c.Family = app.ActAward
@@ -231,22 +236,26 @@ func libraryBit(v bool) int64 {
 
 // librarySelectInfo parses 843's "<is_reward>|<option>" without inventing a
 // default when the field is absent (the dialog-end call).
-func librarySelectInfo(params map[string]any) (selectID int64, isReward, present bool, err error) {
+func librarySelectInfo(params map[string]any) (selectID, rawReward int64, present bool, err error) {
 	raw, ok := params["select_info"]
 	if !ok {
-		return 0, false, false, nil
+		return 0, 0, false, nil
 	}
 	text, ok := raw.(string)
 	if !ok {
-		return 0, false, false, errors.New("invalid select_info")
+		return 0, 0, false, errors.New("invalid select_info")
 	}
 	parts := strings.Split(text, "|")
-	if len(parts) != 2 || (parts[0] != "0" && parts[0] != "1") {
-		return 0, false, false, errors.New("invalid select_info")
+	if len(parts) != 2 {
+		return 0, 0, false, errors.New("invalid select_info")
 	}
-	option, e := strconv.ParseInt(parts[1], 10, 64)
-	if e != nil || option <= 0 {
-		return 0, false, false, errors.New("invalid select_info")
+	reward, rewardError := strconv.ParseInt(parts[0], 10, 64)
+	if rewardError != nil || reward < 0 || reward > library.MaxWireInt || strconv.FormatInt(reward, 10) != parts[0] {
+		return 0, 0, false, errors.New("invalid select_info")
 	}
-	return option, parts[0] == "1", true, nil
+	option, optionError := strconv.ParseInt(parts[1], 10, 64)
+	if optionError != nil || option <= 0 {
+		return 0, 0, false, errors.New("invalid select_info")
+	}
+	return option, reward, true, nil
 }
