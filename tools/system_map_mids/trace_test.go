@@ -139,3 +139,10 @@ func TestSQLConstantConcatenationKeepsRelationAndLateLock(t *testing.T) {
 		}
 	}
 }
+
+func TestLockClauseDoesNotConsumeFollowingUpdate(t *testing.T) {
+	_, write, _ := traceSQLTables("SELECT id FROM profiles FOR UPDATE\nUPDATE profiles SET id=1")
+	if strings.Join(write, ",") != "profiles" {
+		t.Fatalf("following update lost: %v", write)
+	}
+}

@@ -539,9 +539,10 @@ func traceSQLTables(text string) ([]string, []string, []string) {
 	for _, match := range traceCTEAlias.FindAllStringSubmatch(text, -1) {
 		aliases[traceTableName(match[1])] = true
 	}
+	writeText := traceLock.ReplaceAllString(text, "")
 	for _, pattern := range []*regexp.Regexp{traceInsert, traceUpdate, traceDelete} {
-		for _, match := range pattern.FindAllStringSubmatchIndex(text, -1) {
-			if table := traceTableName(text[match[2]:match[3]]); table != "" {
+		for _, match := range pattern.FindAllStringSubmatchIndex(writeText, -1) {
+			if table := traceTableName(writeText[match[2]:match[3]]); table != "" {
 				write[table] = true
 			}
 		}

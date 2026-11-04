@@ -160,7 +160,8 @@
    "conquer_school_report_views",
    "conquer_school_reports",
    "gxb_operation_receipts",
-   "player_conquer_facts"
+   "player_conquer_facts",
+   "player_directory_profiles"
   ]
  },
  "tests": {
