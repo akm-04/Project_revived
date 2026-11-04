@@ -29,6 +29,12 @@
    }
   ],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "gameplay_contexts": [
     "i5store.FenceActorTx"
    ],
@@ -50,6 +56,8 @@
    ]
   },
   "row_locks": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "player_social_roots",
    "players",

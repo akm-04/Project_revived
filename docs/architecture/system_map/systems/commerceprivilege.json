@@ -31,6 +31,12 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "commerce_charge_purchases": [
     "commerceprivilegestore.ReadPurchaseCountTx"
    ],
@@ -48,6 +54,8 @@
    ]
   },
   "row_locks": [
+   "account_sessions",
+   "accounts",
    "commerce_charge_purchases",
    "commerce_privilege_roots",
    "gameplay_contexts",

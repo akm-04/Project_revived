@@ -45,9 +45,10 @@ func TestTraceSQLRejectsProse(t *testing.T) {
 
 func TestStoreLocksUseReferencingFunction(t *testing.T) {
 	source := `package fixture
- func Previous() {}
- const lockSQL = "SELECT owner_fence FROM realtime_presence_owner_state FOR SHARE"
- func AssertOwnerFenceTx() string { return lockSQL }
+func Previous() {}
+const lockSQL = "SELECT owner_fence FROM realtime_presence_owner_state FOR SHARE"
+func AssertOwnerFenceTx() string { return lockSQL }
+func UnknownLock() string { return " FOR UPDATE" }
  `
 	world, pkg := fixturePackage(t, source)
 	store := "internal/adapters/postgres/presencestore"
@@ -62,8 +63,12 @@ func TestStoreLocksUseReferencingFunction(t *testing.T) {
 	world.packages[path] = &listedPackage{ImportPath: path, Dir: directory, GoFiles: []string{"store.go"}}
 	world.source = &sourceImporter{world: world, packages: map[string]*checkedPackage{path: {info: pkg.info, files: pkg.files}}, loading: map[string]bool{}}
 	locks := world.rowLocks()
-	if len(locks) != 1 || locks[0].Method != "AssertOwnerFenceTx" || locks[0].Table != "realtime_presence_owner_state" {
-		t.Fatalf("wrong method attribution: %+v", locks)
+	methods := map[string]typedLock{}
+	for _, lock := range locks {
+		methods[lock.Method] = lock
+	}
+	if len(locks) != 2 || methods["AssertOwnerFenceTx"].Table != "realtime_presence_owner_state" || methods["UnknownLock"].Method != "UnknownLock" || methods["UnknownLock"].Table != "" {
+		t.Fatalf("incorrect concrete/unknown lock attribution: %+v", locks)
 	}
 }
 
@@ -144,5 +149,41 @@ func TestLockClauseDoesNotConsumeFollowingUpdate(t *testing.T) {
 	_, write, _ := traceSQLTables("SELECT id FROM profiles FOR UPDATE\nUPDATE profiles SET id=1")
 	if strings.Join(write, ",") != "profiles" {
 		t.Fatalf("following update lost: %v", write)
+	}
+}
+
+func TestSQLLockOFResolvesAllNamedAliases(t *testing.T) {
+	for _, test := range []struct{ query, wanted string }{
+		{"SELECT i.id FROM personal_dm_intents i JOIN personal_dm_delivery d ON i.id=d.id FOR UPDATE OF d", "personal_dm_delivery FOR UPDATE"},
+		{"SELECT gc.id FROM gameplay_contexts gc JOIN account_sessions s ON s.id=gc.id JOIN accounts a ON a.id=s.id FOR SHARE OF gc,s,a", "account_sessions FOR SHARE,accounts FOR SHARE,gameplay_contexts FOR SHARE"},
+	} {
+		_, _, locks := traceSQLTables(test.query)
+		if strings.Join(locks, ",") != test.wanted {
+			t.Fatalf("OF targets: %v", locks)
+		}
+	}
+}
+
+func TestTraceSelectsMIDNotEqual(t *testing.T) {
+	world, pkg := fixturePackage(t, `package fixture
+ type Request struct { MID int }
+ type Service struct{}
+ func (Service) Load() {}
+ func (Service) Claim() {}
+ type Dispatcher struct { Service Service }
+ func (d Dispatcher) Dispatch(r Request) {
+  if 1303 != r.MID { d.Service.Load(); return }
+  d.Service.Claim()
+ }
+ `)
+	for _, mid := range []int{1302, 1303} {
+		walker := newTracer(world, mid)
+		path := modulePath + "internal/application/fixture"
+		walker.pkgs[path] = pkg
+		walker.walk(traceTarget{pkgPath: path, receiver: "Dispatcher", name: "Dispatch"}, 0, true)
+		result := strings.Join(walker.lines, "\n")
+		if strings.Contains(result, "Service.Claim ") != (mid == 1303) || strings.Contains(result, "Service.Load ") != (mid == 1302) {
+			t.Fatalf("inequality branch%d:\n%s", mid, result)
+		}
 	}
 }

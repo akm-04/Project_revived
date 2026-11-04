@@ -41,6 +41,12 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "conquer_school_players": [
     "conquerstore.ReadModeTx"
    ],
@@ -58,6 +64,8 @@
    ]
   },
   "row_locks": [
+   "account_sessions",
+   "accounts",
    "conquer_school_players",
    "gameplay_contexts",
    "player_conquer_facts",

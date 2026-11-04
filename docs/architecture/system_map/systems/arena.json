@@ -88,6 +88,12 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "arena_casual_sessions": [
     "arenastore.ReadCasualSessionTx"
    ],
@@ -118,6 +124,8 @@
    ]
   },
   "row_locks": [
+   "account_sessions",
+   "accounts",
    "arena_casual_sessions",
    "arena_competitions",
    "arena_friend_invitations",

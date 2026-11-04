@@ -58,6 +58,11 @@ class SystemMapViewTests(unittest.TestCase):
         self.assertEqual(system_map.row_lock_methods_by_system(['owner'], [lock], callers), {'owner': {}})
         self.assertEqual(system_map.row_locks_by_system(['owner'], [lock], callers), {'owner': []})
 
+    def test_trace_guard_rejects_sibling_route(self):
+        with patch.object(system_map, 'TRACE_ANCHORS', {}), patch.object(system_map, 'FORBIDDEN_TRACE_ANCHORS', {1302: ['Service.Claim']}), patch.object(system_map, 'helper_trace', return_value='Service.Claim fixture.go:1'):
+            with self.assertRaisesRegex(SystemExit, 'falsely reaches'):
+                system_map.validate_trace_anchors()
+
     def test_inverse_calls_preserve_opposite_methods(self):
         outgoing = {'library': {'achievement': ['PrepareMarriageTx']}, 'achievement': {'library': ['HeroInputsTx']}}
         incoming = system_map.inverse_calls(['library', 'achievement'], outgoing)

@@ -493,7 +493,7 @@ var (
 	traceUpdate = regexp.MustCompile(`(?i)\bupdate\s+([a-zA-Z0-9_".]+)(?:\s+(?:as\s+)?[a-z][a-zA-Z0-9_]*)?\s+set\b`)
 	traceDelete = regexp.MustCompile(`(?i)\bdelete\s+from\s+([a-zA-Z0-9_".]+)`)
 	traceRead   = regexp.MustCompile(`(?i)\b(?:from|join)\s+([a-zA-Z0-9_".]+)`)
-	traceLock   = regexp.MustCompile(`(?is)for\s+(update|share)`)
+	traceLock   = regexp.MustCompile(`(?is)\bfor\s+(update|share)(?:\s+of\s+([a-zA-Z0-9_".]+(?:\s*,\s*[a-zA-Z0-9_".]+)*))?`)
 )
 
 var traceKeywords = map[string]bool{
@@ -524,6 +524,28 @@ var sqlLeadingComments = regexp.MustCompile(`(?s)^(?:\s|--[^\n]*(?:\n|$)|/\*.*?\
 
 func isSQLFragment(text string) bool {
 	return sqlFragment.MatchString(sqlLeadingComments.ReplaceAllString(text, ""))
+}
+
+var traceRelation = regexp.MustCompile(`(?i)\b(?:from|join)\s+([a-zA-Z0-9_".]+)`)
+var traceRelationAlias = regexp.MustCompile(`(?i)^\s+(?:as\s+)?([a-zA-Z0-9_"]+)`)
+
+func lockRelationAliases(text string) map[string]string {
+	aliases := map[string]string{}
+	for _, match := range traceRelation.FindAllStringSubmatchIndex(text, -1) {
+		table := traceTableName(text[match[2]:match[3]])
+		aliases[table] = table
+		alias := traceRelationAlias.FindStringSubmatch(text[match[1]:])
+		if len(alias) == 0 {
+			continue
+		}
+		name := strings.ToLower(normalizeTableName(alias[1]))
+		switch name {
+		case "where", "join", "inner", "left", "right", "full", "cross", "on", "for", "order", "group", "limit", "union":
+			continue
+		}
+		aliases[name] = table
+	}
+	return aliases
 }
 
 var traceCTEAlias = regexp.MustCompile(`(?i)(?:\bwith\s+(?:recursive\s+)?|,)\s*([a-zA-Z0-9_"]+)\s*(?:\([^)]*\)\s*)?as\s+(?:(?:not\s+)?materialized\s*)?\(`)
@@ -562,12 +584,29 @@ func traceSQLTables(text string) ([]string, []string, []string) {
 		if start < 0 {
 			start = 0
 		}
-		tables := lockTable.FindAllStringSubmatch(text[start:location[0]], -1)
+		window := text[start:location[0]]
+		kind := strings.ToUpper(text[location[2]:location[3]])
+		if len(location) > 4 && location[4] >= 0 {
+			aliases := lockRelationAliases(window)
+			targets := []string{}
+			for _, raw := range strings.Split(text[location[4]:location[5]], ",") {
+				target := aliases[strings.ToLower(normalizeTableName(strings.TrimSpace(raw)))]
+				if target == "" {
+					targets = nil
+					break
+				}
+				targets = append(targets, target)
+			}
+			for _, table := range targets {
+				locks[table+" FOR "+kind] = true
+			}
+			continue
+		}
+		tables := lockTable.FindAllStringSubmatch(window, -1)
 		if len(tables) == 0 {
 			continue
 		}
 		table := traceTableName(tables[len(tables)-1][1])
-		kind := strings.ToUpper(text[location[2]:location[3]])
 		if table != "" {
 			locks[table+" FOR "+kind] = true
 		}

@@ -112,6 +112,12 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "campaign_players": [
     "campaignstore.LockTx"
    ],
@@ -120,6 +126,8 @@
    ]
   },
   "row_locks": [
+   "account_sessions",
+   "accounts",
    "campaign_players",
    "gameplay_contexts"
   ],

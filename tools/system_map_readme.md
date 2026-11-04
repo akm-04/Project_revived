@@ -64,6 +64,7 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 - `locks.ranks` / `locks.profiles` – referenced `*LockRank` constants and tx `LockTimeout`.
   `locks.row_locks` – tables this system's stores lock `FOR UPDATE`/`FOR SHARE`, attributed
   through the store method's callers (including store-internal caller closure).
+  These are static lock-clause candidates: call arguments can disable a clause even when a method is listed.
   `locks.row_lock_methods` – per table, the `store.method` names that reach the SQL holding the
   clause; `trace` says whether that clause is conditional.
   `locks.unresolved_methods` names lock clauses whose table cannot be resolved locally,
@@ -82,7 +83,8 @@ python3 tools/system_map.py --refresh-coverage <one-mid-per-line-file>
 
 The hooks in `tools/githooks` run `--write` and stage the result in every commit and merge commit; turn them on once per repo with `git config core.hooksPath tools/githooks`. `--check` in `tools/check.sh` is the backstop. If a merge conflicts inside the map, resolve it by running `--write`.
 `--check` fails on stale generated files, validates every generated path exists, checks the
-campaign/clientlog attribution anchors, and re-runs `trace` for MIDs 114, 161 and 338.
+campaign/clientlog attribution anchors, and re-runs bounded `trace` checks for MIDs 114, 161, 338 and 528,
+plus negative sibling-route checks for Achievement MIDs 1302/1303.
 Trace assertions match symbols, source paths and required tables; source line numbers
 remain navigation metadata and may move without changing a relationship.
 `show missions` aliases to `i5`: there is no `internal/application/missions` package.

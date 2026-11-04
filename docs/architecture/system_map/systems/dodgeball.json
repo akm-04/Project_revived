@@ -29,6 +29,12 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "dodgeball_players": [
     "dodgeballstore.LockTx"
    ],
@@ -43,6 +49,8 @@
    ]
   },
   "row_locks": [
+   "account_sessions",
+   "accounts",
    "dodgeball_players",
    "gameplay_contexts",
    "mail_namespace_counters",

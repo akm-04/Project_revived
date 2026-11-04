@@ -29,7 +29,7 @@
    }
   ],
   "row_lock_methods": {
-   "personal_dm_intents": [
+   "personal_dm_delivery": [
     "generaldmstore.Find",
     "generaldmstore.Lock"
    ],
@@ -38,7 +38,7 @@
    ]
   },
   "row_locks": [
-   "personal_dm_intents",
+   "personal_dm_delivery",
    "players"
   ],
   "unresolved_methods": []

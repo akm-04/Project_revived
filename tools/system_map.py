@@ -1371,6 +1371,7 @@ TRACE_ANCHORS = {
         "player_mission_roots",
         "FOR UPDATE",
     ],
+    528: ["UNRESOLVED registered wrapper observing", "Mode.SP internal/application/workplace/mode.go:"],
     338: [
         "Mode.Result internal/application/march/settle.go:",
         "Service.AttestReportTx internal/application/combat/service.go:",
@@ -1382,12 +1383,22 @@ def missing_trace_anchors(output, anchors):
     return [anchor for anchor in anchors if anchor not in output]
 
 
+FORBIDDEN_TRACE_ANCHORS = {
+    1302: ["Service.Claim internal/application/achievement/"],
+    1303: ["Service.Load internal/application/achievement/"],
+}
+
+
 def validate_trace_anchors():
-    for mid, anchors in sorted(TRACE_ANCHORS.items()):
+    for mid in sorted(set(TRACE_ANCHORS) | set(FORBIDDEN_TRACE_ANCHORS)):
+        anchors = TRACE_ANCHORS.get(mid, [])
         output = helper_trace(mid)
         missing = missing_trace_anchors(output, anchors)
         if missing:
             raise SystemExit("trace %d is missing %s" % (mid, missing[0]))
+        for forbidden in FORBIDDEN_TRACE_ANCHORS.get(mid, []):
+            if forbidden in output:
+                raise SystemExit("trace %d falsely reaches %s" % (mid, forbidden))
 
 
 def write_output(files):

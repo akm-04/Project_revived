@@ -154,6 +154,12 @@
    }
   ],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "gameplay_contexts": [
     "i5store.FenceActorTx"
    ],
@@ -211,11 +217,16 @@
    "players": [
     "i4store.LockBoundRecipientTx"
    ],
+   "redeem_campaigns": [
+    "i5store.LockRedeemByDigestTx"
+   ],
    "redeem_codes": [
     "i5store.LockRedeemByDigestTx"
    ]
   },
   "row_locks": [
+   "account_sessions",
+   "accounts",
    "gameplay_contexts",
    "mail_namespace_counters",
    "mail_records",
@@ -233,6 +244,7 @@
    "player_story_cursors",
    "player_temporal_resources",
    "players",
+   "redeem_campaigns",
    "redeem_codes"
   ],
   "unresolved_methods": []
