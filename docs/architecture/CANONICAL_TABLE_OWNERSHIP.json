@@ -5321,6 +5321,24 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00109_i9_10g_charge.sql"
+    },
+    "content_social_input_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00116_i9_10e_social_content.sql"
     }
   }
 }
