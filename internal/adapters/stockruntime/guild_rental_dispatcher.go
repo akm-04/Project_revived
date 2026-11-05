@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/guildrental"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/guild"
@@ -133,7 +134,11 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		if err != nil {
 			return rentalFailure(err)
 		}
-		return okI5(map[string]any{"rent_count": list.RentCount, "pets": rentalPartners(list.Rows)})
+		partners, err := rentalPartners(list.Rows)
+		if err != nil {
+			return rentalFailure(err)
+		}
+		return okI5(map[string]any{"rent_count": list.RentCount, "pets": partners})
 	case 2768:
 		if !onlyStockGameplayParams(p, "load_place", "rent_count", "campaign_type", "rent_type") {
 			return rentalBad()
@@ -146,8 +151,12 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		if err != nil {
 			return rentalFailure(err)
 		}
+		partners, err := rentalPartners(list.Rows)
+		if err != nil {
+			return rentalFailure(err)
+		}
 		return okI5(map[string]any{
-			"guild_rent_heroes": map[string]any{"rent_type": requested, "partners": rentalPartners(list.Rows), "rent_count": list.RentCount},
+			"guild_rent_heroes": map[string]any{"rent_type": requested, "partners": partners, "rent_count": list.RentCount},
 			"rent_count":        list.RentCount,
 			"tutor_rent_heroes": []any{},
 		})
@@ -202,30 +211,36 @@ func rentalSentPets(rows []guildrental.Row) []any {
 	return out
 }
 
-func rentalPartners(rows []guildrental.Row) []any {
+func rentalPartners(rows []guildrental.Row) ([]any, error) {
 	out := make([]any, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, rentalPartner(row))
+		partner, err := rentalPartner(row)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, partner)
 	}
-	return out
+	return out, nil
 }
 
-func rentalPartner(row guildrental.Row) map[string]any {
+func rentalPartner(row guildrental.Row) (map[string]any, error) {
 	body := map[string]any{}
 	if row.Hero != nil {
-		wire, err := heroproj.StockHero(*row.Hero)
-		if err == nil {
-			for key, value := range wire {
-				body[key] = value
-			}
+		wire, err := heroproj.StockHeroDetail(*row.Hero, rentalAppearance(row.Appearance), row.TwiceAwakeStage)
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range wire {
+			body[key] = value
 		}
 	}
 	if row.Pet != nil {
 		wire, err := petproj.StockPrivate(*row.Pet, true)
-		if err == nil {
-			for key, value := range wire {
-				body[key] = value
-			}
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range wire {
+			body[key] = value
 		}
 	}
 	body["player_name"] = row.Profile.Name
@@ -238,7 +253,25 @@ func rentalPartner(row guildrental.Row) map[string]any {
 	body["rent_need_mana"] = row.Price
 	body["can_rent"] = row.CanRent
 	body["have_rent"] = row.HaveRent
-	return body
+	return body, nil
+}
+
+// rentalAppearance converts the Character owner's qualified appearance to the
+// stock projection view; a read without one is not replaced by a default.
+func rentalAppearance(appearance *characterasset.EffectiveHeroAppearance) *heroproj.AppearanceView {
+	if appearance == nil {
+		return nil
+	}
+	view := heroproj.AppearanceView{OwnerStateVersion: appearance.OwnerStateVersion, CurrentSkinID: appearance.CurrentSkinID, IllusionSkinID: appearance.IllusionSkinID}
+	view.Skins = make([]heroproj.QualifiedSkinView, 0, len(appearance.Skins))
+	for _, skin := range appearance.Skins {
+		view.Skins = append(view.Skins, heroproj.QualifiedSkinView{ModelID: skin.ModelID, ExpiresAt: skin.ExpiresAt})
+	}
+	view.LIVE = make([]heroproj.QualifiedLIVEView, 0, len(appearance.LIVE))
+	for _, live := range appearance.LIVE {
+		view.LIVE = append(view.LIVE, heroproj.QualifiedLIVEView{ModelID: live.ModelID, IsShow: live.IsShow})
+	}
+	return &view
 }
 
 func rentalBad() httpedge.Response {

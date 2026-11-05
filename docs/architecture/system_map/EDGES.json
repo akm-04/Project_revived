@@ -3575,11 +3575,12 @@
     "DefaultProfile"
    ],
    "store:contentstore": [
-    "*ActiveRevision"
+    "*ActiveRevision",
+    "*HeroExpPolicyTx"
    ],
    "store:guildrentalread": [
     "*BalanceTx",
-    "*HeroTx",
+    "*HeroProjectionTx",
     "*LevelTx",
     "*PetTx",
     "*ProfileTx",
