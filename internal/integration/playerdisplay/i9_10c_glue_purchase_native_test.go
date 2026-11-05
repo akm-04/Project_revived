@@ -105,6 +105,29 @@ func TestI910CGluePurchaseCounterAndValuesCommitTogether(t *testing.T) {
 	if err != nil || unchanged != stored {
 		t.Fatal("projection wrote counter", stored, unchanged, err)
 	}
+	current = floorOperation(revision, current.StartedAt.Add(24*time.Hour))
+	if err = purchase(nil); err != nil {
+		t.Fatal("next-day counter update", err)
+	}
+	updated, _, err := owner.ReadGluePurchasesTx(ctx, database, player.PlayerID)
+	if err != nil || updated.Count != 1 || updated.StateVersion != 2 || updated.GameDay != modes.Day(current.StartedAt) {
+		t.Fatal("counter UPDATE", updated, err)
+	}
+	_, err = service.Runner.Run(ctx, current, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		if _, err := owner.LockRootTx(ctx, scope.Tx, player.PlayerID); err != nil {
+			return err
+		}
+		stale := updated
+		stale.StateVersion = 2
+		return owner.SaveGluePurchasesTx(ctx, scope.Tx, stale, 1)
+	})
+	if err == nil {
+		t.Fatal("stale counter CAS accepted")
+	}
+	afterConflict, _, err := owner.ReadGluePurchasesTx(ctx, database, player.PlayerID)
+	if err != nil || afterConflict != updated {
+		t.Fatal("stale CAS changed counter", afterConflict, err)
+	}
 }
 
 func gluePurchaseTransaction(service i5.Service, player identity.ActorContext, current operation.Context, afterApply error) error {
@@ -175,8 +198,9 @@ func TestI910CGluePurchaseNativeLimitRecoveryAndAtomicity(t *testing.T) {
 	}
 
 	atLimit := actor(t, database)
-	exec(t, database, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at) VALUES($1,'glue',300,1,clock_timestamp())`, int64(atLimit.PlayerID))
-	if err := gluePurchaseTransaction(service, atLimit, opPinned(revision), nil); !errors.Is(err, i5.ErrGluePurchaseLimit) {
+	limitOperation := opPinned(revision)
+	exec(t, database, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at) VALUES($1,'glue',300,1,$2)`, int64(atLimit.PlayerID), limitOperation.StartedAt)
+	if err := gluePurchaseTransaction(service, atLimit, limitOperation, nil); !errors.Is(err, i5.ErrGluePurchaseLimit) {
 		t.Fatal("exact limit must refuse", err)
 	}
 	if _, exists, err := store.ReadScalarDailyFloorTx(ctx, database, atLimit.PlayerID, "glue"); err != nil || exists {

@@ -79,11 +79,20 @@ func validateStackOnlyRestoration(plan grant.Plan) error {
 }
 
 func rejectMaterialExchangeCollisions(cost MaterialCost, plan grant.Plan) error {
+	scalarDebits := make(map[string]struct{}, len(cost.Scalars))
+	for _, debit := range cost.Scalars {
+		scalarDebits[debit.ResourceKey] = struct{}{}
+	}
 	debits := make(map[int64]struct{}, len(cost.Stacks))
 	for _, x := range cost.Stacks {
 		debits[x.ItemID] = struct{}{}
 	}
 	for _, line := range plan.Lines {
+		if line.Kind == grant.ScalarCurrency {
+			if _, exists := scalarDebits[line.ResourceKey]; exists {
+				return fmt.Errorf("%w: scalar %s", ErrMaterialExchangeResourceCollision, line.ResourceKey)
+			}
+		}
 		if _, exists := debits[line.ItemID]; exists {
 			return fmt.Errorf("%w: stack item %d", ErrMaterialExchangeResourceCollision, line.ItemID)
 		}
