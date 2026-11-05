@@ -5,6 +5,18 @@
   10001002
  ],
  "guild_rental_fixture": true,
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "crystal",
+   "Amount": 1000
+  },
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "mana",
+   "Amount": 10000
+  }
+ ],
  "steps": [
   "wait:5",
   "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:createTeam({name='vc9bc',icon=20010001,icon_frame=0},function(code) if code~=xyd.error.OK then error('vc-cache-create-'..tostring(code)) end end)",
