@@ -195,8 +195,14 @@ func templateRows(participants []cb.Participant) []any {
 
 func (s Mode) opponent(c context.Context, q tx.Queryer, a identity.ActorContext, catalog d.Catalog, at time.Time, ordinal uint64) (Opponent, error) {
 	enemy, found, err := s.Opponents.ArenaOpponentTx(c, q, a.PlayerID, catalog.Limits.PVPRankingSection, ordinal, at)
-	if err != nil || found {
-		return enemy, err
+	if err != nil {
+		return Opponent{}, err
+	}
+	if found && len(enemy.Heroes) == 0 {
+		return Opponent{}, d.ErrRefused
+	}
+	if found {
+		return enemy, nil
 	}
 	enemy, found, err = s.Opponents.RobotOpponentTx(c, q, ordinal)
 	if err != nil {
@@ -204,6 +210,9 @@ func (s Mode) opponent(c context.Context, q tx.Queryer, a identity.ActorContext,
 	}
 	if !found {
 		return Opponent{}, errNoOpponent
+	}
+	if len(enemy.Heroes) == 0 {
+		return Opponent{}, d.ErrRefused
 	}
 	return enemy, nil
 }

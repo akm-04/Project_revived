@@ -110,7 +110,7 @@ func pvpBattle(a identity.ActorContext, request FightRequest, enemy Opponent) cb
 	for _, id := range request.Formation {
 		teamA = append(teamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
-	battle := cb.BattleRequest{CampaignType: darena.CampaignType, BattleID: darena.BattleID, TeamA: teamA}
+	battle := cb.BattleRequest{CampaignType: darena.CampaignType, BattleID: darena.BattleID, TeamA: teamA, Context: &cd.BattleContext{Transform: darena.Transform}}
 	if request.PetID > 0 {
 		battle.PetsA = []cb.Participant{{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: request.PetID}}
 	}
