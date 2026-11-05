@@ -1,0 +1,42 @@
+{
+  "name": "i9_10b_forum_global",
+  "level": 100,
+  "pet_awakening_fixture": true,
+  "note": "D497 global forum through the stock Library model wrappers and both stock windows: hero 834/832/833 (fields, like toggle) and pet 834/832/833 with forum_type=2, plus hero/pet board separation. The pet is the declared pet fixture only; post/read/like still go through the production dispatcher.",
+  "settle_seconds": 10,
+  "steps": [
+    "wait:2",
+    "lua:_G.vcP=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) _G.vcH=vcP:getHeroByID(1) _G.vcL=xyd.ModelManager.get():loadModel(xyd.ModelType.LIBRARY) if not vcH then error('vc-no-partner-1') end",
+    "wait:2",
+    "lua:xyd.WindowManager.get():openWindow('senior_forum',{hero=vcH,forum_list={}})",
+    "wait:8",
+    "lua:if not xyd.WindowManager.get():getWindow('senior_forum') then error('vc-senior-forum-window') end",
+    "lua:vcL:addForumComment({id=vcH:getHeroID(),comment='vc-global-hero'},function(c) if c~=xyd.error.OK then error('vc-834-hero-'..tostring(c)) end end)",
+    "wait:2",
+    "lua:vcL:queryForumByPage({start_pos=1,end_pos=50,table_id=vcH:getTableID()},function(c,b) if c~=xyd.error.OK then error('vc-832-hero-'..tostring(c)) end if type(b.comments)~='table' then error('vc-832-hero-shape') end local f=nil for _,r in ipairs(b.comments) do if r.comment=='vc-global-hero' then f=r end end if not f then error('vc-832-hero-missing') end if tonumber(f.player_id)~=tonumber(vcH:getPlayerID()) then error('vc-832-hero-author') end if type(f.hero_lev)~='number' or type(f.hero_color)~='number' or type(f.hero_star)~='number' then error('vc-832-hero-display') end if type(f.region)~='number' or type(f.like)~='number' or type(f.is_commented)~='number' then error('vc-832-hero-fields') end end)",
+    "wait:2",
+    "lua:vcL:addForumLike({player_id=vcH:getPlayerID(),table_id=vcH:getTableID()},function(c,b) if c~=xyd.error.OK then error('vc-833-hero-'..tostring(c)) end if type(b.comments)~='table' then error('vc-833-hero-shape') end local f=nil for _,r in ipairs(b.comments) do if tonumber(r.player_id)==tonumber(vcH:getPlayerID()) and r.comment=='vc-global-hero' then f=r end end if not f then error('vc-833-hero-row') end if tonumber(f.like)~=1 or tonumber(f.is_commented)~=1 then error('vc-833-hero-like-'..tostring(f.like)..'-'..tostring(f.is_commented)) end end)",
+    "wait:2",
+    "lua:vcL:addForumLike({player_id=vcH:getPlayerID(),table_id=vcH:getTableID()},function(c,b) if c~=xyd.error.OK then error('vc-833-hero-off-'..tostring(c)) end local f=nil for _,r in ipairs(b.comments) do if tonumber(r.player_id)==tonumber(vcH:getPlayerID()) and r.comment=='vc-global-hero' then f=r end end if not f or tonumber(f.like)~=0 or tonumber(f.is_commented)~=0 then error('vc-833-hero-toggle') end end)",
+    "wait:2",
+    "lua:vcP:loadCollectedPets(function(c) if c~=xyd.error.OK then error('vc-pets-'..tostring(c)) end end)",
+    "wait:3",
+    "lua:_G.vcPet=vcP:getPetByTableID(10010001) if not vcPet then error('vc-no-pet') end _G.vcPetTable=vcPet:getTableID() _G.vcPetID=vcPet:getPetID() if not vcPetTable or vcPetTable<=0 then error('vc-pet-table') end",
+    "lua:vcL:addForumComment({id=vcPetID,forum_type=xyd.ForumType.Pet,comment='vc-global-pet'},function(c) if c~=xyd.error.OK then error('vc-834-pet-'..tostring(c)) end end)",
+    "wait:2",
+    "lua:vcL:queryForumByPage({start_pos=1,end_pos=50,table_id=vcPetTable,forum_type=xyd.ForumType.Pet},function(c,b) if c~=xyd.error.OK then error('vc-832-pet-'..tostring(c)) end local f=nil for _,r in ipairs(b.comments or {}) do if r.comment=='vc-global-pet' then f=r end end if not f then error('vc-832-pet-missing') end if type(f.pet_lev)~='number' or type(f.pet_color)~='number' or type(f.pet_star)~='number' then error('vc-832-pet-display') end if f.hero_lev~=nil then error('vc-832-pet-leak') end end)",
+    "wait:2",
+    "lua:vcL:addForumLike({player_id=vcP.playerID,table_id=vcPetTable,forum_type=xyd.ForumType.Pet},function(c,b) if c~=xyd.error.OK then error('vc-833-pet-'..tostring(c)) end local f=nil for _,r in ipairs(b.comments or {}) do if tonumber(r.player_id)==tonumber(vcP.playerID) and r.comment=='vc-global-pet' then f=r end end if not f or tonumber(f.like)~=1 or tonumber(f.is_commented)~=1 then error('vc-833-pet-like') end end)",
+    "wait:2",
+    "lua:vcL:queryForumByPage({start_pos=1,end_pos=50,table_id=vcPetTable},function(c,b) if c~=xyd.error.OK then error('vc-832-cross-'..tostring(c)) end if #(b.comments or {})~=0 then error('vc-832-cross-leak') end end)",
+    "wait:2",
+    "lua:xyd.WindowManager.get():openWindow('pet_forum',{hero=vcPet,forum_list={}})",
+    "wait:8",
+    "lua:if not xyd.WindowManager.get():getWindow('pet_forum') then error('vc-pet-forum-window') end"
+  ],
+  "expect_ok": [
+    832,
+    833,
+    834
+  ]
+}

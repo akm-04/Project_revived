@@ -79,6 +79,7 @@ func companionHero(t *testing.T, p *pg.Pool, actor identity.ActorContext) charac
 func resetForumBoards(t *testing.T, p *pg.Pool) {
 	t.Helper()
 	exec(t, p, `DELETE FROM library_forum_reactions`)
+	exec(t, p, `DELETE FROM library_forum_boards`)
 	exec(t, p, `DELETE FROM library_forum_comments`)
 }
 
