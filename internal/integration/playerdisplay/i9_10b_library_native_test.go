@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
+	app "gxb.local/backend/v2/internal/application/librarylocal"
 	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -148,12 +149,15 @@ func TestI9_10BLibrary836FullPayload(t *testing.T) {
 	if row["favor_degree"] != int64(0) || row["is_married"] != int64(0) {
 		t.Fatalf("favor row %+v", row)
 	}
-	dialogs, ok := row["partner_dialogs"].([]any)
-	if !ok || len(dialogs) != 1 {
+	dialogs, ok := row["partner_dialogs"].([]app.DialogRow)
+	if !ok || len(dialogs) != 2 {
 		t.Fatalf("partner_dialogs %T %+v", row["partner_dialogs"], row["partner_dialogs"])
 	}
-	dialog := dialogs[0].(map[string]any)
-	if dialog["dialog_id"] != int64(3) || dialog["is_read"] != int64(1) || dialog["is_awarded"] != int64(1) || dialog["select_id"] != int64(9) {
+	if opened := dialogs[0]; opened.DialogID != int64(1) || opened.IsRead != int64(0) || opened.IsAwarded != int64(0) || opened.SelectID != int64(0) {
+		t.Fatalf("statically opened dialog row %+v", opened)
+	}
+	dialog := dialogs[1]
+	if dialog.DialogID != int64(3) || dialog.IsRead != int64(1) || dialog.IsAwarded != int64(1) || dialog.SelectID != int64(9) {
 		t.Fatalf("dialog row %+v", dialog)
 	}
 	missions, ok := row["partner_missions"].([]any)
@@ -164,12 +168,12 @@ func TestI9_10BLibrary836FullPayload(t *testing.T) {
 	if mission["mission_id"] != int64(1001) || mission["process"] != int64(1) || mission["mission_state"] != int64(2) {
 		t.Fatalf("mission row %+v", mission)
 	}
-	acts, ok := row["partner_acts"].([]any)
+	acts, ok := row["partner_acts"].([]app.ActSlot)
 	if !ok || len(acts) != lib.ActCount {
 		t.Fatalf("partner_acts %T %+v", row["partner_acts"], row["partner_acts"])
 	}
 	for i, want := range []int64{0, 1, 0, 0} {
-		if got := acts[i].(map[string]any)["is_awarded"]; got != want {
+		if got := acts[i].IsAwarded; got != want {
 			t.Fatalf("act %d is_awarded %v want %d", i+1, got, want)
 		}
 	}

@@ -5321,6 +5321,22 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00109_i9_10g_charge.sql"
+    },
+    "library_forum_boards": {
+      "owner": "library-forum",
+      "migration": "migrations/00118_i9_10b_global_forum.sql",
+      "allowed_query_owners": [
+        "library-forum"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

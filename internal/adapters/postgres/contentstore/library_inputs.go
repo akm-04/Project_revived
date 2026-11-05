@@ -105,19 +105,21 @@ func (s Store) LibraryInputsRevisionTx(ctx context.Context, q tx.Queryer, revisi
 }
 
 type libraryDomainPayload struct {
-	Templates          []library.TemplateRule          `json:"templates"`
-	Gifts              []library.GiftRule              `json:"gifts"`
-	Feeding            library.FeedRules               `json:"feeding"`
-	NormalCollections  []library.NormalCollectionRule  `json:"normal_collections"`
-	SpecialCollections []library.SpecialCollectionRule `json:"special_collections"`
-	Stages             []library.StageRule             `json:"stages"`
-	Acts               []library.ActRule               `json:"acts"`
-	Missions           []library.MissionRule           `json:"missions"`
-	Talks              []library.TalkRule              `json:"talks"`
-	CGs                []library.CGRule                `json:"cgs"`
-	Backgrounds        []library.BackgroundRule        `json:"backgrounds"`
-	DialogConfigs      []library.DialogConfigRule      `json:"dialog_configs"`
-	CourseGiftBoxes    []library.CourseGiftBoxRule     `json:"course_gift_boxes"`
+	Templates            []library.TemplateRule          `json:"templates"`
+	Gifts                []library.GiftRule              `json:"gifts"`
+	Feeding              library.FeedRules               `json:"feeding"`
+	NormalCollections    []library.NormalCollectionRule  `json:"normal_collections"`
+	SpecialCollections   []library.SpecialCollectionRule `json:"special_collections"`
+	Stages               []library.StageRule             `json:"stages"`
+	Acts                 []library.ActRule               `json:"acts"`
+	Missions             []library.MissionRule           `json:"missions"`
+	Talks                []library.TalkRule              `json:"talks"`
+	CGs                  []library.CGRule                `json:"cgs"`
+	Backgrounds          []library.BackgroundRule        `json:"backgrounds"`
+	DialogConfigs        []library.DialogConfigRule      `json:"dialog_configs"`
+	DialogNodes          []library.DialogNodeRule        `json:"dialog_nodes"`
+	DialogSourceUnknowns []int64                         `json:"dialog_source_unknowns"`
+	CourseGiftBoxes      []library.CourseGiftBoxRule     `json:"course_gift_boxes"`
 }
 
 func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) (library.Catalog, error) {
@@ -136,7 +138,7 @@ func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) 
 	if c.Feeding.Validate() != nil {
 		return out, library.ErrUnqualified
 	}
-	out = library.Catalog{ContentRevision: revision, Templates: map[int64]library.TemplateRule{}, Gifts: map[int64]library.GiftRule{}, Feeding: c.Feeding, NormalCollections: map[int64]library.NormalCollectionRule{}, Acts: map[int64]library.ActRule{}, Missions: map[int64]library.MissionRule{}, Talks: map[int64]library.TalkRule{}, CGs: map[int64]library.CGRule{}, Backgrounds: map[int64]library.BackgroundRule{}, DialogConfigs: map[int64]library.DialogConfigRule{}, CourseGiftBoxes: map[int64]library.CourseGiftBoxRule{}}
+	out = library.Catalog{ContentRevision: revision, Templates: map[int64]library.TemplateRule{}, Gifts: map[int64]library.GiftRule{}, Feeding: c.Feeding, NormalCollections: map[int64]library.NormalCollectionRule{}, Acts: map[int64]library.ActRule{}, Missions: map[int64]library.MissionRule{}, Talks: map[int64]library.TalkRule{}, CGs: map[int64]library.CGRule{}, Backgrounds: map[int64]library.BackgroundRule{}, DialogConfigs: map[int64]library.DialogConfigRule{}, DialogNodes: map[library.DialogGroupKey]map[int64]library.DialogNode{}, DialogSourceUnknowns: append([]int64(nil), c.DialogSourceUnknowns...), CourseGiftBoxes: map[int64]library.CourseGiftBoxRule{}}
 	for _, r := range c.Templates {
 		out.Templates[r.TableID] = r
 	}
@@ -181,6 +183,18 @@ func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) 
 	}
 	for _, r := range c.DialogConfigs {
 		out.DialogConfigs[r.ID] = r
+	}
+	for _, r := range c.DialogNodes {
+		key := library.DialogGroupKey{RelationshipSourceID: r.RelationshipSourceID, DialogGroup: r.DialogGroup}
+		if out.DialogNodes[key] == nil {
+			out.DialogNodes[key] = map[int64]library.DialogNode{}
+		}
+		node := library.DialogNode{NodeID: r.NodeID, TurnIDs: append([]int64(nil), r.TurnIDs...)}
+		if r.IsReward != nil {
+			reward := *r.IsReward
+			node.IsReward = &reward
+		}
+		out.DialogNodes[key][r.NodeID] = node
 	}
 	for _, r := range c.CourseGiftBoxes {
 		r.Rolls = append([]library.CourseDropRoll(nil), r.Rolls...)

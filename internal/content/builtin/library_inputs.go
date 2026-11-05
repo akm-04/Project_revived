@@ -23,6 +23,8 @@ type LibraryInputCatalog struct {
 	CGs                                []LibraryCGRule                `json:"cgs"`
 	Backgrounds                        []LibraryBackgroundRule        `json:"backgrounds"`
 	DialogConfigs                      []LibraryDialogConfigRule      `json:"dialog_configs"`
+	DialogNodes                        []LibraryDialogNodeRule        `json:"dialog_nodes,omitempty"`
+	DialogSourceUnknowns               []int64                        `json:"dialog_source_unknowns,omitempty"`
 	CourseGiftBoxes                    []LibraryCourseGiftBoxRule     `json:"course_gift_boxes"`
 }
 
@@ -32,7 +34,7 @@ func (c LibraryInputCatalog) Validate() error {
 	}
 	seen := map[int64]bool{}
 	for _, r := range c.Templates {
-		if r.TableID <= 0 || r.RelationshipSourceID <= 0 || r.CollectionSourceID <= 0 || seen[r.TableID] {
+		if r.TableID <= 0 || r.RelationshipSourceID <= 0 || r.CollectionSourceID <= 0 || seen[r.TableID] || r.ModelID < 0 || r.AwakenTableID < 0 || (r.Awaken != 0 && r.Awaken != 1) {
 			return errLibraryInput
 		}
 		seen[r.TableID] = true
@@ -98,6 +100,20 @@ func (c LibraryInputCatalog) Validate() error {
 			return fmt.Errorf("library: course gift box %d unqualified", r.ItemID)
 		}
 	}
+	seenDialogNodes := map[[3]int64]bool{}
+	for _, r := range c.DialogNodes {
+		if r.Validate() != nil || seenDialogNodes[[3]int64{r.RelationshipSourceID, r.DialogGroup, r.NodeID}] {
+			return fmt.Errorf("library: dialog node %d/%d/%d unqualified", r.RelationshipSourceID, r.DialogGroup, r.NodeID)
+		}
+		seenDialogNodes[[3]int64{r.RelationshipSourceID, r.DialogGroup, r.NodeID}] = true
+	}
+	seenDialogUnknowns := map[int64]bool{}
+	for _, id := range c.DialogSourceUnknowns {
+		if id <= 0 || seenDialogUnknowns[id] {
+			return fmt.Errorf("library: dialog source unknown %d unqualified", id)
+		}
+		seenDialogUnknowns[id] = true
+	}
 	return nil
 }
 
@@ -110,6 +126,9 @@ type LibraryTemplateRule struct {
 	DialogEnabled        bool  `json:"dialog_enabled"`
 	GiftLikeType         int64 `json:"gift_like_type"`
 	GiftDislikeType      int64 `json:"gift_dislike_type"`
+	ModelID              int64 `json:"model_id"`
+	AwakenTableID        int64 `json:"awaken_table_id"`
+	Awaken               int64 `json:"awaken"`
 }
 type LibraryGiftRule struct {
 	ItemID       int64 `json:"item_id"`
@@ -320,6 +339,37 @@ type LibraryDialogConfigRule struct {
 
 func (r LibraryDialogConfigRule) Validate() error {
 	if r.ID <= 0 || r.Type < 1 || r.Type > 7 || r.OpenCondition < 0 || r.AmourReward < 0 || r.GiftReward < 0 {
+		return errLibraryInput
+	}
+	return nil
+}
+
+// LibraryDialogNodeRule retains the raw dialogue graph; reward meaning is not assigned here.
+type LibraryDialogNodeRule struct {
+	RelationshipSourceID int64   `json:"relationship_source_id"`
+	DialogGroup          int64   `json:"dialog_group"`
+	NodeID               int64   `json:"node_id"`
+	IsReward             *int64  `json:"is_reward,omitempty"`
+	TurnIDs              []int64 `json:"turn_ids"`
+}
+
+func (r LibraryDialogNodeRule) Validate() error {
+	if r.RelationshipSourceID <= 0 || r.DialogGroup <= 0 || r.NodeID <= 0 || len(r.TurnIDs) == 0 {
+		return errLibraryInput
+	}
+	if r.IsReward != nil && *r.IsReward < 0 {
+		return errLibraryInput
+	}
+	terminal := false
+	for _, id := range r.TurnIDs {
+		if id == 0 || id < -1 {
+			return errLibraryInput
+		}
+		if id == -1 {
+			terminal = true
+		}
+	}
+	if terminal && len(r.TurnIDs) != 1 {
 		return errLibraryInput
 	}
 	return nil

@@ -79,6 +79,7 @@ func companionHero(t *testing.T, p *pg.Pool, actor identity.ActorContext) charac
 func resetForumBoards(t *testing.T, p *pg.Pool) {
 	t.Helper()
 	exec(t, p, `DELETE FROM library_forum_reactions`)
+	exec(t, p, `DELETE FROM library_forum_boards`)
 	exec(t, p, `DELETE FROM library_forum_comments`)
 }
 
@@ -262,7 +263,7 @@ func TestI9_10BForum834PetInstanceToTable(t *testing.T) {
 	}
 }
 
-func TestI9_10BForumPageCapAndServerIsolation(t *testing.T) {
+func TestI9_10BForumPageCapAndGlobalVisibility(t *testing.T) {
 	p := pool(t)
 	resetForumBoards(t, p)
 	installed(t, p)
@@ -327,14 +328,13 @@ func TestI9_10BForumPageCapAndServerIsolation(t *testing.T) {
 	if response.HTTPStatus != 200 || len(rows) != 50 {
 		t.Fatalf("server one page sees server two status %d len %d", response.HTTPStatus, len(rows))
 	}
-	for _, row := range rows {
-		if row["player_id"] == int64(other.PlayerID) {
-			t.Fatalf("server two comment leaked into server one %+v", row)
-		}
-	}
 	response = forumCall(t, p, other, 832, map[string]any{"start_pos": int64(1), "end_pos": int64(50), "table_id": tableID})
 	rows = forumRowsOf(t, response.Body)
-	if response.HTTPStatus != 200 || len(rows) != 1 || rows[0]["player_id"] != int64(other.PlayerID) || rows[0]["region"] != int64(2) {
-		t.Fatalf("server two board status %d rows %+v", response.HTTPStatus, rows)
+	if response.HTTPStatus != 200 || len(rows) != 50 || rows[0]["player_id"] != int64(last.PlayerID) || rows[0]["region"] != int64(1) {
+		t.Fatalf("global board from server two status %d rows %+v", response.HTTPStatus, rows)
+	}
+	response = forumCall(t, p, players[0], 833, map[string]any{"player_id": int64(other.PlayerID), "table_id": tableID})
+	if response.HTTPStatus != 200 {
+		t.Fatalf("cross-server like status %d body %+v", response.HTTPStatus, response.Body)
 	}
 }
