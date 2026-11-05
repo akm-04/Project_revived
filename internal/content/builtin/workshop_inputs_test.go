@@ -181,3 +181,42 @@ func TestWorkshopInputCatalogRejectsMalformedScratch(t *testing.T) {
 		})
 	}
 }
+
+func TestWorkshopInputCatalogRejectsReviewBoundaryGaps(t *testing.T) {
+	cases := map[string]func(*WorkshopInputCatalog){
+		"negative make time": func(catalog *WorkshopInputCatalog) {
+			for index, recipe := range catalog.ItemRecipes {
+				if len(recipe.MakeResourceIDs) > 0 {
+					catalog.ItemRecipes[index].MakeTime = -1
+					return
+				}
+			}
+		},
+		"negative resolve energy": func(catalog *WorkshopInputCatalog) {
+			for index, recipe := range catalog.ItemRecipes {
+				if len(recipe.ResolveResourceIDs) > 0 {
+					catalog.ItemRecipes[index].ResolveEnergy = -1
+					return
+				}
+			}
+		},
+		"desk missing recipe":       func(catalog *WorkshopInputCatalog) { catalog.Desk[0].CraftableItemIDs[0] = 999999999 },
+		"recycle missing recipe":    func(catalog *WorkshopInputCatalog) { catalog.Recycle[0].RecountItemIDs[0] = 999999999 },
+		"zero hero force threshold": func(catalog *WorkshopInputCatalog) { catalog.HeroProfiles[0].ForceThresholds[0] = 0 },
+		"empty sentinel award": func(catalog *WorkshopInputCatalog) {
+			catalog.Awards[0].ItemID = 0
+			catalog.Awards[0].ItemCount = 0
+			catalog.Awards[0].MaterialIDs = []int64{0}
+			catalog.Awards[0].MaterialAmounts = []int64{0}
+		},
+	}
+	for name, mutate := range cases {
+		t.Run(name, func(t *testing.T) {
+			catalog := workshopScratchCatalog(t)
+			mutate(&catalog)
+			if catalog.Validate() == nil {
+				t.Fatal("malformed Workshop catalogue accepted")
+			}
+		})
+	}
+}

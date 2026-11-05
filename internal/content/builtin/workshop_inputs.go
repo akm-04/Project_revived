@@ -183,7 +183,7 @@ func (c WorkshopInputCatalog) validateHeroProfiles() error {
 		}
 		heroIDs[rule.HeroID] = true
 		for _, threshold := range rule.ForceThresholds {
-			if threshold < 0 {
+			if threshold <= 0 {
 				return errWorkshopInput
 			}
 		}
@@ -220,6 +220,9 @@ func (c WorkshopInputCatalog) validateAwards() error {
 			return errWorkshopInput
 		}
 		sentinel := len(rule.MaterialIDs) == 1 && rule.MaterialIDs[0] == 0 && rule.MaterialAmounts[0] == 0
+		if sentinel && rule.ItemID == 0 {
+			return errWorkshopInput
+		}
 		if !sentinel {
 			if len(rule.MaterialIDs) == 0 {
 				if rule.ItemID == 0 {
@@ -243,7 +246,7 @@ func (c WorkshopInputCatalog) validateAwards() error {
 func (c WorkshopInputCatalog) validateItemRecipes() error {
 	itemIDs := map[int64]bool{}
 	for _, rule := range c.ItemRecipes {
-		if rule.ItemID <= 0 || itemIDs[rule.ItemID] || len(rule.MakeResourceIDs) != len(rule.MakeQuantities) || len(rule.ResolveResourceIDs) != len(rule.ResolveQuantities) || (len(rule.MakeResourceIDs) == 0) != (rule.MakeTime == 0) || (len(rule.ResolveResourceIDs) == 0) != (rule.ResolveEnergy == 0) {
+		if rule.ItemID <= 0 || itemIDs[rule.ItemID] || rule.MakeTime < 0 || rule.ResolveEnergy < 0 || len(rule.MakeResourceIDs) != len(rule.MakeQuantities) || len(rule.ResolveResourceIDs) != len(rule.ResolveQuantities) || (len(rule.MakeResourceIDs) == 0) != (rule.MakeTime == 0) || (len(rule.ResolveResourceIDs) == 0) != (rule.ResolveEnergy == 0) {
 			return errWorkshopInput
 		}
 		if len(rule.MakeResourceIDs) == 0 && len(rule.ResolveResourceIDs) == 0 {
@@ -257,6 +260,20 @@ func (c WorkshopInputCatalog) validateItemRecipes() error {
 		}
 		for index, identifier := range rule.ResolveResourceIDs {
 			if identifier <= 0 || rule.ResolveQuantities[index] <= 0 {
+				return errWorkshopInput
+			}
+		}
+	}
+	for _, rule := range c.Desk {
+		for _, identifier := range rule.CraftableItemIDs {
+			if !itemIDs[identifier] {
+				return errWorkshopInput
+			}
+		}
+	}
+	for _, rule := range c.Recycle {
+		for _, identifier := range rule.RecountItemIDs {
+			if !itemIDs[identifier] {
 				return errWorkshopInput
 			}
 		}
