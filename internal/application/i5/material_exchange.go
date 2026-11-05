@@ -95,6 +95,9 @@ func rejectMaterialExchangeCollisions(cost MaterialCost, plan grant.Plan) error 
 // before any canonical mutation. Re-locking an identity already represented in
 // the opaque plan is allowed; discovering a new identity later is not.
 func (s Service) PrepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, req MaterialExchangeRequest, op operation.Context) (*PreparedMaterialExchange, error) {
+	return s.prepareMaterialExchangeTx(ctx, t, actor, req, op, validateStackOnlyRestoration)
+}
+func (s Service) prepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, req MaterialExchangeRequest, op operation.Context, validateRestoration func(grant.Plan) error) (*PreparedMaterialExchange, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
@@ -107,7 +110,7 @@ func (s Service) PrepareMaterialExchangeTx(ctx context.Context, t tx.Tx, actor i
 	if err := req.Cost.validate(); err != nil {
 		return nil, err
 	}
-	if err := validateStackOnlyRestoration(req.Restoration); err != nil {
+	if err := validateRestoration(req.Restoration); err != nil {
 		return nil, err
 	}
 	if err := rejectMaterialExchangeCollisions(req.Cost, req.Restoration); err != nil {

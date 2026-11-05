@@ -575,6 +575,7 @@
    "character_functions_test.go",
    "composite_functions_test.go",
    "equipment_resources_test.go",
+   "glue_purchase_test.go",
    "hero_equipment_resources_test.go",
    "hero_progression_test.go",
    "hero_promotion_resources_test.go",
