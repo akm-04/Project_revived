@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/guildrental"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/guild"
@@ -213,7 +214,7 @@ func rentalPartners(rows []guildrental.Row) []any {
 func rentalPartner(row guildrental.Row) map[string]any {
 	body := map[string]any{}
 	if row.Hero != nil {
-		wire, err := heroproj.StockHero(*row.Hero)
+		wire, err := heroproj.StockHeroDetail(*row.Hero, rentalAppearance(row.Appearance), row.TwiceAwakeStage)
 		if err == nil {
 			for key, value := range wire {
 				body[key] = value
@@ -239,6 +240,24 @@ func rentalPartner(row guildrental.Row) map[string]any {
 	body["can_rent"] = row.CanRent
 	body["have_rent"] = row.HaveRent
 	return body
+}
+
+// rentalAppearance converts the Character owner's qualified appearance to the
+// stock projection view; a read without one is not replaced by a default.
+func rentalAppearance(appearance *characterasset.EffectiveHeroAppearance) *heroproj.AppearanceView {
+	if appearance == nil {
+		return nil
+	}
+	view := heroproj.AppearanceView{OwnerStateVersion: appearance.OwnerStateVersion, CurrentSkinID: appearance.CurrentSkinID, IllusionSkinID: appearance.IllusionSkinID}
+	view.Skins = make([]heroproj.QualifiedSkinView, 0, len(appearance.Skins))
+	for _, skin := range appearance.Skins {
+		view.Skins = append(view.Skins, heroproj.QualifiedSkinView{ModelID: skin.ModelID, ExpiresAt: skin.ExpiresAt})
+	}
+	view.LIVE = make([]heroproj.QualifiedLIVEView, 0, len(appearance.LIVE))
+	for _, live := range appearance.LIVE {
+		view.LIVE = append(view.LIVE, heroproj.QualifiedLIVEView{ModelID: live.ModelID, IsShow: live.IsShow})
+	}
+	return &view
 }
 
 func rentalBad() httpedge.Response {

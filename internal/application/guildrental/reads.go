@@ -5,7 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+	"time"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -28,9 +30,17 @@ type ReadStore interface {
 	ReadRentalUsesDayTx(context.Context, tx.Queryer, identity.PlayerID, int64) ([]guild.RentalUse, error)
 }
 
+// HeroProjection is the qualified owner view of one offered Hero: the durable
+// row plus the appearance and twice-awake facts the stock detail window reads.
+type HeroProjection struct {
+	Hero            character.Hero
+	Appearance      characterasset.EffectiveHeroAppearance
+	TwiceAwakeStage *int64
+}
+
 // Characters is the existing owned-character read, not a second stat path.
 type Characters interface {
-	HeroTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, bool, error)
+	HeroProjectionTx(context.Context, tx.Queryer, string, time.Time, identity.PlayerID, int64) (HeroProjection, bool, error)
 	PetTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Pet, bool, error)
 }
 
@@ -44,14 +54,16 @@ type Mana interface {
 
 // Row is one visible offer with the projections the stock windows index.
 type Row struct {
-	Offer    guild.RentalOffer
-	Hero     *character.Hero
-	Pet      *character.Pet
-	Profile  playerdirectory.Profile
-	Price    int64
-	Interest int64
-	CanRent  bool
-	HaveRent bool
+	Offer           guild.RentalOffer
+	Hero            *character.Hero
+	Appearance      *characterasset.EffectiveHeroAppearance
+	TwiceAwakeStage *int64
+	Pet             *character.Pet
+	Profile         playerdirectory.Profile
+	Price           int64
+	Interest        int64
+	CanRent         bool
+	HaveRent        bool
 }
 
 // List is one 2768 or 621 answer. RentCount is the client list cache key (C6).
@@ -70,10 +82,12 @@ type Reader struct {
 	Privileges i5.PrivilegeSnapshotProvider
 	Workplace  Workplace
 	Policy     Policy
+	Content    Content
+	Now        func(context.Context, tx.Queryer) (time.Time, error)
 }
 
 func (r Reader) validate() error {
-	if r.Runner.DB == nil || r.Store == nil || r.Characters == nil || r.Profiles == nil || r.Levels == nil || r.Mana == nil || r.Privileges == nil {
+	if r.Runner.DB == nil || r.Store == nil || r.Characters == nil || r.Profiles == nil || r.Levels == nil || r.Mana == nil || r.Privileges == nil || r.Content == nil || r.Now == nil {
 		return ErrUnavailable
 	}
 	return r.Policy.Validate()
@@ -191,6 +205,18 @@ func (r Reader) GuildOffers(c context.Context, a identity.ActorContext, kind gui
 		if err != nil {
 			return err
 		}
+		revision, err := r.Content.ActiveRevision(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		thresholds, err := r.Content.HeroExpPolicyTx(c, sc.Tx, revision, character.MaxHeroLevel)
+		if err != nil {
+			return err
+		}
+		observedAt, err := r.Now(c, sc.Tx)
+		if err != nil {
+			return err
+		}
 		borrowerLimit := level + min(vipLimit.LevelUp, r.Policy.Money.LevelUpCeiling)
 		rows := make([]Row, 0, len(offers))
 		for _, offer := range offers {
@@ -202,7 +228,7 @@ func (r Reader) GuildOffers(c context.Context, a identity.ActorContext, kind gui
 			if err != nil {
 				return err
 			}
-			unitLevel, found, err := r.unit(c, sc.Tx, offer, &row)
+			unitLevel, found, err := r.unit(c, sc.Tx, revision, observedAt.UTC(), thresholds, offer, &row)
 			if err != nil {
 				return err
 			}
@@ -236,14 +262,21 @@ func (r Reader) HeroOfferedTx(c context.Context, q tx.Queryer, pid identity.Play
 	return false, nil
 }
 
-func (r Reader) unit(c context.Context, q tx.Queryer, offer guild.RentalOffer, row *Row) (int64, bool, error) {
+func (r Reader) unit(c context.Context, q tx.Queryer, revision string, observedAt time.Time, thresholds []character.HeroExpThreshold, offer guild.RentalOffer, row *Row) (int64, bool, error) {
 	if offer.Kind == guild.RentalHero {
-		hero, found, err := r.Characters.HeroTx(c, q, offer.Lender, offer.Unit)
+		projection, found, err := r.Characters.HeroProjectionTx(c, q, revision, observedAt, offer.Lender, offer.Unit)
 		if err != nil || !found {
 			return 0, found, err
 		}
-		row.Hero = &hero
-		return hero.Level, true, nil
+		cumulativeExp, err := projection.Hero.SourceCumulativeEXP(thresholds)
+		if err != nil {
+			return 0, false, err
+		}
+		projection.Hero.Exp = cumulativeExp
+		row.Hero = &projection.Hero
+		row.Appearance = &projection.Appearance
+		row.TwiceAwakeStage = projection.TwiceAwakeStage
+		return projection.Hero.Level, true, nil
 	}
 	pet, found, err := r.Characters.PetTx(c, q, offer.Lender, offer.Unit)
 	if err != nil || !found {

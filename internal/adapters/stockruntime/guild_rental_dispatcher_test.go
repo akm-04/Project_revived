@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/guildrental"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -52,6 +53,10 @@ func rentalRow(lender identity.PlayerID, kind guild.RentalKind, unit int64) guil
 		hero := character.Hero{PlayerID: lender, PartnerID: unit, TableID: 10001001, OriginTableID: 10001001, Kind: character.NormalHero,
 			Star: 1, Level: 1, Color: 1, RawSkills: character.NewHeroRawSkillSeed(), CreationContentRevision: strings.Repeat("a", 64), StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 		row.Hero = &hero
+		stage := int64(2)
+		row.Appearance = &characterasset.EffectiveHeroAppearance{OwnerStateVersion: hero.StateVersion, CurrentSkinID: 40001001, IllusionSkinID: -1,
+			Skins: []characterasset.QualifiedSkinEntitlement{{ModelID: 40001001}}}
+		row.TwiceAwakeStage = &stage
 	}
 	return row
 }
@@ -113,6 +118,12 @@ func TestGuildRentalWireShapes(t *testing.T) {
 	if partner["partner_id"] != int64(31) || partner["table_id"] != int64(10001001) || partner["player_id"] != int64(7) ||
 		partner["player_name"] != "lender" || partner["rent_need_mana"] != int64(2000) || partner["can_rent"] != true || partner["have_rent"] != false {
 		t.Fatal("2768 partner row", partner)
+	}
+	if partner["current_skin_id"] != int64(40001001) || partner["twice_awake_stage"] != int64(2) {
+		t.Fatal("2768 partner detail projection", partner)
+	}
+	if skins := partner["skin_ids"].(map[string]any); skins["40001001"] != int64(-1) {
+		t.Fatal("2768 partner skin list", skins)
 	}
 	if tutors := got.Body["tutor_rent_heroes"].([]any); len(tutors) != 0 {
 		t.Fatal("2768 tutor list", tutors)

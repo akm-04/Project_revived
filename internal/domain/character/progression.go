@@ -51,7 +51,7 @@ func (h Hero) AddSourceEXP(amount, maxLevel int64, thresholds []HeroExpThreshold
 	if err := h.ValidatePersistent(); err != nil {
 		return Hero{}, err
 	}
-	if amount <= 0 || maxLevel <= 0 || maxLevel > 100 || int64(len(thresholds)) != maxLevel || now.IsZero() {
+	if amount <= 0 || maxLevel <= 0 || maxLevel > MaxHeroLevel || int64(len(thresholds)) != maxLevel || now.IsZero() {
 		return Hero{}, errors.New("character hero: invalid EXP progression input")
 	}
 	var prev int64 = -1
@@ -101,6 +101,26 @@ func (h Hero) AddSourceEXP(amount, maxLevel int64, thresholds []HeroExpThreshold
 		return Hero{}, err
 	}
 	return h, nil
+}
+
+// SourceCumulativeEXP returns the cumulative EXP the stock client subtracts
+// totalExp(level-1) from. A row below that floor is the legacy placeholder
+// (level set before the source cumulative curve) and reads as zero progress
+// inside its level; no durable state changes.
+func (h Hero) SourceCumulativeEXP(thresholds []HeroExpThreshold) (int64, error) {
+	if h.Level < 1 || int64(len(thresholds)) < h.Level {
+		return 0, errors.New("character hero: invalid cumulative EXP input")
+	}
+	for i := 0; i < int(h.Level); i++ {
+		if thresholds[i].Level != int64(i+1) || thresholds[i].TotalExp < 0 {
+			return 0, errors.New("character hero: invalid cumulative EXP thresholds")
+		}
+	}
+	var floor int64
+	if h.Level > 1 {
+		floor = thresholds[h.Level-2].TotalExp
+	}
+	return max(h.Exp, floor), nil
 }
 
 func (h Hero) EvolveOneStar(now time.Time) (Hero, error) {

@@ -201,6 +201,46 @@ func TestI9_9BProductionUnitsForceMatchesPlace(t *testing.T) {
 	}
 }
 
+func TestI9_9BGuildOffersProjectHeroDetail(t *testing.T) {
+	f := newRentalFixture(t)
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, opPinned(f.revision)); err != nil {
+		t.Fatal("place", err)
+	}
+	// Legacy source rows keep their visible level without the cumulative curve;
+	// the stock detail window subtracts totalExp(level-1) from the wire exp.
+	exec(t, f.pool, `UPDATE player_heroes SET level=100,exp=0,updated_at=clock_timestamp() WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero)
+	content := contentstore.Store{Queryer: f.pool}
+	reads := guildrental.Reader{
+		Runner: tx.Runner{DB: f.pool}, Store: guildstore.Store{Queryer: f.pool},
+		Characters: guildrentalread.Characters{Content: content}, Profiles: guildrentalread.Profiles{}, Levels: guildrentalread.Levels{},
+		Mana: guildrentalread.Mana{}, Privileges: appi5.BaselinePrivilegeProvider{},
+		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: f.service.Policy, Content: content,
+		Now: func(c context.Context, q tx.Queryer) (time.Time, error) {
+			return (postgres.AuthoritativeTime{Queryer: q}).Now(c)
+		},
+	}
+	list, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, 0, opPinned(f.revision))
+	if err != nil {
+		t.Fatal("guild offers", err)
+	}
+	for _, row := range list.Rows {
+		if row.Offer.Unit != f.hero {
+			continue
+		}
+		if row.Hero == nil || row.Hero.Level != 100 || row.Hero.Exp != 1844095 {
+			t.Fatalf("detail exp lev=%v exp=%v", row.Hero, row.Hero.Exp)
+		}
+		if row.Appearance == nil || row.Appearance.OwnerStateVersion != row.Hero.StateVersion {
+			t.Fatalf("qualified appearance %+v", row.Appearance)
+		}
+		if row.TwiceAwakeStage == nil || *row.TwiceAwakeStage != 0 {
+			t.Fatalf("raw twice-awake stage %v", row.TwiceAwakeStage)
+		}
+		return
+	}
+	t.Fatal("lender offer missing from 2768 projection")
+}
+
 func TestI9_9BBorrowedTableCollisionRefunds(t *testing.T) {
 	f := newRentalFixture(t)
 	op := opPinned(f.revision)

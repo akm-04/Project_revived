@@ -40,6 +40,34 @@ func TestStockHeroNeutralShapesAndSpiritOmission(t *testing.T) {
 	}
 }
 
+func TestStockHeroDetailAddsQualifiedAppearanceAndTwiceAwake(t *testing.T) {
+	h := fixture(character.NormalHero)
+	expires := time.Unix(500, 0).UTC()
+	stage := int64(3)
+	appearance := AppearanceView{OwnerStateVersion: h.StateVersion, CurrentSkinID: 40001001, IllusionSkinID: -1,
+		Skins: []QualifiedSkinView{{ModelID: 40001001}, {ModelID: 40001002, ExpiresAt: &expires}}}
+	m, err := StockHeroDetail(h, &appearance, &stage)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m["current_skin_id"] != int64(40001001) || m["illusion_skin_id"] != int64(0) || m["twice_awake_stage"] != int64(3) {
+		t.Fatalf("detail selectors %#v", m)
+	}
+	if skins := m["skin_ids"].(map[string]any); skins["40001001"] != int64(-1) || skins["40001002"] != expires.Unix() {
+		t.Fatalf("skin_ids=%#v", skins)
+	}
+	m, err = StockHeroDetail(h, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := m["current_skin_id"]; ok {
+		t.Fatal("an unqualified appearance must not be invented")
+	}
+	if _, ok := m["twice_awake_stage"]; ok {
+		t.Fatal("an unknown twice-awake stage must not be invented")
+	}
+}
+
 func TestStockRosterUsesPartnerIDMap(t *testing.T) {
 	body, err := StockRoster(0, []character.Hero{fixture(character.NormalHero)})
 	if err != nil {
