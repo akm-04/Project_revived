@@ -20,7 +20,7 @@ func TestValidatedOverridePreservesSourceAndRejectsWholeInvalidPayload(t *testin
 	if !reflect.DeepEqual(source, sourceCatalog()) {
 		t.Fatal("source mutated")
 	}
-	for _, invalid := range []string{`{`, `{"version":1,"revision":"x","unknown":1}`, `{"version":1,"revision":"x","products":[{"id":2,"off":true}]}`, `{"version":1,"revision":"x","products":[{"id":1,"price":0}]}`, `{"version":1,"revision":"x","products":[{"id":1,"items":[{"item_id":999,"item_num":1}]}]}`} {
+	for _, invalid := range []string{`{`, `{"version":1,"revision":"x","products":[{"id":1,"price":9223372036854775807}]}`, `{"version":1,"revision":"x","unknown":1}`, `{"version":1,"revision":"x","products":[{"id":2,"off":true}]}`, `{"version":1,"revision":"x","products":[{"id":1,"price":0}]}`, `{"version":1,"revision":"x","products":[{"id":1,"items":[{"item_id":999,"item_num":1}]}]}`} {
 		catalog, off, revision = effectiveCatalog(source, 1, json.RawMessage(invalid))
 		if off || revision != "source" || !reflect.DeepEqual(catalog, source) {
 			t.Fatalf("invalid overlay did not fall back: %s", invalid)

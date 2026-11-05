@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"math"
 	"strings"
 
 	domain "gxb.local/backend/v2/internal/domain/socialexchange"
@@ -64,6 +65,18 @@ func effectiveCatalog(source domain.Catalog, productID int64, raw json.RawMessag
 		}
 		if product == nil || (setting.Price != nil && *setting.Price <= 0) || (setting.Limit != nil && (*setting.Limit < 1 || *setting.Limit > source.ExchangeLimit)) {
 			return source, false, "source"
+		}
+		limit := source.ExchangeLimit
+		if setting.Limit != nil {
+			limit = *setting.Limit
+		}
+		if setting.Price != nil && *setting.Price > math.MaxInt64/limit {
+			return source, false, "source"
+		}
+		for _, item := range setting.Items {
+			if item.ItemNum > math.MaxInt64/limit {
+				return source, false, "source"
+			}
 		}
 		dropboxID := int64(0)
 		for _, gift := range source.Gifts {
