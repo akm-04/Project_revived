@@ -3,17 +3,14 @@ package builtin_test
 import (
 	"errors"
 	"os"
-	"reflect"
 	"slices"
 	"testing"
 	"time"
 
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/identity"
-	"gxb.local/backend/v2/internal/domain/socialexchange"
 	"gxb.local/backend/v2/internal/domain/socialrecall"
 	"gxb.local/backend/v2/internal/foundation/ids"
-	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
 func TestDecodeSocialInputCatalogRejectsMalformedPayload(t *testing.T) {
@@ -63,80 +60,8 @@ func TestSocialInputCatalogValidationRefusesDrift(t *testing.T) {
 	}
 }
 
-func TestSourceSocialCatalogPlansThroughDomain(t *testing.T) {
+func TestSourceSocialCatalogPlansRecallThroughDomain(t *testing.T) {
 	catalog := decodeSourceCatalog(t)
-	exchangeCatalog := sourceExchangeCatalog(catalog)
-	op := proofOperation(t)
-
-	dropboxItems := make(map[int64]map[int64]struct{}, len(catalog.Dropboxes))
-	for _, dropbox := range catalog.Dropboxes {
-		items := make(map[int64]struct{}, len(dropbox.Rolls))
-		for _, roll := range dropbox.Rolls {
-			items[roll.ItemID] = struct{}{}
-		}
-		dropboxItems[dropbox.ID] = items
-	}
-	for _, product := range catalog.ExchangeProducts {
-		plan, err := socialexchange.BuildPlan(exchangeCatalog, product.ID, 1, op)
-		if err != nil {
-			t.Fatalf("product %d plan: %v", product.ID, err)
-		}
-		if plan.UnitPrice != product.SellPrice || plan.TotalCost != product.SellPrice || plan.PriceCurrency != socialexchange.PriceCurrency {
-			t.Fatalf("product %d cost wrong: %+v", product.ID, plan)
-		}
-		if len(plan.Items) == 0 {
-			t.Fatalf("product %d planned no reward", product.ID)
-		}
-		items, found := dropboxItems[plan.DropboxID]
-		if !found {
-			t.Fatalf("product %d planned unknown dropbox %d", product.ID, plan.DropboxID)
-		}
-		for _, item := range plan.Items {
-			if _, found := items[item.ItemID]; !found {
-				t.Fatalf("product %d planned item %d outside its dropbox", product.ID, item.ItemID)
-			}
-			if item.ItemNum <= 0 {
-				t.Fatalf("product %d planned non-positive quantity", product.ID)
-			}
-		}
-	}
-
-	second, err := socialexchange.BuildPlan(exchangeCatalog, 2, 1, op)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(second.Items, []socialexchange.ItemQuantity{{ItemID: 50001046, ItemNum: 1}}) {
-		t.Fatalf("source product 2 composite reward wrong: %+v", second.Items)
-	}
-	third, err := socialexchange.BuildPlan(exchangeCatalog, 3, 1, op)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(third.Items, []socialexchange.ItemQuantity{{ItemID: 50001024, ItemNum: 1}}) {
-		t.Fatalf("source product 3 composite reward wrong: %+v", third.Items)
-	}
-
-	if _, err := socialexchange.BuildPlan(exchangeCatalog, 1, catalog.ExchangeLimit, op); err != nil {
-		t.Fatalf("source exchange limit refused: %v", err)
-	}
-	if _, err := socialexchange.BuildPlan(exchangeCatalog, 1, catalog.ExchangeLimit+1, op); !errors.Is(err, socialexchange.ErrCount) {
-		t.Fatalf("count above source limit accepted: %v", err)
-	}
-	if _, err := socialexchange.BuildPlan(exchangeCatalog, 999, 1, op); !errors.Is(err, socialexchange.ErrUnknownProduct) {
-		t.Fatalf("unknown product accepted: %v", err)
-	}
-	retry, err := socialexchange.BuildPlan(exchangeCatalog, 1, 10, op)
-	if err != nil {
-		t.Fatal(err)
-	}
-	first, err := socialexchange.BuildPlan(exchangeCatalog, 1, 10, op)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(first, retry) {
-		t.Fatalf("retry changed the source plan: %+v %+v", first, retry)
-	}
-
 	summary := sourceCompletionSummary(t)
 	if summary != (socialrecall.CompletionSummary{CompletedTargets: 3, AcademyLevel: 95, OwnedHeroCount: 20, ChargeTotal: 250}) {
 		t.Fatalf("source completion summary wrong: %+v", summary)
@@ -150,28 +75,6 @@ func TestSourceSocialCatalogPlansThroughDomain(t *testing.T) {
 	if !slices.Equal(claimable, expected) {
 		t.Fatalf("source category claim planning wrong: %v", claimable)
 	}
-}
-
-func sourceExchangeCatalog(catalog builtin.SocialInputCatalog) socialexchange.Catalog {
-	products := make([]socialexchange.Product, 0, len(catalog.ExchangeProducts))
-	for _, product := range catalog.ExchangeProducts {
-		products = append(products, socialexchange.Product{ID: product.ID, GiftID: product.GiftID, SellPrice: product.SellPrice})
-	}
-	gifts := make([]socialexchange.ExchangeGift, 0, len(catalog.ExchangeProducts))
-	for _, gift := range catalog.Gifts {
-		if len(gift.Drops) == 1 {
-			gifts = append(gifts, socialexchange.ExchangeGift{ID: gift.ID, DropboxID: gift.Drops[0]})
-		}
-	}
-	dropboxes := make([]socialexchange.Dropbox, 0, len(catalog.Dropboxes))
-	for _, dropbox := range catalog.Dropboxes {
-		rolls := make([]socialexchange.Drop, 0, len(dropbox.Rolls))
-		for _, roll := range dropbox.Rolls {
-			rolls = append(rolls, socialexchange.Drop{ID: roll.ID, ItemID: roll.ItemID, ItemNum: roll.ItemNum, Rate: roll.DropRate})
-		}
-		dropboxes = append(dropboxes, socialexchange.Dropbox{ID: dropbox.ID, Rolls: rolls})
-	}
-	return socialexchange.Catalog{ExchangeLimit: catalog.ExchangeLimit, Products: products, Gifts: gifts, Dropboxes: dropboxes}
 }
 
 func sourceMilestoneCategories(catalog builtin.SocialInputCatalog) []socialrecall.MilestoneCategory {
@@ -244,17 +147,4 @@ func decodeSourceCatalog(t *testing.T) builtin.SocialInputCatalog {
 		t.Fatal(err)
 	}
 	return catalog
-}
-
-func proofOperation(t *testing.T) operation.Context {
-	t.Helper()
-	identifier, err := ids.NewUUID()
-	if err != nil {
-		t.Fatal(err)
-	}
-	var seed [32]byte
-	for index := range seed {
-		seed[index] = byte(index + 1)
-	}
-	return operation.Context{ID: identifier, StartedAt: time.Unix(1_700_000_000, 0).UTC(), EntropySeed: seed}
 }

@@ -155,6 +155,12 @@ class SocialCompilerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.build(self.parse_modified('misc', mutate))
 
+    def test_generated_social_artifact_is_exact(self):
+        checked_in = json.loads(
+            (ROOT / 'internal/content/builtin/generated/social_input_catalog.json').read_text()
+        )
+        self.assertEqual(self.build(), checked_in)
+
     def test_old_course_catalog_is_unchanged(self):
         items = gen.parse_encoded_item_table(self.blobs['data/tables/item.lua'].data)
         course = build_course(self.blobs, gen.parse_generated_lua_table, items)

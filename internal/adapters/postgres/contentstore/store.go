@@ -225,6 +225,8 @@ const verifyGuildBroadcastSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload
 
 const verifySocialGiftSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false) FROM content_social_gift_catalogs WHERE revision_id=$1`
 
+const verifySocialInputSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_social_input_catalogs WHERE revision_id=$1`
+
 func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle) (registry.Verification, error) {
 	if q == nil {
 		return registry.Verification{}, errors.New("content store: nil queryer")
@@ -450,6 +452,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 	if err != nil {
 		return v, err
 	}
+	var socialInputExact bool
+	err = q.QueryRow(ctx, verifySocialInputSQL, b.RevisionID(), string(b.SocialInputsJSON())).Scan(&socialInputExact, &v.SocialInputCount)
+	if err != nil {
+		return v, err
+	}
+	v.Exact = v.Exact && socialInputExact
 	var broadcastExact bool
 	err = q.QueryRow(ctx, verifyGuildBroadcastSQL, b.RevisionID(), string(b.GuildBroadcastJSON())).Scan(&broadcastExact, &v.GuildBroadcastCount)
 	v.Exact = v.Exact && broadcastExact
@@ -838,6 +846,17 @@ func (Store) InsertEmoticons(ctx context.Context, t tx.Tx, b registry.Bundle) (i
 
 func (Store) InsertSocialGift(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
 	tag, e := t.Exec(ctx, `INSERT INTO content_social_gift_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.SocialGiftJSON()))
+	if e != nil {
+		return 0, e
+	}
+	return tag.RowsAffected(), nil
+}
+
+func (Store) InsertSocialInputs(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
+	if t == nil {
+		return 0, errors.New("content store: nil transaction")
+	}
+	tag, e := t.Exec(ctx, `INSERT INTO content_social_input_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.SocialInputsJSON()))
 	if e != nil {
 		return 0, e
 	}

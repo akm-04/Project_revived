@@ -10,7 +10,7 @@ func TestLoadGeneratedCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := c.RevisionID(), "4afc9fad8807b6648021611bad69d4e28e6cc0fa2a3c562bd5c22c25355f5c2c"; got != want {
+	if got, want := c.RevisionID(), "a7d69b70e4044f0be8f5ec32f464e1b27b64d18a2a1939a72e6ebccf58f066e3"; got != want {
 		t.Fatalf("revision id = %s, want %s", got, want)
 	}
 	if got, want := len(c.PlayerProgression.Rows), 100; got != want {
@@ -30,6 +30,12 @@ func TestLoadGeneratedCatalog(t *testing.T) {
 	}
 	if got, want := c.Manifest.Diagnostics["specialized_type24_items"], 378; got != want {
 		t.Fatalf("type24 diagnostic = %d, want %d", got, want)
+	}
+	if got, want := len(c.SocialInputs.ExchangeProducts), 3; got != want {
+		t.Fatalf("Social exchange products = %d, want %d", got, want)
+	}
+	if got, want := len(c.SocialInputs.InvitationMissions), 250; got != want {
+		t.Fatalf("Social invitation missions = %d, want %d", got, want)
 	}
 }
 

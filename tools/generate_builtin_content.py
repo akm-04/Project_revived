@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-9c-guild-campaign"
+COMPILER_VERSION = "i9-10e-social-content"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -341,6 +341,7 @@ ENABLED_CAPABILITIES = [
     "CHARACTER_APPEARANCE_CA7",
     "FRIEND_DM_EMOTICON_I7A6A",
     "SOCIAL_GIFT_I7A7A",
+    "SOCIAL_CONTENT_I9_10E",
 ]
 
 
@@ -539,6 +540,7 @@ from arena_content import build_arena, build_tournament
 from league_content import build_league
 from conquer_mode_content import build_conquer_mode
 from course_content import build_course
+from social_content import build_social
 class CompileError(ValueError):
     pass
 
@@ -2448,6 +2450,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "guild_invite_policy.json":invite_artifact,
         "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,
+        "social_input_catalog.json": build_social(blobs, parse_generated_lua_table, CompileError),
         "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,
         "function_gates.json": function_artifact,

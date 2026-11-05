@@ -514,13 +514,21 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
       "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
+    },
+    {
+      "ordinal": 70,
+      "stage": "I9-10E Social Content",
+      "compiler_version": "i9-10e-social-content",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "a7d69b70e4044f0be8f5ec32f464e1b27b64d18a2a1939a72e6ebccf58f066e3",
+      "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical."
     }
   ],
   "current": {
-    "stage": "I9-9C Guild Campaign",
-    "compiler_version": "i9-9c-guild-campaign",
+    "stage": "I9-10E Social Content",
+    "compiler_version": "i9-10e-social-content",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
-    "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
+    "revision_id": "a7d69b70e4044f0be8f5ec32f464e1b27b64d18a2a1939a72e6ebccf58f066e3",
+    "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical."
   }
 }
