@@ -1189,7 +1189,7 @@
    "family": "SOCIAL_RECALL_EXCHANGE",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {

@@ -59,6 +59,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialexchangestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
@@ -108,6 +109,7 @@ import (
 	"gxb.local/backend/v2/internal/application/roominvite"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
+	"gxb.local/backend/v2/internal/application/socialexchange"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
@@ -577,6 +579,8 @@ func main() {
 	for _, mid := range []uint16{7, 1537, 8193, 8194} {
 		mustRegister(mid, publicationDispatcher)
 	}
+	exchangeService := socialexchange.Service{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Settings: socialexchangestore.Store{}, Materials: i5svc, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	mustRegister(191, stockruntime.SocialExchangeDispatcher{Authority: authority, Service: exchangeService})
 	socialRelationDB := socialrelationstore.Store{}
 	socialInboxDB := socialinboxstore.Store{}
 	socialPresentation := socialpresentation.TransactionReader{Display: displayService}

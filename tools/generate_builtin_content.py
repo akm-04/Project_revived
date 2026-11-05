@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-10b-dialog-metadata"
+COMPILER_VERSION = "i9-10-social-library-integration"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -190,6 +190,9 @@ SOURCE_MANIFEST = [
     ("app/windows/TeamMessageWindow.lua", "fe5732defb999617d38bb63e94aab355ccefaf567ab87c4506657e021095a085", "I7A8A_STOCK588_TITLE_CONTENT_BOUNDARIES"),
     ('data/tables/friend_dailygift.lua', 'b350a14dab62799dcca37dddde370bd86ed78f1745f01483d0bce065062cf707', 'I7A7A_DAILY_GIFT_EQUIVALENCE'),
     ('data/tables/gift.lua', '8c87dfdc116242afcdebd011cf898d61b08e2cf54ea7d0a11a5f69fabade2ac7', 'I7A7A_COMPLETE_REWARD_VECTOR'),
+    ('data/tables/friend_shop_item.lua', '247daa04482db011bd14da6d7a61e03443bc000e37f7ff8cedb5535f08733030', 'I9_10E_SOCIAL_CONTENT_SOURCE_AUTHORITY'),
+    ('data/tables/friend_recall.lua', '8ec0752112a50ee6958c90139207d5323c488b16b0b378d7754b72a69f2d50eb', 'I9_10E_SOCIAL_CONTENT_SOURCE_AUTHORITY'),
+    ('data/tables/invitation_mission.lua', '370a467df1dc6a8ae1da46d51bcfe6139c76d150b0885c3c61dcb5fad817b9a1', 'I9_10E_SOCIAL_CONTENT_SOURCE_AUTHORITY'),
     ("data/tables/emoticon.lua", "76ccbf5c136f5a484e6e5fbe2ca0ef4f58451676ddea78281285a99afc2d3c08", "I7A6A_EMOTICON_DATA_AUTHORITY"),
     ("app/common/tables/ItemTable.lua", "1f846972f29a55ee2dbb90f2cb9b0124eaeaa90646c3c66644ab66e231c37f00", "ITEM_BEHAVIORAL_PARSER_AUTHORITY"),
     ("data/tables/item.lua", "59b668c28a372543da0c36d7a8d84291cc5b93fa0d92b7cc389a645e96e7b7cc", "ITEM_DATA_AUTHORITY_ENCODED_TABLE"),
@@ -487,6 +490,7 @@ ENABLED_CAPABILITIES = [
     "CHARACTER_APPEARANCE_CA7",
     "FRIEND_DM_EMOTICON_I7A6A",
     "SOCIAL_GIFT_I7A7A",
+    "SOCIAL_CONTENT_I9_10E",
 ]
 
 
@@ -685,6 +689,7 @@ from arena_content import build_arena, build_tournament
 from league_content import build_league
 from conquer_mode_content import build_conquer_mode
 from course_content import build_course
+from social_content import build_social
 class CompileError(ValueError):
     pass
 
@@ -2683,6 +2688,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "guild_invite_policy.json":invite_artifact,
         "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,
+        "social_input_catalog.json": build_social(blobs, parse_generated_lua_table, CompileError),
         "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,
         "function_gates.json": function_artifact,

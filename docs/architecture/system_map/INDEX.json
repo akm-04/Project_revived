@@ -175,6 +175,7 @@
    "1894": "characterpet",
    "1895": "characterpet",
    "190": "socialrelation",
+   "191": "socialexchange",
    "192": "realtimeauth",
    "2064": "campaign",
    "2128": "course",
@@ -705,6 +706,7 @@
    "shared_room_seats": "sharedroom",
    "shared_rooms": "sharedroom",
    "social_blocks": "socialrelation",
+   "social_exchange_tuning": "socialexchange",
    "social_friend_requests": "socialrelation",
    "social_friendships": "socialrelation",
    "social_gift_claim_operations": "socialgift",
@@ -984,7 +986,7 @@
   },
   {
    "callees": 5,
-   "callers": 51,
+   "callers": 52,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1083,7 +1085,7 @@
   },
   {
    "callees": 12,
-   "callers": 52,
+   "callers": 53,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1218,7 +1220,7 @@
   },
   {
    "callees": 0,
-   "callers": 17,
+   "callers": 18,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",
@@ -1323,6 +1325,15 @@
    "path": "internal/application/socialdismiss",
    "purpose": "coordinates relation and room invite Inbox dismissal through typed owner ports",
    "tables": 0
+  },
+  {
+   "callees": 6,
+   "callers": 0,
+   "mids": 1,
+   "name": "socialexchange",
+   "path": "internal/application/socialexchange",
+   "purpose": "",
+   "tables": 1
   },
   {
    "callees": 3,

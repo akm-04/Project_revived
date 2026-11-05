@@ -604,6 +604,7 @@ type Catalog struct {
 	GuildInvite              GuildInvitePolicy
 	GuildBroadcast           GuildBroadcastPolicy
 	SocialGift               SocialGiftCatalog
+	SocialInputs             SocialInputCatalog
 	Emoticons                EmoticonCatalog
 	Manifest                 Manifest
 	Resources                ResourceCatalog
@@ -850,6 +851,10 @@ func Load() (*Catalog, error) {
 	if err := decodeAndVerify("social_gift_catalog.json", manifest.ArtifactSHA256s, &socialGift); err != nil {
 		return nil, err
 	}
+	var socialInputs SocialInputCatalog
+	if err := decodeAndVerify("social_input_catalog.json", manifest.ArtifactSHA256s, &socialInputs); err != nil {
+		return nil, err
+	}
 	var emoticons EmoticonCatalog
 	if err := decodeAndVerify("emoticon_catalog.json", manifest.ArtifactSHA256s, &emoticons); err != nil {
 		return nil, err
@@ -888,6 +893,7 @@ func Load() (*Catalog, error) {
 		GuildInvite:              invite,
 		GuildBroadcast:           broadcast,
 		SocialGift:               socialGift,
+		SocialInputs:             socialInputs,
 		Emoticons:                emoticons,
 		Manifest:                 manifest,
 		Resources:                resources,
@@ -1079,6 +1085,12 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-10b-dialog-metadata" {
 		expectedSources, expectedArtifacts = 545, 55
 	}
+	if manifest.CompilerVersion == "i9-10e-social-content" {
+		expectedSources, expectedArtifacts = 407, 56
+	}
+	if manifest.CompilerVersion == "i9-10-social-library-integration" {
+		expectedSources, expectedArtifacts = 548, 56
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
@@ -1200,6 +1212,9 @@ func validateCatalog(c *Catalog) error {
 		return err
 	}
 	if err := c.SocialGift.Validate(); err != nil {
+		return err
+	}
+	if err := c.SocialInputs.Validate(); err != nil {
 		return err
 	}
 
@@ -1855,7 +1870,7 @@ func validateCatalog(c *Catalog) error {
 
 	caps := append([]string(nil), c.Manifest.EnabledCapabilities...)
 	sort.Strings(caps)
-	wantCaps := []string{"MEMOIR_I9_6C", "DODGEBALL_I9_6B", "GODS_TRIAL_I9_6A", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C", "ADVENTURE_I9_8D", "PET_CAMPAIGN_I9_5C", "WORKPLACE_I9_5B", "CHAMPION_MARCH_I9_5A", "AWAKENING_MISSIONS_I9_4D", "MONTHLY_SIGNIN_I9_4C", "MISSION_CATALOG_I9_4A", "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B", "SUMMON_GACHA_I9_3E", "COMMERCE_CHARGE_I9_10G", "CAMPAIGN_MODE_I9_3A", "COSMETIC_TITLE_CONDITION_I7C6", "ACHIEVEMENT_CATALOG_I7C4FA", "CHAMPIONS_LEAGUE_I7C5F", "CONQUER_MODE_I7C5E", "ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
+	wantCaps := []string{"MEMOIR_I9_6C", "DODGEBALL_I9_6B", "GODS_TRIAL_I9_6A", "WORLD_BOSS_I9_8A", "ILLUSION_I9_8B", "OCCULT_I9_8C", "ADVENTURE_I9_8D", "PET_CAMPAIGN_I9_5C", "WORKPLACE_I9_5B", "CHAMPION_MARCH_I9_5A", "AWAKENING_MISSIONS_I9_4D", "MONTHLY_SIGNIN_I9_4C", "MISSION_CATALOG_I9_4A", "SCALAR_MARCH_COIN_I9_4A", "MISSION_ACTIVITY_I9_4B", "SCALAR_GUILD_COIN_I9_4B", "DODGE_TICKET_STACK_I9_4B", "SUMMON_GACHA_I9_3E", "COMMERCE_CHARGE_I9_10G", "CAMPAIGN_MODE_I9_3A", "COSMETIC_TITLE_CONDITION_I7C6", "ACHIEVEMENT_CATALOG_I7C4FA", "CHAMPIONS_LEAGUE_I7C5F", "CONQUER_MODE_I7C5E", "ARENA_MODE_I7C5D", "ONE_ON_ONE_MODE_I7C5C", "TOP_FLOOR_MODE_I7C5B", "ACHIEVEMENT_TIER_FACTS_I7C4B", "COSMETIC_PRIVILEGE_I7C4A", "STAT_INPUTS_I7C3B", "STAT_RULES_I7C3A", "CONQUER_INPUTS_I7C2J", "EVOLUTION_INPUTS_I7C2I", "SPIRIT_INPUTS_I7C2H", "ELEMENT_INPUTS_I7C2G", "INSCRIPTION_INPUTS_I7C2F", "COURSE_INPUTS_I7C2E", "BOOK_INPUTS_I7C2D", "DORM_INPUTS_I7C2C", "LIBRARY_INPUTS_I7C2B", "CHARACTER_APPEARANCE_CA7", "EQUIPMENT_PRIMITIVES_CA4", "FRIEND_DM_EMOTICON_I7A6A", "FUNCTION_LEVEL_ELIGIBILITY_R5", "GUILD_BROADCAST_I7A8A", "GUILD_INVITE_PRESENTATION_I7A8B", "HERO_CORE_CA2", "HERO_EQUIPMENT_CA4_2", "HERO_FUMO_CA4_3A", "HERO_PROGRESSION_CA2", "HERO_PROMOTION_RESTORATION_CA4_3B", "HERO_RAW_SKILLS_I7C2A", "PET_ACQUISITION_CA3", "PET_CORE_CA3", "PET_EQUIPMENT_CA4_4A", "PET_PROGRESSION_CA3", "PET_PROMOTION_RESTORATION_CA4_4B", "PLAYER_DISPLAY_I7B6A", "PLAYER_EXP_R5", "PRACTICE_CA6", "PUBLIC_PROFILE_PREFERENCES_I7B2B", "PUBLIC_PROFILE_SHOWCASE_SELECTION_I7B3A", "QUALIFIED_ORDINARY_STACK_ITEM_DEFINITIONS", "SCALAR_CRYSTAL", "SCALAR_MANA", "SOCIAL_GIFT_I7A7A", "SOCIAL_CONTENT_I9_10E", "SUPER_EQUIPMENT_CA4_5", "TEMPORAL_ENERGY_R5", "TEMPORAL_SKILL_POINT_R5", "TEMPORAL_SPIRIT_ENERGY_R5"}
 	sort.Strings(wantCaps)
 	if len(caps) != len(wantCaps) {
 		return fmt.Errorf("builtin content: enabled capability count drift: %v", caps)
