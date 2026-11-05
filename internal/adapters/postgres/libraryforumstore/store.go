@@ -165,7 +165,8 @@ func (Store) RetireOldestCommentsTx(ctx context.Context, transaction tx.Tx, key 
 	if transaction == nil || key.Validate() != nil || count < 1 || count > d.MaxLiveComments || at.IsZero() {
 		return app.ErrRequest
 	}
-	tag, err := transaction.Exec(ctx, `UPDATE library_forum_comments SET retired_at=GREATEST($4,created_at,updated_at) WHERE forum_type=$1 AND table_id=$2 AND author_player_id IN (SELECT author_player_id FROM library_forum_comments WHERE forum_type=$1 AND table_id=$2 AND retired_at IS NULL ORDER BY created_at,author_player_id LIMIT $3 FOR UPDATE)`, key.ForumType, key.TableID, count, at.UTC())
+	// The board lock serializes writers; a locking LIMIT subquery can reselect rows during UPDATE.
+	tag, err := transaction.Exec(ctx, `UPDATE library_forum_comments SET retired_at=GREATEST($4,created_at,updated_at) WHERE forum_type=$1 AND table_id=$2 AND author_player_id IN (SELECT author_player_id FROM library_forum_comments WHERE forum_type=$1 AND table_id=$2 AND retired_at IS NULL ORDER BY created_at,author_player_id LIMIT $3)`, key.ForumType, key.TableID, count, at.UTC())
 	if err == nil && tag.RowsAffected() != count {
 		return app.ErrUnavailable
 	}

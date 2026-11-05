@@ -37,8 +37,7 @@
     "libraryforumstore.LockBoardTx"
    ],
    "library_forum_comments": [
-    "libraryforumstore.DeleteReactionTx",
-    "libraryforumstore.RetireOldestCommentsTx"
+    "libraryforumstore.DeleteReactionTx"
    ]
   },
   "row_locks": [
