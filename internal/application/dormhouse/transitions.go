@@ -30,6 +30,9 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if at.Before(root.UpdatedAt) {
 		return nil, ErrStale
 	}
+	if c.Family == BuyGlue {
+		return s.buyGlueTx(ctx, t, a, d, catalog)
+	}
 	rooms, e := s.Owner.ListRoomsTx(ctx, t, a.PlayerID)
 	if e != nil {
 		return nil, e

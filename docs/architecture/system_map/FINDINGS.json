@@ -820,16 +820,6 @@
    "stage": null
   },
   {
-   "mid": 1845,
-   "name": "BUY_GLUE",
-   "files": [
-    "app/windows/FurnitureFactoryWindow.lua"
-   ],
-   "family": "DORM",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 1856,
    "name": "GET_CLASS_INFO",
    "files": [

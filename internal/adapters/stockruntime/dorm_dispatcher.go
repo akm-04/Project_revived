@@ -35,6 +35,8 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	c := app.Command{}
 	var allowed []string
 	switch mid {
+	case 1845:
+		c.Family = app.BuyGlue
 	case 2512:
 		allowed = []string{"host_id"}
 	case 2514:
@@ -74,7 +76,7 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		return v
 	}
-	if mid != 2512 && mid != 2513 && mid != 2693 {
+	if mid != 1845 && mid != 2512 && mid != 2513 && mid != 2693 {
 		c.HouseID = get("house_id")
 	}
 	if mid == 2512 || mid == 2514 {
@@ -126,6 +128,13 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	}
 	out, e := d.Service.Command(ctx, a, c, req.Envelope.Operation)
 	if e != nil {
+		if mid == 1845 {
+			status := http.StatusServiceUnavailable
+			if errors.Is(e, app.ErrRejected) || errors.Is(e, dorm.ErrGlueDailyLimit) {
+				status = http.StatusConflict
+			}
+			return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error": "dorm_glue_purchase_refused"}}
+		}
 		response := failDorm(e)
 		if key, ok := out.Body["wrong_key"].(string); ok {
 			response.Body["wrong_key"] = key

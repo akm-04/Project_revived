@@ -21,9 +21,12 @@ type GluePurchaseRequest struct {
 	Source                              grant.SourceIdentity
 }
 type PreparedGluePurchase struct{ exchange *PreparedMaterialExchange }
+type GluePurchaseResult struct {
+	Crystal, Glue economy.ScalarBalance
+}
 type TxGluePurchase interface {
 	PrepareGluePurchaseTx(context.Context, tx.Tx, identity.ActorContext, GluePurchaseRequest, operation.Context) (*PreparedGluePurchase, error)
-	ApplyGluePurchaseTx(context.Context, tx.Tx, *PreparedGluePurchase) (MaterialExchangeResult, error)
+	ApplyGluePurchaseTx(context.Context, tx.Tx, *PreparedGluePurchase) (GluePurchaseResult, error)
 }
 
 var _ TxGluePurchase = Service{}
@@ -60,9 +63,25 @@ func (service Service) PrepareGluePurchaseTx(ctx context.Context, transaction tx
 	}
 	return &PreparedGluePurchase{exchange: prepared}, nil
 }
-func (service Service) ApplyGluePurchaseTx(ctx context.Context, transaction tx.Tx, prepared *PreparedGluePurchase) (MaterialExchangeResult, error) {
+func (service Service) ApplyGluePurchaseTx(ctx context.Context, transaction tx.Tx, prepared *PreparedGluePurchase) (GluePurchaseResult, error) {
 	if prepared == nil || prepared.exchange == nil {
-		return MaterialExchangeResult{}, ErrInvalidGluePurchase
+		return GluePurchaseResult{}, ErrInvalidGluePurchase
 	}
-	return service.ApplyMaterialExchangeTx(ctx, transaction, prepared.exchange)
+	applied, err := service.ApplyMaterialExchangeTx(ctx, transaction, prepared.exchange)
+	if err != nil {
+		return GluePurchaseResult{}, err
+	}
+	if len(applied.Debit.Scalars) != 1 {
+		return GluePurchaseResult{}, ErrInvalidGluePurchase
+	}
+	crystal := applied.Debit.Scalars[0]
+	player := prepared.exchange.playerID
+	glue, exists, err := service.Store.LockScalarTx(ctx, transaction, player, GlueResourceKey, prepared.exchange.op.StartedAt)
+	if err != nil {
+		return GluePurchaseResult{}, err
+	}
+	if !exists || crystal.Validate() != nil || glue.Validate() != nil || crystal.PlayerID != player || glue.PlayerID != player || crystal.ResourceKey != "crystal" || glue.ResourceKey != GlueResourceKey {
+		return GluePurchaseResult{}, ErrInvalidGluePurchase
+	}
+	return GluePurchaseResult{Crystal: crystal, Glue: glue}, nil
 }

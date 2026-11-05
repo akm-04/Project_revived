@@ -442,6 +442,9 @@
    "course": [
     "*SnapshotTx"
    ],
+   "dormhouse": [
+    "*ReadCosmeticPrivilegeTx"
+   ],
    "guildrental": [
     "*SnapshotTx"
    ],
@@ -1091,11 +1094,13 @@
     "*SettleGrantTx"
    ],
    "dormhouse": [
+    "*ApplyGluePurchaseTx",
     "*ApplyMaterialDebitTx",
     "*ApplyMaterialExchangeTx",
     "*FenceActorTx",
     "*ListStacksTx",
     "*LockDormPlayerStateTx",
+    "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
     "*ReadDormPlayerStateTx"
@@ -3051,17 +3056,22 @@
    "characterhero": [
     "*ApplyDormEXPLockedTx"
    ],
+   "commerceprivilege": [
+    "*ReadCosmeticPrivilegeTx"
+   ],
    "generation": [
     "Bind",
     "DecisionAt",
     "Run"
    ],
    "i5": [
+    "*ApplyGluePurchaseTx",
     "*ApplyMaterialDebitTx",
     "*ApplyMaterialExchangeTx",
     "*FenceActorTx",
     "*ListStacksTx",
     "*LockDormPlayerStateTx",
+    "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
     "*ReadDormPlayerStateTx"
@@ -3091,10 +3101,12 @@
     "*ListRoomsTx",
     "*LockAdmissionTx",
     "*LockRootTx",
+    "*ReadGluePurchasesTx",
     "*ReadHeroTx",
     "*ReadRoomTx",
     "*ReadRootTx",
     "*SaveAdmissionTx",
+    "*SaveGluePurchasesTx",
     "*SaveHeroTx",
     "*SaveRoomTx",
     "*SaveRootTx"

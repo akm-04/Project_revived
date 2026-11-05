@@ -9,7 +9,7 @@
    "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
-   "count": 8,
+   "count": 9,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -75,9 +75,19 @@
   "unresolved_methods": []
  },
  "login": [
+  "GlueBootstrap",
+  "OverlayMID1",
   "OverlayRosterTx"
  ],
  "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 25
+   },
+   "mid": 1845,
+   "name": "BUY_GLUE"
+  },
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
@@ -178,6 +188,7 @@
    "gxb_content_revisions",
    "gxb_operation_receipts",
    "player_dorm_admissions",
+   "player_dorm_glue_purchases",
    "player_dorm_heroes",
    "player_dorm_rooms",
    "player_dorm_roots",
@@ -192,6 +203,7 @@
   "written": [
    "gxb_operation_receipts",
    "player_dorm_admissions",
+   "player_dorm_glue_purchases",
    "player_dorm_heroes",
    "player_dorm_rooms",
    "player_dorm_roots"

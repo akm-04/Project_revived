@@ -1,6 +1,7 @@
 {
  "login_composition": {
   "DetailContributors": [
+   "appdorm.GlueBootstrap",
    "appi5.AwakeningBootstrap",
    "appi5.SignInBootstrap",
    "appi5.MissionBootstrap",
@@ -160,6 +161,7 @@
    "1841": "profilefeedback",
    "1842": "profilefeedback",
    "1844": "publicprofile",
+   "1845": "dormhouse",
    "185": "socialrelation",
    "186": "socialrelation",
    "187": "socialrelation",
@@ -894,7 +896,7 @@
   },
   {
    "callees": 7,
-   "callers": 15,
+   "callers": 16,
    "mids": 3,
    "name": "commerceprivilege",
    "path": "internal/application/commerceprivilege",
@@ -947,9 +949,9 @@
    "tables": 1
   },
   {
-   "callees": 9,
+   "callees": 10,
    "callers": 3,
-   "mids": 9,
+   "mids": 10,
    "name": "dormhouse",
    "path": "internal/application/dormhouse",
    "purpose": "",

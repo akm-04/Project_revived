@@ -34,6 +34,7 @@ const (
 	Exchange = "DORM_EXCHANGE"
 	Start    = "DORM_START"
 	Finish   = "DORM_FINISH"
+	BuyGlue  = "DORM_BUY_GLUE"
 )
 
 var ErrUnavailable = errors.New("dorm: unavailable or unresolved admission")
@@ -55,6 +56,10 @@ func (c Command) Validate() error {
 		return dorm.ErrInvalidFacts
 	}
 	switch c.Family {
+	case BuyGlue:
+		if c.HouseID != 0 || c.ItemID != 0 || c.Amount != 0 || c.Floor != 0 || c.Position != 0 || c.Index != 0 || len(c.Partners) != 0 || c.Furniture != nil {
+			return dorm.ErrInvalidFacts
+		}
 	case Open:
 		if c.ItemID <= 0 || c.Floor <= 0 || c.Position < 1 || c.Position > 6 {
 			return dorm.ErrInvalidFacts
@@ -178,18 +183,21 @@ type CostPort interface {
 	ApplyMaterialDebitTx(context.Context, tx.Tx, *i5.PreparedMaterialDebit) (i5.MaterialDebitResult, error)
 }
 type Service struct {
-	Timed    gen.TimedRunner
-	Reads    tx.Runner
-	Heroes   HeroPort
-	Owner    OwnerPort
-	Content  ContentPort
-	Players  playerroot.TxLocker
-	Fence    ActorFence
-	Costs    CostPort
-	Values   ValuePort
-	EXP      CharacterEXPOwner
-	Exchange i5.TxMaterialExchange
-	Receipts receipt.Store
+	Timed          gen.TimedRunner
+	Reads          tx.Runner
+	Heroes         HeroPort
+	Owner          OwnerPort
+	Content        ContentPort
+	Players        playerroot.TxLocker
+	Fence          ActorFence
+	Costs          CostPort
+	Values         ValuePort
+	EXP            CharacterEXPOwner
+	Exchange       i5.TxMaterialExchange
+	Receipts       receipt.Store
+	GluePurchases  GluePurchaseOwner
+	GlueValues     i5.TxGluePurchase
+	GluePrivileges GluePrivilegeReader
 }
 
 func (s Service) complete() bool {
@@ -534,7 +542,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 // Infrastructure/proof/unknown failures retain PENDING; only definite domain or
 // lifecycle rejection may advance a lane without its economic effect.
 func terminalRejection(e error) bool {
-	for _, x := range []error{dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
+	for _, x := range []error{dorm.ErrGlueDailyLimit, i5.ErrGluePurchaseLimit, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
 		if errors.Is(e, x) {
 			return true
 		}
