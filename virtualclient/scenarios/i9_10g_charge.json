@@ -20,7 +20,9 @@
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.vip)<1 or tonumber(p.charge)<30 then error('vc-vip-'..tostring(p.vip)..'/'..tostring(p.charge)) end if tonumber(p.crystal)<=0 then error('vc-crystal') end",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:queryChargeData(function(code,body) if code~=xyd.error.OK then error('vc-charge-reload-'..tostring(code)) end local seen={} for _,row in ipairs(body.charges or {}) do seen[tostring(row.charge_id)]=tonumber(row.charge_count) end if seen['80001001']~=1 or seen['80001007']~=1 then error('vc-charge-history') end end)",
   "wait:6",
-  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) xyd.Backend.get():request(xyd.mid.GET_VIP_AWARD,{id=1},function(code,body) if code~=xyd.error.OK then error('vc-vip-award-'..tostring(code)) end if type(body.awards)~='table' or #body.awards~=4 then error('vc-vip-awards-'..tostring(body.awards and #body.awards)) end p:handleRewards(body.awards) p.vipAwards=p.vipAwards or {} p.vipAwards[1]=1 end)",
+  "lua:local m=xyd.WindowManager.get() m:closeWindow('vip_recharge') m:openWindow('vip_recharge',{windowState=false,middleLev=1})",
+  "wait:6",
+  "lua:local w=xyd.WindowManager.get():getWindow('vip_recharge') if not w or w.middleLev~=1 or not w.middleHelpItem then error('vc-vip-award-stock-page') end local b=w.middleHelpItem:getChildByName('container'):getChildByName('gain_btn') if not b or not b:isVisible() or not b:isTouchEnabled() then error('vc-vip-award-stock-button') end local r=b:getCascadeBoundingBox() __vc.tap(r.x+r.width/2,r.y+r.height/2)",
   "wait:6",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if not p.vipAwards or tonumber(p.vipAwards[1])~=1 then error('vc-vip-award-local') end",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) xyd.Backend.get():request(xyd.mid.GET_VIP_AWARD,{id=1},function(code,body) if code~=xyd.error.OK then error('vc-vip-award-replay-'..tostring(code)) end if type(body.awards)~='table' or #body.awards~=4 then error('vc-vip-award-replay-shape') end end)",
@@ -37,5 +39,5 @@
   657,
   32000
  ],
- "note": "Month card and diamond buys go through the contract's private MID 32000; the step dispatches xyd.event.RECHARGE with the reply's recharge_event so stock SelfPlayer.onRecharge_ runs. 354 uses stock queryChargeData and VipRechargeWindow. MID 657 uses the stock GET_VIP_AWARD reply callback body (the award button closure is not reachable from Lua) and stock handleRewards; relogin proves MID 1 card fields and vip_awards after the card."
+ "note": "Month card and diamond buys use the authorized private MID 32000 bridge and dispatch the reply into stock RECHARGE handling. 354 uses stock queryChargeData. The first 657 claim taps the existing VipRechargeWindow level-1 award button and runs its original registered callback; no copied success callback or assignment of vipAwards/rewards. Additional direct 657 calls test replay and refusal. Relogin checks MID 1 card fields and persisted awards."
 }
