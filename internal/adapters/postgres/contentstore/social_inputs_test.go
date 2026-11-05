@@ -2,6 +2,8 @@ package contentstore
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -213,8 +215,20 @@ func TestSocialInputCatalogTxRejectsMissingCapabilityAndMalformedPayload(t *test
 		t.Fatal("trailing payload accepted")
 	}
 	unknownField := `{"unknown":true,` + payload[1:]
-	if _, err := (Store{}).SocialInputCatalogTx(ctx, socialQueryer(manifest, unknownField), revision); err == nil {
-		t.Fatal("unknown payload field accepted")
+	var malformedObject any
+	if err := json.Unmarshal([]byte(unknownField), &malformedObject); err != nil {
+		t.Fatal(err)
+	}
+	canonical, err := json.Marshal(malformedObject)
+	if err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256(append(canonical, '\n'))
+	unknownManifest := generatedManifest(t)
+	unknownManifest["artifact_sha256s"].(map[string]any)["social_input_catalog.json"] = hex.EncodeToString(digest[:])
+	_, err = (Store{}).SocialInputCatalogTx(ctx, socialQueryer(encodeManifest(t, unknownManifest), unknownField), revision)
+	if err == nil || errors.Is(err, ErrSocialContentUnavailable) || !strings.Contains(err.Error(), `unknown field "unknown"`) {
+		t.Fatalf("matching-hash payload did not reach strict unknown-field rejection: %v", err)
 	}
 }
 

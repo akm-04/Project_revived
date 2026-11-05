@@ -521,7 +521,28 @@
       "compiler_version": "i9-10e-social-content",
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "a7d69b70e4044f0be8f5ec32f464e1b27b64d18a2a1939a72e6ebccf58f066e3",
-      "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical."
+      "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE",
+      "provenance": {
+        "accepted_generation_69": {
+          "backend_head": "af440962b45ab99b43d87c24bb661ae86ae67842",
+          "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
+          "sources": 395,
+          "status": "ACCEPTED_HISTORY_RETAINED_UNCHANGED"
+        },
+        "actual_parent": {
+          "backend_head": "fff27c38077db8e7113c40e872d2fc3338f53e44",
+          "revision_id": "4afc9fad8807b6648021611bad69d4e28e6cc0fa2a3c562bd5c22c25355f5c2c",
+          "sources": 404,
+          "status": "UNSEALED_STAGE_WORKING_MANIFEST"
+        },
+        "baseline_regeneration": {
+          "revision_id": "20061f6ef0ed188887898432cc6a3eccd31c228ee974e03e76dfd399c285cbc6",
+          "sources": 407,
+          "status": "SCRATCH_REGENERATION_WITH_STAGED_SOCIAL_SOURCE_PINS_NOT_PARENT_OR_ACCEPTED_REVISION"
+        },
+        "relation": "Compiler-generation succession is not a contiguous accepted artifact or backend upgrade history. Existing payload identity comparison uses actual_parent; full historical upgrade remains separate proof."
+      }
     }
   ],
   "current": {
@@ -529,6 +550,7 @@
     "compiler_version": "i9-10e-social-content",
     "parser_version": "lua-generated-v18-guild-invite",
     "revision_id": "a7d69b70e4044f0be8f5ec32f464e1b27b64d18a2a1939a72e6ebccf58f066e3",
-    "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical."
+    "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical.",
+    "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }
