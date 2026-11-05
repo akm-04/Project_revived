@@ -5339,6 +5339,20 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00116_i9_10e_social_content.sql"
+    },
+    "social_exchange_tuning": {
+      "owner": "socialexchange",
+      "allowed_query_owners": [
+        "socialexchange"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialexchangestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialexchangestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00119_i9_10e_exchange_tuning.sql"
     }
   }
 }

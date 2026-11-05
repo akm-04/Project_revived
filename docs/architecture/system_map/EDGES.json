@@ -776,6 +776,10 @@
     "DecisionAt",
     "Run"
    ],
+   "socialexchange": [
+    "DecisionAt",
+    "Run"
+   ],
    "socialfriendbase": [
     "DecisionAt",
     "Operation",
@@ -1295,6 +1299,11 @@
    "sharedroom": [
     "*FenceActorTx"
    ],
+   "socialexchange": [
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*PrepareMaterialExchangeTx"
+   ],
    "socialgift": [
     "*FenceActorTx",
     "*GiftGrantIdentityExistsTx",
@@ -1510,6 +1519,9 @@
    "socialdismiss": [
     "Validate"
    ],
+   "socialexchange": [
+    "Validate"
+   ],
    "socialgift": [
     "CanonicalPlayerIDs",
     "Validate"
@@ -1618,6 +1630,7 @@
    ]
   },
   "socialdismiss": {},
+  "socialexchange": {},
   "socialfriendbase": {},
   "socialgift": {
    "socialprojection": [
@@ -4793,6 +4806,32 @@
     "*LockPlayerRootsTx"
    ]
   },
+  "socialexchange": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*PrepareMaterialExchangeTx"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*SocialExchangeCatalogTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ]
+  },
   "socialfriendbase": {
    "frienddm": [
     "*FindProjection",
@@ -5413,6 +5452,9 @@
   "roominvite": [],
   "sharedroom": [],
   "socialdismiss": [],
+  "socialexchange": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "socialfriendbase": [],
   "socialgift": [],
   "socialinbox": [],

@@ -398,16 +398,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 191,
-   "name": "EXCHANGE_ITEMS",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 193,
    "name": "recall_friend",
    "files": [
@@ -2297,6 +2287,7 @@
     "publicprofile",
     "ranking",
     "sharedroom",
+    "socialexchange",
     "socialgift",
     "spirit",
     "summon",
@@ -2347,6 +2338,7 @@
     "publicprofile",
     "ranking",
     "sharedroom",
+    "socialexchange",
     "socialgift",
     "spirit",
     "summon",
@@ -2397,6 +2389,7 @@
     "publicprofile",
     "ranking",
     "sharedroom",
+    "socialexchange",
     "socialgift",
     "spirit",
     "summon",
@@ -2505,6 +2498,7 @@
     "roominvite",
     "sharedroom",
     "socialdismiss",
+    "socialexchange",
     "socialgift",
     "socialprojection",
     "socialrelation",
