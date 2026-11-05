@@ -1,0 +1,32 @@
+{
+ "name": "i9_9b_guild_rental_cache",
+ "level": 32,
+ "heroes": [
+  10001002
+ ],
+ "guild_rental_fixture": true,
+ "steps": [
+  "wait:5",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:createTeam({name='vc9bc',icon=20010001,icon_frame=0},function(code) if code~=xyd.error.OK then error('vc-cache-create-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadSelfGuild(function(code) if code~=xyd.error.OK then error('vc-cache-load-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) if not g.guild_id or g.guild_id==0 then error('vc-cache-no-guild') end",
+  "fixture:guild_rental_lender",
+  "wait:2",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadAllTeamHeros({campaign_type=xyd.CampaignType.NORMAL},function(code,reply) if code~=xyd.error.OK then error('vc-cache-2768-first-'..tostring(code)) end local nested=reply.guild_rent_heroes if type(nested)~='table' or type(nested.partners)~='table' then error('vc-cache-2768-first-shape') end __vc_first={count=g.rentCount,list=g.allTeamHeros_} local me=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER).playerID for _,row in ipairs(g.allTeamHeros_) do if row.player_id~=me then __vc_first_row=row end end if not __vc_first_row then error('vc-cache-no-peer-row') end end)",
+  "wait:3",
+  "lua:if not __vc_first or not __vc_first_row then error('vc-cache-first-missing') end if not __vc_first.count or __vc_first.count==0 then error('vc-cache-first-count') end",
+  "fixture:guild_rental_lender_change",
+  "wait:1",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadAllTeamHeros({campaign_type=xyd.CampaignType.NORMAL},function(code,reply) if code~=xyd.error.OK then error('vc-cache-2768-second-'..tostring(code)) end local nested=reply.guild_rent_heroes if type(nested)~='table' or type(nested.partners)~='table' then error('vc-cache-2768-second-shape') end __vc_second={count=g.rentCount,list=g.allTeamHeros_} local me=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER).playerID for _,row in ipairs(g.allTeamHeros_) do if row.player_id~=me then __vc_second_row=row end end if not __vc_second_row then error('vc-cache-second-no-peer-row') end end)",
+  "wait:3",
+  "lua:if not __vc_second or not __vc_second_row then error('vc-cache-second-missing') end if __vc_first.count==__vc_second.count then error('vc-cache-key-unchanged-'..tostring(__vc_first.count)) end if __vc_first.list==__vc_second.list then error('vc-cache-list-not-replaced') end if __vc_first_row.lev==__vc_second_row.lev and __vc_first_row.exp==__vc_second_row.exp then error('vc-cache-data-unchanged') end if __vc_second_row.lev~=5 then error('vc-cache-new-level-'..tostring(__vc_second_row.lev)) end"
+ ],
+ "settle_seconds": 10,
+ "expect_ok": [
+  2768
+ ],
+ "expect_lua_errors": [],
+ "note": "Narrow SelfGuild cache transition: the first loadAllTeamHeros builds allTeamHeros_ and rentCount from the peer's offer; guild_rental_lender_change moves that offered girl to level 5, a second stock loadAllTeamHeros must receive a different rent_count, replace allTeamHeros_ with a new table and carry the changed level/EXP. It does not render HireHeroWindow and does not replace the full I9-9B VC suite."
+}

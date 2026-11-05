@@ -193,6 +193,7 @@
   ],
   "scenarios_naming": [
    "i9_9b_guild_rental.json",
+   "i9_9b_guild_rental_cache.json",
    "playtest4_fixes.json"
   ],
   "unit": [
