@@ -238,8 +238,8 @@ func main() {
 	heroEconomy := appi5.HeroProgressionDebiter{Store: i5db, Content: contentDB}
 	heroMaterialCosts := appi5.MaterialCostDebiter{Store: i5db, Content: contentDB}
 	heroEquipmentResources := appi5.HeroEquipmentResourceDebiter{Store: i5db, Content: contentDB}
-	heroEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db}
-	i5CrossOwner := appi5.CrossOwner{Store: i5db}
+	heroEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}
+	i5CrossOwner := appi5.CrossOwner{Store: i5db, FloorPolicies: contentDB}
 	practiceSvc := apppractice.Service{
 		Runner: runner, Store: heroDB, Content: contentDB, Privileges: privileges, ReconcileQueryer: pool,
 		Deps: apppractice.ServiceDeps{
@@ -289,7 +289,7 @@ func main() {
 	petSvc := apppet.Service{Awakening: heroDB, Runner: runner, Timed: petTimed, Store: heroDB, Fencer: i5db, Content: contentDB, Progression: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Acquisition: petAcquisitionDebit, MaterialCosts: heroMaterialCosts, Scalar: i5CrossOwner, PetExp: petExpDebit, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, RestorationModifier: characterasset.IdentityRestorationModifier{}, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB}
 	heroSvc.AwakeningEquipment, petSvc.AwakeningEquipment = &i5svc, &i5svc
 	i5svc.Awakening.Heroes, i5svc.Awakening.Pets = heroSvc, petSvc
-	petEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db}
+	petEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}
 	guildPolicyArtifact, err := guildpolicy.LoadBuiltin()
 	if err != nil {
 		log.Fatalf("I6C Guild policy: %v", err)
@@ -589,7 +589,7 @@ func main() {
 	friendBase := socialfriendbase.Service{FriendDM: friendDM, Projection: socialReads}
 	mustRegister(515, stockruntime.FriendDMDispatcher{Authority: authority, Service: friendDM, Emitter: postgres.FriendDMWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("friend dm wakeup degraded: %v", err) }}})
 	socialDismissal := socialdismiss.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialRelationDB, Inbox: socialInboxDB}
-	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
+	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
 	giftReload := socialreload.Service{Runner: runner, Relations: socialRelationDB, Inbox: socialInboxDB, Observer: socialPresentation, Gifts: giftService}
 	if e := configureGuildInvite(ctx, pool, runner, &guildSvc, &giftService, &socialReads, &giftReload); e != nil {
 		log.Fatalf("Guild Invite bundle readiness: %v", e)

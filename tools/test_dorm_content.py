@@ -36,7 +36,8 @@ class DormGlueExactSourceTests(unittest.TestCase):
         archive = os.environ.get("GXB_R4A_SOURCE_ARCHIVE")
         if not archive:
             raise unittest.SkipTest("exact source archive not supplied")
-        cls.artifact = gen.compile_archive(Path(archive))["dorm_input_catalog.json"]
+        cls.artifacts = gen.compile_archive(Path(archive))
+        cls.artifact = cls.artifacts["dorm_input_catalog.json"]
 
     def test_schema_v2_glue_from_exact_pinned_source(self):
         catalog = self.artifact
@@ -84,6 +85,17 @@ class DormGlueExactSourceTests(unittest.TestCase):
             if name in ("schema_version", "glue"):
                 continue
             self.assertEqual(self.artifact[name], value, name)
+
+    def test_generated_artifacts_have_zero_drift(self):
+        gen.write_artifacts(self.artifacts, Path(__file__).resolve().parents[1] /
+                            "internal/content/builtin/generated", check=True)
+
+    def test_glue_is_qualified_named_scalar_without_invented_asset_id(self):
+        rows = [row for row in self.artifacts["resource_catalog.json"]["resources"]
+                if row.get("resource_key") == "glue"]
+        self.assertEqual(rows, [{"catalog_status": "QUALIFIED", "class": "SCALAR_CURRENCY",
+                                "definition_key": "scalar_currency:glue", "resource_key": "glue",
+                                "settlement_activation": "ENABLED_R4"}])
 
 
 if __name__ == "__main__":

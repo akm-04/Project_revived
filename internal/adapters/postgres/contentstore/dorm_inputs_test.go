@@ -20,8 +20,24 @@ func dormTestRevision(label string) string {
 
 func decodeDormV1(t *testing.T, bundle registry.Bundle) builtin.DormInputCatalog {
 	t.Helper()
+
+	var legacyFields map[string]json.RawMessage
+	if err := json.Unmarshal(bundle.DormInputsJSON(), &legacyFields); err != nil {
+		t.Fatal(err)
+	}
+	delete(legacyFields, "glue")
+	legacyFields["schema_version"] = json.RawMessage("1")
+	legacyRaw, err := json.Marshal(legacyFields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	legacyRaw = append(legacyRaw, '\n')
+	digest := sha256.Sum256(legacyRaw)
+	if hex.EncodeToString(digest[:]) != "9fa00237f6b160e7465b44edcf28aeb4b8b6ff46c1ed5e64189f2c2b4b2ce20f" {
+		t.Fatal("retained schema1 payload changed")
+	}
 	var catalog builtin.DormInputCatalog
-	decoder := json.NewDecoder(bytes.NewReader(bundle.DormInputsJSON()))
+	decoder := json.NewDecoder(bytes.NewReader(legacyRaw))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&catalog); err != nil {
 		t.Fatal(err)
@@ -90,7 +106,9 @@ func TestDormCatalogReadsV1WithoutGlue(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	catalog, err := loadDormFixture(t, bundle.RevisionID(), bundle.ManifestJSON(), bundle.DormInputsJSON())
+	payload := encodeDormPayload(t, decodeDormV1(t, bundle))
+	revision := dormTestRevision("retained schema1 accepted")
+	catalog, err := loadDormFixture(t, revision, dormFixtureManifest(t, bundle, revision, payload), payload)
 	if err != nil {
 		t.Fatal(err)
 	}

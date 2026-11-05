@@ -3794,6 +3794,7 @@
     "*ResolvePetStarterPolicyTx",
     "*ResolveProgressionPolicyTx",
     "*ResolveResourceTx",
+    "*ScalarDailyFloorMinimumTx",
     "*SignInCatalogTx",
     "*SummonCatalogTx"
    ],

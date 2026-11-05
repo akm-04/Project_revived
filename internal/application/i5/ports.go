@@ -33,12 +33,13 @@ func (d TemporalDescriptor) FixedPolicy(cap int64) economy.TemporalPolicy {
 }
 
 type ResourcePolicy struct {
-	Kind          grant.LineKind
-	WireTableID   int64
-	Stack         *economy.StackDefinition
-	Temporal      *economy.TemporalPolicy // legacy exact-version rows only
-	Descriptor    *TemporalDescriptor     // immutable R5 temporal rows
-	PolicyVersion string
+	DailyFloorMinimum *int64
+	Kind              grant.LineKind
+	WireTableID       int64
+	Stack             *economy.StackDefinition
+	Temporal          *economy.TemporalPolicy // legacy exact-version rows only
+	Descriptor        *TemporalDescriptor     // immutable R5 temporal rows
+	PolicyVersion     string
 }
 
 type FunctionGate struct {

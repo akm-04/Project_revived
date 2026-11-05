@@ -1056,6 +1056,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     resources.append({"catalog_status":"QUALIFIED","class":"SCALAR_CURRENCY",
         "definition_key":"scalar_currency:friendship_coin","resource_key":"friendship_coin",
         "settlement_activation":"ENABLED_R4"})
+    if "glue" not in economy_names or "glue" in asset_by_name:
+        raise CompileError("Dorm glue named scalar source identity drift")
+    resources.append({"catalog_status": "QUALIFIED", "class": "SCALAR_CURRENCY",
+                      "definition_key": "scalar_currency:glue", "resource_key": "glue",
+                      "settlement_activation": "ENABLED_R4"})
     # Tea Party pays friend_medal as a player scalar (SelfPlayer.lua:143,1159,
     # misc.lua guild_donate_scroll_reward); it has no asset.lua row, so pin a
     # synthetic negative identity outside the source asset range.

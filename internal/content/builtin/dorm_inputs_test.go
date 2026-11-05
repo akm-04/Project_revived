@@ -2,6 +2,8 @@ package builtin
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -14,8 +16,24 @@ func loadDormV1(t *testing.T) DormInputCatalog {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	var legacyFields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &legacyFields); err != nil {
+		t.Fatal(err)
+	}
+	delete(legacyFields, "glue")
+	legacyFields["schema_version"] = json.RawMessage("1")
+	legacyRaw, err := json.Marshal(legacyFields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	legacyRaw = append(legacyRaw, '\n')
+	digest := sha256.Sum256(legacyRaw)
+	if hex.EncodeToString(digest[:]) != "9fa00237f6b160e7465b44edcf28aeb4b8b6ff46c1ed5e64189f2c2b4b2ce20f" {
+		t.Fatal("retained schema1 payload changed")
+	}
 	var catalog DormInputCatalog
-	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder := json.NewDecoder(bytes.NewReader(legacyRaw))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&catalog); err != nil {
 		t.Fatal(err)

@@ -5321,6 +5321,20 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00109_i9_10g_charge.sql"
+    },
+    "player_scalar_daily_floors": {
+      "owner": "typed-economy",
+      "allowed_query_owners": [
+        "typed-economy"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i5store/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00112_i9_10c_scalar_daily_floors.sql"
     }
   }
 }

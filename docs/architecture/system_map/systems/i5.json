@@ -2,6 +2,7 @@
  "background": [],
  "content": [
   "content_awakening_catalogs",
+  "content_dorm_input_catalogs",
   "content_mission_activity_catalogs",
   "content_monthly_signin_catalogs"
  ],
@@ -475,6 +476,7 @@
    "account_sessions",
    "accounts",
    "content_awakening_catalogs",
+   "content_dorm_input_catalogs",
    "content_mission_activity_catalogs",
    "content_monthly_signin_catalogs",
    "gameplay_contexts",
@@ -507,6 +509,7 @@
    "player_mission_instances",
    "player_mission_roots",
    "player_progression",
+   "player_scalar_daily_floors",
    "player_signin_roots",
    "player_story_cursors",
    "player_temporal_resources",
@@ -534,6 +537,7 @@
    "player_mission_instances",
    "player_mission_roots",
    "player_progression",
+   "player_scalar_daily_floors",
    "player_signin_roots",
    "player_story_cursors",
    "player_temporal_resources",
@@ -587,6 +591,7 @@
    "pet_acquisition_test.go",
    "pet_progression_test.go",
    "promotion_restoration_test.go",
+   "scalar_daily_floor_test.go",
    "service_test.go",
    "temporal_repin_test.go",
    "workplace_sp_test.go"

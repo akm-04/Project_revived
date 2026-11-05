@@ -26,7 +26,8 @@ type TxPlayerLevelReader interface {
 // CrossOwner composes narrow I5-owned ports without exposing the much wider I5
 // Service/Store surface to shared domains.
 type CrossOwner struct {
-	Store CrossOwnerBackend
+	FloorPolicies ScalarDailyFloorPolicySource
+	Store         CrossOwnerBackend
 }
 
 type CrossOwnerBackend interface {
@@ -40,10 +41,21 @@ func (c CrossOwner) DebitScalarTx(ctx context.Context, t tx.Tx, pid identity.Pla
 	if c.Store == nil || t == nil || !pid.Valid() || key == "" || amount <= 0 || now.IsZero() {
 		return economy.ScalarBalance{}, errors.New("i5 cross-owner scalar debit: invalid input")
 	}
+	minimum, err := dailyFloorMinimumTx(ctx, t, c.FloorPolicies, key)
+	if err != nil {
+		return economy.ScalarBalance{}, err
+	}
 	if err := c.Store.LockEconomyOwnerTx(ctx, t, pid); err != nil {
 		return economy.ScalarBalance{}, err
 	}
 	b, exists, err := c.Store.LockScalarTx(ctx, t, pid, key, now.UTC())
+	if err != nil {
+		return economy.ScalarBalance{}, err
+	}
+	if !exists && minimum != nil {
+		b = economy.ScalarBalance{PlayerID: pid, ResourceKey: key, StateVersion: 1, UpdatedAt: now.UTC()}
+	}
+	b, exists, err = settleDailyFloorTx(ctx, t, c.Store, b, exists, minimum, now.UTC())
 	if err != nil {
 		return economy.ScalarBalance{}, err
 	}
@@ -89,6 +101,10 @@ func (c CrossOwner) AuthorizeLevelAndDebitScalarTx(ctx context.Context, t tx.Tx,
 	if c.Store == nil || t == nil || !pid.Valid() || minLevel <= 0 || key == "" || amount <= 0 || now.IsZero() {
 		return 0, economy.ScalarBalance{}, errors.New("i5 cross-owner level+debit: invalid input")
 	}
+	minimum, err := dailyFloorMinimumTx(ctx, t, c.FloorPolicies, key)
+	if err != nil {
+		return 0, economy.ScalarBalance{}, err
+	}
 	if err := c.Store.LockEconomyOwnerTx(ctx, t, pid); err != nil {
 		return 0, economy.ScalarBalance{}, err
 	}
@@ -100,6 +116,13 @@ func (c CrossOwner) AuthorizeLevelAndDebitScalarTx(ctx context.Context, t tx.Tx,
 		return level, economy.ScalarBalance{}, ErrLevelRequirement
 	}
 	b, exists, err := c.Store.LockScalarTx(ctx, t, pid, key, now.UTC())
+	if err != nil {
+		return level, economy.ScalarBalance{}, err
+	}
+	if !exists && minimum != nil {
+		b = economy.ScalarBalance{PlayerID: pid, ResourceKey: key, StateVersion: 1, UpdatedAt: now.UTC()}
+	}
+	b, exists, err = settleDailyFloorTx(ctx, t, c.Store, b, exists, minimum, now.UTC())
 	if err != nil {
 		return level, economy.ScalarBalance{}, err
 	}
