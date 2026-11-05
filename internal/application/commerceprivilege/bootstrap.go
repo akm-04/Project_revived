@@ -19,20 +19,13 @@ func (BootstrapProjection) Claims() []string {
 		"17.left_month_tili_day", "17.privilege_left_card_day", "17.privilege_month_card_end", "17.vip_awards"}
 }
 func (p BootstrapProjection) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorContext, _ bool, at time.Time, detail map[string]any) error {
-	snap, ok, e := p.Provider.snapshot(c, q, a.PlayerID, "", at)
+	snap, privilegeKnown, e := p.Provider.snapshot(c, q, a.PlayerID, "", at)
 	if e != nil {
 		return e
-	}
-	if !ok {
-		return nil
 	}
 	out, ok := detail["17"].(map[string]any)
 	if !ok {
 		return errors.New("privilege MID17 projection unavailable")
-	}
-	cards, e := p.Provider.Store.ReadCardsTx(c, q, a.PlayerID)
-	if e != nil {
-		return e
 	}
 	claimed, e := p.Provider.Store.ReadVIPClaimedTx(c, q, a.PlayerID)
 	if e != nil {
@@ -44,6 +37,15 @@ func (p BootstrapProjection) OverlayMID1(c context.Context, q tx.Queryer, a iden
 			awards[level-1] = 1
 		}
 	}
+	// Claim flags must exist before the first tap, independently of privilege qualification.
+	out["vip_awards"] = awards
+	if !privilegeKnown {
+		return nil
+	}
+	cards, e := p.Provider.Store.ReadCardsTx(c, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
 	now := at.Unix()
 	out["vip"] = snap.State.VIPLevel
 	out["charge"] = snap.State.Charge
@@ -54,6 +56,5 @@ func (p BootstrapProjection) OverlayMID1(c context.Context, q tx.Queryer, a iden
 	out["left_month_tili_day"] = int64(0)
 	out["privilege_left_card_day"] = d.LeftDays(cards.PrivilegeCardEnd, now)
 	out["privilege_month_card_end"] = cards.PrivilegeCardEnd
-	out["vip_awards"] = awards
 	return nil
 }
