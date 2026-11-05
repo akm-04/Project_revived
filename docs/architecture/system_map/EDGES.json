@@ -2021,7 +2021,7 @@
     "*ReadFunctionEligibilityTx",
     "*SettleGrantTx"
    ],
-   "interface:adventure.Heroes": [
+   "interface:adventure.Roster": [
     "*OverlayMID1"
    ],
    "roominvite": [

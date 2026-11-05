@@ -58,7 +58,8 @@ type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
 
-type Heroes interface {
+// Roster is the existing stock roster composer (MID1 key 49 Heroes, 780 Pets).
+type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
@@ -89,16 +90,16 @@ type Grants interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
 }
 
-// Opponent is one 10004 target: an Arena player defense or a robot team.
+// Opponent is one 10004 target: an Arena player defense or a robot team, both
+// already resolved to typed Combat participants by their owner.
 type Opponent struct {
-	PlayerID       identity.PlayerID
-	Heroes         []int64
-	PetID          int64
-	TemplateHeroes []cb.Participant
+	PlayerID identity.PlayerID
+	Heroes   []cb.Participant
+	Pets     []cb.Participant
 }
 
 type Opponents interface {
-	ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64) (Opponent, bool, error)
+	ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64, time.Time) (Opponent, bool, error)
 	RobotOpponentTx(context.Context, tx.Queryer, uint64) (Opponent, bool, error)
 }
 
@@ -114,7 +115,8 @@ type Mode struct {
 	Content   Content
 	Functions Functions
 	Directory Directory
-	Heroes    Heroes
+	Heroes    Roster
+	Pets      Roster
 	Combat    Combat
 	Costs     Costs
 	Grants    Grants
@@ -130,7 +132,7 @@ type Mode struct {
 
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Fresh != nil && s.Store != nil && s.Content != nil &&
-		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Costs != nil && s.Grants != nil && s.Opponents != nil && s.Wake != nil &&
+		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Costs != nil && s.Grants != nil && s.Opponents != nil && s.Wake != nil &&
 		s.Rooms.Store != nil && s.RoomStore != nil && s.Mail != nil && s.Partners != nil && s.HeroWire != nil
 }
 

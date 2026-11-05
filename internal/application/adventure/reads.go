@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	cb "gxb.local/backend/v2/internal/application/combat"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -107,7 +108,7 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, tableID int64, op
 func (s Mode) detail(c context.Context, a identity.ActorContext, catalog d.Catalog, occurrence d.Occurrence, at time.Time, op operation.Context) (map[string]any, error) {
 	switch occurrence.EventType {
 	case d.EventBattle:
-		enemy, err := s.opponent(c, s.Fresh, a, catalog, eventOrdinal(op, "adventure.pvp.info/v1", occurrence.SourceKey))
+		enemy, err := s.opponent(c, s.Fresh, a, catalog, at, eventOrdinal(op, "adventure.pvp.info/v1", occurrence.SourceKey))
 		if err != nil {
 			return nil, err
 		}
@@ -128,21 +129,15 @@ func (s Mode) detail(c context.Context, a identity.ActorContext, catalog d.Catal
 }
 
 // enemyInfo is the single 10004 opponent object the battle window draws: the
-// player fields, the hero rows, the pet row and the robot flag.
+// player fields, the hero rows, the pet row and the robot flag. Arena and robot
+// participants are already typed; owned rows come from the owner's roster.
 func (s Mode) enemyInfo(c context.Context, enemy Opponent, at time.Time) (map[string]any, error) {
 	info := map[string]any{"player_id": int64(0), "player_name": "", "lev": int64(0), "heroes": []any{}, "is_robot": int64(0)}
-	if len(enemy.TemplateHeroes) > 0 {
-		info["is_robot"] = int64(1)
-		heroes := make([]any, 0, len(enemy.TemplateHeroes))
-		for _, participant := range enemy.TemplateHeroes {
-			if participant.TemplateParams != nil {
-				heroes = append(heroes, participant.TemplateParams)
-			}
-		}
-		info["heroes"] = heroes
-		return info, nil
-	}
 	if !enemy.PlayerID.Valid() {
+		if len(enemy.Heroes) > 0 {
+			info["is_robot"] = int64(1)
+		}
+		info["heroes"] = templateRows(enemy.Heroes)
 		return info, nil
 	}
 	profile, found, err := s.Directory.ProfileTx(c, s.Fresh, enemy.PlayerID)
@@ -159,26 +154,47 @@ func (s Mode) enemyInfo(c context.Context, enemy Opponent, at time.Time) (map[st
 		return nil, err
 	}
 	heroes := make([]any, 0, len(enemy.Heroes))
-	for _, heroID := range enemy.Heroes {
-		if row, ok := roster[strconv.FormatInt(heroID, 10)]; ok {
+	for _, participant := range enemy.Heroes {
+		if participant.TemplateParams != nil {
+			heroes = append(heroes, participant.TemplateParams)
+			continue
+		}
+		if row, ok := roster[strconv.FormatInt(participant.Identity, 10)]; ok {
 			heroes = append(heroes, row)
 		}
 	}
 	info["heroes"] = heroes
-	if enemy.PetID > 0 {
-		pets, err := s.petRows(c, s.Fresh, enemy.PlayerID, at)
-		if err != nil {
-			return nil, err
+	if len(enemy.Pets) == 0 {
+		return info, nil
+	}
+	pets, err := s.petRows(c, s.Fresh, enemy.PlayerID, at)
+	if err != nil {
+		return nil, err
+	}
+	for _, participant := range enemy.Pets {
+		if participant.TemplateParams != nil {
+			info["pet"] = participant.TemplateParams
+			continue
 		}
-		if row, ok := pets[strconv.FormatInt(enemy.PetID, 10)]; ok {
+		if row, ok := pets[strconv.FormatInt(participant.Identity, 10)]; ok {
 			info["pet"] = row
 		}
 	}
 	return info, nil
 }
 
-func (s Mode) opponent(c context.Context, q tx.Queryer, a identity.ActorContext, catalog d.Catalog, ordinal uint64) (Opponent, error) {
-	enemy, found, err := s.Opponents.ArenaOpponentTx(c, q, a.PlayerID, catalog.Limits.PVPRankingSection, ordinal)
+func templateRows(participants []cb.Participant) []any {
+	rows := make([]any, 0, len(participants))
+	for _, participant := range participants {
+		if participant.TemplateParams != nil {
+			rows = append(rows, participant.TemplateParams)
+		}
+	}
+	return rows
+}
+
+func (s Mode) opponent(c context.Context, q tx.Queryer, a identity.ActorContext, catalog d.Catalog, at time.Time, ordinal uint64) (Opponent, error) {
+	enemy, found, err := s.Opponents.ArenaOpponentTx(c, q, a.PlayerID, catalog.Limits.PVPRankingSection, ordinal, at)
 	if err != nil || found {
 		return enemy, err
 	}

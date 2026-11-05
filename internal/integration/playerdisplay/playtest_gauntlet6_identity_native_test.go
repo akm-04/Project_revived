@@ -15,6 +15,8 @@ import (
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	d "gxb.local/backend/v2/internal/domain/adventure"
+	darena "gxb.local/backend/v2/internal/domain/arena"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -23,12 +25,12 @@ import (
 // real Arena owner. The robot arm stays empty so no fallback can mask a miss.
 type arenaAdventureOpponents struct{ arena apparena.Service }
 
-func (o arenaAdventureOpponents) ArenaOpponentTx(c context.Context, q tx.Queryer, player identity.PlayerID, section int64, ordinal uint64) (appadventure.Opponent, bool, error) {
-	defense, found, err := o.arena.AdventureOpponentTx(c, q, player, section, ordinal)
+func (o arenaAdventureOpponents) ArenaOpponentTx(c context.Context, q tx.Queryer, player identity.PlayerID, section int64, ordinal uint64, at time.Time) (appadventure.Opponent, bool, error) {
+	defense, found, err := o.arena.AdventureOpponentTx(c, q, player, section, ordinal, at)
 	if err != nil || !found {
 		return appadventure.Opponent{}, found, err
 	}
-	return appadventure.Opponent{PlayerID: defense.PlayerID, Heroes: defense.Heroes, PetID: defense.PetID}, true, nil
+	return appadventure.Opponent{PlayerID: defense.PlayerID, Heroes: defense.Heroes, Pets: defense.Pets}, true, nil
 }
 
 func (arenaAdventureOpponents) RobotOpponentTx(context.Context, tx.Queryer, uint64) (appadventure.Opponent, bool, error) {
@@ -58,10 +60,10 @@ func integerValue(t *testing.T, value any) int64 {
 	return n
 }
 
-// TestPlaytestGauntlet6AdventureDefenderIdentityNative is expected RED until the
-// lead's typed Arena->Adventure boundary lands. It saves a production Arena
-// defense by table id, observes the real Arena opponent read, and requires the
-// 2417 projection and 2419 fight to use the defender's owned partner ids.
+// TestPlaytestGauntlet6AdventureDefenderIdentityNative saves a production
+// Arena defense by table id, observes the real Arena opponent read, and requires
+// the typed team, the 2417 projection and the 2419 fight to use the defender's
+// owned partner ids.
 func TestPlaytestGauntlet6AdventureDefenderIdentityNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
@@ -117,14 +119,21 @@ func TestPlaytestGauntlet6AdventureDefenderIdentityNative(t *testing.T) {
 		t.Fatal("adventure catalog", err)
 	}
 	opponents := arenaAdventureOpponents{arena: arena}
-	defense, found, err := opponents.ArenaOpponentTx(ctx, p, attacker.PlayerID, catalog.Limits.PVPRankingSection, 0)
+	defense, found, err := opponents.ArenaOpponentTx(ctx, p, attacker.PlayerID, catalog.Limits.PVPRankingSection, 0, time.Now().UTC())
 	if err != nil || !found {
 		t.Fatalf("real arena opponent found=%v err=%v", found, err)
 	}
 	if defense.PlayerID != defender.PlayerID || len(defense.Heroes) != len(tableIDs) {
 		t.Fatalf("arena opponent is not the saved defense: %+v", defense)
 	}
-	t.Logf("arena opponent player %d raw heroes %v", defense.PlayerID, defense.Heroes)
+	for index, participant := range defense.Heroes {
+		tableID := tableIDs[index]
+		if participant.Origin != cd.OwnedForeign || participant.Kind != cd.HeroActor || participant.Player != defender.PlayerID ||
+			participant.Identity != wantByTable[tableID] || participant.TemplateParams != nil {
+			t.Fatalf("saved table %d was not resolved to owned participant %+v", tableID, participant)
+		}
+	}
+	t.Logf("arena opponent player %d typed heroes %+v", defense.PlayerID, defense.Heroes)
 
 	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
 	mode := adventureTestMode(t, p, clock, opponents)
@@ -178,4 +187,130 @@ func TestPlaytestGauntlet6AdventureDefenderIdentityNative(t *testing.T) {
 			t.Fatalf("2419 is_win %#v", response.Body["is_win"])
 		}
 	})
+}
+
+// TestPlaytestGauntlet6AdventureMixedDefenderNative keeps owned, summoned and pet
+// categories in one saved Arena defense: four owned girls whose partner ids
+// differ from their table ids, one production season Summon, and an owned pet.
+func TestPlaytestGauntlet6AdventureMixedDefenderNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	arena := arenaService(t, p)
+	attacker, attackerHeroes := oneOnOnePlayer(t, p, server)
+	defender, _ := oneOnOnePlayer(t, p, server)
+	revision := installed(t, p)
+
+	if _, err := arena.Info(ctx, attacker, op()); err != nil {
+		t.Fatal("attacker arena entry", err)
+	}
+	if _, err := arena.Info(ctx, defender, op()); err != nil {
+		t.Fatal("defender arena entry", err)
+	}
+	exec(t, p, `INSERT INTO player_function_eligibility(player_id,function_id,content_revision,source_fact_key,eligible_at)
+		VALUES($1,68,$2,'gauntlet6:function:68',clock_timestamp()-interval '1 minute') ON CONFLICT(player_id,function_id)DO NOTHING`,
+		int64(attacker.PlayerID), revision)
+	exec(t, p, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'king_coin',100000,1,clock_timestamp())
+		ON CONFLICT(player_id,resource_key)DO UPDATE SET amount=100000`, int64(defender.PlayerID))
+	exchanged, err := arena.Exchange(ctx, defender, darena.ExchangeSummon, 10001040, op())
+	if err != nil || exchanged.Award == nil || !exchanged.Award.Summon {
+		t.Fatalf("production summon award %+v %v", exchanged.Award, err)
+	}
+	pet := statPet(t, p, defender, revision)
+	ownedTables := []int64{10001001, 10001002, 10001003, 10001004}
+	summonTable := int64(10001040)
+	formation := append(append([]int64{}, ownedTables...), summonTable)
+	if _, err = arena.ModifyDefence(ctx, defender, formation, pet.PetID, op()); err != nil {
+		t.Fatal("save mixed arena defense", err)
+	}
+	exec(t, p, `DELETE FROM arena_players WHERE player_id NOT IN ($1,$2)`, int64(attacker.PlayerID), int64(defender.PlayerID))
+
+	fight := combatService(t, p)
+	partnerByTable := map[int64]int64{}
+	for partnerKey, raw := range productionHeroRows(t, fight, p, defender.PlayerID, time.Now().UTC()) {
+		row, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		partnerID, err := strconv.ParseInt(partnerKey, 10, 64)
+		if err != nil {
+			continue
+		}
+		partnerByTable[integerValue(t, row["table_id"])] = partnerID
+	}
+	for _, tableID := range ownedTables {
+		partnerID, known := partnerByTable[tableID]
+		if !known || partnerID == tableID {
+			t.Fatalf("owned fixture table %d is not an identity collision: %d", tableID, partnerID)
+		}
+	}
+
+	catalog, err := (contentstore.Store{Queryer: p}).AdventureCatalogTx(ctx, p, revision)
+	if err != nil {
+		t.Fatal("adventure catalog", err)
+	}
+	opponents := arenaAdventureOpponents{arena: arena}
+	defense, found, err := opponents.ArenaOpponentTx(ctx, p, attacker.PlayerID, catalog.Limits.PVPRankingSection, 0, time.Now().UTC())
+	if err != nil || !found || defense.PlayerID != defender.PlayerID {
+		t.Fatalf("real arena opponent found=%v defense=%+v err=%v", found, defense, err)
+	}
+	if len(defense.Heroes) != len(formation) {
+		t.Fatalf("mixed heroes %+v", defense.Heroes)
+	}
+	for index, tableID := range ownedTables {
+		participant := defense.Heroes[index]
+		if participant.Origin != cd.OwnedForeign || participant.Kind != cd.HeroActor || participant.Player != defender.PlayerID ||
+			participant.Identity != partnerByTable[tableID] || participant.TemplateParams != nil {
+			t.Fatalf("owned table %d resolved to %+v", tableID, participant)
+		}
+	}
+	summoned := defense.Heroes[len(ownedTables)]
+	params := summoned.TemplateParams
+	if summoned.Origin != cd.Template || summoned.Kind != cd.HeroActor || summoned.Player.Valid() || summoned.Identity != summonTable ||
+		params == nil || integerValue(t, params["player_id"]) != 0 || integerValue(t, params["partner_id"]) != summonTable || integerValue(t, params["table_id"]) != summonTable {
+		t.Fatalf("summoned table %d resolved to %+v", summonTable, summoned)
+	}
+	if len(defense.Pets) != 1 {
+		t.Fatalf("mixed pets %+v", defense.Pets)
+	}
+	if pets := defense.Pets[0]; pets.Origin != cd.OwnedForeign || pets.Kind != cd.PetActor || pets.Player != defender.PlayerID || pets.Identity != pet.PetID {
+		t.Fatalf("owned pet resolved to %+v", pets)
+	}
+
+	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
+	mode := adventureTestMode(t, p, clock, opponents)
+	opContext := opPinned(revision)
+	opContext.StartedAt = clock.at
+	putAdventureOccurrence(t, p, attacker.PlayerID, d.EventBattle, 0, clock.at, clock.at.Add(2*time.Hour), "gauntlet6-mixed-pvp")
+
+	info, err := mode.Info(ctx, attacker, d.EventBattle, opContext)
+	if err != nil {
+		t.Fatal("mixed battle info", err)
+	}
+	enemy, _ := info["detail"].(map[string]any)["enemy_infos"].(map[string]any)
+	rows, _ := enemy["heroes"].([]any)
+	if enemy["player_id"] != int64(defender.PlayerID) || enemy["is_robot"] != int64(0) || len(rows) != len(formation) {
+		t.Fatalf("mixed enemy_infos %#v", enemy)
+	}
+	for index, tableID := range ownedTables {
+		row, _ := rows[index].(map[string]any)
+		if integerValue(t, row["table_id"]) != tableID || integerValue(t, row["partner_id"]) != partnerByTable[tableID] {
+			t.Fatalf("owned enemy row for table %d: %#v", tableID, rows[index])
+		}
+	}
+	summonRow, _ := rows[len(ownedTables)].(map[string]any)
+	if integerValue(t, summonRow["player_id"]) != 0 || integerValue(t, summonRow["partner_id"]) != summonTable || integerValue(t, summonRow["table_id"]) != summonTable {
+		t.Fatalf("summoned enemy row: %#v", rows[len(ownedTables)])
+	}
+	petRow, _ := enemy["pet"].(map[string]any)
+	if petRow == nil || integerValue(t, petRow["pet_id"]) != pet.PetID {
+		t.Fatalf("enemy pet row: %#v", enemy["pet"])
+	}
+
+	response, err := mode.Fight(ctx, attacker, appadventure.FightRequest{Formation: []int64{attackerHeroes[0]}}, opContext)
+	if err != nil {
+		t.Fatalf("2419 mixed fight failed: %v", err)
+	}
+	if report, _ := response.Body["battle_report"].(string); report == "" {
+		t.Fatal("2419 mixed battle report missing")
+	}
 }
