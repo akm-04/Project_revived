@@ -22,7 +22,7 @@
   "wait:6",
   "lua:local m=xyd.WindowManager.get() m:closeWindow('vip_recharge') m:openWindow('vip_recharge',{windowState=false,middleLev=1})",
   "wait:6",
-  "lua:local w=xyd.WindowManager.get():getWindow('vip_recharge') if not w or w.middleLev~=1 or not w.middleHelpItem then error('vc-vip-award-stock-page') end local b=w.middleHelpItem:getChildByName('container'):getChildByName('gain_btn') if not b or not b:isVisible() or not b:isTouchEnabled() then error('vc-vip-award-stock-button') end local r=b:getCascadeBoundingBox() __vc.tap(r.x+r.width/2,r.y+r.height/2)",
+  "lua:local w=xyd.WindowManager.get():getWindow('vip_recharge') if not w or w.middleLev~=1 or not w.middleHelpItem then error('vc-vip-award-stock-page') end local parent=w.middleHelpItem:getChildByName('container') local b=parent:getChildByName('gain_btn') if not b or not b:isVisible() or not b:isTouchEnabled() then error('vc-vip-award-stock-button') end local bind=b.addTouchEventListener local callback b.addTouchEventListener=function(button,handler) callback=handler return bind(button,handler) end w:initVipAwardBtnState(b,1,parent) b.addTouchEventListener=bind if type(callback)~='function' then error('vc-vip-award-stock-handler') end callback(b,ccui.TouchEventType.ended)",
   "wait:6",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if not p.vipAwards or tonumber(p.vipAwards[1])~=1 then error('vc-vip-award-local') end",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) xyd.Backend.get():request(xyd.mid.GET_VIP_AWARD,{id=1},function(code,body) if code~=xyd.error.OK then error('vc-vip-award-replay-'..tostring(code)) end if type(body.awards)~='table' or #body.awards~=4 then error('vc-vip-award-replay-shape') end end)",
@@ -39,5 +39,5 @@
   657,
   32000
  ],
- "note": "Month card and diamond buys use the authorized private MID 32000 bridge and dispatch the reply into stock RECHARGE handling. 354 uses stock queryChargeData. The first 657 claim taps the existing VipRechargeWindow level-1 award button and runs its original registered callback; no copied success callback or assignment of vipAwards/rewards. Additional direct 657 calls test replay and refusal. Relogin checks MID 1 card fields and persisted awards."
+ "note": "Month card and diamond buys use the authorized private MID 32000 bridge and stock RECHARGE handling. 354 uses stock queryChargeData. For the first 657 claim the scenario opens the level-1 VIP award page, checks the existing button is visible/enabled, captures its original stock handler during registration through the existing widget binding API, restores that API, then invokes the registered ended callback. This is actual stock callback proof, not physical hit-testing/rendered-phone proof; no copied response handler or assignment of vipAwards/rewards. Additional direct 657 calls test replay/refusal; relogin checks persisted awards/cards."
 }
