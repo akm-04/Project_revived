@@ -796,7 +796,7 @@
    "tables": 2
   },
   {
-   "callees": 3,
+   "callees": 4,
    "callers": 0,
    "mids": 2,
    "name": "bootstrap",
@@ -1378,6 +1378,15 @@
    "name": "socialprojection",
    "path": "internal/application/socialprojection",
    "purpose": "composes typed owner reads in one caller transaction",
+   "tables": 0
+  },
+  {
+   "callees": 0,
+   "callers": 1,
+   "mids": 0,
+   "name": "socialrecall",
+   "path": "internal/application/socialrecall",
+   "purpose": "",
    "tables": 0
   },
   {

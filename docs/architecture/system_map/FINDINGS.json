@@ -2243,7 +2243,9 @@
    "kind": "code_1"
   }
  ],
- "systems_not_wired": [],
+ "systems_not_wired": [
+  "socialrecall"
+ ],
  "tables_locked_by_many": [
   {
    "table": "account_sessions",

@@ -1738,6 +1738,12 @@
     "Search"
    ]
   },
+  "socialrecall": {
+   "bootstrap": [
+    "*Name",
+    "*ReconcileCharacterLogin"
+   ]
+  },
   "socialrelation": {
    "arena": [
     "*PrepareFriendFightPrivacyTx",
@@ -2240,6 +2246,10 @@
    "interface:bootstrap.MID1DetailContributor": [
     "*Claims",
     "*Name"
+   ],
+   "socialrecall": [
+    "*Name",
+    "*ReconcileCharacterLogin"
    ]
   },
   "campaign": {
@@ -4992,6 +5002,7 @@
     "*ProfilesByExactNameTx"
    ]
   },
+  "socialrecall": {},
   "socialrelation": {
    "generation": [
     "DecisionAt",
@@ -5461,6 +5472,7 @@
   "socialinbox": [],
   "socialpresence": [],
   "socialprojection": [],
+  "socialrecall": [],
   "socialrelation": [
    "cmd/gxb-api/main_postgres.go"
   ],
