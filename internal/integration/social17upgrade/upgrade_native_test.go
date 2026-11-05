@@ -239,8 +239,14 @@ func requireNewSocial(t *testing.T, p *pg.Pool, revision string) (builtin.Social
 
 func TestSocial17HistoricalUpgradeAndReceiptReplay(t *testing.T) {
 	evidencePath := os.Getenv("GXB_SOCIAL17_EVIDENCE")
-	if evidencePath == "" {
-		t.Fatal("GXB_SOCIAL17_EVIDENCE required")
+	configured := evidencePath != "" || os.Getenv("GXB_SOCIAL17_DSN") != "" || os.Getenv("GXB_SOCIAL17_UPGRADE_EVIDENCE") != ""
+	if !configured {
+		t.Skip("dedicated historical-upgrade database and evidence inputs not configured")
+	}
+	for _, name := range []string{"GXB_SOCIAL17_DSN", "GXB_SOCIAL17_EVIDENCE", "GXB_SOCIAL17_UPGRADE_EVIDENCE"} {
+		if os.Getenv(name) == "" {
+			t.Fatalf("%s required before running the one-shot historical upgrade", name)
+		}
 	}
 	raw, err := os.ReadFile(evidencePath)
 	if err != nil {
