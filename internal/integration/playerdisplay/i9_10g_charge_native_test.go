@@ -475,3 +475,37 @@ func TestI910GPrivilegeSnapshotSkillCapRisesAtVIPFive(t *testing.T) {
 		t.Fatalf("privilege card: %+v %v", active, e)
 	}
 }
+
+func TestI910GInitialAwardFlagsDoNotQualifyUnknownPrivilege(t *testing.T) {
+	database := pool(t)
+	installed(t, database)
+	actor := bornActor(t, database)
+	store := ps.Store{}
+	if _, found, err := store.ReadPrivilegeTx(ctx, database, actor.PlayerID, false); err != nil || found {
+		t.Fatalf("fresh privilege must remain unknown: found=%v error=%v", found, err)
+	}
+	baseline := map[string]any{"vip": int64(0), "charge": int64(0), "vip_awards": []int64{}}
+	detail := map[string]any{"17": baseline}
+	if err := (cp.BootstrapProjection{Provider: privilegeProvider(database)}).OverlayMID1(ctx, database, actor, false, time.Now().UTC(), detail); err != nil {
+		t.Fatal(err)
+	}
+	flags, ok := baseline["vip_awards"].([]int64)
+	if !ok || len(flags) != 15 {
+		t.Fatalf("initial stock award flags: %#v", baseline["vip_awards"])
+	}
+	for _, flag := range flags {
+		if flag != 0 {
+			t.Fatalf("unclaimed award flags: %v", flags)
+		}
+	}
+	if number(t, baseline["vip"]) != 0 || number(t, baseline["charge"]) != 0 {
+		t.Fatalf("privilege baseline changed: %#v", baseline)
+	}
+	if _, found, err := store.ReadPrivilegeTx(ctx, database, actor.PlayerID, false); err != nil || found {
+		t.Fatalf("projection created privilege state: found=%v error=%v", found, err)
+	}
+	claimed, err := store.ReadVIPClaimedTx(ctx, database, actor.PlayerID)
+	if err != nil || len(claimed) != 0 {
+		t.Fatalf("projection wrote claims: %v %v", claimed, err)
+	}
+}
