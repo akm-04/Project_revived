@@ -1,10 +1,10 @@
 package guildrental
 
 import (
+	"cmp"
 	"context"
-	"crypto/sha256"
 	"encoding/binary"
-	"fmt"
+	"slices"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/characterasset"
@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -205,18 +206,24 @@ func (r Reader) GuildOffers(c context.Context, a identity.ActorContext, kind gui
 		if err != nil {
 			return err
 		}
-		revision, err := r.Content.ActiveRevision(c, sc.Tx)
-		if err != nil {
-			return err
+		var revision string
+		var thresholds []character.HeroExpThreshold
+		var observedAt time.Time
+		if kind == guild.RentalHero {
+			revision, err = r.Content.ActiveRevision(c, sc.Tx)
+			if err != nil {
+				return err
+			}
+			thresholds, err = r.Content.HeroExpPolicyTx(c, sc.Tx, revision, character.MaxHeroLevel)
+			if err != nil {
+				return err
+			}
+			observedAt, err = r.Now(c, sc.Tx)
+			if err != nil {
+				return err
+			}
 		}
-		thresholds, err := r.Content.HeroExpPolicyTx(c, sc.Tx, revision, character.MaxHeroLevel)
-		if err != nil {
-			return err
-		}
-		observedAt, err := r.Now(c, sc.Tx)
-		if err != nil {
-			return err
-		}
+
 		borrowerLimit := level + min(vipLimit.LevelUp, r.Policy.Money.LevelUpCeiling)
 		rows := make([]Row, 0, len(offers))
 		for _, offer := range offers {
@@ -238,7 +245,11 @@ func (r Reader) GuildOffers(c context.Context, a identity.ActorContext, kind gui
 			row.HaveRent, row.CanRent = admission(offer, kind, uses, unitLevel, borrowerLimit, mana >= row.Price)
 			rows = append(rows, row)
 		}
-		list = List{Rows: rows, RentCount: rentCount(kind, requestedType, rows)}
+		count, err := rentCount(kind, requestedType, rows)
+		if err != nil {
+			return err
+		}
+		list = List{Rows: rows, RentCount: count}
 		return nil
 	})
 	return list, err
@@ -300,17 +311,75 @@ func admission(offer guild.RentalOffer, kind guild.RentalKind, uses []guild.Rent
 	return false, affordable && unitLevel <= borrowerLimit
 }
 
-// rentCount is the nonzero cache key SelfGuild.lua compares (C6): the visible
-// rows, the requested type and each row's price, can_rent and have_rent.
-func rentCount(kind guild.RentalKind, requestedType int64, rows []Row) int64 {
-	raw := fmt.Sprintf("%s:%d", kind, requestedType)
-	for _, row := range rows {
-		raw += fmt.Sprintf(";%d:%s:%d:%d:%t:%t", int64(row.Offer.Lender), row.Offer.Kind, row.Offer.Unit, row.Price, row.CanRent, row.HaveRent)
+// rentCount excludes observation metadata and interest: they change on reads
+// without changing the cached detail. Character data is copied before normalization.
+func rentCount(kind guild.RentalKind, requestedType int64, rows []Row) (int64, error) {
+	type cacheEntry struct {
+		Lender            identity.PlayerID
+		Kind              guild.RentalKind
+		Unit              int64
+		Price             int64
+		CanRent, HaveRent bool
+		Profile           playerdirectory.Profile
+		Hero              *character.Hero
+		Pet               *character.Pet
+		Appearance        *characterasset.EffectiveHeroAppearance
+		TwiceAwakeStage   *int64
 	}
-	sum := sha256.Sum256([]byte(raw))
+	entries := make([]cacheEntry, 0, len(rows))
+	for _, row := range rows {
+		entry := cacheEntry{Lender: row.Offer.Lender, Kind: row.Offer.Kind, Unit: row.Offer.Unit,
+			Price: row.Price, CanRent: row.CanRent, HaveRent: row.HaveRent, Profile: row.Profile, TwiceAwakeStage: row.TwiceAwakeStage}
+		if row.Hero != nil {
+			hero := *row.Hero
+			hero.StateVersion, hero.CurrentSkinID, hero.IllusionSkinID = 0, 0, 0
+			hero.CreatedAt, hero.UpdatedAt = time.Time{}, time.Time{}
+			hero.CreationContentRevision = ""
+			entry.Hero = &hero
+		}
+		if row.Pet != nil {
+			pet := *row.Pet
+			pet.StateVersion, pet.ActiveStyle, pet.OriginTableID = 0, 0, 0
+			pet.CreatedAt, pet.UpdatedAt = time.Time{}, time.Time{}
+			pet.CreationContentRevision = ""
+			entry.Pet = &pet
+		}
+		if row.Appearance != nil {
+			appearance := *row.Appearance
+			appearance.OwnerStateVersion = 0
+			appearance.ObservedAt = time.Time{}
+			appearance.Skins = slices.Clone(appearance.Skins)
+			appearance.LIVE = slices.Clone(appearance.LIVE)
+			slices.SortFunc(appearance.Skins, func(first, second characterasset.QualifiedSkinEntitlement) int {
+				return cmp.Compare(first.ModelID, second.ModelID)
+			})
+			slices.SortFunc(appearance.LIVE, func(first, second characterasset.QualifiedLIVEState) int {
+				return cmp.Compare(first.ModelID, second.ModelID)
+			})
+			entry.Appearance = &appearance
+		}
+		entries = append(entries, entry)
+	}
+	slices.SortFunc(entries, func(first, second cacheEntry) int {
+		if order := cmp.Compare(first.Lender, second.Lender); order != 0 {
+			return order
+		}
+		if order := cmp.Compare(first.Kind, second.Kind); order != 0 {
+			return order
+		}
+		return cmp.Compare(first.Unit, second.Unit)
+	})
+	sum, err := receipt.FingerprintRequest(struct {
+		Kind          guild.RentalKind
+		RequestedType int64
+		Rows          []cacheEntry
+	}{kind, requestedType, entries})
+	if err != nil {
+		return 0, err
+	}
 	value := int64(binary.BigEndian.Uint64(sum[:8]) & 0x7fffffffffffffff)
 	if value == 0 {
-		return 1
+		return 1, nil
 	}
-	return value
+	return value, nil
 }
