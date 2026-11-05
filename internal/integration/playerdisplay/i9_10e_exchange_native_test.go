@@ -310,8 +310,10 @@ func exchangeBalance(t *testing.T, database *pg.Pool, player int64) int64 {
 
 type failingExchangeSettings struct{}
 
-func (failingExchangeSettings) TuningTx(context.Context, tx.Queryer) (json.RawMessage, error) {
-	return nil, errors.New("injected tuning read failure")
+func (failingExchangeSettings) TuningTx(ctx context.Context, query tx.Queryer) (json.RawMessage, error) {
+	var value int64
+	err := query.QueryRow(ctx, `SELECT nonexistent_tuning_column FROM social_exchange_tuning`).Scan(&value)
+	return nil, err
 }
 
 func TestI910EExchangeAllSourceProductsDebitGrantReplayAndReload(t *testing.T) {
