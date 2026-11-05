@@ -33,11 +33,16 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "library_forum_boards": [
+    "libraryforumstore.LockBoardTx"
+   ],
    "library_forum_comments": [
-    "libraryforumstore.DeleteReactionTx"
+    "libraryforumstore.DeleteReactionTx",
+    "libraryforumstore.RetireOldestCommentsTx"
    ]
   },
   "row_locks": [
+   "library_forum_boards",
    "library_forum_comments"
   ]
  },
@@ -79,12 +84,14 @@
  ],
  "tables": {
   "owned": [
+   "library_forum_boards",
    "library_forum_comments",
    "library_forum_reactions"
   ],
   "read": [
    "gameplay_contexts",
    "gxb_operation_receipts",
+   "library_forum_boards",
    "library_forum_comments",
    "library_forum_reactions",
    "player_directory_profiles",
@@ -94,6 +101,7 @@
   ],
   "written": [
    "gxb_operation_receipts",
+   "library_forum_boards",
    "library_forum_comments",
    "library_forum_reactions"
   ]
