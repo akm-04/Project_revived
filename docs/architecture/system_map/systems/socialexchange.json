@@ -92,7 +92,9 @@
   "integration": [
    "playerdisplay"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_10e_exchange.json"
+  ],
   "unit": [
    "override_test.go",
    "service_test.go"
