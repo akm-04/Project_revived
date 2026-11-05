@@ -5335,6 +5335,20 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00112_i9_10c_scalar_daily_floors.sql"
+    },
+    "player_dorm_glue_purchases": {
+      "owner": "dorm-house",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00113_i9_10c_glue_purchases.sql"
     }
   }
 }

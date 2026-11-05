@@ -163,6 +163,7 @@
  "tables": {
   "owned": [
    "player_dorm_admissions",
+   "player_dorm_glue_purchases",
    "player_dorm_heroes",
    "player_dorm_rooms",
    "player_dorm_roots"

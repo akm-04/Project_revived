@@ -638,6 +638,7 @@
    "player_course_roots": "course",
    "player_directory_profiles": "playerdirectory",
    "player_dorm_admissions": "dormhouse",
+   "player_dorm_glue_purchases": "dormhouse",
    "player_dorm_heroes": "dormhouse",
    "player_dorm_rooms": "dormhouse",
    "player_dorm_roots": "dormhouse",
@@ -952,7 +953,7 @@
    "name": "dormhouse",
    "path": "internal/application/dormhouse",
    "purpose": "",
-   "tables": 4
+   "tables": 5
   },
   {
    "callees": 12,
