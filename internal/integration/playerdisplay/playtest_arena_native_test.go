@@ -16,6 +16,12 @@ func TestPlaytestArenaRefreshOlderCardAndFormationsNative(t *testing.T) {
 	a, _ := oneOnOnePlayer(t, p, rankingServer(t, p))
 	b, _ := oneOnOnePlayer(t, p, rankingServer(t, p))
 	c, _ := oneOnOnePlayer(t, p, rankingServer(t, p))
+	// Later tests in this package delete other players' arena rows, which these matches would block.
+	defer func() {
+		exec(t, p, `DELETE FROM arena_records WHERE owner_player_id=$1 OR match_id IN (SELECT match_id FROM arena_matches WHERE attacker_id=$1)`, int64(a.PlayerID))
+		exec(t, p, `DELETE FROM arena_partner_usage WHERE player_id=$1`, int64(a.PlayerID))
+		exec(t, p, `DELETE FROM arena_matches WHERE attacker_id=$1`, int64(a.PlayerID))
+	}()
 	catalog := arenaCatalog(t, p)
 	for _, actor := range []identity.ActorContext{a, b, c} {
 		if _, err := s.Info(ctx, actor, op()); err != nil {
