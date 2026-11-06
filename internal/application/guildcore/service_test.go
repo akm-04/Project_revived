@@ -481,10 +481,18 @@ func TestValidGuildNameUsesStockWeightedLength(t *testing.T) {
 	}{
 		{name: strings.Repeat("a", 20), valid: true},
 		{name: strings.Repeat("a", 21)},
+		{name: strings.Repeat("é", 20), valid: true},
+		{name: strings.Repeat("é", 21)},
+		{name: strings.Repeat("a", 19) + "é", valid: true},
+		{name: strings.Repeat("a", 20) + "é"},
 		{name: strings.Repeat("界", 10), valid: true},
 		{name: strings.Repeat("界", 11)},
+		{name: strings.Repeat("ࠀ", 10), valid: true},
+		{name: strings.Repeat("ࠀ", 11)},
 		{name: strings.Repeat("a", 18) + "界", valid: true},
 		{name: strings.Repeat("a", 19) + "界"},
+		{name: strings.Repeat("\U00010000", 20), valid: true},
+		{name: strings.Repeat("\U00010000", 21)},
 		{name: "", valid: false},
 		{name: string([]byte{0xff}), valid: false},
 	} {
@@ -501,13 +509,20 @@ func TestCreateAndRenameRejectGuildNamesOverStockLength(t *testing.T) {
 	if _, err := service.Create(context.Background(), actor, CreateRequest{Name: strings.Repeat("a", 21), Icon: 20010001}, opFixture(t, time.Unix(1000, 0).UTC())); !errors.Is(err, ErrInvalidGuildPolicyInput) {
 		t.Fatalf("overlength create error=%v", err)
 	}
+	acceptedActor := actorFixture(t, 100002)
+	if _, err := service.Create(context.Background(), acceptedActor, CreateRequest{Name: strings.Repeat("a", 20), Icon: 20010001}, opFixture(t, time.Unix(1001, 0).UTC())); err != nil {
+		t.Fatalf("stock-length create rejected: %v", err)
+	}
 
 	guildID := guild.ID(1000030)
 	current := guildFixture(guildID)
 	st.guilds[guildID] = current
 	st.seedMembership(memberFixture(actor.PlayerID, guildID, guild.Leader))
-	if _, err := service.UpdateSettings(context.Background(), actor, SettingsRequest{Name: strings.Repeat("界", 11), Icon: current.Icon, IconFrame: 0, MinAllowLevel: 32, ApplyType: guild.ApplyByApplication}, opFixture(t, time.Unix(1001, 0).UTC())); !errors.Is(err, ErrInvalidSettings) {
+	if _, err := service.UpdateSettings(context.Background(), actor, SettingsRequest{Name: strings.Repeat("界", 11), Icon: current.Icon, IconFrame: 0, MinAllowLevel: 32, ApplyType: guild.ApplyByApplication}, opFixture(t, time.Unix(1002, 0).UTC())); !errors.Is(err, ErrInvalidSettings) {
 		t.Fatalf("overlength rename error=%v", err)
+	}
+	if _, err := service.UpdateSettings(context.Background(), actor, SettingsRequest{Name: strings.Repeat("é", 20), Icon: current.Icon, IconFrame: 0, MinAllowLevel: 32, ApplyType: guild.ApplyByApplication}, opFixture(t, time.Unix(1003, 0).UTC())); err != nil {
+		t.Fatalf("stock-length rename rejected: %v", err)
 	}
 }
 

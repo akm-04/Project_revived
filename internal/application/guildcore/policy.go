@@ -79,15 +79,15 @@ func (p Policy) ValidName(s string) bool {
 	}
 	runeCount := 0
 	halfUnits := 0
-	for _, character := range s {
+	for byteIndex := range s {
 		runeCount++
-		if character <= 0x7f {
-			halfUnits++
+		if s[byteIndex] >= 224 && s[byteIndex] <= 239 {
+			halfUnits += 2
 			continue
 		}
-		halfUnits += 2
+		halfUnits++
 	}
-	return runeCount >= p.NameMinChars && halfUnits/2+halfUnits%2 <= p.NameMaxChars
+	return runeCount >= p.NameMinChars && halfUnits <= p.NameMaxChars*2
 }
 
 func (p Policy) ValidBulletin(s string) bool {
