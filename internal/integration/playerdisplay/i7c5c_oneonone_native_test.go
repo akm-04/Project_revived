@@ -5,6 +5,7 @@ package playerdisplay_test
 import (
 	"context"
 	"errors"
+	"net/http"
 	"slices"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	ach "gxb.local/backend/v2/internal/application/achievement"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -26,11 +28,14 @@ import (
 	appdisplay "gxb.local/backend/v2/internal/application/playerdisplay"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/domain/mail"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 func oneOnOneService(t *testing.T, p *pg.Pool) app.Service {
@@ -421,5 +426,57 @@ func TestI7C5COneOnOneReconcileAbandonedNative(t *testing.T) {
 	if scalar(t, pool, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1 AND status='SETTLED'`, int64(a.PlayerID)) != 1 ||
 		scalar(t, pool, `SELECT count(*) FROM one_on_one_records WHERE owner_player_id=$1`, int64(a.PlayerID)) != 1 {
 		t.Fatal("abandoned match not settled once")
+	}
+}
+
+// TestI7C5COneOnOneRivalRegionWireNative runs MATCH_ENEMIES through the production
+// dispatcher over a real competition: a rival on another server must carry its own
+// band in player_info.region, which ChangeEnemyWindow concatenates into "S"..region.
+func TestI7C5COneOnOneRivalRegionWireNative(t *testing.T) {
+	pool := pool(t)
+	defer pool.Close()
+	s := oneOnOneService(t, pool)
+	a, heroesA := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	b, heroesB := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	if a.LogicalServerID == b.LogicalServerID {
+		t.Fatal("fixture needs two logical servers")
+	}
+	for _, x := range []struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}{{a, heroesA}, {b, heroesB}} {
+		if _, err := s.Load(ctx, x.actor, op()); err != nil {
+			t.Fatal(err)
+		}
+		if err := s.ChangeTeams(ctx, x.actor, teamsOf(x.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// The better rival is one row ahead of the requester in the Junior order.
+	exec(t, pool, `UPDATE one_on_one_players SET points=3000,state_version=state_version+1 WHERE player_id NOT IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID))
+	exec(t, pool, `UPDATE one_on_one_players SET points=99999,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
+	dispatcher := stockruntime.OneOnOneDispatcher{Authority: fixedSocialAuthority{actor: a}, Service: s}
+	response := dispatcher.Dispatch(ctx, httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 2482, Operation: op(), ReceivedAt: time.Now().UTC(),
+		Claims: wire.CredentialClaims{Token: "fixture", Region: int64(a.LogicalServerID)}, Params: map[string]any{}}})
+	if response.HTTPStatus != http.StatusOK {
+		t.Fatalf("MATCH_ENEMIES status=%d body=%v cause=%v", response.HTTPStatus, response.Body, response.Cause)
+	}
+	offered := response.Body["match_infos"].([]map[string]any)
+	found := false
+	for _, row := range offered {
+		info := row["player_info"].(map[string]any)
+		player := identity.PlayerID(info["player_id"].(int64))
+		if info["region"] != int64(logicalserver.PlayerRegion(player)) {
+			t.Fatalf("rival %d region=%v", player, info["region"])
+		}
+		if player == b.PlayerID {
+			found = true
+			if info["region"] != int64(b.LogicalServerID) {
+				t.Fatalf("better rival on server %d answered region=%v", b.LogicalServerID, info["region"])
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("the better rival on server %d was not offered: %v", b.LogicalServerID, offered)
 	}
 }
