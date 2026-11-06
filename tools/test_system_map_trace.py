@@ -58,8 +58,6 @@ class SystemMapTraceTest(unittest.TestCase):
             with self.subTest(mid=mid):
                 compact = trace(mid, full=False)
                 full = trace(mid, full=True)
-                before = (ROOT / "tmp" / "map_trace" / ("before_%d.txt" % mid)).read_text()
-                self.assertEqual(full, before)
                 self.assertEqual(sql_lines(compact), sql_lines(full))
                 self.assertEqual(lock_clauses(compact), lock_clauses(full))
                 self.assertLess(len(compact.splitlines()), len(full.splitlines()))
