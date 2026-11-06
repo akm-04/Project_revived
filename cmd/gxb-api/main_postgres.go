@@ -159,7 +159,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	pool, err := postgres.Open(ctx, string(cfg.PostgresDSN), postgres.PoolSettings{
-		MaxConns: 16, MinConns: 1, MaxConnLifetime: 30 * time.Minute,
+		MaxConns: int32(envPositiveInt("GXB_API_DB_POOL_MAX_CONNS", 16)), MinConns: 1, MaxConnLifetime: 30 * time.Minute,
 		MaxConnIdleTime: 5 * time.Minute, HealthCheckPeriod: 30 * time.Second,
 		ApplicationName: "gxb-v2-i6b-api",
 	})
@@ -729,7 +729,7 @@ func main() {
 			mustRegister(mid, stockruntime.InactiveModeDispatcher{Authority: authority})
 		}
 	}
-	admission, err := httpedge.NewAdmission(256)
+	admission, err := httpedge.NewAdmission(envPositiveInt("GXB_HTTP_EDGE_MAX_IN_FLIGHT", 256))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -18,9 +18,15 @@ var (
 	ErrUnsupportedDetails  = errors.New("activity directory: unsupported details value")
 )
 
+// PlayerLevel reads the actor's directory level. A caller projecting inside an
+// open transaction supplies it so a provider reads through that transaction
+// instead of opening its own connection; nil lets the provider use its reader.
+type PlayerLevel func(context.Context, identity.PlayerID) (int64, bool, error)
+
 type ProjectionContext struct {
-	Actor      identity.ActorContext
-	DecisionAt time.Time
+	Actor       identity.ActorContext
+	DecisionAt  time.Time
+	PlayerLevel PlayerLevel
 }
 
 func validateActor(actor identity.ActorContext) error {

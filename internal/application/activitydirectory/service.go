@@ -13,14 +13,14 @@ import (
 
 type Directory struct{ Registry Registry }
 
-func (d Directory) ListAt(ctx context.Context, actor identity.ActorContext, at time.Time) ([]activity.Projection, error) {
+func (d Directory) ListAt(ctx context.Context, actor identity.ActorContext, at time.Time, level PlayerLevel) ([]activity.Projection, error) {
 	if err := validateActor(actor); err != nil {
 		return nil, err
 	}
 	if d.Registry.Len() == 0 {
 		return []activity.Projection{}, nil
 	}
-	pc := ProjectionContext{Actor: actor, DecisionAt: at.UTC()}
+	pc := ProjectionContext{Actor: actor, DecisionAt: at.UTC(), PlayerLevel: level}
 	if err := pc.Validate(); err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ type Runtime struct {
 func (s Runtime) List(ctx context.Context, actor identity.ActorContext) ([]activity.Projection, error) {
 	if s.Directory.Registry.Len() == 0 {
 		// No child provider is evaluated, so no authoritative gameplay instant is sampled.
-		return s.Directory.ListAt(ctx, actor, time.Time{})
+		return s.Directory.ListAt(ctx, actor, time.Time{}, nil)
 	}
 	if s.Time == nil {
 		return nil, errors.New("activity directory: nil time authority")
@@ -97,7 +97,7 @@ func (s Runtime) List(ctx context.Context, actor identity.ActorContext) ([]activ
 	if err != nil {
 		return nil, err
 	}
-	return s.Directory.ListAt(ctx, actor, at)
+	return s.Directory.ListAt(ctx, actor, at, nil)
 }
 
 func (s Runtime) Lookup(ctx context.Context, actor identity.ActorContext, tableID int64) (activity.Projection, bool, error) {
