@@ -6,6 +6,10 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "tools"))
+import system_map
+
+
 SYSTEM_MAP = ROOT / "tools" / "system_map.py"
 LOCK_CLAUSE_PATTERN = re.compile(r"(?:^|; )((?:conditional )?lock [^;]+)")
 
@@ -35,6 +39,20 @@ def lock_clauses(output):
 
 
 class SystemMapTraceTest(unittest.TestCase):
+    def test_compaction_keeps_fanout_unresolved_and_bound_markers(self):
+        full = (
+            "MID 1 handler fixture.Dispatcher fixture.go:1\n"
+            "Dispatcher.Dispatch fixture.go:1\n"
+            "  FANOUT Load has 2 implementers, not followed: fixture.First.Load, fixture.Second.Load\n"
+            "  UNRESOLVED registered wrapper observing\n"
+            "  BOUND depth 48 reached\n"
+        )
+
+        compact = system_map.compact_trace(full)
+
+        for marker in ("FANOUT Load", "UNRESOLVED registered wrapper", "BOUND depth 48"):
+            self.assertIn(marker, compact)
+
     def test_compact_trace_preserves_sql_and_lock_clauses(self):
         for mid in (836, 1, 191):
             with self.subTest(mid=mid):

@@ -152,6 +152,13 @@ func TestLockClauseDoesNotConsumeFollowingUpdate(t *testing.T) {
 	}
 }
 
+func TestSQLFragmentKeywordsAreNotRelationNames(t *testing.T) {
+	read, write, _ := traceSQLTables("SELECT id FROM JOIN guilds ON true\nSELECT id FROM UPDATE profiles SET id=1")
+	if strings.Join(read, ",") != "guilds" || strings.Join(write, ",") != "profiles" {
+		t.Fatalf("fragment keywords became relations: read=%v write=%v", read, write)
+	}
+}
+
 func TestSQLLockOFResolvesAllNamedAliases(t *testing.T) {
 	for _, test := range []struct{ query, wanted string }{
 		{"SELECT i.id FROM personal_dm_intents i JOIN personal_dm_delivery d ON i.id=d.id FOR UPDATE OF d", "personal_dm_delivery FOR UPDATE"},

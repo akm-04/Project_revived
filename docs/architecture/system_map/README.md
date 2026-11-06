@@ -8,25 +8,20 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 (when a suite has run) `scenario_coverage.json`. Do not edit generated files by hand.
 
 ## Read only what the question needs
-- Start with `show <mid>` to find its owner; use `show <system>` for that system's record and both edge directions.
-- `calls[A][B]` means **A calls B**; `called_by[A][B]` means **B calls A**.
-  For example, Library calls Achievement's `PrepareMarriageTx`; Achievement calls Library's `HeroLibraryInputsTx`.
-- These are direct static call-site relationships, not a request's transitive dependency list.
-  A `*` target is a possible interface implementation, not a confirmed runtime binding; inspect composition and source.
-- Use `trace <mid>` for a bounded, live **static** request walk with source references; retain its `FANOUT`, `UNRESOLVED` and `BOUND` lines.
-- `row_lock_methods` names methods; only `trace` annotates detected conditional lock clauses. Neither proves execution or complete lock order.
-- Missing edges or facts mean unknown within the extractor's limits, not proof of absence. Contract matches and scenario names are reading leads.
-- Read-only workers without shell access should receive targeted `show`/`trace` outputs from the lead, or exact JSON sections **including the direction key**.
-- Check source and accepted PassMap contracts before changing behaviour; use runtime evidence for deployment, active content and executed-test claims.
+- `show <mid>` gives the registered owner and client references; `show <system>` gives its record and both edge directions.
+- `calls[A][B]` means **A calls B**; `called_by[A][B]` means **B calls A**. Edges are direct static call sites, not a request's full dependency list.
+- `trace <mid>` walks a bounded static route with source references. Keep `FANOUT`, `UNRESOLVED` and `BOUND` markers; check source before treating a possibility as fact.
+- `show unhandled` lists client-sent MIDs without an owned, concrete handler. Window file references are not proof of runtime reachability; dead code is not inferred.
+- Lock rows are static candidates and can be incomplete across wide interfaces or adapter-owned paths. Use a route trace for request-specific locks; neither view proves execution or lock order.
+- Contract matches and scenario names are reading leads. Check source and accepted PassMap contracts before changing behaviour; use runtime evidence for deployment, active content and executed-test claims.
 
 ## Files
 - `INDEX.json` – one row per `internal/application/<system>` with counts and purpose,
   plus `mid_to_system` and `table_to_system`.
 - `EDGES.json` – `calls`, `called_by`, `composition` for every system.
 - `systems/<system>.json` – one system; `show <system>` joins its edge detail without reading all of `EDGES.json`.
-- `FINDINGS.json` – review leads, not verdicts. `unattributed_pushes` retains
-  registrations whose owner cannot be resolved instead of silently discarding them.
-- `client_mid_callers.json` – MIDs, names, files, `senders` (same-line `request(`), `other`.
+- `FINDINGS.json` – review leads, not verdicts. `client_senders_without_live_handler` lists every MID with a same-line client `request(` sender but no owned, concrete handler; `unattributed_pushes` retains registrations whose owner cannot be resolved.
+- `client_mid_callers.json` – MIDs, names, files, `senders` (same-line `request(`), `other`. A sender is a static source reference, not proof the file is loaded or reached at runtime.
 
 ## Fields
 - `mids` – registered stock HTTP MIDs, client names, and the handler `file:line`
@@ -62,11 +57,11 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
   store adapters and local variables that no single system owns; start there for "who builds login".
 - `background` – `runReconcile` loops (gxb-api) and River enqueues/workers.
 - `locks.ranks` / `locks.profiles` – referenced `*LockRank` constants and tx `LockTimeout`.
-  `locks.row_locks` – tables this system's stores lock `FOR UPDATE`/`FOR SHARE`, attributed
-  through the store method's callers (including store-internal caller closure).
-  These are static lock-clause candidates: call arguments can disable a clause even when a method is listed.
-  `locks.row_lock_methods` – per table, the `store.method` names that reach the SQL holding the
-  clause; `trace` says whether that clause is conditional.
+  `locks.row_locks` and `locks.row_lock_methods` – PostgreSQL lock clauses found in stores and
+  attributed through typed application-to-store edges plus a bounded store-local caller walk.
+  These are lower-bound static candidates: wide interfaces and adapter-owned request paths can
+  hide callers, and call arguments can disable a conditional clause. Use `trace <mid>` for the
+  route-specific static walk; neither view proves execution or complete lock order.
   `locks.unresolved_methods` names lock clauses whose table cannot be resolved locally,
   such as a suffix passed to another function; an empty table name is never invented.
 - `tests.scenarios_naming` – scenarios that name a MID in text; not coverage.
@@ -75,7 +70,7 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 ```
 python3 tools/system_map.py --write
 python3 tools/system_map.py --check
-python3 tools/system_map.py show <system|mid|table>
+python3 tools/system_map.py show <system|mid|table|unhandled>
 python3 tools/system_map.py trace <mid> [--full]
 python3 tools/system_map.py --refresh-client <src_64>
 python3 tools/system_map.py --refresh-coverage <one-mid-per-line-file>
@@ -121,7 +116,7 @@ it handles common CTE aliases and joins but is not a full PostgreSQL parser.
   unexported types, in `internal/application` and `internal/adapters/postgres`.
   Local unnamed types and implementations outside those directories are not resolved.
 - Fact kinds assigned through non-constant expressions are reported in `gaps`.
+- `FINDINGS.client_senders_without_live_handler` uses `client_mid_callers.json` same-line `request(` matches and current registrations. `window_sender_files` is source-path evidence only; runtime reachability and dead-code status remain unknown. Registration status separates absent, fallback-only, unattributed and handler-less registrations.
 - `FINDINGS.soft_refusals` finds literal refusal bodies only and does not state the HTTP status;
   it misses a 200 that replays a stored or duplicate result (for example 30005, 30002). A review lead.
-- Locks are listed as taken, never as a proven order; SQL text without `FOR UPDATE`/`FOR SHARE`
-  (e.g. `pgx.CopyFrom`) is not a row lock here.
+- Locks are candidates, never a proven order; clauses reachable only through wide interfaces or adapter-owned routes may be absent from a system row. SQL text without `FOR UPDATE`/`FOR SHARE` (e.g. `pgx.CopyFrom`) is not a row lock here.

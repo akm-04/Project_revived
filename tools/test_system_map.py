@@ -52,6 +52,49 @@ class SystemMapViewTests(unittest.TestCase):
         self.assertEqual(unattributed, [unknown])
         self.assertEqual(sum(map(len, grouped.values())) + len(unattributed), 2)
 
+    def test_client_senders_without_live_handler_are_classified(self):
+        client = {
+            '1': {'name': 'LIVE', 'senders': ['app/windows/Live.lua']},
+            '2': {'name': 'FALLBACK', 'senders': ['app/model/Fallback.lua']},
+            '3': {'name': 'UNREGISTERED', 'senders': ['app/model/Missing.lua']},
+            '4': {'name': 'UNATTRIBUTED', 'senders': ['app/windows/Unknown.lua']},
+            '5': {'name': 'NO_HANDLER_FILE', 'senders': ['app/model/NoHandler.lua']},
+            '6': {'name': 'NOT_SENT', 'senders': []},
+        }
+        grouped = {
+            1: [{'fallback': False, 'owner': 'guildcore', 'handler_file': 'dispatcher.go'}],
+            2: [{'fallback': True, 'owner': 'guildcore'}],
+            4: [{'fallback': False, 'owner': ''}],
+            5: [{'fallback': False, 'owner': 'guildcore'}],
+        }
+
+        finding = system_map.client_senders_without_live_handler(client, grouped)
+
+        self.assertEqual(finding['count'], 4)
+        self.assertEqual(finding['window_sender_mid_count'], 1)
+        self.assertEqual(finding['non_window_sender_mid_count'], 3)
+        self.assertEqual(finding['registration_status_counts'], {
+            'inactive_fallback': 1,
+            'no_registration': 1,
+            'unattributed_registration': 1,
+            'registration_without_dispatch_handler': 1,
+        })
+        self.assertTrue(all(row['runtime_reachability'] == 'unknown' for row in finding['mids']))
+
+    def test_show_unhandled_returns_generated_client_finding(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            (output / 'INDEX.json').write_text(json.dumps({'systems': []}))
+            finding = {'count': 1, 'mids': [{'mid': 39}]}
+            (output / 'FINDINGS.json').write_text(json.dumps({
+                'client_senders_without_live_handler': finding,
+            }))
+            with patch.object(system_map, 'OUTPUT_DIRECTORY', output):
+                captured = io.StringIO()
+                with contextlib.redirect_stdout(captured):
+                    system_map.show_entry('unhandled')
+        self.assertEqual(json.loads(captured.getvalue()), finding)
+
     def test_unresolved_lock_target_is_not_an_empty_table(self):
         lock = {'table': '', 'store': 'store/example', 'method': 'LockTx'}
         callers = {('store/example', 'LockTx'): {'owner'}}

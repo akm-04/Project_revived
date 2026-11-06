@@ -996,6 +996,68 @@ def store_callers(edges):
     return callers
 
 
+def client_senders_without_live_handler(client, grouped):
+    status_counts = {
+        "inactive_fallback": 0,
+        "no_registration": 0,
+        "unattributed_registration": 0,
+        "registration_without_dispatch_handler": 0,
+    }
+    rows = []
+    window_sender_mid_count = 0
+    for raw_mid, client_entry in sorted(client.items(), key=lambda item: int(item[0])):
+        sender_files = client_entry.get("senders") or []
+        if not sender_files:
+            continue
+        mid = int(raw_mid)
+        registrations = grouped.get(mid, [])
+        has_live_handler = any(
+            not registration.get("fallback")
+            and registration.get("owner")
+            and registration.get("handler_file")
+            for registration in registrations
+        )
+        if has_live_handler:
+            continue
+        non_fallback_registrations = [
+            registration for registration in registrations if not registration.get("fallback")
+        ]
+        if not registrations:
+            status = "no_registration"
+        elif not non_fallback_registrations:
+            status = "inactive_fallback"
+        elif all(not registration.get("owner") for registration in non_fallback_registrations):
+            status = "unattributed_registration"
+        else:
+            status = "registration_without_dispatch_handler"
+        window_sender_files = [
+            sender_file for sender_file in sender_files if sender_file.startswith("app/windows/")
+        ]
+        if window_sender_files:
+            window_sender_mid_count += 1
+        status_counts[status] += 1
+        rows.append({
+            "mid": mid,
+            "name": client_entry["name"],
+            "registration_status": status,
+            "senders": sender_files,
+            "window_sender_files": window_sender_files,
+            "non_window_sender_files": [
+                sender_file for sender_file in sender_files
+                if not sender_file.startswith("app/windows/")
+            ],
+            "runtime_reachability": "unknown",
+        })
+    return {
+        "count": len(rows),
+        "window_sender_mid_count": window_sender_mid_count,
+        "non_window_sender_mid_count": len(rows) - window_sender_mid_count,
+        "registration_status_counts": status_counts,
+        "runtime_reachability": "unknown from source-file references alone",
+        "mids": rows,
+    }
+
+
 def login_composition():
     path = ROOT / "cmd" / "gxb-api" / "main_postgres.go"
     text = read_text(path)
@@ -1306,6 +1368,7 @@ def build_system_map():
             "disposition": mode.get("disposition"),
             "stage": mode.get("target"),
         })
+    unhandled_client_senders = client_senders_without_live_handler(client, grouped)
 
     several_writers = []
     for table in sorted(writers):
@@ -1329,6 +1392,7 @@ def build_system_map():
     findings = {
         "note": "These lists are leads for a reviewer, not verdicts. Confirm each entry against the source it cites.",
         "client_mids_not_live": client_not_live,
+        "client_senders_without_live_handler": unhandled_client_senders,
         "facts_without_consumer": [
             {"fact": kind, "systems": sorted(system for system, kinds in emitted_by_system.items() if kind in kinds)}
             for kind in sorted(emitted_all) if kind not in fact_consumer_map
@@ -1555,6 +1619,10 @@ def show_entry(key):
     index = json.loads(read_text(OUTPUT_DIRECTORY / "INDEX.json"))
     requested_key = key
     key = SHOW_ALIASES.get(key, key)
+    if key == "unhandled":
+        findings = json.loads(read_text(OUTPUT_DIRECTORY / "FINDINGS.json"))
+        print(json.dumps(findings["client_senders_without_live_handler"], indent=1, ensure_ascii=False))
+        return
     if key in {row["name"] for row in index["systems"]}:
         record = json.loads(read_text(SYSTEMS_DIRECTORY / (key + ".json")))
         edges = json.loads(read_text(OUTPUT_DIRECTORY / "EDGES.json"))
