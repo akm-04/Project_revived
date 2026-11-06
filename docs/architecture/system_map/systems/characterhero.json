@@ -409,6 +409,7 @@
   "scenarios_naming": [
    "arena.json",
    "conquer.json",
+   "i9_10_topfloor_team_info_popup.json",
    "i9_3b_crystal.json",
    "i9_3b_sweep.json",
    "i9_3d_challenge_loss.json",

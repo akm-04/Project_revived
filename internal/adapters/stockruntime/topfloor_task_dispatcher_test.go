@@ -109,3 +109,32 @@ func TestI97ATaskRefusalDoesNotInvokeStockSuccessCallback(t *testing.T) {
 		t.Fatal("stock client ignores error_code before success callback", result)
 	}
 }
+
+// invalidTaskWireFixture returns the row-level ErrInvalid the native defense
+// test proves, so the registered task MIDs answer it without a 200 body.
+type invalidTaskWireFixture struct{ taskWireFixture }
+
+func (invalidTaskWireFixture) LoadTask(context.Context, identity.ActorContext, operation.Context, bool) (application.TaskArenaView, error) {
+	return application.TaskArenaView{}, domain.ErrInvalid
+}
+
+func (invalidTaskWireFixture) TaskFormation(context.Context, identity.ActorContext, int64) (domain.Display, error) {
+	return domain.Display{}, domain.ErrInvalid
+}
+
+func TestI9_10TaskInvalidDefenseRefusesMIDs(t *testing.T) {
+	dispatcher := TopFloorTaskDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &invalidTaskWireFixture{}}
+	cases := []struct {
+		mid    uint16
+		params map[string]any
+	}{
+		{282, map[string]any{}},
+		{295, map[string]any{"other_player_id": json.Number("7")}},
+	}
+	for _, testCase := range cases {
+		result := dispatcher.Dispatch(context.Background(), heroReq(t, testCase.mid, testCase.params))
+		if result.HTTPStatus != 400 || result.Body["error"] != "invalid_top_floor_task_parameter" {
+			t.Fatalf("MID %d invalid defense refusal %+v", testCase.mid, result)
+		}
+	}
+}
