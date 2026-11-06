@@ -36,7 +36,10 @@ func (f *oneOnOneFake) ChangeTeams(_ context.Context, _ identity.ActorContext, t
 	return nil
 }
 func (f *oneOnOneFake) Match(context.Context, identity.ActorContext, operation.Context) ([]d.Entry, error) {
-	return []d.Entry{{Face: d.Face{Player: 200007, Name: "rival", Level: 60}, Ranked: oneOnOneRanked}}, nil
+	return []d.Entry{
+		{Face: d.Face{Player: 200007, Name: "rival", Level: 60}, Ranked: oneOnOneRanked},
+		{Face: d.Face{Player: 400012, Name: "far rival", Level: 61}, Ranked: oneOnOneRanked},
+	}, nil
 }
 func (f *oneOnOneFake) EnemyTeam(context.Context, identity.PlayerID) ([]d.TeamView, error) {
 	return []d.TeamView{{Heroes: []map[string]any{{"table_id": int64(11001)}}}, {}}, nil
@@ -98,9 +101,14 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 	if !reflect.DeepEqual(f.teams, []d.Team{{Heroes: []int64{3, 4}, Pet: 9}, {Heroes: []int64{5}}, {Heroes: []int64{6}}}) {
 		t.Fatal("PEAK_CHANGE_TEAMS", f.teams)
 	}
-	match := call(2482, map[string]any{})["match_infos"].([]map[string]any)[0]
-	if match["player_info"].(map[string]any)["player_id"] != int64(200007) || match["rank_info"].(map[string]any)["rank"] != int64(512) {
-		t.Fatal("MATCH_ENEMIES", match)
+	matches := call(2482, map[string]any{})["match_infos"].([]map[string]any)
+	// The requester is on server 1; ChangeEnemyWindow renders "S"..player_info.region, so each
+	// rival must carry its own band, never the requester's.
+	for index, rival := range []struct{ player, region int64 }{{200007, 2}, {400012, 4}} {
+		info := matches[index]["player_info"].(map[string]any)
+		if info["player_id"] != rival.player || info["region"] != rival.region || matches[index]["rank_info"].(map[string]any)["rank"] != int64(512) {
+			t.Fatalf("MATCH_ENEMIES rival %d player_info=%v", index, info)
+		}
 	}
 	defense := call(2483, map[string]any{"enemy_id": n("200007")})["defense"].([]map[string]any)
 	if len(defense) != 2 || len(defense[1]["formation_info"].([]map[string]any)) != 0 {
@@ -121,7 +129,8 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 		t.Fatal("PEAK_RECORDS list is a bare array", r)
 	}
 	record := call(2487, map[string]any{})["battle_records"].([]map[string]any)[0]
-	if record["record_id"] != int64(5) || record["is_win"] != int64(1) || record["mode"] != int64(2) || record["attack_player_info"].(map[string]any)["player_id"] != int64(100001) {
+	if record["record_id"] != int64(5) || record["is_win"] != int64(1) || record["mode"] != int64(2) || record["attack_player_info"].(map[string]any)["player_id"] != int64(100001) ||
+		record["attack_player_info"].(map[string]any)["region"] != int64(1) || record["defense_player_info"].(map[string]any)["region"] != int64(2) {
 		t.Fatal("PEAK_RECORDS_LIST", record)
 	}
 	if call(2486, map[string]any{})["left_times"] != int64(10) || call(2488, map[string]any{})["left_times"] != int64(7) {

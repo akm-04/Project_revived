@@ -1,0 +1,43 @@
+{
+  "name": "oneonone_rival_region",
+  "note": "Runs after oneonone_rival_seed on the same VCDB. The stock challenge button requests MATCH_ENEMIES (2482) and opens ChangeEnemyWindow, whose win_times label concatenates player_info.region; tapping the rival head requests GET_ENEMY_TEAM (2483) and opens peak_team_info. The final step starts the match through the stock PeakArena model (2484) only inside the 1on1 window 00:00-14:00 UTC; never move the clock for this file.",
+  "level": 60,
+  "heroes": [
+    10001001,
+    10001002,
+    10001003,
+    10001004,
+    10001005,
+    10001006,
+    10001007,
+    10001008,
+    10001009,
+    10001010,
+    10001011,
+    10001012,
+    10001013,
+    10001014,
+    10001015
+  ],
+  "steps": [
+    "window:sub_arena",
+    "tap:peak_arena_node",
+    "wait:10",
+    "tap:challenge_btn",
+    "wait:15",
+    "lua:local w=xyd.WindowManager.get():getWindow('change_enemy') assert(w,'vc-change-enemy-missing') local m=w.matches[1] assert(m,'vc-change-enemy-no-match') assert(tonumber(m.player_info.region)>0,'vc-region-zero') local label=w:nodeByName('enemy_container1'):getChildByName('win_times'):getString() assert(label=='S'..tostring(m.player_info.region),'vc-region-label-'..label) __vcRival=m.player_info.player_id __vcRegion=label",
+    "tap:enemy_container1/head_frame",
+    "wait:10",
+    "lua:local t=xyd.WindowManager.get():getWindow('peak_team_info') assert(t,'vc-team-info-missing') assert(__vcRival,'vc-rival-missing') local w=xyd.WindowManager.get():getWindow('change_enemy') assert(w.teamInfos[1] and #w.teamInfos[1]>0,'vc-team-info-empty')",
+    "lua:local w=xyd.WindowManager.get():getWindow('change_enemy') local f={} local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do if #f<#w.teamInfos[1] then f[#f+1]=tostring(h:getHeroID()) end end assert(#f==#w.teamInfos[1],'vc-start-teams-'..#f) xyd.ModelManager.get():loadModel(xyd.ModelType.PEAK_ARENA):startFight({formations=f,enemy_id=__vcRival},function(code) if code~=xyd.error.OK then error('vc-start-'..tostring(code)) end __vcStarted=true end)",
+    "wait:30",
+    "lua:assert(__vcStarted,'vc-start-missing')"
+  ],
+  "settle_seconds": 30,
+  "expect_ok": [
+    2480,
+    2482,
+    2483,
+    2484
+  ]
+}
