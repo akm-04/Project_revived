@@ -64,7 +64,7 @@ func (dispatcher GMQuestionDispatcher) Dispatch(ctx context.Context, request htt
 	}
 	rows := make([]any, 0, len(entries))
 	for _, entry := range entries {
-		rows = append(rows, map[string]any{"talker_id": int64(entry.Question.Player), "player_id": int64(entry.Question.Player), "talker_name": entry.Profile.Name, "player_type": int64(0), "msg": entry.Question.Message, "created_time": entry.Question.AskedAt.Unix(), "avatar_id": entry.Profile.AvatarID, "avatar_frame_id": entry.Profile.AvatarFrameID, "lev": entry.Profile.Level})
+		rows = append(rows, map[string]any{"talker_id": int64(entry.Question.Player), "player_id": int64(entry.Question.Player), "talker_name": entry.Profile.Name, "player_type": int64(0), "msg": entry.Question.Message, "created_time": entry.Question.AskedAt.Unix()})
 	}
 	return okI5(map[string]any{"list": rows})
 }
