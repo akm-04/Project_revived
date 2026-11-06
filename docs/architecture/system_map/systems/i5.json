@@ -564,7 +564,8 @@
    "i9_4c_signin_bonus.json",
    "i9_4d_awakening.json",
    "i9_5c_pet_awakening.json",
-   "i9_tutorial_switches.json"
+   "i9_tutorial_switches.json",
+   "playtest8_mail_claim.json"
   ],
   "unit": [
    "awakening_occult_material_test.go",

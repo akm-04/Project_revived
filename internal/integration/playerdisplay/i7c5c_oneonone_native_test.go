@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -92,6 +93,25 @@ func oneOnOneCatalog(t *testing.T, p *pg.Pool) d.Catalog {
 	return catalog
 }
 
+type oneOnOneFrameOnlyContent struct {
+	contentstore.Store
+}
+
+func (content oneOnOneFrameOnlyContent) OneOnOneCatalogTx(requestContext context.Context, databaseQuery tx.Queryer, revision string) (d.Catalog, error) {
+	catalog, catalogError := content.Store.OneOnOneCatalogTx(requestContext, databaseQuery, revision)
+	if catalogError != nil {
+		return d.Catalog{}, catalogError
+	}
+	catalog.Rewards = append([]d.Reward(nil), catalog.Rewards...)
+	for index := range catalog.Rewards {
+		catalog.Rewards[index].Crystal = 0
+		catalog.Rewards[index].Mana = 0
+		catalog.Rewards[index].TopCoin = 0
+		catalog.Rewards[index].Items = nil
+	}
+	return catalog, nil
+}
+
 func teamsOf(heroes []int64, n int) []d.Team {
 	out := []d.Team{}
 	for i := range n {
@@ -107,6 +127,99 @@ func startSettled(s app.Service, a identity.ActorContext, command app.StartComma
 		if !errors.Is(err, app.ErrUnresolved) {
 			return m, err
 		}
+	}
+}
+
+func TestI9_10OneOnOneSettlementWaitsForConcurrentFrameClaimNative(t *testing.T) {
+	databasePool := pool(t)
+	defer databasePool.Close()
+	service := oneOnOneService(t, databasePool)
+	logicalServer := rankingServer(t, databasePool)
+	actor, _ := oneOnOnePlayer(t, databasePool, logicalServer)
+	catalog := oneOnOneCatalog(t, databasePool)
+	frameReward, found := catalog.RewardFor(1)
+	if !found || frameReward.FrameID <= 0 {
+		t.Fatal("rank-1 frame reward missing")
+	}
+	if _, loadError := service.Load(ctx, actor, op()); loadError != nil {
+		t.Fatal(loadError)
+	}
+	exec(t, databasePool, `UPDATE one_on_one_players SET level=5,slot=NULL,state_version=state_version+1 WHERE slot=1 AND player_id<>$1`, int64(actor.PlayerID))
+	exec(t, databasePool, `UPDATE one_on_one_players SET level=1,slot=1,state_version=state_version+1 WHERE player_id=$1`, int64(actor.PlayerID))
+
+	values := i5store.Store{Queryer: databasePool}
+	transaction, beginError := databasePool.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if beginError != nil {
+		t.Fatal(beginError)
+	}
+	frameMail, _, deliveryError := (i5.SettlementMail{Store: values}).DeliverTx(ctx, transaction, i5.SettlementMailRequest{Recipient: actor.PlayerID, SourceKind: "PLAYTEST_FRAME_CLAIM", SourceKey: "one-on-one-concurrent", Title: "Frame reward", Sender: "Academy", Body: "Claim the frame", PolicyVersion: "i9-10-playtest-v1", Lines: []grant.Line{{Kind: grant.StackItem, ItemID: frameReward.FrameID, Amount: 1}}, At: time.Now().UTC()})
+	if deliveryError != nil {
+		transaction.Rollback(ctx)
+		t.Fatal(deliveryError)
+	}
+	if commitError := transaction.Commit(ctx); commitError != nil {
+		t.Fatal(commitError)
+	}
+
+	latest := catalog.LatestSettlement(time.Now())
+	exec(t, databasePool, `DELETE FROM one_on_one_settlement_ranks WHERE day>$1`, latest-8)
+	exec(t, databasePool, `DELETE FROM one_on_one_settlements WHERE day>$1`, latest-8)
+	exec(t, databasePool, `UPDATE one_on_one_competitions SET settled_through=$1,state_version=state_version+1`, latest-8)
+	service.Content = oneOnOneFrameOnlyContent{Store: contentstore.Store{Queryer: databasePool}}
+
+	release := make(chan struct{})
+	var releaseOnce sync.Once
+	defer releaseOnce.Do(func() { close(release) })
+	claimLocked := make(chan struct{})
+	claims := genuineGrants(databasePool)
+	claims.Store = blockedFrameClaimStore{Store: claims.Store, locked: claimLocked, release: release, lockOnce: &sync.Once{}}
+	claimDone := make(chan error, 1)
+	go func() {
+		_, claimError := claims.ClaimMail(ctx, actor, frameMail.Address, op())
+		claimDone <- claimError
+	}()
+	select {
+	case <-claimLocked:
+	case <-time.After(10 * time.Second):
+		t.Fatal("frame claim did not acquire the Economy owner lock")
+	}
+
+	settlementMailLockAttempted := make(chan struct{})
+	settlementLockAttempted := make(chan struct{})
+	service.Mail = observedFrameMail{Mail: service.Mail, lockAttempted: settlementMailLockAttempted, lockOnce: &sync.Once{}}
+	service.FrameStacks = observedFrameStackStore{MaterialCostStore: values, lockAttempted: settlementLockAttempted, lockOnce: &sync.Once{}}
+	type settlementResult struct {
+		applied int
+		failure error
+	}
+	settlementDone := make(chan settlementResult, 1)
+	go func() {
+		applied, settlementError := service.Due(ctx, op())
+		settlementDone <- settlementResult{applied: applied, failure: settlementError}
+	}()
+	select {
+	case <-settlementMailLockAttempted:
+	case <-time.After(10 * time.Second):
+		t.Fatal("settlement did not reach the mail namespace locks")
+	}
+	releaseOnce.Do(func() { close(release) })
+	if claimError := <-claimDone; claimError != nil {
+		t.Fatal("concurrent frame claim", claimError)
+	}
+	select {
+	case <-settlementLockAttempted:
+	case <-time.After(10 * time.Second):
+		t.Fatal("settlement did not reach the Economy owner locks")
+	}
+	settled := <-settlementDone
+	if settled.failure != nil || settled.applied < 1 {
+		t.Fatalf("settlement result: %+v", settled)
+	}
+	if stackQuantity(t, databasePool, actor.PlayerID, frameReward.FrameID) != 1 ||
+		scalar(t, databasePool, `SELECT count(*) FROM one_on_one_settlement_ranks WHERE player_id=$1 AND day>$2`, int64(actor.PlayerID), latest-8) == 0 ||
+		scalar(t, databasePool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(actor.PlayerID)) != 0 ||
+		scalar(t, databasePool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_REWARD'`, int64(actor.PlayerID)) != 0 {
+		t.Fatal("settlement did not observe the claimed frame or emitted an empty reward mail")
 	}
 }
 

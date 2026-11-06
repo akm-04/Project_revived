@@ -83,6 +83,17 @@ func (store observedFrameStackStore) LockEconomyOwnerTx(ctx context.Context, tra
 	return store.MaterialCostStore.LockEconomyOwnerTx(ctx, transaction, player)
 }
 
+type observedFrameMail struct {
+	app.Mail
+	lockAttempted chan struct{}
+	lockOnce      *sync.Once
+}
+
+func (mail observedFrameMail) LockRecipientsTx(ctx context.Context, transaction tx.Tx, recipients []identity.PlayerID) error {
+	mail.lockOnce.Do(func() { close(mail.lockAttempted) })
+	return mail.Mail.LockRecipientsTx(ctx, transaction, recipients)
+}
+
 // topFloorPlayer is a genuine combat owner with function 4 open and an Achievement root.
 func topFloorPlayer(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (identity.ActorContext, string, character.HeroRef) {
 	t.Helper()
@@ -339,7 +350,9 @@ func TestI9_10TopFloorSettlementWaitsForConcurrentFrameClaimNative(t *testing.T)
 		t.Fatal("frame claim did not acquire the Economy owner lock")
 	}
 
+	settlementMailLockAttempted := make(chan struct{})
 	settlementLockAttempted := make(chan struct{})
+	s.Mail = observedFrameMail{Mail: s.Mail, lockAttempted: settlementMailLockAttempted, lockOnce: &sync.Once{}}
 	s.FrameStacks = observedFrameStackStore{MaterialCostStore: values, lockAttempted: settlementLockAttempted, lockOnce: &sync.Once{}}
 	type settlementResult struct {
 		settled int
@@ -351,13 +364,18 @@ func TestI9_10TopFloorSettlementWaitsForConcurrentFrameClaimNative(t *testing.T)
 		settlementDone <- settlementResult{settled: settled, err: settlementErr}
 	}()
 	select {
-	case <-settlementLockAttempted:
+	case <-settlementMailLockAttempted:
 	case <-time.After(10 * time.Second):
-		t.Fatal("settlement did not reach the Economy owner lock")
+		t.Fatal("settlement did not reach the mail namespace locks")
 	}
 	releaseOnce.Do(func() { close(release) })
 	if err = <-claimDone; err != nil {
 		t.Fatal("concurrent frame claim", err)
+	}
+	select {
+	case <-settlementLockAttempted:
+	case <-time.After(10 * time.Second):
+		t.Fatal("settlement did not reach the Economy owner locks")
 	}
 	settled := <-settlementDone
 	if settled.err != nil || settled.settled != 1 {

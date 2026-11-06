@@ -10630,18 +10630,7 @@
     "course",
     "dormhouse",
     "i5",
-    "inscription",
-    "oneonone",
-    "topfloor"
-   ]
-  },
-  {
-   "table": "player_item_stacks",
-   "systems": [
-    "characterhero",
-    "i5",
-    "oneonone",
-    "topfloor"
+    "inscription"
    ]
   },
   {

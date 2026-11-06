@@ -73,6 +73,7 @@ type Functions interface {
 }
 
 type Mail interface {
+	LockRecipientsTx(context.Context, tx.Tx, []identity.PlayerID) error
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
