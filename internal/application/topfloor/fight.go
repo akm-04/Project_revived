@@ -204,8 +204,14 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		return d.Fight{}, err
 	}
 	enemyRank, ok, err := s.Store.RankOfTx(c, sc.Tx, server, enemy)
-	if err != nil || !ok {
+	if err != nil {
 		return d.Fight{}, errors.Join(err, d.ErrConflict)
+	}
+	if !ok {
+		if !r.Avenge {
+			return d.Fight{}, d.ErrOfferStale
+		}
+		return d.Fight{}, d.ErrConflict
 	}
 	if !r.Avenge {
 		if err = d.MatchOfferSnapshot(snapshot, snapshotFound, 0, rank, enemy, enemyRank); err != nil {

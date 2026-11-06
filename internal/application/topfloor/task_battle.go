@@ -115,6 +115,9 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 		}
 		display, err := service.taskDisplay(requestContext, scope.Tx, catalog, period, opponent, at)
 		if err != nil {
+			if !command.Avenge && errors.Is(err, errTaskOccupantNotRanked) {
+				return domain.ErrOfferStale
+			}
 			return err
 		}
 		rank, _, err := service.Store.TaskRankOfTx(requestContext, scope.Tx, actor.LogicalServerID, period.Rotation.Number, domain.Occupant{Player: actor.PlayerID})
