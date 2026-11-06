@@ -81,7 +81,8 @@ func (p Policy) ValidName(s string) bool {
 	halfUnits := 0
 	for byteIndex := range s {
 		runeCount++
-		if s[byteIndex] >= 224 && s[byteIndex] <= 239 {
+		// xyd.getTextLen counts a character whose lead byte is 226-240 as one unit and every other character as half.
+		if s[byteIndex] >= 226 && s[byteIndex] <= 240 {
 			halfUnits += 2
 			continue
 		}
