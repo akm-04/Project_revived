@@ -216,6 +216,45 @@ func (Store) ReadPlayerTx(c context.Context, q tx.Queryer, pid identity.PlayerID
 	return p, true, p.Validate()
 }
 
+type offerSnapshotRow struct {
+	Server         identity.LogicalServerID `json:"server"`
+	Generation     int64                    `json:"generation"`
+	ChallengerRank int64                    `json:"challenger_rank"`
+	Offers         []d.Ranked               `json:"offers"`
+	UpdatedAt      time.Time                `json:"updated_at"`
+}
+
+// ReadOfferSnapshotTx reads the player's latest issued offer set for one scope.
+// START locks it right after the player row; preflight reads it unlocked.
+func (Store) ReadOfferSnapshotTx(c context.Context, q tx.Queryer, player identity.PlayerID, scope int64, lock bool) (d.OfferSnapshot, bool, error) {
+	if q == nil || !player.Valid() || (scope != d.OfferScopeNormal && scope != d.OfferScopeSpecial) {
+		return d.OfferSnapshot{}, false, d.ErrInvalid
+	}
+	statement := `SELECT jsonb_build_object('server',logical_server_id,'generation',generation,'challenger_rank',challenger_rank,'offers',offers,'updated_at',updated_at)::text FROM top_floor_offer_snapshots WHERE player_id=$1 AND scope=$2`
+	if lock {
+		statement += ` FOR UPDATE`
+	}
+	var row offerSnapshotRow
+	found, err := readJSON(c, q, statement, &row, int64(player), scope)
+	if err != nil || !found {
+		return d.OfferSnapshot{}, found, err
+	}
+	snapshot := d.OfferSnapshot{Player: player, Server: row.Server, Scope: scope, Generation: row.Generation, ChallengerRank: row.ChallengerRank, Offers: row.Offers, UpdatedAt: row.UpdatedAt}
+	return snapshot, true, snapshot.Validate()
+}
+
+func (Store) SaveOfferSnapshotTx(c context.Context, t tx.Tx, snapshot d.OfferSnapshot) error {
+	if t == nil || snapshot.Validate() != nil {
+		return d.ErrConflict
+	}
+	offers, err := json.Marshal(snapshot.Offers)
+	if err != nil {
+		return err
+	}
+	return one(t.Exec(c, `INSERT INTO top_floor_offer_snapshots(player_id,logical_server_id,scope,generation,challenger_rank,offers,updated_at)VALUES($1,$2,$3,$4,$5,$6::jsonb,$7) ON CONFLICT(player_id,scope) DO UPDATE SET logical_server_id=EXCLUDED.logical_server_id,generation=EXCLUDED.generation,challenger_rank=EXCLUDED.challenger_rank,offers=EXCLUDED.offers,updated_at=EXCLUDED.updated_at`,
+		int64(snapshot.Player), int64(snapshot.Server), snapshot.Scope, snapshot.Generation, snapshot.ChallengerRank, string(offers), snapshot.UpdatedAt))
+}
+
 // DefendedTx reports which of the players have saved a non-empty defense.
 func (Store) DefendedTx(c context.Context, q tx.Queryer, players []identity.PlayerID) (map[identity.PlayerID]bool, error) {
 	out := map[identity.PlayerID]bool{}

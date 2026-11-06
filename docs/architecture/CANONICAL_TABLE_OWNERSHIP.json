@@ -3492,6 +3492,20 @@
       "write_exceptions": [],
       "migration": "migrations/00065_i7c5b_top_floor.sql"
     },
+    "top_floor_offer_snapshots": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00117_i9_10_topfloor_offer_snapshots.sql"
+    },
     "top_floor_day_settlements": {
       "owner": "TopFloor",
       "allowed_query_owners": [

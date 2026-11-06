@@ -88,6 +88,10 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 			return err
 		}
 		at := scope.Operation.DecisionAt()
+		snapshot, snapshotFound, err := service.Store.ReadOfferSnapshotTx(requestContext, scope.Tx, actor.PlayerID, domain.OfferScopeSpecial, true)
+		if err != nil {
+			return err
+		}
 		formation, _, err := service.taskTeam(requestContext, scope.Tx, catalog, period, actor.PlayerID, domain.TaskModeDefense{Heroes: command.Formation, Pet: command.PetID, Leader: command.Leader}, at)
 		if err != nil {
 			return err
@@ -117,8 +121,16 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 		if err != nil {
 			return err
 		}
+		if !command.Avenge {
+			if err = domain.MatchOfferSnapshot(snapshot, snapshotFound, period.Rotation.Number, rank, display.Occupant, display.Rank); err != nil {
+				return err
+			}
+		}
 		if command.Avenge && catalog.AvengeType(rank, display.Rank) != 0 {
 			return domain.ErrRefused
+		}
+		if err = service.requireTaskDefense(requestContext, scope.Tx, catalog, period, actor.PlayerID, player, at); err != nil {
+			return err
 		}
 		next := player
 		next.Player = catalog.Rolled(player.Player, at)
