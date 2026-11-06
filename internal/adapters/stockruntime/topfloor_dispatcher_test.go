@@ -3,6 +3,8 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -57,6 +59,26 @@ func (f *topFloorFake) RecordInfo(context.Context, identity.ActorContext, int64)
 }
 func (f *topFloorFake) Formation(context.Context, identity.ActorContext, int64) (d.Display, error) {
 	return topFloorRobot, nil
+}
+
+// D370/F4: the refusal status and stock error_code the START callbacks expect.
+func TestI9_10TopFloorRefusalWire(t *testing.T) {
+	for _, check := range []struct {
+		err    error
+		status int
+		code   int64
+	}{
+		{fmt.Errorf("moved: %w", d.ErrOfferStale), 409, topFloorRankChangedError},
+		{fmt.Errorf("no defense: %w", d.ErrDefenseRequired), 409, topFloorGenericRefusal},
+	} {
+		response := failTopFloor(check.err)
+		if response.HTTPStatus != check.status || response.Body["error_code"] != check.code {
+			t.Fatalf("%v -> %d %v", check.err, response.HTTPStatus, response.Body)
+		}
+	}
+	if !errors.Is(fmt.Errorf("moved: %w", d.ErrOfferStale), d.ErrOfferStale) {
+		t.Fatal("stale refusal must stay identifiable")
+	}
 }
 
 func TestI7C5BTopFloorWireShapes(t *testing.T) {

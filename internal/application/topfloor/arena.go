@@ -120,7 +120,7 @@ func (s Service) arena(c context.Context, a identity.ActorContext, op operation.
 				}
 				out.Enemies = append(out.Enemies, view)
 			}
-			return nil
+			return s.saveOfferSnapshot(c, sc.Tx, a.LogicalServerID, a.PlayerID, d.OfferScopeNormal, 0, rank, out.Enemies, at)
 		})
 		return err
 	})
@@ -131,6 +131,28 @@ func samePlayer(a, b d.Player) bool {
 	x, _ := json.Marshal(a)
 	y, _ := json.Marshal(b)
 	return string(x) == string(y)
+}
+
+// saveOfferSnapshot persists the identities and ranks the offer response just
+// returned, so admission can compare them without reserving the opponent.
+func (s Service) saveOfferSnapshot(c context.Context, t tx.Tx, server identity.LogicalServerID, pid identity.PlayerID, scope, generation, challengerRank int64, enemies []d.Display, at time.Time) error {
+	offers := make([]d.Ranked, 0, len(enemies))
+	for _, enemy := range enemies {
+		offers = append(offers, d.Ranked{Rank: enemy.Rank, Occupant: enemy.Occupant})
+	}
+	return s.Store.SaveOfferSnapshotTx(c, t, d.OfferSnapshot{Player: pid, Server: server, Scope: scope, Generation: generation, ChallengerRank: challengerRank, Offers: offers, UpdatedAt: at.UTC()})
+}
+
+// requireAttackDefense refuses a new attack whose owner has no usable saved
+// defense. It reads through the same roster owner SaveDefense validates.
+func (s Service) requireAttackDefense(c context.Context, q tx.Queryer, pid identity.PlayerID, p d.Player, at time.Time) error {
+	if len(p.Defense) == 0 {
+		return d.ErrDefenseRequired
+	}
+	if _, _, err := s.team(c, q, pid, p.Defense, p.DefensePet, at); err != nil {
+		return fmt.Errorf("%w: %v", d.ErrDefenseRequired, err)
+	}
+	return nil
 }
 
 // enter seeds the server ladder on first use and appends the player at the bottom.
@@ -308,7 +330,8 @@ func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes 
 }
 
 // PreFight checks that the named opponent is currently admissible without
-// consuming anything; revenge sends no enemy and is checked at START.
+// consuming anything; revenge sends no enemy and is checked at START. A moved
+// challenger or offered target rank is refused before the formation opens.
 func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int64) error {
 	if !s.ready() {
 		return d.ErrUnavailable
@@ -320,10 +343,23 @@ func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int6
 	if enemy == 0 {
 		return nil
 	}
-	if _, ok := offered(p, enemy); !ok {
+	occupant, ok := offered(p, enemy)
+	if !ok {
 		return d.ErrRefused
 	}
-	return nil
+	rank, ok, err := s.Store.RankOfTx(c, s.Fresh, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
+	if err != nil || !ok {
+		return errors.Join(err, d.ErrRefused)
+	}
+	targetRank, ok, err := s.Store.RankOfTx(c, s.Fresh, a.LogicalServerID, occupant)
+	if err != nil || !ok {
+		return errors.Join(err, d.ErrRefused)
+	}
+	snapshot, found, err := s.Store.ReadOfferSnapshotTx(c, s.Fresh, a.PlayerID, d.OfferScopeNormal, false)
+	if err != nil {
+		return err
+	}
+	return d.MatchOfferSnapshot(snapshot, found, 0, rank, occupant, targetRank)
 }
 
 func offered(p d.Player, table int64) (d.Occupant, bool) {

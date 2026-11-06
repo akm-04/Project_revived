@@ -39,6 +39,8 @@ type Store interface {
 	SwapTx(context.Context, tx.Tx, identity.LogicalServerID, d.Ranked, d.Ranked) error
 	ReadPlayerTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.Player, bool, error)
 	DefendedTx(context.Context, tx.Queryer, []identity.PlayerID) (map[identity.PlayerID]bool, error)
+	ReadOfferSnapshotTx(context.Context, tx.Queryer, identity.PlayerID, int64, bool) (d.OfferSnapshot, bool, error)
+	SaveOfferSnapshotTx(context.Context, tx.Tx, d.OfferSnapshot) error
 	InsertPlayerTx(context.Context, tx.Tx, d.Player) error
 	SavePlayerTx(context.Context, tx.Tx, d.Player, int64) error
 	ReadFightTx(context.Context, tx.Queryer, ids.UUID, bool) (d.Fight, bool, error)

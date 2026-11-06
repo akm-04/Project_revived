@@ -129,6 +129,9 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	}
 
 	// B04/B05/B07/B09: START against an offered robot settles once and replays.
+	if err = s.SaveDefense(ctx, a, []int64{refA.PartnerID}, 0, op()); err != nil {
+		t.Fatal("attacker saved defense", err)
+	}
 	enemy := viewA.Enemies[0]
 	command := app.StartCommand{Formation: []int64{refA.PartnerID}, Enemy: enemy.Occupant.TableID()}
 	fight, err := s.Start(ctx, a, command, op())
@@ -179,6 +182,23 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	// B04: player vs player through the defender's saved defense (OWNED_FOREIGN).
 	exec(t, pool, `UPDATE top_floor_players SET offered=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID), `[{"player":`+strconv.FormatInt(int64(a.PlayerID), 10)+`}]`)
 	if err = s.SaveDefense(ctx, a, []int64{refA.PartnerID}, 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	// The fixture offered a player directly, so record the rank snapshot an offer
+	// response would have written; START compares against it.
+	pvpSnapshot := topfloorstore.Store{}
+	pvpTx, err := pool.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pvpTx.Rollback(ctx)
+	if err = pvpSnapshot.SaveOfferSnapshotTx(ctx, pvpTx, d.OfferSnapshot{Player: b.PlayerID, Server: server, Scope: d.OfferScopeNormal, Generation: 0,
+		ChallengerRank: scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(b.PlayerID)),
+		Offers:         []d.Ranked{{Rank: scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(a.PlayerID)), Occupant: d.Occupant{Player: a.PlayerID}}},
+		UpdatedAt:      time.Now().UTC()}); err != nil {
+		t.Fatal(err)
+	}
+	if err = pvpTx.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
 	before := map[identity.PlayerID]int64{a.PlayerID: scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(a.PlayerID)), b.PlayerID: scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(b.PlayerID))}
@@ -279,6 +299,9 @@ func TestI7C5BTopFloorReconcileAbandonedNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if err = s.SaveDefense(ctx, a, []int64{ref.PartnerID}, 0, op()); err != nil {
+		t.Fatal("saved defense", err)
+	}
 	stalled := s
 	stalled.Combat = stalledCombat{s.Combat}
 	pending, err := stalled.Start(ctx, a, app.StartCommand{Formation: []int64{ref.PartnerID}, Enemy: view.Enemies[0].Occupant.TableID()}, op())
@@ -313,6 +336,9 @@ func TestI9_10TopFloorPendingStartReplayNative(t *testing.T) {
 	view, err := s.Load(ctx, a, op())
 	if err != nil {
 		t.Fatal(err)
+	}
+	if err = s.SaveDefense(ctx, a, []int64{ref.PartnerID}, 0, op()); err != nil {
+		t.Fatal("saved defense", err)
 	}
 	command := app.StartCommand{Formation: []int64{ref.PartnerID}, Enemy: view.Enemies[0].Occupant.TableID()}
 	stalled := s
@@ -444,6 +470,9 @@ func earnTaskChallenges(t *testing.T, database *pg.Pool, service app.Service, ac
 	current, err := service.Load(ctx, actor, op())
 	if err != nil {
 		t.Fatal(err)
+	}
+	if err = service.SaveDefense(ctx, actor, []int64{hero.PartnerID}, 0, op()); err != nil {
+		t.Fatal("normal defense for task-mode eligibility", err)
 	}
 	transaction, err := database.Begin(ctx, tx.Options{})
 	if err != nil {

@@ -1,0 +1,27 @@
+{
+ "name": "i9_10_topfloor_defense_required",
+ "note": "D487 through the stock Top Floor window: a fresh player opens the arena, preflights an offered opponent (294), enters the stock formation window, selects the team and confirms START (280) without ever saving a defense. The server refuses before any ticket debit, so no battle window opens, the formation window stays, and a stock LOAD_ARENA read afterwards still reports 5 tickets.",
+ "level": 60,
+ "heroes": [10001001, 10001002, 10001003, 10001004, 10001005],
+ "settle_seconds": 10,
+ "steps": [
+  "wait:60",
+  "window:sub_arena",
+  "tap:arena_node",
+  "wait:15",
+  "tap:enemy_pos1/challenge_button",
+  "wait:8",
+  "tap:ok_btn",
+  "wait:5",
+  "tap:enemy_pos1/challenge_button",
+  "wait:10",
+  "lua:local cards = {} local function walk(node) if not node:isVisible() then return end if node:getName() == 'layout' then table.insert(cards, node) return end for _, child in ipairs(node:getChildren()) do walk(child) end end walk(xyd.WindowManager.get():getWindow('arena_select_team'):nodeByName('list_layer')) for _, card in ipairs(cards) do local box = card:getCascadeBoundingBox() __vc.tap(box.x + box.width / 2, box.y + box.height / 2) end",
+  "wait:5",
+  "tap:button_battle",
+  "wait:10",
+  "lua:local w=xyd.WindowManager.get() assert(w:getWindow('arena_select_team'),'vc-defense-refusal-window-gone') assert(not w:getWindow('battle_win') and not w:getWindow('battle_lose'),'vc-defense-refusal-entered-battle') print('vc-defense-refusal-ok')",
+  "lua:xyd.Backend.get():request(xyd.mid.LOAD_ARENA,{},function(code,body) assert(code==xyd.error.OK and body.left_time==5,'vc-defense-refusal-spent-ticket') print('vc-defense-refusal-tickets',body.left_time) end)",
+  "wait:5"
+ ],
+ "expect_ok": [59, 272, 291, 294]
+}
