@@ -94,6 +94,40 @@ func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
 	return cfg, p, nil
 }
 
+// frameSource is the transport seam. TCP and WebSocket each decode their wire
+// into the same realtime.Frame values and feed the same session loop.
+type frameSource interface {
+	SetReadDeadline(time.Time) error
+	ReadFrames(context.Context) ([]wireRT.Frame, error)
+}
+
+type tcpFrameSource struct {
+	conn    net.Conn
+	decoder *wireRT.StreamDecoder
+	buffer  []byte
+}
+
+func (r *tcpFrameSource) SetReadDeadline(deadline time.Time) error {
+	return r.conn.SetReadDeadline(deadline)
+}
+
+func (r *tcpFrameSource) ReadFrames(context.Context) ([]wireRT.Frame, error) {
+	n, readErr := r.conn.Read(r.buffer)
+	if n == 0 {
+		return nil, readErr
+	}
+	frames, err := r.decoder.Feed(r.buffer[:n])
+	if err != nil {
+		return nil, err
+	}
+	return frames, readErr
+}
+
+func readTimedOut(err error) bool {
+	var networkError net.Error
+	return errors.As(err, &networkError) && networkError.Timeout() || errors.Is(err, context.DeadlineExceeded)
+}
+
 func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 	if conn == nil {
 		return errors.New("nil realtime connection")
@@ -102,22 +136,28 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 	if err != nil {
 		return err
 	}
+	decoder, err := wireRT.NewStreamDecoder(cfg)
+	if err != nil {
+		return err
+	}
+	source := &tcpFrameSource{conn: conn, decoder: decoder, buffer: make([]byte, 8192)}
+	return s.serve(ctx, cfg, policy, source, func() (*connWriter, error) {
+		return newConnWriter(ctx, conn, cfg, policy.WriteTimeout)
+	})
+}
+
+func (s RealtimeServer) serve(ctx context.Context, cfg limits.Config, policy RealtimePolicy, source frameSource, newWriter func() (*connWriter, error)) error {
 	lease, err := s.Admission.AcquirePreauth()
 	if err != nil {
 		return err
 	}
 	defer lease.Release()
-	dec, err := wireRT.NewStreamDecoder(cfg)
-	if err != nil {
-		return err
-	}
-	writer, err := newConnWriter(ctx, conn, cfg, policy.WriteTimeout)
+	writer, err := newWriter()
 	if err != nil {
 		return err
 	}
 	defer writer.Close()
 
-	buf := make([]byte, 8192)
 	var gate *wireRT.Gate
 	roleKey := ""
 	var admitted *app.Admission
@@ -144,22 +184,18 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 			return err
 		}
 		if admitted == nil {
-			_ = conn.SetReadDeadline(handshakeDeadline)
+			_ = source.SetReadDeadline(handshakeDeadline)
 		} else {
 			idleDeadline := lastClientActivity.Add(policy.ClientIdleTimeout)
 			deadline := idleDeadline
 			if nextLiveness.Before(deadline) {
 				deadline = nextLiveness
 			}
-			_ = conn.SetReadDeadline(deadline)
+			_ = source.SetReadDeadline(deadline)
 		}
-		n, readErr := conn.Read(buf)
+		frames, readErr := source.ReadFrames(ctx)
 		now := time.Now().UTC()
-		if n > 0 {
-			frames, err := dec.Feed(buf[:n])
-			if err != nil {
-				return err
-			}
+		if len(frames) > 0 {
 			for _, f := range frames {
 				if gate == nil {
 					claims, err := wireRT.ParseTCPLogin(f)
@@ -259,7 +295,7 @@ func (s RealtimeServer) ServeConn(ctx context.Context, conn net.Conn) error {
 			if errors.Is(readErr, io.EOF) {
 				return nil
 			}
-			if ne, ok := readErr.(net.Error); ok && ne.Timeout() {
+			if readTimedOut(readErr) {
 				if admitted == nil {
 					return readErr
 				}
