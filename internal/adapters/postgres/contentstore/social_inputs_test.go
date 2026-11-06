@@ -264,3 +264,63 @@ func socialProofOperation(t *testing.T) operation.Context {
 	}
 	return operation.Context{ID: identifier, StartedAt: time.Unix(1_700_000_000, 0).UTC(), EntropySeed: seed}
 }
+
+func TestSocialRecallRulesTxBindsSchemaTwoAndRefusesHistoricalManifests(t *testing.T) {
+	ctx := context.Background()
+	revision, _ := currentSocialRevision(t)
+	manifest := generatedRaw(t, "manifest.json")
+	payload := generatedRaw(t, "social_input_catalog.json")
+	rules, err := (Store{}).SocialRecallRulesTx(ctx, socialQueryer(manifest, payload), revision)
+	if err != nil || rules.Limits.RequiredOffline != 7*24*time.Hour || rules.Limits.MaxActiveTasks != 3 || rules.TaskDuration != 3*24*time.Hour {
+		t.Fatalf("schema2 rules: %+v %v", rules, err)
+	}
+
+	var legacy map[string]any
+	if err := json.Unmarshal([]byte(payload), &legacy); err != nil {
+		t.Fatal(err)
+	}
+	legacy["schema_version"] = float64(1)
+	delete(legacy, "recall_rules")
+	legacyRaw, err := json.Marshal(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := builtin.DecodeSocialInputCatalog(legacyRaw); err != nil {
+		t.Fatalf("schema1 fixture is not a valid historical catalog: %v", err)
+	}
+	legacyDigest := sha256.Sum256(append(append([]byte{}, legacyRaw...), '\n'))
+	legacyManifest := generatedManifest(t)
+	legacyManifest["artifact_sha256s"].(map[string]any)["social_input_catalog.json"] = hex.EncodeToString(legacyDigest[:])
+	legacyManifestRaw := encodeManifest(t, legacyManifest)
+	if _, err := (Store{}).SocialInputCatalogTx(ctx, socialQueryer(legacyManifestRaw, string(legacyRaw)), revision); err != nil {
+		t.Fatalf("schema1 historical exchange content became unreadable: %v", err)
+	}
+	if _, err := (Store{}).SocialRecallRulesTx(ctx, socialQueryer(legacyManifestRaw, string(legacyRaw)), revision); !errors.Is(err, ErrSocialContentUnavailable) {
+		t.Fatalf("schema1 historical content invented recall settings: %v", err)
+	}
+
+	capabilityless := withoutSocialCapability(t, generatedManifest(t), revision)
+	if _, err := (Store{}).SocialRecallRulesTx(ctx, socialQueryer(capabilityless, payload), revision); !errors.Is(err, ErrSocialContentUnavailable) {
+		t.Fatalf("capability-less historical manifest served recall settings: %v", err)
+	}
+}
+
+func TestSocialRecallRulesRejectLegacyAndBindSourceDays(t *testing.T) {
+	raw, err := builtin.GeneratedFile("social_input_catalog.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := builtin.DecodeSocialInputCatalog(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rules, err := socialRecallRules(catalog)
+	if err != nil || rules.Limits.RequiredOffline != 7*24*time.Hour || rules.Limits.MaxActiveTasks != 3 || rules.TaskDuration != 3*24*time.Hour {
+		t.Fatal(rules, err)
+	}
+	catalog.SchemaVersion = 1
+	catalog.RecallRules = nil
+	if _, err = socialRecallRules(catalog); !errors.Is(err, ErrSocialContentUnavailable) {
+		t.Fatal("legacy content invented settings", err)
+	}
+}

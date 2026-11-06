@@ -11,7 +11,7 @@ import (
 // Social content is pure source data. Domain binding belongs to contentstore,
 // keeping the accepted content/application boundary intact.
 const (
-	socialSchemaVersion              = 1
+	socialSchemaVersion              = 2
 	SocialExchangeLimit              = 10
 	socialWeightTotal                = 10000
 	socialExpectedProducts           = 3
@@ -28,11 +28,25 @@ var ErrSocialUnqualified = errors.New("social content: unqualified payload")
 type SocialInputCatalog struct {
 	SchemaVersion      int                       `json:"schema_version"`
 	ExchangeLimit      int64                     `json:"exchange_limit"`
+	RecallRules        *SocialRecallRules        `json:"recall_rules,omitempty"`
 	ExchangeProducts   []SocialExchangeProduct   `json:"exchange_products"`
 	Dropboxes          []SocialDropbox           `json:"dropboxes"`
 	RecallMilestones   []SocialRecallMilestone   `json:"recall_milestones"`
 	Gifts              []SocialGift              `json:"gifts"`
 	InvitationMissions []SocialInvitationMission `json:"invitation_missions"`
+}
+
+type SocialRecallRules struct {
+	OfflineDays    int64 `json:"offline_days"`
+	TaskDays       int64 `json:"task_days"`
+	MaxActiveTasks int64 `json:"max_active_tasks"`
+}
+
+func (rules SocialRecallRules) Validate() error {
+	if rules.OfflineDays != 7 || rules.TaskDays != 3 || rules.MaxActiveTasks != 3 {
+		return socialError("recall settings drift")
+	}
+	return nil
 }
 
 type SocialExchangeProduct struct {
@@ -104,8 +118,14 @@ func DecodeSocialInputCatalog(raw []byte) (SocialInputCatalog, error) {
 }
 
 func (c SocialInputCatalog) Validate() error {
-	if c.SchemaVersion != socialSchemaVersion || c.ExchangeLimit != SocialExchangeLimit {
+	if (c.SchemaVersion != 1 && c.SchemaVersion != socialSchemaVersion) || c.ExchangeLimit != SocialExchangeLimit {
 		return socialError("schema version or exchange limit")
+	}
+	if c.SchemaVersion == 1 && c.RecallRules != nil {
+		return socialError("legacy schema cannot carry recall settings")
+	}
+	if c.SchemaVersion == socialSchemaVersion && (c.RecallRules == nil || c.RecallRules.Validate() != nil) {
+		return socialError("missing or invalid recall settings")
 	}
 	if len(c.ExchangeProducts) != socialExpectedProducts || len(c.Dropboxes) != socialExpectedDropboxes {
 		return socialError("exchange product or dropbox count")

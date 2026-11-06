@@ -23,7 +23,8 @@ type Common struct {
 }
 type Friend struct {
 	Common
-	IsSent bool `json:"is_sent"`
+	IsSent          bool  `json:"is_sent"`
+	RecallingFriend int64 `json:"recalling_friend"`
 }
 type SearchPlayer struct {
 	Common
@@ -83,7 +84,23 @@ func MapBase(r Result) Base {
 		v.Blacklist = append(v.Blacklist, common(p))
 	}
 	for _, p := range r.Friends {
-		v.Friends = append(v.Friends, Friend{Common: common(p), IsSent: p.IsSent})
+		recalling := int64(0)
+		if r.Recalling[int64(p.Minimal.PlayerID)] {
+			recalling = 1
+		}
+		v.Friends = append(v.Friends, Friend{Common: common(p), IsSent: p.IsSent, RecallingFriend: recalling})
+	}
+	for _, row := range r.RecallDoing {
+		v.Doing = append(v.Doing, row)
+	}
+	for _, row := range r.RecallDone {
+		v.Done = append(v.Done, row)
+	}
+	for _, identifier := range r.RecallGot {
+		v.Got = append(v.Got, identifier)
+	}
+	for _, identifier := range r.RecallAwarded {
+		v.Awarded = append(v.Awarded, identifier)
 	}
 	for _, p := range r.Requests {
 		v.Requests = append(v.Requests, Request{Common: common(p.Player), Message: p.Message, At: p.At.Unix()})

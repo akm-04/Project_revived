@@ -398,26 +398,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 193,
-   "name": "recall_friend",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 194,
-   "name": "get_recall_award",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 208,
    "name": "LOAD_BATTLE_FORMATION",
    "files": [
@@ -2243,9 +2223,7 @@
    "kind": "code_1"
   }
  ],
- "systems_not_wired": [
-  "socialrecall"
- ],
+ "systems_not_wired": [],
  "tables_locked_by_many": [
   {
    "table": "account_sessions",
@@ -2291,6 +2269,7 @@
     "sharedroom",
     "socialexchange",
     "socialgift",
+    "socialrecall",
     "spirit",
     "summon",
     "topfloor",
@@ -2342,6 +2321,7 @@
     "sharedroom",
     "socialexchange",
     "socialgift",
+    "socialrecall",
     "spirit",
     "summon",
     "topfloor",
@@ -2393,6 +2373,7 @@
     "sharedroom",
     "socialexchange",
     "socialgift",
+    "socialrecall",
     "spirit",
     "summon",
     "topfloor",
@@ -2503,6 +2484,7 @@
     "socialexchange",
     "socialgift",
     "socialprojection",
+    "socialrecall",
     "socialrelation",
     "spirit",
     "worldboss"

@@ -3,9 +3,11 @@ package contentstore
 import (
 	"context"
 	"errors"
+	"time"
 
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/socialexchange"
+	"gxb.local/backend/v2/internal/domain/socialrecall"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -70,4 +72,24 @@ func socialExchangeCatalog(catalog builtin.SocialInputCatalog) (socialexchange.C
 		return socialexchange.Catalog{}, e
 	}
 	return out, nil
+}
+
+func (store Store) SocialRecallRulesTx(ctx context.Context, query tx.Queryer, revision string) (socialrecall.StartRules, error) {
+	catalog, err := store.SocialInputCatalogTx(ctx, query, revision)
+	if err != nil {
+		return socialrecall.StartRules{}, err
+	}
+	return socialRecallRules(catalog)
+}
+
+func socialRecallRules(catalog builtin.SocialInputCatalog) (socialrecall.StartRules, error) {
+	if catalog.Validate() != nil || catalog.RecallRules == nil {
+		return socialrecall.StartRules{}, ErrSocialContentUnavailable
+	}
+	source := catalog.RecallRules
+	rules := socialrecall.StartRules{Limits: socialrecall.Limits{RequiredOffline: time.Duration(source.OfflineDays) * 24 * time.Hour, MaxActiveTasks: int(source.MaxActiveTasks)}, TaskDuration: time.Duration(source.TaskDays) * 24 * time.Hour}
+	if err := rules.Validate(); err != nil {
+		return socialrecall.StartRules{}, err
+	}
+	return rules, nil
 }

@@ -21,7 +21,20 @@ func wirePlayer(p sp.Player) sv.Player {
 // wireInput is the finite application-to-view bridge at the allowed edge. It
 // copies only committed response values; it performs no read or selection.
 func wireInput(r sp.Result) sv.Result {
-	v := sv.Result{ObservedAt: r.ObservedAt, SendCount: r.SendCount, ReceiveCount: r.ReceiveCount}
+	v := sv.Result{ObservedAt: r.ObservedAt, SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, Recalling: map[int64]bool{}}
+	for _, row := range r.Recall.Doing {
+		v.RecallDoing = append(v.RecallDoing, sv.RecallDoing{PlayerID: int64(row.PlayerID), PlayerName: r.RecallNames[row.PlayerID], RecallingTime: row.RecallingTime})
+	}
+	for _, row := range r.Recall.Done {
+		v.RecallDone = append(v.RecallDone, sv.RecallDone{PlayerID: int64(row.PlayerID), PlayerName: r.RecallNames[row.PlayerID], Lev: row.Baseline.AcademyLevel, CurLev: row.Current.AcademyLevel, PartnerNum: row.Baseline.OwnedHeroCount, CurPartnerNum: row.Current.OwnedHeroCount, Charge: row.Baseline.ChargeTotal, CurCharge: row.Current.ChargeTotal})
+	}
+	for _, player := range r.Recall.Got {
+		v.RecallGot = append(v.RecallGot, int64(player))
+	}
+	v.RecallAwarded = append(v.RecallAwarded, r.Recall.Awarded...)
+	for _, player := range r.Recall.Recalling {
+		v.Recalling[int64(player)] = true
+	}
 	for _, p := range r.Friends {
 		v.Friends = append(v.Friends, wirePlayer(p))
 	}

@@ -1,6 +1,7 @@
 package builtin_test
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"slices"
@@ -29,7 +30,7 @@ func TestSocialInputCatalogValidationRefusesDrift(t *testing.T) {
 	cases := map[string]func(*builtin.SocialInputCatalog){
 		"gift dropbox":         func(c *builtin.SocialInputCatalog) { c.Gifts[0].Drops = []int64{999999} },
 		"unreferenced dropbox": func(c *builtin.SocialInputCatalog) { c.Gifts[1].Drops = append([]int64(nil), c.Gifts[0].Drops...) },
-		"schema version":       func(c *builtin.SocialInputCatalog) { c.SchemaVersion = 2 },
+		"schema version":       func(c *builtin.SocialInputCatalog) { c.SchemaVersion = 3 },
 		"exchange limit":       func(c *builtin.SocialInputCatalog) { c.ExchangeLimit = 11 },
 		"product count":        func(c *builtin.SocialInputCatalog) { c.ExchangeProducts = c.ExchangeProducts[:2] },
 		"product gift":         func(c *builtin.SocialInputCatalog) { c.ExchangeProducts[0].GiftID = 99999999 },
@@ -147,4 +148,35 @@ func decodeSourceCatalog(t *testing.T) builtin.SocialInputCatalog {
 		t.Fatal(err)
 	}
 	return catalog
+}
+
+func TestSocialRecallRulesAndHistoricalSchema(t *testing.T) {
+	catalog := decodeSourceCatalog(t)
+	if catalog.SchemaVersion != 2 || catalog.RecallRules == nil || catalog.RecallRules.Validate() != nil {
+		t.Fatal("missing qualified recall settings", catalog.RecallRules)
+	}
+	original := *catalog.RecallRules
+	for _, invalid := range []builtin.SocialRecallRules{{OfflineDays: 0, TaskDays: 3, MaxActiveTasks: 3}, {OfflineDays: 7, TaskDays: 0, MaxActiveTasks: 3}, {OfflineDays: 7, TaskDays: 3, MaxActiveTasks: 4}} {
+		catalog.RecallRules = &invalid
+		if catalog.Validate() == nil {
+			t.Fatal("invalid settings accepted", invalid)
+		}
+	}
+	catalog.RecallRules = &original
+	catalog.SchemaVersion = 1
+	if catalog.Validate() == nil {
+		t.Fatal("legacy schema accepted new settings")
+	}
+	catalog.RecallRules = nil
+	if err := catalog.Validate(); err != nil {
+		t.Fatal("historical schema rejected", err)
+	}
+	raw, err := json.Marshal(catalog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := builtin.DecodeSocialInputCatalog(raw)
+	if err != nil || decoded.SchemaVersion != 1 || decoded.RecallRules != nil {
+		t.Fatal("historical decoding changed", decoded.SchemaVersion, err)
+	}
 }
