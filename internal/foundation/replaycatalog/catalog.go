@@ -31,6 +31,8 @@ type Family struct {
 // authority. A new mutating family must be classified here before cumulative guards
 // may treat replay coverage as complete.
 var Enabled = []Family{
+	{Name: "i9.gm-question-ask", OwnerKind: "player", Domain: "gmquestion", Operation: "ask", IdentityClass: CallerSemantic, SemanticSource: "retained actor operation identity and exact question fingerprint", ReceiptSchema: "gxb.gmquestion.ask.v1", Residual: "Stock packet has no intent nonce; a new terminal identical packet may be a deliberate additional inquiry"},
+
 	{Name: "i9.mission-claim", OwnerKind: "player", Domain: "objective", Operation: "mission-claim", IdentityClass: GenerationBound, SemanticSource: "objective id + canonical DAY/LIFETIME/HERO occurrence", Consumptive: true, ReceiptSchema: "gxb.i5.mission-claim.v1", Residual: "Stock packet has no nonce: a delayed identical daily claim in a new game day targets that new occurrence"},
 	{Name: "i9.activity-chest-claim", OwnerKind: "player", Domain: "objective", Operation: "activity-claim", IdentityClass: GenerationBound, SemanticSource: "DAY/WEEK + chest index + canonical day/week occurrence", Consumptive: true, ReceiptSchema: "gxb.i5.activity-claim.v1", Residual: "Stock packet has no nonce: a delayed identical claim after reset targets the new occurrence"},
 	{Name: "i9.mission-source-fact", OwnerKind: "player", Domain: "objective", Operation: "mission-source-fact", IdentityClass: CallerSemantic, SemanticSource: "canonical source domain/business key and fact semantic identity across daily rollover", ReceiptSchema: "gxb.i5.mission-source-fact.v1"},

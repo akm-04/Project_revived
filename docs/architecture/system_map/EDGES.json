@@ -651,6 +651,10 @@
     "DecisionAt",
     "Run"
    ],
+   "gmquestion": [
+    "DecisionAt",
+    "Run"
+   ],
    "godstrial": [
     "DecisionAt",
     "Operation",
@@ -826,6 +830,7 @@
     "Run"
    ]
   },
+  "gmquestion": {},
   "godstrial": {},
   "guildbroadcast": {
    "generation": [
@@ -1116,6 +1121,9 @@
    ],
    "frienddm": [
     "*PrepareEmoticonEntitlementTx"
+   ],
+   "gmquestion": [
+    "*FenceActorTx"
    ],
    "godstrial": [
     "*DebitTemporalTx",
@@ -1421,6 +1429,9 @@
   },
   "petcampaign": {},
   "playerdirectory": {
+   "gmquestion": [
+    "Validate"
+   ],
    "libraryforum": [
     "Validate"
    ],
@@ -1483,6 +1494,9 @@
    ],
    "generaldm": [
     "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "gmquestion": [
     "Validate"
    ],
    "guildbroadcast": [
@@ -3263,6 +3277,30 @@
    ],
    "workplace": [
     "*Now"
+   ]
+  },
+  "gmquestion": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "godstrial": {
@@ -5368,6 +5406,9 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "generation": [],
+  "gmquestion": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "godstrial": [
    "cmd/gxb-api/godstrial_postgres.go"
   ],

@@ -44,6 +44,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/gmquestionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/godstrialstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
@@ -88,6 +89,7 @@ import (
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/gmquestion"
 	appgodstrial "gxb.local/backend/v2/internal/application/godstrial"
 	appguildcampaign "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/application/guildcore"
@@ -552,6 +554,11 @@ func main() {
 		mustRegister(mid, stockruntime.AchievementDispatcher{Authority: authority, Service: achievements})
 	}
 	socialTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
+	questionService := gmquestion.Service{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Owner: gmquestionstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	questionDispatcher := stockruntime.GMQuestionDispatcher{Authority: authority, Service: questionService}
+	mustRegister(4, questionDispatcher)
+	mustRegister(5, questionDispatcher)
+
 	publicationDB := publicationstore.Store{}
 	if err := publicationDB.CheckSchema(ctx, pool); err != nil {
 		log.Fatal(err)

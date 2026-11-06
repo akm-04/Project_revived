@@ -373,7 +373,9 @@
    "368": "i5",
    "369": "i5",
    "370": "i5",
+   "4": "gmquestion",
    "49": "characterhero",
+   "5": "gmquestion",
    "50": "summon",
    "51": "characterhero",
    "513": "generaldm",
@@ -646,6 +648,7 @@
    "player_element_admissions": "elementequipment",
    "player_element_heroes": "elementequipment",
    "player_element_roots": "elementequipment",
+   "player_gm_questions": "gmquestion",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
    "player_hero_evolution": "characterhero",
@@ -986,12 +989,21 @@
   },
   {
    "callees": 5,
-   "callers": 52,
+   "callers": 53,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
    "purpose": "",
    "tables": 0
+  },
+  {
+   "callees": 6,
+   "callers": 0,
+   "mids": 2,
+   "name": "gmquestion",
+   "path": "internal/application/gmquestion",
+   "purpose": "",
+   "tables": 1
   },
   {
    "callees": 10,
@@ -1085,7 +1097,7 @@
   },
   {
    "callees": 12,
-   "callers": 53,
+   "callers": 54,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1193,7 +1205,7 @@
   },
   {
    "callees": 0,
-   "callers": 3,
+   "callers": 4,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1220,7 +1232,7 @@
   },
   {
    "callees": 0,
-   "callers": 18,
+   "callers": 19,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",

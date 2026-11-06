@@ -13,28 +13,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 4,
-   "name": "LOAD_GM_QUESTIONS",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/windows/ChatWindow.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 5,
-   "name": "ASK_GM_QUESTION",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/windows/ChatWindow.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 17,
    "name": "LOAD_PLAYER_INFO",
    "files": [
@@ -2264,6 +2242,7 @@
     "dodgeball",
     "dormhouse",
     "elementequipment",
+    "gmquestion",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -2315,6 +2294,7 @@
     "dodgeball",
     "dormhouse",
     "elementequipment",
+    "gmquestion",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -2366,6 +2346,7 @@
     "dodgeball",
     "dormhouse",
     "elementequipment",
+    "gmquestion",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -2476,6 +2457,7 @@
     "elementequipment",
     "frienddm",
     "generaldm",
+    "gmquestion",
     "guildbroadcast",
     "guildcampaign",
     "guildcore",
