@@ -45,7 +45,7 @@ func heroes(v d.Display) []map[string]any {
 }
 
 func Enemy(v d.Display) map[string]any {
-	row := map[string]any{"table_id": v.Occupant.TableID(), "player_name": v.Name, "lev": v.Level, "avatar_id": v.AvatarID, "avatar_frame_id": v.FrameID, "win": v.Wins, "rank": v.Rank, "force": v.Force,
+	row := map[string]any{"table_id": v.Occupant.TableID(), "player_name": v.Name, "lev": v.Level, "avatar_id": v.AvatarID, "avatar_frame_id": v.FrameID, "win": v.Wins, "rank": v.Rank, "force": v.Force, "is_robot": v.Occupant.IsRobot(),
 		"guild_name": v.GuildName, "ban_hero_id": int64(0), "conquer_lev": v.ConquerLevel, "conquer_loop_id": v.ConquerLoop, "heros": heroes(v), "book_shelf_lev": int64(0)}
 	if v.Pet != nil {
 		row["pet"] = v.Pet

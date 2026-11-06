@@ -160,6 +160,9 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 	if err != nil || !found {
 		return display, errors.Join(err, domain.ErrRefused)
 	}
+	if len(player.Player.Defense) == 0 {
+		return display, domain.ErrRefused
+	}
 	display.Wins = player.Player.Wins
 	display.Heroes, display.Pet, err = service.taskTeam(requestContext, query, catalog, period, occupant.Player, domain.TaskModeDefense{Heroes: player.Player.Defense, Pet: player.Player.DefensePet, Leader: player.Leader}, at)
 	display.Force = teamForce(display.Heroes)
