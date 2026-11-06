@@ -65,7 +65,9 @@
   "written": []
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "logincapacity"
+  ],
   "scenarios_naming": [],
   "unit": [
    "service_test.go"
