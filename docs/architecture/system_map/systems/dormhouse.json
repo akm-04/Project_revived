@@ -173,8 +173,12 @@
  "tables": {
   "owned": [
    "player_dorm_admissions",
+   "player_dorm_comment_reactions",
+   "player_dorm_comments",
    "player_dorm_glue_purchases",
    "player_dorm_heroes",
+   "player_dorm_praises",
+   "player_dorm_room_social",
    "player_dorm_rooms",
    "player_dorm_roots"
   ],
@@ -213,7 +217,9 @@
   "integration": [
    "playerdisplay"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_10c_buy_glue_1845.json"
+  ],
   "unit": []
  }
 }

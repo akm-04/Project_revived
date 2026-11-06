@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00120_i9_10c_glue_admission.sql",
+  "highest_migration": "00121_i9_10c_dorm_social.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -107,13 +107,17 @@
     "00104_i9_9b_guild_rental.sql": "e83a0e78264e79dbd91e14b0c8fa35e93904af4005a06599e9a51b67180e3d45",
     "00105_i9_9c_guild_campaign.sql": "73fa898c97f31b8839b0d13b6c9938e13d4d04cf6574c6ee0d26b6bd4942bb84",
     "00106_i9_9_illusion_no_pool.sql": "534170a86751e9c8195dab76ccc54c20b992e569140bb7b844af9f708d5542bb",
+    "00107_i9_10_logical_servers_3_4.sql": "6fd75fc518e7093fbacf884ac29f3fd22a27a48d54939e562ffcfd7f7b804e3c",
+    "00108_i9_10_mail_tuning.sql": "8a25b770bb407642b0fdaaaa7e9d8cab662620c4e29941ce2941bd55f32c06f4",
+    "00109_i9_10g_charge.sql": "1a2d3857ebc6b4294b790a8bf6413d8eacb78f595bb99cbe04788e5cfbef93c1",
     "00110_i9_10b_library.sql": "9f63e346004ca715043263bdf0ca917d876e3d53deac89b2e8dee61315436148",
     "00111_i9_10b_dialog_read.sql": "a59ed9b6ffa0a9e9a2b4e4e5a8443082fd5776cf8b3a20f768da0c69b63f9217",
     "00112_i9_10c_scalar_daily_floors.sql": "880ed503bfe415799c98b96526a786ad0c01135bddfae98d8764ff23adecec66",
     "00113_i9_10c_glue_purchases.sql": "8e36c51a12dd46886f7a88c16e9540c346a313567af7c6a970898caa1f0fd4ee",
-    "00120_i9_10c_glue_admission.sql": "68b3e002189ef77c685a3e43ac869a7f5ab28fcd6f71d603fa735d19256c2fab"
+    "00120_i9_10c_glue_admission.sql": "68b3e002189ef77c685a3e43ac869a7f5ab28fcd6f71d603fa735d19256c2fab",
+    "00121_i9_10c_dorm_social.sql": "22f24a0b5ab1633280ba3a493823120f4a2f7b5027230f5aeb763dd14b887be0"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CUMULATIVE_MIGRATION_LOCK_I9_9"
+  "status": "CUMULATIVE_MIGRATION_LOCK_I9_10_WORKING"
 }

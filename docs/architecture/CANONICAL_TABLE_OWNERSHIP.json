@@ -5349,6 +5349,70 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00113_i9_10c_glue_purchases.sql"
+    },
+    "player_dorm_room_social": {
+      "owner": "dorm-house",
+      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_dorm_praises": {
+      "owner": "dorm-house",
+      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_dorm_comments": {
+      "owner": "dorm-house",
+      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_dorm_comment_reactions": {
+      "owner": "dorm-house",
+      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "allowed_query_owners": [
+        "dorm-house"
+      ],
+      "allowed_read_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "allowed_write_paths": [
+        "sql/dorm/",
+        "internal/adapters/postgres/dormstore/"
+      ],
+      "write_exceptions": []
     }
   }
 }
