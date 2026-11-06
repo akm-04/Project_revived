@@ -18,10 +18,12 @@ const (
 )
 
 var (
-	ErrUnavailable = errors.New("topfloor: unavailable")
-	ErrConflict    = errors.New("topfloor: conflicting state")
-	ErrInvalid     = errors.New("topfloor: invalid request")
-	ErrRefused     = errors.New("topfloor: refused by rule")
+	ErrUnavailable     = errors.New("topfloor: unavailable")
+	ErrConflict        = errors.New("topfloor: conflicting state")
+	ErrInvalid         = errors.New("topfloor: invalid request")
+	ErrRefused         = errors.New("topfloor: refused by rule")
+	ErrDefenseRequired = errors.New("topfloor: saved defense required")
+	ErrOfferStale      = errors.New("topfloor: offered rank changed")
 )
 
 type Reward struct {

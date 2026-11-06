@@ -35,6 +35,9 @@ func TestI97ATaskModeAdmissionReadsNative(t *testing.T) {
 		t.Skip("normal Top Floor freeze: no host clock change permitted")
 	}
 	command := application.StartCommand{Formation: []int64{hero.PartnerID}, Enemy: current.Enemies[0].Occupant.TableID()}
+	if err = service.SaveDefense(ctx, actor, []int64{hero.PartnerID}, 0, op()); err != nil {
+		t.Fatal("saved defense", err)
+	}
 	result, err := service.Start(ctx, actor, command, op())
 	if err != nil || len(result.Report) == 0 {
 		t.Fatalf("genuine admission: %v", err)

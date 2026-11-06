@@ -84,6 +84,9 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if err = service.SaveDefense(ctx, actor, []int64{hero.PartnerID}, 0, op()); err != nil {
+		t.Fatal("saved defense", err)
+	}
 	// Rank and available tickets are fixture preconditions; every weekly admission below uses the real START owner.
 	transaction, err := database.Begin(ctx, tx.Options{})
 	if err != nil {

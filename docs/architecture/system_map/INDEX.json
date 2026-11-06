@@ -722,6 +722,7 @@
    "top_floor_day_settlements": "topfloor",
    "top_floor_fights": "topfloor",
    "top_floor_ladders": "topfloor",
+   "top_floor_offer_snapshots": "topfloor",
    "top_floor_partner_usage": "topfloor",
    "top_floor_players": "topfloor",
    "top_floor_ranks": "topfloor",
@@ -1432,7 +1433,7 @@
    "name": "topfloor",
    "path": "internal/application/topfloor",
    "purpose": "composes the Top Floor owner (C5B_TOP_FLOOR_MODE_V1): ladder entry, opponents, tickets, START through the Combat foundation, terminal rank settlement, daily mail settlement and history facts",
-   "tables": 15
+   "tables": 16
   },
   {
    "callees": 15,

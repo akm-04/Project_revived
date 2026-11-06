@@ -188,6 +188,13 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if err != nil || !found {
 		return d.Fight{}, errors.Join(err, d.ErrRefused)
 	}
+	snapshot, snapshotFound, err := s.Store.ReadOfferSnapshotTx(c, sc.Tx, a.PlayerID, d.OfferScopeNormal, true)
+	if err != nil {
+		return d.Fight{}, err
+	}
+	if err = s.requireAttackDefense(c, sc.Tx, a.PlayerID, p, at); err != nil {
+		return d.Fight{}, err
+	}
 	rank, _, err := s.Store.RankOfTx(c, sc.Tx, server, d.Occupant{Player: a.PlayerID})
 	if err != nil {
 		return d.Fight{}, err
@@ -199,6 +206,11 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	enemyRank, ok, err := s.Store.RankOfTx(c, sc.Tx, server, enemy)
 	if err != nil || !ok {
 		return d.Fight{}, errors.Join(err, d.ErrConflict)
+	}
+	if !r.Avenge {
+		if err = d.MatchOfferSnapshot(snapshot, snapshotFound, 0, rank, enemy, enemyRank); err != nil {
+			return d.Fight{}, err
+		}
 	}
 	defenders, pets, err := s.defenders(c, sc.Tx, catalog, enemy)
 	if err != nil {
