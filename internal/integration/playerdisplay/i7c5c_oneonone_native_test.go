@@ -27,6 +27,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/oneonone"
 	appdisplay "gxb.local/backend/v2/internal/application/playerdisplay"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/domain/mail"
@@ -43,7 +44,7 @@ func oneOnOneService(t *testing.T, p *pg.Pool) app.Service {
 	fight := combatService(t, p)
 	values, content := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: oneononestore.Store{}, Content: content,
-		Fence: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Mail: i5.SettlementMail{Store: values},
+		Fence: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, FrameStacks: values, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
 		Directory: i4store.PlayerDirectoryReader{}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
@@ -285,6 +286,11 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	exec(t, pool, `UPDATE one_on_one_players SET level=1,slot=1,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID))
 	now := time.Now()
 	latest := catalog.LatestSettlement(now)
+	revision, err := (contentstore.Store{Queryer: pool}).ActiveRevision(ctx, pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grantGenuine(t, pool, a, revision, "owned one-on-one frame fixture", []grant.Line{{Kind: grant.StackItem, ItemID: 120001005, Amount: 1}})
 	// The fixture replays its own window; earlier runs on the same database settled it already.
 	exec(t, pool, `DELETE FROM one_on_one_settlement_ranks WHERE day>$1`, latest-8)
 	exec(t, pool, `DELETE FROM one_on_one_settlements WHERE day>$1`, latest-8)
@@ -297,7 +303,8 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 		t.Fatal("settlement must be once", again, err)
 	}
 	if scalar(t, pool, `SELECT count(*) FROM mail_attachments m JOIN mail_records r USING(mail_uuid) WHERE r.recipient_player_id=$1 AND r.source_kind='ONE_ON_ONE_REWARD' AND m.resource_key='top_coin' AND m.amount=2100`, int64(a.PlayerID)) != int64(settled) ||
-		scalar(t, pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(a.PlayerID)) != 1 {
+		scalar(t, pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(a.PlayerID)) != 0 ||
+		scalar(t, pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(b.PlayerID)) != 1 {
 		t.Fatal("reward and frame mails")
 	}
 	// The top_coin income (ENABLED_R4) is claimable through the stock mail claim.

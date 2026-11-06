@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -468,6 +469,45 @@ func TestCreateEstablishesGuildRowsBeforeI5AndConvergesStockRetry(t *testing.T) 
 	}
 	if !again.Replayed || again.GuildID != got.GuildID || cp.calls != 1 {
 		t.Fatalf("retry=%+v debitCalls=%d", again, cp.calls)
+	}
+}
+
+func TestValidGuildNameUsesStockWeightedLength(t *testing.T) {
+	st := newMemStore()
+	svc, _ := serviceFixture(t, st, levelPort{level: 50}, &combinedPort{level: 50})
+	for _, test := range []struct {
+		name  string
+		valid bool
+	}{
+		{name: strings.Repeat("a", 20), valid: true},
+		{name: strings.Repeat("a", 21)},
+		{name: strings.Repeat("界", 10), valid: true},
+		{name: strings.Repeat("界", 11)},
+		{name: strings.Repeat("a", 18) + "界", valid: true},
+		{name: strings.Repeat("a", 19) + "界"},
+		{name: "", valid: false},
+		{name: string([]byte{0xff}), valid: false},
+	} {
+		if got := svc.Policy.Policy.ValidName(test.name); got != test.valid {
+			t.Errorf("ValidName(%q)=%v want %v", test.name, got, test.valid)
+		}
+	}
+}
+
+func TestCreateAndRenameRejectGuildNamesOverStockLength(t *testing.T) {
+	st := newMemStore()
+	actor := actorFixture(t, 100001)
+	service, _ := serviceFixture(t, st, levelPort{level: 50}, &combinedPort{level: 50})
+	if _, err := service.Create(context.Background(), actor, CreateRequest{Name: strings.Repeat("a", 21), Icon: 20010001}, opFixture(t, time.Unix(1000, 0).UTC())); !errors.Is(err, ErrInvalidGuildPolicyInput) {
+		t.Fatalf("overlength create error=%v", err)
+	}
+
+	guildID := guild.ID(1000030)
+	current := guildFixture(guildID)
+	st.guilds[guildID] = current
+	st.seedMembership(memberFixture(actor.PlayerID, guildID, guild.Leader))
+	if _, err := service.UpdateSettings(context.Background(), actor, SettingsRequest{Name: strings.Repeat("界", 11), Icon: current.Icon, IconFrame: 0, MinAllowLevel: 32, ApplyType: guild.ApplyByApplication}, opFixture(t, time.Unix(1001, 0).UTC())); !errors.Is(err, ErrInvalidSettings) {
+		t.Fatalf("overlength rename error=%v", err)
 	}
 }
 

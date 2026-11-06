@@ -77,8 +77,17 @@ func (p Policy) ValidName(s string) bool {
 	if !utf8.ValidString(s) {
 		return false
 	}
-	n := len([]rune(s))
-	return n >= p.NameMinChars && n <= p.NameMaxChars
+	runeCount := 0
+	halfUnits := 0
+	for _, character := range s {
+		runeCount++
+		if character <= 0x7f {
+			halfUnits++
+			continue
+		}
+		halfUnits += 2
+	}
+	return runeCount >= p.NameMinChars && halfUnits/2+halfUnits%2 <= p.NameMaxChars
 }
 
 func (p Policy) ValidBulletin(s string) bool {

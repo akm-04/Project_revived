@@ -63,6 +63,12 @@
    ],
    "one_on_one_players": [
     "oneononestore.ReadPlayerTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockEconomyOwnerTx"
+   ],
+   "player_item_stacks": [
+    "i5store.LockStackTx"
    ]
   },
   "row_locks": [
@@ -71,7 +77,9 @@
    "gameplay_contexts",
    "one_on_one_competitions",
    "one_on_one_matches",
-   "one_on_one_players"
+   "one_on_one_players",
+   "player_economy_owners",
+   "player_item_stacks"
   ],
   "unresolved_methods": []
  },
@@ -196,7 +204,9 @@
    "one_on_one_rounds",
    "one_on_one_settlement_ranks",
    "player_cosmetic_entitlements",
-   "player_directory_profiles"
+   "player_directory_profiles",
+   "player_economy_owners",
+   "player_item_stacks"
   ],
   "written": [
    "gxb_operation_receipts",

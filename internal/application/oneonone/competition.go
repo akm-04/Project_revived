@@ -133,7 +133,12 @@ func (s Service) Due(c context.Context, parent operation.Context) (int, error) {
 		if err != nil {
 			return applied, err
 		}
-		_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), transitionEvidence{store: s.Store, reader: s.Fresh, next: next}, func(c context.Context, sc gen.TimedScope) error {
+		isolation := tx.RepeatableRead
+		if next.Kind == d.TransitionSettle {
+			// Read Committed lets the frame check see claims completed while it waits on the Economy owner lock.
+			isolation = tx.ReadCommitted
+		}
+		_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: isolation}, retry(), transitionEvidence{store: s.Store, reader: s.Fresh, next: next}, func(c context.Context, sc gen.TimedScope) error {
 			return s.transitionTx(c, sc, next)
 		})
 		if err != nil {
@@ -197,7 +202,21 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, catalog d.Catalo
 				return err
 			}
 			row.Mail = &m.MailUUID
+			ownsFrame := false
 			if a.Reward.FrameID > 0 {
+				if s.FrameStacks == nil {
+					return d.ErrUnavailable
+				}
+				if err := s.FrameStacks.LockEconomyOwnerTx(c, sc.Tx, a.Player); err != nil {
+					return err
+				}
+				stack, exists, err := s.FrameStacks.LockStackTx(c, sc.Tx, a.Player, a.Reward.FrameID, at)
+				if err != nil {
+					return err
+				}
+				ownsFrame = exists && stack.Quantity > 0
+			}
+			if a.Reward.FrameID > 0 && !ownsFrame {
 				if _, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: a.Player, SourceKind: frameMailKind, SourceKey: strconv.FormatInt(int64(a.Player), 10),
 					Title: catalog.Mail["LEGEND_MAIL_TITLE"], Sender: catalog.Mail["LEGEND_MAIL_SENDER"], Body: fmt.Sprintf(catalog.Mail["LEGEND_MAIL_TEXT"], a.ServerRank), PolicyVersion: d.ContractID,
 					Lines: []grant.Line{{Kind: grant.StackItem, ItemID: a.Reward.FrameID, Amount: 1}}, At: at}); err != nil {

@@ -31,6 +31,7 @@ import (
 var (
 	ErrUnsupportedGrantDestination = errors.New("grant destination belongs to an unimplemented owner")
 	ErrMailNotFound                = errors.New("mail not found")
+	ErrMailNotClaimable            = errors.New("mail attachments are not claimable")
 	ErrMailStackFull               = errors.New("mail attachment would exceed canonical stack capacity")
 	ErrObjectiveNotFound           = errors.New("objective not found")
 	ErrRedeemInvalid               = errors.New("invalid redeem code")
@@ -920,7 +921,7 @@ func (s Service) ClaimMail(ctx context.Context, actor identity.ActorContext, add
 		var nested *GrantResult
 		if len(r.Attachments) > 0 {
 			if !r.Claimable(now) {
-				return errors.New("mail attachments are not claimable")
+				return ErrMailNotClaimable
 			}
 			lines := make([]grant.Line, 0, len(r.Attachments))
 			for _, a := range r.Attachments {

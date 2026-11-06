@@ -119,6 +119,7 @@ type Service struct {
 	Functions    Functions
 	Privileges   i5.PrivilegeSnapshotProvider
 	Costs        i5.TxMaterialCostDebiter
+	FrameStacks  i5.MaterialCostStore
 	Mail         Mail
 	Achievements Achievements
 	Combat       Combat

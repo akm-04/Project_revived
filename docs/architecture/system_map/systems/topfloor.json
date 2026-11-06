@@ -65,6 +65,12 @@
    "gameplay_contexts": [
     "i5store.FenceActorTx"
    ],
+   "player_economy_owners": [
+    "i5store.LockEconomyOwnerTx"
+   ],
+   "player_item_stacks": [
+    "i5store.LockStackTx"
+   ],
    "top_floor_fights": [
     "topfloorstore.ReadFightTx"
    ],
@@ -88,6 +94,8 @@
    "account_sessions",
    "accounts",
    "gameplay_contexts",
+   "player_economy_owners",
+   "player_item_stacks",
    "top_floor_fights",
    "top_floor_ladders",
    "top_floor_players",
@@ -322,7 +330,9 @@
    "gxb_content_revisions",
    "gxb_operation_receipts",
    "player_directory_profiles",
+   "player_economy_owners",
    "player_function_eligibility",
+   "player_item_stacks",
    "top_floor_fights",
    "top_floor_ladders",
    "top_floor_partner_usage",

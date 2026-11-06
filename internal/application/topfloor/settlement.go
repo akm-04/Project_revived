@@ -97,7 +97,8 @@ func (s Service) settleDay(c context.Context, server identity.LogicalServerID, d
 	if err != nil {
 		return err
 	}
-	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), settledEvidence{store: s.Store, reader: s.Fresh, server: server, day: day}, func(c context.Context, sc gen.TimedScope) error {
+	// Read Committed lets the frame check see claims completed while it waits on the Economy owner lock.
+	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.ReadCommitted}, retry(), settledEvidence{store: s.Store, reader: s.Fresh, server: server, day: day}, func(c context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
 		l, found, err := s.Store.ReadLadderTx(c, sc.Tx, server, true)
 		if err != nil || !found {
@@ -134,7 +135,22 @@ func (s Service) settleDay(c context.Context, server identity.LogicalServerID, d
 				}
 				entry.Mail = &m.MailUUID
 			}
-			if reward, ok := catalog.RewardFor(r.Rank); ok && reward.FrameID > 0 {
+			reward, hasReward := catalog.RewardFor(r.Rank)
+			ownsFrame := false
+			if hasReward && reward.FrameID > 0 {
+				if s.FrameStacks == nil {
+					return d.ErrUnavailable
+				}
+				if err := s.FrameStacks.LockEconomyOwnerTx(c, sc.Tx, r.Occupant.Player); err != nil {
+					return err
+				}
+				stack, exists, err := s.FrameStacks.LockStackTx(c, sc.Tx, r.Occupant.Player, reward.FrameID, at)
+				if err != nil {
+					return err
+				}
+				ownsFrame = exists && stack.Quantity > 0
+			}
+			if hasReward && reward.FrameID > 0 && !ownsFrame {
 				_, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: r.Occupant.Player, SourceKind: dailyFrameMailKind, SourceKey: fmt.Sprintf("%d:%d", server, r.Occupant.Player),
 					Title: catalog.MailTitle, Sender: catalog.MailSender, Body: fmt.Sprintf(catalog.MailText, r.Rank), PolicyVersion: d.ContractID, Lines: []grant.Line{{Kind: grant.StackItem, ItemID: reward.FrameID, Amount: 1}}, At: at})
 				if err != nil {
