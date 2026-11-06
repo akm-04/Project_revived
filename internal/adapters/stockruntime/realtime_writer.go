@@ -22,23 +22,36 @@ type outboundWrite struct {
 // connWriter is one bounded single-writer loop per admitted socket. Multiple
 // callers may enqueue, but only this loop touches conn.Write.
 type connWriter struct {
-	conn         net.Conn
-	writeTimeout time.Duration
-	queue        chan outboundWrite
-	maxBytes     int
-	mu           sync.Mutex
-	queuedBytes  int
-	closed       bool
-	cancel       context.CancelFunc
-	done         chan struct{}
+	encode         func(wireRT.Frame, limits.Config) ([]byte, error)
+	write          func(context.Context, []byte) error
+	closeTransport func()
+	queue          chan outboundWrite
+	maxBytes       int
+	mu             sync.Mutex
+	queuedBytes    int
+	closed         bool
+	cancel         context.CancelFunc
+	done           chan struct{}
 }
 
 func newConnWriter(parent context.Context, conn net.Conn, cfg limits.Config, writeTimeout time.Duration) (*connWriter, error) {
-	if conn == nil || cfg.WriterFrames <= 0 || cfg.WriterBytes <= 0 || writeTimeout <= 0 {
+	if conn == nil {
+		return nil, errors.New("invalid realtime writer configuration")
+	}
+	return newFrameWriter(parent, cfg, writeTimeout, wireRT.EncodeFrameWithConfig,
+		func(_ context.Context, b []byte) error { return writeFrameBytes(conn, b, writeTimeout) },
+		func() { _ = conn.Close() })
+}
+
+// newFrameWriter owns the single-writer queue for one transport. The encoder
+// and byte sink are the only transport-specific parts; frame admission, bounds,
+// ordering and teardown stay shared.
+func newFrameWriter(parent context.Context, cfg limits.Config, writeTimeout time.Duration, encode func(wireRT.Frame, limits.Config) ([]byte, error), write func(context.Context, []byte) error, closeTransport func()) (*connWriter, error) {
+	if encode == nil || write == nil || closeTransport == nil || cfg.WriterFrames <= 0 || cfg.WriterBytes <= 0 || writeTimeout <= 0 {
 		return nil, errors.New("invalid realtime writer configuration")
 	}
 	ctx, cancel := context.WithCancel(parent)
-	w := &connWriter{conn: conn, writeTimeout: writeTimeout, queue: make(chan outboundWrite, cfg.WriterFrames), maxBytes: cfg.WriterBytes, cancel: cancel, done: make(chan struct{})}
+	w := &connWriter{encode: encode, write: write, closeTransport: closeTransport, queue: make(chan outboundWrite, cfg.WriterFrames), maxBytes: cfg.WriterBytes, cancel: cancel, done: make(chan struct{})}
 	go w.run(ctx)
 	return w, nil
 }
@@ -73,7 +86,7 @@ func (w *connWriter) Send(ctx context.Context, frame wireRT.Frame, cfg limits.Co
 // I7A-2 session retirement uses this narrow seam to linearize "may this stale
 // handle enqueue?" without holding a lifecycle mutex while conn.Write blocks.
 func (w *connWriter) enqueue(ctx context.Context, frame wireRT.Frame, cfg limits.Config) (<-chan error, error) {
-	b, err := wireRT.EncodeFrameWithConfig(frame, cfg)
+	b, err := w.encode(frame, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +130,7 @@ func (w *connWriter) run(ctx context.Context) {
 			w.mu.Unlock()
 			return
 		case req := <-w.queue:
-			err := writeFrameBytes(w.conn, req.data, w.writeTimeout)
+			err := w.write(ctx, req.data)
 			w.release(len(req.data))
 			req.done <- err
 			if err != nil {
@@ -134,6 +147,7 @@ func (w *connWriter) Close() {
 	if w == nil {
 		return
 	}
+	w.closeTransport()
 	w.cancel()
 	<-w.done
 }
