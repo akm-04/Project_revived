@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -44,6 +45,36 @@ type SettlementMailRequest struct {
 // are granted only when the recipient claims the mail.
 type SettlementMail struct {
 	Store SettlementMailStore
+}
+
+// LockRecipientsTx reserves every rank-610 mail namespace before a batch takes Economy locks.
+func (m SettlementMail) LockRecipientsTx(ctx context.Context, t tx.Tx, recipients []identity.PlayerID) error {
+	if m.Store == nil || t == nil {
+		return errors.New("i5 settlement mail lock inputs incomplete")
+	}
+	unique := make(map[identity.PlayerID]struct{}, len(recipients))
+	ordered := make([]identity.PlayerID, 0, len(recipients))
+	for _, recipient := range recipients {
+		if !recipient.Valid() {
+			return errors.New("i5 settlement mail recipient invalid")
+		}
+		if _, exists := unique[recipient]; exists {
+			continue
+		}
+		unique[recipient] = struct{}{}
+		ordered = append(ordered, recipient)
+	}
+	sort.Slice(ordered, func(left, right int) bool {
+		leftIdentity := strconv.FormatInt(int64(ordered[left]), 10) + ":" + mail.Normal.String()
+		rightIdentity := strconv.FormatInt(int64(ordered[right]), 10) + ":" + mail.Normal.String()
+		return leftIdentity < rightIdentity
+	})
+	for _, recipient := range ordered {
+		if err := m.Store.LockMailNamespaceCounterTx(ctx, t, recipient, mail.Normal); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // DeliverTx returns the delivered mail and whether it already existed.

@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -42,9 +44,54 @@ func topFloorService(t *testing.T, p *pg.Pool) app.Service {
 	fight := combatService(t, p)
 	values, content := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
-		Fence: values, Functions: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Mail: i5.SettlementMail{Store: values},
+		Fence: values, Functions: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, FrameStacks: values, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
 		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+}
+
+type blockedFrameClaimStore struct {
+	i5.Store
+	locked   chan struct{}
+	release  <-chan struct{}
+	lockOnce *sync.Once
+}
+
+func (store blockedFrameClaimStore) LockEconomyOwnerTx(ctx context.Context, transaction tx.Tx, player identity.PlayerID) error {
+	if err := store.Store.LockEconomyOwnerTx(ctx, transaction, player); err != nil {
+		return err
+	}
+	var waitErr error
+	store.lockOnce.Do(func() {
+		close(store.locked)
+		select {
+		case <-store.release:
+		case <-ctx.Done():
+			waitErr = ctx.Err()
+		}
+	})
+	return waitErr
+}
+
+type observedFrameStackStore struct {
+	i5.MaterialCostStore
+	lockAttempted chan struct{}
+	lockOnce      *sync.Once
+}
+
+func (store observedFrameStackStore) LockEconomyOwnerTx(ctx context.Context, transaction tx.Tx, player identity.PlayerID) error {
+	store.lockOnce.Do(func() { close(store.lockAttempted) })
+	return store.MaterialCostStore.LockEconomyOwnerTx(ctx, transaction, player)
+}
+
+type observedFrameMail struct {
+	app.Mail
+	lockAttempted chan struct{}
+	lockOnce      *sync.Once
+}
+
+func (mail observedFrameMail) LockRecipientsTx(ctx context.Context, transaction tx.Tx, recipients []identity.PlayerID) error {
+	mail.lockOnce.Do(func() { close(mail.lockAttempted) })
+	return mail.Mail.LockRecipientsTx(ctx, transaction, recipients)
 }
 
 // topFloorPlayer is a genuine combat owner with function 4 open and an Achievement root.
@@ -247,6 +294,98 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	}
 	if !strings.Contains(catalog.MailText, "%d") {
 		t.Fatal("source mail text")
+	}
+}
+
+func TestI9_10TopFloorSettlementWaitsForConcurrentFrameClaimNative(t *testing.T) {
+	p := pool(t)
+	defer p.Close()
+	s := topFloorService(t, p)
+	server := rankingServer(t, p)
+	a, revision, _ := topFloorPlayer(t, p, server)
+	content := contentstore.Store{Queryer: p}
+	catalog, err := content.TopFloorCatalogTx(ctx, p, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	frameReward, found := catalog.RewardFor(1)
+	if !found || frameReward.FrameID <= 0 {
+		t.Fatal("rank-1 frame reward missing")
+	}
+	if _, err := s.Load(ctx, a, op()); err != nil {
+		t.Fatal(err)
+	}
+	exec(t, p, `UPDATE top_floor_ranks SET robot_team=CASE WHEN rank=1 THEN NULL ELSE (SELECT robot_team FROM top_floor_ranks WHERE logical_server_id=$1 AND rank=1) END, player_id=CASE WHEN rank=1 THEN $2 ELSE NULL END WHERE logical_server_id=$1 AND (rank=1 OR player_id=$2)`, int64(server), int64(a.PlayerID))
+	latest := catalog.LatestCutoffDay(time.Now())
+	exec(t, p, `UPDATE top_floor_ladders SET settled_day=$2,state_version=state_version+1 WHERE logical_server_id=$1`, int64(server), latest-1)
+
+	values := i5store.Store{Queryer: p}
+	transaction, err := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		t.Fatal(err)
+	}
+	frameMail, _, err := (i5.SettlementMail{Store: values}).DeliverTx(ctx, transaction, i5.SettlementMailRequest{Recipient: a.PlayerID, SourceKind: "PLAYTEST_FRAME_CLAIM", SourceKey: "top-floor-concurrent", Title: "Frame reward", Sender: "Academy", Body: "Claim the frame", PolicyVersion: "i9-10-playtest-v1", Lines: []grant.Line{{Kind: grant.StackItem, ItemID: frameReward.FrameID, Amount: 1}}, At: time.Now().UTC()})
+	if err != nil {
+		transaction.Rollback(ctx)
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	release := make(chan struct{})
+	var releaseOnce sync.Once
+	defer releaseOnce.Do(func() { close(release) })
+	claimLocked := make(chan struct{})
+	claims := genuineGrants(p)
+	claims.Store = blockedFrameClaimStore{Store: claims.Store, locked: claimLocked, release: release, lockOnce: &sync.Once{}}
+	claimDone := make(chan error, 1)
+	go func() {
+		_, claimErr := claims.ClaimMail(ctx, a, frameMail.Address, op())
+		claimDone <- claimErr
+	}()
+	select {
+	case <-claimLocked:
+	case <-time.After(10 * time.Second):
+		t.Fatal("frame claim did not acquire the Economy owner lock")
+	}
+
+	settlementMailLockAttempted := make(chan struct{})
+	settlementLockAttempted := make(chan struct{})
+	s.Mail = observedFrameMail{Mail: s.Mail, lockAttempted: settlementMailLockAttempted, lockOnce: &sync.Once{}}
+	s.FrameStacks = observedFrameStackStore{MaterialCostStore: values, lockAttempted: settlementLockAttempted, lockOnce: &sync.Once{}}
+	type settlementResult struct {
+		settled int
+		err     error
+	}
+	settlementDone := make(chan settlementResult, 1)
+	go func() {
+		settled, settlementErr := s.SettleDue(ctx, server, op())
+		settlementDone <- settlementResult{settled: settled, err: settlementErr}
+	}()
+	select {
+	case <-settlementMailLockAttempted:
+	case <-time.After(10 * time.Second):
+		t.Fatal("settlement did not reach the mail namespace locks")
+	}
+	releaseOnce.Do(func() { close(release) })
+	if err = <-claimDone; err != nil {
+		t.Fatal("concurrent frame claim", err)
+	}
+	select {
+	case <-settlementLockAttempted:
+	case <-time.After(10 * time.Second):
+		t.Fatal("settlement did not reach the Economy owner locks")
+	}
+	settled := <-settlementDone
+	if settled.err != nil || settled.settled != 1 {
+		t.Fatalf("settlement result: %+v", settled)
+	}
+	if stackQuantity(t, p, a.PlayerID, frameReward.FrameID) != 1 ||
+		scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='TOP_FLOOR_DAILY_FRAME'`, int64(a.PlayerID)) != 0 ||
+		scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='TOP_FLOOR_DAILY'`, int64(a.PlayerID)) != 1 ||
+		scalar(t, p, `SELECT count(*) FROM mail_attachments m JOIN mail_records r USING(mail_uuid) WHERE r.recipient_player_id=$1 AND r.source_kind='TOP_FLOOR_DAILY' AND m.resource_key='arena_coin' AND m.amount=800`, int64(a.PlayerID)) != 1 {
+		t.Fatal("concurrent claim ownership or daily reward mail is incorrect")
 	}
 }
 

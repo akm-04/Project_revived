@@ -551,7 +551,7 @@ func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 
 const mailListJSON = `
 WITH active AS (
- SELECT * FROM mail_records WHERE recipient_player_id=$1 AND (expires_at IS NULL OR expires_at>$2)
+ SELECT * FROM mail_records WHERE recipient_player_id=$1 AND shown AND (expires_at IS NULL OR expires_at>$2)
 ), page AS (
  SELECT * FROM active ORDER BY created_at DESC,namespace,wire_id DESC LIMIT $3
 )

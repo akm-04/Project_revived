@@ -1239,10 +1239,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "petcampaign": [
     "*CheckAwakeningPetMaterialTx",
@@ -1332,10 +1334,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "workplace": [
     "*DebitTemporalTx",
@@ -4295,10 +4299,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "interface:oneonone.Roster": [
     "*OverlayMID1"
@@ -5162,10 +5168,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
