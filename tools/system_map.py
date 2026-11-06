@@ -250,6 +250,117 @@ def helper_trace(mid):
     return completed.stdout
 
 
+TRACE_LOCAL_FUNCTION_VALUES = {
+    "cancel", "release", "body", "acqCancel", "txCancel", "reconcileCancel",
+}
+TRACE_FANOUT_PATTERN = re.compile(r"^(FANOUT .*? has (\d+) implementers, not followed: )(.*)$")
+
+
+def trace_indent(line):
+    return len(line) - len(line.lstrip(" "))
+
+
+def trace_call_line(line):
+    value = line.lstrip()
+    if not value or value.startswith(("MID ", "sql: ", "facts: ", "FANOUT ", "UNRESOLVED ", "BOUND ", "push: ")):
+        return False
+    return "(seen above, touches tables)" not in value
+
+
+def trace_marker_line(line):
+    value = line.lstrip()
+    return value.startswith(("sql: ", "facts: ", "FANOUT ", "UNRESOLVED ", "BOUND ", "push: "))
+
+
+def compact_fanout(line):
+    match = TRACE_FANOUT_PATTERN.match(line.lstrip())
+    if not match:
+        return line
+    implementer_count = int(match.group(2))
+    names = match.group(3).split(", ")
+    if implementer_count <= 5 or len(names) <= 5:
+        return line
+    shortened = ", ".join(names[:5]) + ", ... (+%d more)" % (implementer_count - 5)
+    return line[:trace_indent(line)] + match.group(1) + shortened
+
+
+def compact_trace(output):
+    lines = output.splitlines()
+    if not lines:
+        return output
+
+    authorization_root = next(
+        (index for index, line in enumerate(lines)
+         if line.lstrip().startswith("RealtimeAuthority.ResolveGameplayBearer ")),
+        None,
+    )
+    hidden_authorization_lines = set()
+    authorization_summary = {}
+    if authorization_root is not None:
+        authorization_indent = trace_indent(lines[authorization_root])
+        authorization_end = authorization_root + 1
+        while authorization_end < len(lines) and trace_indent(lines[authorization_end]) > authorization_indent:
+            authorization_end += 1
+        hidden_authorization_lines = set(range(authorization_root + 1, authorization_end))
+        hidden_call_count = sum(trace_call_line(lines[index]) for index in hidden_authorization_lines)
+        authorization_summary[authorization_root] = (
+            lines[authorization_root] + " (shared auth path summarized; %d calls omitted)" % hidden_call_count
+        )
+
+    unresolved_function_value_lines = {}
+    call_frame_stack = []
+    for index, line in enumerate(lines):
+        indent = trace_indent(line)
+        while call_frame_stack and call_frame_stack[-1][0] >= indent:
+            call_frame_stack.pop()
+        value = line.lstrip()
+        if value.startswith("UNRESOLVED "):
+            local_function_value = value[len("UNRESOLVED "):]
+            if local_function_value in TRACE_LOCAL_FUNCTION_VALUES:
+                parent = call_frame_stack[-1][1] if call_frame_stack else None
+                unresolved_function_value_lines.setdefault(parent, []).append(index)
+        if trace_call_line(line):
+            call_frame_stack.append((indent, index))
+
+    closure_summaries = {}
+    hidden_closure_lines = set()
+    for unresolved_line_indexes in unresolved_function_value_lines.values():
+        first = unresolved_line_indexes[0]
+        closure_summaries[first] = " " * trace_indent(lines[first]) + (
+            "UNRESOLVED local function values: %d" % len(unresolved_line_indexes)
+        )
+        hidden_closure_lines.update(unresolved_line_indexes[1:])
+
+    keep = [True] * len(lines)
+    for index, line in enumerate(lines):
+        if index in hidden_authorization_lines and not trace_marker_line(line):
+            keep[index] = False
+            continue
+        if index in hidden_closure_lines:
+            keep[index] = False
+            continue
+        if not trace_call_line(line):
+            continue
+        if "internal/application/" in line or "(seen above, touches tables)" in line:
+            continue
+        if index == authorization_root:
+            continue
+        has_child = index + 1 < len(lines) and trace_indent(lines[index + 1]) > trace_indent(line)
+        if not has_child:
+            keep[index] = False
+
+    compacted = []
+    for index, line in enumerate(lines):
+        if not keep[index]:
+            continue
+        if index in authorization_summary:
+            line = authorization_summary[index]
+        if index in closure_summaries:
+            line = closure_summaries[index]
+        compacted.append(compact_fanout(line))
+    return "\n".join(compacted) + ("\n" if output.endswith("\n") else "")
+
+
 def refresh_client(source_directory):
     mid_file = source_directory / "app" / "common" / "network" / "mid.lua"
     if not mid_file.is_file():
@@ -1505,6 +1616,7 @@ def main():
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--refresh-client", metavar="SRC_64")
     parser.add_argument("--refresh-coverage", metavar="FILE")
+    parser.add_argument("--full", action="store_true", help="show an unabridged trace")
     parser.add_argument("words", nargs="*")
     arguments = parser.parse_args()
     if arguments.refresh_client:
@@ -1524,7 +1636,8 @@ def main():
             show_entry(words[1])
             return 0
         if len(words) == 2 and words[0] == "trace" and words[1].isdigit():
-            sys.stdout.write(helper_trace(int(words[1])))
+            trace = helper_trace(int(words[1]))
+            sys.stdout.write(trace if arguments.full else compact_trace(trace))
             return 0
         if len(words) == 1:
             show_entry(words[0])

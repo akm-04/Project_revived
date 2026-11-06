@@ -1,0 +1,173 @@
+MID 1 handler stockruntime.BootstrapDispatcher internal/adapters/stockruntime/http_dispatchers.go:149
+BootstrapDispatcher.Dispatch internal/adapters/stockruntime/http_dispatchers.go:149
+  BootstrapService.MID1 internal/adapters/postgres/i4store/bootstrap_runtime.go:254  at internal/adapters/stockruntime/http_dispatchers.go:178
+    sql: read account_session_server_observations, gameplay_context_credentials
+    BootstrapService.validate internal/adapters/postgres/i4store/bootstrap_runtime.go:179  at internal/adapters/postgres/i4store/bootstrap_runtime.go:255
+      ValidatePersistenceContributors internal/application/bootstrap/persistence_contributor.go:30  at internal/adapters/postgres/i4store/bootstrap_runtime.go:192
+        FANOUT Name has 19 implementers, not followed: achievementstore.BootstrapContributor.Name, bookstore.BootstrapContributor.Name, characterbirth.BirthCompanion.Name, characterstore.BootstrapContributor.Name, characterstore.PetBootstrapContributor.Name, ... (+14 more)
+        FANOUT Required has 19 implementers, not followed: achievementstore.BootstrapContributor.Required, bookstore.BootstrapContributor.Required, characterbirth.BirthCompanion.Required, characterstore.BootstrapContributor.Required, characterstore.PetBootstrapContributor.Required, ... (+14 more)
+      ValidateDetailContributors internal/application/bootstrap/detail_contributor.go:24  at internal/adapters/postgres/i4store/bootstrap_runtime.go:195
+        FANOUT Name has 22 implementers, not followed: activitystore.BootstrapProjection.Name, adventure.Mode.Name, bookstore.BootstrapProjection.Name, campaign.Mode.Name, characterstore.HeroBootstrapProjection.Name, ... (+17 more)
+        FANOUT Claims has 22 implementers, not followed: activitystore.BootstrapProjection.Claims, adventure.Mode.Claims, bookstore.BootstrapProjection.Claims, campaign.Mode.Claims, characterstore.HeroBootstrapProjection.Claims, ... (+17 more)
+        validProjectionClaim internal/application/bootstrap/detail_contributor.go:65  at internal/application/bootstrap/detail_contributor.go:47
+        projectionClaimsOverlap internal/application/bootstrap/detail_contributor.go:87  at internal/application/bootstrap/detail_contributor.go:55
+      resolvedProfile internal/adapters/postgres/i4store/bootstrap_runtime.go:208  at internal/adapters/postgres/i4store/bootstrap_runtime.go:198
+    contextIDFromOperation internal/adapters/postgres/i4store/bootstrap_runtime.go:882  at internal/adapters/postgres/i4store/bootstrap_runtime.go:265
+      ContextIDFrom internal/domain/identity/types.go:31  at internal/adapters/postgres/i4store/bootstrap_runtime.go:884
+    credentialIDFromOperation internal/adapters/postgres/i4store/bootstrap_runtime.go:886  at internal/adapters/postgres/i4store/bootstrap_runtime.go:269
+    fixedTime.Now internal/application/workplace/claim.go:144  at internal/adapters/postgres/i4store/bootstrap_runtime.go:279
+    Runner.Run internal/foundation/tx/runner.go:20  at internal/adapters/postgres/i4store/bootstrap_runtime.go:287
+      UNRESOLVED local function values: 1
+      Runner.attempt internal/foundation/tx/runner.go:82  at internal/foundation/tx/runner.go:43
+        UNRESOLVED local function values: 6
+        Runner.event internal/foundation/tx/runner.go:270  at internal/foundation/tx/runner.go:88
+        transactionFinalizer.finish internal/foundation/tx/runner.go:259  at internal/foundation/tx/runner.go:104
+          transactionFinalizer.rollback internal/foundation/tx/runner.go:244  at internal/foundation/tx/runner.go:261
+            UNRESOLVED local function values: 1
+        applyTimeouts internal/foundation/tx/runner.go:219  at internal/foundation/tx/runner.go:109
+        IsDefiniteAbortError internal/foundation/tx/sqlstate.go:30  at internal/foundation/tx/runner.go:113
+        Set.Keep internal/foundation/changes/changes.go:39  at internal/foundation/tx/runner.go:133
+        FANOUT Resolve has 20 implementers, not followed: bookskill.resolver.Resolve, characterpractice.generationResolver.Resolve, combat.resolutionEvidence.Resolve, course.resolver.Resolve, dormhouse.resolver.Resolve, ... (+15 more)
+      waitDefiniteAbortRetry internal/foundation/tx/runner.go:204  at internal/foundation/tx/runner.go:48
+    BootstrapService.authenticatePair internal/adapters/postgres/i4store/bootstrap_runtime.go:471  at internal/adapters/postgres/i4store/bootstrap_runtime.go:288
+      sql: read account_sessions, accounts; lock account_sessions FOR UPDATE
+      loadSessionCredential internal/adapters/postgres/i4store/bootstrap_runtime.go:505  at internal/adapters/postgres/i4store/bootstrap_runtime.go:480
+        sql: read account_session_credentials
+        parseCredentialID internal/adapters/postgres/i4store/bootstrap_runtime.go:897  at internal/adapters/postgres/i4store/bootstrap_runtime.go:514
+        parseSessionID internal/adapters/postgres/i4store/realtime_authority.go:164  at internal/adapters/postgres/i4store/bootstrap_runtime.go:518
+      loadSessionCredential (seen above, touches tables)  at internal/adapters/postgres/i4store/bootstrap_runtime.go:484
+      loadAccountSession internal/adapters/postgres/i4store/bootstrap_runtime.go:547  at internal/adapters/postgres/i4store/bootstrap_runtime.go:495
+        parseAccountID internal/adapters/postgres/i4store/realtime_authority.go:157  at internal/adapters/postgres/i4store/bootstrap_runtime.go:559
+      AuthenticatePair internal/domain/identity/credentials.go:38  at internal/adapters/postgres/i4store/bootstrap_runtime.go:499
+    MID1Fingerprint internal/application/bootstrap/reconcile.go:16  at internal/adapters/postgres/i4store/bootstrap_runtime.go:292
+      FingerprintRequest internal/foundation/receipt/fingerprint.go:21  at internal/application/bootstrap/reconcile.go:17
+        encodeCanonical internal/foundation/receipt/fingerprint.go:35  at internal/foundation/receipt/fingerprint.go:24
+          writeBytes internal/foundation/receipt/fingerprint.go:165  at internal/foundation/receipt/fingerprint.go:68
+    loadPlayer internal/adapters/postgres/i4store/bootstrap_runtime.go:746  at internal/adapters/postgres/i4store/bootstrap_runtime.go:297
+      sql: read players
+    loadServerForMID1Admission internal/adapters/postgres/i4store/bootstrap_runtime.go:730  at internal/adapters/postgres/i4store/bootstrap_runtime.go:301
+      loadServerWithQuery internal/adapters/postgres/i4store/bootstrap_runtime.go:679  at internal/adapters/postgres/i4store/bootstrap_runtime.go:732
+        Server.Validate internal/domain/logicalserver/server.go:51  at internal/adapters/postgres/i4store/bootstrap_runtime.go:702
+      serverAdmissionFenceQuery internal/adapters/postgres/i4store/bootstrap_runtime.go:723  at internal/adapters/postgres/i4store/bootstrap_runtime.go:732
+        sql: read logical_servers; lock logical_servers FOR SHARE, logical_servers FOR UPDATE
+      serverAdmissionFenceQuery (seen above, touches tables)  at internal/adapters/postgres/i4store/bootstrap_runtime.go:735
+      loadPlayer (seen above, touches tables)  at internal/adapters/postgres/i4store/bootstrap_runtime.go:739
+    loadLiveContext internal/adapters/postgres/i4store/bootstrap_runtime.go:767  at internal/adapters/postgres/i4store/bootstrap_runtime.go:311
+      sql: read gameplay_contexts
+    BootstrapService.resolveBearerKey internal/adapters/postgres/i4store/bootstrap_runtime.go:201  at internal/adapters/postgres/i4store/bootstrap_runtime.go:316
+      KeyringBearerKeyResolver.ResolveBearerKey internal/application/identitylifecycle/key_resolver.go:55  at internal/adapters/postgres/i4store/bootstrap_runtime.go:203
+        BearerDerivationKey.Validate internal/application/identitylifecycle/key_resolver.go:15  at internal/application/identitylifecycle/key_resolver.go:60
+      StaticBearerKeyResolver.ResolveBearerKey internal/application/identitylifecycle/key_resolver.go:36  at internal/adapters/postgres/i4store/bootstrap_runtime.go:203
+    PlanMID1 internal/application/bootstrap/service.go:38  at internal/adapters/postgres/i4store/bootstrap_runtime.go:320
+      PlanCharacter internal/domain/logicalserver/bootstrap.go:43  at internal/application/bootstrap/service.go:42
+      PlanSelection internal/domain/identity/selection.go:27  at internal/application/bootstrap/service.go:46
+      DeriveGameplayBearer internal/domain/identity/credentials.go:56  at internal/application/bootstrap/service.go:50
+      MID1IsNew internal/domain/logicalserver/bootstrap.go:75  at internal/application/bootstrap/service.go:54
+    Store.FindTx internal/adapters/postgres/kernelstore/store.go:60  at internal/adapters/postgres/i4store/bootstrap_runtime.go:355
+      sql: read gxb_operation_receipts
+      ParseCanonicalJSON internal/foundation/policy/refs.go:115  at internal/adapters/postgres/kernelstore/store.go:100
+    validateStoredMID1Selection internal/adapters/postgres/i4store/bootstrap_runtime.go:927  at internal/adapters/postgres/i4store/bootstrap_runtime.go:364
+    ApplyLoginReconcilers internal/application/bootstrap/login_reconciler.go:40  at internal/adapters/postgres/i4store/bootstrap_runtime.go:367
+      ValidateLoginReconcilers internal/application/bootstrap/login_reconciler.go:23  at internal/application/bootstrap/login_reconciler.go:44
+        FANOUT Name has 5 implementers, not followed: i5.AwakeningBootstrap.Name, i5.MailExpiryLoginReconciler.Name, i5.MissionBootstrap.Name, i5.PetStarterLoginReconciler.Name, i5.SignInBootstrap.Name
+      FANOUT ReconcileCharacterLogin has 5 implementers, not followed: i5.AwakeningBootstrap.ReconcileCharacterLogin, i5.MailExpiryLoginReconciler.ReconcileCharacterLogin, i5.MissionBootstrap.ReconcileCharacterLogin, i5.PetStarterLoginReconciler.ReconcileCharacterLogin, i5.SignInBootstrap.ReconcileCharacterLogin
+      FANOUT Name has 5 implementers, not followed: i5.AwakeningBootstrap.Name, i5.MailExpiryLoginReconciler.Name, i5.MissionBootstrap.Name, i5.PetStarterLoginReconciler.Name, i5.SignInBootstrap.Name
+    Reconciler.ReconcileDirectoryTx internal/application/directorysync/service.go:63  at internal/adapters/postgres/i4store/bootstrap_runtime.go:371
+      Store.ReadCanonicalDirectoryTx internal/adapters/postgres/i5store/store.go:168  at internal/application/directorysync/service.go:67
+        sql: read player_profiles, player_progression
+        CanonicalSnapshot.Validate internal/application/directorysync/service.go:23  at internal/adapters/postgres/i5store/store.go:179
+      DirectoryLevelProjection.LockOwnedDirectoryTx internal/adapters/postgres/i4store/directory_level_projection.go:52  at internal/application/directorysync/service.go:74
+        sql: read player_directory_profiles; lock player_directory_profiles FOR UPDATE
+        ProjectionSnapshot.Validate internal/application/directorysync/service.go:38  at internal/adapters/postgres/i4store/directory_level_projection.go:60
+      DirectoryLevelProjection.ApplyOwnedDirectoryTx internal/adapters/postgres/i4store/directory_level_projection.go:66  at internal/application/directorysync/service.go:84
+        sql: write player_directory_profiles
+    BootstrapService.projectMID1Detail internal/adapters/postgres/i4store/bootstrap_runtime.go:454  at internal/adapters/postgres/i4store/bootstrap_runtime.go:375
+      BuildMID1Detail internal/projection/lobby/shapes.go:37  at internal/adapters/postgres/i4store/bootstrap_runtime.go:458
+        baseline internal/projection/lobby/shapes.go:90  at internal/projection/lobby/shapes.go:43
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroList
+          UNRESOLVED zeroMap
+          UNRESOLVED zeroList
+      FANOUT OverlayMID1 has 22 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, ... (+17 more)
+      FANOUT Name has 22 implementers, not followed: activitystore.BootstrapProjection.Name, adventure.Mode.Name, bookstore.BootstrapProjection.Name, campaign.Mode.Name, characterstore.HeroBootstrapProjection.Name, ... (+17 more)
+    Store.BindCharacterBootstrapOperation internal/adapters/postgres/contentstore/bootstrap_binding.go:15  at internal/adapters/postgres/i4store/bootstrap_runtime.go:386
+      Store.ActiveRevision internal/adapters/postgres/contentstore/store.go:623  at internal/adapters/postgres/contentstore/bootstrap_binding.go:22
+        Store.ReadActivation internal/adapters/postgres/contentstore/store.go:557  at internal/adapters/postgres/contentstore/store.go:627
+          sql: read gxb_content_activation
+    applyMID1PlayerRoot internal/adapters/postgres/i4store/bootstrap_runtime.go:811  at internal/adapters/postgres/i4store/bootstrap_runtime.go:390
+      sql: write logical_servers, player_directory_profiles, players
+    ApplyPersistenceContributors internal/application/bootstrap/persistence_contributor.go:54  at internal/adapters/postgres/i4store/bootstrap_runtime.go:398
+      FANOUT PersistCharacterBootstrap has 19 implementers, not followed: achievementstore.BootstrapContributor.PersistCharacterBootstrap, bookstore.BootstrapContributor.PersistCharacterBootstrap, characterbirth.BirthCompanion.PersistCharacterBootstrap, characterstore.BootstrapContributor.PersistCharacterBootstrap, characterstore.PetBootstrapContributor.PersistCharacterBootstrap, ... (+14 more)
+      FANOUT Name has 19 implementers, not followed: achievementstore.BootstrapContributor.Name, bookstore.BootstrapContributor.Name, characterbirth.BirthCompanion.Name, characterstore.BootstrapContributor.Name, characterstore.PetBootstrapContributor.Name, ... (+14 more)
+    Reconciler.ReconcileDirectoryTx (seen above, touches tables)  at internal/adapters/postgres/i4store/bootstrap_runtime.go:410
+    buildMID1Receipt internal/adapters/postgres/i4store/bootstrap_runtime.go:922  at internal/adapters/postgres/i4store/bootstrap_runtime.go:429
+      Receipt.Validate internal/foundation/receipt/receipt.go:42  at internal/adapters/postgres/i4store/bootstrap_runtime.go:924
+        MarshalCanonicalJSON internal/foundation/policy/refs.go:113  at internal/foundation/receipt/receipt.go:58
+    applyMID1ContextPlan internal/adapters/postgres/i4store/bootstrap_runtime.go:841  at internal/adapters/postgres/i4store/bootstrap_runtime.go:434
+      sql: read gameplay_context_credentials; write gameplay_context_credentials, gameplay_contexts
+    Store.PutTx internal/adapters/postgres/kernelstore/store.go:24  at internal/adapters/postgres/i4store/bootstrap_runtime.go:437
+      sql: write gxb_operation_receipts
+      Store.FindTx (seen above, touches tables)  at internal/adapters/postgres/kernelstore/store.go:47
+    BootstrapService.hydrateCommittedMID1 internal/adapters/postgres/i4store/bootstrap_runtime.go:962  at internal/adapters/postgres/i4store/bootstrap_runtime.go:448
+      sql: read gameplay_context_credentials
+      BootstrapService.authenticatePair (seen above, touches tables)  at internal/adapters/postgres/i4store/bootstrap_runtime.go:968
+      loadPlayer (seen above, touches tables)  at internal/adapters/postgres/i4store/bootstrap_runtime.go:972
+      loadServer internal/adapters/postgres/i4store/bootstrap_runtime.go:713  at internal/adapters/postgres/i4store/bootstrap_runtime.go:979
+        sql: read logical_servers
+      loadLiveContext (seen above, touches tables)  at internal/adapters/postgres/i4store/bootstrap_runtime.go:983
+  BootTracker.Record internal/projection/lobby/manifest.go:208  at internal/adapters/stockruntime/http_dispatchers.go:184
+    validateEvent internal/projection/lobby/manifest.go:175  at internal/projection/lobby/manifest.go:212
+  BootTracker.Correlate internal/projection/lobby/manifest.go:322  at internal/adapters/stockruntime/http_dispatchers.go:184
+    BootTracker.CorrelationTags internal/projection/lobby/manifest.go:304  at internal/projection/lobby/manifest.go:326
+  BootstrapDispatcher.logURL internal/adapters/stockruntime/http_dispatchers.go:205  at internal/adapters/stockruntime/http_dispatchers.go:190
+    Service.IssueLogURL internal/application/clientlog/service.go:116  at internal/adapters/stockruntime/http_dispatchers.go:210
+      MintCapability internal/domain/clientlog/clientlog.go:249  at internal/application/clientlog/service.go:120
+      Store.SaveGrant internal/adapters/postgres/clientlogstore/store.go:20  at internal/application/clientlog/service.go:126
+        sql: write client_log_capabilities
+    Service.FallbackLogURL internal/application/clientlog/service.go:133  at internal/adapters/stockruntime/http_dispatchers.go:212

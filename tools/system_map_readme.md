@@ -76,7 +76,7 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 python3 tools/system_map.py --write
 python3 tools/system_map.py --check
 python3 tools/system_map.py show <system|mid|table>
-python3 tools/system_map.py trace <mid>
+python3 tools/system_map.py trace <mid> [--full]
 python3 tools/system_map.py --refresh-client <src_64>
 python3 tools/system_map.py --refresh-coverage <one-mid-per-line-file>
 ```
@@ -100,11 +100,15 @@ remain conservative possibilities. From the registered dispatcher it follows the
 function-level call graph (each function once), printing `file:line`, SQL tables with read,
 write and `FOR UPDATE`/`FOR SHARE` (`conditional lock` when a branch appends the clause, so the
 caller's argument decides), objective fact kinds recorded, and push calls. A repeated function that
-touches tables prints `(seen above, touches tables)`. It prints
-`UNRESOLVED <expression>` for function values and dynamic routes it will not guess, `FANOUT` naming
-the implementers of an interface with more than three (a registry or per-mode port family; which one
-runs is decided at composition, so open the construction file), and a
-`BOUND` line when its node or depth limit stops the walk.
+touches tables prints `(seen above, touches tables)`.
+
+By default, `trace <mid>` compacts the shared `HeroDispatcher.actor` to
+`RealtimeAuthority.ResolveGameplayBearer` authentication walk to one summary and its SQL line.
+It drops non-application leaf calls with no children, limits each `FANOUT` to five names plus
+`... (+N more)`, and groups unresolved local function values (`cancel`, `release`, `body`,
+`acqCancel`, `txCancel`, `reconcileCancel`) into one count per frame. Application calls, every
+`sql:` line and lock clause, and all `FANOUT`, `UNRESOLVED`, and `BOUND` markers remain visible.
+Use `trace <mid> --full` for the original unabridged output.
 Registered wrappers that are not traversed are named in an `UNRESOLVED registered wrapper`
 line: the inner dispatcher walk omits their effects. SQL relation extraction remains lexical;
 it handles common CTE aliases and joins but is not a full PostgreSQL parser.
