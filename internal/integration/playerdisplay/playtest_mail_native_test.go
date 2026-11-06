@@ -219,8 +219,13 @@ func TestPlaytestClaimedMailHiddenFromListAndCounts(t *testing.T) {
 	claim := func(address mail.Address) httpedge.Response {
 		return dispatcher.Dispatch(ctx, playtestRequest(a, 369, map[string]any{"id": address.WireID, "is_region": false}))
 	}
-	if response := claim(addresses[0]); response.HTTPStatus != 200 {
+	if response := claim(addresses[0]); response.HTTPStatus != 200 || response.Body["is_shown"] != int64(0) {
 		t.Fatalf("single claim: %+v", response)
+	}
+	singlePage := dispatcher.Dispatch(ctx, playtestRequest(a, 368, map[string]any{"load_num": int64(20)}))
+	singleRows, singleRowsOK := singlePage.Body["mail_list"].([]any)
+	if singlePage.HTTPStatus != 200 || singlePage.Body["total"] != int64(5) || singlePage.Body["new_mail_total"] != int64(5) || !singleRowsOK || len(singleRows) != 5 {
+		t.Fatalf("list immediately after single claim: %+v", singlePage)
 	}
 	batch := dispatcher.Dispatch(ctx, playtestRequest(a, 370, map[string]any{"normal_ids": strconv.FormatInt(addresses[1].WireID, 10) + "|" + strconv.FormatInt(addresses[2].WireID, 10), "region_ids": ""}))
 	if batch.HTTPStatus != 200 {
