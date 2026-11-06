@@ -121,7 +121,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if e = root.Facts.Validate(c); e != nil {
+	if e = s.validateFacts(ctx, t, root.Facts, c, d.ContentRevision); e != nil {
 		return nil, e
 	}
 	before := root.Facts.Clone()
@@ -187,6 +187,9 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 				cost.Scalars["crystal"] = n
 			}
 			b.Level = b.Job.Target
+			if book.ExtensionBuilding(cmd.Type) {
+				b.CatalogRevision = b.Job.Revision
+			}
 			b.Job = nil
 			b.Recent = true
 			st.Buildings[cmd.Type] = b
@@ -323,7 +326,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if _, e = st.Settle(at); e != nil {
 		return nil, e
 	}
-	if e = st.Validate(c); e != nil {
+	if e = s.validateFacts(ctx, t, st, c, d.ContentRevision); e != nil {
 		return nil, e
 	}
 	if !reflect.DeepEqual(before, st) {

@@ -16,9 +16,18 @@ func TestI7C2DBookCoreSourceRoundtripRollbackPreserve(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
 	a := actor(t, p)
-	c, e := (contentstore.Store{Queryer: p}).BookCatalogTx(ctx, p, rev)
-	if e != nil || len(c.Buildings) != 112 || len(c.Skills) != 399 {
-		t.Fatal("source binder", e)
+	content := contentstore.Store{Queryer: p}
+	active, on, e := content.BookInputsActive(ctx)
+	if e != nil || !on || active == rev {
+		t.Fatalf("new generation must install beside active legacy R1: active %q new %q err %v", active, rev, e)
+	}
+	legacy, e := content.BookCatalogTx(ctx, p, active)
+	if e != nil || len(legacy.Buildings) != 112 || len(legacy.Skills) != 399 {
+		t.Fatal("legacy source binder", e)
+	}
+	c, e := content.BookCatalogTx(ctx, p, rev)
+	if e != nil || len(c.Buildings) != 135 || len(c.Skills) != 399 {
+		t.Fatal("new source binder", e)
 	}
 	if c.Books[130001020].PieceCount != 40 || c.Books[130001021].PieceCount != 45 {
 		t.Fatal("qualified anomaly policy")
@@ -36,7 +45,7 @@ func TestI7C2DBookCoreSourceRoundtripRollbackPreserve(t *testing.T) {
 		t.Fatal(e)
 	}
 	root, e := store.ReadRootTx(ctx, p, a.PlayerID)
-	if e != nil || root.Facts.Validate(c) != nil || root.Version != 1 || root.Facts.Buildings[4].Level != 1 || len(root.Facts.Skills) != 0 {
+	if e != nil || root.Facts.Validate(c) != nil || root.Facts.Validate(legacy) != nil || root.Version != 1 || root.Facts.Buildings[4].Level != 1 || len(root.Facts.Skills) != 0 {
 		t.Fatal(root, e)
 	}
 	tr, e = p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
@@ -92,7 +101,7 @@ func TestI7C2DBookCoreSourceRoundtripRollbackPreserve(t *testing.T) {
 		t.Fatal(e)
 	}
 	root, e = store.ReadRootTx(ctx, p, a.PlayerID)
-	if e != nil || root.Facts.Buildings[4].Level != 50 || root.Version != 2 || root.Facts.Validate(c) != nil {
+	if e != nil || root.Facts.Buildings[4].Level != 50 || root.Version != 2 || root.Facts.Validate(c) != nil || root.Facts.Validate(legacy) != nil {
 		t.Fatal("preserve explicit", root, e)
 	}
 }

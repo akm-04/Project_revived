@@ -18,56 +18,68 @@ func generatedBookInputCatalog(t *testing.T) BookInputCatalog {
 	return catalog
 }
 
+// schema2BookInputCatalog is the generated payload itself; generation is the
+// only source of schema2 rows.
 func schema2BookInputCatalog(t *testing.T) BookInputCatalog {
 	t.Helper()
+	return generatedBookInputCatalog(t)
+}
+
+// legacyBookInputCatalog is a DTO-level projection of the current schema2
+// payload, not the retained old manifest or byte-identical old artifact. It
+// proves only that schema1 validation still accepts the unchanged 1/3/4 rows.
+func legacyBookInputCatalog(t *testing.T) BookInputCatalog {
+	t.Helper()
 	catalog := generatedBookInputCatalog(t)
-	catalog.SchemaVersion = 2
-	added := []BookBuildingRule{
-		{Type: 2, Level: 1, Duration: 43200, RequiresType: 1, RequiresLevel: 2, Resources: map[string]int64{"magic_dust": 25000, "magic_liquid": 25000, "magic_energy": 150}},
-		{Type: 2, Level: 2, Duration: 86400, RequiresType: 1, RequiresLevel: 3, Resources: map[string]int64{"magic_dust": 50000, "magic_liquid": 50000, "magic_energy": 400}},
-		{Type: 2, Level: 3, Duration: 129600, RequiresType: 1, RequiresLevel: 4},
-		{Type: 2, Level: 4, Duration: 172800, RequiresType: 1, RequiresLevel: 5},
-		{Type: 2, Level: 5, Duration: 216000, RequiresType: 1, RequiresLevel: 5},
-		{Type: 2, Level: 6, Duration: 259200, RequiresType: 1, RequiresLevel: 6},
-		{Type: 2, Level: 7, Duration: 302400, RequiresType: 1, RequiresLevel: 6},
-		{Type: 2, Level: 8},
-		{Type: 5, Level: 1, Duration: 43200, RequiresType: 1, RequiresLevel: 2},
-		{Type: 5, Level: 2, Duration: 86400, RequiresType: 1, RequiresLevel: 3},
-		{Type: 5, Level: 3, Duration: 129600, RequiresType: 1, RequiresLevel: 4},
-		{Type: 5, Level: 4, Duration: 172800, RequiresType: 1, RequiresLevel: 5},
-		{Type: 5, Level: 5},
-		{Type: 6, Level: 1, Duration: 43200, RequiresType: 1, RequiresLevel: 2},
-		{Type: 6, Level: 2, Duration: 86400, RequiresType: 1, RequiresLevel: 3},
-		{Type: 6, Level: 3, Duration: 129600, RequiresType: 1, RequiresLevel: 4},
-		{Type: 6, Level: 4, Duration: 172800, RequiresType: 1, RequiresLevel: 5},
-		{Type: 6, Level: 5},
-		{Type: 7, Level: 1, Duration: 43200, RequiresType: 2, RequiresLevel: 2},
-		{Type: 7, Level: 2, Duration: 86400, RequiresType: 2, RequiresLevel: 3},
-		{Type: 7, Level: 3, Duration: 129600, RequiresType: 2, RequiresLevel: 4},
-		{Type: 7, Level: 4, Duration: 172800, RequiresType: 2, RequiresLevel: 5},
-		{Type: 7, Level: 5, RequiresType: 2},
+	catalog.SchemaVersion = 1
+	buildings := []BookBuildingRule{}
+	for _, rule := range catalog.Buildings {
+		if rule.Type == 1 || rule.Type == 3 || rule.Type == 4 {
+			buildings = append(buildings, rule)
+		}
 	}
-	catalog.Buildings = append(append([]BookBuildingRule(nil), catalog.Buildings...), added...)
+	catalog.Buildings = buildings
 	return catalog
 }
 
-func TestBookInputCatalogSchema1RemainsQualified(t *testing.T) {
+func TestBookInputCatalogGeneratedSchema2Qualified(t *testing.T) {
 	catalog, err := Load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if catalog.BookInputs.SchemaVersion != 1 || len(catalog.BookInputs.Buildings) != 112 {
-		t.Fatalf("schema1 book inputs no longer load: version %d rows %d", catalog.BookInputs.SchemaVersion, len(catalog.BookInputs.Buildings))
+	if catalog.BookInputs.SchemaVersion != 2 || len(catalog.BookInputs.Buildings) != 135 {
+		t.Fatalf("generated book inputs: version %d rows %d", catalog.BookInputs.SchemaVersion, len(catalog.BookInputs.Buildings))
+	}
+	counts := map[int64]int{}
+	var terminal BookBuildingRule
+	for _, rule := range catalog.BookInputs.Buildings {
+		counts[rule.Type]++
+		if rule.Type == 2 && rule.Level == 8 {
+			terminal = rule
+		}
+	}
+	want := map[int64]int{1: 6, 2: 8, 3: 6, 4: 100, 5: 5, 6: 5, 7: 5}
+	for sourceType, n := range want {
+		if counts[sourceType] != n {
+			t.Fatalf("type %d rows = %d, want %d", sourceType, counts[sourceType], n)
+		}
+	}
+	if terminal.Type != 2 || terminal.Level != 8 || terminal.Duration != 0 || terminal.RequiresType != 0 || terminal.RequiresLevel != 0 {
+		t.Fatalf("terminal workbench row = %+v", terminal)
 	}
 }
 
-func TestBookInputCatalogSchema2Qualified(t *testing.T) {
-	catalog := schema2BookInputCatalog(t)
+func TestBookInputCatalogLegacyDTOProjectionQualified(t *testing.T) {
+	catalog := legacyBookInputCatalog(t)
 	if err := catalog.Validate(); err != nil {
 		t.Fatal(err)
 	}
-	if len(catalog.Buildings) != 135 {
-		t.Fatalf("schema2 building rows = %d, want 135", len(catalog.Buildings))
+	counts := map[int64]int{}
+	for _, rule := range catalog.Buildings {
+		counts[rule.Type]++
+	}
+	if len(catalog.Buildings) != 112 || counts[1] != 6 || counts[3] != 6 || counts[4] != 100 {
+		t.Fatalf("legacy projection rows=%d counts=%v", len(catalog.Buildings), counts)
 	}
 }
 
@@ -86,7 +98,7 @@ func TestBookInputCatalogRejectsMalformedSchemas(t *testing.T) {
 		},
 		{
 			name:  "schema1 carrying a schema2 building type",
-			build: generatedBookInputCatalog,
+			build: legacyBookInputCatalog,
 			mutate: func(c *BookInputCatalog) {
 				c.Buildings = append([]BookBuildingRule(nil), c.Buildings...)
 				c.Buildings[0].Type = 2
