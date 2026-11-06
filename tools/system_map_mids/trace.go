@@ -498,6 +498,7 @@ var (
 
 var traceKeywords = map[string]bool{
 	"select": true, "where": true, "set": true, "values": true, "lateral": true,
+	"join": true, "update": true,
 }
 
 func traceTableName(raw string) string {
@@ -569,15 +570,24 @@ func traceSQLTables(text string) ([]string, []string, []string) {
 			}
 		}
 	}
-	for _, match := range traceRead.FindAllStringSubmatchIndex(text, -1) {
-		if traceSkipFunction(text, match) {
-			continue
+	for offset := 0; offset < len(text); {
+		match := traceRead.FindStringSubmatchIndex(text[offset:])
+		if len(match) == 0 {
+			break
 		}
-		raw := text[match[2]:match[3]]
-		table := traceTableName(raw)
-		if table != "" && (!aliases[table] || strings.Contains(raw, ".")) {
-			read[table] = true
+		for index, position := range match {
+			if position >= 0 {
+				match[index] = offset + position
+			}
 		}
+		if !traceSkipFunction(text, match) {
+			raw := text[match[2]:match[3]]
+			table := traceTableName(raw)
+			if table != "" && (!aliases[table] || strings.Contains(raw, ".")) {
+				read[table] = true
+			}
+		}
+		offset = match[0] + 1
 	}
 	for _, location := range traceLock.FindAllStringSubmatchIndex(text, -1) {
 		start := location[0] - 800
