@@ -181,6 +181,18 @@ func TestTaskModeExactCompiledCatalog(t *testing.T) {
 	if len(catalog.Rules) != 6 || len(catalog.Schedule) != 91 || len(catalog.Rewards) != 17 || len(catalog.HeroCamps) != 569 {
 		t.Fatal("exact source profile changed")
 	}
+	// D512: the compiled schedule still contains mode 6, but no week may run it;
+	// a faction entry resolves to the next non-faction entry without shifting weeks.
+	base := time.Date(2017, 8, 10, 21, 0, 0, 0, time.UTC)
+	for index, entry := range catalog.Schedule {
+		rotation, err := catalog.Rotation(base.Add(time.Duration(index) * 7 * 24 * time.Hour))
+		if err != nil || rotation.Number != int64(index+1) || rotation.Mode == TaskModeCamp {
+			t.Fatalf("schedule %d faction resolution: %+v %v", index, rotation, err)
+		}
+		if entry.Mode != TaskModeCamp && rotation.Mode != entry.Mode {
+			t.Fatalf("schedule %d non-faction mode changed: %+v", index, rotation)
+		}
+	}
 }
 
 func TestTaskModePeriodDailyCutoffAndRetiredPeriod(t *testing.T) {

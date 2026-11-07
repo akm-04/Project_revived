@@ -73,6 +73,8 @@ def build_task_modes(blobs, parse, parse_indexed, indexed_field):
                           hero_slots=int(row['partner_num']), pet_allowed=row['can_pet_join'] == '1',
                           leader_allowed=row['can_leader_join'] == '1', reset_defense=row['team_reset'] == '1',
                           banned_tables=[] if row['banned_partner'] == '0' else _ints(row['banned_partner']), buff_groups=groups))
+    # PRIVATE_POLICY D512: the source's unnamed 4th column (values 1..17) has no
+    # client table mapping an index to a ban or camp set, so it stays dropped.
     schedule = [dict(date=row['id'], mode=int(row['mode']), submode=int(row['submode']))
                 for row in sorted(table('arena_mode_schedule'), key=lambda row: row['id'])]
     rewards = []
