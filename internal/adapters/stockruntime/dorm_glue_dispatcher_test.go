@@ -54,5 +54,8 @@ func TestDormGlueDispatcherUsesStockEmptyRequestAndRejectsUnsafeSuccess(t *testi
 		if response.Body["error_code"] != int64(1) {
 			t.Fatalf("stock refusal body %v", response.Body)
 		}
+		if cell.status == 409 && len(response.Body) != 1 {
+			t.Fatalf("conflict refusal body must be only error_code: %v", response.Body)
+		}
 	}
 }
