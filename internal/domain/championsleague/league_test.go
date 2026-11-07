@@ -58,6 +58,34 @@ func TestLeaguePrivateScoreFairnessConservation(t *testing.T) {
 		}
 	}
 }
+func TestLeagueChallengeRankPolicy(t *testing.T) {
+	catalog := catalog(t)
+	tests := []struct {
+		name         string
+		attackerRank int64
+		defenderRank int64
+		allowed      bool
+	}{
+		{name: "better rank regardless of distance", attackerRank: 12, defenderRank: 1, allowed: true},
+		{name: "same rank", attackerRank: 12, defenderRank: 12},
+		{name: "worse rank at radius", attackerRank: 12, defenderRank: 22, allowed: true},
+		{name: "worse rank outside radius", attackerRank: 12, defenderRank: 23},
+		{name: "missing attacker rank", defenderRank: 1},
+		{name: "missing defender rank", attackerRank: 1},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if allowed := catalog.CanChallenge(test.attackerRank, test.defenderRank); allowed != test.allowed {
+				t.Fatalf("CanChallenge(%d, %d) = %t", test.attackerRank, test.defenderRank, allowed)
+			}
+		})
+	}
+	narrowCatalog := catalog
+	narrowCatalog.OpponentRadius = 2
+	if !narrowCatalog.CanChallenge(30, 32) || narrowCatalog.CanChallenge(30, 33) {
+		t.Fatal("challenge radius ignored the catalog policy")
+	}
+}
 func TestLeagueProtectionFrenzyBoundaries(t *testing.T) {
 	c := catalog(t)
 	at := time.Date(2026, 10, 20, 12, 50, 0, 0, time.UTC)
