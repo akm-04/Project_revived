@@ -30,7 +30,7 @@ import (
 func marchNewServer(t *testing.T, p *pg.Pool) identity.LogicalServerID {
 	t.Helper()
 	var server int64
-	if e := p.QueryRow(ctx, `SELECT COALESCE(MAX(logical_server_id),0)+1 FROM logical_servers`).Scan(&server); e != nil {
+	if e := p.QueryRow(ctx, `SELECT MIN(s) FROM generate_series(1,20000) s WHERE NOT EXISTS(SELECT 1 FROM logical_servers WHERE logical_server_id=s)`).Scan(&server); e != nil {
 		t.Fatal(e)
 	}
 	exec(t, p, `INSERT INTO logical_servers(logical_server_id,name,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,created_at)VALUES($1,'march-scale-test',true,true,true,$1*100000+25001,($1+1)*100000-1,clock_timestamp())`, server)
