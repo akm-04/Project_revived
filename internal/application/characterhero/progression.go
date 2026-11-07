@@ -13,6 +13,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -424,6 +425,11 @@ func (s Service) Evolve(ctx context.Context, actor identity.ActorContext, partne
 		}
 		if err := s.ProgressionStore.SaveHeroProgressionTx(txctx, scope.Tx, next, old); err != nil {
 			return err
+		}
+		if logID, ok := lib.StarLogID(next.Star); ok {
+			if err := s.recordHeroJournalTx(txctx, scope.Tx, actor.PlayerID, next.PartnerID, logID, boundOp.StartedAt); err != nil {
+				return err
+			}
 		}
 		payload, err := json.Marshal(progressionReceipt{PartnerID: next.PartnerID, Star: next.Star, Level: next.Level, Exp: next.Exp})
 		if err != nil {

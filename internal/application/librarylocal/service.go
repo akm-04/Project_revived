@@ -236,6 +236,8 @@ type LibraryPort interface {
 	InsertCGClaimTx(context.Context, tx.Tx, lib.CGClaimFact) (bool, error)
 	ListBackgroundsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.BackgroundFact, error)
 	UnlockBackgroundTx(context.Context, tx.Tx, lib.BackgroundFact) (bool, error)
+	ListHeroLogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.HeroLogFact, error)
+	InsertHeroLogTx(context.Context, tx.Tx, lib.HeroLogFact) (bool, error)
 }
 type ContentPort interface {
 	LibraryInputsActive(context.Context) (string, bool, error)
@@ -754,7 +756,22 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				}
 			}
 			if facts.Favor > oldFavor {
+				for _, logID := range lib.FavorLogIDsCrossed(oldFavor, facts.Favor) {
+					if _, e = s.Library.InsertHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: logID, OccurredAt: d.DecisionAt}); e != nil {
+						return e
+					}
+				}
 				if e = s.recordIntimacy(ctx, sc.Tx, d.Operation, a.PlayerID); e != nil {
+					return e
+				}
+			}
+			if !wasMarried && facts.Married {
+				if _, e = s.Library.InsertHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: lib.LogMarried, OccurredAt: d.DecisionAt}); e != nil {
+					return e
+				}
+			}
+			if d.Command.Family == TalkAward && out.HasDialog && out.Dialog.IsAwarded {
+				if e = s.recordDialogueLogsTx(ctx, sc.Tx, a.PlayerID, d.Command.PartnerID, d.DecisionAt); e != nil {
 					return e
 				}
 			}
@@ -773,7 +790,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 					return readErr
 				}
 				out.PartnerDialogs = projectPartnerDialogs(catalog, rule.DialogEnabled, facts.Favor, facts.Married, d.Command.PartnerID, storedDialogs)
-				out.PartnerActs = projectPartnerActs(d.Command.PartnerID, actAwards)
+				out.PartnerActs = projectPartnerActs(catalog, d.Command.PartnerID, facts.Favor, actAwards)
 			}
 		}
 		if e = s.putReceipt(ctx, sc.Tx, d, out); e != nil {

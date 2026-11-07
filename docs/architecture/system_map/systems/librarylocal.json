@@ -309,6 +309,7 @@
    "player_library_backgrounds",
    "player_library_cg_claims",
    "player_library_dialogs",
+   "player_library_hero_logs",
    "player_library_heroes",
    "player_library_partner_missions",
    "player_library_roots",
@@ -331,6 +332,7 @@
    "player_library_backgrounds",
    "player_library_cg_claims",
    "player_library_dialogs",
+   "player_library_hero_logs",
    "player_library_heroes",
    "player_library_partner_missions",
    "player_library_roots",
@@ -344,6 +346,7 @@
    "player_library_backgrounds",
    "player_library_cg_claims",
    "player_library_dialogs",
+   "player_library_hero_logs",
    "player_library_heroes",
    "player_library_partner_missions",
    "player_library_roots",
@@ -359,6 +362,7 @@
   ],
   "unit": [
    "command_reward_test.go",
+   "inputs_test.go",
    "roll_policy_test.go"
   ]
  }

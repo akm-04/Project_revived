@@ -2706,6 +2706,9 @@
     "*FindTx",
     "*PutTx"
    ],
+   "store:librarystore": [
+    "*RecordHeroLogTx"
+   ],
    "workplace": [
     "*Now"
    ]
@@ -4270,11 +4273,13 @@
     "*EnsurePlayerRootTx",
     "*InsertActAwardTx",
     "*InsertCGClaimTx",
+    "*InsertHeroLogTx",
     "*InsertTalkClaimTx",
     "*ListActAwardsTx",
     "*ListBackgroundsTx",
     "*ListCGClaimsTx",
     "*ListDialogsTx",
+    "*ListHeroLogsTx",
     "*ListHeroesTx",
     "*ListMissionsTx",
     "*ListTalkClaimsTx",

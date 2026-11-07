@@ -343,7 +343,8 @@
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
-  "internal/adapters/postgres/kernelstore"
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/librarystore"
  ],
  "tables": {
   "owned": [
@@ -394,6 +395,7 @@
    "player_hero_skin_entitlements",
    "player_heroes",
    "player_item_stacks",
+   "player_library_heroes",
    "players"
   ],
   "written": [
@@ -401,7 +403,8 @@
    "player_hero_live_entitlements",
    "player_hero_roots",
    "player_hero_skin_entitlements",
-   "player_heroes"
+   "player_heroes",
+   "player_library_hero_logs"
   ]
  },
  "tests": {

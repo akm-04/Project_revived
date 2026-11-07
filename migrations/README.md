@@ -43,3 +43,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00141: I9-10 D510 random Dorm visits: login-activity index for the 256 most recently active same-server players.
 - 00143: I9-10 D512 operator-configurable Top Floor girl bans by mode and rotation.
 - 00150: I9-10A Event Centre notice board (MIDs 1083-1087) stored server combat reports, one row per player report id retained by the board history. Empty on upgrade.
+- 00151: I9-10 bugs 51-53: Girls Log milestones (player, hero, log id) written by the summon facet, favor stages, dialogue awards, marriage, star-up, promotion and awakening. Empty on upgrade.

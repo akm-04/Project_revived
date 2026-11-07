@@ -720,6 +720,7 @@
    "player_library_backgrounds": "librarylocal",
    "player_library_cg_claims": "librarylocal",
    "player_library_dialogs": "librarylocal",
+   "player_library_hero_logs": "librarylocal",
    "player_library_heroes": "librarylocal",
    "player_library_partner_missions": "librarylocal",
    "player_library_roots": "librarylocal",
@@ -904,7 +905,7 @@
    "tables": 0
   },
   {
-   "callees": 23,
+   "callees": 24,
    "callers": 15,
    "mids": 21,
    "name": "characterhero",
@@ -1216,7 +1217,7 @@
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
    "purpose": "",
-   "tables": 9
+   "tables": 10
   },
   {
    "callees": 13,

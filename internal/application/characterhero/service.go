@@ -35,6 +35,12 @@ type HeroAppearanceStore interface {
 type ActorFencer interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
+
+// HeroJournal is the Library owner's Girls Log port. Character events (star,
+// promotion, awakening) are recorded where they happen, in the same transaction.
+type HeroJournal interface {
+	RecordHeroLogTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
+}
 type ContentGate interface {
 	HeroCoreActive(context.Context) (string, bool, error)
 	HeroKind(context.Context, string, int64) (character.HeroKind, error)
@@ -59,6 +65,7 @@ type Service struct {
 	AwakeningEquipment        appi5.AwakeningEquipmentPort
 	Awakening                 AwakeningMutationStore
 	FreshFacets               HeroLocalFacetInitializer
+	Journals                  HeroJournal
 	Runner                    tx.Runner
 	Timed                     appgeneration.TimedRunner
 	Store                     Store
@@ -95,6 +102,16 @@ type Service struct {
 func profile() tx.Profile {
 	return tx.Profile{Name: "CA2_HERO_CORE", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 8 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 12 * time.Second}
 }
+
+// recordHeroJournalTx writes a Girls Log milestone when the production
+// composition supplies the Library journal. Nil keeps standalone compositions.
+func (s Service) recordHeroJournalTx(ctx context.Context, t tx.Tx, player identity.PlayerID, partnerID, logID int64, at time.Time) error {
+	if s.Journals == nil {
+		return nil
+	}
+	return s.Journals.RecordHeroLogTx(ctx, t, player, partnerID, logID, at)
+}
+
 func (s Service) validate() error {
 	if s.Runner.DB == nil || s.Store == nil || s.Fencer == nil || s.Content == nil || s.Receipts == nil || s.ReceiptRead == nil {
 		return errors.New("character hero: incomplete service")

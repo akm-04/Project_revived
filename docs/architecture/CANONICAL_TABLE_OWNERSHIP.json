@@ -2516,6 +2516,22 @@
       ],
       "write_exceptions": []
     },
+    "player_library_hero_logs": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00151_i9_10_intimacy_hero_logs.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
     "player_library_admissions": {
       "owner": "library-local-progression",
       "migration": "migrations/00049_i7c2b_library_inputs.sql",
