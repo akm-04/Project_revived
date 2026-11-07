@@ -4,9 +4,11 @@ package playerdisplay_test
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	d "gxb.local/backend/v2/internal/domain/topfloor"
 )
 
 // TestI9_10TopFloorTaskViewerVisibilityNative proves D512's read-only mode state:
@@ -69,6 +71,14 @@ func TestI9_10TopFloorTaskViewerVisibilityNative(t *testing.T) {
 	}
 	if scalar(t, database, `SELECT count(*) FROM top_floor_task_players WHERE logical_server_id=$1`, int64(server)) != 0 {
 		t.Fatal("viewer MID created a task player")
+	}
+
+	// The server-level gate stays hard: below it, even the viewer state refuses.
+	belowServer := rankingServer(t, database)
+	below, _, _ := topFloorPlayer(t, database, belowServer)
+	exec(t, database, `UPDATE player_directory_profiles SET lev=59 WHERE player_id >= $1 AND player_id < $2`, int64(belowServer)*100000, (int64(belowServer)+1)*100000)
+	if _, err := service.LoadTask(ctx, below, op(), false); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("viewer below the server level answered: %v", err)
 	}
 }
 
