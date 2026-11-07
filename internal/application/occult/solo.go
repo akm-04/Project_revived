@@ -213,7 +213,18 @@ func (s Mode) CreateSolo(c context.Context, a identity.ActorContext, chapterID i
 		return nil, d.ErrInvalid
 	}
 	if loaded.view != nil {
-		return s.heldRoom(c, a, loaded, chapterID, d.SingleCampaignType)
+		if loaded.view.state.ChapterID == chapterID && loaded.view.state.CampaignType == d.SingleCampaignType {
+			return s.heldRoom(c, a, loaded, chapterID, d.SingleCampaignType)
+		}
+		// PRIVATE_POLICY: the stock client's Single button sends 2366 without
+		// leaving a held room, and shows no toast for a bare refusal. Close the
+		// player's own unstarted, single-member team room and start Single. Any
+		// other held room still refuses.
+		ownEmptyTeamRoom := loaded.view.state.CampaignType == d.MultiCampaignType &&
+			loaded.view.room.Owner == a.PlayerID && !loaded.view.state.Started() && len(loaded.view.room.Members()) == 1
+		if !ownEmptyTeamRoom {
+			return nil, fmt.Errorf("%w: a held %d room blocks a single room", d.ErrRefused, loaded.view.state.CampaignType)
+		}
 	}
 	if loaded.tickets.Tickets < 1 {
 		return nil, economy.ErrInsufficientBalance
@@ -253,7 +264,9 @@ func (s Mode) heldRoom(c context.Context, a identity.ActorContext, loaded snapsh
 	if err != nil {
 		return nil, err
 	}
-	body["function_type"] = int64(roomChangeFunction)
+	if loaded.view.state.Started() {
+		body["function_type"] = int64(roomChangeFunction)
+	}
 	return body, nil
 }
 
@@ -336,7 +349,13 @@ func (s Mode) roomChange(c context.Context, a identity.ActorContext, op operatio
 	if err != nil {
 		return nil, err
 	}
-	body["function_type"] = int64(roomChangeFunction)
+	// ROOM_CHANGE tells the client to leave prepare for the sub-map or to close
+	// it after leaving. An unstarted room reply must not carry it: the create and
+	// join callbacks open occult_prepare themselves, and the client's deferred
+	// close coroutine would otherwise close the window they just opened.
+	if loaded.view == nil || loaded.view.state.Started() {
+		body["function_type"] = int64(roomChangeFunction)
+	}
 	return body, nil
 }
 

@@ -13,14 +13,14 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func playerInfo(profile playerdirectory.Profile, online bool) map[string]any {
+func playerInfo(profile playerdirectory.Profile, online bool, force int64) map[string]any {
 	presence := int64(0)
 	if online {
 		presence = 1
 	}
 	return map[string]any{"player_id": int64(profile.PlayerID), "player_name": profile.Name, "avatar_id": profile.AvatarID,
 		"avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "conquer_lev": profile.ConquerLevel, "conquer_loop_id": profile.ConquerLoopID,
-		"is_online": presence}
+		"is_online": presence, "force": force}
 }
 
 // chapterFraction is the 0..1 chapter completion the client's progress field
@@ -69,7 +69,7 @@ func (s Mode) stateBody(c context.Context, q tx.Queryer, a identity.ActorContext
 		if !found {
 			return nil, d.ErrUnavailable
 		}
-		info := playerInfo(record, online[member])
+		info := playerInfo(record, online[member], state.Force(int64(member)))
 		dispatched, dead := state.HeroCounts(int64(member))
 		memberIDs = append(memberIDs, int64(member))
 		memberInfos = append(memberInfos, info)

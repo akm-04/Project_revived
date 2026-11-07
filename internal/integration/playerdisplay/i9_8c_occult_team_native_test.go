@@ -15,6 +15,7 @@ import (
 	cb "gxb.local/backend/v2/internal/application/combat"
 	oc "gxb.local/backend/v2/internal/application/occult"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -577,4 +578,84 @@ func (occultstoreForTest) insertReport(c context.Context, p *pg.Pool, key string
 	_, err := p.Raw().Exec(c, `INSERT INTO occult_reports(report_id,logical_server_id,room_id,member_ids,content,created_at,expires_at)
 		VALUES($1,$2,$3,ARRAY[$4]::bigint[],'{"battle_report":"{}","awards":{}}'::jsonb,$5,$5::timestamptz+interval '7 days')`, key, server, room, member, at)
 	return err
+}
+
+// TestI9_10OccultCreateReplyAndSingleOverOwnRoomNative covers the real-client
+// retest: a team create must not announce ROOM_CHANGE (the client opens the
+// prepare window itself), member_infos must carry force, and Single may replace
+// the player's own unstarted single-member team room.
+func TestI9_10OccultCreateReplyAndSingleOverOwnRoomNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, _ := occultOwner(t, p, server, 2)
+	b, _ := occultOwner(t, p, server, 2)
+	c, _ := occultOwner(t, p, server, 2)
+	empty, _ := occultOwner(t, p, server, 0)
+	s, _ := occultTestMode(t, p)
+
+	created, err := s.CreateTeam(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := occultRoomID(t, created)
+	if _, announced := created["function_type"]; announced {
+		t.Fatalf("an unstarted team create must not announce ROOM_CHANGE: %#v", created)
+	}
+	roomInfo, _ := created["room_info"].(map[string]any)
+	members, _ := roomInfo["member_infos"].([]map[string]any)
+	if len(members) != 1 {
+		t.Fatalf("member_infos %#v", roomInfo)
+	}
+	force, ok := members[0]["force"].(int64)
+	if !ok || force <= 0 {
+		t.Fatalf("member force %#v", members[0])
+	}
+
+	repeated, err := s.CreateTeam(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal("repeat create", err)
+	}
+	if occultRoomID(t, repeated) != roomID {
+		t.Fatalf("repeat create replaced the room: %#v", repeated)
+	}
+	if _, announced := repeated["function_type"]; announced {
+		t.Fatalf("a repeated team create must not announce ROOM_CHANGE: %#v", repeated)
+	}
+
+	solo, err := s.CreateSolo(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal("single over the own empty team room", err)
+	}
+	soloRoom := occultRoomID(t, solo)
+	if soloRoom == roomID {
+		t.Fatal("single reused the team room")
+	}
+	state := occultRoomState(t, p, soloRoom)
+	if state.CampaignType != d.SingleCampaignType || !state.Started() {
+		t.Fatalf("solo room state %+v", state)
+	}
+	if solo["function_type"] != int64(1) {
+		t.Fatalf("a started solo room drives the sub-map: %#v", solo)
+	}
+	if got := occultTickets(t, p, a.PlayerID); got != 1 {
+		t.Fatalf("single cost one scroll, left %d", got)
+	}
+	if open := scalar(t, p, `SELECT count(*) FROM shared_rooms WHERE room_id=$1 AND status='OPEN'`, roomID); open != 0 {
+		t.Fatal("the replaced team room stayed open")
+	}
+
+	held, err := s.CreateTeam(ctx, b, 2, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.JoinRoom(ctx, c, occultRoomID(t, held), op()); err != nil {
+		t.Fatal("join for the member guard", err)
+	}
+	if _, err = s.CreateSolo(ctx, b, 2, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatal("a team room with a member must block Single", err)
+	}
+
+	if _, err = s.CreateSolo(ctx, empty, 2, op()); !errors.Is(err, economy.ErrInsufficientBalance) {
+		t.Fatal("single with no scrolls", err)
+	}
 }

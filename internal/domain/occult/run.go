@@ -64,6 +64,7 @@ type RunState struct {
 	Team               *TeamFight                       `json:"team,omitempty"`
 	TeamRounds         int64                            `json:"team_rounds,omitempty"`
 	Notices            []NoticeRecord                   `json:"notices,omitempty"`
+	Forces             map[string]int64                 `json:"forces,omitempty"`
 }
 
 func NewRun(chapterID, campaignType int64) RunState {
@@ -81,6 +82,17 @@ func LoadRunState(raw json.RawMessage) (RunState, error) {
 func key(id int64) string { return strconv.FormatInt(id, 10) }
 
 func (s RunState) Started() bool { return s.StartedAt > 0 }
+
+// SetForce freezes a member's best-15 AP so the prepare window renders it
+// without a Hero-stat read on every room change.
+func (s *RunState) SetForce(playerID, force int64) {
+	if s.Forces == nil {
+		s.Forces = map[string]int64{}
+	}
+	s.Forces[key(playerID)] = force
+}
+
+func (s RunState) Force(playerID int64) int64 { return s.Forces[key(playerID)] }
 
 func (s *RunState) Start(at int64) error {
 	if s.Started() {
