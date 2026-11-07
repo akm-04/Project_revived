@@ -3232,9 +3232,8 @@
    ],
    "store:i4store": [
     "*LockPlayerRootsTx",
-    "*PlayerIDBoundsTx",
     "*ProfileTx",
-    "*ProfilesAfterTx"
+    "*ProfilesByRecentActivityTx"
    ],
    "store:kernelstore": [
     "*FindTx",

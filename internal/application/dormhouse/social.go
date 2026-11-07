@@ -452,22 +452,13 @@ func (s Service) SocialRead(ctx context.Context, actor identity.ActorContext, op
 }
 
 func (s Service) randomHouseTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, at time.Time, entropy [32]byte) (map[string]any, error) {
-	server := actor.LogicalServerID
-	bandMin, bandMax := logicalserver.BandMin(server), logicalserver.BandMax(server)
-	_, upper, ok, err := s.Directory.PlayerIDBoundsTx(ctx, t)
+	candidates, err := s.directoryCandidatesTx(ctx, t, actor)
 	if err != nil {
 		return nil, err
 	}
-	if !ok || upper < bandMin {
+	if len(candidates) == 0 {
 		return nil, dorm.ErrUnqualified
 	}
-	if upper > bandMax {
-		upper = bandMax
-	}
-	if bandMin > upper {
-		return nil, dorm.ErrUnqualified
-	}
-	span := int64(upper-bandMin) + 1
 	seed := int64(0)
 	for _, b := range entropy[:8] {
 		seed = seed<<8 | int64(b)
@@ -475,12 +466,9 @@ func (s Service) randomHouseTx(ctx context.Context, t tx.Tx, actor identity.Acto
 	if seed < 0 {
 		seed = -seed
 	}
-	start := identity.PlayerID(int64(bandMin) + (seed % span))
-	candidates, err := s.directoryCandidatesTx(ctx, t, start, upper, bandMin, actor, at)
-	if err != nil {
-		return nil, err
-	}
-	for _, profile := range candidates {
+	offset := int(seed % int64(len(candidates)))
+	for index := range candidates {
+		profile := candidates[(offset+index)%len(candidates)]
 		values, err := s.Values.ReadDormPlayerStateTx(ctx, t, profile.PlayerID, at)
 		if err != nil {
 			return nil, err
@@ -493,30 +481,18 @@ func (s Service) randomHouseTx(ctx context.Context, t tx.Tx, actor identity.Acto
 	return nil, dorm.ErrUnqualified
 }
 
-func (s Service) directoryCandidatesTx(ctx context.Context, t tx.Tx, start, upper, bandMin identity.PlayerID, actor identity.ActorContext, at time.Time) ([]playerdirectory.Profile, error) {
-	out := []playerdirectory.Profile{}
-	appendCandidates := func(rows []playerdirectory.Profile) {
-		for _, row := range rows {
-			if row.PlayerID < bandMin || row.PlayerID > upper || row.PlayerID == actor.PlayerID || logicalserver.PlayerRegion(row.PlayerID) != actor.LogicalServerID {
-				continue
-			}
-			out = append(out, row)
-		}
-	}
-	rows, err := s.Directory.ProfilesAfterTx(ctx, t, start, 256)
+func (s Service) directoryCandidatesTx(ctx context.Context, t tx.Tx, actor identity.ActorContext) ([]playerdirectory.Profile, error) {
+	rows, err := s.Directory.ProfilesByRecentActivityTx(ctx, t, actor.LogicalServerID, actor.PlayerID, 256)
 	if err != nil {
 		return nil, err
 	}
-	appendCandidates(rows)
-	if len(out) == 0 && start > bandMin {
-		rows, err = s.Directory.ProfilesAfterTx(ctx, t, bandMin-1, 256)
-		if err != nil {
-			return nil, err
+	out := make([]playerdirectory.Profile, 0, len(rows))
+	ids := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		if row.PlayerID == actor.PlayerID || logicalserver.PlayerRegion(row.PlayerID) != actor.LogicalServerID {
+			continue
 		}
-		appendCandidates(rows)
-	}
-	ids := make([]int64, 0, len(out))
-	for _, row := range out {
+		out = append(out, row)
 		ids = append(ids, int64(row.PlayerID))
 	}
 	visitable, err := s.Social.VisitablePlayersTx(ctx, t, ids)

@@ -20,6 +20,9 @@ func (DiscoveryReader) PlayerIDBoundsTx(c context.Context, t tx.Tx) (identity.Pl
 func (DiscoveryReader) ProfilesAfterTx(c context.Context, t tx.Tx, id identity.PlayerID, limit int) ([]playerdirectory.Profile, error) {
 	return (i4store.TransactionDiscoveryReader{}).ProfilesAfterTx(c, t, id, limit)
 }
+func (DiscoveryReader) ProfilesByRecentActivityTx(c context.Context, t tx.Tx, server identity.LogicalServerID, exclude identity.PlayerID, limit int) ([]playerdirectory.Profile, error) {
+	return (i4store.TransactionDiscoveryReader{}).ProfilesByRecentActivityTx(c, t, server, exclude, limit)
+}
 func (DiscoveryReader) ProfilesByExactNameTx(c context.Context, t tx.Tx, name string, limit int) ([]playerdirectory.Profile, error) {
 	ids, e := (i5store.Store{}).ReadPlayerIDsByExactNameTx(c, t, name, limit)
 	if e != nil {
