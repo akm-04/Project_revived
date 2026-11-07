@@ -227,7 +227,7 @@
   {
    "file": "internal/adapters/stockruntime/illusion_room_notice.go",
    "kind": "direct",
-   "line": 138,
+   "line": 143,
    "mid": 518,
    "roles": [
     "Role",

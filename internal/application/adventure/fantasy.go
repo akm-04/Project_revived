@@ -105,15 +105,18 @@ func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request R
 			response.Duplicate = true
 			return map[string]any{}, nil
 		}
-		star, damage := d.ClampSolo(request.Star, request.Damage, illusion.DamageCap, 0)
+		star, damage := d.ClampSolo(request.Star, request.Damage, catalog.Limits.IllusionTotalDamage, 0)
 		attempt.Resolved, attempt.Damage = true, damage
 		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
 			return nil, err
 		}
-		awards := []any{}
+		body := map[string]any{}
 		if d.IsWin(star) {
 			reward, lines := giftAwards(catalog, catalog.Limits.IllusionGiftSingle)
-			awards = reward
+			// The client closes the single battle only on a nil awards key.
+			if len(reward) > 0 {
+				body["awards"] = reward
+			}
 			if err = s.settleGrant(c, sc, a, "illusion_single", occurrence, lines); err != nil {
 				return nil, err
 			}
@@ -121,7 +124,7 @@ func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request R
 		if _, err = s.finish(c, sc.Tx, a, occurrence, at); err != nil {
 			return nil, err
 		}
-		return map[string]any{"awards": awards}, nil
+		return body, nil
 	})
 	return Response{Body: body, Duplicate: response.Duplicate}, err
 }

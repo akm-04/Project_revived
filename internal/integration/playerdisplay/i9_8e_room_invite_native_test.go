@@ -265,6 +265,15 @@ func TestI9_8ERoomInviteCoopNative(t *testing.T) {
 	if _, found = noticeOfType(socialNoticePage(t, p, target), socialinbox.RoomInviteCoopNoticeType); !found {
 		t.Fatal("co-op re-invite did not reappear")
 	}
+	// With gifts active READ_NOTICE is the gift Claim; it must consume a type 8
+	// room invite too, because the client's JOIN handler runs after that reply.
+	claimed, err := roomInviteClaimService(p).Claim(ctx, target, []socialinbox.NoticeID{socialinbox.NoticeID(row.ID)}, op())
+	if err != nil || len(claimed.NoticeIDs) != 1 || int64(claimed.NoticeIDs[0]) != row.ID || claimed.Amount != 0 {
+		t.Fatalf("READ_NOTICE co-op claim %+v %v", claimed, err)
+	}
+	if _, found = noticeOfType(socialNoticePage(t, p, target), socialinbox.RoomInviteCoopNoticeType); found {
+		t.Fatal("the gift Claim did not remove the co-op invite")
+	}
 	other, _ := adventureOwner(t, p, rankingServer(t, p), 100, 10001001)
 	if _, err = mode.InviteCoop(ctx, owner, other.PlayerID, opContext); err == nil {
 		t.Fatal("a recipient on another logical server was accepted")

@@ -67,6 +67,8 @@ type RoomState struct {
 	Damage      int64                      `json:"damage,omitempty"`
 	TeamInfo    json.RawMessage            `json:"team_info,omitempty"`
 	Reports     map[string]json.RawMessage `json:"reports,omitempty"`
+	// Forces is each seat's best-15 AP frozen when the player entered the room.
+	Forces map[string]int64 `json:"forces,omitempty"`
 }
 
 func (s RoomState) Encode() (json.RawMessage, error) { return json.Marshal(s) }
@@ -96,6 +98,15 @@ func LoadRoomState(raw json.RawMessage) (RoomState, error) {
 }
 
 func (s RoomState) Pick(playerID int64) RoomPick { return s.Picks[strconv.FormatInt(playerID, 10)] }
+
+func (s RoomState) Force(playerID int64) int64 { return s.Forces[strconv.FormatInt(playerID, 10)] }
+
+func (s *RoomState) SetForce(playerID, force int64) {
+	if s.Forces == nil {
+		s.Forces = map[string]int64{}
+	}
+	s.Forces[strconv.FormatInt(playerID, 10)] = force
+}
 
 func (s *RoomState) SetPick(playerID int64, pick RoomPick) {
 	if s.Picks == nil {

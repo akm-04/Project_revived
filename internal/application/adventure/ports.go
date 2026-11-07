@@ -12,6 +12,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -61,6 +62,11 @@ type Directory interface {
 // Roster is the existing stock roster composer (MID1 key 49 Heroes, 780 Pets).
 type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
+}
+
+// Stats reads the qualified public force the team window displays.
+type Stats interface {
+	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
 }
 
 type Combat interface {
@@ -119,6 +125,7 @@ type Mode struct {
 	Directory Directory
 	Heroes    Roster
 	Pets      Roster
+	Stats     Stats
 	Combat    Combat
 	Costs     Costs
 	Grants    Grants

@@ -60,6 +60,10 @@ func (s Mode) DefenseInfo(c context.Context, a identity.ActorContext, op operati
 }
 
 func (s Mode) adventureCatalog(c context.Context, q tx.Queryer, op operation.Context) (d.Catalog, error) {
+	op, err := s.pin(c, op)
+	if err != nil {
+		return d.Catalog{}, err
+	}
 	revision, _ := op.Policies.Get("content")
 	return s.Content.AdventureCatalogTx(c, q, revision)
 }
@@ -103,7 +107,7 @@ func (s Mode) ensureDefenseRoom(c context.Context, a identity.ActorContext, cata
 // room_info is the member list, the position and kill arrays are siblings, and
 // challenge_times is the viewer's tries array indexed by position.
 func (s Mode) defenseDetail(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState, viewer identity.PlayerID) (map[string]any, error) {
-	ids, infos, err := s.roomMembers(c, q, room)
+	ids, infos, err := s.roomMembers(c, q, room, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +207,11 @@ func (s Mode) StartDefense(c context.Context, a identity.ActorContext, request F
 	if err := validateFormation(request.Formation); err != nil || position < 1 || position > d.DefenseMonsterCount {
 		return nil, d.ErrInvalid
 	}
-	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: DefenseFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: DefenseFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		at := sc.Operation.DecisionAt()
 		state, err := s.roomState(*room)
 		if err != nil {

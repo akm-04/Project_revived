@@ -6,11 +6,14 @@ import (
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/heroforce"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -101,7 +104,7 @@ func (s Mode) admitCoop(c context.Context, q tx.Queryer, a identity.ActorContext
 	return nil
 }
 
-func (s Mode) memberInfo(c context.Context, q tx.Queryer, player identity.PlayerID) (map[string]any, error) {
+func (s Mode) memberInfo(c context.Context, q tx.Queryer, player identity.PlayerID, force int64) (map[string]any, error) {
 	profile, found, err := s.Directory.ProfileTx(c, q, player)
 	if err != nil {
 		return nil, err
@@ -110,15 +113,15 @@ func (s Mode) memberInfo(c context.Context, q tx.Queryer, player identity.Player
 		return nil, d.ErrRefused
 	}
 	return map[string]any{"player_id": int64(profile.PlayerID), "player_name": profile.Name, "avatar_id": profile.AvatarID,
-		"avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level}, nil
+		"avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "force": force}, nil
 }
 
-func (s Mode) roomMembers(c context.Context, q tx.Queryer, room sharedroom.Room) ([]int64, []any, error) {
+func (s Mode) roomMembers(c context.Context, q tx.Queryer, room sharedroom.Room, forces map[identity.PlayerID]int64) ([]int64, []any, error) {
 	members := room.Members()
 	ids := make([]int64, 0, len(members))
 	infos := make([]any, 0, len(members))
 	for _, member := range members {
-		info, err := s.memberInfo(c, q, member)
+		info, err := s.memberInfo(c, q, member, forces[member])
 		if err != nil {
 			return nil, nil, err
 		}
@@ -126,6 +129,59 @@ func (s Mode) roomMembers(c context.Context, q tx.Queryer, room sharedroom.Room)
 		infos = append(infos, info)
 	}
 	return ids, infos, nil
+}
+
+// recordForce freezes the joining player's best-15 AP into the room payload so
+// the realtime 518 projection needs no Hero-stat dependencies.
+func (s Mode) recordForce(c context.Context, a identity.ActorContext, at time.Time, op operation.Context) (sharedroom.Room, error) {
+	forces, err := s.bestForces(c, []identity.PlayerID{a.PlayerID}, at)
+	if err != nil {
+		return sharedroom.Room{}, err
+	}
+	return s.Rooms.Update(c, a, sr.UpdateRequest{Family: IllusionFamily(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		state, err := s.roomState(*room)
+		if err != nil {
+			return err
+		}
+		state.SetForce(int64(a.PlayerID), forces[a.PlayerID])
+		return s.restoreRoom(sc, room, state)
+	}}, op)
+}
+
+// bestForces reads each player's best-15 AP in one read-only snapshot for the
+// room window projection.
+func (s Mode) bestForces(c context.Context, players []identity.PlayerID, at time.Time) (map[identity.PlayerID]int64, error) {
+	forces := make(map[identity.PlayerID]int64, len(players))
+	if s.Stats == nil || len(players) == 0 {
+		return forces, nil
+	}
+	revision, err := s.Content.ActiveRevision(c, s.Fresh)
+	if err != nil {
+		return nil, err
+	}
+	id, err := ids.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
+	if err != nil {
+		return nil, err
+	}
+	op := operation.Context{ID: id, StartedAt: at, Policies: policies}
+	_, _, err = s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		for _, player := range players {
+			force, err := heroforce.Best15(c, sc, s.Heroes, s.Stats, player, revision, at)
+			if err != nil {
+				return err
+			}
+			forces[player] = force
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return forces, nil
 }
 
 func abs64(value int64) int64 {

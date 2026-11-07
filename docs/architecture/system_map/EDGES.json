@@ -140,6 +140,9 @@
     "Queryer",
     "Validate"
    ],
+   "heroforce": [
+    "NewCoherentReadScope"
+   ],
    "illusion": [
     "NewCoherentReadScope"
    ],
@@ -703,6 +706,9 @@
     "DecisionAt",
     "Run"
    ],
+   "heroforce": [
+    "Operation"
+   ],
    "i5": [
     "Bind",
     "DecisionAt",
@@ -932,6 +938,17 @@
   "heroevolution": {
    "publicstats": [
     "*CoherentHeroInputsTx"
+   ]
+  },
+  "heroforce": {
+   "adventure": [
+    "Best15"
+   ],
+   "illusion": [
+    "Best15"
+   ],
+   "occult": [
+    "Best15"
    ]
   },
   "i5": {
@@ -1602,13 +1619,13 @@
     "*HeroTx",
     "*PetTx"
    ],
+   "heroforce": [
+    "*HeroTx"
+   ],
    "illusion": [
     "*HeroTx"
    ],
    "march": [
-    "*HeroTx"
-   ],
-   "occult": [
     "*HeroTx"
    ],
    "publicprofile": [
@@ -2091,6 +2108,9 @@
     "DecisionAt",
     "Operation",
     "Run"
+   ],
+   "heroforce": [
+    "Best15"
    ],
    "i5": [
     "*DebitMaterialCostTx",
@@ -3846,6 +3866,20 @@
     "*PutTx"
    ]
   },
+  "heroforce": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "generation": [
+    "Operation"
+   ],
+   "interface:heroforce.Roster": [
+    "*OverlayMID1"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ]
+  },
   "i5": {
    "adventure": [
     "*ObserveTx"
@@ -3950,6 +3984,9 @@
     "DecisionAt",
     "Operation",
     "Run"
+   ],
+   "heroforce": [
+    "Best15"
    ],
    "i5": [
     "*DebitMaterialCostTx",
@@ -4315,6 +4352,9 @@
     "Operation",
     "Run"
    ],
+   "heroforce": [
+    "Best15"
+   ],
    "i5": [
     "*CheckAwakeningOccultMaterialTx",
     "*DebitOccultTicketTx",
@@ -4331,9 +4371,6 @@
    ],
    "playerroot": [
     "CanonicalPlayerIDs"
-   ],
-   "publicstats": [
-    "*HeroTx"
    ],
    "roominvite": [
     "*Materialize"
@@ -5581,6 +5618,7 @@
   "heroevolution": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "heroforce": [],
   "i5": [
    "cmd/gxb-api/main_postgres.go"
   ],

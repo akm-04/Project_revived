@@ -10,6 +10,7 @@ import (
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/heroforce"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
@@ -83,6 +84,9 @@ func (s Mode) CreateRoom(c context.Context, a identity.ActorContext, op operatio
 	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		state, err := d.LoadRoomState(room.Payload)
 		if err != nil {
+			return err
+		}
+		if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
 			return err
 		}
 		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
@@ -178,17 +182,13 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 	if err != nil {
 		return nil, err
 	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	info, err := s.teamInfo(c, s.Fresh, joined, state, at)
-	if err != nil {
-		return nil, err
-	}
+	var info map[string]any
 	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		state, err := d.LoadRoomState(room.Payload)
 		if err != nil {
+			return err
+		}
+		if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
 			return err
 		}
 		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
@@ -259,6 +259,9 @@ func (s Mode) SetPartner(c context.Context, a identity.ActorContext, request Par
 			return err
 		}
 		state.SetPick(int64(a.PlayerID), pick)
+		if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
+			return err
+		}
 		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
 		if err != nil {
 			return err
@@ -480,6 +483,24 @@ func tableIDOf(roster map[string]map[string]any, partnerID int64) int64 {
 	return partnerID
 }
 
+// recordForce freezes the player's best-15 AP into the room payload so the
+// prepare window and the 518 rebuild show it without re-reading every hero.
+func (s Mode) recordForce(c context.Context, sc gen.TimedScope, player identity.PlayerID, state *d.RoomState) error {
+	if s.Stats == nil {
+		return nil
+	}
+	revision, err := s.Content.ActiveRevision(c, sc.Tx)
+	if err != nil {
+		return err
+	}
+	force, err := heroforce.Best15(c, sc, s.Heroes, s.Stats, player, revision, sc.Operation.DecisionAt())
+	if err != nil {
+		return err
+	}
+	state.SetForce(int64(player), force)
+	return nil
+}
+
 func (s Mode) storeTeamInfo(sc gen.TimedScope, room *sharedroom.Room, state d.RoomState, info map[string]any) error {
 	raw, err := json.Marshal(info)
 	if err != nil {
@@ -537,7 +558,7 @@ func (s Mode) teamInfo(c context.Context, q tx.Queryer, room sharedroom.Room, st
 			details = append(details, row)
 		}
 		out[slot.idName] = int64(player)
-		out[slot.infoName] = playerInfo(profile, pick.Force)
+		out[slot.infoName] = playerInfo(profile, state.Force(int64(player)))
 		out[slot.prefix+"_status"] = readyOf(room, player)
 		out[slot.prefix+"_partner"] = strings.Join(ids, "|")
 		out[slot.prefix+"_partner_detail"] = details

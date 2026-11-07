@@ -56,6 +56,11 @@ func (s Mode) CreateCoop(c context.Context, a identity.ActorContext, op operatio
 		return nil, d.ErrRefused
 	}
 	state := d.RoomState{RoomType: d.RoomTypeIllusion, SpecialData: occurrence.SpecialData, MasterLevel: profile.Level, Phase: "SELECTING"}
+	forces, err := s.bestForces(c, []identity.PlayerID{a.PlayerID}, at)
+	if err != nil {
+		return nil, err
+	}
+	state.SetForce(int64(a.PlayerID), forces[a.PlayerID])
 	payload, err := state.Encode()
 	if err != nil {
 		return nil, err
@@ -121,6 +126,9 @@ func (s Mode) EnterCoop(c context.Context, a identity.ActorContext, roomID int64
 	}
 	joined, err := s.Rooms.Join(c, a, IllusionFamily(), roomID, op)
 	if err != nil {
+		return nil, err
+	}
+	if joined, err = s.recordForce(c, a, at, op); err != nil {
 		return nil, err
 	}
 	state, err = s.roomState(joined)
@@ -548,7 +556,11 @@ func (s Mode) coopBattle(c context.Context, sc gen.TimedScope, room sharedroom.R
 }
 
 func (s Mode) coopRoomInfo(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState) (map[string]any, error) {
-	ids, infos, err := s.roomMembers(c, q, room)
+	forces := make(map[identity.PlayerID]int64, len(room.Members()))
+	for _, member := range room.Members() {
+		forces[member] = state.Force(int64(member))
+	}
+	ids, infos, err := s.roomMembers(c, q, room, forces)
 	if err != nil {
 		return nil, err
 	}
