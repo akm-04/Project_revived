@@ -691,8 +691,10 @@ func (session *httpPollSession) runSocket(ctx context.Context, socket *pollSocke
 	defer session.socketWait.Done()
 	defer close(socket.done)
 	defer socket.source.close()
+	// The poll's own idle limit reaches serve through frameSource.ClientIdleTimeout;
+	// overriding the policy here would also shrink the presence lease to the poll
+	// idle timeout, hiding the recipient from cross-owner admission (general DM).
 	policy := session.server.policy
-	policy.ClientIdleTimeout = socket.source.ClientIdleTimeout()
 	err := session.server.server.serve(ctx, session.server.config, policy, socket.source, func() (*connWriter, error) {
 		return newFrameWriter(ctx, session.server.config, policy.WriteTimeout, wireRT.EncodeJSONFrame,
 			func(_ context.Context, frame []byte) error { return session.enqueue(socket.tag, frame) },
