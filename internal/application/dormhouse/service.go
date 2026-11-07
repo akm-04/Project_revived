@@ -618,7 +618,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 // Infrastructure/proof/unknown failures retain PENDING; only definite domain or
 // lifecycle rejection may advance a lane without its economic effect.
 func terminalRejection(e error) bool {
-	for _, x := range []error{dorm.ErrGlueDailyLimit, i5.ErrGluePurchaseLimit, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, dorm.ErrHidden, dorm.ErrModerated, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
+	for _, x := range []error{dorm.ErrGlueDailyLimit, i5.ErrGluePurchaseLimit, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, dorm.ErrHidden, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
 		if errors.Is(e, x) {
 			return true
 		}

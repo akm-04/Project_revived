@@ -138,19 +138,15 @@ func boolFlag(value bool) int64 {
 	return 0
 }
 
-// moderatedSocialText applies the published public-profile corpus. A masked
-// span means the source moderation policy blocked the text, so Dorm refuses it
-// instead of storing a rewritten name or comment.
+// moderatedSocialText masks blocked spans with the published public-profile
+// corpus. Dorm's own name/comment bounds still apply before the text is stored.
 func moderatedSocialText(text string, words []string) (string, error) {
 	if len(words) == 0 {
 		return "", ErrUnavailable
 	}
-	moderated, e := profile.ModerateIntro(text, words)
+	moderated, e := profile.MaskWords(text, words)
 	if e != nil {
 		return "", dorm.ErrInvalidFacts
-	}
-	if moderated != text {
-		return "", dorm.ErrModerated
 	}
 	return moderated, nil
 }
