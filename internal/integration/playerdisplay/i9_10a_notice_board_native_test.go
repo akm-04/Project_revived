@@ -87,6 +87,11 @@ func setBoardStart(t *testing.T, database *pg.Pool, actor identity.ActorContext,
 
 func injectBoardMission(t *testing.T, database *pg.Pool, actor identity.ActorContext, missionID int64, leader int64, partners []int64, startAt int64) {
 	t.Helper()
+	injectBoardMissionOfType(t, database, actor, missionID, leader, partners, startAt, ec.BoardTaskTypeNormal, 10001)
+}
+
+func injectBoardMissionOfType(t *testing.T, database *pg.Pool, actor identity.ActorContext, missionID int64, leader int64, partners []int64, startAt int64, kind int64, awardID int64) {
+	t.Helper()
 	transaction, err := database.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if err != nil {
 		t.Fatal(err)
@@ -97,7 +102,7 @@ func injectBoardMission(t *testing.T, database *pg.Pool, actor identity.ActorCon
 	if err != nil || !found {
 		t.Fatalf("lock board root %v %v", found, err)
 	}
-	root.Facts.Board.Doing = append(root.Facts.Board.Doing, ec.BoardMission{MissionID: missionID, Leader: leader, Partners: partners, StartAt: startAt, Type: ec.BoardTaskTypeNormal, AwardID: 10001})
+	root.Facts.Board.Doing = append(root.Facts.Board.Doing, ec.BoardMission{MissionID: missionID, Leader: leader, Partners: partners, StartAt: startAt, Type: kind, AwardID: awardID})
 	previous := root.Version
 	root.Version++
 	root.UpdatedAt = time.Now().UTC()
