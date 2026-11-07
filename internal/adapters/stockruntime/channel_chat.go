@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
+	"log"
 	"sync"
 	"time"
 )
@@ -52,7 +53,6 @@ type ChannelChatDispatcher struct {
 	policy            ChannelChatPolicy
 	OnReport          func(ChannelChatReport)
 	messages, workers chan struct{}
-	structuredEnabled bool // no production setter or constructor activation; future owner activation requires a new selected seal
 }
 
 func NewChannelChatDispatcher(reg *ConnectionRegistry, service channelchat.Service, publisher RealtimePublisher, p ChannelChatPolicy) (*ChannelChatDispatcher, error) {
@@ -102,7 +102,10 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	if !ok || !sameAdmission(exact, admitted) || !d.Registry.IsCurrent(h) || r.Channel != channelForRole(exact.Domain.Role) || r.HasRegion && r.Region != int64(exact.Domain.Actor.LogicalServerID) {
 		return nil, ErrInvalidRealtimeSession
 	}
-	if r.Type != 0 && (!d.structuredEnabled || ingress.Selector == nil || !d.Service.Owners.Available(channelchat.Kind(ingress.Selector.Kind))) {
+	// D506: structured chat is active whenever production wiring supplies the
+	// owner for the selected kind; an unwired kind stays silent but is logged.
+	if r.Type != 0 && (ingress.Selector == nil || !d.Service.Owners.Available(channelchat.Kind(ingress.Selector.Kind))) {
+		log.Printf("structured channel chat refused: type=%d channel=%d owner unavailable", r.Type, r.Channel)
 		d.report(ChannelChatReport{ProviderGated: true})
 		return nil, nil
 	}

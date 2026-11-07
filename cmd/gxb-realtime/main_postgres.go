@@ -240,7 +240,8 @@ func run() error {
 	channelService := channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{},
 		Owners: channelchat.Owners{Illusion: channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
 			AdventureIllusion: channelchatread.AdventureIllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
-			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}}}}
+			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}},
+			Defense:           channelchatread.DefenseRoomReader{Store: sharedroomstore.Store{}}}}
 	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
 	if err != nil {
 		return err

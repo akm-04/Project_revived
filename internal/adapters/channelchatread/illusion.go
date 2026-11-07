@@ -10,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/application/channelchat"
 	ar "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/illusion"
-	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -21,7 +20,7 @@ type IllusionRoomReader struct {
 	Content contentstore.Store
 }
 
-func (r IllusionRoomReader) ReadIllusionTx(c context.Context, t tx.Tx, _ ar.Admission, _ time.Time, selection channelchat.RoomSelection) (channelchat.Owned[channelchat.Invitation], error) {
+func (r IllusionRoomReader) ReadIllusionTx(c context.Context, t tx.Tx, a ar.Admission, _ time.Time, selection channelchat.RoomSelection) (channelchat.Owned[channelchat.Invitation], error) {
 	if t == nil || selection.RoomID <= 0 {
 		return channelchat.Owned[channelchat.Invitation]{}, channelchat.ErrInvalidStructured
 	}
@@ -29,7 +28,7 @@ func (r IllusionRoomReader) ReadIllusionTx(c context.Context, t tx.Tx, _ ar.Admi
 	if err != nil {
 		return channelchat.Owned[channelchat.Invitation]{}, err
 	}
-	if !found || room.Family != "illusion" || room.Slot != 1 || room.Status != sharedroom.StatusOpen {
+	if !found || room.Family != "illusion" || room.Slot != 1 || !shareableRoom(room, a) {
 		return channelchat.Owned[channelchat.Invitation]{}, channelchat.ErrInvalidStructured
 	}
 	state, err := d.LoadRoomState(room.Payload)
