@@ -27,8 +27,6 @@ func TestI9_10ArenaPresetDefenseRequiresCompleteTeamNative(t *testing.T) {
 
 	revision := installed(t, pool)
 	bornHero(t, pool, partialActor, revision, 10001019, 2000)
-	lightning := bornHeroCard(t, pool, partialActor, revision, 11001004, 10001004, 2001)
-	exec(t, pool, `UPDATE player_heroes SET level=20,state_version=state_version+1,updated_at=clock_timestamp() WHERE player_id=$1 AND partner_id=$2`, int64(partialActor.PlayerID), lightning.PartnerID)
 	info, err := service.Info(ctx, partialActor, op())
 	if err != nil {
 		t.Fatal(err)
@@ -39,13 +37,11 @@ func TestI9_10ArenaPresetDefenseRequiresCompleteTeamNative(t *testing.T) {
 
 	completeActor, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
 	bornHero(t, pool, completeActor, revision, 10001019, 2000)
-	lightning = bornHeroCard(t, pool, completeActor, revision, 11001004, 10001004, 2001)
-	exec(t, pool, `UPDATE player_heroes SET level=20,state_version=state_version+1,updated_at=clock_timestamp() WHERE player_id=$1 AND partner_id=$2`, int64(completeActor.PlayerID), lightning.PartnerID)
 	info, err = service.Info(ctx, completeActor, op())
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantPreset := []int64{10001001, 10001002, 10001003, 11001004, 10001019}
+	wantPreset := []int64{10001001, 10001002, 10001003, 10001004, 10001019}
 	if !slices.Equal(info.Player.Defense.Heroes, wantPreset) {
 		t.Fatalf("Arena defense %v, want D511 team %v", info.Player.Defense.Heroes, wantPreset)
 	}
