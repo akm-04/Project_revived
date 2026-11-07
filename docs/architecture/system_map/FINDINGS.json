@@ -1332,12 +1332,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 622,
+  "count": 620,
   "window_sender_mid_count": 144,
-  "non_window_sender_mid_count": 478,
+  "non_window_sender_mid_count": 476,
   "registration_status_counts": {
    "inactive_fallback": 528,
-   "no_registration": 92,
+   "no_registration": 90,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -1744,32 +1744,6 @@
      "app/windows/CommentWindow.lua"
     ],
     "non_window_sender_files": [],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 193,
-    "name": "recall_friend",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 194,
-    "name": "get_recall_award",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
     "runtime_reachability": "unknown"
    },
    {
