@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "policy_id": "I9_10_HERO_RECOMMEND_PRIVATE_POLICY_V1",
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "mids": [2497, 2498, 2499],
+  "source_evidence": {
+    "categories": "data/tables/hero_recommend_type.lua:9-52",
+    "rules": "data/tables/translation.lua:13956-13958",
+    "fantasy_is_illusion": "data/tables/translation.lua:8040-8041 ILLUSION_TXT = Fantasy"
+  },
+  "decisions": [
+    {
+      "id": "refresh_window",
+      "classification": "PRIVATE_POLICY",
+      "value": "The snapshot generation boundary is Monday 04:00 UTC. The first read or reconcile tick after the boundary rebuilds it; reads before the boundary serve the previous generation. No scheduler-exact 04:00-05:00 execution is claimed."
+    },
+    {
+      "id": "on_demand_refresh",
+      "classification": "PRIVATE_POLICY",
+      "value": "A read on a logical server without the current generation builds it inside the request's serializable transaction. The periodic generation reconcile provider performs the same bounded refresh for servers that own player roots."
+    },
+    {
+      "id": "snapshot_scope",
+      "classification": "PRIVATE_POLICY",
+      "value": "One snapshot per logical server. Each category source is filtered to that server; the global 1 on 1, Arena and Champions League surfaces are narrowed by the owning player's logical_server_id."
+    },
+    {
+      "id": "source_scan_cap",
+      "classification": "PRIVATE_POLICY",
+      "value": "At most 100 rows are read from each category source per refresh. Fantasy reads at most 200 resolved attempts. Every scan is bounded."
+    },
+    {
+      "id": "formation_cap",
+      "classification": "PRIVATE_POLICY",
+      "value": "At most 20 resolved formations are retained per category before detail assembly."
+    },
+    {
+      "id": "recommendation_cap",
+      "classification": "PRIVATE_POLICY",
+      "value": "At most 50 table_ids are returned per category and at most 50 in total_rank_list."
+    },
+    {
+      "id": "force_board_scope",
+      "classification": "PRIVATE_POLICY",
+      "value": "The per-hero force board considers at most 64 candidate owners harvested from the same bounded source formations and popularity exemplars. It is not a full player_heroes scan; the server's full ownership set is knowingly out of scope."
+    },
+    {
+      "id": "force_board_cap",
+      "classification": "PRIVATE_POLICY",
+      "value": "At most 50 force rows are retained per recommended hero."
+    },
+    {
+      "id": "detail_formation_cap",
+      "classification": "PRIVATE_POLICY",
+      "value": "At most 3 formations are returned per category in one hero detail. Categories 4 (Fantasy) and 5 (Guild Event) return arrays; categories 1, 2, 3 and 6 return the first object, matching the client's getListLen/getKeyAndData shape."
+    },
+    {
+      "id": "popularity_weight_topfloor",
+      "classification": "PRIVATE_POLICY",
+      "value": "sum(fights + 2*wins + kill_count) per partner over the server's top_floor_partner_usage"
+    },
+    {
+      "id": "popularity_weight_oneonone",
+      "classification": "PRIVATE_POLICY",
+      "value": "sum(fights + 2*wins + kill_count) per partner over the server's one_on_one_partner_usage"
+    },
+    {
+      "id": "popularity_weight_arena",
+      "classification": "PRIVATE_POLICY",
+      "value": "sum(fights + 2*wins + kill_count) per table_id over the server's arena_partner_usage"
+    },
+    {
+      "id": "popularity_weight_fantasy",
+      "classification": "PRIVATE_POLICY",
+      "value": "sum(resolved attempt damage) per partner over at most 200 server attempts; attempts are the only retained formation source"
+    },
+    {
+      "id": "popularity_weight_guild_event",
+      "classification": "PRIVATE_POLICY",
+      "value": "sum(server-record damage) per captured partner over at most 100 server records; records written before the formation capture carry no partners and contribute nothing"
+    },
+    {
+      "id": "popularity_weight_champion",
+      "classification": "PRIVATE_POLICY",
+      "value": "count of settled attacker lineups containing the partner over at most 100 server-scoped settled matches"
+    },
+    {
+      "id": "formation_order",
+      "classification": "PRIVATE_POLICY",
+      "value": "Formations are ordered by source performance weight descending, then owner player_id ascending. Top Floor weight is the owner's summed partner usage; 1 on 1 weight is the owner's points; Arena weight is star*1000+point; Fantasy and Guild Event weight is damage; Champion weight is points."
+    },
+    {
+      "id": "hero_tiebreak",
+      "classification": "PRIVATE_POLICY",
+      "value": "Equal hero scores rank by lower table_id first. Equal force rows rank by lower player_id first."
+    },
+    {
+      "id": "force",
+      "classification": "PRIVATE_POLICY",
+      "value": "Force is publicstats.Service.HeroTx with publicstats.Self for the owning player inside a CoherentReadScope built from the refresh transaction's exact content revision and decision time, rounded to int64. No force is derived from another player's Foreign view or from the fresh pool."
+    },
+    {
+      "id": "exceed_percent",
+      "classification": "PRIVATE_POLICY",
+      "value": "For an owning viewer, exceed_percent = count(stored force rows below the viewer's force) / max(1, len(stored force rows)), emitted as a fraction as the client multiplies by 100. A viewer outside the bounded board is compared against the same stored rows."
+    },
+    {
+      "id": "my_rank",
+      "classification": "PRIVATE_POLICY",
+      "value": "For an owning viewer, rank is 1 + count(stored force rows above the viewer's force); rank 0 and force 0 when the viewer does not own the hero. An unknown positive table_id returns my_rank {rank:0,force:0} and an empty rank_list."
+    },
+    {
+      "id": "no_record_detail",
+      "classification": "PRIVATE_POLICY",
+      "value": "2498 returns {} when the hero has no derived detail (no owning candidate and no force row). A recommended hero always has at least one owning candidate by construction."
+    },
+    {
+      "id": "guild_event_history",
+      "classification": "PRIVATE_POLICY",
+      "value": "No historical Guild Event formation is fabricated. Only new completed records with the captured owned formation partner ids contribute; the category is legitimately empty until such records exist."
+    },
+    {
+      "id": "summoned_heroes",
+      "classification": "PRIVATE_POLICY",
+      "value": "Arena table ids that the owner's stock roster does not contain (summoned or otherwise unowned girls) are omitted from a formation and contribute no force, rather than inventing an owned row."
+    }
+  ],
+  "capabilities": {
+    "top_floor": "topfloorstore.HeroRecommendSourceTx",
+    "one_on_one": "oneononestore.HeroRecommendSourceTx",
+    "arena": "arenastore.HeroRecommendSourceTx",
+    "fantasy": "illusionstore.HeroRecommendSourceTx",
+    "guild_event": "guildcampaignstore.HeroRecommendSourceTx",
+    "champion": "leaguestore.HeroRecommendSourceTx"
+  }
+}

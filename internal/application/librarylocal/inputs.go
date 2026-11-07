@@ -276,15 +276,6 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		*out = body
 		return nil
 	}
-	// PRIVATE_POLICY: No authoritative ranking or formation producer exists. shortcut: return client-safe no-data views until a producer is approved.
-	if mid == 2497 {
-		*out = map[string]any{"sub_rank_list": map[string]any{}, "total_rank_list": []any{}}
-		return nil
-	}
-	if mid == 2498 {
-		*out = map[string]any{}
-		return nil
-	}
 	if mid == 853 {
 		f, e := s.HeroLibraryInputsTx(ctx, q, scope, targetIdentifier)
 		if e != nil {

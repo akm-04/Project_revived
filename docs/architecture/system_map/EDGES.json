@@ -29,6 +29,9 @@
    ]
   },
   "arena": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
    ],
@@ -141,6 +144,9 @@
     "Validate"
    ],
    "heroforce": [
+    "NewCoherentReadScope"
+   ],
+   "herorecommend": [
     "NewCoherentReadScope"
    ],
    "illusion": [
@@ -709,6 +715,11 @@
    "heroforce": [
     "Operation"
    ],
+   "herorecommend": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
    "i5": [
     "Bind",
     "DecisionAt",
@@ -871,6 +882,9 @@
    "guildcore": [
     "*CloseGuildTx",
     "*RemoveMemberTx"
+   ],
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
    ]
   },
   "guildcore": {
@@ -955,6 +969,7 @@
     "Best15"
    ]
   },
+  "herorecommend": {},
   "i5": {
    "achievement": [
     "*FenceActorTx",
@@ -1414,7 +1429,11 @@
    ]
   },
   "identitylifecycle": {},
-  "illusion": {},
+  "illusion": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ]
+  },
   "inscription": {
    "achievement": [
     "*CompleteSuitCountTx"
@@ -1476,6 +1495,9 @@
   },
   "occult": {},
   "oneonone": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
    ],
@@ -1486,6 +1508,9 @@
   "petcampaign": {},
   "playerdirectory": {
    "dormhouse": [
+    "Validate"
+   ],
+   "herorecommend": [
     "Validate"
    ],
    "libraryforum": [
@@ -1565,6 +1590,9 @@
     "CanonicalPlayerIDs",
     "LockKey"
    ],
+   "herorecommend": [
+    "Validate"
+   ],
    "occult": [
     "CanonicalPlayerIDs"
    ],
@@ -1637,6 +1665,9 @@
     "*PetTx"
    ],
    "heroforce": [
+    "*HeroTx"
+   ],
+   "herorecommend": [
     "*HeroTx"
    ],
    "illusion": [
@@ -1964,6 +1995,9 @@
   },
   "summon": {},
   "topfloor": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ],
    "march": [
     "*MarchCandidatesTx"
    ],
@@ -3899,6 +3933,60 @@
     "*HeroTx"
    ]
   },
+  "herorecommend": {
+   "arena": [
+    "*HeroRecommendSourceTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "guildcampaign": [
+    "*HeroRecommendSourceTx"
+   ],
+   "illusion": [
+    "*HeroRecommendSourceTx"
+   ],
+   "interface:herorecommend.Roster": [
+    "*OverlayMID1"
+   ],
+   "oneonone": [
+    "*HeroRecommendSourceTx"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:guildstore": [
+    "*ReadGuildTx",
+    "*ReadMembershipTx"
+   ],
+   "store:i4store": [
+    "*ListPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:leaguestore": [
+    "*HeroRecommendSourceTx"
+   ],
+   "topfloor": [
+    "*HeroRecommendSourceTx"
+   ]
+  },
   "i5": {
    "adventure": [
     "*ObserveTx"
@@ -5675,6 +5763,9 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "heroforce": [],
+  "herorecommend": [
+   "cmd/gxb-api/hero_recommend_postgres.go"
+  ],
   "i5": [
    "cmd/gxb-api/main_postgres.go"
   ],

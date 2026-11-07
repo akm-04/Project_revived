@@ -96,6 +96,7 @@ import (
 	"gxb.local/backend/v2/internal/application/guildcore"
 	appguildtea "gxb.local/backend/v2/internal/application/guildtea"
 	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
+	appherorecommend "gxb.local/backend/v2/internal/application/herorecommend"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
@@ -409,6 +410,12 @@ func main() {
 	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher { return stockruntime.Decorated{Next: d} }
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
+	heroRecommend := canonicalHeroRecommend(pool, runner, contentDB, owners, publicStats)
+	heroRecommendD := stockruntime.HeroRecommendDispatcher{Authority: authority, Service: heroRecommend}
+	for _, mid := range []uint16{2497, 2498, 2499} {
+		mustRegister(mid, heroRecommendD)
+	}
+	go runReconcile(ctx, pool, appherorecommend.Reconciler{Service: heroRecommend})
 	profileMetrics := canonicalProfileMetrics(contentDB, publicStats, displayService, achievements)
 	profileRecords := apppublicprofile.RosterRecords{Heroes: owners.roster(contentDB), Pets: characterstore.PetBootstrapProjection{Content: contentDB}, Awakening: publicStats.Awakening, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: contentDB, Heroes: characterstore.Store{Queryer: pool}, Kinds: contentDB, Players: i4store.PlayerRootLocker{}}}
 	var profileHistory apppublicprofile.HistoryReader
@@ -712,7 +719,7 @@ func main() {
 		mustRegister(mid, observing(authority, achievements, "Dorm", dormD))
 	}
 	libraryD := stockruntime.LibraryDispatcher{Authority: authority, Service: librarySvc}
-	for _, mid := range []uint16{72, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 851, 852, 853, 854, 855, 856, 857, 2497, 2498, 2784, 2785} {
+	for _, mid := range []uint16{72, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 851, 852, 853, 854, 855, 856, 857, 2784, 2785} {
 		mustRegister(mid, libraryD)
 	}
 	forumD := stockruntime.LibraryForumDispatcher{Authority: authority, Service: forumSvc}
