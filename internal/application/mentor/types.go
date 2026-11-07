@@ -18,7 +18,6 @@ import (
 
 var (
 	ErrInvalid     = errors.New("mentor: invalid request")
-	ErrRefused     = errors.New("mentor: request refused")
 	ErrUnavailable = errors.New("mentor: unavailable")
 )
 
@@ -144,10 +143,5 @@ type GrantOwner interface {
 
 type ContentReader interface {
 	MentorCatalog() (Catalog, error)
-	ActiveRevision(context.Context, tx.Queryer) (string, error)
-}
-
-// RevisionReader is the immutable content revision used by relation rows.
-type RevisionReader interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 }
