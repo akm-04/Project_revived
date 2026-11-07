@@ -137,6 +137,13 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	}
 	stop()
 	if err != nil {
+		// A foreign or missing owner reference is a silent refusal: the sender
+		// keeps its session and no recipient sees a card.
+		if errors.Is(err, channelchat.ErrInvalidStructured) || errors.Is(err, channelchat.ErrProviderUnavailable) {
+			log.Printf("structured channel chat refused: type=%d channel=%d owner rejected reference", r.Type, r.Channel)
+			d.report(ChannelChatReport{ProviderGated: true})
+			return nil, nil
+		}
 		return nil, err
 	}
 	if !d.Registry.IsCurrent(h) {

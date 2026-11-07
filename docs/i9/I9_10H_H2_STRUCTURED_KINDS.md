@@ -7,7 +7,7 @@ equal to the discriminator. Receives are `CHAT_MESSAGE` (32783).
 
 | Wire type | Kind | Client sender (file:line) | Channels | Owner |
 |---|---|---|---|---|
-| 1 | `ArenaReference` | `ArenaRecordWindow.lua:306,490` default `type_=1` (`RecordShareMenuWindow.lua:9`); payload `player_id,player_name,enemy_name,time,is_attack,id` | 0, 2, 4 (`RecordShareMenuWindow.lua:23-28,48-53,71-76`) | **Missing.** `channelchat.Owners.Arena` is nil. Owning system: Arena record/terminal (`internal/application/arena`). Follow-up. |
+| 1 | `ArenaReference` | `ArenaRecordWindow.lua:306,490` default `type_=1` (`RecordShareMenuWindow.lua:9`); payload `player_id,player_name,enemy_name,time,is_attack,id` | 0, 2, 4 (`RecordShareMenuWindow.lua:23-28,48-53,71-76`) | **Wired by I9-10H** (`channelchatread.ArenaReportReader`, `Owners.Arena`): Top Floor records, Region Arena records and Champions League settled matches; sender must be the record owner (attacker or defender) and the record still stored. `PeakReference` (type 1 with `record_id`) stays unwired. |
 | 2 | `ScratchShare` | `ScratchCardRecordWindow.lua:98-101` `type_=2`; payload `player_id,player_name,share_gua,rand_card_group,card_group,scratch_status` | 0, 2, 4 (same menu) | **Missing.** `Owners.Scratch` is nil; no scratch-card system/room store in the tree. Follow-up (activities/scratch card owner). |
 | 3 | `IllusionInvitation` | `IllusionInviteWindow.lua:62-72,80-94`; payload `room_id,type,boss_name,room_lev` | 4, 2 | **Present and wired** (`channelchatread.IllusionRoomReader`). |
 | 4 | `OccultInvitation` | `OccultInviteWindow.lua:61-71,81-95`; payload `room_id,type,chapter_id,force` | 4, 2 | **Present and wired** (`channelchatread.OccultRoomReader`). |
@@ -27,6 +27,19 @@ equal to the discriminator. Receives are `CHAT_MESSAGE` (32783).
 - `TEAM_CHANNEL` card rendering reads `np_info, player_id, player_name, message, player_type, type, avatar_id,
   avatar_frame_id, lev` from the outer envelope and `room_id/type/boss_name/room_lev` (or
   `chapter_id/force`) from the decoded `message`.
+
+## Type 1 replay path
+
+A type-1 card without `record_id` is an `ArenaReference` (`channel_structured.go:183-199`). Clicking it
+sends `LOAD_ARENA_FIGHT_RECORDS` (289) with `fighter_id` and `id` (`MessageManager.lua:780-784`,
+`SocialSystemWindow.lua:1043-1047`, `SocialSystemChatWindow.lua:345-349`) and reads one record object
+from `records` with `report`, `attack_*`, `defend_*`, `is_attack`, `win`, then opens `arena_share`
+(`MessageManager.lua:786-817`, `ArenaShareWindow.lua:9-39`). `TopFloorDispatcher` answers that shape
+from the retained Top Floor record (`topfloor.Service.RecordReplay`); the viewer need not be in the
+fight, only an authenticated player. A record owned by another `fighter_id`, an unknown id or an
+expired report answers empty, which the client shows as `ARENA_RECORD_OUT_OF_DATE`.
+Champions League hides its share button (`ChampionsLeagueRecordWindow.lua:211`), so league and Region
+Arena cards are not stock-reachable even though the owner validates those sources.
 
 ## Wire check
 

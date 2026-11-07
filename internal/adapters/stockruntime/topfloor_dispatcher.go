@@ -29,6 +29,7 @@ type TopFloorPort interface {
 	BuyTicket(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	ResetTimer(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	Records(context.Context, identity.ActorContext) ([]app.RecordView, error)
+	RecordReplay(context.Context, int64) (app.RecordReplay, error)
 	Report(context.Context, string) ([]byte, error)
 	RecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, d.Record, error)
 	Formation(context.Context, identity.ActorContext, int64, operation.Context) (d.Display, error)
@@ -148,6 +149,22 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		}
 		return okI5(projection.ResetTimer(player))
 	case 289:
+		if _, replay := p["fighter_id"]; replay {
+			fighter, fighterOK := topFloorInteger(p, "fighter_id", true)
+			recordID, idOK := topFloorInteger(p, "id", true)
+			if !onlyStockGameplayParams(p, "fighter_id", "id") || !fighterOK || !idOK {
+				return badHero("invalid_top_floor_parameter")
+			}
+			value, err := t.Service.RecordReplay(ctx, recordID)
+			if err != nil {
+				return failTopFloor(err)
+			}
+			// An id owned by another player answers out of date, never their replay.
+			if int64(value.Record.Owner) != fighter {
+				value = app.RecordReplay{}
+			}
+			return okI5(projection.RecordReplay(value.Record, value.Self, value.Opponent, value.Report))
+		}
 		records, err := t.Service.Records(ctx, a)
 		if err != nil {
 			return failTopFloor(err)

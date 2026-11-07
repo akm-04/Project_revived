@@ -184,6 +184,14 @@ type RecordInfo struct {
 	CanAvenge  bool
 }
 
+// RecordReplay is one retained record and its stored report for a chat-card replay.
+type RecordReplay struct {
+	Record   d.Record
+	Self     d.Display
+	Opponent d.Display
+	Report   []byte
+}
+
 type RankList struct {
 	Rows   []d.Display
 	MyRank int64

@@ -158,7 +158,8 @@ func TestStructuredFixturePublicationUsesCanonicalCampBeforeSend(t *testing.T) {
 				if e != nil || <-readErr != nil || rt.ValidateChannelChat(frame.Params) != nil || report.Outcomes[ChatTransportWriteRecorded] != 1 || report.Outcomes[ChatIneligible] != 1 {
 					t.Fatal(frame, e, report)
 				}
-			} else if mode == "unavailableowner" {
+			} else if mode == "unavailableowner" || mode == "forgedcamp" {
+				// A refused owner reference is silent; the sender keeps its session.
 				if e != nil || !report.ProviderGated || db.active.Load() != 0 {
 					t.Fatal(e, report)
 				}

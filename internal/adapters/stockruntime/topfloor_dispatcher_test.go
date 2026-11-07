@@ -53,6 +53,9 @@ func (f *topFloorFake) ResetTimer(context.Context, identity.ActorContext, operat
 func (f *topFloorFake) Records(context.Context, identity.ActorContext) ([]app.RecordView, error) {
 	return []app.RecordView{{Record: d.Record{ID: 4, Attack: false, Win: false, At: time.Unix(1700000000, 0)}, Self: d.Display{Name: "me"}, Opponent: d.Display{Name: "them"}}}, nil
 }
+func (f *topFloorFake) RecordReplay(context.Context, int64) (app.RecordReplay, error) {
+	return app.RecordReplay{Record: d.Record{ID: 4, Owner: 100001, Attack: true, Win: true, At: time.Unix(1700000000, 0)}, Self: d.Display{Name: "me", Level: 3, AvatarID: 4, FrameID: 5}, Opponent: d.Display{Name: "them", Level: 6, AvatarID: 7, FrameID: 8}, Report: f.report}, nil
+}
 func (f *topFloorFake) Report(context.Context, string) ([]byte, error) { return f.report, nil }
 func (f *topFloorFake) RecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, d.Record, error) {
 	return app.RecordInfo{Opponent: topFloorRobot, AvengeType: 3}, d.Record{}, nil
@@ -128,6 +131,17 @@ func TestI7C5BTopFloorWireShapes(t *testing.T) {
 	record := call(289, map[string]any{})["records"].([]map[string]any)[0]
 	if record["attack_name"] != "them" || record["defend_name"] != "me" || record["is_attack"] != int64(0) {
 		t.Fatal("defense record sides", record)
+	}
+	replay := call(289, map[string]any{"fighter_id": n("100001"), "id": n("4")})["records"].(map[string]any)
+	if replay["attack_name"] != "me" || replay["defend_name"] != "them" || replay["is_attack"] != int64(1) || replay["win"] != int64(1) ||
+		replay["attack_avatar"] != int64(4) || replay["defend_avatar_frame"] != int64(8) || len(replay["report"].([]map[string]any)) != 1 {
+		t.Fatal("chat-card replay row", replay)
+	}
+	if foreign := call(289, map[string]any{"fighter_id": n("100002"), "id": n("4")})["records"].(map[string]any); len(foreign) != 0 {
+		t.Fatal("another player's record id answered a replay", foreign)
+	}
+	if r := dispatcher.Dispatch(context.Background(), heroReq(t, 289, map[string]any{"fighter_id": n("100001"), "id": n("4"), "rank": n("1")})); r.HTTPStatus != 400 {
+		t.Fatal("replay with extra params", r)
 	}
 	if call(290, map[string]any{"player_id": n("1"), "report_key": "k"})["report"] == nil {
 		t.Fatal("report")
