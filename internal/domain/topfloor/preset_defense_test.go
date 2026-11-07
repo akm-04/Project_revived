@@ -55,7 +55,7 @@ func TestSelectPresetDefenseReturnsOwnedSubsetAndRejectsForeignHeroes(t *testing
 }
 
 func presetHero(owner identity.PlayerID, partnerID, tableID, originTableID, level int64) character.Hero {
-	at := time.Now().UTC()
+	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	return character.Hero{PlayerID: owner, PartnerID: partnerID, TableID: tableID, OriginTableID: originTableID, Star: 1, Level: level, Color: 1,
 		CreationContentRevision: strings.Repeat("a", 64), RawSkills: character.NewHeroRawSkillSeed(), StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 }
