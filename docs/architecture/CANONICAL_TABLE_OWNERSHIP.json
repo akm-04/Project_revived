@@ -5517,6 +5517,48 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00124_i9_10e_social_recall_awards.sql"
+    },
+    "social_invite_bindings": {
+      "owner": "socialinvite",
+      "allowed_query_owners": [
+        "socialinvite"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialinvitestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialinvitestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00130_i9_10e_social_invite.sql"
+    },
+    "social_invite_mission_claims": {
+      "owner": "socialinvite",
+      "allowed_query_owners": [
+        "socialinvite"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialinvitestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialinvitestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00130_i9_10e_social_invite.sql"
+    },
+    "social_invite_tuning": {
+      "owner": "socialinvite",
+      "allowed_query_owners": [
+        "socialinvite"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialinvitestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialinvitestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00130_i9_10e_social_invite.sql"
     }
   }
 }

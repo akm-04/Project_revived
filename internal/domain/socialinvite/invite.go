@@ -5,11 +5,49 @@ package socialinvite
 
 import (
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 )
+
+// PRIVATE_POLICY (D493 item 4): the source misc invite level gate is below
+// academy level 50; this reconstruction keeps that literal policy limit.
+const InviteAcademyLevelLimit int64 = 50
+
+// PRIVATE_POLICY (D493 item 4): no original-server code spelling exists. The
+// code is a canonical, non-secret, unique base36 spelling of the inviter's
+// player id, so every existing character has exactly one valid code.
+const InviteCodePolicy = "I9_10E_INVITE_CODE_BASE36_V1"
+
+const maxInviteCodeLength = 13
+
+func EncodeCode(player identity.PlayerID) (string, error) {
+	if !player.Valid() {
+		return "", ErrInvalid
+	}
+	return strings.ToUpper(strconv.FormatInt(int64(player), 36)), nil
+}
+
+// DecodeCode accepts the canonical code and its case-insensitive spelling.
+func DecodeCode(raw string) (identity.PlayerID, error) {
+	code := strings.ToUpper(strings.TrimSpace(raw))
+	if code == "" || len(code) > maxInviteCodeLength {
+		return 0, ErrInvalid
+	}
+	value, err := strconv.ParseInt(code, 36, 64)
+	if err != nil || value <= 0 {
+		return 0, ErrInvalid
+	}
+	player := identity.PlayerID(value)
+	canonical, err := EncodeCode(player)
+	if err != nil || canonical != code {
+		return 0, ErrInvalid
+	}
+	return player, nil
+}
 
 var (
 	ErrInvalid        = errors.New("social invite: invalid binding")

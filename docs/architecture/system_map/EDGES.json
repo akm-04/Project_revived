@@ -191,6 +191,9 @@
    "ranking": [
     "NewCoherentReadScope"
    ],
+   "socialinvite": [
+    "ValidateExactRevisionID"
+   ],
    "socialprojection": [
     "ValidateExactRevisionID"
    ],
@@ -800,6 +803,11 @@
     "Operation",
     "Run"
    ],
+   "socialinvite": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
    "socialpresence": [
     "DecisionAt",
     "Operation",
@@ -1325,6 +1333,10 @@
     "*SettleGrantTx",
     "*VerifyGiftBalanceTx"
    ],
+   "socialinvite": [
+    "*FenceActorTx",
+    "*SettleGrantTx"
+   ],
    "socialrecall": [
     "*FenceActorTx",
     "*ReadScalarTx",
@@ -1553,6 +1565,9 @@
     "CanonicalPlayerIDs",
     "Validate"
    ],
+   "socialinvite": [
+    "Validate"
+   ],
    "socialprojection": [
     "Validate"
    ],
@@ -1661,7 +1676,11 @@
    ]
   },
   "socialdismiss": {},
-  "socialexchange": {},
+  "socialexchange": {
+   "socialinvite": [
+    "*TuningTx"
+   ]
+  },
   "socialfriendbase": {},
   "socialgift": {
    "socialprojection": [
@@ -1751,6 +1770,11 @@
    ],
    "socialreloadref": [
     "Descriptor"
+   ]
+  },
+  "socialinvite": {
+   "socialexchange": [
+    "*TuningTx"
    ]
   },
   "socialpresence": {
@@ -4901,6 +4925,9 @@
    "playerroot": [
     "Validate"
    ],
+   "socialinvite": [
+    "*TuningTx"
+   ],
    "store:contentstore": [
     "*ActiveRevision",
     "*SocialExchangeCatalogTx"
@@ -5004,6 +5031,38 @@
    ]
   },
   "socialinbox": {},
+  "socialinvite": {
+   "characterasset": [
+    "ValidateExactRevisionID"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*SettleGrantTx"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "socialexchange": [
+    "*TuningTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*SocialInvitationMissionsTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ]
+  },
   "socialpresence": {
    "generation": [
     "DecisionAt",
@@ -5583,6 +5642,9 @@
   "socialfriendbase": [],
   "socialgift": [],
   "socialinbox": [],
+  "socialinvite": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "socialpresence": [],
   "socialprojection": [],
   "socialrecall": [

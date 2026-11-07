@@ -388,6 +388,9 @@
    "368": "i5",
    "369": "i5",
    "370": "i5",
+   "384": "socialinvite",
+   "385": "socialinvite",
+   "386": "socialinvite",
    "49": "characterhero",
    "50": "summon",
    "51": "characterhero",
@@ -735,6 +738,9 @@
    "social_gift_transfers": "socialgift",
    "social_guild_invite_invalidations": "socialinbox",
    "social_guild_invite_materializations": "socialinbox",
+   "social_invite_bindings": "socialinvite",
+   "social_invite_mission_claims": "socialinvite",
+   "social_invite_tuning": "socialinvite",
    "social_notices": "socialinbox",
    "social_recall_awards": "socialrecall",
    "social_recall_tasks": "socialrecall",
@@ -857,7 +863,7 @@
   },
   {
    "callees": 4,
-   "callers": 34,
+   "callers": 35,
    "mids": 0,
    "name": "characterasset",
    "path": "internal/application/characterasset",
@@ -1010,7 +1016,7 @@
   },
   {
    "callees": 5,
-   "callers": 53,
+   "callers": 54,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1109,7 +1115,7 @@
   },
   {
    "callees": 12,
-   "callers": 53,
+   "callers": 54,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1244,7 +1250,7 @@
   },
   {
    "callees": 0,
-   "callers": 20,
+   "callers": 21,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",
@@ -1351,8 +1357,8 @@
    "tables": 0
   },
   {
-   "callees": 6,
-   "callers": 0,
+   "callees": 7,
+   "callers": 1,
    "mids": 1,
    "name": "socialexchange",
    "path": "internal/application/socialexchange",
@@ -1384,6 +1390,15 @@
    "name": "socialinbox",
    "path": "internal/application/socialinbox",
    "purpose": "",
+   "tables": 3
+  },
+  {
+   "callees": 8,
+   "callers": 1,
+   "mids": 3,
+   "name": "socialinvite",
+   "path": "internal/application/socialinvite",
+   "purpose": "owns the durable friend-invitation surface: one immutable inviter per invitee and once-only invitation mission claims",
    "tables": 3
   },
   {
