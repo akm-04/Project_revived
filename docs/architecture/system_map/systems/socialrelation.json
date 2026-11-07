@@ -262,6 +262,7 @@
    "socialrelation"
   ],
   "scenarios_naming": [
+   "i9_10e_social_recall.json",
    "i9_7c_friend_fight.json",
    "social.json"
   ],

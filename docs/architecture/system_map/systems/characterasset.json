@@ -62,6 +62,7 @@
    "practice_contribution_test.go",
    "public_showcase_test.go",
    "references_test.go",
+   "roster_summary_test.go",
    "saved_preset_reference_state_test.go",
    "synthetic_projection_test.go"
   ]

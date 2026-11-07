@@ -62,6 +62,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialexchangestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialrecallstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/summonstore"
@@ -114,6 +115,7 @@ import (
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/application/socialprojection"
+	"gxb.local/backend/v2/internal/application/socialrecall"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/application/socialreload"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
@@ -337,7 +339,7 @@ func main() {
 		BootstrapProfileVersion: "i4-wave-s-v1",
 		PersistenceContributors: characterbirth.Contributors(contentstore.Store{Queryer: pool}, privileges, dormBundle.RevisionID()),
 		LoginTime:               postgres.AuthoritativeTime{Queryer: pool},
-		LoginReconcilers:        []appboot.CharacterLoginReconciler{appi5.MailExpiryLoginReconciler{Store: i5db}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}},
+		LoginReconcilers:        []appboot.CharacterLoginReconciler{i4store.PlayerLoginActivity{}, socialrecall.LoginReconciler{Owner: socialrecallstore.Store{}, Players: i4store.PlayerRootLocker{}}, appi5.MailExpiryLoginReconciler{Store: i5db}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}},
 		OperationBinder:         contentstore.Store{},
 		DetailContributors:      []appboot.MID1DetailContributor{appdorm.GlueBootstrap{Owner: dormstore.Store{}}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
@@ -582,11 +584,17 @@ func main() {
 	exchangeService := socialexchange.Service{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Settings: socialexchangestore.Store{}, Materials: i5svc, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
 	mustRegister(191, stockruntime.SocialExchangeDispatcher{Authority: authority, Service: exchangeService})
 	socialRelationDB := socialrelationstore.Store{}
+	recallTargets := socialrecallstore.TargetReader{Activity: i4store.PlayerLoginActivity{}, Progression: i5db, Roster: characterstore.RosterMetricReader{Store: heroDB, Content: contentDB}, Privilege: privileges, Relations: socialRelationDB}
+	recallService := socialrecall.StartService{Timed: socialTimed, Fence: i5db, Content: contentDB, Starter: socialrecall.Starter{Players: i4store.PlayerRootLocker{}, Owner: socialrecallstore.Store{}, Targets: recallTargets}, Projection: socialrecallstore.DoingProjection{Directory: i4store.TransactionDiscoveryReader{}}, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	mustRegister(193, stockruntime.SocialRecallStartDispatcher{Authority: authority, Service: recallService})
+	recallAwarder := socialrecall.Awarder{Players: i4store.PlayerRootLocker{}, Owner: socialrecallstore.Store{}, Content: contentDB, Current: recallTargets, Grants: i5svc}
+	recallClaim := socialrecall.ClaimService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Awarder: recallAwarder, Values: i5db, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	mustRegister(194, stockruntime.SocialRecallAwardDispatcher{Authority: authority, Service: recallClaim})
 	socialInboxDB := socialinboxstore.Store{}
 	socialPresentation := socialpresentation.TransactionReader{Display: displayService}
 	socialCommands := socialrelation.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Store: socialRelationDB, Inbox: socialinbox.RelationService{Store: socialInboxDB}, Presentation: socialPresentation}
 	giftService := socialgift.Service{Timed: socialTimed, Reads: runner, Store: socialgiftstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Inbox: socialinbox.GiftService{Store: socialInboxDB}, NoticeEvidence: socialInboxDB, Grants: i5svc, Admission: authority, Fence: i5db}
-	socialReads := socialprojection.Service{Gifts: giftService, NoticePages: socialInboxDB, Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: publicpresentation.DiscoveryReader{}, Presentation: socialPresentation, PresentationAt: socialPresentation, Observer: socialPresentation}
+	socialReads := socialprojection.Service{Gifts: giftService, NoticePages: socialInboxDB, Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: publicpresentation.DiscoveryReader{}, Presentation: socialPresentation, PresentationAt: socialPresentation, Observer: socialPresentation, Recall: socialrecallstore.RecallProjectionReader{Current: recallTargets}, Content: contentDB}
 	friendDM := frienddm.Service{Timed: socialTimed, Queryer: pool, Store: frienddmstore.Store{}, Players: i4store.PlayerRootLocker{}, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Observer: socialPresentation, Content: contentDB, Entitlement: appi5.EmoticonEntitlementReader{Store: i5db, Content: contentDB}, Owner: presencestore.Store{Queryer: pool}}
 	generalDM := generaldm.Service{Timed: socialTimed, Queryer: pool, Store: generaldmstore.Store{}, Bindings: generaldmbindings.Reader{}, Privacy: socialrelation.GeneralDMPrivacyProvider{Store: socialRelationDB}, Players: i4store.PlayerRootLocker{}, Presentation: socialPresentation, Observer: socialPresentation, Owner: presencestore.Store{Queryer: pool}}
 	mustRegister(513, stockruntime.GeneralDMDispatcher{Authority: authority, Service: generalDM, Slots: make(chan struct{}, 16), Emitter: postgres.GeneralDMWakeupEmitter{Pool: pool}})

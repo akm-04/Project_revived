@@ -3,11 +3,13 @@ package socialprojection
 import (
 	"context"
 	"encoding/binary"
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
+	"gxb.local/backend/v2/internal/application/socialrecall"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -21,6 +23,10 @@ type GiftReader interface {
 	GiftSnapshotTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (socialgift.Snapshot, error)
 	GiftNoticeValidityTx(context.Context, tx.Queryer, identity.PlayerID, []socialinbox.Notice) (map[socialinbox.NoticeID]bool, error)
 }
+type ContentRevisionReader interface {
+	ActiveRevision(context.Context, tx.Queryer) (string, error)
+}
+
 type Service struct {
 	Invites        socialinbox.InviteNoticeReader
 	PresentationAt playerpresentation.TxReaderAt
@@ -33,6 +39,8 @@ type Service struct {
 	Directory      playerdirectory.TxDiscoveryReader
 	Presentation   playerpresentation.TxReader
 	Observer       playerpresentation.TxObserver
+	Recall         socialrecall.RecallBaseReader
+	Content        ContentRevisionReader
 }
 
 func DefaultReadProfile() tx.Profile {
@@ -141,20 +149,20 @@ func (s Service) LoadList(c context.Context, a identity.ActorContext, k ListKind
 }
 func (s Service) load(c context.Context, a identity.ActorContext, op operation.Context, k ListKind) (Result, error) {
 	return s.run(c, a, op, func(c context.Context, t tx.Tx, hasRoot bool) (Result, error) {
-		return s.loadTx(c, t, a, k, hasRoot)
+		return s.loadTx(c, t, a, k, hasRoot, op)
 	})
 }
 
 // ReadBasePreparedTx is the additive I7A6A same-transaction entry. The caller
 // already holds its complete ordered 315/360/361/363 plan, including recipient
 // root presence/absence. It performs reads only and never ensures a root.
-func (s Service) ReadBasePreparedTx(c context.Context, t tx.Tx, a identity.ActorContext, hasRoot bool) (Result, error) {
+func (s Service) ReadBasePreparedTx(c context.Context, t tx.Tx, a identity.ActorContext, hasRoot bool, operationContext operation.Context) (Result, error) {
 	if t == nil || s.Presentation == nil || s.Observer == nil || s.Relations == nil || s.Inbox == nil {
 		return Result{}, ErrInvalidRead
 	}
-	return s.loadTx(c, t, a, 0, hasRoot)
+	return s.loadTx(c, t, a, 0, hasRoot, operationContext)
 }
-func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k ListKind, hasRoot bool) (Result, error) {
+func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k ListKind, hasRoot bool, op operation.Context) (Result, error) {
 	out := emptyResult()
 	friends, blocks := []identity.PlayerID{}, []identity.PlayerID{}
 	requests := []socialrelation.FriendRequest{}
@@ -194,13 +202,44 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 			}
 		}
 	}
-	if s.Invites != nil {
-		if s.PresentationAt == nil {
+	recallEnabled := false
+	if s.Recall != nil && !op.ID.IsZero() && k == 0 {
+		if s.Content == nil || s.PresentationAt == nil || s.Observer == nil {
 			return Result{}, ErrInvalidRead
 		}
 		observed, e = s.Observer.ObserveTx(c, t)
 		if e != nil || observed.IsZero() {
 			return Result{}, ErrInvalidRead
+		}
+		revision, pinned := op.Policies.Get("content")
+		if !pinned {
+			revision, e = s.Content.ActiveRevision(c, t)
+			if e != nil {
+				return Result{}, e
+			}
+		}
+		if characterasset.ValidateExactRevisionID(revision) != nil {
+			return Result{}, ErrInvalidRead
+		}
+		bound, e := socialrecall.BindRecallPolicies(op, revision)
+		if e != nil {
+			return Result{}, ErrInvalidRead
+		}
+		out.Recall, e = s.Recall.ReadRecallBaseTx(c, tx.Scope{Tx: t, Operation: bound, Attempt: 1, Options: tx.Options{Isolation: tx.RepeatableRead}}, a, revision, observed, friends)
+		if e != nil {
+			return Result{}, e
+		}
+		recallEnabled = true
+	}
+	if s.Invites != nil {
+		if s.PresentationAt == nil {
+			return Result{}, ErrInvalidRead
+		}
+		if observed.IsZero() {
+			observed, e = s.Observer.ObserveTx(c, t)
+			if e != nil || observed.IsZero() {
+				return Result{}, ErrInvalidRead
+			}
 		}
 		if hasRoot && (k == 0 || k == Notice) {
 			notices, e = prepared.selectAt(observed)
@@ -210,6 +249,14 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		}
 	}
 	ids := append(append([]identity.PlayerID{}, friends...), blocks...)
+	if recallEnabled {
+		for _, row := range out.Recall.Doing {
+			ids = append(ids, row.PlayerID)
+		}
+		for _, row := range out.Recall.Done {
+			ids = append(ids, row.PlayerID)
+		}
+	}
 	for i, req := range requests {
 		if req.Validate() != nil || req.TargetPlayerID != a.PlayerID || req.Status != socialrelation.RequestPending {
 			return Result{}, ErrInvalidRead
@@ -241,7 +288,7 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		}
 	}
 	var b playerpresentation.Batch
-	if s.Invites != nil {
+	if s.Invites != nil || recallEnabled {
 		b, e = s.presentAt(c, t, ids, observed)
 	} else {
 		b, e = s.present(c, t, ids)
@@ -250,6 +297,25 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 		return Result{}, e
 	}
 	out.ObservedAt = b.ObservedAt
+	if recallEnabled {
+		if !b.ObservedAt.Equal(observed) {
+			return Result{}, ErrInvalidRead
+		}
+		for _, row := range out.Recall.Doing {
+			profile, found := b.Players[row.PlayerID]
+			if !found {
+				return Result{}, ErrInvalidRead
+			}
+			out.RecallNames[row.PlayerID] = profile.Minimal.Name
+		}
+		for _, row := range out.Recall.Done {
+			profile, found := b.Players[row.PlayerID]
+			if !found {
+				return Result{}, ErrInvalidRead
+			}
+			out.RecallNames[row.PlayerID] = profile.Minimal.Name
+		}
+	}
 	sent := map[identity.PlayerID]bool{}
 	if s.Gifts != nil && (k == 0 || k == Friend) {
 		gift, e := s.Gifts.GiftSnapshotTx(c, t, a.PlayerID, b.ObservedAt)

@@ -26,6 +26,8 @@
    "appadventure.Mode"
   ],
   "LoginReconcilers": [
+   "i4store.PlayerLoginActivity",
+   "socialrecall.LoginReconciler",
    "appi5.MailExpiryLoginReconciler",
    "appi5.SignInBootstrap",
    "appi5.MissionBootstrap",
@@ -179,6 +181,8 @@
    "190": "socialrelation",
    "191": "socialexchange",
    "192": "realtimeauth",
+   "193": "socialrecall",
+   "194": "socialrecall",
    "2064": "campaign",
    "2128": "course",
    "2129": "course",
@@ -685,6 +689,7 @@
    "player_library_partner_missions": "librarylocal",
    "player_library_roots": "librarylocal",
    "player_library_talk_claims": "librarylocal",
+   "player_login_observations": "bootstrap",
    "player_pet_practice_candidates": "characterpractice",
    "player_pet_roots": "characterpet",
    "player_pet_style_entitlements": "characterpet",
@@ -731,6 +736,8 @@
    "social_guild_invite_invalidations": "socialinbox",
    "social_guild_invite_materializations": "socialinbox",
    "social_notices": "socialinbox",
+   "social_recall_awards": "socialrecall",
+   "social_recall_tasks": "socialrecall",
    "social_request_epochs": "socialrelation",
    "summon_players": "summon",
    "summon_tuning": "summon",
@@ -819,7 +826,7 @@
    "name": "bootstrap",
    "path": "internal/application/bootstrap",
    "purpose": "",
-   "tables": 9
+   "tables": 10
   },
   {
    "callees": 13,
@@ -850,7 +857,7 @@
   },
   {
    "callees": 4,
-   "callers": 32,
+   "callers": 34,
    "mids": 0,
    "name": "characterasset",
    "path": "internal/application/characterasset",
@@ -1003,7 +1010,7 @@
   },
   {
    "callees": 5,
-   "callers": 52,
+   "callers": 53,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1237,7 +1244,7 @@
   },
   {
    "callees": 0,
-   "callers": 19,
+   "callers": 20,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",
@@ -1389,13 +1396,22 @@
    "tables": 3
   },
   {
-   "callees": 8,
+   "callees": 11,
    "callers": 1,
    "mids": 0,
    "name": "socialprojection",
    "path": "internal/application/socialprojection",
    "purpose": "composes typed owner reads in one caller transaction",
    "tables": 0
+  },
+  {
+   "callees": 7,
+   "callers": 1,
+   "mids": 2,
+   "name": "socialrecall",
+   "path": "internal/application/socialrecall",
+   "purpose": "",
+   "tables": 2
   },
   {
    "callees": 6,

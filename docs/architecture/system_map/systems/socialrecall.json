@@ -1,0 +1,150 @@
+{
+ "background": [],
+ "content": [
+  "content_player_display_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/social_recall_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "social-recall-award"
+   },
+   {
+    "lock_timeout_ms": 5000,
+    "name": "social-recall-start"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "social_recall_tasks": [
+    "socialrecallstore.PrepareStartStateTx",
+    "socialrecallstore.ReadActiveRecallForTargetTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "players",
+   "social_recall_tasks"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "LoginReconciler",
+  "ReconcileCharacterLogin"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_recall_dispatcher.go",
+    "line": 60
+   },
+   "mid": 193,
+   "name": "recall_friend"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/social_recall_dispatcher.go",
+    "line": 33
+   },
+   "mid": 194,
+   "name": "get_recall_award"
+  }
+ ],
+ "name": "socialrecall",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/socialrecallstore"
+ ],
+ "tables": {
+  "owned": [
+   "social_recall_awards",
+   "social_recall_tasks"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_hero_roots",
+   "player_heroes",
+   "player_login_observations",
+   "player_pet_roots",
+   "player_pets",
+   "player_progression",
+   "player_social_presence",
+   "players",
+   "realtime_presence_leases",
+   "social_blocks",
+   "social_friend_requests",
+   "social_friendships",
+   "social_recall_awards",
+   "social_recall_tasks"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "social_recall_awards",
+   "social_recall_tasks"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "socialprojection"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "award_test.go",
+   "command_test.go",
+   "login_test.go",
+   "start_test.go"
+  ]
+ }
+}

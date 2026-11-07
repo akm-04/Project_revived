@@ -27,6 +27,8 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00076: I8.5-3 client observability: stock ErrorLog/crash uploads (per-upload rows with attribution and quarantine, parsed client rows), per-session log capabilities (digest only), and the HTTP request journal (outcome, error class, redacted cause, masked raw envelope for unknown/undecodable requests). Retention by expires_at (7 days routine, 30 days error/anomaly). No foreign keys. Empty on upgrade.
 - 00077: I8.5-6 F3 player ids above the stock robot range (D63): logical-server cursors move to server*100000+25001 and a check keeps them there, because stock reads a wire table_id <= 25000 as a robot team. Players already allocated below it keep their ids.
 - 00078: I8.5-6 F1 level function announcement (D59): existing players get the eligibility and unlock rows the new announcer writes for every pure level gate they reached in the active content revision (capability NONE; Pet Function 38 keeps its starter-egg path). Empty on a fresh database.
-- 00120: I9-10C Dorm glue purchase admission lane, widening the per-player Dorm admission family check to DORM_BUY_GLUE.
-- 00121: I9-10C Dorm room social metadata, lifetime praises, comments and comment reactions. Empty on upgrade.
-- 00122: I9-10C Dorm social admission lanes for CHANGE_NAME, HIDE_HOUSE, PRAISE_HOUSE, COMMENT_HOUSE, PRAISE_COMMENT and DELETE_COMMENT.
+- 00125: I9-10C per-player I5 scalar daily floor anchors for the glue floor. Empty on upgrade.
+- 00126: I9-10C Dorm daily glue purchase counters. Empty on upgrade.
+- 00127: I9-10C Dorm glue purchase admission lane, widening the per-player Dorm admission family check to DORM_BUY_GLUE.
+- 00128: I9-10C Dorm room social metadata, lifetime praises, comments and comment reactions. Empty on upgrade.
+- 00129: I9-10C Dorm social admission lanes for CHANGE_NAME, HIDE_HOUSE, PRAISE_HOUSE, COMMENT_HOUSE, PRAISE_COMMENT and DELETE_COMMENT.

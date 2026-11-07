@@ -169,7 +169,11 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
 		return d.Fight{}, err
 	}
-	l, found, err := s.Store.ReadLadderTx(c, sc.Tx, server, true)
+	// Admission only reads the ladder root. Locking it made every START in the
+	// server queue on one row and abort with 40001 after any entry or settlement.
+	// The RepeatableRead snapshot still decides "settlement due" at the bound
+	// decision instant, and admission writes no ladder row.
+	l, found, err := s.Store.ReadLadderTx(c, sc.Tx, server, false)
 	if err != nil || !found {
 		return d.Fight{}, errors.Join(err, d.ErrRefused)
 	}
@@ -204,8 +208,14 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		return d.Fight{}, err
 	}
 	enemyRank, ok, err := s.Store.RankOfTx(c, sc.Tx, server, enemy)
-	if err != nil || !ok {
+	if err != nil {
 		return d.Fight{}, errors.Join(err, d.ErrConflict)
+	}
+	if !ok {
+		if !r.Avenge {
+			return d.Fight{}, d.ErrOfferStale
+		}
+		return d.Fight{}, d.ErrConflict
 	}
 	if !r.Avenge {
 		if err = d.MatchOfferSnapshot(snapshot, snapshotFound, 0, rank, enemy, enemyRank); err != nil {

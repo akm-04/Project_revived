@@ -177,6 +177,7 @@
     "PetReferenceFromLockKey",
     "PetReferenceLockKey",
     "Queryer",
+    "Summary",
     "Validate",
     "ValidateExactRevisionID",
     "ValidateReferenceGuardPlan"
@@ -189,6 +190,12 @@
    ],
    "ranking": [
     "NewCoherentReadScope"
+   ],
+   "socialprojection": [
+    "ValidateExactRevisionID"
+   ],
+   "socialrecall": [
+    "ValidateExactRevisionID"
    ],
    "spirit": [
     "Queryer",
@@ -799,6 +806,10 @@
     "Run",
     "Validate"
    ],
+   "socialrecall": [
+    "DecisionAt",
+    "Run"
+   ],
    "socialrelation": [
     "DecisionAt",
     "Run"
@@ -951,10 +962,6 @@
     "*PrepareMaterialExchangeTx",
     "*ReadScalarTx",
     "*SettleGrantTx"
-   ],
-   "bootstrap": [
-    "*Name",
-    "*ReconcileCharacterLogin"
    ],
    "campaign": [
     "*CompleteAwakeningPetTx",
@@ -1318,6 +1325,11 @@
     "*SettleGrantTx",
     "*VerifyGiftBalanceTx"
    ],
+   "socialrecall": [
+    "*FenceActorTx",
+    "*ReadScalarTx",
+    "*SettleGrantTx"
+   ],
    "spirit": [
     "*ApplyMaterialDebitTx",
     "*FenceActorTx",
@@ -1544,6 +1556,10 @@
    "socialprojection": [
     "Validate"
    ],
+   "socialrecall": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
    "socialrelation": [
     "LockKey",
     "Validate"
@@ -1751,6 +1767,12 @@
     "ReadBasePreparedTx",
     "Recommend",
     "Search"
+   ]
+  },
+  "socialrecall": {
+   "socialprojection": [
+    "*ReadRecallBaseTx",
+    "BindRecallPolicies"
    ]
   },
   "socialrelation": {
@@ -2243,14 +2265,14 @@
    ]
   },
   "bootstrap": {
-   "i5": [
-    "*Name",
-    "*ReconcileCharacterLogin"
-   ],
    "interface:bootstrap.CharacterBootstrapPersistenceContributor": [
     "*Name",
     "*PersistCharacterBootstrap",
     "*Required"
+   ],
+   "interface:bootstrap.CharacterLoginReconciler": [
+    "*Name",
+    "*ReconcileCharacterLogin"
    ],
    "interface:bootstrap.MID1DetailContributor": [
     "*Claims",
@@ -4597,6 +4619,7 @@
     "PetReferenceFromLockKey",
     "PetReferenceLockKey",
     "Queryer",
+    "Summary",
     "Validate",
     "ValidateExactRevisionID",
     "ValidateReferenceGuardPlan"
@@ -4999,6 +5022,9 @@
    ]
   },
   "socialprojection": {
+   "characterasset": [
+    "ValidateExactRevisionID"
+   ],
    "guildinvitetarget": [
     "*ReadCurrentInviteNoticeTx"
    ],
@@ -5029,6 +5055,10 @@
     "ValidateRoomInviteLifecycle",
     "WireSafe"
    ],
+   "socialrecall": [
+    "*ReadRecallBaseTx",
+    "BindRecallPolicies"
+   ],
    "socialrelation": [
     "*ActiveBlocksForTx",
     "*ActiveFriendsTx",
@@ -5038,12 +5068,46 @@
     "CanonicalServer",
     "Validate"
    ],
+   "store:contentstore": [
+    "*ActiveRevision"
+   ],
    "store:i4store": [
     "*LockPlayerRootsTx",
     "*PlayerIDBoundsTx",
     "*ProfileTx",
     "*ProfilesAfterTx",
     "*ProfilesByExactNameTx"
+   ]
+  },
+  "socialrecall": {
+   "characterasset": [
+    "ValidateExactRevisionID"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*ReadScalarTx",
+    "*SettleGrantTx"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs",
+    "Validate"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*SocialRecallAwardCatalogTx",
+    "*SocialRecallRulesTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "socialrelation": {
@@ -5517,6 +5581,9 @@
   "socialinbox": [],
   "socialpresence": [],
   "socialprojection": [],
+  "socialrecall": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "socialrelation": [
    "cmd/gxb-api/main_postgres.go"
   ],

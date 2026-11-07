@@ -5348,7 +5348,7 @@
         "internal/adapters/postgres/i5store/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00112_i9_10c_scalar_daily_floors.sql"
+      "migration": "migrations/00125_i9_10c_scalar_daily_floors.sql"
     },
     "player_dorm_glue_purchases": {
       "owner": "dorm-house",
@@ -5362,11 +5362,11 @@
         "internal/adapters/postgres/dormstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00113_i9_10c_glue_purchases.sql"
+      "migration": "migrations/00126_i9_10c_glue_purchases.sql"
     },
     "player_dorm_room_social": {
       "owner": "dorm-house",
-      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "migration": "migrations/00128_i9_10c_dorm_social.sql",
       "allowed_query_owners": [
         "dorm-house"
       ],
@@ -5382,7 +5382,7 @@
     },
     "player_dorm_praises": {
       "owner": "dorm-house",
-      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "migration": "migrations/00128_i9_10c_dorm_social.sql",
       "allowed_query_owners": [
         "dorm-house"
       ],
@@ -5398,7 +5398,7 @@
     },
     "player_dorm_comments": {
       "owner": "dorm-house",
-      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "migration": "migrations/00128_i9_10c_dorm_social.sql",
       "allowed_query_owners": [
         "dorm-house"
       ],
@@ -5414,7 +5414,7 @@
     },
     "player_dorm_comment_reactions": {
       "owner": "dorm-house",
-      "migration": "migrations/00121_i9_10c_dorm_social.sql",
+      "migration": "migrations/00128_i9_10c_dorm_social.sql",
       "allowed_query_owners": [
         "dorm-house"
       ],
@@ -5475,6 +5475,48 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00119_i9_10e_exchange_tuning.sql"
+    },
+    "social_recall_tasks": {
+      "owner": "socialrecall",
+      "allowed_query_owners": [
+        "socialrecall"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00123_i9_10e_social_recall.sql"
+    },
+    "player_login_observations": {
+      "owner": "identity/logicalserver/bootstrap",
+      "migration": "migrations/00122_i9_10e_player_login_observations.sql",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i4store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i4store/"
+      ],
+      "write_exceptions": []
+    },
+    "social_recall_awards": {
+      "owner": "socialrecall",
+      "allowed_query_owners": [
+        "socialrecall"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00124_i9_10e_social_recall_awards.sql"
     }
   }
 }

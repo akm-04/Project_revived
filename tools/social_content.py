@@ -194,6 +194,30 @@ def _exchange_limit(rows, error):
     return limit
 
 
+
+def _recall_rules(rows, error):
+    settings = {
+        'friend_recall_days': ('offline_days', 7),
+        'friend_recall_task_time': ('task_days', 3),
+        'friend_recall_task_limit': ('max_active_tasks', 3),
+    }
+    rules = {}
+    for row in rows:
+        setting = settings.get(row['key'])
+        if setting is None:
+            continue
+        field, expected = setting
+        if field in rules:
+            raise error(f'duplicate recall setting {row["key"]}')
+        value = _integer(row['value'], row['key'], error, minimum=1)
+        if value != expected:
+            raise error(f'recall setting drift {row["key"]}: {value}')
+        rules[field] = value
+    if len(rules) != len(settings):
+        raise error('missing source recall setting')
+    return rules
+
+
 def _invitation_missions(rows, error):
     if len(rows) != _EXPECTED_INVITATION_MISSIONS:
         raise error(f'invitation mission source count drift: {len(rows)}')
@@ -357,7 +381,8 @@ def _compile_social(blobs, parse_table, error):
         error,
     )
     return dict(
-        schema_version=1,
+        schema_version=2,
+        recall_rules=_recall_rules(parse_table(blobs['data/tables/misc.lua'].data), error),
         exchange_limit=_exchange_limit(
             parse_table(blobs['data/tables/misc.lua'].data), error
         ),

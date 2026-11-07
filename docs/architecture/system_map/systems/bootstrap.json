@@ -239,6 +239,7 @@
    "gameplay_context_credentials",
    "gameplay_contexts",
    "logical_servers",
+   "player_login_observations",
    "players"
   ],
   "read": [],

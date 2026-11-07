@@ -398,26 +398,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 193,
-   "name": "recall_friend",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 194,
-   "name": "get_recall_award",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 208,
    "name": "LOAD_BATTLE_FORMATION",
    "files": [
@@ -1252,12 +1232,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 612,
+  "count": 610,
   "window_sender_mid_count": 143,
-  "non_window_sender_mid_count": 469,
+  "non_window_sender_mid_count": 467,
   "registration_status_counts": {
    "inactive_fallback": 528,
-   "no_registration": 82,
+   "no_registration": 80,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -1664,32 +1644,6 @@
      "app/windows/CommentWindow.lua"
     ],
     "non_window_sender_files": [],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 193,
-    "name": "recall_friend",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 194,
-    "name": "get_recall_award",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
     "runtime_reachability": "unknown"
    },
    {
@@ -10249,6 +10203,7 @@
     "sharedroom",
     "socialexchange",
     "socialgift",
+    "socialrecall",
     "spirit",
     "summon",
     "topfloor",
@@ -10300,6 +10255,7 @@
     "sharedroom",
     "socialexchange",
     "socialgift",
+    "socialrecall",
     "spirit",
     "summon",
     "topfloor",
@@ -10351,6 +10307,7 @@
     "sharedroom",
     "socialexchange",
     "socialgift",
+    "socialrecall",
     "spirit",
     "summon",
     "topfloor",
@@ -10461,6 +10418,7 @@
     "socialexchange",
     "socialgift",
     "socialprojection",
+    "socialrecall",
     "socialrelation",
     "spirit",
     "worldboss"

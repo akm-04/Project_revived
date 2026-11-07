@@ -247,3 +247,18 @@ func canonicalTime(value time.Time) (time.Time, bool) {
 func validTime(value time.Time) bool {
 	return !value.IsZero() && value.Location() == time.UTC
 }
+
+type StartRules struct {
+	Limits       Limits
+	TaskDuration time.Duration
+}
+
+func (rules StartRules) Validate() error {
+	if err := rules.Limits.Validate(); err != nil {
+		return err
+	}
+	if rules.TaskDuration <= 0 {
+		return ErrDuration
+	}
+	return nil
+}

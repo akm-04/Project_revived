@@ -20,7 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const i910cMigration120File = "00120_i9_10c_glue_admission.sql"
+const i910cMigration127File = "00127_i9_10c_glue_admission.sql"
 
 // Commands are the stock shapes the owning Dorm command validates; the
 // admissions are written through the production store, never by raw fixture SQL.
@@ -84,15 +84,15 @@ func i910cLockAdmission(t *testing.T, p *pg.Pool, owner dormstore.Store, player 
 	return owner.LockAdmissionTx(ctx, transaction, player, family)
 }
 
-// TestI910CMigration120PreservesAdmissionsAndAdmitsBuyGlue runs on a dedicated
-// database at goose 113: it populates the seven predecessor admission families
-// through dormstore, applies the owning 00120 migration, and reads every row and
+// TestI910CMigration127PreservesAdmissionsAndAdmitsBuyGlue runs on a dedicated
+// database at goose 126: it populates the seven predecessor admission families
+// through dormstore, applies the owning 00127 migration, and reads every row and
 // the new DORM_BUY_GLUE lane back through the production admission store.
 // One-shot per database: drop and recreate to repeat.
-func TestI910CMigration120PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
-	dsn := os.Getenv("GXB_I910C_MIG120_DSN")
+func TestI910CMigration127PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
+	dsn := os.Getenv("GXB_I910C_MIG127_DSN")
 	if dsn == "" {
-		t.Skip("dedicated populated schema113 migration120 fixture not configured")
+		t.Skip("dedicated populated schema126 migration127 fixture not configured")
 	}
 	p, err := pg.Open(ctx, dsn, pg.PoolSettings{MaxConns: 8, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
 	if err != nil {
@@ -103,8 +103,8 @@ func TestI910CMigration120PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
 	if err = p.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version`).Scan(&gooseVersion); err != nil {
 		t.Fatal(err)
 	}
-	if gooseVersion != 113 {
-		t.Fatalf("predecessor goose=%d want 113", gooseVersion)
+	if gooseVersion != 126 {
+		t.Fatalf("predecessor goose=%d want 126", gooseVersion)
 	}
 	predecessor := i910cFamilyConstraint(t, p)
 	if !strings.Contains(predecessor, app.Open) || !strings.Contains(predecessor, app.Finish) || strings.Contains(predecessor, app.BuyGlue) {
@@ -131,7 +131,7 @@ func TestI910CMigration120PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
 		t.Fatalf("predecessor schema admitted DORM_BUY_GLUE: %v", refusal)
 	}
 
-	migration, err := os.ReadFile("../../../migrations/" + i910cMigration120File)
+	migration, err := os.ReadFile("../../../migrations/" + i910cMigration127File)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestI910CMigration120PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
 			continue
 		}
 		if _, err = migrationTransaction.Exec(ctx, statement); err != nil {
-			t.Fatalf("apply %s: %v", i910cMigration120File, err)
+			t.Fatalf("apply %s: %v", i910cMigration127File, err)
 		}
 	}
 
@@ -168,11 +168,11 @@ func TestI910CMigration120PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
 		}
 	}
 	if err = i910cSaveAdmission(t, p, owner, buyGlue); err != nil {
-		t.Fatalf("migration120 DORM_BUY_GLUE admission: %v", err)
+		t.Fatalf("migration127 DORM_BUY_GLUE admission: %v", err)
 	}
 	stored, exists, err := i910cLockAdmission(t, p, owner, actor.PlayerID, app.BuyGlue)
 	if err != nil || !exists || stored.State != "PENDING" || stored.Command.Family != app.BuyGlue || stored.Operation.ID != buyGlue.Operation.ID {
 		t.Fatalf("migrated DORM_BUY_GLUE lane: %+v exists=%v err=%v", stored, exists, err)
 	}
-	t.Logf("REAL_PG migration120: goose=%d seven predecessor families preserved, predecessor refused DORM_BUY_GLUE (%v), %s applied, new lane=%s content=%s", gooseVersion, refusal, i910cMigration120File, stored.Operation.ID, revision)
+	t.Logf("REAL_PG migration127: goose=%d seven predecessor families preserved, predecessor refused DORM_BUY_GLUE (%v), %s applied, new lane=%s content=%s", gooseVersion, refusal, i910cMigration127File, stored.Operation.ID, revision)
 }

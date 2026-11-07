@@ -234,7 +234,7 @@ func TestI910CUpgradeQualification(t *testing.T) {
 	evidencePath := os.Getenv("GXB_I910C_OLD_EVIDENCE")
 	upgradeDSN := os.Getenv("GXB_I910C_UPGRADE_DSN")
 	if evidencePath == "" && upgradeDSN == "" {
-		t.Skip("dedicated one-shot schema113 historical upgrade fixture not configured")
+		t.Skip("dedicated one-shot schema126 historical upgrade fixture not configured")
 	}
 	if evidencePath == "" || upgradeDSN == "" {
 		t.Fatal("GXB_I910C_OLD_EVIDENCE and GXB_I910C_UPGRADE_DSN must both be configured")
@@ -269,8 +269,8 @@ func TestI910CUpgradeQualification(t *testing.T) {
 	if err := p.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version`).Scan(&gooseVersion); err != nil {
 		t.Fatal(err)
 	}
-	if gooseVersion != 113 {
-		t.Fatalf("goose=%d want 113", gooseVersion)
+	if gooseVersion != 126 {
+		t.Fatalf("goose=%d want 126", gooseVersion)
 	}
 
 	activationBefore, ok, err := store.ReadActivation(ctx, p)
