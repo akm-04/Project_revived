@@ -144,10 +144,16 @@ func (service Service) requireTaskDefense(requestContext context.Context, query 
 	}
 	return nil
 }
+
+var errTaskOccupantNotRanked = errors.New("topfloor: task occupant is not ranked")
+
 func (service Service) taskDisplay(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, occupant domain.Occupant, at time.Time) (domain.Display, error) {
 	rank, found, err := service.Store.TaskRankOfTx(requestContext, query, period.Ladder.Server, period.Rotation.Number, occupant)
-	if err != nil || !found {
+	if err != nil {
 		return domain.Display{}, errors.Join(err, domain.ErrRefused)
+	}
+	if !found {
+		return domain.Display{}, errors.Join(domain.ErrRefused, errTaskOccupantNotRanked)
 	}
 	if occupant.IsRobot() {
 		team, _ := catalog.Team(occupant.Robot)
