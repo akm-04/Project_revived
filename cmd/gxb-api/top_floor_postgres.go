@@ -163,7 +163,7 @@ func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store
 	return apptopfloor.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
 		Fence: i5db, Functions: i5db, Privileges: privileges, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, FrameStacks: i5db, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight,
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, HeroPower: fight.Inputs.Stats, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, HeroPower: fight.Inputs.Stats, OwnedHeroes: characterstore.Store{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
 // runReconcile runs one mode's owed settlements and abandoned matches every 30 s (in-process reconcile provider).

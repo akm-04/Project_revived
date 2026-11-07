@@ -17,6 +17,9 @@ const (
 	DefenseSlots    = 5
 )
 
+// PresetDefenseGirls is the D511 preset roster; PRIVATE_POLICY D511: use the owned subset, highest-level copy each, in this order as the formation slot order.
+var PresetDefenseGirls = []int64{10001001, 10001002, 10001003, 10001004, 10001019}
+
 var (
 	ErrUnavailable     = errors.New("topfloor: unavailable")
 	ErrConflict        = errors.New("topfloor: conflicting state")

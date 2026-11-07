@@ -205,7 +205,40 @@ func (s Service) requireAttackDefense(c context.Context, q tx.Queryer, pid ident
 	return nil
 }
 
-// enter seeds the server ladder on first use and appends the player at the bottom.
+// presetDefense selects the owned subset of the D511 preset girls, choosing the
+// highest-level owned copy of each in policy slot order. No selection means the
+// player owns none and keeps the D487 refusal.
+func (s Service) presetDefense(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]int64, error) {
+	heroes, err := s.OwnedHeroes.ListHeroesTx(c, q, pid)
+	if err != nil {
+		return nil, err
+	}
+	chosen := make([]int64, 0, len(d.PresetDefenseGirls))
+	for _, girl := range d.PresetDefenseGirls {
+		best, bestLevel := int64(0), int64(0)
+		for _, hero := range heroes {
+			if hero.ValidatePersistent() != nil || hero.PlayerID != pid {
+				return nil, d.ErrConflict
+			}
+			if hero.OriginTableID != girl {
+				continue
+			}
+			if hero.Level > bestLevel || (hero.Level == bestLevel && (best == 0 || hero.PartnerID < best)) {
+				best, bestLevel = hero.PartnerID, hero.Level
+			}
+		}
+		if best != 0 {
+			chosen = append(chosen, best)
+		}
+	}
+	if err = defenseShape(chosen, 0); err != nil {
+		return nil, err
+	}
+	return chosen, nil
+}
+
+// enter seeds the server ladder on first use, appends the player at the bottom
+// and writes the D511 preset defense in the same transaction before the insert.
 func (s Service) enter(c context.Context, t tx.Tx, catalog d.Catalog, revision string, a identity.ActorContext, at time.Time) (d.Player, error) {
 	l, found, err := s.Store.ReadLadderTx(c, t, a.LogicalServerID, true)
 	if err != nil {
@@ -240,6 +273,14 @@ func (s Service) enter(c context.Context, t tx.Tx, catalog d.Catalog, revision s
 		return d.Player{}, err
 	}
 	p := catalog.NewPlayer(a.PlayerID, a.LogicalServerID, revision, rank, at)
+	preset, err := s.presetDefense(c, t, a.PlayerID)
+	if err != nil {
+		return d.Player{}, err
+	}
+	if len(preset) > 0 {
+		stamp := at.UTC()
+		p.Defense, p.DefensePet, p.DefenseSetAt = preset, 0, &stamp
+	}
 	return p, s.Store.InsertPlayerTx(c, t, p)
 }
 
@@ -402,7 +443,8 @@ func (s Service) team(c context.Context, q tx.Queryer, pid identity.PlayerID, he
 	return nil, nil, fmt.Errorf("%w: pet %d not owned", d.ErrRefused, pet)
 }
 
-func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes []int64, pet int64, op operation.Context) error {
+// defenseShape is the formation validation shared by MID278 and the D511 preset.
+func defenseShape(heroes []int64, pet int64) error {
 	seen := map[int64]bool{}
 	for _, id := range heroes {
 		if id <= 0 || seen[id] {
@@ -412,6 +454,13 @@ func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes 
 	}
 	if len(heroes) > d.DefenseSlots || pet < 0 {
 		return d.ErrInvalid
+	}
+	return nil
+}
+
+func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes []int64, pet int64, op operation.Context) error {
+	if err := defenseShape(heroes, pet); err != nil {
+		return err
 	}
 	if !s.ready() {
 		return d.ErrUnavailable
