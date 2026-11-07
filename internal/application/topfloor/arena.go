@@ -213,23 +213,13 @@ func (s Service) presetDefense(c context.Context, q tx.Queryer, pid identity.Pla
 	if err != nil {
 		return nil, err
 	}
-	chosen := make([]int64, 0, len(d.PresetDefenseGirls))
-	for _, girl := range d.PresetDefenseGirls {
-		best, bestLevel := int64(0), int64(0)
-		for _, hero := range heroes {
-			if hero.ValidatePersistent() != nil || hero.PlayerID != pid {
-				return nil, d.ErrConflict
-			}
-			if hero.OriginTableID != girl {
-				continue
-			}
-			if hero.Level > bestLevel || (hero.Level == bestLevel && (best == 0 || hero.PartnerID < best)) {
-				best, bestLevel = hero.PartnerID, hero.Level
-			}
-		}
-		if best != 0 {
-			chosen = append(chosen, best)
-		}
+	selected, err := d.SelectPresetDefense(heroes, pid)
+	if err != nil {
+		return nil, err
+	}
+	chosen := make([]int64, 0, len(selected))
+	for _, hero := range selected {
+		chosen = append(chosen, hero.PartnerID)
 	}
 	if err = defenseShape(chosen, 0); err != nil {
 		return nil, err
