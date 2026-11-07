@@ -9,6 +9,7 @@ import (
 	domain "gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"math"
+	"strings"
 	"testing"
 )
 
@@ -96,6 +97,36 @@ func TestMemoirPlayerFightRefusalsAreCodedConflicts(t *testing.T) {
 				t.Fatalf("response=%+v", response)
 			}
 		})
+	}
+}
+
+type memoirBranchProbe struct {
+	MemoirPort
+	saveCause  error
+	floorCause error
+}
+
+func (probe memoirBranchProbe) SaveMap(context.Context, identity.ActorContext, int, []int, operation.Context) (map[string]any, error) {
+	return nil, probe.saveCause
+}
+func (probe memoirBranchProbe) NextFloor(context.Context, identity.ActorContext, int, operation.Context) (map[string]any, error) {
+	return nil, probe.floorCause
+}
+
+// The journal cause column is what selects the 2306/2308 refusal branch; the
+// coded body alone cannot tell them apart.
+func TestMemoirSaveMapAndNextFloorKeepTheBranchCause(t *testing.T) {
+	actor := actorForHTTP(t)
+	saveCause := fmt.Errorf("%w: position 54 is not reachable from 12", domain.ErrRefused)
+	floorCause := fmt.Errorf("%w: exit at 54 is closed (guardian_won=false)", domain.ErrRefused)
+	dispatcher := MemoirDispatcher{Authority: httpAuthority{actor}, Service: memoirBranchProbe{saveCause: saveCause, floorCause: floorCause}}
+	saved := dispatcher.Dispatch(context.Background(), heroReq(t, 2306, map[string]any{"now_pos": 54, "open_grids": []any{}}))
+	if saved.HTTPStatus != 409 || saved.Body["error_code"] != int64(1) || !strings.Contains(fmt.Sprint(saved.Cause), "position 54 is not reachable from 12") {
+		t.Fatalf("save response=%+v", saved)
+	}
+	floor := dispatcher.Dispatch(context.Background(), heroReq(t, 2308, map[string]any{"grid_pos": 54}))
+	if floor.HTTPStatus != 409 || floor.Body["error_code"] != int64(1) || !strings.Contains(fmt.Sprint(floor.Cause), "exit at 54 is closed") {
+		t.Fatalf("floor response=%+v", floor)
 	}
 }
 
