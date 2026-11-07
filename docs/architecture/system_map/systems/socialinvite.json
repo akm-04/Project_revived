@@ -131,7 +131,9 @@
  },
  "tests": {
   "integration": [],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_10e_invite.json"
+  ],
   "unit": [
    "projection_test.go"
   ]

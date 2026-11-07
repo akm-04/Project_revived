@@ -54,7 +54,9 @@ type Profile struct {
 }
 
 func (p Profile) Validate(player identity.PlayerID) error {
-	if p.PlayerID != player || p.Name == "" || p.AvatarID < 0 {
+	// An empty name is a stock lifecycle state for a character that has not
+	// completed naming; the client renders it as blank rather than a protocol error.
+	if p.PlayerID != player || p.AvatarID < 0 || p.RegionName == "" {
 		return ErrFacts
 	}
 	return nil
@@ -74,7 +76,7 @@ type InviteeFacts struct {
 }
 
 func (f InviteeFacts) Validate() error {
-	if !f.Player.Valid() || f.Name == "" || f.AvatarID < 0 || f.RegionName == "" || f.AcademyLevel < 0 || f.OwnedHeroCount < 0 || f.HighestOwnedHeroLevel < 0 || f.ChargeTotal < 0 {
+	if !f.Player.Valid() || f.AvatarID < 0 || f.RegionName == "" || f.AcademyLevel < 0 || f.OwnedHeroCount < 0 || f.HighestOwnedHeroLevel < 0 || f.ChargeTotal < 0 {
 		return ErrFacts
 	}
 	return nil
