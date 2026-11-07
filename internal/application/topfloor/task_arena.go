@@ -37,13 +37,23 @@ func (service Service) taskCatalog(requestContext context.Context, query tx.Quer
 		return catalog, period, found, err
 	}
 	if !found {
-		return catalog, proposal, false, nil
+		period = proposal
+	} else if catalog, err = service.Content.TopFloorCatalogTx(requestContext, query, period.Ladder.ContentRevision); err != nil {
+		return catalog, period, true, err
 	}
-	catalog, err = service.Content.TopFloorCatalogTx(requestContext, query, period.Ladder.ContentRevision)
-	if err == nil && catalog.TaskModes == nil {
-		err = domain.ErrUnavailable
+	if catalog.TaskModes == nil {
+		return catalog, period, found, domain.ErrUnavailable
 	}
-	return catalog, period, true, err
+	bannedTables, err := service.Store.TaskModeBanTablesTx(requestContext, query, period.Rotation.Mode, period.Rotation.Number)
+	if err != nil {
+		return catalog, period, found, err
+	}
+	updatedTaskModes, err := catalog.TaskModes.WithOperatorBans(period.Rotation.Mode, bannedTables)
+	if err != nil {
+		return catalog, period, found, err
+	}
+	catalog.TaskModes = &updatedTaskModes
+	return catalog, period, found, nil
 }
 func (service Service) taskStateTx(requestContext context.Context, scope gen.TimedScope, actor identity.ActorContext) (domain.Catalog, domain.TaskModePeriod, domain.TaskModePlayer, error) {
 	at := scope.Operation.DecisionAt()

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -113,6 +114,26 @@ func TestTaskModeFormationTrustBoundaries(t *testing.T) {
 	original, _ := camp.Buffs(2)
 	if original[0] != 22 {
 		t.Fatal("returned buffs mutate pinned rules")
+	}
+}
+
+func TestTaskModeOperatorBansExtendOnlyTheSelectedMode(t *testing.T) {
+	catalog := TaskModeCatalog{Rules: []TaskModeRule{
+		{ID: TaskModeSingle, BannedTables: []int64{10001001}},
+		{ID: TaskModeBanned, BannedTables: []int64{10001005}},
+	}}
+	updated, err := catalog.WithOperatorBans(TaskModeSingle, []int64{10001001, 10001002})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(updated.Rules[0].BannedTables, []int64{10001001, 10001002}) || !slices.Equal(updated.Rules[1].BannedTables, []int64{10001005}) {
+		t.Fatalf("operator bans did not union only into the selected mode: %+v", updated.Rules)
+	}
+	if !slices.Equal(catalog.Rules[0].BannedTables, []int64{10001001}) {
+		t.Fatal("operator bans mutated the source catalog")
+	}
+	if _, err = catalog.WithOperatorBans(TaskModeSingle, []int64{0}); err == nil {
+		t.Fatal("nonpositive operator ban accepted")
 	}
 }
 
