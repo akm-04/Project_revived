@@ -8,6 +8,9 @@ type TemplateRule struct {
 	DialogEnabled        bool  `json:"dialog_enabled"`
 	GiftLikeType         int64 `json:"gift_like_type"`
 	GiftDislikeType      int64 `json:"gift_dislike_type"`
+	ModelID              int64 `json:"model_id"`
+	AwakenTableID        int64 `json:"awaken_table_id"`
+	Awaken               int64 `json:"awaken"`
 }
 type GiftRule struct {
 	ItemID       int64 `json:"item_id"`
@@ -86,20 +89,22 @@ type SpecialCollectionRule struct {
 	Contribution      Contribution `json:"contribution"`
 }
 type Catalog struct {
-	ContentRevision    string
-	Templates          map[int64]TemplateRule
-	Gifts              map[int64]GiftRule
-	Feeding            FeedRules
-	NormalCollections  map[int64]NormalCollectionRule
-	SpecialCollections [SpecialClaimCount]SpecialCollectionRule
-	Stages             []StageRule
-	Acts               map[int64]ActRule
-	Missions           map[int64]MissionRule
-	Talks              map[int64]TalkRule
-	CGs                map[int64]CGRule
-	Backgrounds        map[int64]BackgroundRule
-	DialogConfigs      map[int64]DialogConfigRule
-	CourseGiftBoxes    map[int64]CourseGiftBoxRule
+	ContentRevision      string
+	Templates            map[int64]TemplateRule
+	Gifts                map[int64]GiftRule
+	Feeding              FeedRules
+	NormalCollections    map[int64]NormalCollectionRule
+	SpecialCollections   [SpecialClaimCount]SpecialCollectionRule
+	Stages               []StageRule
+	Acts                 map[int64]ActRule
+	Missions             map[int64]MissionRule
+	Talks                map[int64]TalkRule
+	CGs                  map[int64]CGRule
+	Backgrounds          map[int64]BackgroundRule
+	DialogConfigs        map[int64]DialogConfigRule
+	DialogNodes          map[DialogGroupKey]map[int64]DialogNode
+	DialogSourceUnknowns []int64
+	CourseGiftBoxes      map[int64]CourseGiftBoxRule
 }
 
 // StageRule is one favor stage and the act/mission sets it opens.
@@ -219,6 +224,48 @@ func (r DialogConfigRule) Validate() error {
 	return nil
 }
 
+type DialogGroupKey struct {
+	RelationshipSourceID int64
+	DialogGroup          int64
+}
+
+// DialogNode retains the raw dialogue graph; reward meaning is not assigned here.
+type DialogNode struct {
+	NodeID   int64
+	IsReward *int64
+	TurnIDs  []int64
+}
+
+type DialogNodeRule struct {
+	RelationshipSourceID int64   `json:"relationship_source_id"`
+	DialogGroup          int64   `json:"dialog_group"`
+	NodeID               int64   `json:"node_id"`
+	IsReward             *int64  `json:"is_reward,omitempty"`
+	TurnIDs              []int64 `json:"turn_ids"`
+}
+
+func (r DialogNodeRule) Validate() error {
+	if r.RelationshipSourceID <= 0 || r.DialogGroup <= 0 || r.NodeID <= 0 || len(r.TurnIDs) == 0 {
+		return ErrUnqualified
+	}
+	if r.IsReward != nil && *r.IsReward < 0 {
+		return ErrUnqualified
+	}
+	terminal := false
+	for _, id := range r.TurnIDs {
+		if id == 0 || id < -1 {
+			return ErrUnqualified
+		}
+		if id == -1 {
+			terminal = true
+		}
+	}
+	if terminal && len(r.TurnIDs) != 1 {
+		return ErrUnqualified
+	}
+	return nil
+}
+
 // CourseDropRoll is one row of a course gift box dropbox, rates in ten-thousandths.
 type CourseDropRoll struct {
 	ID      int64 `json:"id"`
@@ -291,6 +338,38 @@ func (c Catalog) Validate() error {
 		if r.Validate() != nil {
 			return ErrUnqualified
 		}
+	}
+	for key, nodes := range c.DialogNodes {
+		if key.RelationshipSourceID <= 0 || key.DialogGroup <= 0 || len(nodes) == 0 {
+			return ErrUnqualified
+		}
+		for nodeID, node := range nodes {
+			if nodeID <= 0 || node.NodeID != nodeID || len(node.TurnIDs) == 0 {
+				return ErrUnqualified
+			}
+			if node.IsReward != nil && *node.IsReward < 0 {
+				return ErrUnqualified
+			}
+			terminal := false
+			for _, id := range node.TurnIDs {
+				if id == 0 || id < -1 {
+					return ErrUnqualified
+				}
+				if id == -1 {
+					terminal = true
+				}
+			}
+			if terminal && len(node.TurnIDs) != 1 {
+				return ErrUnqualified
+			}
+		}
+	}
+	seenDialogUnknowns := map[int64]bool{}
+	for _, id := range c.DialogSourceUnknowns {
+		if id <= 0 || seenDialogUnknowns[id] {
+			return ErrUnqualified
+		}
+		seenDialogUnknowns[id] = true
 	}
 	for _, r := range c.CourseGiftBoxes {
 		if r.Validate() != nil {

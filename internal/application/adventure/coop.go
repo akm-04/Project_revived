@@ -580,7 +580,7 @@ func (s Mode) heroRows(c context.Context, q tx.Queryer, player identity.PlayerID
 
 func (s Mode) petRows(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time) (map[string]map[string]any, error) {
 	detail := map[string]any{}
-	if err := s.Heroes.OverlayMID1(c, q, identity.ActorContext{PlayerID: player}, false, at, detail); err != nil {
+	if err := s.Pets.OverlayMID1(c, q, identity.ActorContext{PlayerID: player}, false, at, detail); err != nil {
 		return nil, err
 	}
 	body, _ := detail["780"].(map[string]any)

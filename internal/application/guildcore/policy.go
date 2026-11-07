@@ -77,8 +77,18 @@ func (p Policy) ValidName(s string) bool {
 	if !utf8.ValidString(s) {
 		return false
 	}
-	n := len([]rune(s))
-	return n >= p.NameMinChars && n <= p.NameMaxChars
+	runeCount := 0
+	halfUnits := 0
+	for byteIndex := range s {
+		runeCount++
+		// xyd.getTextLen counts a character whose lead byte is 226-240 as one unit and every other character as half.
+		if s[byteIndex] >= 226 && s[byteIndex] <= 240 {
+			halfUnits += 2
+			continue
+		}
+		halfUnits++
+	}
+	return runeCount >= p.NameMinChars && halfUnits <= p.NameMaxChars*2
 }
 
 func (p Policy) ValidBulletin(s string) bool {

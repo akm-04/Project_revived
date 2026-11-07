@@ -161,8 +161,19 @@ func (service Service) TaskPreFight(requestContext context.Context, actor identi
 	if !found {
 		return domain.ErrRefused
 	}
-	_, err = service.taskDisplay(requestContext, service.Fresh, catalog, period, occupant, at)
-	return err
+	display, err := service.taskDisplay(requestContext, service.Fresh, catalog, period, occupant, at)
+	if err != nil {
+		return err
+	}
+	rank, _, err := service.Store.TaskRankOfTx(requestContext, service.Fresh, actor.LogicalServerID, period.Rotation.Number, domain.Occupant{Player: actor.PlayerID})
+	if err != nil {
+		return err
+	}
+	snapshot, snapshotFound, err := service.Store.ReadOfferSnapshotTx(requestContext, service.Fresh, actor.PlayerID, domain.OfferScopeSpecial, false)
+	if err != nil {
+		return err
+	}
+	return domain.MatchOfferSnapshot(snapshot, snapshotFound, period.Rotation.Number, rank, display.Occupant, display.Rank)
 }
 func (service Service) TaskRankList(requestContext context.Context, actor identity.ActorContext) (RankList, error) {
 	_, at, err := service.readContext(requestContext)

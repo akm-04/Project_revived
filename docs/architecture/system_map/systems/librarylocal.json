@@ -354,6 +354,7 @@
    "i9_10b_library.json"
   ],
   "unit": [
+   "command_reward_test.go",
    "roll_policy_test.go"
   ]
  }

@@ -442,6 +442,8 @@ func failI5(err error) httpedge.Response {
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_redeem"}}
 	case errors.Is(err, appi5.ErrMailStackFull):
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "stack_capacity"}}
+	case errors.Is(err, appi5.ErrMailNotClaimable):
+		return conflictRefusal(1)
 	case errors.Is(err, appi5.ErrMailNotFound), errors.Is(err, appi5.ErrObjectiveNotFound):
 		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "not_found"}}
 	default:

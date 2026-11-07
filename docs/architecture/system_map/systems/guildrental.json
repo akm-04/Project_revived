@@ -82,7 +82,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 593,
    "name": "LOAD_SENT_HEROS"
@@ -90,7 +90,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 594,
    "name": "RENT_HERO"
@@ -98,7 +98,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 595,
    "name": "CANCEL_RENT_HERO"
@@ -106,7 +106,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 618,
    "name": "LOAD_RENT_PET"
@@ -114,7 +114,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 619,
    "name": "RENT_PET"
@@ -122,7 +122,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 620,
    "name": "CANCEL_RENT_PET"
@@ -130,7 +130,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 621,
    "name": "LOAD_CAN_RENT_PET_LIST"
@@ -138,7 +138,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 623,
    "name": "LOAD_USED_PARTNER"
@@ -146,7 +146,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 34
+    "line": 35
    },
    "mid": 2768,
    "name": "GET_RENT_HEROS"
@@ -171,9 +171,12 @@
    "guild_rental_offers",
    "guild_rental_uses",
    "gxb_content_activation",
+   "gxb_content_hero_exp",
    "gxb_content_hero_templates",
    "player_currency_balances",
    "player_directory_profiles",
+   "player_hero_live_entitlements",
+   "player_hero_skin_entitlements",
    "player_heroes",
    "player_pets",
    "player_progression",
@@ -190,6 +193,7 @@
   ],
   "scenarios_naming": [
    "i9_9b_guild_rental.json",
+   "i9_9b_guild_rental_cache.json",
    "playtest4_fixes.json"
   ],
   "unit": [

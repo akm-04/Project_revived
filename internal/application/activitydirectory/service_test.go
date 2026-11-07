@@ -92,7 +92,7 @@ func TestListSortsValidatesActorAndClonesDetails(t *testing.T) {
 	d := Directory{Registry: r}
 	at := time.Unix(123, 0).UTC()
 	a := actor(t)
-	rows, err := d.ListAt(context.Background(), a, at)
+	rows, err := d.ListAt(context.Background(), a, at, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func TestListSortsValidatesActorAndClonesDetails(t *testing.T) {
 	}
 	m := rows[0].Details.(map[string]any)
 	m["nested"].([]any)[0] = int64(99)
-	rows2, err := d.ListAt(context.Background(), a, at)
+	rows2, err := d.ListAt(context.Background(), a, at, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestProviderMismatchMalformedAndAbsentFailClosed(t *testing.T) {
 		return activity.Projection{TableID: 99, IsOpen: 1}, true, nil
 	})
 	r, _ := NewRegistry([]Registration{{Name: "bad", TableID: 10, RuntimeCapability: "bad", Provider: bad}}, nil)
-	_, err := (Directory{Registry: r}).ListAt(context.Background(), actor(t), time.Unix(1, 0).UTC())
+	_, err := (Directory{Registry: r}).ListAt(context.Background(), actor(t), time.Unix(1, 0).UTC(), nil)
 	if !errors.Is(err, ErrProviderMismatch) {
 		t.Fatalf("want mismatch got %v", err)
 	}
@@ -174,7 +174,7 @@ func TestMalformedProjectionAndUnsupportedDetailsFailClosed(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, err = (Directory{Registry: r}).ListAt(context.Background(), actor(t), time.Unix(1, 0).UTC())
+			_, err = (Directory{Registry: r}).ListAt(context.Background(), actor(t), time.Unix(1, 0).UTC(), nil)
 			if err == nil {
 				t.Fatal("malformed projection accepted")
 			}

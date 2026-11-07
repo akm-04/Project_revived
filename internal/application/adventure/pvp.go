@@ -42,7 +42,7 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if err = s.ownedHeroes(c, sc.Tx, a, at, request.Formation); err != nil {
 			return err
 		}
-		enemy, err := s.opponent(c, sc.Tx, a, catalog, eventOrdinal(sc.Operation.Operation(), "adventure.pvp.fight/v1", occurrence.SourceKey))
+		enemy, err := s.opponent(c, sc.Tx, a, catalog, at, eventOrdinal(sc.Operation.Operation(), "adventure.pvp.fight/v1", occurrence.SourceKey))
 		if err != nil {
 			return err
 		}
@@ -110,22 +110,12 @@ func pvpBattle(a identity.ActorContext, request FightRequest, enemy Opponent) cb
 	for _, id := range request.Formation {
 		teamA = append(teamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
-	battle := cb.BattleRequest{CampaignType: darena.CampaignType, BattleID: darena.BattleID, TeamA: teamA}
+	battle := cb.BattleRequest{CampaignType: darena.CampaignType, BattleID: darena.BattleID, TeamA: teamA, Context: &cd.BattleContext{Transform: darena.Transform}}
 	if request.PetID > 0 {
 		battle.PetsA = []cb.Participant{{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: request.PetID}}
 	}
-	if len(enemy.TemplateHeroes) > 0 {
-		battle.WavesB = [][]cb.Participant{enemy.TemplateHeroes}
-		return battle
-	}
-	teamB := make([]cb.Participant, 0, len(enemy.Heroes))
-	for _, id := range enemy.Heroes {
-		teamB = append(teamB, cb.Participant{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: enemy.PlayerID, Identity: id})
-	}
-	battle.WavesB = [][]cb.Participant{teamB}
-	if enemy.PetID > 0 {
-		battle.PetsB = []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.PetActor, Player: enemy.PlayerID, Identity: enemy.PetID}}
-	}
+	battle.WavesB = [][]cb.Participant{enemy.Heroes}
+	battle.PetsB = enemy.Pets
 	return battle
 }
 

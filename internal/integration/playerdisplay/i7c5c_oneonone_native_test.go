@@ -5,9 +5,11 @@ package playerdisplay_test
 import (
 	"context"
 	"errors"
+	"net/http"
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -18,6 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	ach "gxb.local/backend/v2/internal/application/achievement"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -25,12 +28,16 @@ import (
 	app "gxb.local/backend/v2/internal/application/oneonone"
 	appdisplay "gxb.local/backend/v2/internal/application/playerdisplay"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/domain/mail"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 func oneOnOneService(t *testing.T, p *pg.Pool) app.Service {
@@ -38,7 +45,7 @@ func oneOnOneService(t *testing.T, p *pg.Pool) app.Service {
 	fight := combatService(t, p)
 	values, content := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: oneononestore.Store{}, Content: content,
-		Fence: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Mail: i5.SettlementMail{Store: values},
+		Fence: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, FrameStacks: values, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
 		Directory: i4store.PlayerDirectoryReader{}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
@@ -86,6 +93,25 @@ func oneOnOneCatalog(t *testing.T, p *pg.Pool) d.Catalog {
 	return catalog
 }
 
+type oneOnOneFrameOnlyContent struct {
+	contentstore.Store
+}
+
+func (content oneOnOneFrameOnlyContent) OneOnOneCatalogTx(requestContext context.Context, databaseQuery tx.Queryer, revision string) (d.Catalog, error) {
+	catalog, catalogError := content.Store.OneOnOneCatalogTx(requestContext, databaseQuery, revision)
+	if catalogError != nil {
+		return d.Catalog{}, catalogError
+	}
+	catalog.Rewards = append([]d.Reward(nil), catalog.Rewards...)
+	for index := range catalog.Rewards {
+		catalog.Rewards[index].Crystal = 0
+		catalog.Rewards[index].Mana = 0
+		catalog.Rewards[index].TopCoin = 0
+		catalog.Rewards[index].Items = nil
+	}
+	return catalog, nil
+}
+
 func teamsOf(heroes []int64, n int) []d.Team {
 	out := []d.Team{}
 	for i := range n {
@@ -101,6 +127,99 @@ func startSettled(s app.Service, a identity.ActorContext, command app.StartComma
 		if !errors.Is(err, app.ErrUnresolved) {
 			return m, err
 		}
+	}
+}
+
+func TestI9_10OneOnOneSettlementWaitsForConcurrentFrameClaimNative(t *testing.T) {
+	databasePool := pool(t)
+	defer databasePool.Close()
+	service := oneOnOneService(t, databasePool)
+	logicalServer := rankingServer(t, databasePool)
+	actor, _ := oneOnOnePlayer(t, databasePool, logicalServer)
+	catalog := oneOnOneCatalog(t, databasePool)
+	frameReward, found := catalog.RewardFor(1)
+	if !found || frameReward.FrameID <= 0 {
+		t.Fatal("rank-1 frame reward missing")
+	}
+	if _, loadError := service.Load(ctx, actor, op()); loadError != nil {
+		t.Fatal(loadError)
+	}
+	exec(t, databasePool, `UPDATE one_on_one_players SET level=5,slot=NULL,state_version=state_version+1 WHERE slot=1 AND player_id<>$1`, int64(actor.PlayerID))
+	exec(t, databasePool, `UPDATE one_on_one_players SET level=1,slot=1,state_version=state_version+1 WHERE player_id=$1`, int64(actor.PlayerID))
+
+	values := i5store.Store{Queryer: databasePool}
+	transaction, beginError := databasePool.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if beginError != nil {
+		t.Fatal(beginError)
+	}
+	frameMail, _, deliveryError := (i5.SettlementMail{Store: values}).DeliverTx(ctx, transaction, i5.SettlementMailRequest{Recipient: actor.PlayerID, SourceKind: "PLAYTEST_FRAME_CLAIM", SourceKey: "one-on-one-concurrent", Title: "Frame reward", Sender: "Academy", Body: "Claim the frame", PolicyVersion: "i9-10-playtest-v1", Lines: []grant.Line{{Kind: grant.StackItem, ItemID: frameReward.FrameID, Amount: 1}}, At: time.Now().UTC()})
+	if deliveryError != nil {
+		transaction.Rollback(ctx)
+		t.Fatal(deliveryError)
+	}
+	if commitError := transaction.Commit(ctx); commitError != nil {
+		t.Fatal(commitError)
+	}
+
+	latest := catalog.LatestSettlement(time.Now())
+	exec(t, databasePool, `DELETE FROM one_on_one_settlement_ranks WHERE day>$1`, latest-8)
+	exec(t, databasePool, `DELETE FROM one_on_one_settlements WHERE day>$1`, latest-8)
+	exec(t, databasePool, `UPDATE one_on_one_competitions SET settled_through=$1,state_version=state_version+1`, latest-8)
+	service.Content = oneOnOneFrameOnlyContent{Store: contentstore.Store{Queryer: databasePool}}
+
+	release := make(chan struct{})
+	var releaseOnce sync.Once
+	defer releaseOnce.Do(func() { close(release) })
+	claimLocked := make(chan struct{})
+	claims := genuineGrants(databasePool)
+	claims.Store = blockedFrameClaimStore{Store: claims.Store, locked: claimLocked, release: release, lockOnce: &sync.Once{}}
+	claimDone := make(chan error, 1)
+	go func() {
+		_, claimError := claims.ClaimMail(ctx, actor, frameMail.Address, op())
+		claimDone <- claimError
+	}()
+	select {
+	case <-claimLocked:
+	case <-time.After(10 * time.Second):
+		t.Fatal("frame claim did not acquire the Economy owner lock")
+	}
+
+	settlementMailLockAttempted := make(chan struct{})
+	settlementLockAttempted := make(chan struct{})
+	service.Mail = observedFrameMail{Mail: service.Mail, lockAttempted: settlementMailLockAttempted, lockOnce: &sync.Once{}}
+	service.FrameStacks = observedFrameStackStore{MaterialCostStore: values, lockAttempted: settlementLockAttempted, lockOnce: &sync.Once{}}
+	type settlementResult struct {
+		applied int
+		failure error
+	}
+	settlementDone := make(chan settlementResult, 1)
+	go func() {
+		applied, settlementError := service.Due(ctx, op())
+		settlementDone <- settlementResult{applied: applied, failure: settlementError}
+	}()
+	select {
+	case <-settlementMailLockAttempted:
+	case <-time.After(10 * time.Second):
+		t.Fatal("settlement did not reach the mail namespace locks")
+	}
+	releaseOnce.Do(func() { close(release) })
+	if claimError := <-claimDone; claimError != nil {
+		t.Fatal("concurrent frame claim", claimError)
+	}
+	select {
+	case <-settlementLockAttempted:
+	case <-time.After(10 * time.Second):
+		t.Fatal("settlement did not reach the Economy owner locks")
+	}
+	settled := <-settlementDone
+	if settled.failure != nil || settled.applied < 1 {
+		t.Fatalf("settlement result: %+v", settled)
+	}
+	if stackQuantity(t, databasePool, actor.PlayerID, frameReward.FrameID) != 1 ||
+		scalar(t, databasePool, `SELECT count(*) FROM one_on_one_settlement_ranks WHERE player_id=$1 AND day>$2`, int64(actor.PlayerID), latest-8) == 0 ||
+		scalar(t, databasePool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(actor.PlayerID)) != 0 ||
+		scalar(t, databasePool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_REWARD'`, int64(actor.PlayerID)) != 0 {
+		t.Fatal("settlement did not observe the claimed frame or emitted an empty reward mail")
 	}
 }
 
@@ -280,6 +399,11 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	exec(t, pool, `UPDATE one_on_one_players SET level=1,slot=1,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID))
 	now := time.Now()
 	latest := catalog.LatestSettlement(now)
+	revision, err := (contentstore.Store{Queryer: pool}).ActiveRevision(ctx, pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grantGenuine(t, pool, a, revision, "owned one-on-one frame fixture", []grant.Line{{Kind: grant.StackItem, ItemID: 120001005, Amount: 1}})
 	// The fixture replays its own window; earlier runs on the same database settled it already.
 	exec(t, pool, `DELETE FROM one_on_one_settlement_ranks WHERE day>$1`, latest-8)
 	exec(t, pool, `DELETE FROM one_on_one_settlements WHERE day>$1`, latest-8)
@@ -292,7 +416,8 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 		t.Fatal("settlement must be once", again, err)
 	}
 	if scalar(t, pool, `SELECT count(*) FROM mail_attachments m JOIN mail_records r USING(mail_uuid) WHERE r.recipient_player_id=$1 AND r.source_kind='ONE_ON_ONE_REWARD' AND m.resource_key='top_coin' AND m.amount=2100`, int64(a.PlayerID)) != int64(settled) ||
-		scalar(t, pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(a.PlayerID)) != 1 {
+		scalar(t, pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(a.PlayerID)) != 0 ||
+		scalar(t, pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ONE_ON_ONE_FRAME'`, int64(b.PlayerID)) != 1 {
 		t.Fatal("reward and frame mails")
 	}
 	// The top_coin income (ENABLED_R4) is claimable through the stock mail claim.
@@ -421,5 +546,57 @@ func TestI7C5COneOnOneReconcileAbandonedNative(t *testing.T) {
 	if scalar(t, pool, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1 AND status='SETTLED'`, int64(a.PlayerID)) != 1 ||
 		scalar(t, pool, `SELECT count(*) FROM one_on_one_records WHERE owner_player_id=$1`, int64(a.PlayerID)) != 1 {
 		t.Fatal("abandoned match not settled once")
+	}
+}
+
+// TestI7C5COneOnOneRivalRegionWireNative runs MATCH_ENEMIES through the production
+// dispatcher over a real competition: a rival on another server must carry its own
+// band in player_info.region, which ChangeEnemyWindow concatenates into "S"..region.
+func TestI7C5COneOnOneRivalRegionWireNative(t *testing.T) {
+	pool := pool(t)
+	defer pool.Close()
+	s := oneOnOneService(t, pool)
+	a, heroesA := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	b, heroesB := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	if a.LogicalServerID == b.LogicalServerID {
+		t.Fatal("fixture needs two logical servers")
+	}
+	for _, x := range []struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}{{a, heroesA}, {b, heroesB}} {
+		if _, err := s.Load(ctx, x.actor, op()); err != nil {
+			t.Fatal(err)
+		}
+		if err := s.ChangeTeams(ctx, x.actor, teamsOf(x.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// The better rival is one row ahead of the requester in the Junior order.
+	exec(t, pool, `UPDATE one_on_one_players SET points=3000,state_version=state_version+1 WHERE player_id NOT IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID))
+	exec(t, pool, `UPDATE one_on_one_players SET points=99999,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
+	dispatcher := stockruntime.OneOnOneDispatcher{Authority: fixedSocialAuthority{actor: a}, Service: s}
+	response := dispatcher.Dispatch(ctx, httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 2482, Operation: op(), ReceivedAt: time.Now().UTC(),
+		Claims: wire.CredentialClaims{Token: "fixture", Region: int64(a.LogicalServerID)}, Params: map[string]any{}}})
+	if response.HTTPStatus != http.StatusOK {
+		t.Fatalf("MATCH_ENEMIES status=%d body=%v cause=%v", response.HTTPStatus, response.Body, response.Cause)
+	}
+	offered := response.Body["match_infos"].([]map[string]any)
+	found := false
+	for _, row := range offered {
+		info := row["player_info"].(map[string]any)
+		player := identity.PlayerID(info["player_id"].(int64))
+		if info["region"] != int64(logicalserver.PlayerRegion(player)) {
+			t.Fatalf("rival %d region=%v", player, info["region"])
+		}
+		if player == b.PlayerID {
+			found = true
+			if info["region"] != int64(b.LogicalServerID) {
+				t.Fatalf("better rival on server %d answered region=%v", b.LogicalServerID, info["region"])
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("the better rival on server %d was not offered: %v", b.LogicalServerID, offered)
 	}
 }

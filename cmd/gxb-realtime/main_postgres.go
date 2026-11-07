@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -403,6 +404,28 @@ func run() error {
 	defer ln.Close()
 	go func() { <-ctx.Done(); _ = ln.Close() }()
 	log.Printf("gxb-realtime I4 listening on %s", cfg.RealtimeAddr)
+	wsFailure := make(chan error, 1)
+	if wsAddress := os.Getenv("GXB_REALTIME_WS_ADDR"); wsAddress != "" {
+		wsListener, err := net.Listen("tcp", wsAddress)
+		if err != nil {
+			stop()
+			<-listenerDone
+			<-reconcileDone
+			<-generalDone
+			return err
+		}
+		wsServer := &http.Server{ReadHeaderTimeout: 5 * time.Second, Handler: server.WebSocketHandler(ctx)}
+		wsDone := make(chan struct{})
+		go func() {
+			defer close(wsDone)
+			if e := wsServer.Serve(wsListener); e != nil && !errors.Is(e, http.ErrServerClosed) && ctx.Err() == nil {
+				wsFailure <- e
+				stop()
+			}
+		}()
+		defer func() { _ = wsServer.Close(); <-wsDone }()
+		log.Printf("gxb-realtime WebSocket listening on %s%s", wsAddress, stockruntime.WebSocketPath)
+	}
 	listenerSlots := make(chan struct{}, runtimePolicy.MaxConnections)
 	var connections sync.WaitGroup
 	defer func() {
@@ -423,6 +446,8 @@ func run() error {
 				case failure := <-reconcileFailure:
 					return failure
 				case failure := <-generalFailure:
+					return failure
+				case failure := <-wsFailure:
 					return failure
 				default:
 					return nil

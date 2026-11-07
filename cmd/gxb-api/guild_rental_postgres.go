@@ -104,8 +104,8 @@ func canonicalGuildRental(p *pg.Pool, r tx.Runner, content contentstore.Store, g
 		Facts: i5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Mail: i5.SettlementMail{Store: i5db},
 		Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: content, Policy: binding,
 	}
-	reads := guildrental.Reader{Runner: r, Store: guildDB, Characters: guildrentalread.Characters{}, Profiles: guildrentalread.Profiles{},
+	reads := guildrental.Reader{Runner: r, Store: guildDB, Characters: guildrentalread.Characters{Content: content}, Profiles: guildrentalread.Profiles{},
 		Levels: guildrentalread.Levels{}, Mana: guildrentalread.Mana{}, Privileges: privileges,
-		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: binding}
+		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: binding, Content: content, Now: now}
 	return service, reads
 }

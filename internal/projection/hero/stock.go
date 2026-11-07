@@ -63,6 +63,26 @@ func StockHero(h character.Hero) (map[string]any, error) {
 	}
 	return out, nil
 }
+
+// StockHeroDetail is one Hero as the stock detail window indexes it: the
+// qualified effective appearance and the raw twice-awake stage, which the
+// roster format carries but the plain roster row does not.
+func StockHeroDetail(h character.Hero, appearance *AppearanceView, twiceAwakeStage *int64) (map[string]any, error) {
+	out, err := StockHero(h)
+	if err != nil {
+		return nil, err
+	}
+	if appearance != nil {
+		if err := applyAppearance(out, h, *appearance); err != nil {
+			return nil, err
+		}
+	}
+	if twiceAwakeStage != nil {
+		out["twice_awake_stage"] = *twiceAwakeStage
+	}
+	return out, nil
+}
+
 func StockHeroWithFumoLevels(h character.Hero, levels character.HeroFumoSlots) (map[string]any, error) {
 	out, err := StockHero(h)
 	if err != nil {

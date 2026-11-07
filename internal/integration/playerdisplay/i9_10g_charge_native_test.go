@@ -370,6 +370,90 @@ func TestI910GChargeQueryHistoryAndBoundedOtherRead(t *testing.T) {
 	}
 }
 
+func TestI910GChargeConcurrentSameIntentDoesNotDoubleGrant(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	start := crystalBalance(t, p, a)
+	intent := uuid().String()
+	const workers = 4
+	var wg sync.WaitGroup
+	errs := make(chan error, workers)
+	replies := make(chan map[string]any, workers)
+	for range workers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			body, e := chargeService(p).Tap(ctx, a, cp.TapRequest{ChargeID: 80001007, IntentID: intent}, opPinned(rev))
+			if e != nil {
+				errs <- e
+				return
+			}
+			replies <- body
+		}()
+	}
+	wg.Wait()
+	close(errs)
+	close(replies)
+	for e := range errs {
+		t.Fatal(e)
+	}
+	seen := 0
+	for body := range replies {
+		seen++
+		if number(t, segment(t, body)["delta"]) != 200 {
+			t.Fatalf("reply %d delta: %#v", seen, body)
+		}
+	}
+	if seen != workers {
+		t.Fatalf("replies=%d want %d", seen, workers)
+	}
+	purchases, e := (ps.Store{}).ReadPurchasesTx(ctx, p, a.PlayerID)
+	if e != nil || len(purchases) != 1 || purchases[0].ChargeCount != 1 {
+		t.Fatalf("purchases: %+v %v", purchases, e)
+	}
+	if crystalBalance(t, p, a) != start+200 {
+		t.Fatalf("same intent granted twice: %d -> %d", start, crystalBalance(t, p, a))
+	}
+}
+
+func TestI910GChargeInvalidOverlayAndExpiredCardExtension(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	exec(t, p, `INSERT INTO commerce_recharge_tuning(singleton,payload,updated_at)VALUES(true,$1::jsonb,clock_timestamp()) ON CONFLICT(singleton)DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at`, `{"version":0,"mode":"DISABLED","products":{}}`)
+	t.Cleanup(func() { exec(t, p, `DELETE FROM commerce_recharge_tuning`) })
+	reply, e := chargeService(p).Query(ctx, a, time.Unix(1700000000, 0))
+	if e != nil {
+		t.Fatal(e)
+	}
+	if charges, ok := reply["charges"].([]d.Purchase); !ok || len(charges) != 23 {
+		t.Fatalf("invalid overlay must keep the source catalog: %#v", reply["charges"])
+	}
+	if body := segment(t, chargeTap(t, p, rev, a, 80001007, uuid().String())); number(t, body["delta"]) != 200 {
+		t.Fatalf("invalid overlay must keep the source grant: %#v", body)
+	}
+	expiredAt := time.Now().UTC().Add(-10 * 24 * time.Hour).Unix()
+	exec(t, p, `INSERT INTO commerce_charge_cards(player_id,month_card_start,month_card_end,privilege_card_end,updated_at)VALUES($1,$2,$3,0,clock_timestamp()) ON CONFLICT(player_id)DO UPDATE SET month_card_start=excluded.month_card_start,month_card_end=excluded.month_card_end,privilege_card_end=excluded.privilege_card_end,updated_at=excluded.updated_at`, int64(a.PlayerID), expiredAt-30*86400, expiredAt)
+	before, e := privilegeProvider(p).SnapshotTx(ctx, p, a.PlayerID, time.Now().UTC())
+	if e != nil || before.MonthCardActive {
+		t.Fatalf("expired card reported active: %+v %v", before, e)
+	}
+	start := time.Now().UTC().Add(-time.Minute).Unix()
+	chargeTap(t, p, rev, a, 80001001, uuid().String())
+	cards, e := (ps.Store{}).ReadCardsTx(ctx, p, a.PlayerID)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if cards.MonthCardStart < start || d.LeftDays(cards.MonthCardEnd, time.Now().UTC().Unix()) != 30 {
+		t.Fatalf("expired card did not extend from now: %+v", cards)
+	}
+	after, e := privilegeProvider(p).SnapshotTx(ctx, p, a.PlayerID, time.Now().UTC())
+	if e != nil || !after.MonthCardActive {
+		t.Fatalf("extended card reported inactive: %+v %v", after, e)
+	}
+}
+
 func TestI910GPrivilegeSnapshotSkillCapRisesAtVIPFive(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
@@ -389,5 +473,39 @@ func TestI910GPrivilegeSnapshotSkillCapRisesAtVIPFive(t *testing.T) {
 	active, e := privilegeProvider(p).SnapshotTx(ctx, p, a.PlayerID, time.Now().UTC())
 	if e != nil || !active.MonthlyPrivilegeActive || active.SkillPointNaturalCap != 30 {
 		t.Fatalf("privilege card: %+v %v", active, e)
+	}
+}
+
+func TestI910GInitialAwardFlagsDoNotQualifyUnknownPrivilege(t *testing.T) {
+	database := pool(t)
+	installed(t, database)
+	actor := bornActor(t, database)
+	store := ps.Store{}
+	if _, found, err := store.ReadPrivilegeTx(ctx, database, actor.PlayerID, false); err != nil || found {
+		t.Fatalf("fresh privilege must remain unknown: found=%v error=%v", found, err)
+	}
+	baseline := map[string]any{"vip": int64(0), "charge": int64(0), "vip_awards": []int64{}}
+	detail := map[string]any{"17": baseline}
+	if err := (cp.BootstrapProjection{Provider: privilegeProvider(database)}).OverlayMID1(ctx, database, actor, false, time.Now().UTC(), detail); err != nil {
+		t.Fatal(err)
+	}
+	flags, ok := baseline["vip_awards"].([]int64)
+	if !ok || len(flags) != 15 {
+		t.Fatalf("initial stock award flags: %#v", baseline["vip_awards"])
+	}
+	for _, flag := range flags {
+		if flag != 0 {
+			t.Fatalf("unclaimed award flags: %v", flags)
+		}
+	}
+	if number(t, baseline["vip"]) != 0 || number(t, baseline["charge"]) != 0 {
+		t.Fatalf("privilege baseline changed: %#v", baseline)
+	}
+	if _, found, err := store.ReadPrivilegeTx(ctx, database, actor.PlayerID, false); err != nil || found {
+		t.Fatalf("projection created privilege state: found=%v error=%v", found, err)
+	}
+	claimed, err := store.ReadVIPClaimedTx(ctx, database, actor.PlayerID)
+	if err != nil || len(claimed) != 0 {
+		t.Fatalf("projection wrote claims: %v %v", claimed, err)
 	}
 }

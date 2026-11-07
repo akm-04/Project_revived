@@ -85,6 +85,57 @@ type MaterialCostStore interface {
 	DeleteStackTx(context.Context, tx.Tx, economy.StackState) error
 }
 
+type FrameStackRequest struct {
+	Player identity.PlayerID
+	ItemID int64
+}
+
+// LockFrameStackOwnershipTx preserves I5's canonical Economy-before-Stack lock order for batches.
+func LockFrameStackOwnershipTx(ctx context.Context, transaction tx.Tx, store MaterialCostStore, requests []FrameStackRequest, at time.Time) (map[FrameStackRequest]bool, error) {
+	if store == nil || transaction == nil || at.IsZero() {
+		return nil, errors.New("i5 frame stack lock inputs incomplete")
+	}
+	uniqueRequests := make(map[FrameStackRequest]struct{}, len(requests))
+	uniqueOwners := make(map[identity.PlayerID]struct{}, len(requests))
+	orderedRequests := make([]FrameStackRequest, 0, len(requests))
+	orderedOwners := make([]identity.PlayerID, 0, len(requests))
+	for _, request := range requests {
+		if !request.Player.Valid() || request.ItemID <= 0 {
+			return nil, errors.New("i5 frame stack request invalid")
+		}
+		if _, exists := uniqueRequests[request]; exists {
+			continue
+		}
+		uniqueRequests[request] = struct{}{}
+		orderedRequests = append(orderedRequests, request)
+		if _, exists := uniqueOwners[request.Player]; exists {
+			continue
+		}
+		uniqueOwners[request.Player] = struct{}{}
+		orderedOwners = append(orderedOwners, request.Player)
+	}
+	sort.Slice(orderedOwners, func(left, right int) bool { return orderedOwners[left] < orderedOwners[right] })
+	for _, owner := range orderedOwners {
+		if err := store.LockEconomyOwnerTx(ctx, transaction, owner); err != nil {
+			return nil, err
+		}
+	}
+	sort.Slice(orderedRequests, func(left, right int) bool {
+		leftIdentity := fmt.Sprintf("%d:%d", int64(orderedRequests[left].Player), orderedRequests[left].ItemID)
+		rightIdentity := fmt.Sprintf("%d:%d", int64(orderedRequests[right].Player), orderedRequests[right].ItemID)
+		return leftIdentity < rightIdentity
+	})
+	ownership := make(map[FrameStackRequest]bool, len(orderedRequests))
+	for _, request := range orderedRequests {
+		stack, exists, err := store.LockStackTx(ctx, transaction, request.Player, request.ItemID, at)
+		if err != nil {
+			return nil, err
+		}
+		ownership[request] = exists && stack.Quantity > 0
+	}
+	return ownership, nil
+}
+
 // MaterialCostDebiter composes immutable I5 content qualification with canonical
 // Economy/Scalar/Stack ownership. CA4-1 refactors its planning into a no-write
 // preflight so the mixed material-exchange seam can union the same lock identities

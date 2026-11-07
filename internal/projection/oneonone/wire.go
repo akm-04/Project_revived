@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"gxb.local/backend/v2/internal/domain/logicalserver"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 )
 
@@ -87,7 +88,8 @@ func Load(v d.ArenaView) map[string]any {
 }
 
 func PlayerInfo(f d.Face) map[string]any {
-	return map[string]any{"player_id": int64(f.Player), "player_name": f.Name, "avatar_id": f.AvatarID, "avatar_frame_id": f.FrameID, "lev": f.Level, "conquer_lev": f.ConquerLevel, "conquer_loop_id": f.ConquerLoop}
+	return map[string]any{"player_id": int64(f.Player), "player_name": f.Name, "avatar_id": f.AvatarID, "avatar_frame_id": f.FrameID, "lev": f.Level, "conquer_lev": f.ConquerLevel, "conquer_loop_id": f.ConquerLoop,
+		"region": int64(logicalserver.PlayerRegion(f.Player))}
 }
 
 func Matches(rows []d.Entry) map[string]any {

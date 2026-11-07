@@ -250,6 +250,117 @@ def helper_trace(mid):
     return completed.stdout
 
 
+TRACE_LOCAL_FUNCTION_VALUES = {
+    "cancel", "release", "body", "acqCancel", "txCancel", "reconcileCancel",
+}
+TRACE_FANOUT_PATTERN = re.compile(r"^(FANOUT .*? has (\d+) implementers, not followed: )(.*)$")
+
+
+def trace_indent(line):
+    return len(line) - len(line.lstrip(" "))
+
+
+def trace_call_line(line):
+    value = line.lstrip()
+    if not value or value.startswith(("MID ", "sql: ", "facts: ", "FANOUT ", "UNRESOLVED ", "BOUND ", "push: ")):
+        return False
+    return "(seen above, touches tables)" not in value
+
+
+def trace_marker_line(line):
+    value = line.lstrip()
+    return value.startswith(("sql: ", "facts: ", "FANOUT ", "UNRESOLVED ", "BOUND ", "push: "))
+
+
+def compact_fanout(line):
+    match = TRACE_FANOUT_PATTERN.match(line.lstrip())
+    if not match:
+        return line
+    implementer_count = int(match.group(2))
+    names = match.group(3).split(", ")
+    if implementer_count <= 5 or len(names) <= 5:
+        return line
+    shortened = ", ".join(names[:5]) + ", ... (+%d more)" % (implementer_count - 5)
+    return line[:trace_indent(line)] + match.group(1) + shortened
+
+
+def compact_trace(output):
+    lines = output.splitlines()
+    if not lines:
+        return output
+
+    authorization_root = next(
+        (index for index, line in enumerate(lines)
+         if line.lstrip().startswith("RealtimeAuthority.ResolveGameplayBearer ")),
+        None,
+    )
+    hidden_authorization_lines = set()
+    authorization_summary = {}
+    if authorization_root is not None:
+        authorization_indent = trace_indent(lines[authorization_root])
+        authorization_end = authorization_root + 1
+        while authorization_end < len(lines) and trace_indent(lines[authorization_end]) > authorization_indent:
+            authorization_end += 1
+        hidden_authorization_lines = set(range(authorization_root + 1, authorization_end))
+        hidden_call_count = sum(trace_call_line(lines[index]) for index in hidden_authorization_lines)
+        authorization_summary[authorization_root] = (
+            lines[authorization_root] + " (shared auth path summarized; %d calls omitted)" % hidden_call_count
+        )
+
+    unresolved_function_value_lines = {}
+    call_frame_stack = []
+    for index, line in enumerate(lines):
+        indent = trace_indent(line)
+        while call_frame_stack and call_frame_stack[-1][0] >= indent:
+            call_frame_stack.pop()
+        value = line.lstrip()
+        if value.startswith("UNRESOLVED "):
+            local_function_value = value[len("UNRESOLVED "):]
+            if local_function_value in TRACE_LOCAL_FUNCTION_VALUES:
+                parent = call_frame_stack[-1][1] if call_frame_stack else None
+                unresolved_function_value_lines.setdefault(parent, []).append(index)
+        if trace_call_line(line):
+            call_frame_stack.append((indent, index))
+
+    closure_summaries = {}
+    hidden_closure_lines = set()
+    for unresolved_line_indexes in unresolved_function_value_lines.values():
+        first = unresolved_line_indexes[0]
+        closure_summaries[first] = " " * trace_indent(lines[first]) + (
+            "UNRESOLVED local function values: %d" % len(unresolved_line_indexes)
+        )
+        hidden_closure_lines.update(unresolved_line_indexes[1:])
+
+    keep = [True] * len(lines)
+    for index, line in enumerate(lines):
+        if index in hidden_authorization_lines and not trace_marker_line(line):
+            keep[index] = False
+            continue
+        if index in hidden_closure_lines:
+            keep[index] = False
+            continue
+        if not trace_call_line(line):
+            continue
+        if "internal/application/" in line or "(seen above, touches tables)" in line:
+            continue
+        if index == authorization_root:
+            continue
+        has_child = index + 1 < len(lines) and trace_indent(lines[index + 1]) > trace_indent(line)
+        if not has_child:
+            keep[index] = False
+
+    compacted = []
+    for index, line in enumerate(lines):
+        if not keep[index]:
+            continue
+        if index in authorization_summary:
+            line = authorization_summary[index]
+        if index in closure_summaries:
+            line = closure_summaries[index]
+        compacted.append(compact_fanout(line))
+    return "\n".join(compacted) + ("\n" if output.endswith("\n") else "")
+
+
 def refresh_client(source_directory):
     mid_file = source_directory / "app" / "common" / "network" / "mid.lua"
     if not mid_file.is_file():
@@ -885,6 +996,68 @@ def store_callers(edges):
     return callers
 
 
+def client_senders_without_live_handler(client, grouped):
+    status_counts = {
+        "inactive_fallback": 0,
+        "no_registration": 0,
+        "unattributed_registration": 0,
+        "registration_without_dispatch_handler": 0,
+    }
+    rows = []
+    window_sender_mid_count = 0
+    for raw_mid, client_entry in sorted(client.items(), key=lambda item: int(item[0])):
+        sender_files = client_entry.get("senders") or []
+        if not sender_files:
+            continue
+        mid = int(raw_mid)
+        registrations = grouped.get(mid, [])
+        has_live_handler = any(
+            not registration.get("fallback")
+            and registration.get("owner")
+            and registration.get("handler_file")
+            for registration in registrations
+        )
+        if has_live_handler:
+            continue
+        non_fallback_registrations = [
+            registration for registration in registrations if not registration.get("fallback")
+        ]
+        if not registrations:
+            status = "no_registration"
+        elif not non_fallback_registrations:
+            status = "inactive_fallback"
+        elif all(not registration.get("owner") for registration in non_fallback_registrations):
+            status = "unattributed_registration"
+        else:
+            status = "registration_without_dispatch_handler"
+        window_sender_files = [
+            sender_file for sender_file in sender_files if sender_file.startswith("app/windows/")
+        ]
+        if window_sender_files:
+            window_sender_mid_count += 1
+        status_counts[status] += 1
+        rows.append({
+            "mid": mid,
+            "name": client_entry["name"],
+            "registration_status": status,
+            "senders": sender_files,
+            "window_sender_files": window_sender_files,
+            "non_window_sender_files": [
+                sender_file for sender_file in sender_files
+                if not sender_file.startswith("app/windows/")
+            ],
+            "runtime_reachability": "unknown",
+        })
+    return {
+        "count": len(rows),
+        "window_sender_mid_count": window_sender_mid_count,
+        "non_window_sender_mid_count": len(rows) - window_sender_mid_count,
+        "registration_status_counts": status_counts,
+        "runtime_reachability": "unknown from source-file references alone",
+        "mids": rows,
+    }
+
+
 def login_composition():
     path = ROOT / "cmd" / "gxb-api" / "main_postgres.go"
     text = read_text(path)
@@ -1195,6 +1368,7 @@ def build_system_map():
             "disposition": mode.get("disposition"),
             "stage": mode.get("target"),
         })
+    unhandled_client_senders = client_senders_without_live_handler(client, grouped)
 
     several_writers = []
     for table in sorted(writers):
@@ -1218,6 +1392,7 @@ def build_system_map():
     findings = {
         "note": "These lists are leads for a reviewer, not verdicts. Confirm each entry against the source it cites.",
         "client_mids_not_live": client_not_live,
+        "client_senders_without_live_handler": unhandled_client_senders,
         "facts_without_consumer": [
             {"fact": kind, "systems": sorted(system for system, kinds in emitted_by_system.items() if kind in kinds)}
             for kind in sorted(emitted_all) if kind not in fact_consumer_map
@@ -1444,6 +1619,10 @@ def show_entry(key):
     index = json.loads(read_text(OUTPUT_DIRECTORY / "INDEX.json"))
     requested_key = key
     key = SHOW_ALIASES.get(key, key)
+    if key == "unhandled":
+        findings = json.loads(read_text(OUTPUT_DIRECTORY / "FINDINGS.json"))
+        print(json.dumps(findings["client_senders_without_live_handler"], indent=1, ensure_ascii=False))
+        return
     if key in {row["name"] for row in index["systems"]}:
         record = json.loads(read_text(SYSTEMS_DIRECTORY / (key + ".json")))
         edges = json.loads(read_text(OUTPUT_DIRECTORY / "EDGES.json"))
@@ -1505,6 +1684,7 @@ def main():
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--refresh-client", metavar="SRC_64")
     parser.add_argument("--refresh-coverage", metavar="FILE")
+    parser.add_argument("--full", action="store_true", help="show an unabridged trace")
     parser.add_argument("words", nargs="*")
     arguments = parser.parse_args()
     if arguments.refresh_client:
@@ -1524,7 +1704,8 @@ def main():
             show_entry(words[1])
             return 0
         if len(words) == 2 and words[0] == "trace" and words[1].isdigit():
-            sys.stdout.write(helper_trace(int(words[1])))
+            trace = helper_trace(int(words[1]))
+            sys.stdout.write(trace if arguments.full else compact_trace(trace))
             return 0
         if len(words) == 1:
             show_entry(words[0])

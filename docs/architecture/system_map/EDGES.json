@@ -779,6 +779,10 @@
     "DecisionAt",
     "Run"
    ],
+   "socialexchange": [
+    "DecisionAt",
+    "Run"
+   ],
    "socialfriendbase": [
     "DecisionAt",
     "Operation",
@@ -1240,10 +1244,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "petcampaign": [
     "*CheckAwakeningPetMaterialTx",
@@ -1300,6 +1306,11 @@
    "sharedroom": [
     "*FenceActorTx"
    ],
+   "socialexchange": [
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*PrepareMaterialExchangeTx"
+   ],
    "socialgift": [
     "*FenceActorTx",
     "*GiftGrantIdentityExistsTx",
@@ -1328,10 +1339,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "workplace": [
     "*DebitTemporalTx",
@@ -1515,6 +1528,9 @@
    "socialdismiss": [
     "Validate"
    ],
+   "socialexchange": [
+    "Validate"
+   ],
    "socialgift": [
     "CanonicalPlayerIDs",
     "Validate"
@@ -1623,6 +1639,7 @@
    ]
   },
   "socialdismiss": {},
+  "socialexchange": {},
   "socialfriendbase": {},
   "socialgift": {
    "socialprojection": [
@@ -2026,7 +2043,7 @@
     "*ReadFunctionEligibilityTx",
     "*SettleGrantTx"
    ],
-   "interface:adventure.Heroes": [
+   "interface:adventure.Roster": [
     "*OverlayMID1"
    ],
    "roominvite": [
@@ -3587,11 +3604,12 @@
     "DefaultProfile"
    ],
    "store:contentstore": [
-    "*ActiveRevision"
+    "*ActiveRevision",
+    "*HeroExpPolicyTx"
    ],
    "store:guildrentalread": [
     "*BalanceTx",
-    "*HeroTx",
+    "*HeroProjectionTx",
     "*LevelTx",
     "*PetTx",
     "*ProfileTx",
@@ -4294,10 +4312,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "interface:oneonone.Roster": [
     "*OverlayMID1"
@@ -4806,6 +4826,32 @@
     "*LockPlayerRootsTx"
    ]
   },
+  "socialexchange": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyMaterialExchangeTx",
+    "*FenceActorTx",
+    "*PrepareMaterialExchangeTx"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*SocialExchangeCatalogTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
+   ]
+  },
   "socialfriendbase": {
    "frienddm": [
     "*FindProjection",
@@ -5135,10 +5181,12 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
+    "*LockRecipientsTx",
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "LockFrameStackOwnershipTx"
    ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
@@ -5426,6 +5474,9 @@
   "roominvite": [],
   "sharedroom": [],
   "socialdismiss": [],
+  "socialexchange": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "socialfriendbase": [],
   "socialgift": [],
   "socialinbox": [],

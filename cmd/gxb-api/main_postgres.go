@@ -59,6 +59,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialexchangestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
@@ -108,6 +109,7 @@ import (
 	"gxb.local/backend/v2/internal/application/roominvite"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
+	"gxb.local/backend/v2/internal/application/socialexchange"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
@@ -157,7 +159,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	pool, err := postgres.Open(ctx, string(cfg.PostgresDSN), postgres.PoolSettings{
-		MaxConns: 16, MinConns: 1, MaxConnLifetime: 30 * time.Minute,
+		MaxConns: int32(envPositiveInt("GXB_API_DB_POOL_MAX_CONNS", 16)), MinConns: 1, MaxConnLifetime: 30 * time.Minute,
 		MaxConnIdleTime: 5 * time.Minute, HealthCheckPeriod: 30 * time.Second,
 		ApplicationName: "gxb-v2-i6b-api",
 	})
@@ -577,6 +579,8 @@ func main() {
 	for _, mid := range []uint16{7, 1537, 8193, 8194} {
 		mustRegister(mid, publicationDispatcher)
 	}
+	exchangeService := socialexchange.Service{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Settings: socialexchangestore.Store{}, Materials: i5svc, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	mustRegister(191, stockruntime.SocialExchangeDispatcher{Authority: authority, Service: exchangeService})
 	socialRelationDB := socialrelationstore.Store{}
 	socialInboxDB := socialinboxstore.Store{}
 	socialPresentation := socialpresentation.TransactionReader{Display: displayService}
@@ -725,7 +729,7 @@ func main() {
 			mustRegister(mid, stockruntime.InactiveModeDispatcher{Authority: authority})
 		}
 	}
-	admission, err := httpedge.NewAdmission(256)
+	admission, err := httpedge.NewAdmission(envPositiveInt("GXB_HTTP_EDGE_MAX_IN_FLIGHT", 256))
 	if err != nil {
 		log.Fatal(err)
 	}

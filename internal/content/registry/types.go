@@ -75,6 +75,7 @@ var supportedCapabilities = [...]string{
 	"CHARACTER_APPEARANCE_CA7",
 	"FRIEND_DM_EMOTICON_I7A6A",
 	"SOCIAL_GIFT_I7A7A",
+	"SOCIAL_CONTENT_I9_10E",
 }
 
 type Bundle struct {
@@ -115,6 +116,7 @@ type Bundle struct {
 	guildInviteJSON                           []byte
 	guildBroadcastJSON                        []byte
 	socialGiftJSON                            []byte
+	socialInputsJSON                          []byte
 	emoticonsJSON                             []byte
 	manifest                                  builtin.Manifest
 	manifestJSON                              []byte
@@ -243,6 +245,10 @@ func LoadBuiltinBundle() (Bundle, error) {
 		return Bundle{}, err
 	}
 	socialGift, err := builtin.GeneratedFile("social_gift_catalog.json")
+	if err != nil {
+		return Bundle{}, err
+	}
+	socialInputs, err := builtin.GeneratedFile("social_input_catalog.json")
 	if err != nil {
 		return Bundle{}, err
 	}
@@ -433,6 +439,7 @@ func LoadBuiltinBundle() (Bundle, error) {
 		guildInviteJSON:                        append([]byte(nil), invite...),
 		guildBroadcastJSON:                     append([]byte(nil), broadcast...),
 		socialGiftJSON:                         append([]byte(nil), socialGift...),
+		socialInputsJSON:                       append([]byte(nil), socialInputs...),
 		emoticonsJSON:                          append([]byte(nil), emoticons...),
 		manifest:                               cat.Manifest,
 		manifestJSON:                           append([]byte(nil), manifest...),
@@ -490,7 +497,7 @@ func (b Bundle) Validate() error {
 	if b.manifest.SchemaVersion != builtin.SchemaVersion {
 		return fmt.Errorf("content registry: unsupported bundle schema %d", b.manifest.SchemaVersion)
 	}
-	for name, raw := range map[string][]byte{"league": b.leagueJSON, "conquer-mode": b.conquerModeJSON, "arena": b.arenaJSON, "one-on-one": b.oneOnOneJSON, "top-floor": b.topFloorJSON, "gods-trial": b.godsTrialJSON, "world-boss": b.worldBossJSON, "illusion": b.illusionJSON, "occult": b.occultJSON, "adventure": b.adventureJSON, "dodgeball": b.dodgeballJSON, "memoir": b.memoirJSON, "pet-campaign": b.petCampaignJSON, "workplace": b.workplaceJSON, "march": b.marchJSON, "campaign": b.campaignJSON, "summon": b.summonJSON, "charge": b.chargeJSON, "achievement": b.achievementJSON, "privilege": b.privilegeJSON, "stat-inputs": b.statInputsJSON, "stat-rules": b.statRulesJSON, "conquer-inputs": b.conquerInputsJSON, "evolution-inputs": b.evolutionInputsJSON, "spirit-inputs": b.spiritInputsJSON, "element-inputs": b.elementInputsJSON, "inscription-inputs": b.inscriptionInputsJSON, "course-inputs": b.courseInputsJSON, "book-inputs": b.bookInputsJSON, "dorm-inputs": b.dormInputsJSON, "library-inputs": b.libraryInputsJSON, "manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON, "guild-invite": b.guildInviteJSON, "guild-broadcast": b.guildBroadcastJSON} {
+	for name, raw := range map[string][]byte{"league": b.leagueJSON, "conquer-mode": b.conquerModeJSON, "arena": b.arenaJSON, "one-on-one": b.oneOnOneJSON, "top-floor": b.topFloorJSON, "gods-trial": b.godsTrialJSON, "world-boss": b.worldBossJSON, "illusion": b.illusionJSON, "occult": b.occultJSON, "adventure": b.adventureJSON, "dodgeball": b.dodgeballJSON, "memoir": b.memoirJSON, "pet-campaign": b.petCampaignJSON, "workplace": b.workplaceJSON, "march": b.marchJSON, "campaign": b.campaignJSON, "summon": b.summonJSON, "charge": b.chargeJSON, "achievement": b.achievementJSON, "privilege": b.privilegeJSON, "stat-inputs": b.statInputsJSON, "stat-rules": b.statRulesJSON, "conquer-inputs": b.conquerInputsJSON, "evolution-inputs": b.evolutionInputsJSON, "spirit-inputs": b.spiritInputsJSON, "element-inputs": b.elementInputsJSON, "inscription-inputs": b.inscriptionInputsJSON, "course-inputs": b.courseInputsJSON, "book-inputs": b.bookInputsJSON, "dorm-inputs": b.dormInputsJSON, "library-inputs": b.libraryInputsJSON, "manifest": b.manifestJSON, "resources": b.resourcesJSON, "progression": b.progressionJSON, "functions": b.functionGatesJSON, "objectives": b.objectivesJSON, "hero-core": b.heroCoreJSON, "pet-core": b.petCoreJSON, "pet-acquisition": b.petAcquisitionJSON, "pet-progression": b.petProgressionJSON, "equipment-primitives": b.equipmentPrimitivesJSON, "hero-equipment": b.heroEquipmentJSON, "super-equipment": b.superEquipmentJSON, "hero-fumo": b.heroFumoJSON, "hero-promotion-restoration": b.heroPromotionRestorationJSON, "pet-equipment": b.petEquipmentJSON, "pet-promotion-restoration": b.petPromotionRestorationJSON, "practice": b.practiceJSON, "appearance": b.appearanceJSON, "emoticons": b.emoticonsJSON, "social-gift": b.socialGiftJSON, "social-inputs": b.socialInputsJSON, "guild-invite": b.guildInviteJSON, "guild-broadcast": b.guildBroadcastJSON} {
 		if len(raw) == 0 || !json.Valid(raw) {
 			return fmt.Errorf("content registry: invalid %s JSON", name)
 		}
@@ -540,6 +547,7 @@ func (b Bundle) PublicShowcaseJSON() []byte { return append([]byte(nil), b.publi
 func (b Bundle) PublicProfileJSON() []byte  { return append([]byte(nil), b.publicProfileJSON...) }
 func (b Bundle) GuildBroadcastJSON() []byte { return append([]byte(nil), b.guildBroadcastJSON...) }
 func (b Bundle) SocialGiftJSON() []byte     { return append([]byte(nil), b.socialGiftJSON...) }
+func (b Bundle) SocialInputsJSON() []byte   { return append([]byte(nil), b.socialInputsJSON...) }
 func (b Bundle) EmoticonsJSON() []byte      { return append([]byte(nil), b.emoticonsJSON...) }
 func (b Bundle) RevisionID() string         { return b.manifest.RevisionID }
 func (b Bundle) SchemaVersion() int         { return b.manifest.SchemaVersion }
@@ -682,6 +690,7 @@ type Verification struct {
 	PublicProfileCount                        int64
 	GuildInviteCount                          int64
 	GuildBroadcastCount                       int64
+	SocialInputCount                          int64
 	EmoticonCount                             int64
 	Exact                                     bool
 	ResourceCount                             int64
@@ -708,7 +717,7 @@ type Verification struct {
 
 func (v Verification) Matches(b Bundle) bool {
 	r, p, f, o, h, pet, petAcquisition, petProgression, equipmentPrimitives, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	return v.LeagueCount == 1 && v.ConquerModeCount == 1 && v.ArenaCount == 1 && v.OneOnOneCount == 1 && v.TopFloorCount == 1 && v.MarchCount == 1 && v.WorkplaceCount == 1 && v.GodsTrialCount == 1 && v.WorldBossCount == 1 && v.IllusionCount == 1 && v.OccultCount == 1 && v.AdventureCount == 1 && v.DodgeballCount == 1 && v.MemoirCount == 1 && v.PetCampaignCount == 1 && v.CampaignCount == 1 && v.SummonCount == 1 && v.ChargeCount == 1 && v.AchievementCount == 1 && v.PrivilegeCount == 1 && v.StatInputsCount == 1 && v.StatRulesCount == 1 && v.ConquerInputsCount == 1 && v.EvolutionInputsCount == 1 && v.SpiritInputsCount == 1 && v.ElementInputsCount == 1 && v.InscriptionInputsCount == 1 && v.CourseInputsCount == 1 && v.BookInputsCount == 1 && v.DormInputsCount == 1 && v.LibraryInputsCount == 1 && v.PlayerDisplayCount == 1 && v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
+	return v.LeagueCount == 1 && v.ConquerModeCount == 1 && v.ArenaCount == 1 && v.OneOnOneCount == 1 && v.TopFloorCount == 1 && v.MarchCount == 1 && v.WorkplaceCount == 1 && v.GodsTrialCount == 1 && v.WorldBossCount == 1 && v.IllusionCount == 1 && v.OccultCount == 1 && v.AdventureCount == 1 && v.DodgeballCount == 1 && v.MemoirCount == 1 && v.PetCampaignCount == 1 && v.CampaignCount == 1 && v.SummonCount == 1 && v.ChargeCount == 1 && v.AchievementCount == 1 && v.PrivilegeCount == 1 && v.StatInputsCount == 1 && v.StatRulesCount == 1 && v.ConquerInputsCount == 1 && v.EvolutionInputsCount == 1 && v.SpiritInputsCount == 1 && v.ElementInputsCount == 1 && v.InscriptionInputsCount == 1 && v.CourseInputsCount == 1 && v.BookInputsCount == 1 && v.DormInputsCount == 1 && v.LibraryInputsCount == 1 && v.PlayerDisplayCount == 1 && v.PublicShowcaseCount == 1 && v.PublicProfileCount == 1 && v.GuildInviteCount == 1 && v.GuildBroadcastCount == 1 && v.SocialInputCount == 1 && v.Exact && v.EmoticonCount == 85 && v.ResourceCount == r && v.ProgressionCount == p && v.FunctionGateCount == f && v.ObjectiveCount == o && v.HeroCount == h && v.PetCount == pet && v.PetAcquisitionCount == petAcquisition && v.PetProgressionCount == petProgression && v.EquipmentPrimitiveCount == equipmentPrimitives && v.HeroEquipmentCount == heroEquipment && v.SuperEquipmentCount == superEquipment && v.HeroFumoTargetCount == heroFumoTargets && v.HeroFumoMaterialCount == heroFumoMaterials && v.HeroPromotionRestorationEquipmentCount == restorationEquipment && v.HeroPromotionRestorationFractionCount == restorationFractions && v.HeroPromotionRestorationDenominationCount == restorationDenominations && v.PetEquipmentCount == petEquipment && v.PetPromotionRestorationEquipmentCount == petRestorationEquipment && v.PracticeCount == practice && v.AppearanceCount == appearance
 }
 
 // Repository is the canonical content-registry persistence port. It receives
@@ -770,6 +779,7 @@ type Repository interface {
 	InsertGuildBroadcast(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertGuildInvite(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertSocialGift(context.Context, tx.Tx, Bundle) (int64, error)
+	InsertSocialInputs(context.Context, tx.Tx, Bundle) (int64, error)
 	InsertEmoticons(context.Context, tx.Tx, Bundle) (int64, error)
 	VerifyRevision(context.Context, tx.Queryer, Bundle) (Verification, error)
 	ReadActivation(context.Context, tx.Queryer) (ActivationIdentity, bool, error)

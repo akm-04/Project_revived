@@ -177,6 +177,7 @@
    "1894": "characterpet",
    "1895": "characterpet",
    "190": "socialrelation",
+   "191": "socialexchange",
    "192": "realtimeauth",
    "2064": "campaign",
    "2128": "course",
@@ -615,6 +616,7 @@
    "league_matches": "championsleague",
    "league_players": "championsleague",
    "league_settlements": "championsleague",
+   "library_forum_boards": "libraryforum",
    "library_forum_comments": "libraryforum",
    "library_forum_reactions": "libraryforum",
    "logical_servers": "bootstrap",
@@ -711,6 +713,7 @@
    "shared_room_seats": "sharedroom",
    "shared_rooms": "sharedroom",
    "social_blocks": "socialrelation",
+   "social_exchange_tuning": "socialexchange",
    "social_friend_requests": "socialrelation",
    "social_friendships": "socialrelation",
    "social_gift_claim_operations": "socialgift",
@@ -726,6 +729,7 @@
    "top_floor_day_settlements": "topfloor",
    "top_floor_fights": "topfloor",
    "top_floor_ladders": "topfloor",
+   "top_floor_offer_snapshots": "topfloor",
    "top_floor_partner_usage": "topfloor",
    "top_floor_players": "topfloor",
    "top_floor_ranks": "topfloor",
@@ -990,7 +994,7 @@
   },
   {
    "callees": 5,
-   "callers": 51,
+   "callers": 52,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1089,7 +1093,7 @@
   },
   {
    "callees": 12,
-   "callers": 52,
+   "callers": 53,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1130,7 +1134,7 @@
    "name": "libraryforum",
    "path": "internal/application/libraryforum",
    "purpose": "",
-   "tables": 2
+   "tables": 3
   },
   {
    "callees": 13,
@@ -1224,7 +1228,7 @@
   },
   {
    "callees": 0,
-   "callers": 17,
+   "callers": 18,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",
@@ -1331,6 +1335,15 @@
    "tables": 0
   },
   {
+   "callees": 6,
+   "callers": 0,
+   "mids": 1,
+   "name": "socialexchange",
+   "path": "internal/application/socialexchange",
+   "purpose": "",
+   "tables": 1
+  },
+  {
    "callees": 3,
    "callers": 0,
    "mids": 0,
@@ -1427,7 +1440,7 @@
    "name": "topfloor",
    "path": "internal/application/topfloor",
    "purpose": "composes the Top Floor owner (C5B_TOP_FLOOR_MODE_V1): ladder entry, opponents, tickets, START through the Combat foundation, terminal rank settlement, daily mail settlement and history facts",
-   "tables": 15
+   "tables": 16
   },
   {
    "callees": 15,

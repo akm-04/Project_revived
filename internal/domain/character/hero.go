@@ -17,6 +17,7 @@ const (
 	HeroInstanceLockRank          = 410
 	MaxSortType                   = 8191
 	MaxHeroStar                   = 8
+	MaxHeroLevel                  = 100
 )
 
 type HeroRoot struct {

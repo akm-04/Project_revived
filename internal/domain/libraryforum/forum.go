@@ -1,5 +1,5 @@
 // Package libraryforum owns the stock hero and pet forum boards: cross-player
-// comments and likes scoped to one logical server.
+// global comments and likes across logical servers.
 package libraryforum
 
 import (
@@ -15,19 +15,19 @@ const (
 	PetForum        int64 = 2
 	MaxCommentRunes       = 32
 	MaxPageRows           = 50
+	MaxLiveComments       = 200
 )
 
 var ErrInvalid = errors.New("library forum: invalid fact")
 
-// Key identifies one forum board on one logical server.
+// Key identifies one global forum board.
 type Key struct {
-	LogicalServerID identity.LogicalServerID
-	ForumType       int64
-	TableID         int64
+	ForumType int64
+	TableID   int64
 }
 
 func (k Key) Validate() error {
-	if !k.LogicalServerID.Valid() || (k.ForumType != HeroForum && k.ForumType != PetForum) || k.TableID <= 0 {
+	if (k.ForumType != HeroForum && k.ForumType != PetForum) || k.TableID <= 0 {
 		return ErrInvalid
 	}
 	return nil

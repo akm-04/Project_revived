@@ -62,6 +62,7 @@ type Fence interface {
 }
 
 type Mail interface {
+	LockRecipientsTx(context.Context, tx.Tx, []identity.PlayerID) error
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
@@ -109,6 +110,7 @@ type Service struct {
 	Fence        Fence
 	Privileges   i5.PrivilegeSnapshotProvider
 	Costs        i5.TxMaterialCostDebiter
+	FrameStacks  i5.MaterialCostStore
 	Mail         Mail
 	Achievements Achievements
 	Facts        Facts

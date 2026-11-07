@@ -14,6 +14,10 @@ import (
 
 // Store is the forum owner. It is the only writer of the forum tables.
 type Store interface {
+	LockBoardTx(context.Context, tx.Tx, d.Key) error
+	CountLiveCommentsTx(context.Context, tx.Queryer, d.Key) (int64, error)
+	RetireOldestCommentsTx(context.Context, tx.Tx, d.Key, int64, time.Time) error
+	ClearAuthorReactionsTx(context.Context, tx.Tx, d.Key, identity.PlayerID) error
 	ListCommentsTx(context.Context, tx.Queryer, d.Key, identity.PlayerID, int64, int64) ([]d.Listed, error)
 	LockCommentTx(context.Context, tx.Tx, d.Key, identity.PlayerID) (d.Comment, bool, error)
 	UpsertCommentTx(context.Context, tx.Tx, d.Comment) error

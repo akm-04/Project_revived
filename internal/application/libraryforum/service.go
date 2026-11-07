@@ -284,7 +284,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, q PageQuery,
 	if !s.complete() || q.Validate() != nil || op.ID.IsZero() || op.StartedAt.IsZero() {
 		return Page{}, ErrRequest
 	}
-	key := d.Key{LogicalServerID: a.LogicalServerID, ForumType: q.ForumType, TableID: q.TableID}
+	key := d.Key{ForumType: q.ForumType, TableID: q.TableID}
 	if key.Validate() != nil {
 		return Page{}, ErrRequest
 	}
@@ -382,10 +382,13 @@ func (s Service) commitTx(ctx context.Context, t tx.Tx, a identity.ActorContext,
 	out := Result{Schema: ResultSchema, Command: admission.Command, Actor: admission.Actor, OperationID: admission.Operation.ID, Entropy: admission.Operation.EntropySeed, DecisionAt: admission.DecisionAt}
 	switch admission.Command.Family {
 	case Like:
-		key := d.Key{LogicalServerID: a.LogicalServerID, ForumType: admission.Command.ForumType, TableID: admission.Command.TableID}
+		key := d.Key{ForumType: admission.Command.ForumType, TableID: admission.Command.TableID}
 		author := identity.PlayerID(admission.Command.Author)
-		if key.Validate() != nil || !author.Valid() || logicalserver.PlayerRegion(author) != a.LogicalServerID {
+		if key.Validate() != nil || !author.Valid() {
 			return Result{}, ErrRejected
+		}
+		if e := s.Store.LockBoardTx(ctx, t, key); e != nil {
+			return Result{}, e
 		}
 		if _, found, e := s.Store.LockCommentTx(ctx, t, key, author); e != nil {
 			return Result{}, e
@@ -419,6 +422,29 @@ func (s Service) commitTx(ctx context.Context, t tx.Tx, a identity.ActorContext,
 		if comment.Validate() != nil {
 			return Result{}, ErrRejected
 		}
+		if e = s.Store.LockBoardTx(ctx, t, key); e != nil {
+			return Result{}, e
+		}
+		previous, found, e := s.Store.LockCommentTx(ctx, t, key, a.PlayerID)
+		if e != nil {
+			return Result{}, e
+		}
+		if found {
+			comment.CreatedAt = previous.CreatedAt
+		} else {
+			count, countError := s.Store.CountLiveCommentsTx(ctx, t, key)
+			if countError != nil {
+				return Result{}, countError
+			}
+			if count >= d.MaxLiveComments {
+				if e = s.Store.RetireOldestCommentsTx(ctx, t, key, count-d.MaxLiveComments+1, admission.DecisionAt); e != nil {
+					return Result{}, e
+				}
+			}
+			if e = s.Store.ClearAuthorReactionsTx(ctx, t, key, a.PlayerID); e != nil {
+				return Result{}, e
+			}
+		}
 		if e = s.Store.UpsertCommentTx(ctx, t, comment); e != nil {
 			return Result{}, e
 		}
@@ -430,7 +456,7 @@ func (s Service) commitTx(ctx context.Context, t tx.Tx, a identity.ActorContext,
 }
 
 func (s Service) resolveCommentTargetTx(ctx context.Context, q tx.Queryer, a identity.ActorContext, c Command) (d.Key, error) {
-	key := d.Key{LogicalServerID: a.LogicalServerID, ForumType: c.ForumType}
+	key := d.Key{ForumType: c.ForumType}
 	switch c.ForumType {
 	case d.HeroForum:
 		h, ok, e := s.Characters.FindHeroByPartnerIDTx(ctx, q, a.PlayerID, c.Instance)
@@ -474,7 +500,7 @@ func (s Service) pageTx(ctx context.Context, q tx.Queryer, viewer identity.Playe
 }
 
 func (s Service) rowTx(ctx context.Context, q tx.Queryer, key d.Key, item d.Listed) (Row, error) {
-	if !item.Author.Valid() || !d.ValidText(item.Text) || item.Likes < 0 || item.CreatedAt.IsZero() || logicalserver.PlayerRegion(item.Author) != key.LogicalServerID {
+	if !item.Author.Valid() || !d.ValidText(item.Text) || item.Likes < 0 || item.CreatedAt.IsZero() || !logicalserver.PlayerRegion(item.Author).Valid() {
 		return Row{}, ErrRejected
 	}
 	profile, ok, e := s.Directory.ProfileTx(ctx, q, item.Author)
@@ -484,7 +510,7 @@ func (s Service) rowTx(ctx context.Context, q tx.Queryer, key d.Key, item d.List
 	if !ok || profile.Validate() != nil || profile.PlayerID != item.Author {
 		return Row{}, ErrRejected
 	}
-	row := Row{PlayerID: int64(item.Author), PlayerName: profile.Name, AvatarID: profile.AvatarID, AvatarFrameID: profile.AvatarFrameID, Region: int64(key.LogicalServerID), PlayerLevel: profile.Level, ConquerLevel: profile.ConquerLevel, ConquerLoopID: profile.ConquerLoopID, Comment: item.Text, Likes: item.Likes, ViewerLiked: item.ViewerLiked, TableID: key.TableID}
+	row := Row{PlayerID: int64(item.Author), PlayerName: profile.Name, AvatarID: profile.AvatarID, AvatarFrameID: profile.AvatarFrameID, Region: int64(logicalserver.PlayerRegion(item.Author)), PlayerLevel: profile.Level, ConquerLevel: profile.ConquerLevel, ConquerLoopID: profile.ConquerLoopID, Comment: item.Text, Likes: item.Likes, ViewerLiked: item.ViewerLiked, TableID: key.TableID}
 	switch key.ForumType {
 	case d.HeroForum:
 		hero, ok, e := s.heroForTableTx(ctx, q, item.Author, key.TableID)

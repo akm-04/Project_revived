@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/domain/character"
 	d "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/guild"
@@ -133,6 +134,7 @@ type Fence interface {
 
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
+	HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error)
 }
 
 type Service struct {

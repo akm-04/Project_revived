@@ -3492,6 +3492,20 @@
       "write_exceptions": [],
       "migration": "migrations/00065_i7c5b_top_floor.sql"
     },
+    "top_floor_offer_snapshots": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00117_i9_10_topfloor_offer_snapshots.sql"
+    },
     "top_floor_day_settlements": {
       "owner": "TopFloor",
       "allowed_query_owners": [
@@ -5413,6 +5427,54 @@
         "internal/adapters/postgres/dormstore/"
       ],
       "write_exceptions": []
+    },
+    "library_forum_boards": {
+      "owner": "library-forum",
+      "migration": "migrations/00118_i9_10b_global_forum.sql",
+      "allowed_query_owners": [
+        "library-forum"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/libraryforumstore/"
+      ],
+      "write_exceptions": []
+    },
+    "content_social_input_catalogs": {
+      "owner": "content-registry",
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00116_i9_10e_social_content.sql"
+    },
+    "social_exchange_tuning": {
+      "owner": "socialexchange",
+      "allowed_query_owners": [
+        "socialexchange"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialexchangestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialexchangestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00119_i9_10e_exchange_tuning.sql"
     }
   }
 }

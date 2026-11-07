@@ -16,19 +16,29 @@ type ActivityProvider struct {
 }
 
 func (p ActivityProvider) Project(c context.Context, pc activitydirectory.ProjectionContext) (activity.Projection, bool, error) {
-	if p.Queryer == nil || p.Directory == nil {
-		return activity.Projection{}, false, d.ErrUnavailable
-	}
-	projection := activity.Projection{TableID: d.ActivityID, StartTime: 0, EndTime: 0, Days: -1, Details: map[string]any{"level": d.OpenLevel}}
-	profile, found, err := p.Directory.ProfileTx(c, p.Queryer, pc.Actor.PlayerID)
+	level, found, err := p.level(c, pc)
 	if err != nil {
 		return activity.Projection{}, false, err
 	}
+	projection := activity.Projection{TableID: d.ActivityID, StartTime: 0, EndTime: 0, Days: -1, Details: map[string]any{"level": d.OpenLevel}}
 	if !found {
 		return projection, true, nil
 	}
-	if profile.Level >= d.OpenLevel {
+	if level >= d.OpenLevel {
 		projection.IsOpen = 1
 	}
 	return projection, true, nil
+}
+
+// level prefers the caller's transaction-scoped reader so a MID1 transaction
+// never asks the pool for a second connection.
+func (p ActivityProvider) level(c context.Context, pc activitydirectory.ProjectionContext) (int64, bool, error) {
+	if pc.PlayerLevel != nil {
+		return pc.PlayerLevel(c, pc.Actor.PlayerID)
+	}
+	if p.Queryer == nil || p.Directory == nil {
+		return 0, false, d.ErrUnavailable
+	}
+	profile, found, err := p.Directory.ProfileTx(c, p.Queryer, pc.Actor.PlayerID)
+	return profile.Level, found, err
 }

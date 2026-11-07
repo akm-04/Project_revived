@@ -60,9 +60,13 @@ type Command struct {
 	SelectID  int64 `json:",omitempty"`
 	IsReward  bool  `json:",omitempty"`
 	HasSelect bool  `json:",omitempty"`
+	RawReward int64 `json:",omitempty"`
 }
 
 func (c Command) Validate() error {
+	if c.RawReward != 0 && (c.Family != TalkAward || c.RawReward < 2 || c.RawReward > lib.MaxWireInt || !c.HasSelect || !c.IsReward) {
+		return lib.ErrUnqualified
+	}
 	switch c.Family {
 	case Gift:
 		if c.PartnerID <= 0 || c.Value <= 0 {
@@ -161,6 +165,19 @@ type Admission struct {
 	ContentRevision string
 	State           string
 }
+
+// DialogRow and ActSlot are the typed 836/838/840 projections. Concrete field
+// types keep a receipt replay byte-identical to the committing reply.
+type DialogRow struct {
+	DialogID  int64 `json:"dialog_id"`
+	IsRead    int64 `json:"is_read"`
+	IsAwarded int64 `json:"is_awarded"`
+	SelectID  int64 `json:"select_id"`
+}
+type ActSlot struct {
+	IsAwarded int64 `json:"is_awarded"`
+}
+
 type Result struct {
 	Schema          string
 	Command         Command
@@ -185,6 +202,8 @@ type Result struct {
 	BoardPartner    int64
 	BoardCard       int64
 	BoardModelID    int64
+	PartnerDialogs  []DialogRow
+	PartnerActs     []ActSlot
 }
 type HeroPort interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
@@ -279,6 +298,9 @@ func fingerprint(c Command) ([32]byte, error) {
 		request["select_id"] = c.SelectID
 		request["is_reward"] = c.IsReward
 		request["has_select"] = c.HasSelect
+	}
+	if c.RawReward != 0 {
+		request["raw_reward"] = c.RawReward
 	}
 	return receipt.FingerprintRequest(request)
 }
@@ -610,7 +632,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if e != nil {
 				return e
 			}
-			next, e := s.boardTx(ctx, sc.Tx, a, d, h, root)
+			next, e := s.boardTx(ctx, sc.Tx, a, d, h, catalog, root)
 			if e != nil {
 				return e
 			}
@@ -741,6 +763,18 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			out.Favor = facts.Favor
 			out.Married = facts.Married
 			out.Applied = facts.Applied
+			if d.Command.Family == Gift {
+				storedDialogs, readErr := s.Library.ListDialogsTx(ctx, sc.Tx, a.PlayerID)
+				if readErr != nil {
+					return readErr
+				}
+				actAwards, readErr := s.Library.ListActAwardsTx(ctx, sc.Tx, a.PlayerID)
+				if readErr != nil {
+					return readErr
+				}
+				out.PartnerDialogs = projectPartnerDialogs(catalog, rule.DialogEnabled, facts.Favor, facts.Married, d.Command.PartnerID, storedDialogs)
+				out.PartnerActs = projectPartnerActs(d.Command.PartnerID, actAwards)
+			}
 		}
 		if e = s.putReceipt(ctx, sc.Tx, d, out); e != nil {
 			return e

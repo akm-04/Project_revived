@@ -3,16 +3,20 @@
 package playerdisplay_test
 
 import (
+	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 func TestPlaytestOverflowMailIsOpenableClaimableAndExpires(t *testing.T) {
@@ -179,5 +183,72 @@ func TestPlaytestOverflowMailIsOpenableClaimableAndExpires(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("reconciled mail not listed")
+	}
+}
+
+func TestPlaytestClaimedMailHiddenFromListAndCounts(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	a := bornActor(t, p)
+	values := i5store.Store{Queryer: p}
+	mailService := i5.SettlementMail{Store: values}
+	transaction, err := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		t.Fatal(err)
+	}
+	addresses := make([]mail.Address, 0, 6)
+	for index := range 5 {
+		record, _, deliverErr := mailService.DeliverTx(ctx, transaction, i5.SettlementMailRequest{Recipient: a.PlayerID, SourceKind: "PLAYTEST_MAIL", SourceKey: fmt.Sprintf("attachment-%d", index), Title: "Playtest attachment", Sender: "Academy", Body: "Claim this reward", PolicyVersion: "i9-10-playtest-v1", Lines: []grant.Line{{Kind: grant.StackItem, ItemID: 50005182, Amount: 1}}, At: time.Now().UTC()})
+		if deliverErr != nil {
+			transaction.Rollback(ctx)
+			t.Fatal(deliverErr)
+		}
+		addresses = append(addresses, record.Address)
+	}
+	readOnly, _, err := mailService.DeliverNoticeTx(ctx, transaction, i5.SettlementMailRequest{Recipient: a.PlayerID, SourceKind: "PLAYTEST_MAIL", SourceKey: "read-only", Title: "Playtest notice", Sender: "Academy", Body: "Read this notice", PolicyVersion: "i9-10-playtest-v1", At: time.Now().UTC()})
+	if err != nil {
+		transaction.Rollback(ctx)
+		t.Fatal(err)
+	}
+	addresses = append(addresses, readOnly.Address)
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	dispatcher := stockruntime.I5Dispatcher{Authority: playtestAuthority{a}, Service: genuineGrants(p)}
+	claim := func(address mail.Address) httpedge.Response {
+		return dispatcher.Dispatch(ctx, playtestRequest(a, 369, map[string]any{"id": address.WireID, "is_region": false}))
+	}
+	if response := claim(addresses[0]); response.HTTPStatus != 200 || response.Body["is_shown"] != int64(0) {
+		t.Fatalf("single claim: %+v", response)
+	}
+	singlePage := dispatcher.Dispatch(ctx, playtestRequest(a, 368, map[string]any{"load_num": int64(20)}))
+	singleRows, singleRowsOK := singlePage.Body["mail_list"].([]any)
+	if singlePage.HTTPStatus != 200 || singlePage.Body["total"] != int64(5) || singlePage.Body["new_mail_total"] != int64(5) || !singleRowsOK || len(singleRows) != 5 {
+		t.Fatalf("list immediately after single claim: %+v", singlePage)
+	}
+	batch := dispatcher.Dispatch(ctx, playtestRequest(a, 370, map[string]any{"normal_ids": strconv.FormatInt(addresses[1].WireID, 10) + "|" + strconv.FormatInt(addresses[2].WireID, 10), "region_ids": ""}))
+	if batch.HTTPStatus != 200 {
+		t.Fatalf("batch claim: %+v", batch)
+	}
+	if response := claim(addresses[1]); response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+		t.Fatalf("single after batch should be a conflict: %+v", response)
+	}
+	page := dispatcher.Dispatch(ctx, playtestRequest(a, 368, map[string]any{"load_num": int64(2)}))
+	if page.HTTPStatus != 200 || page.Body["total"] != int64(3) || page.Body["new_mail_total"] != int64(3) {
+		t.Fatalf("paged mail counts: %+v", page)
+	}
+	rows, ok := page.Body["mail_list"].([]any)
+	if !ok || len(rows) != 2 {
+		t.Fatalf("mail page: %#v", page.Body["mail_list"])
+	}
+	if scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='PLAYTEST_MAIL'`, int64(a.PlayerID)) != 6 ||
+		scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='PLAYTEST_MAIL' AND NOT shown`, int64(a.PlayerID)) != 3 {
+		t.Fatal("hidden claimed mail rows were deleted or not hidden")
+	}
+	batchPage, ok := batch.Body["mail_list"].(map[string]any)
+	batchRows, rowsOK := batchPage["mail_list"].([]any)
+	if !ok || !rowsOK || len(batchRows) != 3 || batchPage["total"] != int64(3) || batchPage["new_mail_total"] != int64(3) {
+		t.Fatalf("batch response counts: %#v", batch.Body)
 	}
 }

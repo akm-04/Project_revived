@@ -133,7 +133,12 @@ func (s Service) Due(c context.Context, parent operation.Context) (int, error) {
 		if err != nil {
 			return applied, err
 		}
-		_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), transitionEvidence{store: s.Store, reader: s.Fresh, next: next}, func(c context.Context, sc gen.TimedScope) error {
+		isolation := tx.RepeatableRead
+		if next.Kind == d.TransitionSettle {
+			// Read Committed lets the frame check see claims completed while it waits on mail namespace locks.
+			isolation = tx.ReadCommitted
+		}
+		_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: isolation}, retry(), transitionEvidence{store: s.Store, reader: s.Fresh, next: next}, func(c context.Context, sc gen.TimedScope) error {
 			return s.transitionTx(c, sc, next)
 		})
 		if err != nil {
@@ -188,17 +193,49 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, catalog d.Catalo
 	settlement := d.Settlement{Day: next.Key, CutoffAt: next.At, SettledAt: at, CompetitionVersion: root.StateVersion, ContentRevision: revision}
 	tops := map[identity.LogicalServerID][]identity.PlayerID{}
 	sunday := d.Weekday(next.Key) == 7
-	for _, a := range catalog.Awards(ranked, next.Key) {
+	awards := catalog.Awards(ranked, next.Key)
+	mailRecipients := []identity.PlayerID{}
+	frameRequests := []i5.FrameStackRequest{}
+	for _, award := range awards {
+		if award.Reward == nil {
+			continue
+		}
+		if len(rewardLines(*award.Reward)) > 0 || award.Reward.FrameID > 0 {
+			mailRecipients = append(mailRecipients, award.Player)
+		}
+		if award.Reward.FrameID > 0 {
+			frameRequests = append(frameRequests, i5.FrameStackRequest{Player: award.Player, ItemID: award.Reward.FrameID})
+		}
+	}
+	if len(frameRequests) > 0 && s.FrameStacks == nil {
+		return d.ErrUnavailable
+	}
+	if err := s.Mail.LockRecipientsTx(c, sc.Tx, mailRecipients); err != nil {
+		return err
+	}
+	frameOwnership := map[i5.FrameStackRequest]bool{}
+	if len(frameRequests) > 0 {
+		ownership, err := i5.LockFrameStackOwnershipTx(c, sc.Tx, s.FrameStacks, frameRequests, at)
+		if err != nil {
+			return err
+		}
+		frameOwnership = ownership
+	}
+	for _, a := range awards {
 		row := d.SettlementRow{Player: a.Player, Global: a.Global, ServerRank: a.ServerRank, Title: a.Title}
 		if a.Reward != nil {
-			m, _, err := s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: a.Player, SourceKind: rewardMailKind, SourceKey: strconv.FormatInt(next.Key, 10),
-				Title: catalog.Mail["LEGEND_MAIL_TITLE"], Sender: catalog.Mail["LEGEND_MAIL_SENDER"], Body: fmt.Sprintf(catalog.Mail["LEGEND_MAIL_TEXT"], a.ServerRank), PolicyVersion: d.ContractID, Lines: rewardLines(*a.Reward), At: at})
-			if err != nil {
-				return err
+			lines := rewardLines(*a.Reward)
+			if len(lines) > 0 {
+				m, _, err := s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: a.Player, SourceKind: rewardMailKind, SourceKey: strconv.FormatInt(next.Key, 10),
+					Title: catalog.Mail["LEGEND_MAIL_TITLE"], Sender: catalog.Mail["LEGEND_MAIL_SENDER"], Body: fmt.Sprintf(catalog.Mail["LEGEND_MAIL_TEXT"], a.ServerRank), PolicyVersion: d.ContractID, Lines: lines, At: at})
+				if err != nil {
+					return err
+				}
+				row.Mail = &m.MailUUID
 			}
-			row.Mail = &m.MailUUID
-			if a.Reward.FrameID > 0 {
-				if _, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: a.Player, SourceKind: frameMailKind, SourceKey: strconv.FormatInt(int64(a.Player), 10),
+			ownsFrame := frameOwnership[i5.FrameStackRequest{Player: a.Player, ItemID: a.Reward.FrameID}]
+			if a.Reward.FrameID > 0 && !ownsFrame {
+				if _, _, err := s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: a.Player, SourceKind: frameMailKind, SourceKey: strconv.FormatInt(int64(a.Player), 10),
 					Title: catalog.Mail["LEGEND_MAIL_TITLE"], Sender: catalog.Mail["LEGEND_MAIL_SENDER"], Body: fmt.Sprintf(catalog.Mail["LEGEND_MAIL_TEXT"], a.ServerRank), PolicyVersion: d.ContractID,
 					Lines: []grant.Line{{Kind: grant.StackItem, ItemID: a.Reward.FrameID, Amount: 1}}, At: at}); err != nil {
 					return err

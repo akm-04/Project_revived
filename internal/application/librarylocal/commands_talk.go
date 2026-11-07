@@ -30,7 +30,20 @@ func (s Service) talkAwardTx(ctx context.Context, t tx.Tx, d Admission, catalog 
 	if found {
 		dialog = existing
 	}
-	claim := !d.Command.HasSelect || d.Command.IsReward
+	claim := false
+	if d.Command.HasSelect {
+		reward, e := catalog.TalkChoice(rule.RelationshipSourceID, d.Command.Value, d.Command.SelectID, talkRawReward(d.Command))
+		if e != nil {
+			return facts, false, dialog, e
+		}
+		claim = reward
+	} else {
+		reward, e := catalog.TalkEnd(rule.RelationshipSourceID, d.Command.Value, dialog.SelectID)
+		if e != nil {
+			return facts, false, dialog, e
+		}
+		claim = reward
+	}
 	selectID := int64(0)
 	if d.Command.HasSelect {
 		selectID = d.Command.SelectID
@@ -56,4 +69,14 @@ func (s Service) talkAwardTx(ctx context.Context, t tx.Tx, d Admission, catalog 
 		}
 	}
 	return hero, favorChanged, next, nil
+}
+
+func talkRawReward(command Command) int64 {
+	if command.RawReward > 1 {
+		return command.RawReward
+	}
+	if command.IsReward {
+		return 1
+	}
+	return 0
 }

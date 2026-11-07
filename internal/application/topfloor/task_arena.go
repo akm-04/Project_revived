@@ -133,6 +133,17 @@ func (service Service) taskTeam(requestContext context.Context, query tx.Queryer
 	}
 	return rows, pet, nil
 }
+
+// requireTaskDefense refuses a new special attack without a usable saved defense.
+func (service Service) requireTaskDefense(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, player identity.PlayerID, saved domain.TaskModePlayer, at time.Time) error {
+	if len(saved.Player.Defense) == 0 {
+		return domain.ErrDefenseRequired
+	}
+	if _, _, err := service.taskTeam(requestContext, query, catalog, period, player, domain.TaskModeDefense{Heroes: saved.Player.Defense, Pet: saved.Player.DefensePet, Leader: saved.Leader}, at); err != nil {
+		return fmt.Errorf("%w: %v", domain.ErrDefenseRequired, err)
+	}
+	return nil
+}
 func (service Service) taskDisplay(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, occupant domain.Occupant, at time.Time) (domain.Display, error) {
 	rank, found, err := service.Store.TaskRankOfTx(requestContext, query, period.Ladder.Server, period.Rotation.Number, occupant)
 	if err != nil || !found {
@@ -159,6 +170,9 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 	player, found, err := service.Store.ReadTaskPlayerTx(requestContext, query, occupant.Player, period, false)
 	if err != nil || !found {
 		return display, errors.Join(err, domain.ErrRefused)
+	}
+	if len(player.Player.Defense) == 0 {
+		return display, domain.ErrRefused
 	}
 	display.Wins = player.Player.Wins
 	display.Heroes, display.Pet, err = service.taskTeam(requestContext, query, catalog, period, occupant.Player, domain.TaskModeDefense{Heroes: player.Player.Defense, Pet: player.Player.DefensePet, Leader: player.Leader}, at)
@@ -241,7 +255,7 @@ func (service Service) LoadTask(requestContext context.Context, actor identity.A
 			}
 			result.Enemies = append(result.Enemies, display)
 		}
-		return nil
+		return service.saveOfferSnapshot(requestContext, scope.Tx, actor.LogicalServerID, actor.PlayerID, domain.OfferScopeSpecial, period.Rotation.Number, rank, result.Enemies, at)
 	})
 	return result, err
 }

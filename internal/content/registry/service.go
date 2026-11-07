@@ -484,6 +484,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotGift != 1 {
 				return errors.New("content registry: SocialGift payload count drift")
 			}
+			gotSocialInput, err := s.Repo.InsertSocialInputs(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotSocialInput != 1 {
+				return errors.New("content registry: Social input payload count drift")
+			}
 			gotEmoticons, err := s.Repo.InsertEmoticons(tctx, scope.Tx, b)
 			if err != nil {
 				return err

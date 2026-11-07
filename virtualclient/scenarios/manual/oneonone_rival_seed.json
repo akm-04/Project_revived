@@ -1,0 +1,35 @@
+{
+  "name": "oneonone_rival_seed",
+  "note": "Manual prerequisite for oneonone_rival_region on the same database. This run enters 1on1 (MID 2480) and saves three one-girl teams through MID 2481, so the next run has a rival with a defense and an earlier Junior reach. Not part of vc_suite.sh: the pair shares one VCDB and must run seed then region.",
+  "level": 60,
+  "heroes": [
+    10001001,
+    10001002,
+    10001003,
+    10001004,
+    10001005,
+    10001006,
+    10001007,
+    10001008,
+    10001009,
+    10001010,
+    10001011,
+    10001012,
+    10001013,
+    10001014,
+    10001015
+  ],
+  "steps": [
+    "window:sub_arena",
+    "tap:peak_arena_node",
+    "wait:10",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local f={} for _,h in pairs(p:getHeros()) do if #f<3 then f[#f+1]=tostring(h:getHeroID()) end end assert(#f==3,'vc-seed-heroes-'..#f) xyd.Backend.get():request(xyd.mid.PEAK_CHANGE_TEAMS,{formations=f},function(code) if code~=xyd.error.OK then error('vc-seed-change-'..tostring(code)) end __vcSeedSaved=true end)",
+    "wait:10",
+    "lua:assert(__vcSeedSaved,'vc-seed-change-missing')"
+  ],
+  "settle_seconds": 20,
+  "expect_ok": [
+    2480,
+    2481
+  ]
+}

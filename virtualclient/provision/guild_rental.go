@@ -44,3 +44,27 @@ func GuildRentalLenderFixture(requestContext context.Context, databaseURL, accou
 	}
 	return transaction.Commit(requestContext)
 }
+
+// GuildRentalLenderChangeFixture moves the peer's offered girl to another
+// valid level inside the driven player's admission band, so a second 2768 read
+// must carry a different rent_count and different detail than the first.
+func GuildRentalLenderChangeFixture(requestContext context.Context, databaseURL, peerAccountID string) error {
+	pool, err := postgres.Open(requestContext, databaseURL, postgres.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Minute, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "vc-guild-rental-change"})
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+	var lender, partner int64
+	if err := pool.QueryRow(requestContext, `SELECT o.lender_id,o.unit_id FROM guild_rental_offers o JOIN players p ON p.player_id=o.lender_id WHERE p.account_id=$1 AND o.kind='HERO' ORDER BY o.unit_id LIMIT 1`, peerAccountID).Scan(&lender, &partner); err != nil {
+		return fmt.Errorf("guild rental change fixture needs the peer's offer: %w", err)
+	}
+	transaction, err := pool.Begin(requestContext, tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		return err
+	}
+	defer transaction.Rollback(requestContext)
+	if _, err := transaction.Exec(requestContext, `UPDATE player_heroes SET level=5,exp=0,state_version=state_version+1,updated_at=clock_timestamp() WHERE player_id=$1 AND partner_id=$2`, lender, partner); err != nil {
+		return err
+	}
+	return transaction.Commit(requestContext)
+}

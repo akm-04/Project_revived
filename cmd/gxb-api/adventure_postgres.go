@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"strconv"
+	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
@@ -29,7 +30,7 @@ func canonicalAdventure(p *pg.Pool, r tx.Runner, content contentstore.Store, val
 	return appadventure.Mode{
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r},
 		Fresh: p, Store: adventurestore.Store{}, Content: content,
-		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Combat: fight,
+		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner,
 		Opponents: opponents, Wake: adventureWakeup{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Invites: invites, Mail: i5.SettlementMail{Store: values},
@@ -44,12 +45,12 @@ type adventureOpponents struct {
 	TopFloor apptopfloor.Service
 }
 
-func (o adventureOpponents) ArenaOpponentTx(c context.Context, q tx.Queryer, player identity.PlayerID, section int64, ordinal uint64) (appadventure.Opponent, bool, error) {
-	defense, found, err := o.Arena.AdventureOpponentTx(c, q, player, section, ordinal)
+func (o adventureOpponents) ArenaOpponentTx(c context.Context, q tx.Queryer, player identity.PlayerID, section int64, ordinal uint64, at time.Time) (appadventure.Opponent, bool, error) {
+	defense, found, err := o.Arena.AdventureOpponentTx(c, q, player, section, ordinal, at)
 	if err != nil || !found {
 		return appadventure.Opponent{}, found, err
 	}
-	return appadventure.Opponent{PlayerID: defense.PlayerID, Heroes: defense.Heroes, PetID: defense.PetID}, true, nil
+	return appadventure.Opponent{PlayerID: defense.PlayerID, Heroes: defense.Heroes, Pets: defense.Pets}, true, nil
 }
 
 func (o adventureOpponents) RobotOpponentTx(c context.Context, q tx.Queryer, ordinal uint64) (appadventure.Opponent, bool, error) {
@@ -57,7 +58,7 @@ func (o adventureOpponents) RobotOpponentTx(c context.Context, q tx.Queryer, ord
 	if err != nil || !found {
 		return appadventure.Opponent{}, found, err
 	}
-	return appadventure.Opponent{TemplateHeroes: robot.Heroes}, true, nil
+	return appadventure.Opponent{Heroes: robot.Heroes}, true, nil
 }
 
 // adventureWakeup emits the commit-coupled wakeup that carries notices 33/34.

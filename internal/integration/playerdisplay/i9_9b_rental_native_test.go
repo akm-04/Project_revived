@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"testing"
 	"time"
@@ -25,18 +26,23 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/workplacestore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appcombat "gxb.local/backend/v2/internal/application/combat"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/guildrental"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/workplace"
 	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
+	"gxb.local/backend/v2/internal/domain/character"
 	d "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 // rentalUnits is the I9-9B fixture port: level comes from the production
@@ -199,6 +205,46 @@ func TestI9_9BProductionUnitsForceMatchesPlace(t *testing.T) {
 	if unit.Force <= 0 || unit.Force != stored {
 		t.Fatalf("units force %d stored %d", unit.Force, stored)
 	}
+}
+
+func TestI9_9BGuildOffersProjectHeroDetail(t *testing.T) {
+	f := newRentalFixture(t)
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, opPinned(f.revision)); err != nil {
+		t.Fatal("place", err)
+	}
+	// Legacy source rows keep their visible level without the cumulative curve;
+	// the stock detail window subtracts totalExp(level-1) from the wire exp.
+	exec(t, f.pool, `UPDATE player_heroes SET level=100,exp=0,updated_at=clock_timestamp() WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero)
+	content := contentstore.Store{Queryer: f.pool}
+	reads := guildrental.Reader{
+		Runner: tx.Runner{DB: f.pool}, Store: guildstore.Store{Queryer: f.pool},
+		Characters: guildrentalread.Characters{Content: content}, Profiles: guildrentalread.Profiles{}, Levels: guildrentalread.Levels{},
+		Mana: guildrentalread.Mana{}, Privileges: appi5.BaselinePrivilegeProvider{},
+		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: f.service.Policy, Content: content,
+		Now: func(c context.Context, q tx.Queryer) (time.Time, error) {
+			return (postgres.AuthoritativeTime{Queryer: q}).Now(c)
+		},
+	}
+	list, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, 0, opPinned(f.revision))
+	if err != nil {
+		t.Fatal("guild offers", err)
+	}
+	for _, row := range list.Rows {
+		if row.Offer.Unit != f.hero {
+			continue
+		}
+		if row.Hero == nil || row.Hero.Level != 100 || row.Hero.Exp != 1844095 {
+			t.Fatalf("detail exp lev=%v exp=%v", row.Hero, row.Hero.Exp)
+		}
+		if row.Appearance == nil || row.Appearance.OwnerStateVersion != row.Hero.StateVersion {
+			t.Fatalf("qualified appearance %+v", row.Appearance)
+		}
+		if row.TwiceAwakeStage == nil || *row.TwiceAwakeStage != 0 {
+			t.Fatalf("raw twice-awake stage %v", row.TwiceAwakeStage)
+		}
+		return
+	}
+	t.Fatal("lender offer missing from 2768 projection")
 }
 
 func TestI9_9BBorrowedTableCollisionRefunds(t *testing.T) {
@@ -630,5 +676,337 @@ func TestI9_9BRentalNative(t *testing.T) {
 	}
 	if mail := scalar(t, f.pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id IN ($1,$2) AND source_kind='GUILD_RENTAL_DEPARTURE'`, int64(f.lender.PlayerID), int64(f.petLender.PlayerID)); mail != 2 {
 		t.Fatal("C15 second close mailed again", mail)
+	}
+}
+
+// rentalContent is both the Reader's policy content and the qualified owner
+// read's appearance content; production binds the same content store to both.
+type rentalContent interface {
+	guildrental.Content
+	guildrentalread.CharacterContent
+}
+
+func authoritativeObservation(c context.Context, q tx.Queryer) (time.Time, error) {
+	return (postgres.AuthoritativeTime{Queryer: q}).Now(c)
+}
+
+func observationOffset(delta time.Duration) func(context.Context, tx.Queryer) (time.Time, error) {
+	return func(c context.Context, q tx.Queryer) (time.Time, error) {
+		at, err := authoritativeObservation(c, q)
+		return at.Add(delta), err
+	}
+}
+
+// rentalReader builds the production Reader composition the canonical wiring
+// uses: existing owner reads only, no fixture projection DTOs.
+func rentalReader(f rentalFixture, content rentalContent, now func(context.Context, tx.Queryer) (time.Time, error)) guildrental.Reader {
+	return guildrental.Reader{
+		Runner: tx.Runner{DB: f.pool}, Store: guildstore.Store{Queryer: f.pool},
+		Characters: guildrentalread.Characters{Content: content}, Profiles: guildrentalread.Profiles{}, Levels: guildrentalread.Levels{},
+		Mana: guildrentalread.Mana{}, Privileges: appi5.BaselinePrivilegeProvider{},
+		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: f.service.Policy, Content: content, Now: now,
+	}
+}
+
+// heroExpFailureContent is the production content store with one policy read
+// made to fail, so a 621 answer proves the pet path never asks for a Hero curve.
+type heroExpFailureContent struct {
+	contentstore.Store
+}
+
+func (heroExpFailureContent) HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error) {
+	return nil, errors.New("fixture: hero EXP curve unavailable")
+}
+
+var errRentalListOnlyPort = errors.New("fixture: rental proof port wires only list reads")
+
+// rentalListOnlyPort forwards GuildOffers to the production Reader. The other
+// port methods are unused by 2768/621 and refuse instead of fabricating data.
+type rentalListOnlyPort struct {
+	Reader guildrental.Reader
+}
+
+func (p rentalListOnlyPort) GuildOffers(c context.Context, a identity.ActorContext, kind guild.RentalKind, requestedType int64, op operation.Context) (guildrental.List, error) {
+	return p.Reader.GuildOffers(c, a, kind, requestedType, op)
+}
+func (rentalListOnlyPort) Place(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) error {
+	return errRentalListOnlyPort
+}
+func (rentalListOnlyPort) Recall(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) (int64, int64, error) {
+	return 0, 0, errRentalListOnlyPort
+}
+func (rentalListOnlyPort) OwnOffers(context.Context, identity.ActorContext, guild.RentalKind, operation.Context) ([]guildrental.Row, error) {
+	return nil, errRentalListOnlyPort
+}
+func (rentalListOnlyPort) UsedPartners(context.Context, identity.ActorContext, operation.Context) ([]int64, error) {
+	return nil, errRentalListOnlyPort
+}
+
+// rentalFixtureAuthority is a test bearer map to the fixture actors. It is not
+// the production login proof and does not claim to be.
+type rentalFixtureAuthority map[string]identity.ActorContext
+
+func (a rentalFixtureAuthority) ResolveGameplayBearer(_ context.Context, token string, _ time.Time) (identity.ActorContext, error) {
+	actor, ok := a[token]
+	if !ok {
+		return identity.ActorContext{}, errors.New("fixture: unknown bearer")
+	}
+	return actor, nil
+}
+
+func rentalDispatch(t *testing.T, dispatcher stockruntime.GuildRentalDispatcher, bearer string, actor identity.ActorContext, mid uint16, params map[string]any, op operation.Context) httpedge.Response {
+	t.Helper()
+	return dispatcher.Dispatch(ctx, httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: op, MID: mid, Params: params,
+		Claims: wire.CredentialClaims{Token: bearer, Region: int64(actor.LogicalServerID)}, ReceivedAt: time.Now().UTC()}})
+}
+
+func rentalWirePartner(t *testing.T, body map[string]any, unit int64) map[string]any {
+	t.Helper()
+	nested, ok := body["guild_rent_heroes"].(map[string]any)
+	if !ok {
+		t.Fatalf("2768 guild_rent_heroes shape %T", body["guild_rent_heroes"])
+	}
+	partners, ok := nested["partners"].([]any)
+	if !ok {
+		t.Fatalf("2768 partners shape %T", nested["partners"])
+	}
+	for _, raw := range partners {
+		partner := raw.(map[string]any)
+		if partner["partner_id"] == unit {
+			return partner
+		}
+	}
+	t.Fatalf("2768 partner %d missing from %v", unit, partners)
+	return nil
+}
+
+func rentalWirePet(t *testing.T, body map[string]any, unit int64) map[string]any {
+	t.Helper()
+	pets, ok := body["pets"].([]any)
+	if !ok {
+		t.Fatalf("621 pets shape %T", body["pets"])
+	}
+	for _, raw := range pets {
+		pet := raw.(map[string]any)
+		if pet["pet_id"] == unit {
+			return pet
+		}
+	}
+	t.Fatalf("621 pet %d missing from %v", unit, pets)
+	return nil
+}
+
+func rentalListRow(t *testing.T, list guildrental.List, kind guild.RentalKind, unit int64) guildrental.Row {
+	t.Helper()
+	for _, row := range list.Rows {
+		if row.Offer.Kind == kind && row.Offer.Unit == unit {
+			return row
+		}
+	}
+	t.Fatalf("%s row %d missing from projection", kind, unit)
+	return guildrental.Row{}
+}
+
+func rentalOfferState(t *testing.T, f rentalFixture) string {
+	t.Helper()
+	return fmt.Sprint(
+		scalar(t, f.pool, `SELECT state_version FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT current_skin_id FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT exp FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT count(*) FROM player_hero_skin_entitlements WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT count(*) FROM guild_rental_offers WHERE lender_id IN ($1,$2)`, int64(f.lender.PlayerID), int64(f.petLender.PlayerID)),
+		scalar(t, f.pool, `SELECT count(*) FROM guild_rental_uses WHERE borrower_id=$1`, int64(f.borrower.PlayerID)),
+	)
+}
+
+// TestI9_9BProjectionCacheKeyAndWireNative drives the production Reader and
+// stock GuildRentalDispatcher over the actual fixture owner rows: an equipped
+// and then expired skin, a nonzero raw awakening stage, EXP and equipment
+// changes, a stable key across observation times, and the 621 pet path under a
+// content owner whose Hero EXP curve read fails.
+func TestI9_9BProjectionCacheKeyAndWireNative(t *testing.T) {
+	f := newRentalFixture(t)
+	rev := f.revision
+	readOp := opPinned(rev)
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, readOp); err != nil {
+		t.Fatal("place hero offer", err)
+	}
+	if err := f.service.Place(ctx, f.petLender, guild.RentalPet, f.pet, readOp); err != nil {
+		t.Fatal("place pet offer", err)
+	}
+	content := contentstore.Store{Queryer: f.pool}
+	reader := rentalReader(f, content, authoritativeObservation)
+	dispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower},
+		Service: rentalListOnlyPort{Reader: reader}}
+
+	readHero := func(t *testing.T) (guildrental.List, map[string]any) {
+		t.Helper()
+		list, err := reader.GuildOffers(ctx, f.borrower, guild.RentalHero, 1, readOp)
+		if err != nil {
+			t.Fatal("2768 projection", err)
+		}
+		response := rentalDispatch(t, dispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": int64(1)}, readOp)
+		if response.HTTPStatus != http.StatusOK {
+			t.Fatalf("2768 wire status %d body %v", response.HTTPStatus, response.Body)
+		}
+		return list, response.Body
+	}
+
+	baseline, baselineBody := readHero(t)
+	baselineRow := rentalListRow(t, baseline, guild.RentalHero, f.hero)
+	if baselineRow.Hero == nil || baselineRow.Hero.Level != 1 || baselineRow.Appearance == nil ||
+		baselineRow.Appearance.CurrentSkinID != 0 || len(baselineRow.Appearance.Skins) != 0 ||
+		baselineRow.TwiceAwakeStage == nil || *baselineRow.TwiceAwakeStage != 0 {
+		t.Fatalf("baseline real owner projection %+v", baselineRow)
+	}
+	if !baselineRow.CanRent || baselineRow.HaveRent {
+		t.Fatalf("baseline admission can=%v have=%v", baselineRow.CanRent, baselineRow.HaveRent)
+	}
+	baselinePartner := rentalWirePartner(t, baselineBody, f.hero)
+	nestedRentCount, _ := baselineBody["guild_rent_heroes"].(map[string]any)["rent_count"].(int64)
+	if baseline.RentCount == 0 || baselineBody["rent_count"] != baseline.RentCount || nestedRentCount != baseline.RentCount ||
+		baselinePartner["table_id"] != int64(genuineHeroTable) || baselinePartner["player_id"] != int64(f.lender.PlayerID) ||
+		baselinePartner["exp"] != baselineRow.Hero.Exp || baselinePartner["current_skin_id"] != int64(0) ||
+		baselinePartner["twice_awake_stage"] != int64(0) || baselinePartner["rent_need_mana"] != baselineRow.Price ||
+		baselinePartner["can_rent"] != true || baselinePartner["have_rent"] != false {
+		t.Fatalf("baseline wire row %v", baselinePartner)
+	}
+	if tutors, ok := baselineBody["tutor_rent_heroes"].([]any); !ok || len(tutors) != 0 {
+		t.Fatalf("baseline tutor list %v", baselineBody["tutor_rent_heroes"])
+	}
+
+	// The borrower grows first so the offered girl can level and keep admission.
+	compositeLevel(t, f.pool, f.borrower, rev, 100)
+	heroes := genuineHeroService(f.pool)
+	must(heroes.UseExpItems(ctx, f.lender, f.hero, []appi5.HeroExpItemDebit{{ItemID: heroExpItem, Count: 5}}, opPinned(rev)))(t, "hero exp")
+	experience, experienceBody := readHero(t)
+	experienceRow := rentalListRow(t, experience, guild.RentalHero, f.hero)
+	if experience.RentCount == baseline.RentCount || !experienceRow.CanRent {
+		t.Fatalf("progression key %d baseline %d can=%v", experience.RentCount, baseline.RentCount, experienceRow.CanRent)
+	}
+	if experienceRow.Hero.Level == baselineRow.Hero.Level && experienceRow.Hero.Exp == baselineRow.Hero.Exp {
+		t.Fatalf("progression did not change the projection %+v", experienceRow.Hero)
+	}
+	if rentalWirePartner(t, experienceBody, f.hero)["exp"] != experienceRow.Hero.Exp ||
+		rentalWirePartner(t, experienceBody, f.hero)["lev"] != experienceRow.Hero.Level {
+		t.Fatalf("progression wire %v", rentalWirePartner(t, experienceBody, f.hero))
+	}
+
+	// A genuine content skin item: SkinOn validates item, model and origin table.
+	must(heroes.SkinOn(ctx, f.lender, f.hero, genuineSkinItem, opPinned(rev)))(t, "skin unlock")
+	must(heroes.SkinOn(ctx, f.lender, f.hero, genuineSkinItem, opPinned(rev)))(t, "skin wear")
+	skinned, skinnedBody := readHero(t)
+	skinnedRow := rentalListRow(t, skinned, guild.RentalHero, f.hero)
+	skinnedWire := rentalWirePartner(t, skinnedBody, f.hero)
+	if skinned.RentCount == experience.RentCount || skinnedRow.Appearance.CurrentSkinID != 40001001 ||
+		len(skinnedRow.Appearance.Skins) != 1 || skinnedRow.Appearance.OwnerStateVersion != skinnedRow.Hero.StateVersion {
+		t.Fatalf("skin projection %+v", skinnedRow.Appearance)
+	}
+	if skinnedWire["current_skin_id"] != int64(40001001) || skinnedWire["skin_ids"].(map[string]any)["40001001"] != int64(-1) {
+		t.Fatalf("skin wire %v", skinnedWire)
+	}
+
+	// The same durable entitlement past its deadline is fixture data; no clock moves.
+	exec(t, f.pool, `UPDATE player_hero_skin_entitlements SET expires_at=$3 WHERE player_id=$1 AND partner_id=$2 AND model_id=$4`,
+		int64(f.lender.PlayerID), f.hero, time.Now().UTC().Add(-time.Hour), int64(40001001))
+	expired, expiredBody := readHero(t)
+	expiredRow := rentalListRow(t, expired, guild.RentalHero, f.hero)
+	expiredWire := rentalWirePartner(t, expiredBody, f.hero)
+	if expired.RentCount == skinned.RentCount || expiredRow.Appearance.CurrentSkinID != 0 || len(expiredRow.Appearance.Skins) != 0 {
+		t.Fatalf("expired skin projection %+v", expiredRow.Appearance)
+	}
+	if expiredWire["current_skin_id"] != int64(0) || len(expiredWire["skin_ids"].(map[string]any)) != 0 {
+		t.Fatalf("expired skin wire %v", expiredWire)
+	}
+
+	// A valid version-2 awakening facet (nonzero raw stage) through the owner store.
+	awakeningTx, err := f.pool.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer awakeningTx.Rollback(ctx)
+	birthStore := characterstore.RawAwakeningStore{}
+	birth, err := birthStore.ReadRawAwakeningBirthTx(ctx, awakeningTx, character.HeroRef{PlayerID: f.lender.PlayerID, PartnerID: f.hero})
+	if err != nil {
+		t.Fatal("raw awakening birth", err)
+	}
+	birth.Version++
+	birth.RawStage = 2
+	birth.UpdatedAt = time.Now().UTC()
+	birth.ProducerReference = "I9_AWAKENING_MISSIONS_V1/native-proof03"
+	if err = birthStore.SaveRawAwakeningTx(ctx, awakeningTx, birth, birth.Version-1); err != nil {
+		t.Fatal("raw awakening save", err)
+	}
+	if err = awakeningTx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	awakened, awakenedBody := readHero(t)
+	awakenedRow := rentalListRow(t, awakened, guild.RentalHero, f.hero)
+	if awakened.RentCount == expired.RentCount || awakenedRow.TwiceAwakeStage == nil || *awakenedRow.TwiceAwakeStage != 2 ||
+		rentalWirePartner(t, awakenedBody, f.hero)["twice_awake_stage"] != int64(2) {
+		t.Fatalf("awakening key %d prev %d stage %v", awakened.RentCount, expired.RentCount, awakenedRow.TwiceAwakeStage)
+	}
+
+	// Unchanged real owner state at a different observation time keeps the key and writes nothing.
+	before := rentalOfferState(t, f)
+	later := rentalReader(f, content, observationOffset(2*time.Hour))
+	laterList, err := later.GuildOffers(ctx, f.borrower, guild.RentalHero, 1, readOp)
+	if err != nil {
+		t.Fatal("future observation read", err)
+	}
+	if laterList.RentCount != awakened.RentCount {
+		t.Fatalf("observation time changed key %d vs %d", laterList.RentCount, awakened.RentCount)
+	}
+	if after := rentalOfferState(t, f); after != before {
+		t.Fatalf("read mutated owner state\nbefore %s\nafter  %s", before, after)
+	}
+
+	// The pet path is 621 with a content owner that fails the Hero EXP curve.
+	failingContent := heroExpFailureContent{Store: contentstore.Store{Queryer: f.pool}}
+	petReader := rentalReader(f, failingContent, authoritativeObservation)
+	petDispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower},
+		Service: rentalListOnlyPort{Reader: petReader}}
+	basePets, err := petReader.GuildOffers(ctx, f.borrower, guild.RentalPet, 0, readOp)
+	if err != nil {
+		t.Fatalf("621 pet list under failing Hero curve: %v", err)
+	}
+	basePetResponse := rentalDispatch(t, petDispatcher, "borrower", f.borrower, 621, map[string]any{"load_place": int64(0)}, readOp)
+	if basePetResponse.HTTPStatus != http.StatusOK || basePetResponse.Body["rent_count"] != basePets.RentCount {
+		t.Fatalf("621 baseline %d %v", basePetResponse.HTTPStatus, basePetResponse.Body)
+	}
+	basePetRow := rentalListRow(t, basePets, guild.RentalPet, f.pet)
+	basePetWire := rentalWirePet(t, basePetResponse.Body, f.pet)
+	if basePetRow.Pet == nil || basePetWire["table_id"] != int64(genuinePetTable) || basePetWire["player_id"] != int64(f.petLender.PlayerID) ||
+		basePetWire["lev"] != basePetRow.Pet.Level || basePetWire["exp"] != basePetRow.Pet.Exp {
+		t.Fatalf("621 baseline row %v", basePetWire)
+	}
+
+	// A real Pet EXP command changes the pet and must change the 621 key.
+	grantGenuine(t, f.pool, f.petLender, rev, "pet exp proof", []grant.Line{{Kind: grant.StackItem, ItemID: petExpItem, Amount: 5}})
+	pets := genuinePetService(f.pool)
+	must(pets.UseExpItems(ctx, f.petLender, f.pet, []appi5.PetExpItemDebit{{ItemID: petExpItem, Count: 1}}, opPinned(rev)))(t, "pet exp")
+	changedPets, err := petReader.GuildOffers(ctx, f.borrower, guild.RentalPet, 0, readOp)
+	if err != nil {
+		t.Fatal("621 changed pet list", err)
+	}
+	changedPetResponse := rentalDispatch(t, petDispatcher, "borrower", f.borrower, 621, map[string]any{"load_place": int64(0)}, readOp)
+	if changedPets.RentCount == basePets.RentCount || changedPetResponse.Body["rent_count"] != changedPets.RentCount {
+		t.Fatalf("621 pet detail did not invalidate key %d vs %d", changedPets.RentCount, basePets.RentCount)
+	}
+	changedPetRow := rentalListRow(t, changedPets, guild.RentalPet, f.pet)
+	changedPetWire := rentalWirePet(t, changedPetResponse.Body, f.pet)
+	if changedPetRow.Pet.Exp == basePetRow.Pet.Exp && changedPetRow.Pet.Level == basePetRow.Pet.Level {
+		t.Fatalf("621 pet command did not change pet %+v", changedPetRow.Pet)
+	}
+	if changedPetWire["exp"] != changedPetRow.Pet.Exp || changedPetWire["lev"] != changedPetRow.Pet.Level ||
+		changedPetWire["table_id"] != int64(genuinePetTable) || changedPetWire["player_id"] != int64(f.petLender.PlayerID) {
+		t.Fatalf("621 changed wire %v", changedPetWire)
+	}
+
+	// Negative control: the same failing content owner refuses the Hero list.
+	heroFailDispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower},
+		Service: rentalListOnlyPort{Reader: rentalReader(f, failingContent, authoritativeObservation)}}
+	if failed := rentalDispatch(t, heroFailDispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": int64(1)}, readOp); failed.HTTPStatus != http.StatusServiceUnavailable {
+		t.Fatalf("2768 failing Hero curve returned %d", failed.HTTPStatus)
 	}
 }

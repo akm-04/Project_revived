@@ -71,6 +71,9 @@
    "top_floor_ladders": [
     "topfloorstore.ReadLadderTx"
    ],
+   "top_floor_offer_snapshots": [
+    "topfloorstore.ReadOfferSnapshotTx"
+   ],
    "top_floor_players": [
     "topfloorstore.ReadPlayerTx"
    ],
@@ -90,6 +93,7 @@
    "gameplay_contexts",
    "top_floor_fights",
    "top_floor_ladders",
+   "top_floor_offer_snapshots",
    "top_floor_players",
    "top_floor_task_fights",
    "top_floor_task_periods",
@@ -300,6 +304,7 @@
    "top_floor_day_settlements",
    "top_floor_fights",
    "top_floor_ladders",
+   "top_floor_offer_snapshots",
    "top_floor_partner_usage",
    "top_floor_players",
    "top_floor_ranks",
@@ -325,6 +330,7 @@
    "player_function_eligibility",
    "top_floor_fights",
    "top_floor_ladders",
+   "top_floor_offer_snapshots",
    "top_floor_partner_usage",
    "top_floor_players",
    "top_floor_ranks",
@@ -342,6 +348,7 @@
    "top_floor_day_settlements",
    "top_floor_fights",
    "top_floor_ladders",
+   "top_floor_offer_snapshots",
    "top_floor_partner_usage",
    "top_floor_players",
    "top_floor_ranks",
@@ -360,6 +367,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [
+   "i9_10_topfloor_defense_required.json",
+   "i9_10_topfloor_team_info_popup.json",
    "i9_4_real_pk.json",
    "i9_7a_top_floor_task.json",
    "i9_7a_top_floor_task_battle.json",

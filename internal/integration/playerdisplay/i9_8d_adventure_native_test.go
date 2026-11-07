@@ -44,7 +44,7 @@ type adventureOpponents struct {
 	robotFound bool
 }
 
-func (o adventureOpponents) ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64) (appadventure.Opponent, bool, error) {
+func (o adventureOpponents) ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64, time.Time) (appadventure.Opponent, bool, error) {
 	return o.arena, o.arenaFound, nil
 }
 
@@ -63,7 +63,7 @@ func adventureTestMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, oppone
 	fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
 	owner := occultI5(p)
 	mode := appadventure.Mode{Timed: timed, Fresh: p, Store: adventurestore.Store{}, Content: content,
-		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Combat: fight,
+		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner, Opponents: opponents, Wake: adventureWake{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Mail: i5.SettlementMail{Store: values},
 		Partners: ownerSummoner(p), HeroWire: heroproj.StockHero}
@@ -237,7 +237,7 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 	a, picks := adventureOwner(t, p, server, 11, 10001001)
 	defender, _, defenderHero := combatOwner(t, p, server)
 	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
-	mode := adventureTestMode(t, p, clock, adventureOpponents{arena: appadventure.Opponent{PlayerID: defender.PlayerID, Heroes: []int64{defenderHero.PartnerID}}, arenaFound: true})
+	mode := adventureTestMode(t, p, clock, adventureOpponents{arena: appadventure.Opponent{PlayerID: defender.PlayerID, Heroes: []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: defender.PlayerID, Identity: defenderHero.PartnerID}}}, arenaFound: true})
 	opContext := opPinned(installed(t, p))
 	opContext.StartedAt = clock.at
 
@@ -315,7 +315,7 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 
 	// Robot fallback: no Arena opponent, a template team resolves.
 	clock.Set(clock.at.Add(time.Minute))
-	robotMode := adventureTestMode(t, p, clock, adventureOpponents{robot: appadventure.Opponent{TemplateHeroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 10001001, TemplateParams: templateParams(10001001)}}}, robotFound: true})
+	robotMode := adventureTestMode(t, p, clock, adventureOpponents{robot: appadventure.Opponent{Heroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 10001001, TemplateParams: templateParams(10001001)}}}, robotFound: true})
 	putAdventureOccurrence(t, p, a.PlayerID, d.EventBattle, 0, clock.at, clock.at.Add(2*time.Hour), "pvp-robot")
 	response, err = robotMode.Fight(ctx, a, appadventure.FightRequest{Formation: []int64{picks[0]}}, opContext)
 	if err != nil {

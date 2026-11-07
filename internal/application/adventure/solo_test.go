@@ -2,11 +2,13 @@ package adventure
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	cb "gxb.local/backend/v2/internal/application/combat"
 	d "gxb.local/backend/v2/internal/domain/adventure"
+	darena "gxb.local/backend/v2/internal/domain/arena"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -121,12 +123,53 @@ func TestRoomPushesRespectAllAndActor(t *testing.T) {
 func TestPVPBattleUsesOpponentDefenseOrRobotTeam(t *testing.T) {
 	actor := identity.ActorContext{PlayerID: identity.PlayerID(7001)}
 	request := FightRequest{Formation: []int64{11, 12}, PetID: 21}
-	player := pvpBattle(actor, request, Opponent{PlayerID: identity.PlayerID(7002), Heroes: []int64{31, 32}, PetID: 41})
+	player := pvpBattle(actor, request, Opponent{PlayerID: identity.PlayerID(7002), Heroes: []cb.Participant{
+		{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: identity.PlayerID(7002), Identity: 31},
+		{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: identity.PlayerID(7002), Identity: 32}},
+		Pets: []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.PetActor, Player: identity.PlayerID(7002), Identity: 41}}})
 	if len(player.TeamA) != 2 || player.TeamA[0].Origin != cd.OwnedSelf || len(player.WavesB) != 1 || player.WavesB[0][0].Origin != cd.OwnedForeign || player.WavesB[0][0].Player != identity.PlayerID(7002) || len(player.PetsB) != 1 {
 		t.Fatalf("player battle %+v", player)
 	}
-	robot := pvpBattle(actor, request, Opponent{TemplateHeroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 51}}})
+	robot := pvpBattle(actor, request, Opponent{Heroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 51}}})
 	if len(robot.WavesB) != 1 || robot.WavesB[0][0].Origin != cd.Template || len(robot.PetsB) != 0 {
 		t.Fatalf("robot battle %+v", robot)
+	}
+}
+
+func TestPVPBattleQualifiesArenaAwardTransforms(t *testing.T) {
+	battle := pvpBattle(identity.ActorContext{PlayerID: 100001}, FightRequest{Formation: []int64{1}}, Opponent{PlayerID: 100002, Heroes: []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: 100002, Identity: 2, Transform: map[string]int64{"arena_add_star": 1}}}})
+	if battle.Context == nil || battle.Context.Transform != darena.Transform {
+		t.Fatal("Arena awards lack their qualified battle context")
+	}
+	if battle.WavesB[0][0].Transform["arena_add_star"] != 1 {
+		t.Fatal("Arena award silently lost")
+	}
+}
+
+type unavailableOpponentSource struct {
+	arenaFound bool
+	robotReads int
+}
+
+func (source *unavailableOpponentSource) ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64, time.Time) (Opponent, bool, error) {
+	return Opponent{PlayerID: 100002}, source.arenaFound, nil
+}
+
+func (source *unavailableOpponentSource) RobotOpponentTx(context.Context, tx.Queryer, uint64) (Opponent, bool, error) {
+	source.robotReads++
+	return Opponent{}, true, nil
+}
+
+func TestUnavailableOpponentRefusesWithoutMaskingPlayer(t *testing.T) {
+	for _, arenaFound := range []bool{true, false} {
+		source := &unavailableOpponentSource{arenaFound: arenaFound}
+		mode := Mode{Opponents: source}
+		_, err := mode.opponent(context.Background(), nil, identity.ActorContext{PlayerID: 100001}, d.Catalog{}, time.Unix(1, 0), 0)
+		if !errors.Is(err, d.ErrRefused) {
+			t.Fatalf("empty resolved team admitted: %v", err)
+		}
+		if arenaFound && source.robotReads != 0 {
+			t.Fatal("unavailable player silently replaced by robot")
+		}
 	}
 }

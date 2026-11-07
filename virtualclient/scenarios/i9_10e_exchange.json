@@ -1,0 +1,41 @@
+{
+ "name": "i9_10e_exchange",
+ "level": 20,
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "friendship_coin",
+   "Amount": 1000
+  }
+ ],
+ "steps": [
+  "wait:5",
+  "lua:_G.vcP=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) _G.vcSS=xyd.ModelManager.get():loadModel(xyd.ModelType.SOCIAL_SYSTEM) _G.vcCoin=tonumber(vcP.friendshipCoin) if vcCoin~=1000 then error('vc-191-grant-'..tostring(vcCoin)) end _G.vcIDs=xyd.tables.dropbox:itemIDs(xyd.tables.gift:drops(xyd.tables.friendShopItem:gift(1))[1]) _G.vcCounts={} for _,id in ipairs(vcIDs) do vcCounts[id]=vcP:getBackpack():getItemNumByID(id) end",
+  "wait:1",
+  "lua:_G.vcW=xyd.WindowManager.get():openWindow('social_system') if not vcW then error('vc-191-window') end",
+  "wait:3",
+  "lua:if not vcW:nodeByName('item_pos1') then error('vc-191-items') end vcW:swapWindowState(6)",
+  "wait:2",
+  "lua:local function find(node,name) if node:getName()==name then return node end for _,child in ipairs(node:getChildren()) do local hit=find(child,name) if hit then return hit end end end local btn=find(vcW:nodeByName('item_pos1'),'exchange_btn') if not btn then error('vc-191-entry-button') end __vc.fireWidget(btn)",
+  "wait:3",
+  "lua:_G.vcF=xyd.WindowManager.get():getWindow('friend_sure_exchange') if not vcF then error('vc-191-sure-window') end if tonumber(vcF.buyNum)~=1 then error('vc-191-buynum-'..tostring(vcF.buyNum)) end local original=vcSS.exchangeItems vcSS.exchangeItems=function(self,req,cb) return original(self,req,function(code,reply) _G.vcCode=code _G.vcReply=reply if cb then cb(code,reply) end end) end",
+  "wait:1",
+  "lua:local function find(node,name) if node:getName()==name then return node end for _,child in ipairs(node:getChildren()) do local hit=find(child,name) if hit then return hit end end end local btn=find(vcF,'exchange_btn') if not btn then error('vc-191-submit') end __vc.fireWidget(btn)",
+  "wait:4",
+  "lua:if vcCode~=xyd.error.OK then error('vc-191-code-'..tostring(vcCode)) end if type(vcReply)~='table' or type(vcReply.awards)~='table' or #vcReply.awards<1 then error('vc-191-awards') end local total=0 for _,a in ipairs(vcReply.awards) do local id=tonumber(a.table_id) local amount=tonumber(a.item_num) if id<=0 or amount<=0 then error('vc-191-award-shape') end total=total+amount if vcP:getBackpack():getItemNumByID(id)~=vcCounts[id]+amount then error('vc-191-local-award-'..id) end end if tonumber(vcP.friendshipCoin)~=vcCoin-100 then error('vc-191-coin-'..tostring(vcP.friendshipCoin)) end if xyd.WindowManager.get():getWindow('friend_sure_exchange') then error('vc-191-not-closed') end xyd.db.stateVariable:setState({playerID=vcP.playerID,name='VC191_TOTAL',state=tostring(total)}) xyd.db.stateVariable:setState({playerID=vcP.playerID,name='VC191_COIN',state=tostring(vcCoin-100)})",
+  "wait:1",
+  "lua:local wm=xyd.WindowManager.get() if wm:getWindow('social_system') then wm:closeWindow('social_system') end wm:openWindow('social_system')",
+  "wait:3",
+  "lua:local w=xyd.WindowManager.get():getWindow('social_system') w:swapWindowState(6) local shown=tonumber(w:nodeByName('coin_num_txt'):getString()) local expected=tonumber(vcP.friendshipCoin) if shown~=expected or expected~=vcCoin-100 then error('vc-191-reopen-coin-'..tostring(shown)..'/'..tostring(expected)) end",
+  "wait:1",
+  "relogin",
+  "wait:5",
+  "lua:_G.vcP=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local expected=tonumber(xyd.db.stateVariable:getState(vcP.playerID,'VC191_TOTAL')) local coin=tonumber(xyd.db.stateVariable:getState(vcP.playerID,'VC191_COIN')) if coin~=1000-100 then error('vc-191-relogin-stored-coin-'..tostring(coin)) end if tonumber(vcP.friendshipCoin)~=coin then error('vc-191-relogin-coin-'..tostring(vcP.friendshipCoin)) end local ids=xyd.tables.dropbox:itemIDs(xyd.tables.gift:drops(xyd.tables.friendShopItem:gift(1))[1]) local total=0 for _,id in ipairs(ids) do total=total+vcP:getBackpack():getItemNumByID(id) end if total~=expected then error('vc-191-relogin-items-'..tostring(total)..'/'..tostring(expected)) end",
+  "wait:1"
+ ],
+ "settle_seconds": 20,
+ "expect_ok": [
+  191
+ ],
+ "note": "I9-10E MID191 stock proof: the SocialSystem friendship-exchange tab opens FriendSureExchangeWindow through its real exchange button; the window's own exchange button sends {id=1,num=1} through SocialSystem.exchangeItems. A wrapper records the wire reply and delegates to the stock callback, so summaryAwards/handleRewards stay original. Asserts local awards and friendship coin, reopens the surface, then relogins and compares server-backed coin and backpack."
+}
