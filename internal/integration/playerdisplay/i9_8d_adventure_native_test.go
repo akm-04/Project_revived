@@ -63,7 +63,7 @@ func adventureTestMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, oppone
 	fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
 	owner := occultI5(p)
 	mode := appadventure.Mode{Timed: timed, Fresh: p, Store: adventurestore.Store{}, Content: content,
-		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight,
+		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner, Opponents: opponents, Wake: adventureWake{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Mail: i5.SettlementMail{Store: values},
 		Partners: ownerSummoner(p), HeroWire: heroproj.StockHero}

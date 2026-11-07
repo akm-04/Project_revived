@@ -107,7 +107,7 @@ func (s Mode) ensureDefenseRoom(c context.Context, a identity.ActorContext, cata
 // room_info is the member list, the position and kill arrays are siblings, and
 // challenge_times is the viewer's tries array indexed by position.
 func (s Mode) defenseDetail(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState, viewer identity.PlayerID) (map[string]any, error) {
-	ids, infos, err := s.roomMembers(c, q, room)
+	ids, infos, err := s.roomMembers(c, q, room, nil)
 	if err != nil {
 		return nil, err
 	}

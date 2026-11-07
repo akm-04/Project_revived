@@ -790,7 +790,7 @@
    "tables": 0
   },
   {
-   "callees": 12,
+   "callees": 13,
    "callers": 1,
    "mids": 20,
    "name": "adventure",
@@ -863,7 +863,7 @@
   },
   {
    "callees": 4,
-   "callers": 35,
+   "callers": 36,
    "mids": 0,
    "name": "characterasset",
    "path": "internal/application/characterasset",
@@ -1016,7 +1016,7 @@
   },
   {
    "callees": 5,
-   "callers": 54,
+   "callers": 55,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1114,6 +1114,15 @@
    "tables": 0
   },
   {
+   "callees": 4,
+   "callers": 3,
+   "mids": 0,
+   "name": "heroforce",
+   "path": "internal/application/heroforce",
+   "purpose": "is the shared \"best 15 AP\" projection: the sum of a player's fifteen strongest heroes' qualified public force",
+   "tables": 0
+  },
+  {
    "callees": 12,
    "callers": 54,
    "mids": 25,
@@ -1132,7 +1141,7 @@
    "tables": 0
   },
   {
-   "callees": 15,
+   "callees": 16,
    "callers": 0,
    "mids": 17,
    "name": "illusion",
