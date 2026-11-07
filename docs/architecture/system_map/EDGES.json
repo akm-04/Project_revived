@@ -5350,6 +5350,9 @@
     "*SnapshotTx",
     "LockFrameStackOwnershipTx"
    ],
+   "interface:topfloor.OwnedHeroReader": [
+    "*ListHeroesTx"
+   ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
    ],

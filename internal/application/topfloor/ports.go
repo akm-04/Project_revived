@@ -13,6 +13,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -97,6 +98,11 @@ type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+// OwnedHeroReader is the CharacterHero-owned roster read used to build the D511 preset defense.
+type OwnedHeroReader interface {
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
+}
+
 type Directory interface {
 	ServerMaximumLevelTx(context.Context, tx.Queryer, identity.LogicalServerID) (int64, error)
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
@@ -128,6 +134,7 @@ type Service struct {
 	Combat       Combat
 	Heroes       Roster
 	Pets         Roster
+	OwnedHeroes  OwnedHeroReader
 	Directory    Directory
 	Guilds       Guilds
 	Facts        Facts
@@ -137,7 +144,7 @@ type Service struct {
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.OwnedHeroes != nil && s.Directory != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 type ArenaView struct {
