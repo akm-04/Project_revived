@@ -17,8 +17,9 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// D487: a new attack needs a currently valid saved defense and spends nothing
-// when it is refused; a saved defense admits and an exact retry replays.
+// D511 refines D487: a player owning none of the preset girls gets no defense
+// and spends nothing when refused. A player with a valid saved defense (here the
+// automatic preset) admits an attack, and an exact retry replays.
 func TestI9_10TopFloorDefenseRequiredNative(t *testing.T) {
 	pool := pool(t)
 	defer pool.Close()
@@ -32,30 +33,35 @@ func TestI9_10TopFloorDefenseRequiredNative(t *testing.T) {
 	if catalog.Frozen(time.Now()) {
 		t.Skip("21:00-21:30 GMT+8 settlement freeze admits no START")
 	}
+
+	denied := presetlessPlayer(t, pool, server)
+	deniedView, err := service.Load(ctx, denied, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	deniedTickets := func() int64 {
+		return scalar(t, pool, `SELECT tickets_left FROM top_floor_players WHERE player_id=$1`, int64(denied.PlayerID))
+	}
+	if _, err = service.Start(ctx, denied, app.StartCommand{Formation: []int64{1}, Enemy: deniedView.Enemies[0].Occupant.TableID()}, op()); !errors.Is(err, d.ErrDefenseRequired) {
+		t.Fatalf("attack without an owned preset girl: %v", err)
+	}
+	if deniedTickets() != 5 || scalar(t, pool, `SELECT count(*) FROM top_floor_fights WHERE challenger_id=$1`, int64(denied.PlayerID)) != 0 ||
+		scalar(t, pool, `SELECT fights FROM top_floor_players WHERE player_id=$1`, int64(denied.PlayerID)) != 0 ||
+		scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(denied.PlayerID)) != deniedView.Rank {
+		t.Fatalf("refused admission spent or moved state: tickets=%d rank=%d", deniedTickets(), scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(denied.PlayerID)))
+	}
+
 	view, err := service.Load(ctx, actor, op())
 	if err != nil {
 		t.Fatal(err)
 	}
-	enemy := view.Enemies[0]
-	command := app.StartCommand{Formation: []int64{hero.PartnerID}, Enemy: enemy.Occupant.TableID()}
+	command := app.StartCommand{Formation: []int64{hero.PartnerID}, Enemy: view.Enemies[0].Occupant.TableID()}
 	tickets := func() int64 {
 		return scalar(t, pool, `SELECT tickets_left FROM top_floor_players WHERE player_id=$1`, int64(actor.PlayerID))
 	}
-	if _, err = service.Start(ctx, actor, command, op()); !errors.Is(err, d.ErrDefenseRequired) {
-		t.Fatalf("attack without a saved defense: %v", err)
-	}
-	if tickets() != 5 || scalar(t, pool, `SELECT count(*) FROM top_floor_fights WHERE challenger_id=$1`, int64(actor.PlayerID)) != 0 ||
-		scalar(t, pool, `SELECT fights FROM top_floor_players WHERE player_id=$1`, int64(actor.PlayerID)) != 0 ||
-		scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(actor.PlayerID)) != view.Rank {
-		t.Fatalf("refused admission spent or moved state: tickets=%d rank=%d", tickets(), scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(actor.PlayerID)))
-	}
-
-	if err = service.SaveDefense(ctx, actor, []int64{hero.PartnerID}, 0, op()); err != nil {
-		t.Fatal(err)
-	}
 	fight, err := service.Start(ctx, actor, command, op())
 	if err != nil || fight.Report == nil || tickets() != 4 {
-		t.Fatalf("saved defense must admit: report=%d tickets=%d err=%v", len(fight.Report), tickets(), err)
+		t.Fatalf("preset defense must admit: report=%d tickets=%d err=%v", len(fight.Report), tickets(), err)
 	}
 	replay, err := service.Start(ctx, actor, command, op())
 	if err != nil || string(replay.Report) != string(fight.Report) || replay.Win != fight.Win || tickets() != 4 ||
