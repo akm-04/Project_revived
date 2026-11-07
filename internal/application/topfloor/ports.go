@@ -13,6 +13,8 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/publicstats"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -97,6 +99,12 @@ type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+// HeroPower is the canonical public Hero force the stock enemy board reads from
+// each hero row instead of recomputing it.
+type HeroPower interface {
+	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+}
+
 type Directory interface {
 	ServerMaximumLevelTx(context.Context, tx.Queryer, identity.LogicalServerID) (int64, error)
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
@@ -128,6 +136,7 @@ type Service struct {
 	Combat       Combat
 	Heroes       Roster
 	Pets         Roster
+	HeroPower    HeroPower
 	Directory    Directory
 	Guilds       Guilds
 	Facts        Facts

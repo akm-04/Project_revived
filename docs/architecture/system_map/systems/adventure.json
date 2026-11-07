@@ -291,6 +291,7 @@
   ],
   "unit": [
    "observer_test.go",
+   "reads_test.go",
    "solo_test.go"
   ]
  }

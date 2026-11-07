@@ -173,7 +173,14 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 	return badHero("unsupported_one_on_one_mid")
 }
 
+// oneOnOneRankChangedError is stock message 35026 ("The ranking has changed,
+// please refresh and challenge again"), shown by the shared Backend error toast.
+const oneOnOneRankChangedError = 35026
+
 func failOneOnOne(err error) httpedge.Response {
+	if errors.Is(err, d.ErrOfferStale) {
+		return conflictRefusal(oneOnOneRankChangedError)
+	}
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "one_on_one_request_refused"}}
 	}

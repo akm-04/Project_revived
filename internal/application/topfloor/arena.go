@@ -5,15 +5,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
 	"time"
 
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/publicstats"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -311,8 +317,56 @@ func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, ser
 	}
 	view.Wins = p.Wins
 	view.Heroes, view.Pet, err = s.team(c, q, o.Player, p.Defense, p.DefensePet, at)
+	if err != nil {
+		return view, err
+	}
+	if err = s.fillHeroForce(c, q, o.Player, view.Heroes, at); err != nil {
+		return d.Display{}, err
+	}
 	view.Force = teamForce(view.Heroes)
-	return view, err
+	return view, nil
+}
+
+// fillHeroForce adds the canonical public force to each defended hero row. The
+// stock enemy board reads row.force instead of recomputing it.
+func (s Service) fillHeroForce(c context.Context, q tx.Queryer, owner identity.PlayerID, heroes []map[string]any, at time.Time) error {
+	if s.HeroPower == nil || len(heroes) == 0 {
+		return nil
+	}
+	// The stock board read runs on the fresh pool outside a transaction; force
+	// is projected only where the owner read already holds a transaction.
+	raw, ok := q.(tx.Tx)
+	if !ok {
+		return nil
+	}
+	revision, err := s.Content.ActiveRevision(c, q)
+	if err != nil {
+		return err
+	}
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
+	if err != nil {
+		return err
+	}
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: raw, Operation: operation.Context{ID: ids.UUID{15: 1}, StartedAt: at.UTC(), Policies: policies}, Attempt: 1, Options: tx.Options{Isolation: tx.Serializable}}, revision, at)
+	if err != nil {
+		return err
+	}
+	for _, row := range heroes {
+		partnerID, _ := row["partner_id"].(int64)
+		if partnerID <= 0 {
+			continue
+		}
+		result, err := s.HeroPower.HeroTx(c, scope, character.HeroRef{PlayerID: owner, PartnerID: partnerID}, publicstats.View{Kind: publicstats.Self, Viewer: owner})
+		if err != nil {
+			return err
+		}
+		force := math.Round(result.Stats.Force)
+		if math.IsNaN(force) || math.IsInf(force, 0) || force < 0 || force > 100000000000 {
+			return d.ErrUnavailable
+		}
+		row["force"] = int64(force)
+	}
+	return nil
 }
 
 // team reads the owner's current roster rows for the given heroes and pet.

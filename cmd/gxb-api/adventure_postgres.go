@@ -58,7 +58,7 @@ func (o adventureOpponents) RobotOpponentTx(c context.Context, q tx.Queryer, ord
 	if err != nil || !found {
 		return appadventure.Opponent{}, found, err
 	}
-	return appadventure.Opponent{Heroes: robot.Heroes}, true, nil
+	return appadventure.Opponent{Name: robot.Name, Level: robot.Level, Heroes: robot.Heroes}, true, nil
 }
 
 // adventureWakeup emits the commit-coupled wakeup that carries notices 33/34.

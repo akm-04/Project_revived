@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -150,5 +151,12 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 	}
 	if f.calls != before {
 		t.Fatal("invalid request reached the owner")
+	}
+}
+
+func TestOneOnOneStaleOfferIsRankChangedConflict(t *testing.T) {
+	response := failOneOnOne(fmt.Errorf("moved: %w", d.ErrOfferStale))
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(oneOnOneRankChangedError) {
+		t.Fatalf("stale offer response=%+v", response)
 	}
 }

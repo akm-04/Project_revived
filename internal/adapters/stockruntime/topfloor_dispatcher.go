@@ -31,7 +31,7 @@ type TopFloorPort interface {
 	Records(context.Context, identity.ActorContext) ([]app.RecordView, error)
 	Report(context.Context, string) ([]byte, error)
 	RecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, d.Record, error)
-	Formation(context.Context, identity.ActorContext, int64) (d.Display, error)
+	Formation(context.Context, identity.ActorContext, int64, operation.Context) (d.Display, error)
 }
 
 type TopFloorDispatcher struct {
@@ -172,7 +172,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p, "other_player_id") || !ok {
 			return badHero("invalid_top_floor_parameter")
 		}
-		v, err := t.Service.Formation(ctx, a, id)
+		v, err := t.Service.Formation(ctx, a, id, op)
 		if err != nil {
 			return failTopFloor(err)
 		}

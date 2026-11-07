@@ -70,6 +70,15 @@ func (h Hero) AddSourceEXP(amount, maxLevel int64, thresholds []HeroExpThreshold
 	if h.Exp > capExp {
 		return Hero{}, errors.New("character hero: Hero EXP exceeds current source-qualified max")
 	}
+	// Stored EXP is cumulative. A legacy row below totalExp(level-1) is repaired
+	// on its next write so every writer persists the source floor.
+	floorExp := int64(0)
+	if h.Level > 1 {
+		floorExp = thresholds[h.Level-2].TotalExp
+	}
+	if h.Exp < floorExp {
+		h.Exp = floorExp
+	}
 	nextExp := h.Exp
 	if amount > math.MaxInt64-nextExp {
 		nextExp = capExp
