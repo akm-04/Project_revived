@@ -701,6 +701,9 @@
    "guildrental": [
     "NewTimedOperation"
    ],
+   "guildtea": [
+    "NewTimedOperation"
+   ],
    "heroevolution": [
     "Bind",
     "DecisionAt",
@@ -1199,6 +1202,7 @@
     "*DebitMaterialCostTx",
     "*FenceActorTx",
     "*ListStacksTx",
+    "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
     "DefaultProfile"
@@ -3745,10 +3749,14 @@
    ]
   },
   "guildtea": {
+   "generation": [
+    "NewTimedOperation"
+   ],
    "i5": [
     "*DebitMaterialCostTx",
     "*FenceActorTx",
     "*ListStacksTx",
+    "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
     "DefaultProfile"

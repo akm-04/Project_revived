@@ -1016,7 +1016,7 @@
   },
   {
    "callees": 5,
-   "callers": 55,
+   "callers": 56,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1087,7 +1087,7 @@
    "tables": 0
   },
   {
-   "callees": 6,
+   "callees": 7,
    "callers": 0,
    "mids": 4,
    "name": "guildtea",

@@ -64,7 +64,7 @@ func guildFixture(t *testing.T, p *pg.Pool, leader identity.ActorContext, member
 	now := time.Now().UTC().Add(-time.Hour)
 	var gid int64
 	if err := p.QueryRow(ctx, `INSERT INTO guilds(guild_id,logical_server_id,name,icon,icon_frame,des,apply_type,min_allow_level,vitality,policy_revision,state_version,created_at,updated_at)
-		SELECT $1*1000000+n,$1,'n'||n,20010001,0,'',0,1,20000,'native-fixture',1,$2,$2 FROM (SELECT COALESCE(MAX(guild_id%1000000),0)+1 AS n FROM guilds WHERE logical_server_id=$1) next RETURNING guild_id`, server, now).Scan(&gid); err != nil {
+		SELECT $1::bigint*1000000+n,$1,'n'||n,20010001,0,'',0,1,20000,'native-fixture',1,$2,$2 FROM (SELECT COALESCE(MAX(guild_id%1000000),0)+1 AS n FROM guilds WHERE logical_server_id=$1) next RETURNING guild_id`, server, now).Scan(&gid); err != nil {
 		t.Fatal(err)
 	}
 	exec(t, p, `INSERT INTO guild_memberships(player_id,guild_id,role,joined_at,membership_version,state_version,updated_at)VALUES($1,$2,1,$3,1,1,$3)`, int64(leader.PlayerID), gid, now)
@@ -336,7 +336,7 @@ func (a teaAuthority) ResolveGameplayBearer(_ context.Context, token string, _ t
 
 func teaService(p *pg.Pool) guildtea.Service {
 	values := i5store.Store{Queryer: p}
-	owner := activityOwner(p)
+	owner := missionOwner(p)
 	teaPolicy, err := guildteapolicy.LoadBuiltin()
 	if err != nil {
 		panic(err)
