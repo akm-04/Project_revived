@@ -253,6 +253,25 @@ func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref charac
 	return s.heroTx(ctx, sc, ref, view, 0, 0, 0)
 }
 
+// RobotForceTx evaluates one unowned source hero template with the same stat
+// engine owned heroes use. A mode robot has no owner facts, so only the source
+// template, its rank-band level/star/colour and its equipped slots contribute.
+func (s Service) RobotForceTx(ctx context.Context, sc ca.CoherentReadScope, tableID, level, star, color int64, equipFlags []int64) (Result, error) {
+	var out Result
+	if !scopeValid(sc) || tableID <= 0 {
+		return out, ErrUnqualified
+	}
+	m, err := s.materializer(ctx, sc)
+	if err != nil {
+		return out, err
+	}
+	force, err := m.RobotHeroForce("NormalHero", tableID, int(level), int(star), int(color), equipFlags)
+	if err != nil {
+		return out, err
+	}
+	return Result{Stats: rules.Result{Force: force}, Profile: "C3B_HERO_CANONICAL_CONDITIONAL_V1"}, nil
+}
+
 // ScaledHeroTx evaluates the same canonical hero at an overridden level, star
 // and colour. The observed owned hero still authorizes the read; only the stat
 // snapshot changes, so a scaled projection uses the one force formula.
