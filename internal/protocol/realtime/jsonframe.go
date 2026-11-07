@@ -14,7 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/limits"
 )
 
-// WebSocket frames carry the same MID and value tree as the TCP codec in a
+// JSON realtime frames carry the same MID and value tree as TCP frames in a
 // JSON envelope: {"mid": <number>, "data": <value>}.
 var ErrMalformedJSONFrame = errors.New("malformed realtime JSON frame")
 
