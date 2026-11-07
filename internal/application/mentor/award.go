@@ -35,6 +35,21 @@ func (service Service) Claim(ctx context.Context, actor identity.ActorContext, m
 	}
 	var body map[string]any
 	err = service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+		players := []identity.PlayerID{actor.PlayerID}
+		if missionID == catalog.Rules.FinishMissionID {
+			existing, err := service.Store.ReadRelationshipsTx(ctx, t, actor.PlayerID, actor.LogicalServerID)
+			if err != nil {
+				return err
+			}
+			for _, relation := range existing {
+				if relation.Student == actor.PlayerID {
+					players = append(players, relation.Mentor)
+				}
+			}
+		}
+		if err := lockPlayerRoots(ctx, service.Players, t, actor.LogicalServerID, players...); err != nil {
+			return err
+		}
 		level, err := playerLevel(ctx, service.Directory, t, actor.PlayerID)
 		if err != nil {
 			return err
@@ -223,6 +238,9 @@ func (service Service) Exam(ctx context.Context, actor identity.ActorContext, is
 	}
 	var body map[string]any
 	err = service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+		if err := lockPlayerRoots(ctx, service.Players, t, actor.LogicalServerID, actor.PlayerID); err != nil {
+			return err
+		}
 		_, found, err := service.Store.LockExamReceiptTx(ctx, t, actor.PlayerID, mission.ID)
 		if err != nil {
 			return err
