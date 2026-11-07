@@ -4,15 +4,14 @@ import (
 	"context"
 	"encoding/hex"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
-	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 )
 
 // Retain this version when later policies are introduced: historical receipts
 // must continue to validate against the rule that produced them.
-const RosterMetricPolicy = "C4C_PRIVATE_CURRENT_ROSTER_V1"
-const RosterMetricSemantics = "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1"
+const RosterMetricPolicy = ca.RosterMetricPolicy
+const RosterMetricSemantics = ca.RosterMetricSemantics
 
 func isRosterMetric(id int64) bool { return id == 1001 || id == 1002 || id == 1008 || id == 1009 }
 func bindRosterPolicy(o operation.Context) (operation.Context, error) {
@@ -48,30 +47,13 @@ func (p CanonicalMetricProvider) rosterMetrics(c context.Context, sc ca.Coherent
 		if pop.PlayerID != r.PlayerID || pop.Family != family || pop.Revision != r.ContentRevision || !pop.ObservedAt.Equal(r.ObservedAt) || pop.RootVersion <= 0 {
 			return nil, ErrContent
 		}
-		origins, instances := map[int64]bool{}, map[int64]bool{}
-		var count, stars, awaken int64
-		for _, row := range pop.Rows {
-			maxStar := int64(character.MaxHeroStar)
-			if family == "Pet" {
-				maxStar = character.MaxPetStar
-			}
-			if row.InstanceID <= 0 || row.OriginTableID <= 0 || row.TableID <= 0 || row.Version <= 0 || row.Star < 1 || row.Star > maxStar || row.BeforeAwaken < 0 || (family == "Pet" && row.BeforeAwaken != 0) || origins[row.OriginTableID] || instances[row.InstanceID] {
-				return nil, ErrContent
-			}
-			origins[row.OriginTableID] = true
-			instances[row.InstanceID] = true
-			if count >= 9007199254740991 || stars > 9007199254740991-row.Star {
-				return nil, ErrContent
-			}
-			count++
-			stars += row.Star
-			if row.BeforeAwaken > 0 {
-				awaken++
-			}
+		summary, err := pop.Summary()
+		if err != nil {
+			return nil, ErrContent
 		}
-		values := map[int64]int64{1001: count, 1008: stars, 1009: awaken}
+		values := map[int64]int64{1001: summary.OwnedCount, 1008: summary.StarCount, 1009: summary.AwakenedCount}
 		if family == "Pet" {
-			values = map[int64]int64{1002: count}
+			values = map[int64]int64{1002: summary.OwnedCount}
 		}
 		for id, value := range values {
 			v := MetricObservation{Owner: "Character" + family, PlayerID: r.PlayerID, FieldID: id, Value: value, Semantics: RosterMetricSemantics, SourceVersion: pop.RootVersion, PopulationDigest: pop.Digest(), PrivatePolicy: RosterMetricPolicy, ContentRevision: r.ContentRevision, ObservedAt: r.ObservedAt.UTC()}

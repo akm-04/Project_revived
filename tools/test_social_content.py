@@ -51,7 +51,7 @@ class SocialCompilerTests(unittest.TestCase):
             self.assertIn(path, self.blobs)
 
         catalog = self.build()
-        self.assertEqual(catalog['schema_version'], 1)
+        self.assertEqual(catalog['schema_version'], 2)
         self.assertEqual(catalog['exchange_limit'], 10)
 
         products = catalog['exchange_products']
@@ -333,6 +333,25 @@ class SocialCompilerTests(unittest.TestCase):
             with self.subTest(table=table_name):
                 with self.assertRaises(gen.CompileError):
                     self.build(self.parse_modified(table_name, mutate))
+
+
+
+    def test_source_recall_rules_are_explicit(self):
+        self.assertEqual(self.build()['recall_rules'], dict(offline_days=7, task_days=3, max_active_tasks=3))
+
+    def test_bad_recall_settings_refused(self):
+        for key in ('friend_recall_days', 'friend_recall_task_time', 'friend_recall_task_limit'):
+            for kind in ('missing', 'duplicate', 'mistyped', 'drifted'):
+                def mutate(rows, key=key, kind=kind):
+                    selected = next(row for row in rows if row['key'] == key)
+                    if kind == 'missing':
+                        rows.remove(selected)
+                    elif kind == 'duplicate':
+                        rows.append(copy.deepcopy(selected))
+                    else:
+                        selected['value'] = 'invalid' if kind == 'mistyped' else '999'
+                with self.subTest(key=key, kind=kind), self.assertRaises(ValueError):
+                    self.build(self.parse_modified('misc', mutate))
 
 
 if __name__ == '__main__':

@@ -550,7 +550,8 @@
    "playerdisplay",
    "publicshowcase",
    "social17upgrade",
-   "socialactivation"
+   "socialactivation",
+   "socialprojection"
   ],
   "scenarios_naming": [
    "i9_3_fresh_lobby.json",

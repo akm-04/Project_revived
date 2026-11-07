@@ -54,6 +54,23 @@ type Player struct {
 	OutgoingPending bool
 	IsSent          bool
 }
+
+type RecallDoing struct {
+	PlayerID      int64  `json:"player_id"`
+	PlayerName    string `json:"player_name"`
+	RecallingTime int64  `json:"recalling_time"`
+}
+
+type RecallDone struct {
+	PlayerID      int64  `json:"player_id"`
+	PlayerName    string `json:"player_name"`
+	Lev           int64  `json:"lev"`
+	CurLev        int64  `json:"cur_lev"`
+	PartnerNum    int64  `json:"partner_num"`
+	CurPartnerNum int64  `json:"cur_partner_num"`
+	Charge        int64  `json:"charge"`
+	CurCharge     int64  `json:"cur_charge"`
+}
 type Requested struct {
 	Player  Player
 	Message string
@@ -76,5 +93,10 @@ type Result struct {
 	Friends, Blocks, Players []Player
 	Requests                 []Requested
 	Notices                  []Notified
+	RecallDoing              []RecallDoing
+	RecallDone               []RecallDone
+	RecallGot                []int64
+	RecallAwarded            []int64
+	Recalling                map[int64]bool
 	SendCount, ReceiveCount  int
 }

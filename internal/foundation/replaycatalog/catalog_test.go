@@ -112,3 +112,26 @@ func TestI9MissionAndChestReceiptFamiliesAreClassified(t *testing.T) {
 		t.Fatalf("unclassified mission receipt operations %v", want)
 	}
 }
+
+func TestSocialExchangeAndRecallReceiptFamiliesAreClassified(t *testing.T) {
+	expected := map[string]string{"socialexchange": "gxb.social.exchange.v1", "socialrecall": "gxb.social.recall.start.v1"}
+	for _, family := range Enabled {
+		schema, found := expected[family.Domain]
+		if !found {
+			continue
+		}
+		if family.IdentityClass != CallerSemantic || family.ReceiptSchema != schema || family.Residual == "" {
+			t.Fatalf("invalid social replay family: %#v", family)
+		}
+		if family.Domain == "socialexchange" && (!family.Consumptive || family.Operation != "exchange") {
+			t.Fatal(family)
+		}
+		if family.Domain == "socialrecall" && family.Operation != "start" {
+			t.Fatal(family)
+		}
+		delete(expected, family.Domain)
+	}
+	if len(expected) != 0 {
+		t.Fatal("unclassified social receipt families", expected)
+	}
+}

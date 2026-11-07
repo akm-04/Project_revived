@@ -5383,6 +5383,48 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00119_i9_10e_exchange_tuning.sql"
+    },
+    "social_recall_tasks": {
+      "owner": "socialrecall",
+      "allowed_query_owners": [
+        "socialrecall"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00123_i9_10e_social_recall.sql"
+    },
+    "player_login_observations": {
+      "owner": "identity/logicalserver/bootstrap",
+      "migration": "migrations/00122_i9_10e_player_login_observations.sql",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/i4store/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/i4store/"
+      ],
+      "write_exceptions": []
+    },
+    "social_recall_awards": {
+      "owner": "socialrecall",
+      "allowed_query_owners": [
+        "socialrecall"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/socialrecallstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00124_i9_10e_social_recall_awards.sql"
     }
   }
 }

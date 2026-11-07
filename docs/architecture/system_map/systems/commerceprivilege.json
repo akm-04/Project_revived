@@ -142,7 +142,8 @@
  "tests": {
   "integration": [
    "missions",
-   "playerdisplay"
+   "playerdisplay",
+   "socialprojection"
   ],
   "scenarios_naming": [
    "i9_10g_charge.json"
