@@ -30,12 +30,14 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/achievement"
@@ -238,7 +240,8 @@ func run() error {
 		return err
 	}
 	channelService := channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{},
-		Owners: channelchat.Owners{Illusion: channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
+		Owners: channelchat.Owners{Arena: channelchatread.ArenaReportReader{TopFloor: topfloorstore.Store{}, Arena: arenastore.Store{}, League: leaguestore.Store{}, Content: contentstore.Store{}},
+			Illusion:          channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
 			AdventureIllusion: channelchatread.AdventureIllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
 			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}},
 			Defense:           channelchatread.DefenseRoomReader{Store: sharedroomstore.Store{}}}}
