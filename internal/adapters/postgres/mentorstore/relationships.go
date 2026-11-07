@@ -16,10 +16,6 @@ import (
 
 type Store struct{}
 
-func validSnapshot(scope tx.Scope) bool {
-	return scope.Tx != nil && (scope.Options.Isolation == tx.RepeatableRead || scope.Options.Isolation == tx.Serializable)
-}
-
 const selectActiveRelationships = `SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL`
 
 type relationshipJSON struct {
