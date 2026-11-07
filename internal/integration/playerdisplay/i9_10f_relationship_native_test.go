@@ -41,14 +41,14 @@ func TestMentorRelationshipSlotsRollbackAndHistory(t *testing.T) {
 	if _, err := (i4store.PlayerRootLocker{}).LockPlayerRootsTx(ctx, scope.Tx, first.LogicalServerID, []identity.PlayerID{second.PlayerID, first.PlayerID}); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.InsertRelationshipTx(ctx, scope, firstPair); err != nil {
+	if err := store.InsertRelationshipTx(ctx, scope.Tx, firstPair); err != nil {
 		t.Fatal(err)
 	}
 	if err := scope.Tx.Rollback(ctx); err != nil {
 		t.Fatal(err)
 	}
 	scope = begin()
-	active, err := store.ActiveRelationshipsTx(ctx, scope, first.PlayerID, first.LogicalServerID)
+	active, err := store.ReadRelationshipsTx(ctx, scope.Tx, first.PlayerID, first.LogicalServerID)
 	if err != nil || len(active) != 0 {
 		t.Fatal("rollback", active, err)
 	}
@@ -58,7 +58,7 @@ func TestMentorRelationshipSlotsRollbackAndHistory(t *testing.T) {
 		if _, err := (i4store.PlayerRootLocker{}).LockPlayerRootsTx(ctx, scope.Tx, record.Server, []identity.PlayerID{record.Student, record.Mentor}); err != nil {
 			t.Fatal(err)
 		}
-		err := store.InsertRelationshipTx(ctx, scope, record)
+		err := store.InsertRelationshipTx(ctx, scope.Tx, record)
 		if !wantSuccess {
 			if tx.SQLState(err) != "23505" {
 				t.Fatal("expected active-slot uniqueness refusal", err)
@@ -80,38 +80,50 @@ func TestMentorRelationshipSlotsRollbackAndHistory(t *testing.T) {
 	secondPair := recordFor(second.PlayerID, third.PlayerID)
 	insert(secondPair, true)
 	scope = begin()
-	active, err = store.ActiveRelationshipsTx(ctx, scope, second.PlayerID, second.LogicalServerID)
+	active, err = store.ReadRelationshipsTx(ctx, scope.Tx, second.PlayerID, second.LogicalServerID)
 	if err != nil || len(active) != 2 {
 		t.Fatal("dual-role slots", len(active), err)
 	}
 	_ = scope.Tx.Rollback(ctx)
 	scope = begin()
-	if err = store.EndRelationshipTx(ctx, scope, firstPair, at.Add(time.Hour)); err != nil {
+	if err = store.EndRelationshipTx(ctx, scope.Tx, firstPair, at.Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 	if err = scope.Tx.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
 	scope = begin()
-	if err = store.EndRelationshipTx(ctx, scope, firstPair, at.Add(2*time.Hour)); !errors.Is(err, mentor.ErrRelationshipConflict) {
+	if err = store.EndRelationshipTx(ctx, scope.Tx, firstPair, at.Add(2*time.Hour)); !errors.Is(err, mentor.ErrRelationshipConflict) {
 		t.Fatal("stale end", err)
 	}
 	_ = scope.Tx.Rollback(ctx)
-	insert(recordFor(first.PlayerID, second.PlayerID), true)
+	reestablished := recordFor(first.PlayerID, second.PlayerID)
+	insert(reestablished, true)
 	var history int
 	if err = database.QueryRow(ctx, "SELECT count(*) FROM mentor_relations WHERE mentor_id=$1", int64(first.PlayerID)).Scan(&history); err != nil || history != 2 {
 		t.Fatal("history not retained", history, err)
+	}
+	var endedIdentifier, endedRevision, endedPolicy string
+	var endedAccepted, endedAt time.Time
+	var endedVersion int64
+	if err = database.QueryRow(ctx, "SELECT relation_id::text,content_revision,policy_version,accepted_at,ended_at,state_version FROM mentor_relations WHERE relation_id=$1", firstPair.ID.String()).Scan(&endedIdentifier, &endedRevision, &endedPolicy, &endedAccepted, &endedAt, &endedVersion); err != nil {
+		t.Fatal(err)
+	}
+	if endedIdentifier != firstPair.ID.String() || endedRevision != firstPair.ContentRevision || endedPolicy != firstPair.PolicyVersion || !endedAccepted.Equal(firstPair.AcceptedAt) || endedAt.Before(firstPair.AcceptedAt) || endedVersion != 2 {
+		t.Fatal("ended row lost producer fields", endedIdentifier, endedRevision, endedPolicy, endedAccepted, endedAt, endedVersion)
+	}
+	if reestablished.ID == firstPair.ID {
+		t.Fatal("re-established relation reused the history id")
 	}
 	readOnly, err := database.Begin(ctx, tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer readOnly.Rollback(ctx)
-	readScope := tx.Scope{Tx: readOnly, Options: tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}}
-	if active, err = store.ActiveRelationshipsTx(ctx, readScope, second.PlayerID, second.LogicalServerID); err != nil || len(active) != 2 {
+	if active, err = store.ReadRelationshipsTx(ctx, readOnly, second.PlayerID, second.LogicalServerID); err != nil || len(active) != 2 {
 		t.Fatal("read-only snapshot", active, err)
 	}
-	if err = store.InsertRelationshipTx(ctx, readScope, recordFor(third.PlayerID, first.PlayerID)); !errors.Is(err, mentor.ErrRelationship) {
+	if err = store.InsertRelationshipTx(ctx, readOnly, recordFor(third.PlayerID, first.PlayerID)); !errors.Is(err, mentor.ErrRelationship) {
 		t.Fatal("read-only write admitted", err)
 	}
 }
@@ -136,7 +148,7 @@ func TestMentorOverlappingPairWaitsOnCanonicalPlayerRoot(t *testing.T) {
 	if _, err = (i4store.PlayerRootLocker{}).LockPlayerRootsTx(ctx, firstTransaction, teacher.LogicalServerID, []identity.PlayerID{firstStudent.PlayerID, teacher.PlayerID}); err != nil {
 		t.Fatal(err)
 	}
-	if err = (mentorstore.Store{}).InsertRelationshipTx(ctx, tx.Scope{Tx: firstTransaction, Options: options}, firstRecord); err != nil {
+	if err = (mentorstore.Store{}).InsertRelationshipTx(ctx, firstTransaction, firstRecord); err != nil {
 		t.Fatal(err)
 	}
 	competitor, err := database.Begin(ctx, options)
@@ -152,7 +164,7 @@ func TestMentorOverlappingPairWaitsOnCanonicalPlayerRoot(t *testing.T) {
 	go func() {
 		_, failure := (i4store.PlayerRootLocker{}).LockPlayerRootsTx(ctx, competitor, teacher.LogicalServerID, []identity.PlayerID{secondStudent.PlayerID, teacher.PlayerID})
 		if failure == nil {
-			failure = (mentorstore.Store{}).InsertRelationshipTx(ctx, tx.Scope{Tx: competitor, Options: options}, secondRecord)
+			failure = (mentorstore.Store{}).InsertRelationshipTx(ctx, competitor, secondRecord)
 		}
 		_ = competitor.Rollback(ctx)
 		result <- failure
@@ -160,7 +172,7 @@ func TestMentorOverlappingPairWaitsOnCanonicalPlayerRoot(t *testing.T) {
 	observed := false
 	deadline := time.Now().Add(3 * time.Second)
 	for time.Now().Before(deadline) {
-		if err = database.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=$1 AND wait_event_type='Lock')", backendProcess).Scan(&observed); err != nil {
+		if err = database.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=$1 AND wait_event_type='Lock' AND query ILIKE '%FROM players%FOR UPDATE%')", backendProcess).Scan(&observed); err != nil {
 			t.Fatal(err)
 		}
 		if observed {
