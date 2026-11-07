@@ -5382,7 +5382,7 @@
         "internal/adapters/postgres/socialrecallstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00114_i9_10e_social_recall.sql"
+      "migration": "migrations/00123_i9_10e_social_recall.sql"
     },
     "player_login_observations": {
       "owner": "identity/logicalserver/bootstrap",
