@@ -227,7 +227,8 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 		t.Fatalf("841 status %d body %+v", code, body)
 	}
 	code, body = api.post(842, map[string]any{"partner_id": int64(1)})
-	if code != 200 || len(body["partner_acts"].([]any)) != 4 {
+	// Favor 100 is the [0,100] band: only act 1 is addressable.
+	if code != 200 || len(body["partner_acts"].([]any)) != 1 {
 		t.Fatalf("842 status %d body %+v", code, body)
 	}
 
@@ -262,15 +263,16 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 		t.Fatalf("840 status %d body %+v", code, body)
 	}
 	dialogs, ok := body["partner_dialogs"].([]any)
-	if !ok || len(dialogs) != 3 {
+	if !ok || len(dialogs) != 4 {
 		t.Fatalf("840 partner_dialogs %T %+v", body["partner_dialogs"], body["partner_dialogs"])
 	}
-	for index, wantID := range []int64{1, 2, 12} {
+	for index, wantID := range []int64{1, 2, 12, 13} {
 		if got := i9Number(t, dialogs[index].(map[string]any)["dialog_id"]); got != wantID {
 			t.Fatalf("840 dialog %d id %d want %d", index, got, wantID)
 		}
 	}
-	if acts, ok := body["partner_acts"].([]any); !ok || len(acts) != 4 {
+	// Favor 113 is the (100,300] band: acts 1 and 2.
+	if acts, ok := body["partner_acts"].([]any); !ok || len(acts) != 2 {
 		t.Fatalf("840 partner_acts %T %+v", body["partner_acts"], body["partner_acts"])
 	}
 	if facts := i9IntimacyFacts(t, p, actor); facts != 1 {

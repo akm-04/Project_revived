@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -556,6 +557,11 @@ func (s Service) PowerUpHero(ctx context.Context, actor identity.ActorContext, p
 		if err := s.ProgressionStore.SaveHeroStateTx(txctx, scope.Tx, next, oldVersion); err != nil {
 			return err
 		}
+		if logID, ok := lib.ColorLogID(next.Color); ok && next.Color > hero.Color {
+			if err := s.recordHeroJournalTx(txctx, scope.Tx, actor.PlayerID, next.PartnerID, logID, bound.StartedAt); err != nil {
+				return err
+			}
+		}
 		awards, err := awardsFromRestoration(grantResult)
 		if err != nil {
 			return err
@@ -676,6 +682,11 @@ func (s Service) OneClickJinjie(ctx context.Context, actor identity.ActorContext
 		}
 		if err := s.ProgressionStore.SaveHeroStateTx(txctx, scope.Tx, next, oldVersion); err != nil {
 			return err
+		}
+		if logID, ok := lib.ColorLogID(next.Color); ok && next.Color > hero.Color {
+			if err := s.recordHeroJournalTx(txctx, scope.Tx, actor.PlayerID, next.PartnerID, logID, bound.StartedAt); err != nil {
+				return err
+			}
 		}
 		awards, err := awardsFromRestoration(resources.Restoration)
 		if err != nil {

@@ -339,7 +339,8 @@
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
-  "internal/adapters/postgres/kernelstore"
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/librarystore"
  ],
  "tables": {
   "owned": [

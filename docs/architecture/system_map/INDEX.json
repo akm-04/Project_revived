@@ -898,7 +898,7 @@
    "tables": 0
   },
   {
-   "callees": 23,
+   "callees": 24,
    "callers": 15,
    "mids": 21,
    "name": "characterhero",
