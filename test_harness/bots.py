@@ -13,6 +13,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -27,6 +28,7 @@ STATE_DIRECTORY = import_legacy.STATE_DIRECTORY
 ACCOUNTS_PATH = import_legacy.ACCOUNTS_PATH
 REGION = import_legacy.REGION
 ROSTER_PATH = HARNESS_DIRECTORY / "bots.json"
+TEAM_ROLES_PATH = HARNESS_DIRECTORY / "team_roles.json"
 SCENARIO_DIRECTORY = HARNESS_DIRECTORY / "scenarios"
 CONTENT_DIRECTORY = (
     HARNESS_DIRECTORY / "backend" / "internal" / "content" / "builtin" / "generated"
@@ -133,6 +135,201 @@ def strength_key(hero):
         int(hero.get("table_id", 0)),
         int(hero.get("partner_id", 0)),
     )
+
+
+def load_team_roles():
+    return json.loads(TEAM_ROLES_PATH.read_text(encoding="utf-8"))
+
+
+def composition_score(heroes, catalogue):
+    role_tags = set()
+    damage_kinds = set()
+    hero_types = set()
+    for hero in heroes:
+        role = catalogue["role_by_hero"].get(str(int(hero["table_id"])), {})
+        role_tags.update(role.get("role_tags") or [role.get("role")])
+        damage_kinds.update(role.get("damage_kind") or [])
+        if role.get("type"):
+            hero_types.add(role["type"])
+    weights = {"tank": 4, "healer": 4, "controller": 2, "support": 2, "damage": 1}
+    return (
+        sum(weights.get(role_tag, 0) for role_tag in role_tags)
+        + len(hero_types)
+        + int("physical" in damage_kinds)
+        + int("magic" in damage_kinds)
+    )
+
+
+FORMATION_ROWS = (2, 3, 4)  # distance_type front, middle, rear
+MAXIMUM_PER_ROW = 2
+# How many equally matched catalogue teams a bot may rotate through, so cloned rosters differ.
+TEAM_VARIANT_SPREAD = 5
+
+
+def position_allows(selected, hero, catalogue):
+    def row_of(member):
+        return catalogue["role_by_hero"].get(str(int(member["table_id"])), {}).get("distance_type")
+
+    row = row_of(hero)
+    if row not in FORMATION_ROWS:
+        return False
+    counts = {formation_row: 0 for formation_row in FORMATION_ROWS}
+    for member in selected:
+        if row_of(member) in counts:
+            counts[row_of(member)] += 1
+    counts[row] += 1
+    if counts[row] > MAXIMUM_PER_ROW:
+        return False
+    slots_left = 5 - len(selected) - 1
+    empty_rows = sum(1 for count in counts.values() if count == 0)
+    return empty_rows <= slots_left
+
+
+def team_variant(login):
+    return zlib.crc32(login.casefold().encode("utf-8"))
+
+
+def team_candidate(heroes, catalogue, template, unavailable_partner_ids):
+    available = sorted(
+        (hero for hero in heroes if int(hero["partner_id"]) not in unavailable_partner_ids),
+        key=strength_key,
+        reverse=True,
+    )
+    selected = []
+    selected_partner_ids = set()
+    selected_table_ids = set()
+    matched_hero_count = 0
+    template_heroes = template["heroes"] if template else []
+    for table_id in template_heroes:
+        matching = next(
+            (
+                hero
+                for hero in available
+                if int(hero["table_id"]) == int(table_id)
+                and int(hero["partner_id"]) not in selected_partner_ids
+                and int(hero["table_id"]) not in selected_table_ids
+            ),
+            None,
+        )
+        if matching is None:
+            continue
+        selected.append(matching)
+        selected_partner_ids.add(int(matching["partner_id"]))
+        selected_table_ids.add(int(matching["table_id"]))
+        matched_hero_count += 1
+    while len(selected) < 5:
+        remaining = [
+            hero
+            for hero in available
+            if int(hero["partner_id"]) not in selected_partner_ids
+            and int(hero["table_id"]) not in selected_table_ids
+        ]
+        if not remaining:
+            return None
+        # A roster too narrow for the 1-2 per row rule still fields five girls.
+        placeable = [hero for hero in remaining if position_allows(selected, hero, catalogue)]
+        next_hero = max(
+            placeable or remaining,
+            key=lambda hero: (
+                composition_score(selected + [hero], catalogue),
+                strength_key(hero),
+            ),
+        )
+        selected.append(next_hero)
+        selected_partner_ids.add(int(next_hero["partner_id"]))
+        selected_table_ids.add(int(next_hero["table_id"]))
+    return {
+        "heroes": selected,
+        "template": template,
+        "matched_hero_count": matched_hero_count,
+    }
+
+
+def select_teams(heroes, catalogue, team_count, variant=0):
+    if team_count < 1:
+        return []
+    unique_partner_ids = {int(hero["partner_id"]) for hero in heroes}
+    if len(unique_partner_ids) < team_count * 5:
+        return []
+    selected_teams = []
+    unavailable_partner_ids = set()
+    used_template_indexes = set()
+    templates = catalogue["teams"]
+    for _ in range(team_count):
+        candidates = []
+        for template_index, template in enumerate(templates):
+            if template_index in used_template_indexes:
+                continue
+            candidate = team_candidate(heroes, catalogue, template, unavailable_partner_ids)
+            if candidate is None:
+                continue
+            candidate["template_index"] = template_index
+            candidates.append(candidate)
+        if not candidates:
+            fallback = team_candidate(heroes, catalogue, None, unavailable_partner_ids)
+            if fallback is None:
+                return []
+            candidates.append(fallback)
+        ranked = sorted(
+            candidates,
+            key=lambda candidate: (
+                candidate["matched_hero_count"],
+                {"mid": 0, "high": 1, "top": 2}.get(
+                    (candidate["template"] or {}).get("tier"), 0
+                ),
+                composition_score(candidate["heroes"], catalogue),
+                tuple(
+                    strength_key(hero)
+                    for hero in sorted(candidate["heroes"], key=strength_key, reverse=True)
+                ),
+            ),
+            reverse=True,
+        )
+        equally_matched = [
+            candidate
+            for candidate in ranked[:TEAM_VARIANT_SPREAD]
+            if candidate["matched_hero_count"] == ranked[0]["matched_hero_count"]
+        ]
+        best_team = equally_matched[(variant + len(selected_teams)) % len(equally_matched)]
+        selected_teams.append(best_team)
+        unavailable_partner_ids.update(
+            int(hero["partner_id"]) for hero in best_team["heroes"]
+        )
+        if "template_index" in best_team:
+            used_template_indexes.add(best_team["template_index"])
+    return selected_teams
+
+
+def select_pet(heroes, pets, catalogue, preferred_table_id=None, unavailable_pet_ids=None):
+    unavailable_pet_ids = unavailable_pet_ids or set()
+    available_pets = [
+        pet
+        for pet in pets
+        if int(pet.get("pet_id", 0)) > 0
+        and int(pet["pet_id"]) not in unavailable_pet_ids
+    ]
+    if not available_pets:
+        return 0
+    hero_table_ids = {int(hero["table_id"]) for hero in heroes}
+    recommendations = {
+        (int(pair["pet_id"]), int(pair["hero_id"]))
+        for pair in catalogue["source_defined_pet_recommendations"]
+    }
+    selected_pet = max(
+        available_pets,
+        key=lambda pet: (
+            int(preferred_table_id is not None and int(pet["table_id"]) == int(preferred_table_id)),
+            sum(
+                (int(pet["table_id"]), hero_table_id) in recommendations
+                for hero_table_id in hero_table_ids
+            ),
+            int(pet.get("star", 1)),
+            int(pet.get("level", 1)),
+            int(pet.get("color", 1)),
+            int(pet["pet_id"]),
+        ),
+    )
+    return int(selected_pet["pet_id"])
 
 
 def select_heroes(heroes, count, quality):
@@ -336,6 +533,24 @@ def hero_query(player_ids):
     return heroes
 
 
+def pet_query(player_ids):
+    if not player_ids:
+        return {}
+    identifiers = ",".join(str(int(player_id)) for player_id in player_ids)
+    sql = (
+        "SELECT COALESCE(json_agg(json_build_object("
+        "'player_id',p.player_id,'pet_id',p.pet_id,'table_id',p.table_id,"
+        "'star',p.star,'level',p.level,'color',p.color)),'[]'::json)::text"
+        " FROM player_pets p"
+        f" WHERE p.player_id IN ({identifiers})"
+    )
+    rows = query_json(sql) or []
+    pets = {}
+    for row in rows:
+        pets.setdefault(int(row["player_id"]), []).append(row)
+    return pets
+
+
 def login_token(login, accounts):
     account = accounts["accounts"][accounts["logins"][login.casefold()]]
     session = account.get("session") or import_legacy.ensure_session(accounts, account)
@@ -356,65 +571,50 @@ def strongest(heroes, count):
     return ordered[:count]
 
 
-def strongest_table_ids(heroes, count):
-    seen = set()
-    tables = []
-    for hero in sorted(heroes, key=strength_key, reverse=True):
-        table_id = int(hero["table_id"])
-        if table_id in seen:
-            continue
-        seen.add(table_id)
-        tables.append(table_id)
-        if len(tables) == count:
-            break
-    return tables
-
-
-def split_teams(partner_ids, team_count):
-    if team_count < 1:
-        return []
-    teams = [[] for _ in range(team_count)]
-    for index, partner_id in enumerate(partner_ids):
-        teams[index % team_count].append(partner_id)
-    if any(len(team) < 1 or len(team) > 5 for team in teams):
-        return []
-    return teams
-
-
 def top_floor_window(now):
     minute = now.hour * 60 + now.minute
     return TOP_FLOOR_FREEZE_START_MINUTE <= minute < TOP_FLOOR_FREEZE_END_MINUTE
 
 
-def enter_top_floor(token, functions, heroes, frozen):
+def enter_top_floor(token, functions, heroes, pets, catalogue, frozen, variant):
     if FUNCTION_TOP_FLOOR not in functions:
         return "closed (function 4)"
     status, body = stock_request(token, 272)
     if status != 200:
         return describe_failure(status, body)
-    partner_ids = [int(hero["partner_id"]) for hero in strongest(heroes, 5)]
-    status, body = stock_request(token, 278, {"heroIDs": partner_ids, "pet_id": 0})
+    teams = select_teams(heroes, catalogue, 1, variant)
+    if not teams:
+        return "closed (fewer than five distinct girls)"
+    team = teams[0]
+    partner_ids = [int(hero["partner_id"]) for hero in team["heroes"]]
+    preferred_pet_table_id = (team["template"] or {}).get("pet")
+    pet_id = select_pet(team["heroes"], pets, catalogue, preferred_pet_table_id)
+    status, body = stock_request(token, 278, {"heroIDs": partner_ids, "pet_id": pet_id})
     if status != 200:
         return describe_failure(status, body)
     return f"defense={len(partner_ids)}" + (" frozen" if frozen else "")
 
 
-def enter_arena(token, functions, heroes):
+def enter_arena(token, functions, heroes, pets, catalogue, variant):
     if FUNCTION_ARENA not in functions:
         return "closed (function 37)"
     status, body = stock_request(token, 768)
     if status != 200:
         return describe_failure(status, body)
-    table_ids = strongest_table_ids(heroes, 5)
-    if len(table_ids) != 5:
-        return "closed (fewer than five girls)"
-    status, body = stock_request(token, 770, {"heros": table_ids, "pet_id": 0})
+    teams = select_teams(heroes, catalogue, 1, variant)
+    if not teams:
+        return "closed (fewer than five distinct girls)"
+    team = teams[0]
+    table_ids = [int(hero["table_id"]) for hero in team["heroes"]]
+    preferred_pet_table_id = (team["template"] or {}).get("pet")
+    pet_id = select_pet(team["heroes"], pets, catalogue, preferred_pet_table_id)
+    status, body = stock_request(token, 770, {"heros": table_ids, "pet_id": pet_id})
     if status != 200:
         return describe_failure(status, body)
     return f"defense={len(table_ids)}"
 
 
-def enter_one_on_one(token, functions, heroes, now):
+def enter_one_on_one(token, functions, heroes, pets, catalogue, now, variant):
     if FUNCTION_ONE_ON_ONE not in functions:
         return "closed (function 16)"
     if now.hour >= ONE_ON_ONE_CLOSE_HOUR:
@@ -425,44 +625,68 @@ def enter_one_on_one(token, functions, heroes, now):
     team_count = len(body.get("defense") or []) if isinstance(body, dict) else 0
     if team_count < 1:
         team_count = 3
-    partner_ids = [int(hero["partner_id"]) for hero in strongest(heroes, 15)]
-    teams = split_teams(partner_ids, team_count)
+    teams = select_teams(heroes, catalogue, team_count, variant)
     if not teams:
-        return "closed (not enough girls for teams)"
-    formations = ["|".join(str(partner_id) for partner_id in team) for team in teams]
+        return "closed (not enough distinct girls for teams)"
+    formations = []
+    used_pet_ids = set()
+    for team in teams:
+        partner_ids = [int(hero["partner_id"]) for hero in team["heroes"]]
+        formation = "|".join(str(partner_id) for partner_id in partner_ids)
+        preferred_pet_table_id = (team["template"] or {}).get("pet")
+        pet_id = select_pet(
+            team["heroes"], pets, catalogue, preferred_pet_table_id, used_pet_ids
+        )
+        if pet_id:
+            formation += "@" + str(pet_id)
+            used_pet_ids.add(pet_id)
+        formations.append(formation)
     status, body = stock_request(token, 2481, {"formations": formations})
     if status != 200:
         return describe_failure(status, body)
     return f"teams={len(teams)}"
 
 
-def enter_league(token, functions, heroes):
+def enter_league(token, functions, heroes, pets, catalogue, variant):
     if FUNCTION_LEAGUE not in functions:
         return "closed (function 91)"
     status, body = stock_request(token, 2800)
     if status != 200:
         return describe_failure(status, body)
-    partner_ids = [int(hero["partner_id"]) for hero in strongest(heroes, 5)]
+    teams = select_teams(heroes, catalogue, 1, variant)
+    if not teams:
+        return "closed (fewer than five distinct girls)"
+    team = teams[0]
+    partner_ids = [int(hero["partner_id"]) for hero in team["heroes"]]
     formation = "|".join(str(partner_id) for partner_id in partner_ids)
-    status, body = stock_request(token, 2805, {"formation": formation, "pet_id": 0})
+    preferred_pet_table_id = (team["template"] or {}).get("pet")
+    pet_id = select_pet(team["heroes"], pets, catalogue, preferred_pet_table_id)
+    status, body = stock_request(
+        token, 2805, {"formation": formation, "pet_id": pet_id}
+    )
     if status != 200:
         return "closed (season): " + describe_failure(status, body)
     return f"defense={len(partner_ids)}"
 
 
-def enter_bot(login, accounts, state, heroes, modes):
+def enter_bot(login, accounts, state, heroes, pets, catalogue, modes):
     token, _ = login_token(login, accounts)
     now = datetime.now(timezone.utc)
     functions = {int(function_id) for function_id in state.get("functions") or []}
+    variant = team_variant(login)
     result = {}
     if modes is None or "top_floor" in modes:
-        result["top_floor"] = enter_top_floor(token, functions, heroes, top_floor_window(now))
+        result["top_floor"] = enter_top_floor(
+            token, functions, heroes, pets, catalogue, top_floor_window(now), variant
+        )
     if modes is None or "arena" in modes:
-        result["arena"] = enter_arena(token, functions, heroes)
+        result["arena"] = enter_arena(token, functions, heroes, pets, catalogue, variant)
     if modes is None or "one_on_one" in modes:
-        result["one_on_one"] = enter_one_on_one(token, functions, heroes, now)
+        result["one_on_one"] = enter_one_on_one(
+            token, functions, heroes, pets, catalogue, now, variant
+        )
     if modes is None or "league" in modes:
-        result["league"] = enter_league(token, functions, heroes)
+        result["league"] = enter_league(token, functions, heroes, pets, catalogue, variant)
     return result
 
 
@@ -474,18 +698,43 @@ def set_energy(player_id, amount):
     )
 
 
-def prove_battle(login, accounts, state, heroes):
-    partner_ids = [int(hero["partner_id"]) for hero in strongest(heroes, len(heroes))]
+def prove_battle(login, accounts, state, heroes, pets, catalogue):
+    ordered_heroes = strongest(heroes, len(heroes))
+    full_team_count = len(ordered_heroes) // 5
+    teams = select_teams(ordered_heroes, catalogue, full_team_count)
+    proof_groups = list(teams)
+    selected_partner_ids = {
+        int(hero["partner_id"])
+        for team in teams
+        for hero in team["heroes"]
+    }
+    remaining_heroes = [
+        hero
+        for hero in ordered_heroes
+        if int(hero["partner_id"]) not in selected_partner_ids
+    ]
+    for offset in range(0, len(remaining_heroes), 5):
+        proof_groups.append(
+            {
+                "heroes": remaining_heroes[offset : offset + 5],
+                "template": None,
+            }
+        )
     set_energy(state["player_id"], ENERGY_FOR_BATTLE_PROOF)
     token, _ = login_token(login, accounts)
     settled = 0
-    for offset in range(0, len(partner_ids), 5):
-        formation = "|".join(str(value) for value in partner_ids[offset:offset + 5])
+    for proof_group in proof_groups:
+        partner_ids = [int(hero["partner_id"]) for hero in proof_group["heroes"]]
+        formation = "|".join(str(partner_id) for partner_id in partner_ids)
+        preferred_pet_table_id = (proof_group["template"] or {}).get("pet")
+        pet_id = select_pet(
+            proof_group["heroes"], pets, catalogue, preferred_pet_table_id
+        )
         request = {
             "campaign_id": BATTLE_PROOF_CAMPAIGN,
             "campaign_type": 1,
             "formation": formation,
-            "pet_id": 0,
+            "pet_id": pet_id,
         }
         status, body = stock_request(token, 113, request)
         if status != 200:
@@ -493,14 +742,15 @@ def prove_battle(login, accounts, state, heroes):
         status, body = stock_request(token, 114, dict(request, star=3))
         if status != 200:
             fail(f"{login}: battle proof settle {formation}: {describe_failure(status, body)}")
-        settled += len(partner_ids[offset:offset + 5])
-    if settled != len(partner_ids):
-        fail(f"{login}: battle proof covered {settled} of {len(partner_ids)} scaled heroes")
+        settled += len(proof_group["heroes"])
+    if settled != len(ordered_heroes):
+        fail(f"{login}: battle proof covered {settled} of {len(ordered_heroes)} scaled heroes")
 
 
 def command_create(arguments):
     roster = load_roster()
     content = load_scaling_content()
+    catalogue = load_team_roles()
     for entry in roster:
         report = import_roster_entry(entry, content)
         print(
@@ -510,32 +760,130 @@ def command_create(arguments):
             f"refused={len(report['content_refused'])}"
         )
     accounts, states = state_query([entry["login"] for entry in roster])
-    heroes_by_player = hero_query([state["player_id"] for state in states.values()])
-    for entry in roster:
-        if not entry["overrides"].get("prove_battle"):
-            continue
-        state = states[entry["login"]]
-        heroes = heroes_by_player.get(int(state["player_id"]), [])
-        prove_battle(entry["login"], accounts, state, heroes)
-        print(f"battle-proof {entry['login']} heroes={len(heroes)} ok")
+    player_ids = [state["player_id"] for state in states.values()]
+    heroes_by_player = hero_query(player_ids)
+    proof_entries = [entry for entry in roster if entry["overrides"].get("prove_battle")]
+    if proof_entries:
+        pets_by_player = pet_query(player_ids)
+        for entry in proof_entries:
+            state = states[entry["login"]]
+            player_id = int(state["player_id"])
+            heroes = heroes_by_player.get(player_id, [])
+            pets = pets_by_player.get(player_id, [])
+            prove_battle(entry["login"], accounts, state, heroes, pets, catalogue)
+            print(f"battle-proof {entry['login']} heroes={len(heroes)} ok")
     print(f"BOTS_CREATE_PASS {len(roster)} bots")
     return 0
 
 
 def command_enter(arguments):
     roster = load_roster()
+    catalogue = load_team_roles()
     accounts, states = state_query([entry["login"] for entry in roster])
-    heroes_by_player = hero_query([state["player_id"] for state in states.values()])
+    player_ids = [state["player_id"] for state in states.values()]
+    heroes_by_player = hero_query(player_ids)
+    pets_by_player = pet_query(player_ids)
     for entry in roster:
         login = entry["login"]
         state = states[login]
-        heroes = heroes_by_player.get(int(state["player_id"]), [])
+        player_id = int(state["player_id"])
+        heroes = heroes_by_player.get(player_id, [])
+        pets = pets_by_player.get(player_id, [])
         if not heroes:
             fail(f"{login}: no heroes to field")
-        result = enter_bot(login, accounts, state, heroes, None)
+        result = enter_bot(login, accounts, state, heroes, pets, catalogue, None)
         modes = " ".join(f"{name}={value}" for name, value in result.items())
         print(f"enter {login} pid={state['player_id']} level={state['level']} {modes}")
     print(f"BOTS_ENTER_PASS {len(roster)} bots")
+    return 0
+
+
+def command_selfcheck(arguments):
+    catalogue = load_team_roles()
+    role_by_hero = catalogue.get("role_by_hero")
+    teams = catalogue.get("teams")
+    recommendations = catalogue.get("source_defined_pet_recommendations")
+    if not isinstance(role_by_hero, dict) or len(role_by_hero) != 277:
+        fail("team_roles.json has an unexpected hero role catalogue")
+    if not isinstance(teams, list) or len(teams) != 30:
+        fail("team_roles.json has an unexpected team catalogue")
+    if not isinstance(recommendations, list) or len(recommendations) != 134:
+        fail("team_roles.json has an unexpected pet recommendation catalogue")
+    for team in teams:
+        if len(team.get("heroes", [])) != 5 or team.get("tier") not in ("top", "high", "mid"):
+            fail("team_roles.json contains an invalid team entry")
+        if any(hero_id not in role_by_hero for hero_id in team["heroes"]):
+            fail("team_roles.json team references an unknown hero")
+    synthetic_heroes = [
+        {
+            "partner_id": index + 1,
+            "table_id": int(hero_table_id),
+            "star": 5,
+            "lev": 100,
+            "color": 10,
+        }
+        for index, hero_table_id in enumerate(list(role_by_hero)[:15])
+    ]
+    selected_teams = select_teams(synthetic_heroes, catalogue, 3)
+    if len(selected_teams) != 3:
+        fail("team builder did not produce three complete teams")
+    selected_partner_ids = [
+        int(hero["partner_id"])
+        for team in selected_teams
+        for hero in team["heroes"]
+    ]
+    if len(selected_partner_ids) != 15 or len(set(selected_partner_ids)) != 15:
+        fail("team builder reused a hero across teams")
+    for team in selected_teams:
+        if len(team["heroes"]) != 5 or len({int(hero["table_id"]) for hero in team["heroes"]}) != 5:
+            fail("team builder returned an incomplete or duplicate lineup")
+    by_row = {
+        formation_row: [
+            hero_table_id
+            for hero_table_id, role in role_by_hero.items()
+            if role.get("distance_type") == formation_row
+        ][:5]
+        for formation_row in FORMATION_ROWS
+    }
+    row_roster = [
+        {"partner_id": 1000 + index, "table_id": int(hero_table_id), "star": 5, "lev": 100, "color": 10}
+        for index, hero_table_id in enumerate(
+            hero_table_id for row_ids in by_row.values() for hero_table_id in row_ids
+        )
+    ]
+    for team in select_teams(row_roster, catalogue, 3):
+        rows = [role_by_hero[str(hero["table_id"])]["distance_type"] for hero in team["heroes"]]
+        if any(not 1 <= rows.count(formation_row) <= MAXIMUM_PER_ROW for formation_row in FORMATION_ROWS):
+            fail(f"team builder broke the 1-2 per row rule: {rows}")
+    catalogue_roster = []
+    for team in teams:
+        for hero_table_id in team["heroes"]:
+            if all(hero["table_id"] != int(hero_table_id) for hero in catalogue_roster):
+                catalogue_roster.append(
+                    {"partner_id": 2000 + len(catalogue_roster), "table_id": int(hero_table_id), "star": 5, "lev": 100, "color": 10}
+                )
+    first_teams = {
+        tuple(hero["table_id"] for hero in select_teams(catalogue_roster, catalogue, 1, variant)[0]["heroes"])
+        for variant in range(TEAM_VARIANT_SPREAD)
+    }
+    if len(first_teams) < 2:
+        fail("cloned rosters with different logins all field the same team")
+    preferred_table_id = int(teams[0]["pet"])
+    synthetic_pets = [
+        {"pet_id": 801, "table_id": preferred_table_id, "star": 1, "level": 1},
+        {"pet_id": 802, "table_id": preferred_table_id + 1, "star": 5, "level": 100},
+    ]
+    selected_pet_id = select_pet(
+        selected_teams[0]["heroes"], synthetic_pets, catalogue, preferred_table_id
+    )
+    if selected_pet_id != 801:
+        fail("pet selection confused pet instance IDs with table IDs")
+    second_pet_id = select_pet(
+        selected_teams[0]["heroes"], synthetic_pets, catalogue, unavailable_pet_ids={801}
+    )
+    if second_pet_id != 802 or select_pet([], [], catalogue) != 0:
+        fail("pet selection failed ownership or empty-roster checks")
+    print("BOTS_SELFCHECK_PASS teams=3 pets=2 network=none database=none")
     return 0
 
 
@@ -598,6 +946,7 @@ def command_scenario(arguments):
     path = SCENARIO_DIRECTORY / f"{name}.json"
     scenario = json.loads(path.read_text(encoding="utf-8"))
     content = load_scaling_content()
+    catalogue = load_team_roles()
     logins = []
     for entry in scenario.get("players") or []:
         report = import_roster_entry(entry, content)
@@ -608,12 +957,24 @@ def command_scenario(arguments):
         create_born_player(born_accounts, born["login"], born["display_name"])
     if logins:
         accounts, states = state_query(logins)
-        heroes_by_player = hero_query([state["player_id"] for state in states.values()])
+        player_ids = [state["player_id"] for state in states.values()]
+        heroes_by_player = hero_query(player_ids)
+        pets_by_player = pet_query(player_ids)
         for entry in scenario["players"]:
             login = entry["login"]
             state = states[login]
-            heroes = heroes_by_player.get(int(state["player_id"]), [])
-            result = enter_bot(login, accounts, state, heroes, scenario.get("modes"))
+            player_id = int(state["player_id"])
+            heroes = heroes_by_player.get(player_id, [])
+            pets = pets_by_player.get(player_id, [])
+            result = enter_bot(
+                login,
+                accounts,
+                state,
+                heroes,
+                pets,
+                catalogue,
+                scenario.get("modes"),
+            )
             modes = " ".join(f"{mode}={value}" for mode, value in result.items())
             print(f"scenario {name}: enter {login} {modes}")
     print(f"SCENARIO_PASS {name}")
@@ -622,7 +983,7 @@ def command_scenario(arguments):
 
 def main(arguments):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["create", "enter", "status", "scenario"])
+    parser.add_argument("command", choices=["create", "enter", "status", "scenario", "selfcheck"])
     parser.add_argument("name", nargs="?")
     parsed = parser.parse_args(arguments)
     try:
@@ -632,6 +993,8 @@ def main(arguments):
             return command_enter(parsed)
         if parsed.command == "status":
             return command_status(parsed)
+        if parsed.command == "selfcheck":
+            return command_selfcheck(parsed)
         return command_scenario([] if parsed.name is None else [parsed.name])
     except BotFailure as error:
         print(f"bots: {error}", file=sys.stderr)

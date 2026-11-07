@@ -1,0 +1,4736 @@
+{
+  "source": {
+    "path": "/home/akm/Chatgpt/EOL_Game/tmp/teamcombo/team_catalog.json",
+    "generation_date": "2026-11-07"
+  },
+  "role_by_hero": {
+    "10001001": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001002": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001003": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001004": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001005": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001006": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001007": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001008": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "support"
+      ]
+    },
+    "10001009": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller"
+      ]
+    },
+    "10001010": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001011": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001012": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001013": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001014": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001015": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001016": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001017": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001018": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001019": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001020": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001021": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001022": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001023": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001024": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001025": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001026": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001027": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001028": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001029": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001030": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001031": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001032": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001033": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001034": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001035": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001036": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001037": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001038": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001039": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001040": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001041": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "physical_burst"
+      ]
+    },
+    "10001042": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001043": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001044": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001045": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001046": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001047": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001048": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "physical_burst"
+      ]
+    },
+    "10001049": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001050": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001051": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001052": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001053": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001054": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001055": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001056": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001057": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank"
+      ]
+    },
+    "10001058": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001059": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001060": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001061": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001062": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001063": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001064": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001065": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001066": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001067": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001068": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001069": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001070": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001071": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001072": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001073": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001074": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "support"
+      ]
+    },
+    "10001075": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001076": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001077": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001078": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "physical_burst"
+      ]
+    },
+    "10001079": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001080": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001081": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller"
+      ]
+    },
+    "10001082": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001083": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001084": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "support"
+      ]
+    },
+    "10001085": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001086": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001087": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001088": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001089": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001090": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001091": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001092": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "magic_burst"
+      ]
+    },
+    "10001093": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank"
+      ]
+    },
+    "10001094": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001095": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001096": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "true"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001097": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001098": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001099": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001100": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001101": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001102": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001103": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "physical_burst"
+      ]
+    },
+    "10001104": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001105": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001106": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001107": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001108": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001109": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001110": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001111": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001112": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001113": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer"
+      ]
+    },
+    "10001114": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001115": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001116": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001117": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001118": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "support"
+      ]
+    },
+    "10001119": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001120": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001121": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001122": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller"
+      ]
+    },
+    "10001123": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "physical_burst"
+      ]
+    },
+    "10001124": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001125": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001126": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001127": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001128": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001129": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001130": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller"
+      ]
+    },
+    "10001131": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001132": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001133": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001134": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001135": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001136": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001137": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001138": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller"
+      ]
+    },
+    "10001139": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "support"
+      ]
+    },
+    "10001140": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller"
+      ]
+    },
+    "10001141": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001142": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001143": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001144": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001145": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001146": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001147": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001148": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001149": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001150": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001151": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001152": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001153": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001154": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001155": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer"
+      ]
+    },
+    "10001156": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001157": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001158": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001159": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "support",
+      "role_tags": [
+        "support"
+      ]
+    },
+    "10001160": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "magic_burst"
+      ]
+    },
+    "10001161": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "support"
+      ]
+    },
+    "10001162": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001163": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001164": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001165": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller"
+      ]
+    },
+    "10001166": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001167": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001168": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001169": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001170": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001171": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001172": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "magic_burst"
+      ]
+    },
+    "10001173": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "support"
+      ]
+    },
+    "10001174": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001175": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001176": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001177": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001178": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "magic_burst"
+      ]
+    },
+    "10001179": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001180": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "support"
+      ]
+    },
+    "10001181": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001182": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller"
+      ]
+    },
+    "10001183": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller"
+      ]
+    },
+    "10001184": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "support"
+      ]
+    },
+    "10001185": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001186": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001187": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001188": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "magic_burst"
+      ]
+    },
+    "10001189": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001190": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "magic_burst"
+      ]
+    },
+    "10001191": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001192": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001193": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001194": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001195": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001196": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001197": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001198": {
+      "distance_type": 3,
+      "type": "strength",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001199": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001200": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001201": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001202": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001203": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001204": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001205": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001206": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001207": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001208": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "magic_burst",
+        "physical_burst"
+      ]
+    },
+    "10001209": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001210": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "magic_burst"
+      ]
+    },
+    "10001211": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001212": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001213": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001214": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "support",
+      "role_tags": [
+        "support"
+      ]
+    },
+    "10001215": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001216": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001217": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller"
+      ]
+    },
+    "10001218": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001219": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001220": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001221": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001222": {
+      "distance_type": 2,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001223": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001224": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "magic_burst"
+      ]
+    },
+    "10001225": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001226": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001227": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "support",
+      "role_tags": [
+        "support"
+      ]
+    },
+    "10001228": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001229": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001230": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller"
+      ]
+    },
+    "10001231": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001232": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "physical_burst",
+        "support"
+      ]
+    },
+    "10001233": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "support"
+      ]
+    },
+    "10001234": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "support"
+      ]
+    },
+    "10001235": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank"
+      ]
+    },
+    "10001236": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001237": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001238": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer"
+      ]
+    },
+    "10001239": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001240": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller"
+      ]
+    },
+    "10001241": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer"
+      ]
+    },
+    "10001242": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001243": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001244": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001245": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001246": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001247": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "magic_burst"
+      ]
+    },
+    "10001248": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    },
+    "10001249": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001250": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank"
+      ]
+    },
+    "10001251": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001252": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001253": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001254": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "support",
+      "role_tags": [
+        "support"
+      ]
+    },
+    "10001255": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "physical_burst"
+      ]
+    },
+    "10001256": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "damage",
+      "role_tags": [
+        "damage"
+      ]
+    },
+    "10001257": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer"
+      ]
+    },
+    "10001258": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001259": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "support"
+      ]
+    },
+    "10001260": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller"
+      ]
+    },
+    "10001261": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001262": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "magic_burst"
+      ]
+    },
+    "10001263": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001264": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001265": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001266": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank"
+      ]
+    },
+    "10001267": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "heal",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller",
+        "support"
+      ]
+    },
+    "10001268": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller",
+        "magic_burst",
+        "support"
+      ]
+    },
+    "10001269": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "controller"
+      ]
+    },
+    "10001270": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "controller",
+      "role_tags": [
+        "controller",
+        "support"
+      ]
+    },
+    "10001271": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "control",
+        "heal",
+        "magic",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "controller",
+        "magic_burst"
+      ]
+    },
+    "10001272": {
+      "distance_type": 4,
+      "type": "agile",
+      "damage_kind": [
+        "physical"
+      ],
+      "role": "physical_burst",
+      "role_tags": [
+        "physical_burst"
+      ]
+    },
+    "10001273": {
+      "distance_type": 2,
+      "type": "strength",
+      "damage_kind": [
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank"
+      ]
+    },
+    "10001274": {
+      "distance_type": 3,
+      "type": "wise",
+      "damage_kind": [
+        "magic",
+        "physical"
+      ],
+      "role": "magic_burst",
+      "role_tags": [
+        "magic_burst"
+      ]
+    },
+    "10001275": {
+      "distance_type": 3,
+      "type": "agile",
+      "damage_kind": [
+        "heal",
+        "physical",
+        "shield"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "tank",
+        "physical_burst"
+      ]
+    },
+    "10001276": {
+      "distance_type": 2,
+      "type": "agile",
+      "damage_kind": [
+        "control",
+        "physical",
+        "shield"
+      ],
+      "role": "tank",
+      "role_tags": [
+        "tank",
+        "controller"
+      ]
+    },
+    "10001277": {
+      "distance_type": 4,
+      "type": "wise",
+      "damage_kind": [
+        "heal",
+        "magic",
+        "physical"
+      ],
+      "role": "healer",
+      "role_tags": [
+        "healer",
+        "support"
+      ]
+    }
+  },
+  "teams": [
+    {
+      "heroes": [
+        "10001021",
+        "10001066",
+        "10001113",
+        "10001253",
+        "10001214"
+      ],
+      "tier": "top",
+      "pet": "10010001"
+    },
+    {
+      "heroes": [
+        "10001234",
+        "10001012",
+        "10001072",
+        "10001142",
+        "10001243"
+      ],
+      "tier": "top",
+      "pet": "10020001"
+    },
+    {
+      "heroes": [
+        "10001093",
+        "10001031",
+        "10001007",
+        "10001132",
+        "10001124"
+      ],
+      "tier": "top",
+      "pet": "10030001"
+    },
+    {
+      "heroes": [
+        "10001039",
+        "10001222",
+        "10001052",
+        "10001223",
+        "10001030"
+      ],
+      "tier": "top",
+      "pet": "10040001"
+    },
+    {
+      "heroes": [
+        "10001008",
+        "10001009",
+        "10001017",
+        "10001112",
+        "10001143"
+      ],
+      "tier": "top",
+      "pet": "10050001"
+    },
+    {
+      "heroes": [
+        "10001102",
+        "10001031",
+        "10001164",
+        "10001203",
+        "10001063"
+      ],
+      "tier": "top",
+      "pet": "10060001"
+    },
+    {
+      "heroes": [
+        "10001067",
+        "10001154",
+        "10001092",
+        "10001004",
+        "10001224"
+      ],
+      "tier": "top",
+      "pet": "10070001"
+    },
+    {
+      "heroes": [
+        "10001006",
+        "10001172",
+        "10001175",
+        "10001144",
+        "10001043"
+      ],
+      "tier": "top",
+      "pet": "10080001"
+    },
+    {
+      "heroes": [
+        "10001056",
+        "10001234",
+        "10001173",
+        "10001028",
+        "10001204"
+      ],
+      "tier": "top",
+      "pet": "10090001"
+    },
+    {
+      "heroes": [
+        "10001008",
+        "10001097",
+        "10001163",
+        "10001015",
+        "10001225"
+      ],
+      "tier": "top",
+      "pet": "10100001"
+    },
+    {
+      "heroes": [
+        "10001067",
+        "10001215",
+        "10001002",
+        "10001083",
+        "10001254"
+      ],
+      "tier": "high",
+      "pet": "10110001"
+    },
+    {
+      "heroes": [
+        "10001039",
+        "10001104",
+        "10001004",
+        "10001003",
+        "10001073"
+      ],
+      "tier": "high",
+      "pet": "10120001"
+    },
+    {
+      "heroes": [
+        "10001006",
+        "10001222",
+        "10001148",
+        "10001265",
+        "10001094"
+      ],
+      "tier": "high",
+      "pet": "10130001"
+    },
+    {
+      "heroes": [
+        "10001067",
+        "10001145",
+        "10001014",
+        "10001177",
+        "10001208"
+      ],
+      "tier": "high",
+      "pet": "10140001"
+    },
+    {
+      "heroes": [
+        "10001039",
+        "10001276",
+        "10001020",
+        "10001198",
+        "10001074"
+      ],
+      "tier": "high",
+      "pet": "10150001"
+    },
+    {
+      "heroes": [
+        "10001234",
+        "10001032",
+        "10001002",
+        "10001235",
+        "10001134"
+      ],
+      "tier": "high",
+      "pet": "10160001"
+    },
+    {
+      "heroes": [
+        "10001008",
+        "10001155",
+        "10001023",
+        "10001004",
+        "10001077"
+      ],
+      "tier": "high",
+      "pet": "10170001"
+    },
+    {
+      "heroes": [
+        "10001081",
+        "10001168",
+        "10001013",
+        "10001184",
+        "10001114"
+      ],
+      "tier": "high",
+      "pet": "10180001"
+    },
+    {
+      "heroes": [
+        "10001116",
+        "10001234",
+        "10001174",
+        "10001275",
+        "10001019"
+      ],
+      "tier": "high",
+      "pet": "10190001"
+    },
+    {
+      "heroes": [
+        "10001039",
+        "10001156",
+        "10001020",
+        "10001195",
+        "10001125"
+      ],
+      "tier": "high",
+      "pet": "10200001"
+    },
+    {
+      "heroes": [
+        "10001021",
+        "10001066",
+        "10001084",
+        "10001255",
+        "10001270"
+      ],
+      "tier": "mid",
+      "pet": "10210001"
+    },
+    {
+      "heroes": [
+        "10001010",
+        "10001066",
+        "10001229",
+        "10001034",
+        "10001237"
+      ],
+      "tier": "mid",
+      "pet": "10220001"
+    },
+    {
+      "heroes": [
+        "10001008",
+        "10001108",
+        "10001033",
+        "10001064",
+        "10001019"
+      ],
+      "tier": "mid",
+      "pet": "10230001"
+    },
+    {
+      "heroes": [
+        "10001068",
+        "10001100",
+        "10001054",
+        "10001178",
+        "10001055"
+      ],
+      "tier": "mid",
+      "pet": "10240001"
+    },
+    {
+      "heroes": [
+        "10001140",
+        "10001206",
+        "10001044",
+        "10001209",
+        "10001277"
+      ],
+      "tier": "mid",
+      "pet": "10250001"
+    },
+    {
+      "heroes": [
+        "10001234",
+        "10001012",
+        "10001065",
+        "10001205",
+        "10001267"
+      ],
+      "tier": "mid",
+      "pet": "10260001"
+    },
+    {
+      "heroes": [
+        "10001158",
+        "10001016",
+        "10001024",
+        "10001036",
+        "10001117"
+      ],
+      "tier": "mid",
+      "pet": "10270001"
+    },
+    {
+      "heroes": [
+        "10001067",
+        "10001136",
+        "10001028",
+        "10001005",
+        "10001200"
+      ],
+      "tier": "mid",
+      "pet": "10010001"
+    },
+    {
+      "heroes": [
+        "10001039",
+        "10001162",
+        "10001029",
+        "10001058",
+        "10001167"
+      ],
+      "tier": "mid",
+      "pet": "10020001"
+    },
+    {
+      "heroes": [
+        "10001008",
+        "10001047",
+        "10001002",
+        "10001095",
+        "10001165"
+      ],
+      "tier": "mid",
+      "pet": "10030001"
+    }
+  ],
+  "source_defined_pet_recommendations": [
+    {
+      "pet_id": "10010001",
+      "hero_id": "10001021"
+    },
+    {
+      "pet_id": "10010001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10010001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10010001",
+      "hero_id": "10001028"
+    },
+    {
+      "pet_id": "10010001",
+      "hero_id": "10001033"
+    },
+    {
+      "pet_id": "10020001",
+      "hero_id": "10001003"
+    },
+    {
+      "pet_id": "10020001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10020001",
+      "hero_id": "10001015"
+    },
+    {
+      "pet_id": "10020001",
+      "hero_id": "10001016"
+    },
+    {
+      "pet_id": "10020001",
+      "hero_id": "10001029"
+    },
+    {
+      "pet_id": "10030001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10030001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10030001",
+      "hero_id": "10001007"
+    },
+    {
+      "pet_id": "10030001",
+      "hero_id": "10001009"
+    },
+    {
+      "pet_id": "10030001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10040001",
+      "hero_id": "10001010"
+    },
+    {
+      "pet_id": "10040001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10040001",
+      "hero_id": "10001006"
+    },
+    {
+      "pet_id": "10040001",
+      "hero_id": "10001030"
+    },
+    {
+      "pet_id": "10040001",
+      "hero_id": "10001019"
+    },
+    {
+      "pet_id": "10050001",
+      "hero_id": "10001003"
+    },
+    {
+      "pet_id": "10050001",
+      "hero_id": "10001006"
+    },
+    {
+      "pet_id": "10050001",
+      "hero_id": "10001030"
+    },
+    {
+      "pet_id": "10050001",
+      "hero_id": "10001019"
+    },
+    {
+      "pet_id": "10050001",
+      "hero_id": "10001017"
+    },
+    {
+      "pet_id": "10060001",
+      "hero_id": "10001031"
+    },
+    {
+      "pet_id": "10060001",
+      "hero_id": "10001048"
+    },
+    {
+      "pet_id": "10060001",
+      "hero_id": "10001009"
+    },
+    {
+      "pet_id": "10060001",
+      "hero_id": "10001047"
+    },
+    {
+      "pet_id": "10060001",
+      "hero_id": "10001051"
+    },
+    {
+      "pet_id": "10070001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10070001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10070001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10070001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10070001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10080001",
+      "hero_id": "10001010"
+    },
+    {
+      "pet_id": "10080001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10080001",
+      "hero_id": "10001006"
+    },
+    {
+      "pet_id": "10080001",
+      "hero_id": "10001030"
+    },
+    {
+      "pet_id": "10080001",
+      "hero_id": "10001019"
+    },
+    {
+      "pet_id": "10090001",
+      "hero_id": "10001021"
+    },
+    {
+      "pet_id": "10090001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10090001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10090001",
+      "hero_id": "10001028"
+    },
+    {
+      "pet_id": "10090001",
+      "hero_id": "10001033"
+    },
+    {
+      "pet_id": "10100001",
+      "hero_id": "10001091"
+    },
+    {
+      "pet_id": "10100001",
+      "hero_id": "10001097"
+    },
+    {
+      "pet_id": "10100001",
+      "hero_id": "10001104"
+    },
+    {
+      "pet_id": "10100001",
+      "hero_id": "10001110"
+    },
+    {
+      "pet_id": "10110001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10110001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10110001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10110001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10110001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10120001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10120001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10120001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10120001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10120001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10130001",
+      "hero_id": "10001010"
+    },
+    {
+      "pet_id": "10130001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10130001",
+      "hero_id": "10001006"
+    },
+    {
+      "pet_id": "10130001",
+      "hero_id": "10001030"
+    },
+    {
+      "pet_id": "10130001",
+      "hero_id": "10001019"
+    },
+    {
+      "pet_id": "10140001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10140001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10140001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10140001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10140001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10150001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10150001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10150001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10150001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10150001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10160001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10160001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10160001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10160001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10160001",
+      "hero_id": "10001021"
+    },
+    {
+      "pet_id": "10170001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10170001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10170001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10170001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10170001",
+      "hero_id": "10001021"
+    },
+    {
+      "pet_id": "10180001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10180001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10180001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10180001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10180001",
+      "hero_id": "10001021"
+    },
+    {
+      "pet_id": "10190001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10190001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10190001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10190001",
+      "hero_id": "10001019"
+    },
+    {
+      "pet_id": "10190001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10200001",
+      "hero_id": "10001002"
+    },
+    {
+      "pet_id": "10200001",
+      "hero_id": "10001004"
+    },
+    {
+      "pet_id": "10200001",
+      "hero_id": "10001013"
+    },
+    {
+      "pet_id": "10200001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10200001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10210001",
+      "hero_id": "10001021"
+    },
+    {
+      "pet_id": "10210001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10210001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10210001",
+      "hero_id": "10001028"
+    },
+    {
+      "pet_id": "10210001",
+      "hero_id": "10001033"
+    },
+    {
+      "pet_id": "10220001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10220001",
+      "hero_id": "10001010"
+    },
+    {
+      "pet_id": "10220001",
+      "hero_id": "10001047"
+    },
+    {
+      "pet_id": "10220001",
+      "hero_id": "10001017"
+    },
+    {
+      "pet_id": "10220001",
+      "hero_id": "10001020"
+    },
+    {
+      "pet_id": "10230001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10230001",
+      "hero_id": "10001014"
+    },
+    {
+      "pet_id": "10230001",
+      "hero_id": "10001019"
+    },
+    {
+      "pet_id": "10230001",
+      "hero_id": "10001036"
+    },
+    {
+      "pet_id": "10230001",
+      "hero_id": "10001047"
+    },
+    {
+      "pet_id": "10240001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10240001",
+      "hero_id": "10001036"
+    },
+    {
+      "pet_id": "10240001",
+      "hero_id": "10001053"
+    },
+    {
+      "pet_id": "10240001",
+      "hero_id": "10001055"
+    },
+    {
+      "pet_id": "10240001",
+      "hero_id": "10001209"
+    },
+    {
+      "pet_id": "10250001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10250001",
+      "hero_id": "10001036"
+    },
+    {
+      "pet_id": "10250001",
+      "hero_id": "10001053"
+    },
+    {
+      "pet_id": "10250001",
+      "hero_id": "10001055"
+    },
+    {
+      "pet_id": "10250001",
+      "hero_id": "10001209"
+    },
+    {
+      "pet_id": "10260001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10260001",
+      "hero_id": "10001055"
+    },
+    {
+      "pet_id": "10260001",
+      "hero_id": "10001093"
+    },
+    {
+      "pet_id": "10260001",
+      "hero_id": "10001192"
+    },
+    {
+      "pet_id": "10260001",
+      "hero_id": "10001259"
+    },
+    {
+      "pet_id": "10270001",
+      "hero_id": "10001012"
+    },
+    {
+      "pet_id": "10270001",
+      "hero_id": "10001036"
+    },
+    {
+      "pet_id": "10270001",
+      "hero_id": "10001053"
+    },
+    {
+      "pet_id": "10270001",
+      "hero_id": "10001055"
+    },
+    {
+      "pet_id": "10270001",
+      "hero_id": "10001209"
+    }
+  ]
+}
