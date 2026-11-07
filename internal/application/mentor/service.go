@@ -152,6 +152,8 @@ func lockPlayerRoots(ctx context.Context, locker playerroot.TxLocker, t tx.Tx, s
 	return nil
 }
 
+// dayKey is the daily counter boundary. PRIVATE_POLICY D508: UTC day, because
+// the stock client sends no timezone and misc.lua has no reset rule.
 func dayKey(at time.Time) string { return at.UTC().Format(dayLayout) }
 
 func sameDay(stored time.Time, at time.Time) bool {

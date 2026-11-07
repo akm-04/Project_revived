@@ -127,6 +127,8 @@ func (state PlayerState) Validate() error {
 	return nil
 }
 
+// MinimumLevelGapPolicy is PRIVATE_POLICY D508: the client has no comparator,
+// so the rule text ("at least 3 levels") is enforced as a named policy.
 const MinimumLevelGapPolicy = "I9_MENTOR_LEVEL_GAP_AT_LEAST_V1"
 
 type Rules struct {
