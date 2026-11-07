@@ -1615,6 +1615,9 @@
     "*HeroTx",
     "*PetTx"
    ],
+   "topfloor": [
+    "*HeroTx"
+   ],
    "workplace": [
     "*HeroTx"
    ]
@@ -5352,6 +5355,9 @@
    ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
+   ],
+   "publicstats": [
+    "*HeroTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
