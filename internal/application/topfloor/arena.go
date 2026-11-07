@@ -64,67 +64,111 @@ func (s Service) Refresh(c context.Context, a identity.ActorContext, op operatio
 	return s.arena(c, a, op, true)
 }
 
+// errEntryRequired makes LOAD join the ladder in a short transaction first; the
+// server-wide ladder root must not stay locked through the offer projection.
+var errEntryRequired = errors.New("topfloor: entry required")
+
 func (s Service) arena(c context.Context, a identity.ActorContext, op operation.Context, refresh bool) (ArenaView, error) {
 	var out ArenaView
 	err := s.mutate(c, a.LogicalServerID, op, func() error {
-		_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
-			at := sc.Operation.DecisionAt()
-			if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
-				return err
-			}
-			revision, catalog, err := s.catalogTx(c, sc.Tx)
-			if err != nil {
-				return err
-			}
-			if err = s.open(c, sc.Tx, catalog, a.PlayerID, at); err != nil {
-				return err
-			}
-			p, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, true)
-			if err != nil {
-				return err
-			}
-			if !found {
-				if p, err = s.enter(c, sc.Tx, catalog, revision, a, at); err != nil {
-					return err
-				}
-			}
-			rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
-			if err != nil || !ok {
-				return errors.Join(err, d.ErrConflict)
-			}
-			next := catalog.Rolled(p, at)
-			if next.OfferedDay != next.TicketDay {
-				next.OfferedDay, next.RefreshCount = next.TicketDay, 0
-			}
-			if refresh {
-				next.RefreshCount++
-			}
-			if next.Offered, err = s.offers(c, sc.Tx, catalog, next, rank); err != nil {
-				return err
-			}
-			if !samePlayer(p, next) {
-				next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
-				if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion); err != nil {
-					return err
-				}
-			}
-			weeklyChallenges, err := s.Store.WeeklyChallengesTx(c, sc.Tx, a.PlayerID, at)
-			if err != nil {
-				return err
-			}
-			out = ArenaView{Player: next, Rank: rank, ServerTime: at, WeeklyChallenges: weeklyChallenges}
-			for _, o := range next.Offered {
-				view, err := s.display(c, sc.Tx, catalog, a.LogicalServerID, o, at)
-				if err != nil {
-					return err
-				}
-				out.Enemies = append(out.Enemies, view)
-			}
-			return s.saveOfferSnapshot(c, sc.Tx, a.LogicalServerID, a.PlayerID, d.OfferScopeNormal, 0, rank, out.Enemies, at)
-		})
+		err := s.loadArena(c, a, op, refresh, &out)
+		if !errors.Is(err, errEntryRequired) {
+			return err
+		}
+		if err = s.joinLadder(c, a, op); err != nil {
+			return err
+		}
+		if err = s.loadArena(c, a, op, refresh, &out); errors.Is(err, errEntryRequired) {
+			return errors.Join(err, d.ErrConflict)
+		}
 		return err
 	})
 	return out, err
+}
+
+// joinLadder enters the player once, alone in its transaction. Read Committed
+// lets concurrent first entries wait on the ladder root instead of aborting, and
+// keeping the root lock out of the projection keeps the pool from queueing. The
+// ladder update is version-guarded while the row is locked; the player insert is
+// keyed by player_id, so no stale read is written back.
+func (s Service) joinLadder(c context.Context, a identity.ActorContext, op operation.Context) error {
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.ReadCommitted}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
+			return err
+		}
+		revision, catalog, err := s.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		if err = s.open(c, sc.Tx, catalog, a.PlayerID, at); err != nil {
+			return err
+		}
+		_, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, true)
+		if err != nil || found {
+			return err
+		}
+		_, err = s.enter(c, sc.Tx, catalog, revision, a, at)
+		return err
+	})
+	return err
+}
+
+func (s Service) loadArena(c context.Context, a identity.ActorContext, op operation.Context, refresh bool, out *ArenaView) error {
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
+			return err
+		}
+		_, catalog, err := s.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		if err = s.open(c, sc.Tx, catalog, a.PlayerID, at); err != nil {
+			return err
+		}
+		p, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, true)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return errEntryRequired
+		}
+		rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
+		if err != nil || !ok {
+			return errors.Join(err, d.ErrConflict)
+		}
+		next := catalog.Rolled(p, at)
+		if next.OfferedDay != next.TicketDay {
+			next.OfferedDay, next.RefreshCount = next.TicketDay, 0
+		}
+		if refresh {
+			next.RefreshCount++
+		}
+		if next.Offered, err = s.offers(c, sc.Tx, catalog, next, rank); err != nil {
+			return err
+		}
+		if !samePlayer(p, next) {
+			next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
+			if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion); err != nil {
+				return err
+			}
+		}
+		weeklyChallenges, err := s.Store.WeeklyChallengesTx(c, sc.Tx, a.PlayerID, at)
+		if err != nil {
+			return err
+		}
+		*out = ArenaView{Player: next, Rank: rank, ServerTime: at, WeeklyChallenges: weeklyChallenges}
+		for _, o := range next.Offered {
+			view, err := s.display(c, sc.Tx, catalog, a.LogicalServerID, o, at)
+			if err != nil {
+				return err
+			}
+			out.Enemies = append(out.Enemies, view)
+		}
+		return s.saveOfferSnapshot(c, sc.Tx, a.LogicalServerID, a.PlayerID, d.OfferScopeNormal, 0, rank, out.Enemies, at)
+	})
+	return err
 }
 
 func samePlayer(a, b d.Player) bool {
@@ -162,9 +206,13 @@ func (s Service) enter(c context.Context, t tx.Tx, catalog d.Catalog, revision s
 		return d.Player{}, err
 	}
 	if !found {
-		l, _ = catalog.NewLadder(a.LogicalServerID, revision, at)
-		if err = s.Store.CreateLadderTx(c, t, l); err != nil {
+		seed, _ := catalog.NewLadder(a.LogicalServerID, revision, at)
+		if err = s.Store.CreateLadderTx(c, t, seed); err != nil {
 			return d.Player{}, err
+		}
+		l, found, err = s.Store.ReadLadderTx(c, t, a.LogicalServerID, true)
+		if err != nil || !found {
+			return d.Player{}, errors.Join(err, d.ErrConflict)
 		}
 	}
 	if len(catalog.Unsettled(l, at)) > 0 {
@@ -175,7 +223,13 @@ func (s Service) enter(c context.Context, t tx.Tx, catalog d.Catalog, revision s
 		return d.Player{}, err
 	}
 	next := l
-	next.Size, next.StateVersion, next.UpdatedAt = rank, l.StateVersion+1, at
+	// A concurrent first entry can create the root with a later decision instant
+	// than this operation's bound one; the root's timestamps must stay ordered.
+	updatedAt := at.UTC()
+	if updatedAt.Before(l.CreatedAt) {
+		updatedAt = l.CreatedAt
+	}
+	next.Size, next.StateVersion, next.UpdatedAt = rank, l.StateVersion+1, updatedAt
 	if err = s.Store.SaveLadderTx(c, t, next, l.StateVersion); err != nil {
 		return d.Player{}, err
 	}

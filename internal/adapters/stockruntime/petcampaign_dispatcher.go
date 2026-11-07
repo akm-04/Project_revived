@@ -142,7 +142,7 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		} else if errors.Is(e, d.ErrRefused) || errors.Is(e, economy.ErrInsufficientBalance) {
 			return conflictRefusal(1)
 		}
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "pet_campaign_failed"}}
+		return httpedge.Response{HTTPStatus: status, Cause: e, Body: map[string]any{"error_code": int64(1), "error": "pet_campaign_failed"}}
 	}
 	return okI5(out)
 }
