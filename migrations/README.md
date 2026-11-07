@@ -35,3 +35,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00130: I9-10E friend invitation binding (one immutable inviter per invitee) and once-only invitation mission claims. Empty on upgrade.
 - 00131: I9-10 bug 29: guild name check allows 20 characters so the stock weighted length (English letters count half) is not refused by the table.
 - 00132: I9-10 Arena D507: the last three issued match-list opponents per player stay fightable after a refresh.
+- 00135: I9-10 1 on 1 D488 parity: each issued MATCH list stores the challenger and target ranks it showed; an offer without one is stale (35026).

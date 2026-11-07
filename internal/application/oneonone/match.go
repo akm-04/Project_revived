@@ -182,15 +182,15 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		return d.Match{}, d.ErrRefused
 	}
 	// D488 parity: the issued list is not a reservation. If the challenger or the
-	// selected target moved out of the better-ranked bands since MATCH, answer
-	// with the stock rank-changed refusal instead of fighting a stale target.
+	// selected target moved to another rank since MATCH, answer with the stock
+	// rank-changed refusal instead of fighting a stale target.
 	if mode == d.ModeNormal {
 		standings, err := s.Store.StandingsTx(c, sc.Tx)
 		if err != nil {
 			return d.Match{}, err
 		}
-		if !catalog.OfferedRankCurrent(catalog.Rank(standings), a.PlayerID, r.Enemy) {
-			return d.Match{}, d.ErrOfferStale
+		if err = d.MatchOfferSnapshot(attacker.OfferSnapshot, catalog.Rank(standings), a.PlayerID, r.Enemy); err != nil {
+			return d.Match{}, err
 		}
 	}
 	rounds := catalog.Level(defender.Level).Teams

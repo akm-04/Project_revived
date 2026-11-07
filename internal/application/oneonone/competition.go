@@ -512,6 +512,7 @@ func (s Service) Match(c context.Context, a identity.ActorContext, op operation.
 			if next.Mode == d.ModeNormal {
 				next.Refreshes++
 				next.Offered = catalog.Offer(ranked, p.PlayerID, next.OfferedDay, next.Refreshes)
+				next.OfferSnapshot = catalog.OfferSnapshot(ranked, p.PlayerID, next.Offered)
 				chosen = next.Offered
 			}
 			next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
