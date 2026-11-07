@@ -63,6 +63,10 @@ func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, e
 }
 
 func (s Mode) readCatalogs(c context.Context, q tx.Queryer, op operation.Context) (d.Catalog, illusion.Catalog, error) {
+	op, err := s.pin(c, op)
+	if err != nil {
+		return d.Catalog{}, illusion.Catalog{}, err
+	}
 	revision, _ := op.Policies.Get("content")
 	catalog, err := s.Content.AdventureCatalogTx(c, q, revision)
 	if err != nil {
