@@ -133,24 +133,80 @@ func (c Catalog) Offer(ranked []Ranked, self identity.PlayerID, day, refresh int
 	return out
 }
 
-// OfferedRankCurrent reports whether target still sits in one of the three
-// better-ranked bands an offer for self is drawn from. D488 parity: an issued
-// offer is not a reservation, so a moved challenger or target is refused.
-func (c Catalog) OfferedRankCurrent(ranked []Ranked, self, target identity.PlayerID) bool {
-	me, ok := Find(ranked, self)
-	if !ok {
-		return false
+// OfferRank is a competitor's rank as the issued offer showed it: the global
+// list rank (client rank_info.rank) and the in-group position the bands use.
+type OfferRank struct {
+	Global  int64 `json:"global"`
+	InGroup int64 `json:"in_group"`
+}
+
+// OfferTarget is one issued target and the rank it held when issued.
+type OfferTarget struct {
+	Player identity.PlayerID `json:"player"`
+	OfferRank
+}
+
+// OfferSnapshot is the latest issued MATCH list and the challenger's own rank,
+// so START can refuse either side after a move (D488 parity with Top Floor).
+type OfferSnapshot struct {
+	Challenger OfferRank     `json:"challenger"`
+	Targets    []OfferTarget `json:"targets"`
+}
+
+func (s OfferSnapshot) Validate() error {
+	if s.Challenger.Global < 1 || s.Challenger.InGroup < 1 || len(s.Targets) > 3 {
+		return ErrConflict
 	}
-	other, ok := Find(ranked, target)
-	if !ok || other.Player == self || Group(other.Level) != Group(me.Level) {
-		return false
-	}
-	for _, band := range c.Bands(me.InGroup, me.Global) {
-		if other.InGroup >= band[0] && other.InGroup <= band[1] {
-			return true
+	for _, target := range s.Targets {
+		if !target.Player.Valid() || target.Global < 1 || target.InGroup < 1 {
+			return ErrConflict
 		}
 	}
-	return false
+	return nil
+}
+
+// OfferSnapshot records the ranks the issued list showed for self and targets.
+func (c Catalog) OfferSnapshot(ranked []Ranked, self identity.PlayerID, targets []identity.PlayerID) *OfferSnapshot {
+	me, ok := Find(ranked, self)
+	if !ok {
+		return nil
+	}
+	snapshot := &OfferSnapshot{Challenger: OfferRank{Global: me.Global, InGroup: me.InGroup}, Targets: []OfferTarget{}}
+	for _, target := range targets {
+		other, ok := Find(ranked, target)
+		if !ok {
+			continue
+		}
+		snapshot.Targets = append(snapshot.Targets, OfferTarget{Player: target, OfferRank: OfferRank{Global: other.Global, InGroup: other.InGroup}})
+	}
+	return snapshot
+}
+
+// MatchOfferSnapshot reports ErrOfferStale unless the latest issued list
+// showed the same challenger rank and the target still holds the issued rank,
+// or the offer predates rank recording (nil).
+func MatchOfferSnapshot(snapshot *OfferSnapshot, ranked []Ranked, self, target identity.PlayerID) error {
+	if snapshot == nil {
+		return ErrOfferStale
+	}
+	me, ok := Find(ranked, self)
+	if !ok || me.Global != snapshot.Challenger.Global || me.InGroup != snapshot.Challenger.InGroup {
+		return ErrOfferStale
+	}
+	other, ok := Find(ranked, target)
+	if !ok {
+		return ErrOfferStale
+	}
+	for _, offered := range snapshot.Targets {
+		if offered.Player != target {
+			continue
+		}
+		if offered.Global != other.Global || offered.InGroup != other.InGroup {
+			return ErrOfferStale
+		}
+		return nil
+	}
+	return ErrOfferStale
 }
 
 // Opening is the promotion opening: vacancy moves and promotion entrants.

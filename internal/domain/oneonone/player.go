@@ -121,6 +121,7 @@ type Player struct {
 	OfferedDay      int64
 	Refreshes       int64
 	Offered         []identity.PlayerID
+	OfferSnapshot   *OfferSnapshot
 	Mode            int64
 	PromotionWeek   int64
 	Candidates      []identity.PlayerID
@@ -143,6 +144,9 @@ func (p Player) Validate() error {
 		p.Opponent != 0 && !slices.Contains(p.Candidates, p.Opponent) || p.StateVersion < 1 || p.CreatedAt.IsZero() {
 		return ErrConflict
 	}
+	if p.OfferSnapshot != nil && p.OfferSnapshot.Validate() != nil {
+		return ErrConflict
+	}
 	return nil
 }
 
@@ -158,7 +162,7 @@ func (c Catalog) Rolled(p Player, at time.Time) Player {
 		p.TriesDay, p.TriesLeft, p.Purchases = day, c.FreeTries, 0
 	}
 	if day := TriesDay(at); day != p.OfferedDay {
-		p.OfferedDay, p.Refreshes, p.Offered = day, 0, []identity.PlayerID{}
+		p.OfferedDay, p.Refreshes, p.Offered, p.OfferSnapshot = day, 0, []identity.PlayerID{}, nil
 	}
 	return p
 }

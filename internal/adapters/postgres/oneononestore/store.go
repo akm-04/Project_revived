@@ -112,6 +112,7 @@ type playerRow struct {
 	OfferedDay      int64                    `json:"offered_day"`
 	Refreshes       int64                    `json:"refreshes"`
 	Offered         []identity.PlayerID      `json:"offered"`
+	OfferSnapshot   *d.OfferSnapshot         `json:"offer_snapshot"`
 	Mode            int64                    `json:"mode"`
 	PromotionWeek   int64                    `json:"promotion_week"`
 	Candidates      []identity.PlayerID      `json:"candidates"`
@@ -130,12 +131,12 @@ type playerRow struct {
 func (r playerRow) player() (d.Player, d.Totals, error) {
 	p := d.Player{PlayerID: r.PlayerID, Server: r.Server, ContentRevision: r.ContentRevision, Position: d.Position{Level: r.Level, Slot: r.Slot, Points: r.Points, PointsAt: r.PointsAt},
 		TriesDay: r.TriesDay, TriesLeft: r.TriesLeft, Purchases: r.Purchases, LastFightAt: r.LastFightAt, Teams: r.Teams, OfferedDay: r.OfferedDay, Refreshes: r.Refreshes,
-		Offered: r.Offered, Mode: r.Mode, PromotionWeek: r.PromotionWeek, Candidates: r.Candidates, Opponent: r.Opponent, Challenges: r.Challenges, PromotionWins: r.PromotionWins,
+		Offered: r.Offered, OfferSnapshot: r.OfferSnapshot, Mode: r.Mode, PromotionWeek: r.PromotionWeek, Candidates: r.Candidates, Opponent: r.Opponent, Challenges: r.Challenges, PromotionWins: r.PromotionWins,
 		LastPromotionAt: r.LastPromotionAt, WinStreak: r.WinStreak, StateVersion: r.StateVersion, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt}
 	return p, d.Totals{Fights: r.Fights, Wins: r.Wins}, p.Validate()
 }
 
-const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'level',level,'slot',COALESCE(slot,0),'points',points,'points_at',points_at,'tries_day',tries_day,'tries_left',tries_left,'purchases',purchases,'last_fight_at',last_fight_at,'teams',teams,'offered_day',offered_day,'refreshes',refreshes,'offered',offered,'mode',mode,'promotion_week',promotion_week,'candidates',candidates,'opponent',COALESCE(opponent,0),'challenges',challenges,'promotion_wins',promotion_wins,'last_promotion_at',last_promotion_at,'win_streak',win_streak,'fights',fights,'wins',wins,'version',state_version,'created_at',created_at,'updated_at',updated_at)`
+const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'level',level,'slot',COALESCE(slot,0),'points',points,'points_at',points_at,'tries_day',tries_day,'tries_left',tries_left,'purchases',purchases,'last_fight_at',last_fight_at,'teams',teams,'offered_day',offered_day,'refreshes',refreshes,'offered',offered,'offer_snapshot',offer_snapshot,'mode',mode,'promotion_week',promotion_week,'candidates',candidates,'opponent',COALESCE(opponent,0),'challenges',challenges,'promotion_wins',promotion_wins,'last_promotion_at',last_promotion_at,'win_streak',win_streak,'fights',fights,'wins',wins,'version',state_version,'created_at',created_at,'updated_at',updated_at)`
 
 func (Store) ReadPlayerTx(c context.Context, q tx.Queryer, pid identity.PlayerID, lock bool) (d.Player, d.Totals, bool, error) {
 	sql := `SELECT ` + playerObject + `::text FROM one_on_one_players WHERE player_id=$1`
@@ -160,6 +161,7 @@ func (Store) PromotingTx(c context.Context, q tx.Queryer) ([]identity.PlayerID, 
 
 type playerArgs struct {
 	teams, offered, candidates string
+	offerSnapshot              any
 	opponent                   any
 }
 
@@ -175,6 +177,13 @@ func argsOf(p d.Player) (playerArgs, error) {
 	if a.candidates, e = encode(p.Candidates); e != nil {
 		return a, e
 	}
+	if p.OfferSnapshot != nil {
+		raw, e := encode(p.OfferSnapshot)
+		if e != nil {
+			return a, e
+		}
+		a.offerSnapshot = raw
+	}
 	if p.Opponent != 0 {
 		a.opponent = int64(p.Opponent)
 	}
@@ -189,8 +198,8 @@ func (Store) InsertPlayerTx(c context.Context, t tx.Tx, p d.Player) error {
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `INSERT INTO one_on_one_players(player_id,logical_server_id,competition_id,content_revision,level,slot,points,points_at,tries_day,tries_left,purchases,last_fight_at,teams,offered_day,refreshes,offered,mode,promotion_week,candidates,opponent,challenges,promotion_wins,last_promotion_at,win_streak,fights,wins,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,NULLIF($6,0),$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$15,$16::jsonb,$17,$18,$19::jsonb,$20,$21,$22,$23,$24,0,0,1,$25,$25)`,
-		int64(p.PlayerID), int64(p.Server), d.CompetitionID, p.ContentRevision, p.Level, p.Slot, p.Points, p.PointsAt, p.TriesDay, p.TriesLeft, p.Purchases, p.LastFightAt, a.teams, p.OfferedDay, p.Refreshes, a.offered,
+	return one(t.Exec(c, `INSERT INTO one_on_one_players(player_id,logical_server_id,competition_id,content_revision,level,slot,points,points_at,tries_day,tries_left,purchases,last_fight_at,teams,offered_day,refreshes,offered,offer_snapshot,mode,promotion_week,candidates,opponent,challenges,promotion_wins,last_promotion_at,win_streak,fights,wins,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,NULLIF($6,0),$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$15,$16::jsonb,$17::jsonb,$18,$19,$20::jsonb,$21,$22,$23,$24,$25,0,0,1,$26,$26)`,
+		int64(p.PlayerID), int64(p.Server), d.CompetitionID, p.ContentRevision, p.Level, p.Slot, p.Points, p.PointsAt, p.TriesDay, p.TriesLeft, p.Purchases, p.LastFightAt, a.teams, p.OfferedDay, p.Refreshes, a.offered, a.offerSnapshot,
 		p.Mode, p.PromotionWeek, a.candidates, a.opponent, p.Challenges, p.PromotionWins, p.LastPromotionAt, p.WinStreak, p.CreatedAt))
 }
 
@@ -203,8 +212,8 @@ func (Store) SavePlayerTx(c context.Context, t tx.Tx, p d.Player, old int64, tot
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `UPDATE one_on_one_players SET level=$3,slot=NULLIF($4,0),points=$5,points_at=$6,tries_day=$7,tries_left=$8,purchases=$9,last_fight_at=$10,teams=$11::jsonb,offered_day=$12,refreshes=$13,offered=$14::jsonb,mode=$15,promotion_week=$16,candidates=$17::jsonb,opponent=$18,challenges=$19,promotion_wins=$20,last_promotion_at=$21,win_streak=$22,fights=fights+$23,wins=wins+$24,state_version=$25,updated_at=$26 WHERE player_id=$1 AND state_version=$2`,
-		int64(p.PlayerID), old, p.Level, p.Slot, p.Points, p.PointsAt, p.TriesDay, p.TriesLeft, p.Purchases, p.LastFightAt, a.teams, p.OfferedDay, p.Refreshes, a.offered, p.Mode, p.PromotionWeek, a.candidates,
+	return one(t.Exec(c, `UPDATE one_on_one_players SET level=$3,slot=NULLIF($4,0),points=$5,points_at=$6,tries_day=$7,tries_left=$8,purchases=$9,last_fight_at=$10,teams=$11::jsonb,offered_day=$12,refreshes=$13,offered=$14::jsonb,offer_snapshot=$15::jsonb,mode=$16,promotion_week=$17,candidates=$18::jsonb,opponent=$19,challenges=$20,promotion_wins=$21,last_promotion_at=$22,win_streak=$23,fights=fights+$24,wins=wins+$25,state_version=$26,updated_at=$27 WHERE player_id=$1 AND state_version=$2`,
+		int64(p.PlayerID), old, p.Level, p.Slot, p.Points, p.PointsAt, p.TriesDay, p.TriesLeft, p.Purchases, p.LastFightAt, a.teams, p.OfferedDay, p.Refreshes, a.offered, a.offerSnapshot, p.Mode, p.PromotionWeek, a.candidates,
 		a.opponent, p.Challenges, p.PromotionWins, p.LastPromotionAt, p.WinStreak, totals.Fights, totals.Wins, p.StateVersion, p.UpdatedAt))
 }
 

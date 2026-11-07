@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"slices"
@@ -118,6 +119,61 @@ func teamsOf(heroes []int64, n int) []d.Team {
 		out = append(out, d.Team{Heroes: []int64{heroes[i]}})
 	}
 	return out
+}
+
+func teamsOfFive(heroes []int64, n int) []d.Team {
+	out := []d.Team{}
+	for i := range n {
+		out = append(out, d.Team{Heroes: heroes[i*5 : i*5+5]})
+	}
+	return out
+}
+
+// pinOneOnOneOffer overwrites the issued MATCH list with one deterministic
+// target and the ranks the production MATCH path would have recorded.
+func pinOneOnOneOffer(t *testing.T, p *pg.Pool, actor identity.ActorContext, enemy identity.PlayerID) {
+	t.Helper()
+	standings, err := (oneononestore.Store{}).StandingsTx(ctx, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog := oneOnOneCatalog(t, p)
+	snapshot := catalog.OfferSnapshot(catalog.Rank(standings), actor.PlayerID, []identity.PlayerID{enemy})
+	if snapshot == nil {
+		t.Fatalf("player %d is not in the standings", actor.PlayerID)
+	}
+	raw, err := json.Marshal(snapshot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exec(t, p, `UPDATE one_on_one_players SET offered=$2::jsonb,offer_snapshot=$3::jsonb,state_version=state_version+1 WHERE player_id=$1`,
+		int64(actor.PlayerID), "["+strconv.FormatInt(int64(enemy), 10)+"]", string(raw))
+}
+
+// inOneOnOneBand reports whether target sits in a band an offer for self draws
+// from now, the weaker condition offered before D488 parity.
+func inOneOnOneBand(t *testing.T, p *pg.Pool, self, target identity.PlayerID) bool {
+	t.Helper()
+	standings, err := (oneononestore.Store{}).StandingsTx(ctx, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog := oneOnOneCatalog(t, p)
+	ranked := catalog.Rank(standings)
+	me, ok := d.Find(ranked, self)
+	if !ok {
+		t.Fatalf("player %d is not in the standings", self)
+	}
+	other, ok := d.Find(ranked, target)
+	if !ok {
+		t.Fatalf("player %d is not in the standings", target)
+	}
+	for _, band := range catalog.Bands(me.InGroup, me.Global) {
+		if other.InGroup >= band[0] && other.InGroup <= band[1] {
+			return true
+		}
+	}
+	return false
 }
 
 // startSettled repeats an identical START while its rounds are still resolving, as the stock client's retry does.
@@ -289,7 +345,7 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 		}
 	}
 	// The fixture pins B as A's offered opponent; the competition may already hold other Juniors (restored databases).
-	exec(t, pool, `UPDATE one_on_one_players SET offered=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID), "["+strconv.FormatInt(int64(b.PlayerID), 10)+"]")
+	pinOneOnOneOffer(t, pool, a, b.PlayerID)
 	enemy, err := s.EnemyTeam(ctx, b.PlayerID)
 	if err != nil || len(enemy) != 3 || len(enemy[0].Heroes) != 1 {
 		t.Fatal("GET_ENEMY_TEAM", err, len(enemy))
@@ -526,8 +582,8 @@ func TestI7C5COneOnOneReconcileAbandonedNative(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	exec(t, pool, `UPDATE one_on_one_players SET offered=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID), "["+strconv.FormatInt(int64(b.PlayerID), 10)+"]")
 	exec(t, pool, `UPDATE one_on_one_players SET points=4800,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
+	pinOneOnOneOffer(t, pool, a, b.PlayerID)
 	stalled := s
 	stalled.Combat = stalledRounds{s.Combat}
 	if _, err := stalled.Start(ctx, a, app.StartCommand{Formations: teamsOf(heroesA, 3), Enemy: b.PlayerID}, op()); err == nil {
@@ -624,15 +680,9 @@ func TestI9_10OneOnOneStaleTargetNative(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := s.Match(ctx, a, op()); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := s.Match(ctx, c, op()); err != nil {
-		t.Fatal(err)
-	}
 	// Both issued lists showed B at a better rank; pin that issued target.
 	for _, actor := range []identity.ActorContext{a, c} {
-		exec(t, p, `UPDATE one_on_one_players SET offered=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(actor.PlayerID), "["+strconv.FormatInt(int64(b.PlayerID), 10)+"]")
+		pinOneOnOneOffer(t, p, actor, b.PlayerID)
 	}
 	// A concurrent attacker settles and drops B below both challengers.
 	exec(t, p, `UPDATE one_on_one_players SET points=3000,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
@@ -640,4 +690,125 @@ func TestI9_10OneOnOneStaleTargetNative(t *testing.T) {
 	if !errors.Is(err, d.ErrOfferStale) {
 		t.Fatalf("moved target START err=%v want ErrOfferStale", err)
 	}
+}
+
+// TestI9_10OneOnOneTargetDroppedOneRankNative proves D488 parity for a target
+// that only drops one rank and stays inside the issued band: the recorded rank,
+// not the current band, decides.
+func TestI9_10OneOnOneTargetDroppedOneRankNative(t *testing.T) {
+	p := pool(t)
+	defer p.Close()
+	s := oneOnOneService(t, p)
+	server := rankingServer(t, p)
+	a, heroesA := oneOnOnePlayer(t, p, server)
+	b, heroesB := oneOnOnePlayer(t, p, server)
+	c, heroesC := oneOnOnePlayer(t, p, server)
+	for _, actor := range []identity.ActorContext{a, b, c} {
+		if _, err := s.Load(ctx, actor, op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, x := range []struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}{{a, heroesA}, {b, heroesB}, {c, heroesC}} {
+		if err := s.ChangeTeams(ctx, x.actor, teamsOf(x.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	exec(t, p, `UPDATE one_on_one_players SET points=4310,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
+	exec(t, p, `UPDATE one_on_one_players SET points=4305,state_version=state_version+1 WHERE player_id=$1`, int64(c.PlayerID))
+	pinOneOnOneOffer(t, p, a, b.PlayerID)
+	// B and C swap ranks; B is still inside A's better-rank bands.
+	exec(t, p, `UPDATE one_on_one_players SET points=4303,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
+	exec(t, p, `UPDATE one_on_one_players SET points=4312,state_version=state_version+1 WHERE player_id=$1`, int64(c.PlayerID))
+	if !inOneOnOneBand(t, p, a.PlayerID, b.PlayerID) {
+		t.Fatal("fixture target must stay inside the issued band")
+	}
+	_, err := s.Start(ctx, a, app.StartCommand{Formations: teamsOf(heroesA, 3), Enemy: b.PlayerID}, op())
+	if !errors.Is(err, d.ErrOfferStale) {
+		t.Fatalf("target that dropped one rank err=%v want ErrOfferStale", err)
+	}
+	response := stockruntime.OneOnOneDispatcher{Authority: fixedSocialAuthority{actor: a}, Service: s}.Dispatch(ctx,
+		httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 2484, Operation: op(), ReceivedAt: time.Now().UTC(),
+			Claims: wire.CredentialClaims{Token: "fixture", Region: int64(a.LogicalServerID)},
+			Params: map[string]any{"formations": []any{"1", "2", "3"}, "enemy_id": json.Number(strconv.FormatInt(int64(b.PlayerID), 10))}}})
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(35026) {
+		t.Fatalf("dropped-rank START response=%+v", response)
+	}
+}
+
+// TestI9_10OneOnOneConcurrentAttackersRankChangedNative proves that when
+// several attackers hold an offer for one rank, the first fight moves the
+// target and everyone after it receives the stock 409/35026 refusal.
+func TestI9_10OneOnOneConcurrentAttackersRankChangedNative(t *testing.T) {
+	p := pool(t)
+	defer p.Close()
+	s := oneOnOneService(t, p)
+	server := rankingServer(t, p)
+	target, targetHeroes := oneOnOnePlayer(t, p, server)
+	type challenger struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}
+	challengers := []challenger{}
+	for range 3 {
+		actor, heroes := oneOnOnePlayer(t, p, server)
+		challengers = append(challengers, challenger{actor, heroes})
+	}
+	if !oneOnOneCatalog(t, p).Open(time.Now()) {
+		t.Skip("1 on 1 START is closed outside 08:00-22:00 GMT+8")
+	}
+	for _, actor := range []identity.ActorContext{target, challengers[0].actor, challengers[1].actor, challengers[2].actor} {
+		if _, err := s.Load(ctx, actor, op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := s.ChangeTeams(ctx, target, teamsOf(targetHeroes, 3), op()); err != nil {
+		t.Fatal(err)
+	}
+	for _, x := range challengers {
+		if err := s.ChangeTeams(ctx, x.actor, teamsOfFive(x.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// One rank above all three attackers, who each hold an offer for it.
+	exec(t, p, `UPDATE one_on_one_players SET points=4305,state_version=state_version+1 WHERE player_id=$1`, int64(target.PlayerID))
+	for _, x := range challengers {
+		pinOneOnOneOffer(t, p, x.actor, target.PlayerID)
+	}
+	targetRank := oneOnOneGlobalRank(t, p, target.PlayerID)
+	first, err := startSettled(s, challengers[0].actor, app.StartCommand{Formations: teamsOfFive(challengers[0].heroes, 3), Enemy: target.PlayerID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !first.Win || oneOnOneGlobalRank(t, p, target.PlayerID) == targetRank {
+		t.Fatalf("first attacker must win and move the target: win=%v rank=%d", first.Win, targetRank)
+	}
+	for _, x := range challengers[1:] {
+		_, err := s.Start(ctx, x.actor, app.StartCommand{Formations: teamsOfFive(x.heroes, 3), Enemy: target.PlayerID}, op())
+		if !errors.Is(err, d.ErrOfferStale) {
+			t.Fatalf("later attacker %d err=%v want ErrOfferStale", x.actor.PlayerID, err)
+		}
+		response := stockruntime.OneOnOneDispatcher{Authority: fixedSocialAuthority{actor: x.actor}, Service: s}.Dispatch(ctx,
+			httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 2484, Operation: op(), ReceivedAt: time.Now().UTC(),
+				Claims: wire.CredentialClaims{Token: "fixture", Region: int64(x.actor.LogicalServerID)},
+				Params: map[string]any{"formations": []any{"1", "2", "3"}, "enemy_id": json.Number(strconv.FormatInt(int64(target.PlayerID), 10))}}})
+		if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(35026) {
+			t.Fatalf("later attacker %d response=%+v", x.actor.PlayerID, response)
+		}
+	}
+}
+
+func oneOnOneGlobalRank(t *testing.T, p *pg.Pool, pid identity.PlayerID) int64 {
+	t.Helper()
+	standings, err := (oneononestore.Store{}).StandingsTx(ctx, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ranked, ok := d.Find(oneOnOneCatalog(t, p).Rank(standings), pid)
+	if !ok {
+		t.Fatalf("player %d is not in the standings", pid)
+	}
+	return ranked.Global
 }
