@@ -70,23 +70,18 @@ func (Store) ReadLadderTx(c context.Context, q tx.Queryer, server identity.Logic
 	return l, true, l.Validate()
 }
 
-// CreateLadderTx seeds the root and the private-policy robot ranks. A concurrent
-// first seeding surfaces as a RepeatableRead serialization failure, which retries.
+// CreateLadderTx seeds the root and the private-policy robot ranks. Seeding is
+// idempotent so a concurrent first entry at Read Committed waits on the losing
+// insert instead of failing; the caller re-reads the durable ladder afterwards.
 func (Store) CreateLadderTx(c context.Context, t tx.Tx, l d.Ladder) error {
 	if t == nil || l.Validate() != nil || l.Size != d.RobotTeams || l.StateVersion != 1 {
 		return d.ErrConflict
 	}
-	if e := one(t.Exec(c, `INSERT INTO top_floor_ladders(logical_server_id,content_revision,policy_id,size,settled_day,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,1,$6,$6) ON CONFLICT(logical_server_id) DO NOTHING`, int64(l.Server), l.ContentRevision, d.PolicyID, l.Size, l.SettledDay, l.CreatedAt)); e != nil {
+	if _, e := t.Exec(c, `INSERT INTO top_floor_ladders(logical_server_id,content_revision,policy_id,size,settled_day,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,1,$6,$6) ON CONFLICT(logical_server_id) DO NOTHING`, int64(l.Server), l.ContentRevision, d.PolicyID, l.Size, l.SettledDay, l.CreatedAt); e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `INSERT INTO top_floor_ranks(logical_server_id,rank,robot_team)SELECT $1,r,$2+1-r FROM generate_series(1,$2::bigint) r`, int64(l.Server), int64(d.RobotTeams))
-	if e != nil {
-		return e
-	}
-	if tag.RowsAffected() != d.RobotTeams {
-		return d.ErrConflict
-	}
-	return nil
+	_, e := t.Exec(c, `INSERT INTO top_floor_ranks(logical_server_id,rank,robot_team)SELECT $1,r,$2+1-r FROM generate_series(1,$2::bigint) r ON CONFLICT(logical_server_id,rank) DO NOTHING`, int64(l.Server), int64(d.RobotTeams))
+	return e
 }
 
 func (Store) SaveLadderTx(c context.Context, t tx.Tx, l d.Ladder, old int64) error {

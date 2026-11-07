@@ -63,7 +63,15 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		return nil, e
 	}
 	var out map[string]any
-	_, res, e := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.Serializable}, retry(), timedReceipt{receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}}, func(c context.Context, sc gen.TimedScope) error {
+	// RepeatableRead, not Serializable: the combat input freeze reads the player's
+	// roster and content, and at a simultaneous START wave SSI turns those reads
+	// into page-level predicate locks that abort unrelated players' starts. Every
+	// write in this body is a state_version-guarded update of a row locked FOR
+	// UPDATE first (pet, hero, player root, campaign row) or an economy row locked
+	// by the I5 owner, and the receipt unique key keeps one application per
+	// operation; a concurrent duplicate instead aborts on the player row lock and
+	// retries into the receipt replay. No stale read is written back.
+	_, res, e := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), timedReceipt{receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}}, func(c context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
 		if e := s.Fence.FenceActorTx(c, sc.Tx, a, at); e != nil {
 			return e
