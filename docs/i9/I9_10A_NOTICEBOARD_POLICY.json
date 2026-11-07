@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "feature": "I9-10A Event Centre Notice Board (MIDs 1083-1087)",
+  "policy_version": "I9_10A_NOTICE_BOARD_V1",
+  "tunables": {
+    "board_building_type": 6,
+    "refresh": {
+      "rule": "DAILY_AT_GAME_DAY_0500_GMT8",
+      "source": "translation.lua EVENT_CENTRE_BOARD_REFRESH_TIME; modes.Day"
+    },
+    "offer_selection": {
+      "rule": "OWNED_HERO_ROWS_SORTED_BY_MISSION_ID_TO_TASK_LIMIT",
+      "task_limit_source": "event_centre_notice_board.task_limit",
+      "gold_task_source": "event_centre_notice_board.gold_task",
+      "min_player_level_by_tier": [1, 10, 20],
+      "tier_source": "event_centre_hero.mission_id position"
+    },
+    "award_selection": {
+      "rule": "MISSION_TIER_GRADE_DETERMINISTIC_BY_PLAYER_DAY_MISSION",
+      "deposit_task_grade": 2,
+      "source": "event_centre_mission_award.grade"
+    },
+    "eligibility": {
+      "leader_and_partners": "OWNED_HERO_PARTNER_IDS_ONLY",
+      "partner_limit": 5,
+      "busy_heroes": "REFUSED_WHILE_THEIR_MISSION_IS_DOING",
+      "power_cap": "SUM_OF_DISPLAYED_HERO_FORCE_AT_MOST_UPPER_LIMIT_FIGHTING",
+      "force_cap_source": "event_centre_hero.upper_limit_fighting at the mission tier"
+    },
+    "combat": {
+      "entry": "internal/application/combat.Service.StartTx -> Resolve -> TerminalTx",
+      "trust_profile": "SERVER_REPORT",
+      "campaign_type": 96,
+      "enemy_lineup": "event_centre_mission.enemy table ids as TEMPLATE actors",
+      "known_limit": "the resolver's table-shaped TEMPLATE cannot carry monster_star/monster_quality/monster_level"
+    },
+    "settlement": {
+      "win": "GRANT_THE_OFFER_AWARD",
+      "loss": "GRANT_NOTHING_AND_REFUND_ANY_DEPOSIT",
+      "deposit_on_win": "CONSUMED",
+      "wish": "DOUBLES_EVERY_AWARD_LINE",
+      "blessing_crystal_item_id": 50001136,
+      "chest_handling": "THE_AWARD_ITEM_IS_GRANTED_AS_A_STACK_ITEM, as BoardTaskBonusItem.lua adds it to the backpack"
+    },
+    "history": {
+      "limit": 50,
+      "report_wire": "reply.report[1].content is the stored JSON report string"
+    }
+  }
+}

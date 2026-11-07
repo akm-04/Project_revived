@@ -10,12 +10,16 @@ import (
 	"time"
 
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
+	appcombat "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -30,6 +34,9 @@ const (
 	ConfirmMake    = "EVENT_CENTRE_CONFIRM_MAKE"
 	AccelerateMake = "EVENT_CENTRE_ACCELERATE_MAKE"
 	AdminExchange  = "EVENT_CENTRE_ADMIN_EXCHANGE"
+	BoardReceive   = "EVENT_CENTRE_BOARD_RECEIVE"
+	BoardGiveUp    = "EVENT_CENTRE_BOARD_GIVE_UP"
+	BoardConfirm   = "EVENT_CENTRE_BOARD_CONFIRM_AWARD"
 )
 
 var ErrUnavailable = errors.New("event centre: unavailable")
@@ -41,6 +48,8 @@ type Command struct {
 	Family                               string
 	ItemID, ItemNum, BuildingType, PetID int64
 	SpeedNum, FromType, ToType           int64
+	MissionID, Leader, WishCrystal       int64
+	Partners                             []int64
 }
 
 func (c Command) Validate() error {
@@ -65,6 +74,15 @@ func (c Command) Validate() error {
 		if c.FromType <= 0 || c.ToType <= 0 || c.FromType == c.ToType {
 			return ErrInvalid
 		}
+	case BoardReceive:
+		if c.MissionID <= 0 || c.Leader <= 0 || len(c.Partners) > 5 || c.WishCrystal < 0 || c.WishCrystal > 1 {
+			return ErrInvalid
+		}
+	case BoardGiveUp:
+		if c.MissionID <= 0 {
+			return ErrInvalid
+		}
+	case BoardConfirm:
 	default:
 		return ErrUnqualified
 	}
@@ -95,6 +113,9 @@ type OwnerPort interface {
 	LockRootTx(context.Context, tx.Tx, identity.PlayerID) (Root, bool, error)
 	EnsureRootTx(context.Context, tx.Tx, identity.PlayerID, string, time.Time) error
 	SaveRootTx(context.Context, tx.Tx, Root, int64) error
+	InsertBoardReportTx(context.Context, tx.Tx, identity.PlayerID, int64, string, time.Time) error
+	ReadBoardReportTx(context.Context, tx.Queryer, identity.PlayerID, int64) (string, bool, error)
+	DeleteBoardReportsExceptTx(context.Context, tx.Tx, identity.PlayerID, []int64) error
 }
 type ContentPort interface {
 	WorkshopInputsActive(context.Context) (string, bool, error)
@@ -117,6 +138,22 @@ type GrantPort interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
 }
 
+type BoardHeroes interface {
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
+}
+type BoardLevels interface {
+	ReadProgressionTx(context.Context, tx.Queryer, identity.PlayerID) (player.Progression, error)
+}
+type BoardStats interface {
+	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+}
+type BoardCombat interface {
+	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, appcombat.StartRequest) (appcombat.Started, error)
+	Resolve(context.Context, operation.Context, ids.UUID) (appcombat.Resolved, error)
+	TerminalTx(context.Context, tx.Tx, appcombat.TerminalRequest) (appcombat.Settled, error)
+	CloseTx(context.Context, tx.Tx, appcombat.TerminalRequest) (appcombat.Closed, error)
+}
+
 type Service struct {
 	Timed    gen.TimedRunner
 	Reads    tx.Runner
@@ -129,6 +166,10 @@ type Service struct {
 	Costs    CostPort
 	Grants   GrantPort
 	Receipts receipt.Store
+	Heroes   BoardHeroes
+	Levels   BoardLevels
+	Stats    BoardStats
+	Combat   BoardCombat
 }
 
 func (s Service) complete() bool {
@@ -316,7 +357,7 @@ func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command
 			return nil
 		}
 		out = Result{Schema: ResultSchema, Command: d.Command, Actor: d.Actor, OperationID: d.Operation.ID, Entropy: d.Operation.EntropySeed, ContentRevision: d.ContentRevision, DecisionAt: d.DecisionAt}
-		out.Body, err = s.apply(ctx, sc.Tx, a, d)
+		out.Body, err = s.apply(ctx, sc, a, d)
 		if err != nil {
 			return err
 		}

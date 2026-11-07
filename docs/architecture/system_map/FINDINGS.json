@@ -576,56 +576,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 1083,
-   "name": "GET_NOTICE_BOARD_INFO",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1084,
-   "name": "RECEIVE_MISSION",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1085,
-   "name": "GIVE_UP_MISSION",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1086,
-   "name": "CONFIRM_NEW_AWARD_LOG",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1087,
-   "name": "GET_NOTICE_BOARD_REPORT",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 1170,
    "name": "BROCAST_FINISH_JIGSAW",
    "files": [
@@ -1018,12 +968,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 588,
+  "count": 583,
   "window_sender_mid_count": 142,
-  "non_window_sender_mid_count": 446,
+  "non_window_sender_mid_count": 441,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 59,
+   "no_registration": 54,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -2449,71 +2399,6 @@
      "app/windows/SelectSXHeroWindow.lua"
     ],
     "non_window_sender_files": [],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1083,
-    "name": "GET_NOTICE_BOARD_INFO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1084,
-    "name": "RECEIVE_MISSION",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1085,
-    "name": "GIVE_UP_MISSION",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1086,
-    "name": "CONFIRM_NEW_AWARD_LOG",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1087,
-    "name": "GET_NOTICE_BOARD_REPORT",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
     "runtime_reachability": "unknown"
    },
    {

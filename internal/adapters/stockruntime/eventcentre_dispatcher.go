@@ -17,6 +17,8 @@ import (
 type EventCentrePort interface {
 	Read(context.Context, identity.ActorContext, uint16, operation.Context) (map[string]any, error)
 	Command(context.Context, identity.ActorContext, app.Command, operation.Context) (app.Result, error)
+	BoardInfo(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+	BoardReport(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 }
 
 type EventCentreDispatcher struct {
@@ -40,6 +42,25 @@ func (d EventCentreDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 			return conflictRefusal(1)
 		}
 		body, err := d.Service.Read(ctx, a, mid, req.Envelope.Operation)
+		if err != nil {
+			return failEventCentre(err)
+		}
+		return okI5(body)
+	case 1083:
+		if !onlyStockGameplayParams(params) {
+			return conflictRefusal(1)
+		}
+		body, err := d.Service.BoardInfo(ctx, a, req.Envelope.Operation)
+		if err != nil {
+			return failEventCentre(err)
+		}
+		return okI5(body)
+	case 1087:
+		boardID, err := requiredInt64(params, "battle_id")
+		if err != nil || !onlyStockGameplayParams(params, "battle_id") {
+			return conflictRefusal(1)
+		}
+		body, err := d.Service.BoardReport(ctx, a, boardID, req.Envelope.Operation)
 		if err != nil {
 			return failEventCentre(err)
 		}
@@ -104,6 +125,26 @@ func eventCentreCommand(mid uint16, params map[string]any) (app.Command, []strin
 		}
 		command = app.Command{Family: app.AccelerateMake, SpeedNum: speedNum, BuildingType: buildingType}
 		return command, []string{"speed_num", "building_type"}, nil
+	case 1084:
+		missionID, firstErr := requiredInt64(params, "mission_id")
+		leader, secondErr := requiredInt64(params, "leader")
+		partners, thirdErr := int64List(params, "partners")
+		wish := optionalInt64(params, "wish_crystal")
+		if firstErr != nil || secondErr != nil || thirdErr != nil || len(partners) > 5 {
+			return command, nil, errors.New("invalid notice board receive request")
+		}
+		command = app.Command{Family: app.BoardReceive, MissionID: missionID, Leader: leader, Partners: partners, WishCrystal: wish}
+		return command, []string{"mission_id", "leader", "partners", "wish_crystal"}, nil
+	case 1085:
+		missionID, err := requiredInt64(params, "mission_id")
+		if err != nil {
+			return command, nil, err
+		}
+		command = app.Command{Family: app.BoardGiveUp, MissionID: missionID}
+		return command, []string{"mission_id"}, nil
+	case 1086:
+		command = app.Command{Family: app.BoardConfirm}
+		return command, nil, nil
 	case 1082:
 		fromType, firstErr := requiredInt64(params, "from_type")
 		toType, secondErr := requiredInt64(params, "to_type")

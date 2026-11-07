@@ -2772,6 +2772,20 @@
       ],
       "write_exceptions": []
     },
+    "player_event_centre_board_reports": {
+      "owner": "event-centre",
+      "migration": "migrations/00150_i9_10a_notice_board_reports.sql",
+      "allowed_query_owners": [
+        "event-centre"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventcentrestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventcentrestore/"
+      ],
+      "write_exceptions": []
+    },
     "player_book_admissions": {
       "owner": "book-skill",
       "migration": "migrations/00051_i7c2d_book_inputs.sql",

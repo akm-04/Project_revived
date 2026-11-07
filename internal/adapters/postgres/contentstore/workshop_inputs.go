@@ -127,12 +127,16 @@ func decodeGenerated(name string, dst any) error {
 
 func workshopCatalogDomain(workshop builtin.WorkshopInputCatalog, administrator builtin.AdministratorInputCatalog) (eventcentre.Catalog, error) {
 	out := eventcentre.Catalog{
-		Desk:        map[int64]eventcentre.DeskRule{},
-		Recycle:     map[int64]eventcentre.RecycleRule{},
-		Admin:       map[[2]int64]eventcentre.AdminRule{},
-		AdminLevels: map[int64][]int64{},
-		Recipes:     map[int64]eventcentre.Recipe{},
-		PetCrafting: map[int64][][]int64{},
+		Desk:         map[int64]eventcentre.DeskRule{},
+		Recycle:      map[int64]eventcentre.RecycleRule{},
+		Admin:        map[[2]int64]eventcentre.AdminRule{},
+		AdminLevels:  map[int64][]int64{},
+		Recipes:      map[int64]eventcentre.Recipe{},
+		PetCrafting:  map[int64][][]int64{},
+		Board:        map[int64]eventcentre.BoardRule{},
+		Missions:     map[int64]eventcentre.MissionRule{},
+		HeroProfiles: map[int64]eventcentre.HeroProfileRule{},
+		Awards:       map[int64]eventcentre.AwardRule{},
 	}
 	if err := workshop.Validate(); err != nil {
 		return out, eventcentre.ErrUnqualified
@@ -180,6 +184,20 @@ func workshopCatalogDomain(workshop builtin.WorkshopInputCatalog, administrator 
 	}
 	for _, rule := range workshop.PetCrafting {
 		out.PetCrafting[rule.TableID] = rule.Levels
+	}
+	for _, rule := range workshop.Board {
+		out.Board[rule.Level] = eventcentre.BoardRule{Level: rule.Level, TaskLimit: rule.TaskLimit, GoldTask: rule.GoldTask}
+	}
+	for _, rule := range workshop.Missions {
+		out.Missions[rule.ID] = eventcentre.MissionRule{ID: rule.ID, HeroID: rule.HeroID, FightID: rule.FightID, Fighting: rule.Fighting, Duration: rule.Duration, Deposit: rule.Deposit,
+			EnemyIDs: append([]int64(nil), rule.EnemyIDs...), MonsterStars: append([]int64(nil), rule.MonsterStars...), MonsterQualities: append([]int64(nil), rule.MonsterQualities...), MonsterLevels: append([]int64(nil), rule.MonsterLevels...)}
+	}
+	for _, rule := range workshop.HeroProfiles {
+		out.HeroProfiles[rule.HeroID] = eventcentre.HeroProfileRule{HeroID: rule.HeroID, MissionIDs: append([]int64(nil), rule.MissionIDs...), ForceThresholds: append([]int64(nil), rule.ForceThresholds...)}
+	}
+	for _, rule := range workshop.Awards {
+		out.Awards[rule.ID] = eventcentre.AwardRule{ID: rule.ID, Grade: rule.Grade, ItemID: rule.ItemID, ItemCount: rule.ItemCount,
+			MaterialIDs: append([]int64(nil), rule.MaterialIDs...), MaterialAmounts: append([]int64(nil), rule.MaterialAmounts...), Gold: rule.Gold}
 	}
 	critParam, err := eventcentre.ParseDecimal(workshop.Misc.CritParam)
 	if err != nil {

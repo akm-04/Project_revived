@@ -130,6 +130,9 @@
     "Queryer",
     "Validate"
    ],
+   "eventcentre": [
+    "NewCoherentReadScope"
+   ],
    "godstrial": [
     "NewCoherentReadScope"
    ],
@@ -373,6 +376,12 @@
    "dodgeball": [
     "*AttestDerivedTx",
     "*StartTx"
+   ],
+   "eventcentre": [
+    "*CloseTx",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
    ],
    "godstrial": [
     "*AttestSummaryTx",
@@ -1167,6 +1176,7 @@
     "*ApplyMaterialDebitTx",
     "*FenceActorTx",
     "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
     "*SettleGrantTx"
    ],
    "frienddm": [
@@ -1647,6 +1657,9 @@
    "combat": [
     "*HeroTx",
     "*PetTx"
+   ],
+   "eventcentre": [
+    "*HeroTx"
    ],
    "heroforce": [
     "*HeroTx"
@@ -3333,6 +3346,15 @@
    "bookskill": [
     "*BookInputsTx"
    ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*CloseTx",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
    "generation": [
     "Bind",
     "DecisionAt"
@@ -3341,10 +3363,17 @@
     "*ApplyMaterialDebitTx",
     "*FenceActorTx",
     "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
     "*SettleGrantTx"
+   ],
+   "interface:eventcentre.BoardHeroes": [
+    "*ListHeroesTx"
    ],
    "interface:eventcentre.PetPort": [
     "*FindPetByIDTx"
+   ],
+   "publicstats": [
+    "*HeroTx"
    ],
    "store:contentstore": [
     "*WorkshopInputsActive",
