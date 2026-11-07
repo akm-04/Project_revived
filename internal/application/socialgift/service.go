@@ -34,6 +34,13 @@ type Service struct {
 	Grants            GrantOwner
 	Admission         ActorAdmission
 	Fence             ActorFence
+	Bond              DailyBondOwner
+}
+
+// DailyBondOwner is the Mentor seam that raises the pair's bond once per day
+// when they exchange the stock gift. It must be called inside this transaction.
+type DailyBondOwner interface {
+	AddDailyBondTx(context.Context, tx.Tx, identity.PlayerID, identity.PlayerID, time.Time) error
 }
 
 func Profile() tx.Profile {
@@ -404,6 +411,11 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		t := Transfer{ID: transferID, Sender: actor.PlayerID, Recipient: recipient, SenderDay: day, SenderGeneration: epoch.Generation, SendOperation: op.ID, RequestFingerprint: fp, StartedAt: op.StartedAt.UTC(), IssuedAt: at, FriendshipGeneration: v.FriendshipGeneration, RecipientBlockVersion: v.RecipientBlockVersion, RewardRevision: content.Revision, VectorFingerprint: content.Catalog.VectorFingerprint, Amount: content.Catalog.Amount, NoticeID: n.NoticeID, Version: 1}
 		if e := s.Store.InsertTransfer(c, sc.Tx, t); e != nil {
 			return e
+		}
+		if s.Bond != nil {
+			if e := s.Bond.AddDailyBondTx(c, sc.Tx, actor.PlayerID, recipient, at); e != nil {
+				return e
+			}
 		}
 		for _, pid := range []identity.PlayerID{actor.PlayerID, recipient} {
 			if e := s.Relations.TouchRootTx(c, sc.Tx, roots[pid], at); e != nil {

@@ -5559,6 +5559,76 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00130_i9_10e_social_invite.sql"
+    },
+    "mentor_relations": {
+      "owner": "mentor",
+      "allowed_query_owners": [
+        "mentor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00137_i9_10f_mentor.sql"
+    },
+    "mentor_states": {
+      "owner": "mentor",
+      "allowed_query_owners": [
+        "mentor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00137_i9_10f_mentor.sql"
+    },
+    "mentor_applications": {
+      "owner": "mentor",
+      "allowed_query_owners": [
+        "mentor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00137_i9_10f_mentor.sql"
+    },
+    "mentor_mission_progress": {
+      "owner": "mentor",
+      "allowed_query_owners": [
+        "mentor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00137_i9_10f_mentor.sql"
+    },
+    "mentor_exam_receipts": {
+      "owner": "mentor",
+      "allowed_query_owners": [
+        "mentor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/mentorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00137_i9_10f_mentor.sql"
     }
   }
 }

@@ -746,6 +746,10 @@
     "Operation",
     "Run"
    ],
+   "mentor": [
+    "DecisionAt",
+    "Run"
+   ],
    "occult": [
     "DecisionAt",
     "Operation",
@@ -1256,6 +1260,11 @@
     "*SettleGrantTx",
     "StockRepresentableBulkAwards"
    ],
+   "mentor": [
+    "*SettleGrantTx",
+    "StockMID369Rewards",
+    "StockRepresentableBulkAwards"
+   ],
    "missioninputs": [
     "*CrystalSpentOnDayTx",
     "*ReadProgressionTx",
@@ -1454,6 +1463,11 @@
   },
   "march": {},
   "memoir": {},
+  "mentor": {
+   "socialgift": [
+    "*AddDailyBondTx"
+   ]
+  },
   "missioninputs": {
    "i5": [
     "*MissionRosterTx",
@@ -1475,6 +1489,9 @@
     "Validate"
    ],
    "libraryforum": [
+    "Validate"
+   ],
+   "mentor": [
     "Validate"
    ],
    "ranking": [
@@ -1841,6 +1858,9 @@
     "Existing",
     "PrepareTx",
     "ReadTx"
+   ],
+   "mentor": [
+    "*EnsureFriendshipTx"
    ],
    "profilefeedback": [
     "CanonicalServer"
@@ -4314,6 +4334,37 @@
     "*MarchCandidatesTx"
    ]
   },
+  "mentor": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*SettleGrantTx",
+    "StockMID369Rewards",
+    "StockRepresentableBulkAwards"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "socialrelation": [
+    "*EnsureFriendshipTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*MentorCatalog"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*PlayerIDBoundsTx",
+    "*ProfileTx",
+    "*ProfilesAfterTx",
+    "*ProfilesByExactNameTx"
+   ],
+   "store:librarystore": [
+    "*BackgroundCountTx"
+   ]
+  },
   "missioninputs": {
    "bookskill": [
     "*BookInputsTx"
@@ -5020,6 +5071,9 @@
     "*SettleGrantTx",
     "*VerifyGiftBalanceTx"
    ],
+   "mentor": [
+    "*AddDailyBondTx"
+   ],
    "playerroot": [
     "CanonicalPlayerIDs",
     "Validate"
@@ -5642,6 +5696,9 @@
   ],
   "memoir": [
    "cmd/gxb-api/memoir_postgres.go"
+  ],
+  "mentor": [
+   "cmd/gxb-api/main_postgres.go"
   ],
   "missioninputs": [],
   "occult": [

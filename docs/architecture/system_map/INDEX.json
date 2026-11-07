@@ -10,6 +10,7 @@
    "activitystore.BootstrapProjection",
    "guildprojection.BootstrapProjection",
    "guildprojection.TeaProjection",
+   "mentorstore.BootstrapProjection",
    "characterstore.HeroBootstrapProjection",
    "librarystore.BootstrapProjection",
    "bookstore.BootstrapProjection",
@@ -165,7 +166,15 @@
    "1844": "publicprofile",
    "1845": "dormhouse",
    "185": "socialrelation",
+   "1856": "mentor",
+   "1857": "mentor",
+   "1858": "mentor",
+   "1859": "mentor",
    "186": "socialrelation",
+   "1860": "mentor",
+   "1861": "mentor",
+   "1862": "mentor",
+   "1863": "mentor",
    "187": "socialrelation",
    "1872": "arena",
    "1873": "arena",
@@ -638,6 +647,11 @@
    "logical_servers": "bootstrap",
    "march_players": "march",
    "memoir_players": "memoir",
+   "mentor_applications": "mentor",
+   "mentor_exam_receipts": "mentor",
+   "mentor_mission_progress": "mentor",
+   "mentor_relations": "mentor",
+   "mentor_states": "mentor",
    "occult_logs": "occult",
    "occult_players": "occult",
    "occult_reports": "occult",
@@ -1016,7 +1030,7 @@
   },
   {
    "callees": 5,
-   "callers": 55,
+   "callers": 56,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1124,7 +1138,7 @@
   },
   {
    "callees": 12,
-   "callers": 54,
+   "callers": 55,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1195,6 +1209,15 @@
    "tables": 1
   },
   {
+   "callees": 7,
+   "callers": 1,
+   "mids": 8,
+   "name": "mentor",
+   "path": "internal/application/mentor",
+   "purpose": "",
+   "tables": 5
+  },
+  {
    "callees": 5,
    "callers": 1,
    "mids": 0,
@@ -1232,7 +1255,7 @@
   },
   {
    "callees": 0,
-   "callers": 4,
+   "callers": 5,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1384,7 +1407,7 @@
    "tables": 0
   },
   {
-   "callees": 10,
+   "callees": 11,
    "callers": 2,
    "mids": 0,
    "name": "socialgift",
@@ -1439,7 +1462,7 @@
   },
   {
    "callees": 6,
-   "callers": 12,
+   "callers": 13,
    "mids": 15,
    "name": "socialrelation",
    "path": "internal/application/socialrelation",

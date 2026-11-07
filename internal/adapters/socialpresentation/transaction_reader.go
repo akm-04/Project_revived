@@ -36,8 +36,14 @@ func (r TransactionReader) ReadManyTx(c context.Context, t tx.Tx, ids []identity
 	return r.ReadManyAtTx(c, t, ids, at)
 }
 func (r TransactionReader) ReadManyAtTx(c context.Context, t tx.Tx, ids []identity.PlayerID, at time.Time) (playerpresentation.Batch, error) {
+	return r.ReadManyAtQueryer(c, t, ids, at)
+}
+
+// ReadManyAtQueryer composes the same owner readers from an existing queryer
+// (for example the MID1 detail contributor). It never opens a transaction.
+func (r TransactionReader) ReadManyAtQueryer(c context.Context, q tx.Queryer, ids []identity.PlayerID, at time.Time) (playerpresentation.Batch, error) {
 	out := playerpresentation.Batch{ObservedAt: at.UTC(), Players: make(map[identity.PlayerID]playerpresentation.Projected)}
-	if t == nil || at.IsZero() {
+	if q == nil || at.IsZero() {
 		return out, errors.New("invalid presentation observation")
 	}
 	if len(ids) == 0 {
@@ -47,12 +53,12 @@ func (r TransactionReader) ReadManyAtTx(c context.Context, t tx.Tx, ids []identi
 	if e != nil {
 		return out, e
 	}
-	rev, e := (contentstore.Store{}).ActiveRevision(c, t)
+	rev, e := (contentstore.Store{}).ActiveRevision(c, q)
 	if e != nil {
 		return out, e
 	}
-	reader := publicpresentation.Reader{Queryer: t, Revision: rev, ObservedAt: at, Display: r.Display}
-	presence, e := (presencestore.Store{Queryer: t}).ReadManyAt(c, ordered, at)
+	reader := publicpresentation.Reader{Queryer: q, Revision: rev, ObservedAt: at, Display: r.Display}
+	presence, e := (presencestore.Store{Queryer: q}).ReadManyAt(c, ordered, at)
 	if e != nil {
 		return out, e
 	}
