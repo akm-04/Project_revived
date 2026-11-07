@@ -94,6 +94,8 @@ type Grants interface {
 // already resolved to typed Combat participants by their owner.
 type Opponent struct {
 	PlayerID identity.PlayerID
+	Name     string
+	Level    int64
 	Heroes   []cb.Participant
 	Pets     []cb.Participant
 }

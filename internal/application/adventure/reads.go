@@ -137,6 +137,7 @@ func (s Mode) enemyInfo(c context.Context, enemy Opponent, at time.Time) (map[st
 		if len(enemy.Heroes) > 0 {
 			info["is_robot"] = int64(1)
 		}
+		info["player_name"], info["lev"] = enemy.Name, enemy.Level
 		info["heroes"] = templateRows(enemy.Heroes)
 		return info, nil
 	}
