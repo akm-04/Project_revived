@@ -124,7 +124,7 @@ func (s Mode) EnterCoop(c context.Context, a identity.ActorContext, roomID int64
 	if len(room.Members()) >= int(room.Capacity) && !seated(room, a.PlayerID) {
 		return nil, fmt.Errorf("%w: room full", d.ErrRefused)
 	}
-	joined, err := s.Rooms.Join(c, a, IllusionFamily(), roomID, op)
+	joined, err := s.Rooms.Join(c, a, sr.JoinRequest{Family: IllusionFamily(), RoomID: roomID}, op)
 	if err != nil {
 		return nil, err
 	}

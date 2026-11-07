@@ -51,6 +51,10 @@ func (s Mode) CreateRoom(c context.Context, a identity.ActorContext, op operatio
 	if err := s.roomReady(); err != nil {
 		return nil, err
 	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
 	at, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
 		return nil, err
@@ -77,24 +81,22 @@ func (s Mode) CreateRoom(c context.Context, a identity.ActorContext, op operatio
 	if err != nil {
 		return nil, err
 	}
-	if _, err = s.Rooms.Open(c, a, sr.OpenRequest{Family: RoomFamilyRef(), Capacity: d.TeamSeats, Lease: roomLease, Payload: payload}, op); err != nil {
-		return nil, err
-	}
 	var info map[string]any
-	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
-		state, err := d.LoadRoomState(room.Payload)
-		if err != nil {
-			return err
-		}
-		if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
-			return err
-		}
-		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
-		if err != nil {
-			return err
-		}
-		return s.storeTeamInfo(sc, room, state, info)
-	}}, op)
+	_, err = s.Rooms.Open(c, a, sr.OpenRequest{Family: RoomFamilyRef(), Capacity: d.TeamSeats, Lease: roomLease, Payload: payload,
+		Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+			state, err := d.LoadRoomState(room.Payload)
+			if err != nil {
+				return err
+			}
+			if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
+				return err
+			}
+			info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
+			if err != nil {
+				return err
+			}
+			return s.storeTeamInfo(sc, room, state, info)
+		}}, op)
 	if err != nil {
 		return nil, err
 	}
@@ -153,6 +155,10 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 	if roomID <= 0 {
 		return nil, d.ErrInvalid
 	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
 	room, found, err := s.RoomStore.ReadRoomTx(c, s.Fresh, roomID)
 	if err != nil {
 		return nil, err
@@ -174,29 +180,22 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 	if !found || profile.Level < d.OpenLevel || abs(profile.Level-state.MasterLevel) > d.TeamLevelBand {
 		return nil, fmt.Errorf("%w: level band", d.ErrRefused)
 	}
-	joined, err := s.Rooms.Join(c, a, RoomFamilyRef(), roomID, op)
-	if err != nil {
-		return nil, err
-	}
-	state, err = d.LoadRoomState(joined.Payload)
-	if err != nil {
-		return nil, err
-	}
 	var info map[string]any
-	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
-		state, err := d.LoadRoomState(room.Payload)
-		if err != nil {
-			return err
-		}
-		if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
-			return err
-		}
-		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
-		if err != nil {
-			return err
-		}
-		return s.storeTeamInfo(sc, room, state, info)
-	}}, op)
+	_, err = s.Rooms.Join(c, a, sr.JoinRequest{Family: RoomFamilyRef(), RoomID: roomID,
+		Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+			state, err := d.LoadRoomState(room.Payload)
+			if err != nil {
+				return err
+			}
+			if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
+				return err
+			}
+			info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
+			if err != nil {
+				return err
+			}
+			return s.storeTeamInfo(sc, room, state, info)
+		}}, op)
 	if err != nil {
 		return nil, err
 	}

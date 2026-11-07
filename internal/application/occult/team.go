@@ -80,7 +80,7 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 	if err = s.requireBand(c, s.Fresh, loaded.catalog, room.Owner, a.PlayerID); err != nil {
 		return nil, err
 	}
-	if _, err = s.Rooms.Join(c, a, RoomFamilyRef(), roomID, op); err != nil {
+	if _, err = s.Rooms.Join(c, a, sr.JoinRequest{Family: RoomFamilyRef(), RoomID: roomID}, op); err != nil {
 		return nil, err
 	}
 	return s.roomChange(c, a, op)
