@@ -137,6 +137,13 @@ func run() error {
 	if err != nil {
 		log.Fatalf("invalid realtime policy: %v", err)
 	}
+	httpPollIdleTimeout := stockruntime.DefaultHTTPPollIdleTimeout
+	if value := os.Getenv("GXB_REALTIME_HTTP_IDLE_TIMEOUT"); value != "" {
+		httpPollIdleTimeout, err = time.ParseDuration(value)
+		if err != nil || httpPollIdleTimeout <= 0 {
+			log.Fatalf("invalid realtime HTTP poll idle timeout: %q", value)
+		}
+	}
 	admission, err := stockruntime.NewAdmissionLimiter(runtimePolicy)
 	if err != nil {
 		log.Fatalf("invalid realtime admission policy: %v", err)
@@ -404,9 +411,9 @@ func run() error {
 	defer ln.Close()
 	go func() { <-ctx.Done(); _ = ln.Close() }()
 	log.Printf("gxb-realtime I4 listening on %s", cfg.RealtimeAddr)
-	wsFailure := make(chan error, 1)
-	if wsAddress := os.Getenv("GXB_REALTIME_WS_ADDR"); wsAddress != "" {
-		wsListener, err := net.Listen("tcp", wsAddress)
+	httpPollFailure := make(chan error, 1)
+	if address := os.Getenv("GXB_REALTIME_HTTP_ADDR"); address != "" {
+		pollListener, err := net.Listen("tcp", address)
 		if err != nil {
 			stop()
 			<-listenerDone
@@ -414,17 +421,30 @@ func run() error {
 			<-generalDone
 			return err
 		}
-		wsServer := &http.Server{ReadHeaderTimeout: 5 * time.Second, Handler: server.WebSocketHandler(ctx)}
-		wsDone := make(chan struct{})
+		pollServer, err := stockruntime.NewHTTPPollServer(ctx, server, httpPollIdleTimeout)
+		if err != nil {
+			_ = pollListener.Close()
+			stop()
+			<-listenerDone
+			<-reconcileDone
+			<-generalDone
+			return err
+		}
+		httpServer := &http.Server{ReadHeaderTimeout: 5 * time.Second, Handler: pollServer.Handler()}
+		pollDone := make(chan struct{})
 		go func() {
-			defer close(wsDone)
-			if e := wsServer.Serve(wsListener); e != nil && !errors.Is(e, http.ErrServerClosed) && ctx.Err() == nil {
-				wsFailure <- e
+			defer close(pollDone)
+			if e := httpServer.Serve(pollListener); e != nil && !errors.Is(e, http.ErrServerClosed) && ctx.Err() == nil {
+				httpPollFailure <- e
 				stop()
 			}
 		}()
-		defer func() { _ = wsServer.Close(); <-wsDone }()
-		log.Printf("gxb-realtime WebSocket listening on %s%s", wsAddress, stockruntime.WebSocketPath)
+		defer func() {
+			_ = httpServer.Close()
+			pollServer.Close()
+			<-pollDone
+		}()
+		log.Printf("gxb-realtime HTTP poll listening on %s%s", address, stockruntime.HTTPPollPath)
 	}
 	listenerSlots := make(chan struct{}, runtimePolicy.MaxConnections)
 	var connections sync.WaitGroup
@@ -447,7 +467,7 @@ func run() error {
 					return failure
 				case failure := <-generalFailure:
 					return failure
-				case failure := <-wsFailure:
+				case failure := <-httpPollFailure:
 					return failure
 				default:
 					return nil

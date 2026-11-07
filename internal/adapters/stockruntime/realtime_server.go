@@ -94,8 +94,7 @@ func (s RealtimeServer) runtimeConfig() (limits.Config, RealtimePolicy, error) {
 	return cfg, p, nil
 }
 
-// frameSource is the transport seam. TCP and WebSocket each decode their wire
-// into the same realtime.Frame values and feed the same session loop.
+// frameSource is the transport seam feeding decoded frames to the shared session loop.
 type frameSource interface {
 	SetReadDeadline(time.Time) error
 	ReadFrames(context.Context) ([]wireRT.Frame, error)
@@ -183,10 +182,21 @@ func (s RealtimeServer) serve(ctx context.Context, cfg limits.Config, policy Rea
 		if err := ctx.Err(); err != nil {
 			return err
 		}
+		clientIdleTimeout := policy.ClientIdleTimeout
+		if transport, ok := source.(interface{ ClientIdleTimeout() time.Duration }); ok && transport.ClientIdleTimeout() > 0 {
+			clientIdleTimeout = transport.ClientIdleTimeout()
+		}
+		if admitted != nil {
+			if transport, ok := source.(interface{ ActivityTime() time.Time }); ok {
+				if activity := transport.ActivityTime(); activity.After(lastClientActivity) {
+					lastClientActivity = activity
+				}
+			}
+		}
 		if admitted == nil {
 			_ = source.SetReadDeadline(handshakeDeadline)
 		} else {
-			idleDeadline := lastClientActivity.Add(policy.ClientIdleTimeout)
+			idleDeadline := lastClientActivity.Add(clientIdleTimeout)
 			deadline := idleDeadline
 			if nextLiveness.Before(deadline) {
 				deadline = nextLiveness
@@ -195,6 +205,13 @@ func (s RealtimeServer) serve(ctx context.Context, cfg limits.Config, policy Rea
 		}
 		frames, readErr := source.ReadFrames(ctx)
 		now := time.Now().UTC()
+		if admitted != nil {
+			if transport, ok := source.(interface{ ActivityTime() time.Time }); ok {
+				if activity := transport.ActivityTime(); activity.After(lastClientActivity) {
+					lastClientActivity = activity
+				}
+			}
+		}
 		if len(frames) > 0 {
 			for _, f := range frames {
 				if gate == nil {
@@ -300,7 +317,7 @@ func (s RealtimeServer) serve(ctx context.Context, cfg limits.Config, policy Rea
 					return readErr
 				}
 				now = time.Now().UTC()
-				if !now.Before(lastClientActivity.Add(policy.ClientIdleTimeout)) {
+				if !now.Before(lastClientActivity.Add(clientIdleTimeout)) {
 					return ErrRealtimeClientIdle
 				}
 				if !now.Before(nextLiveness) {
