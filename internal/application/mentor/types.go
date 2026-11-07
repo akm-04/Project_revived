@@ -8,7 +8,6 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
-	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -130,10 +129,6 @@ type DirectoryReader interface {
 
 type CardReader interface {
 	ReadManyTx(context.Context, tx.Tx, []identity.PlayerID) (playerpresentation.Batch, error)
-}
-
-type PresenceReader interface {
-	ReadManyAt(context.Context, []identity.PlayerID, time.Time) (map[identity.PlayerID]socialpresence.Observation, error)
 }
 
 type FriendshipEnsurer interface {

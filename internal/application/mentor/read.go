@@ -60,7 +60,7 @@ func (service Service) Info(ctx context.Context, actor identity.ActorContext, op
 	return body, nil
 }
 
-func (service Service) readClassFacts(ctx context.Context, q tx.Tx, actor identity.PlayerID, at time.Time, catalog builtin.MentorInputCatalog, rules domain.Rules) (WireFacts, error) {
+func (service Service) readClassFacts(ctx context.Context, q tx.Tx, actor identity.PlayerID, at time.Time, catalog builtin.MentorInputCatalog, _ domain.Rules) (WireFacts, error) {
 	level, err := playerLevel(ctx, service.Directory, q, actor)
 	if err != nil {
 		return WireFacts{}, fmt.Errorf("mentor level: %w", err)
@@ -276,8 +276,8 @@ func (service Service) Finding(ctx context.Context, actor identity.ActorContext,
 			return activity(cards[eligible[i].PlayerID]) > activity(cards[eligible[j].PlayerID])
 		})
 		recent := eligible
-		if len(recent) > FindingResultLimit*2 {
-			recent = recent[:FindingResultLimit*2]
+		if len(recent) > FindingRecentPool {
+			recent = recent[:FindingRecentPool]
 		}
 		shuffleProfiles(recent, op.ID.String())
 		if len(recent) > FindingResultLimit {

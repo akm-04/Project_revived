@@ -25,6 +25,9 @@ const MentorPolicyVersion = domain.MinimumLevelGapPolicy
 const (
 	FindingScanLimit   = 100
 	FindingResultLimit = 20
+	// FindingRecentPool is twice the result count: PRIVATE_POLICY D508 shuffles
+	// the most recently active candidates and returns the first 20.
+	FindingRecentPool = FindingResultLimit * 2
 )
 
 const dayLayout = "2006-01-02"
@@ -35,7 +38,6 @@ type Service struct {
 	Store       Store
 	Directory   DirectoryReader
 	Cards       CardReader
-	Presence    PresenceReader
 	Friendships FriendshipEnsurer
 	Backgrounds BackgroundReader
 	Grants      GrantOwner
