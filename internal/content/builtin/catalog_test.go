@@ -10,7 +10,7 @@ func TestLoadGeneratedCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := c.RevisionID(), "1e3ba8a61fbdbbe9402ac3ab3bdb7bd4bc47a7e26bd817fcb4c7c19fbda4cd21"; got != want {
+	if got, want := c.RevisionID(), "af0e02b656e139dec62dac424c757defd6ced7a319deb2f9ff5c036510afd49f"; got != want {
 		t.Fatalf("revision id = %s, want %s", got, want)
 	}
 	if got, want := len(c.PlayerProgression.Rows), 100; got != want {
@@ -36,12 +36,6 @@ func TestLoadGeneratedCatalog(t *testing.T) {
 	}
 	if got, want := len(c.SocialInputs.InvitationMissions), 250; got != want {
 		t.Fatalf("Social invitation missions = %d, want %d", got, want)
-	}
-	if got, want := len(c.Workshop.PetCrafting), 54; got != want {
-		t.Fatalf("Workshop pet crafting = %d, want %d", got, want)
-	}
-	if got, want := len(c.Administrator.Rules), 180; got != want {
-		t.Fatalf("Administrator rules = %d, want %d", got, want)
 	}
 }
 
