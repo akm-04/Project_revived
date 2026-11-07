@@ -37,6 +37,46 @@ func levelAndVIPGate(raw string) (level, vip int64, ok bool) {
 	return level, vip, levelErr == nil && vipErr == nil && level > 0 && vip >= 0
 }
 
+// mentorFunctionGate reads kind 8 "8|L": own level L and a server-wide
+// qualified player at MentorServerLevelRequirement (function.lua condition 60,
+// misc teacher_lev=60). Function 50 is the only source kind-8 gate.
+func mentorFunctionGate(raw string) (int64, bool) {
+	fields := strings.Split(raw, "|")
+	if len(fields) != 2 || fields[0] != "8" {
+		return 0, false
+	}
+	level, err := strconv.ParseInt(fields[1], 10, 64)
+	return level, err == nil && level > 0
+}
+
+// MentorServerLevelRequirement is the source server-wide level fact for
+// function 50 (TEACHER_OPEN_TIPS: "there is a player in server over lv 60").
+const MentorServerLevelRequirement int64 = 60
+
+func hasMentorFunctionGate(policy FunctionGatePolicy) bool {
+	for _, gate := range policy.Gates {
+		if _, ok := mentorFunctionGate(gate.RawOpenValue); ok {
+			return true
+		}
+	}
+	return false
+}
+
+func mentorFunctionEligibility(policy FunctionGatePolicy, pid identity.PlayerID, level int64, serverQualified bool, now time.Time) []player.FunctionEligibility {
+	out := make([]player.FunctionEligibility, 0)
+	if !serverQualified {
+		return out
+	}
+	for _, gate := range policy.Gates {
+		requiredLevel, ok := mentorFunctionGate(gate.RawOpenValue)
+		if !ok || requiredLevel > level {
+			continue
+		}
+		out = append(out, player.FunctionEligibility{PlayerID: pid, FunctionID: gate.FunctionID, ContentRevision: policy.Revision, SourceFactKey: gate.SourceFactKey, EligibleAt: now.UTC()})
+	}
+	return out
+}
+
 // levelAndVIPEligibility is every kind-3 gate open at level and VIP.
 func levelAndVIPEligibility(policy FunctionGatePolicy, pid identity.PlayerID, level, vip int64, now time.Time) []player.FunctionEligibility {
 	out := make([]player.FunctionEligibility, 0)

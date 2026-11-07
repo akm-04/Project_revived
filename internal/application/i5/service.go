@@ -180,6 +180,7 @@ type Service struct {
 	Privileges         PrivilegeSnapshotProvider
 	Functions          FunctionAnnouncementProvider
 	CharacterFunctions CharacterFunctionReader
+	ServerLevels       ServerLevelReader
 	Directory          DirectoryLevelProjectionPort
 	Backpack           BackpackReader
 	PartnerEntities    PartnerEntityMaterializer
