@@ -77,7 +77,11 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 			ApplicantGateOpen: true, RecipientGateOpen: true, Seeking: domain.Slot(relationType),
 		}, rules)
 		if err != nil {
-			return applicationRefusal(err, relationType, targetState, targetProfile.Level, rules)
+			studentLevel := actorLevel
+			if relationType == 2 {
+				studentLevel = targetProfile.Level
+			}
+			return applicationRefusal(err, studentLevel, rules)
 		}
 		_ = targetRelations
 		application, exists, err := service.Store.LockApplicationTx(ctx, t, actor.PlayerID, target)
@@ -215,7 +219,11 @@ func (service Service) Accept(ctx context.Context, actor identity.ActorContext, 
 			ApplicantGateOpen: true, RecipientGateOpen: true, Seeking: applicantSlot,
 		}, rules)
 		if err != nil {
-			return applicationRefusal(err, int64(applicantSlot), CandidateState{}, applicantLevel, rules)
+			studentLevel := applicantLevel
+			if applicantSlot == domain.SlotStudent {
+				studentLevel = actorLevel
+			}
+			return applicationRefusal(err, studentLevel, rules)
 		}
 		revision, err := service.Content.ActiveRevision(ctx, t)
 		if err != nil || len(revision) != 64 {
@@ -417,19 +425,16 @@ func (service Service) sampleStudentFactsTx(ctx context.Context, t tx.Tx, catalo
 	return advanceMissionCategoryTx(ctx, t, service.Store, relation.Mentor, missions, domain.MissionTypeMentor, domain.CategoryStudentBG, added, at)
 }
 
-func applicationRefusal(err error, relationType int64, target CandidateState, targetLevel int64, rules domain.Rules) error {
+func applicationRefusal(err error, studentLevel int64, rules domain.Rules) error {
 	switch {
 	case errors.Is(err, domain.ErrServerMismatch):
 		return refusal(34018)
 	case errors.Is(err, domain.ErrSamePersonBothRoles):
 		return refusal(34019)
 	case errors.Is(err, domain.ErrSlotFilled):
-		if relationType == 1 {
-			return refusal(34005)
-		}
 		return refusal(34005)
 	case errors.Is(err, domain.ErrLevel):
-		if targetLevel >= rules.StudentLevelLimit {
+		if studentLevel >= rules.StudentLevelLimit {
 			return refusal(34001)
 		}
 		return refusal(34009)
