@@ -10,7 +10,7 @@
    "activitystore.BootstrapProjection",
    "guildprojection.BootstrapProjection",
    "guildprojection.TeaProjection",
-   "characterstore.HeroBootstrapProjection",
+   "heroBootstrap",
    "librarystore.BootstrapProjection",
    "bookstore.BootstrapProjection",
    "coursestore.BootstrapProjection",

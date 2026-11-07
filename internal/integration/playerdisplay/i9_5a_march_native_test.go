@@ -467,6 +467,71 @@ func TestI9_5AMarchNativeVanguardSacrificeAndCanonicalForce(t *testing.T) {
 	}
 }
 
+func TestI9_10MarchNativeStatusCoversEveryOwnedGirl(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	s := marchMode(t, p)
+	bornHero(t, p, a, rev, 10001001, 1)
+	bornHero(t, p, a, rev, 10001002, 2)
+	bornHero(t, p, a, rev, 10001003, 3)
+	compositeLevel(t, p, a, rev, 30)
+	team := []int64{1, 2, 0, 0, 0}
+	if _, err := s.Start(ctx, a, app.Fight{Formation: team}, op()); err != nil {
+		t.Fatal("start", err)
+	}
+	report := marchReport(marchRecord(t, p, a), int64(a.PlayerID), team, true)
+	report.Report.Allies[0].HP, report.Report.Allies[0].MP = 41, 123
+	report.Report.Allies[1].HP, report.Report.Allies[1].MP = 77, 456
+	body, err := s.Result(ctx, a, report, op())
+	if err != nil {
+		t.Fatal("result", err)
+	}
+	self := body["hero_status"].(map[string]any)["self_list"].(map[string]any)
+	if len(self) != 3 {
+		t.Fatal("self_list does not cover every owned girl", self)
+	}
+	used := self["1"].(d.Status)
+	if used.Health != 1 || used.HP != 41 || used.MP != 123 {
+		t.Fatal("carried status missing", used)
+	}
+	fresh := self["3"].(d.Status)
+	if fresh.Health != 0 || fresh.HP != 0 || fresh.MP != 0 {
+		t.Fatal("unused girl not fresh", fresh)
+	}
+	if _, saved := marchRecord(t, p, a).Heroes["3"]; saved {
+		t.Fatal("fresh entry was persisted into the run")
+	}
+	loaded, err := s.Load(ctx, a, op())
+	if err != nil {
+		t.Fatal("load", err)
+	}
+	if len(loaded["hero_status"].(map[string]any)["self_list"].(map[string]any)) != 3 {
+		t.Fatal("load projection incomplete", loaded)
+	}
+	detail := map[string]any{}
+	if err = s.OverlayMID1(ctx, p, a, false, time.Now(), detail); err != nil {
+		t.Fatal("MID1 overlay", err)
+	}
+	mid := detail["336"].(map[string]any)["hero_status"].(map[string]any)
+	if len(mid["self_list"].(map[string]any)) != 3 {
+		t.Fatal("MID1 336 projection incomplete", mid)
+	}
+	if len(mid["rent_list"].(map[string]any)) != 0 {
+		t.Fatal("absent loan must leave rent_list empty for the client's fresh default", mid)
+	}
+	raw, err := json.Marshal(self["3"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	wire := map[string]any{}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	if err = decoder.Decode(&wire); err != nil || fmt.Sprint(wire["hero_id"]) != "3" || fmt.Sprint(wire["health"]) != "0" {
+		t.Fatal("fresh status wire shape", string(raw), err)
+	}
+}
+
 func TestI9_5AMarchNativeRealDefenseSnapshotsDoNotMutateOpponent(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
