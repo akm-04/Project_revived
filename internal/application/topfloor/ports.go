@@ -103,6 +103,9 @@ type Roster interface {
 // each hero row instead of recomputing it.
 type HeroPower interface {
 	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+	// RobotForceTx is the same engine over an unowned source hero template, so
+	// mode robots carry the power of the team their fight would resolve.
+	RobotForceTx(context.Context, ca.CoherentReadScope, int64, int64, int64, int64, []int64) (publicstats.Result, error)
 }
 
 // OwnedHeroReader is the CharacterHero-owned roster read used to build the D511 preset defense.

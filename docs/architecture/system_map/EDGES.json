@@ -1676,7 +1676,8 @@
     "*PetTx"
    ],
    "topfloor": [
-    "*HeroTx"
+    "*HeroTx",
+    "*RobotForceTx"
    ],
    "workplace": [
     "*HeroTx"
@@ -5518,7 +5519,8 @@
     "*OverlayMID1"
    ],
    "publicstats": [
-    "*HeroTx"
+    "*HeroTx",
+    "*RobotForceTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",

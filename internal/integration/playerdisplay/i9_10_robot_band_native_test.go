@@ -93,8 +93,13 @@ func TestI9_10TopFloorRobotRankBandNative(t *testing.T) {
 		if !ok {
 			t.Fatalf("source robot hero %d", id)
 		}
-		if !reflect.DeepEqual(sixHundredth.Heroes[i], params) {
-			t.Fatalf("rank 600 hero %d display %v want source %v", id, sixHundredth.Heroes[i], params)
+		display := sixHundredth.Heroes[i]
+		if force := formValue(t, display, "force"); force <= 0 {
+			t.Fatalf("rank 600 hero %d force %d is not the resolved template power", id, force)
+		}
+		delete(display, "force")
+		if !reflect.DeepEqual(display, params) {
+			t.Fatalf("rank 600 hero %d display %v want source %v", id, display, params)
 		}
 	}
 }
