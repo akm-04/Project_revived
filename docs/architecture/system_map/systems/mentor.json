@@ -1,0 +1,172 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 8,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/mentor_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I9_10F_MENTOR"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "mentor_applications": [
+    "mentorstore.LockApplicationTx"
+   ],
+   "mentor_exam_receipts": [
+    "mentorstore.LockExamReceiptTx"
+   ],
+   "mentor_mission_progress": [
+    "mentorstore.LockMissionProgressTx"
+   ],
+   "mentor_relations": [
+    "mentorstore.LockRelationshipsTx"
+   ],
+   "mentor_states": [
+    "mentorstore.LockStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "BootstrapProjection"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1856,
+   "name": "GET_CLASS_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1857,
+   "name": "APPLY_RELATION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1858,
+   "name": "GET_CLASS_FINDING_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1859,
+   "name": "ACCEPT_TEACH_APPLY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1860,
+   "name": "DENY_TEACH_APPLY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1861,
+   "name": "TERMINATE_RELATION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1862,
+   "name": "GET_CLASS_MISSION_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 33
+   },
+   "mid": 1863,
+   "name": "STUDENT_OVER_FIGHT_RESULT"
+  }
+ ],
+ "name": "mentor",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/librarystore",
+  "internal/adapters/postgres/mentorstore"
+ ],
+ "tables": {
+  "owned": [
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states"
+  ],
+  "read": [
+   "gxb_content_activation",
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states",
+   "player_directory_profiles",
+   "player_library_backgrounds",
+   "players"
+  ],
+  "written": [
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

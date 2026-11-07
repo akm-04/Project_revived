@@ -767,87 +767,6 @@
    "stage": null
   },
   {
-   "mid": 1856,
-   "name": "GET_CLASS_INFO",
-   "files": [
-    "app/model/SelfPlayer.lua",
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1857,
-   "name": "APPLY_RELATION",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1858,
-   "name": "GET_CLASS_FINDING_LIST",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1859,
-   "name": "ACCEPT_TEACH_APPLY",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1860,
-   "name": "DENY_TEACH_APPLY",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1861,
-   "name": "TERMINATE_RELATION",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1862,
-   "name": "GET_CLASS_MISSION_AWARD",
-   "files": [
-    "app/model/SocialSystem.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1863,
-   "name": "STUDENT_OVER_FIGHT_RESULT",
-   "files": [
-    "app/scenes/BattleCreate.lua"
-   ],
-   "family": "MENTOR_STUDENT",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 1864,
    "name": "FIRST_MAIN_TOUCH",
    "files": [
@@ -1209,12 +1128,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 607,
+  "count": 599,
   "window_sender_mid_count": 142,
-  "non_window_sender_mid_count": 465,
+  "non_window_sender_mid_count": 457,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 78,
+   "no_registration": 70,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -3885,110 +3804,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/Sakura.lua",
-     "app/scenes/BattleCreate.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1856,
-    "name": "GET_CLASS_INFO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1857,
-    "name": "APPLY_RELATION",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1858,
-    "name": "GET_CLASS_FINDING_LIST",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1859,
-    "name": "ACCEPT_TEACH_APPLY",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1860,
-    "name": "DENY_TEACH_APPLY",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1861,
-    "name": "TERMINATE_RELATION",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1862,
-    "name": "GET_CLASS_MISSION_AWARD",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SocialSystem.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SocialSystem.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1863,
-    "name": "STUDENT_OVER_FIGHT_RESULT",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/scenes/BattleCreate.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
      "app/scenes/BattleCreate.lua"
     ],
     "runtime_reachability": "unknown"
@@ -10346,6 +10161,7 @@
     "inscription",
     "libraryforum",
     "librarylocal",
+    "mentor",
     "occult",
     "playerdisplay",
     "profilefeedback",
