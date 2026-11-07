@@ -136,10 +136,21 @@ func (dispatcher MemoirDispatcher) Dispatch(ctx context.Context, request httpedg
 func memoirFailure(err error) httpedge.Response {
 	var conflict *receipt.ConflictError
 	if errors.Is(err, domain.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("memoir_invalid_parameter")
+		response := badHero("memoir_invalid_parameter")
+		response.Cause = err
+		return response
+	}
+	// The stock fightPlayer callback indexes battle_info on OK, so a failed
+	// player fight must not be an HTTP 200 body. 35027/35028 are stock message
+	// rows ("This battle report expired" / "Not Available").
+	if errors.Is(err, domain.ErrReportExpired) {
+		return conflictRefusalCause(domain.ReportExpiredCode, err)
+	}
+	if errors.Is(err, domain.ErrFightUnavailable) {
+		return conflictRefusalCause(domain.FightUnavailableCode, err)
 	}
 	if errors.Is(err, domain.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, combat.ErrStartConflict) {
-		return conflictRefusal(1)
+		return conflictRefusalCause(1, err)
 	}
 	return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "memoir_failed"}, Cause: err}
 }

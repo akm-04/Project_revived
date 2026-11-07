@@ -3,8 +3,10 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	application "gxb.local/backend/v2/internal/application/memoir"
 	"gxb.local/backend/v2/internal/domain/identity"
+	domain "gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"math"
 	"testing"
@@ -66,6 +68,37 @@ func TestMemoirStockMapReportBoundary(t *testing.T) {
 		t.Fatal("invalid report reached owner", probe.results)
 	}
 }
+
+type memoirRefusalProbe struct {
+	MemoirPort
+	err error
+}
+
+func (probe memoirRefusalProbe) PlayerFight(context.Context, identity.ActorContext, application.PlayerFight, operation.Context) (map[string]any, error) {
+	return nil, probe.err
+}
+
+func TestMemoirPlayerFightRefusalsAreCodedConflicts(t *testing.T) {
+	actor := actorForHTTP(t)
+	for _, test := range []struct {
+		name string
+		err  error
+		code int64
+	}{
+		{"expired", fmt.Errorf("%w: window ended", domain.ErrReportExpired), domain.ReportExpiredCode},
+		{"unavailable", fmt.Errorf("%w: resolver failed", domain.ErrFightUnavailable), domain.FightUnavailableCode},
+		{"refused", fmt.Errorf("%w: exit is closed", domain.ErrRefused), 1},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			dispatcher := MemoirDispatcher{Authority: httpAuthority{actor}, Service: memoirRefusalProbe{err: test.err}}
+			response := dispatcher.Dispatch(context.Background(), heroReq(t, 2311, map[string]any{"grid_pos": 4, "formation": "7", "pet_id": 0}))
+			if response.HTTPStatus != 409 || response.Body["error_code"] != test.code || response.Cause == nil {
+				t.Fatalf("response=%+v", response)
+			}
+		})
+	}
+}
+
 func TestMemoirOpenGridBoundary(t *testing.T) {
 	for _, raw := range []any{nil, "1|2", []any{1, 1}, []any{55}, []any{1.5}, map[string]any{"1": true}} {
 		if _, valid := memoirOpened(raw); valid {

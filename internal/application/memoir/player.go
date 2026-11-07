@@ -81,8 +81,15 @@ func (mode Mode) PlayerFight(ctx context.Context, actor identity.ActorContext, r
 	if err != nil {
 		return nil, err
 	}
+	if refusal := playerRefusal(response); refusal != nil {
+		return nil, refusal
+	}
 	if prior.Pending != nil && prior.Pending.Kind == memoir.Player && prior.Pending.Grid == request.Grid && slices.Equal(prior.Pending.Formation, request.Formation) && prior.Pending.Pet == request.Pet {
-		return mode.run(ctx, actor, "player_start", request, operationContext, func(_ context.Context, _ scope, _ *memoir.State) (map[string]any, error) { return response, nil })
+		response, err = mode.run(ctx, actor, "player_start", request, operationContext, func(_ context.Context, _ scope, _ *memoir.State) (map[string]any, error) { return response, nil })
+		if err != nil {
+			return nil, err
+		}
+		return response, playerRefusal(response)
 	}
 	response, err = mode.run(ctx, actor, "player_start", request, operationContext, func(ctx context.Context, current scope, state *memoir.State) (map[string]any, error) {
 		if state.Pending == nil && state.Active() && state.Board.Cells[request.Grid-1] == memoir.Road && state.LastGrid == request.Grid && state.LastResult["battle_info"] != nil {
@@ -212,19 +219,26 @@ func (mode Mode) resumePlayer(ctx context.Context, actor identity.ActorContext, 
 			if state.LastResult != nil {
 				return state.LastResult, nil
 			}
-			return nil, memoir.ErrRefused
+			return nil, fmt.Errorf("%w: no pending battle to resolve", memoir.ErrRefused)
 		}
 		if state.Pending.Attempt != pending.Attempt {
-			return nil, memoir.ErrRefused
+			return nil, fmt.Errorf("%w: pending battle changed", memoir.ErrRefused)
 		}
 		terminal := applicationcombat.TerminalRequest{Locator: locator(actor), GenerationRef: pending.Generation, TerminalKind: "MEMOIR_PLAYER_RESULT", SemanticReceiptID: "memoir-result:" + pending.Attempt, At: current.timed.Operation.DecisionAt()}
-		if resolveError != nil || current.timed.Operation.DecisionAt().Unix() >= pending.Deadline {
+		expired := current.timed.Operation.DecisionAt().Unix() >= pending.Deadline
+		if resolveError != nil || expired {
 			terminal.TerminalKind = "MEMOIR_PLAYER_CLOSED"
 			if _, err := mode.Combat.CloseTx(ctx, current.timed.Tx, terminal); err != nil {
 				return nil, err
 			}
 			state.Pending = nil
-			return map[string]any{"error_code": int64(combat.FightExistCode)}, nil
+			// Committing this coded body closes the attempt; the caller turns
+			// it into a 409 refusal so the stock fightPlayer callback never
+			// indexes battle_info on an error-only success.
+			if expired {
+				return map[string]any{"error_code": memoir.ReportExpiredCode}, nil
+			}
+			return map[string]any{"error_code": memoir.FightUnavailableCode}, nil
 		}
 		settled, err := mode.Combat.TerminalTx(ctx, current.timed.Tx, terminal)
 		if err != nil {
@@ -327,6 +341,11 @@ func (mode Mode) playerReply(ctx context.Context, actor identity.ActorContext, a
 		if err = json.Unmarshal(stored.ResultPayload, &response); err != nil {
 			return nil, err
 		}
+		// A legacy receipt may hold the old error-only success body; never replay
+		// it into the stock fightPlayer callback that indexes battle_info.
+		if refusal := playerRefusal(response); refusal != nil {
+			return nil, fmt.Errorf("%w: stored finish of attempt %s", refusal, attempt)
+		}
 		return mode.run(ctx, actor, "player_replay", attempt, operationContext, func(_ context.Context, _ scope, _ *memoir.State) (map[string]any, error) { return response, nil })
 	}
 	state, _, err := mode.Store.ReadTx(ctx, mode.Fresh, actor.PlayerID)
@@ -336,5 +355,28 @@ func (mode Mode) playerReply(ctx context.Context, actor identity.ActorContext, a
 	if state.Pending == nil || state.Pending.Attempt != attempt {
 		return nil, memoir.ErrUnavailable
 	}
-	return mode.resumePlayer(ctx, actor, operationContext)
+	response, err := mode.resumePlayer(ctx, actor, operationContext)
+	if err != nil {
+		return nil, err
+	}
+	if refusal := playerRefusal(response); refusal != nil {
+		return nil, refusal
+	}
+	return response, nil
+}
+
+// playerRefusal turns the committed coded bodies of a closed player fight into
+// the refusal the dispatcher answers with HTTP 409.
+func playerRefusal(response map[string]any) error {
+	if response == nil || response["battle_info"] != nil {
+		return nil
+	}
+	raw, present := response["error_code"]
+	if !present {
+		return nil
+	}
+	if fmt.Sprint(raw) == fmt.Sprint(memoir.ReportExpiredCode) {
+		return fmt.Errorf("%w: result window ended", memoir.ErrReportExpired)
+	}
+	return fmt.Errorf("%w: coded refusal %v", memoir.ErrFightUnavailable, raw)
 }

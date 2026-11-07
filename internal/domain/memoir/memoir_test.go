@@ -3,8 +3,10 @@ package memoir
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 
 	"gxb.local/backend/v2/internal/content/builtin"
@@ -122,10 +124,19 @@ func TestMemoirMapRejectsTeleportAndRepeatedBoxes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	before, _ := json.Marshal(board)
-	if err = board.SaveMap(FinalPosition, []int{FinalPosition}); err == nil {
-		t.Fatal("entered locked endpoint")
+	if board.CanExit(FinalPosition) {
+		t.Fatal("exit before guardian")
 	}
+	if err = board.SaveMap(FinalPosition, []int{FinalPosition}); err != nil {
+		t.Fatal("stock walk stands on the final point before the guardian", err)
+	}
+	if board.CanExit(FinalPosition) {
+		t.Fatal("standing on the final point must not open the exit")
+	}
+	if err = board.SaveMap(InitialPosition, nil); err != nil {
+		t.Fatal(err)
+	}
+	before, _ := json.Marshal(board)
 	if err = board.SaveMap(InitialPosition, []int{BoardCells + 1}); err == nil {
 		t.Fatal("out of bounds visibility accepted")
 	}
@@ -152,6 +163,30 @@ func TestMemoirMapRejectsTeleportAndRepeatedBoxes(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+func TestMemoirRefusalCausesNameTheBranch(t *testing.T) {
+	catalog := sourceCatalog(t)
+	board, err := catalog.NewBoard(catalog.Selected[0], 1, []int64{7}, combat.NewStream([32]byte{2}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	monster := 0
+	for index, kind := range board.Cells {
+		if kind == Monster {
+			monster = index + 1
+			break
+		}
+	}
+	if monster == 0 {
+		t.Fatal("no monster")
+	}
+	if err = board.SaveMap(monster, nil); !errors.Is(err, ErrRefused) || !strings.Contains(err.Error(), "not reachable") {
+		t.Fatal("unreachable move cause", err)
+	}
+	if err = board.SaveMap(InitialPosition, []int{BoardCells + 1}); !errors.Is(err, ErrInvalid) || !strings.Contains(err.Error(), "outside the reachable component") {
+		t.Fatal("opened cell cause", err)
+	}
+}
+
 func TestMemoirReviveAndAbandonKeepIndependentFacts(t *testing.T) {
 	catalog := sourceCatalog(t)
 	state := State{Occurrence: "run", Heroes: map[int64]combat.ActorStatus{8: {Identity: 8}}, MaxFloor: map[int64]int{catalog.Selected[0]: 2}, Sequence: 4}

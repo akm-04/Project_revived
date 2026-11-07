@@ -425,6 +425,14 @@ func conflictRefusal(code int64) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error_code": code}}
 }
 
+// conflictRefusalCause keeps the server-side branch visible in the request
+// journal while the stock client shows the coded toast.
+func conflictRefusalCause(code int64, cause error) httpedge.Response {
+	response := conflictRefusal(code)
+	response.Cause = cause
+	return response
+}
+
 func okI5(body map[string]any) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 }
