@@ -23,6 +23,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/championsleague"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	leagueprojection "gxb.local/backend/v2/internal/projection/championsleague"
 	"sync"
 	"testing"
 	"time"
@@ -191,6 +192,10 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 		t.Fatal("records")
 	}
 	id := records.Records[0].WireID
+	clientRows := leagueprojection.RecordRows(records.Records, a.PlayerID)
+	if len(clientRows) != 1 || clientRows[0]["id"] != id || clientRows[0]["is_attack"] != int64(1) || clientRows[0]["change_point"] != fight.Match.Delta || clientRows[0]["attack_name"] != fight.Match.SelfFace.Name || clientRows[0]["defend_name"] != fight.Match.EnemyFace.Name {
+		t.Fatal("settled record does not match the client row shape", clientRows)
+	}
 	r := leagueDo(t, s, a, app.Command{Kind: "RECORDS", RecordID: id})
 	if string(r.Report) != string(fight.Report) {
 		t.Fatal("replay locator")
@@ -205,6 +210,96 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	clock.Set(cat.SeasonNumbered(fight.Match.Season).OpensAt)
 	if _, e = s.Execute(ctx, a, app.Command{Kind: "INFO"}, op()); e == nil {
 		t.Fatal("backwards clock accepted mutation")
+	}
+}
+func TestI9_10LeagueSeasonOneHonorRoomIsEmptyNative(t *testing.T) {
+	p := pool(t)
+	leagueReset(t, p)
+	catalog := leagueCatalog(t, p)
+	decisionTime := catalog.SeasonNumbered(1).OpensAt.Add(time.Hour)
+	clock := &leagueClock{at: decisionTime}
+	service := leagueService(t, p, clock)
+	actor, _ := leaguePlayer(t, p, rankingServer(t, p), 100)
+	leagueDo(t, service, actor, app.Command{Kind: "INFO"})
+	root, exists, err := (leaguestore.Store{}).RootTx(ctx, p, false)
+	if err != nil || !exists || root.Season != 1 {
+		t.Fatal("native honor fixture is not season one", root, err)
+	}
+	honor := leagueDo(t, service, actor, app.Command{Kind: "HONOR"})
+	if len(honor.Honor) != 0 {
+		t.Fatal("season one has no prior settled season for the Honor Room", honor.Honor)
+	}
+}
+func TestI9_10LeagueChallengeEligibilityAndCrossServerNative(t *testing.T) {
+	p := pool(t)
+	service, clock, catalog, target, attacker, _, attackerHero := leagueActors(t, p)
+	if target.LogicalServerID == attacker.LogicalServerID {
+		t.Fatal("native fixtures must span logical servers")
+	}
+	decisionTime, _ := clock.Now(ctx)
+	fakeActors := make([]identity.ActorContext, 0, catalog.OpponentRadius)
+	for index := int64(0); index < catalog.OpponentRadius; index++ {
+		fakeActors = append(fakeActors, rankingActor(t, p, attacker.LogicalServerID, false))
+	}
+	leagueStore := leaguestore.Store{}
+	transaction, err := p.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer transaction.Rollback(ctx)
+	players, err := leagueStore.PlayersTx(ctx, transaction, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updatedTarget := false
+	for _, player := range players {
+		if player.ID != target.PlayerID {
+			continue
+		}
+		oldVersion := player.Version
+		player.Points = 3000
+		player.Version++
+		player.UpdatedAt = decisionTime
+		if err = leagueStore.PutPlayerTx(ctx, transaction, player, oldVersion); err != nil {
+			t.Fatal(err)
+		}
+		updatedTarget = true
+	}
+	if !updatedTarget {
+		t.Fatal("target league player missing")
+	}
+	for _, fakeActor := range fakeActors {
+		player := catalog.NewPlayer(fakeActor.PlayerID, fakeActor.LogicalServerID, 100, decisionTime)
+		player.Points = 2500
+		if err = leagueStore.PutPlayerTx(ctx, transaction, player, 0); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	defenderInfo := leagueDo(t, service, target, app.Command{Kind: "INFO"})
+	attackerInfo := leagueDo(t, service, attacker, app.Command{Kind: "INFO"})
+	if defenderInfo.Info.Rank != 1 || int64(len(defenderInfo.Info.Enemies)) != catalog.OpponentRadius+1 {
+		t.Fatal("client opponent list must contain self and the allowed lower-ranked window", defenderInfo.Info)
+	}
+	if attackerInfo.Info.Rank != catalog.OpponentRadius+2 || int64(len(attackerInfo.Info.Enemies)) != catalog.OpponentRadius+2 {
+		t.Fatal("client opponent list omitted distant higher-ranked targets", attackerInfo.Info)
+	}
+	foundTarget, foundAttacker := false, false
+	for _, enemy := range attackerInfo.Info.Enemies {
+		foundTarget = foundTarget || enemy.Player.ID == target.PlayerID && enemy.Rank == 1
+		foundAttacker = foundAttacker || enemy.Player.ID == attacker.PlayerID && enemy.Rank == attackerInfo.Info.Rank
+	}
+	if !foundTarget || !foundAttacker {
+		t.Fatal("client opponent list ranks do not match the challenge positions", attackerInfo.Info.Enemies)
+	}
+	if _, err = service.Execute(ctx, target, app.Command{Kind: "ENEMY", Enemy: attacker.PlayerID}, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatal("target beyond the lower-rank radius was accepted", err)
+	}
+	fight := leagueFight(t, service, attacker, target, attackerHero)
+	if fight.Match.Status != "SETTLED" || fight.Match.Attacker != attacker.PlayerID || fight.Match.Defender != target.PlayerID {
+		t.Fatal("distant higher-ranked target was not challengeable", fight.Match)
 	}
 }
 func TestI7C5FLeagueSeasonOriginsTenRealSeasonsNative(t *testing.T) {

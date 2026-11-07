@@ -302,7 +302,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 			ordered := d.Order(players, p.Season, p.Group)
 			for i, x := range ordered {
 				r := int64(i + 1)
-				if x.ID == p.ID || r < v.Rank-cat.OpponentRadius || r > v.Rank+cat.OpponentRadius {
+				if x.ID != p.ID && !cat.CanChallenge(v.Rank, r) {
 					continue
 				}
 				ev := EnemyView{Player: x, Rank: r}
@@ -327,7 +327,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 			}
 			ordered := d.Order(players, p.Season, p.Group)
 			rank, er := d.Rank(ordered, p.ID), d.Rank(ordered, enemy.ID)
-			if er < rank-cat.OpponentRadius || er > rank+cat.OpponentRadius {
+			if !cat.CanChallenge(rank, er) {
 				return d.ErrRefused
 			}
 			p.Selected = enemy.ID
