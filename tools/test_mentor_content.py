@@ -56,7 +56,7 @@ class MentorCompilerTests(unittest.TestCase):
 
     def test_exact_source_catalog_facts(self):
         catalog = self.catalog
-        self.assertEqual(catalog['schema_version'], 1)
+        self.assertEqual(catalog['schema_version'], mc.MENTOR_SCHEMA_VERSION)
         missions = catalog['missions']
         self.assertEqual([row['id'] for row in missions], list(range(100001, 100026)))
         self.assertEqual(Counter(row['type'] for row in missions), Counter({1: 21, 2: 4}))
@@ -113,6 +113,15 @@ class MentorCompilerTests(unittest.TestCase):
         self.assertEqual(catalog['help']['mentor_name'], 'Mentor')
         self.assertEqual(catalog['help']['student_name'], 'Student')
         self.assertEqual(mc.help_digest(catalog['help']), mc._EXPECTED_HELP_DIGEST)
+        self.assertEqual([gift['id'] for gift in catalog['gifts']], list(range(90008004, 90008029)))
+        self.assertEqual(catalog['gifts'][0], dict(
+            id=90008004, crystal=100, exp=0,
+            items=[dict(item_id=50001174, quantity=1), dict(item_id=50001010, quantity=1)],
+        ))
+        self.assertEqual(catalog['exam'], dict(
+            campaign_id=22608, mission_id=100025,
+            items=[dict(item_id=50001004, quantity=1), dict(item_id=50001006, quantity=1), dict(item_id=50001010, quantity=1)],
+        ))
 
     def test_catalog_digest_binds_golden_fixture(self):
         self.assertEqual(mc.catalog_digest(self.catalog), mc.MENTOR_CATALOG_SHA256)
