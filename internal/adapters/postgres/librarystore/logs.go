@@ -29,7 +29,9 @@ func (Store) InsertHeroLogTx(ctx context.Context, t tx.Tx, f library.HeroLogFact
 	if t == nil || f.Validate() != nil {
 		return false, library.ErrInvalidFacts
 	}
-	tag, e := t.Exec(ctx, `INSERT INTO player_library_hero_logs(player_id,partner_id,log_id,occurred_at)VALUES($1,$2,$3,$4)ON CONFLICT(player_id,partner_id,log_id)DO NOTHING`, int64(f.PlayerID), f.PartnerID, f.LogID, f.OccurredAt.UTC())
+	// A legacy Hero without a Library facet yet has no log row to extend; the
+	// explicit backfill owns creating that facet, so this write stays optional.
+	tag, e := t.Exec(ctx, `INSERT INTO player_library_hero_logs(player_id,partner_id,log_id,occurred_at)SELECT $1,$2,$3,$4 WHERE EXISTS(SELECT 1 FROM player_library_heroes WHERE player_id=$1 AND partner_id=$2)ON CONFLICT(player_id,partner_id,log_id)DO NOTHING`, int64(f.PlayerID), f.PartnerID, f.LogID, f.OccurredAt.UTC())
 	if e != nil {
 		return false, e
 	}
