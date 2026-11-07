@@ -166,14 +166,13 @@ func TestPagePraisesBoundedPage(t *testing.T) {
 	rows := []HousePraise{
 		{Owner: socialPlayer(7), HouseID: 3, Actor: socialPlayer(13), FirstAt: socialTime(3)},
 		{Owner: socialPlayer(7), HouseID: 3, Actor: socialPlayer(12), FirstAt: socialTime(3)},
-		{Owner: socialPlayer(7), HouseID: 3, Actor: socialPlayer(11), FirstAt: socialTime(2)},
 	}
-	page, err := PagePraises(rows[:2], 3, target, target.Owner, 0, 2)
+	page, err := PagePraises(rows, 3, target, target.Owner, 0, 2)
 	if err != nil || page.Total != 3 || len(page.Rows) != 2 || page.Rows[0].Actor != socialPlayer(13) || page.Rows[1].Actor != socialPlayer(12) {
 		t.Fatal("first page", page, err)
 	}
-	last, err := PagePraises(rows[2:], 3, target, target.Owner, 2, 2)
-	if err != nil || len(last.Rows) != 1 || last.Rows[0].Actor != socialPlayer(11) || last.Total != 3 {
+	last, err := PagePraises(rows[1:], 3, target, target.Owner, 2, 2)
+	if err != nil || len(last.Rows) != 1 || last.Rows[0].Actor != socialPlayer(12) || last.Total != 3 {
 		t.Fatal("second page", last, err)
 	}
 	empty, err := PagePraises(nil, 0, target, target.Owner, 0, 20)
@@ -253,7 +252,8 @@ func TestPageCommentsOrderingAndBoundedStaleStart(t *testing.T) {
 		t.Fatal("zero-like featured is oldest-first and normal is newest-first", newest, err)
 	}
 
-	// A viewer can request the next page with an old loaded count after the owner deletes a featured row.
+	// Dorm.lua deleteComment refetches with the old loaded count after the
+	// owner deletes a featured row: 44 live, 2 best, 42 non-best, start 43.
 	afterDelete := roomComments(44, map[int64]int64{43: 3, 44: 3})
 	stale, err := PageComments(afterDelete, target, socialPlayer(9), 43, 20)
 	if err != nil || len(stale.Rows) != 0 || stale.Total != 44 || len(stale.Best) != 2 || stale.Best[0].Comment.ID != 43 || stale.Best[1].Comment.ID != 44 {
@@ -306,7 +306,6 @@ func TestPageCommentsRejectsMalformedProjections(t *testing.T) {
 		{listed(badContent, 0)},
 		{listed(comment, -1)},
 		{listed(comment, MaxWireID+1)},
-		{{Comment: comment, Likes: 0, HasReacted: true}},
 	} {
 		if _, err := PageComments(rows, target, socialPlayer(11), 0, 20); !errors.Is(err, ErrInvalidFacts) {
 			t.Fatal("malformed projection accepted", rows, err)

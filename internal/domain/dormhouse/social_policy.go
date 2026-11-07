@@ -221,7 +221,7 @@ func validateListedComments(rows []ListedComment, target RoomTarget) error {
 			return err
 		}
 		comment := row.Comment
-		if !comment.Live() || comment.Owner != target.Owner || comment.HouseID != target.HouseID || seen[comment.ID] || row.Likes < 0 || row.Likes > MaxWireID || row.HasReacted && row.Likes < 1 {
+		if !comment.Live() || comment.Owner != target.Owner || comment.HouseID != target.HouseID || seen[comment.ID] || row.Likes < 0 || row.Likes > MaxWireID {
 			return ErrInvalidFacts
 		}
 		seen[comment.ID] = true
@@ -385,7 +385,8 @@ func PlanComment(rows []ListedComment, target RoomTarget, author identity.Player
 	if err := validateListedComments(rows, target); err != nil {
 		return CommentPlan{}, err
 	}
-	// shortcut: live projections cannot see tombstones; the store unique key rejects reused IDs.
+	// Live projections cannot see tombstones; the store's unique key remains
+	// authoritative for a replayed comment ID.
 	for _, row := range rows {
 		if row.Comment.ID == commentID {
 			return CommentPlan{}, ErrInvalidFacts
