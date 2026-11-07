@@ -25,6 +25,9 @@ func (fake *glueCommandFake) Command(_ context.Context, _ identity.ActorContext,
 func (*glueCommandFake) Read(context.Context, identity.ActorContext, operation.Context, uint16, int64, int64) (map[string]any, error) {
 	return nil, errors.New("unexpected read")
 }
+func (*glueCommandFake) SocialRead(context.Context, identity.ActorContext, operation.Context, uint16, int64, int64, int64, int64) (map[string]any, error) {
+	return nil, errors.New("unexpected social read")
+}
 func TestDormGlueDispatcherUsesStockEmptyRequestAndRejectsUnsafeSuccess(t *testing.T) {
 	fake := &glueCommandFake{}
 	dispatcher := DormDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: fake}
