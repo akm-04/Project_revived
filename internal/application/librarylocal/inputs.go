@@ -363,6 +363,7 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		})
 	}
 	logsByPartner := map[int64]map[string]any{}
+	acquiredAtByPartner := map[int64]time.Time{}
 	for _, row := range heroLogs {
 		entries := logsByPartner[row.PartnerID]
 		if entries == nil {
@@ -370,6 +371,9 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 			logsByPartner[row.PartnerID] = entries
 		}
 		entries[strconv.FormatInt(row.LogID, 10)] = map[string]any{"time": row.OccurredAt.Unix()}
+		if row.LogID == lib.LogAcquired {
+			acquiredAtByPartner[row.PartnerID] = row.OccurredAt
+		}
 	}
 
 	infos := map[string]any{}
@@ -389,6 +393,15 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		partnerLogs := logsByPartner[h.PartnerID]
 		if partnerLogs == nil {
 			partnerLogs = map[string]any{}
+		}
+		acquiredAt := acquiredAtByPartner[h.PartnerID]
+		if acquiredAt.IsZero() {
+			// A backfilled facet keeps the Library row's creation time; the
+			// store persists it (librarystore/store.go:180, inserted at :206).
+			acquiredAt = f.Facts.CreatedAt
+		}
+		for _, milestone := range lib.HoldTimeLogsReached(acquiredAt, at) {
+			partnerLogs[strconv.FormatInt(milestone.LogID, 10)] = map[string]any{"time": milestone.OccurredAt.Unix()}
 		}
 		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{
 			"favor_degree":     f.Facts.Favor,

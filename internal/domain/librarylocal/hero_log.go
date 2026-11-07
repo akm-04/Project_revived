@@ -48,6 +48,36 @@ var dialogueLogThresholds = []logThreshold{
 	{1, 70001}, {10, 70002}, {30, 70003}, {50, 70004},
 }
 
+// Hold time thresholds (type 5) are the condition days owned
+// (library_hero_log.lua rows 50001-50004).
+var holdTimeLogThresholds = []logThreshold{
+	{30, 50001}, {90, 50002}, {180, 50003}, {365, 50004},
+}
+
+// HoldTimeLogMilestone is one type-5 entry, dated from acquisition.
+type HoldTimeLogMilestone struct {
+	LogID      int64
+	OccurredAt time.Time
+}
+
+// HoldTimeLogsReached derives the type-5 milestones an acquisition reached by
+// at. The stock table stores no row for these; the entry is the acquisition
+// time plus the condition days (library_hero_log.lua:324-362).
+func HoldTimeLogsReached(acquiredAt, at time.Time) []HoldTimeLogMilestone {
+	out := []HoldTimeLogMilestone{}
+	if acquiredAt.IsZero() || at.IsZero() || acquiredAt.After(at) {
+		return out
+	}
+	for _, row := range holdTimeLogThresholds {
+		occurredAt := acquiredAt.AddDate(0, 0, int(row.threshold))
+		if occurredAt.After(at) {
+			continue
+		}
+		out = append(out, HoldTimeLogMilestone{LogID: row.logID, OccurredAt: occurredAt})
+	}
+	return out
+}
+
 // FavorLogIDsCrossed returns the favor milestones in (from, to].
 func FavorLogIDsCrossed(from, to int64) []int64 {
 	return crossed(favorLogThresholds, from, to)
