@@ -92,7 +92,7 @@ func TestPlaytestGauntlet6AdventureDefenderIdentityNative(t *testing.T) {
 	if _, err := arena.ModifyDefence(ctx, defender, tableIDs, 0, op()); err != nil {
 		t.Fatal("save real arena defense", err)
 	}
-	exec(t, p, `DELETE FROM arena_players WHERE player_id NOT IN ($1,$2)`, int64(attacker.PlayerID), int64(defender.PlayerID))
+	keepOnlyArenaPlayers(t, p, attacker.PlayerID, defender.PlayerID)
 
 	revision := installed(t, p)
 	exec(t, p, `INSERT INTO player_function_eligibility(player_id,function_id,content_revision,source_fact_key,eligible_at)
@@ -233,7 +233,7 @@ func TestPlaytestGauntlet6AdventureMixedDefenderNative(t *testing.T) {
 	if _, err = arena.ModifyDefence(ctx, defender, formation, pet.PetID, op()); err != nil {
 		t.Fatal("save mixed arena defense", err)
 	}
-	exec(t, p, `DELETE FROM arena_players WHERE player_id NOT IN ($1,$2)`, int64(attacker.PlayerID), int64(defender.PlayerID))
+	keepOnlyArenaPlayers(t, p, attacker.PlayerID, defender.PlayerID)
 
 	fight := combatService(t, p)
 	partnerByTable := map[int64]int64{}
@@ -413,7 +413,7 @@ func TestPlaytestGauntlet6AdventureAwardedDefenderNative(t *testing.T) {
 	if _, err = arena.ModifyDefence(ctx, defender, tableIDs, 0, op()); err != nil {
 		t.Fatal("save awarded arena defense", err)
 	}
-	exec(t, p, `DELETE FROM arena_players WHERE player_id NOT IN ($1,$2)`, int64(attacker.PlayerID), int64(defender.PlayerID))
+	keepOnlyArenaPlayers(t, p, attacker.PlayerID, defender.PlayerID)
 
 	fight := combatService(t, p)
 	partnerByTable := ownedPartnerByTable(t, fight, p, defender.PlayerID, decisionAt)
@@ -537,7 +537,7 @@ func TestPlaytestGauntlet6AdventureUnavailableDefenderRefusesNative(t *testing.T
 	if _, err := arena.ModifyDefence(ctx, defender, summonTables, 0, op()); err != nil {
 		t.Fatal("save summoned-only arena defense", err)
 	}
-	exec(t, p, `DELETE FROM arena_players WHERE player_id NOT IN ($1,$2)`, int64(attacker.PlayerID), int64(defender.PlayerID))
+	keepOnlyArenaPlayers(t, p, attacker.PlayerID, defender.PlayerID)
 
 	readAt := time.Now().UTC()
 	catalog, err := (contentstore.Store{Queryer: p}).AdventureCatalogTx(ctx, p, revision)
@@ -593,4 +593,15 @@ func refusalSignature(t *testing.T, p *pg.Pool, attacker, defender identity.Play
 	finished := textValue(t, p, `SELECT COALESCE(finished_at::text,'') FROM adventure_occurrences WHERE player_id=$1 AND event_type=$2 ORDER BY occurred_at DESC LIMIT 1`, int64(attacker), d.EventBattle)
 	arenaRow := textValue(t, p, `SELECT season::text||':'||state_version::text||':'||awards::text||':'||defense::text FROM arena_players WHERE player_id=$1`, int64(defender))
 	return fmt.Sprintf("%s|%s|%s|%s|%s", balances, stacks, attempts, finished, arenaRow)
+}
+
+// keepOnlyArenaPlayers leaves the two players as the only Arena population;
+// rows other tests left in the shared database reference the removed players.
+func keepOnlyArenaPlayers(t *testing.T, p *pg.Pool, attacker, defender identity.PlayerID) {
+	t.Helper()
+	keep := []any{int64(attacker), int64(defender)}
+	exec(t, p, `DELETE FROM arena_records WHERE owner_player_id NOT IN ($1,$2) OR match_id IN (SELECT match_id FROM arena_matches WHERE attacker_id NOT IN ($1,$2) OR defender_id NOT IN ($1,$2))`, keep...)
+	exec(t, p, `DELETE FROM arena_partner_usage WHERE player_id NOT IN ($1,$2)`, keep...)
+	exec(t, p, `DELETE FROM arena_matches WHERE attacker_id NOT IN ($1,$2) OR defender_id NOT IN ($1,$2)`, keep...)
+	exec(t, p, `DELETE FROM arena_players WHERE player_id NOT IN ($1,$2)`, keep...)
 }
