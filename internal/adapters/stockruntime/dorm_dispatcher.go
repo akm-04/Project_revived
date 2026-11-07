@@ -16,6 +16,7 @@ import (
 type DormPort interface {
 	Command(context.Context, identity.ActorContext, app.Command, operation.Context) (app.Result, error)
 	Read(context.Context, identity.ActorContext, operation.Context, uint16, int64, int64) (map[string]any, error)
+	SocialRead(context.Context, identity.ActorContext, operation.Context, uint16, int64, int64, int64, int64) (map[string]any, error)
 }
 type DormDispatcher struct {
 	Authority rt.GameplayAuthorityPort
@@ -41,6 +42,29 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		allowed = []string{"host_id"}
 	case 2514:
 		allowed = []string{"host_id", "house_id"}
+	case 2518:
+		allowed = []string{"house_id", "house_name"}
+		c.Family = app.ChangeName
+	case 2519:
+	case 2520:
+		allowed = []string{"house_id"}
+		c.Family = app.HideHouse
+	case 2521:
+		allowed = []string{"host_id", "house_id"}
+		c.Family = app.PraiseHouse
+	case 2522:
+		allowed = []string{"house_id", "start", "offset", "total_num"}
+	case 2523:
+		allowed = []string{"host_id", "house_id", "content"}
+		c.Family = app.CommentHouse
+	case 2524:
+		allowed = []string{"host_id", "house_id", "start", "offset", "comment_num"}
+	case 2525:
+		allowed = []string{"host_id", "house_id", "comment_id"}
+		c.Family = app.PraiseComment
+	case 2526:
+		allowed = []string{"house_id", "comment_id"}
+		c.Family = app.DeleteComment
 	case 2513:
 		allowed = []string{"key_item", "floor", "pos"}
 		c.Family = app.Open
@@ -76,6 +100,35 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		return v
 	}
+	if mid == 2519 {
+		body, err := d.Service.SocialRead(ctx, a, req.Envelope.Operation, mid, 0, 0, 0, 1)
+		if err != nil {
+			return failSocialDorm(err)
+		}
+		return httpedge.Response{HTTPStatus: 200, Body: body}
+	}
+	if mid == 2522 || mid == 2524 {
+		c.HouseID = get("house_id")
+		host := int64(0)
+		if mid == 2524 {
+			if _, ok := p["host_id"]; ok {
+				host = get("host_id")
+				if host <= 0 {
+					return badHero("invalid_dorm_social_host")
+				}
+			}
+		}
+		start := get("start")
+		offset := get("offset")
+		if e != nil {
+			return badHero("invalid_dorm_social_page")
+		}
+		body, err := d.Service.SocialRead(ctx, a, req.Envelope.Operation, mid, host, c.HouseID, start, offset)
+		if err != nil {
+			return failSocialDorm(err)
+		}
+		return httpedge.Response{HTTPStatus: 200, Body: body}
+	}
 	if mid != 1845 && mid != 2512 && mid != 2513 && mid != 2693 {
 		c.HouseID = get("house_id")
 	}
@@ -97,6 +150,26 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: 200, Body: body}
 	}
 	switch mid {
+	case 2518:
+		value, err := requiredDormString(p, "house_name")
+		if err != nil {
+			return badHero("invalid_dorm_social_name")
+		}
+		c.HouseName = value
+	case 2521, 2523, 2525:
+		c.HostID = get("host_id")
+		if mid == 2523 {
+			value, err := requiredDormString(p, "content")
+			if err != nil {
+				return badHero("invalid_dorm_social_content")
+			}
+			c.Content = value
+		}
+		if mid == 2525 {
+			c.CommentID = get("comment_id")
+		}
+	case 2526:
+		c.CommentID = get("comment_id")
 	case 2513:
 		c.ItemID = get("key_item")
 		c.Floor = get("floor")
@@ -135,6 +208,9 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			}
 			return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error": "dorm_glue_purchase_refused"}}
 		}
+		if mid >= 2518 && mid <= 2526 {
+			return failSocialDorm(e)
+		}
 		response := failDorm(e)
 		if key, ok := out.Body["wrong_key"].(string); ok {
 			response.Body["wrong_key"] = key
@@ -144,6 +220,9 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	return httpedge.Response{HTTPStatus: 200, Body: out.Body}
 }
 func failDorm(e error) httpedge.Response {
+	if errors.Is(e, dorm.ErrHidden) {
+		return conflictRefusal(1)
+	}
 	status := http.StatusServiceUnavailable
 	body := map[string]any{"error": "dorm_unavailable"}
 	if errors.Is(e, app.ErrRejected) || errors.Is(e, dorm.ErrInvalidFacts) || errors.Is(e, dorm.ErrUnqualified) {
@@ -153,4 +232,27 @@ func failDorm(e error) httpedge.Response {
 		status = http.StatusBadRequest
 	}
 	return httpedge.Response{HTTPStatus: status, Body: body}
+}
+
+// Every Dorm social domain refusal is a 409 conflictRefusal: the stock
+// callbacks either mutate locally or index a nested table on any 200.
+func failSocialDorm(e error) httpedge.Response {
+	for _, target := range []error{app.ErrRejected, app.ErrStale, app.ErrRetired, app.ErrActor, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrStaleTime, dorm.ErrHidden} {
+		if errors.Is(e, target) {
+			return conflictRefusal(1)
+		}
+	}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "dorm_social_unavailable"}}
+}
+
+func requiredDormString(m map[string]any, key string) (string, error) {
+	value, ok := m[key]
+	if !ok {
+		return "", errors.New("missing " + key)
+	}
+	text, ok := value.(string)
+	if !ok {
+		return "", errors.New("invalid " + key)
+	}
+	return text, nil
 }

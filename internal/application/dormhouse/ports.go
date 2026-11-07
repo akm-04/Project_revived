@@ -18,6 +18,29 @@ type OwnerReader interface {
 type ContentReader interface {
 	DormCatalogTx(context.Context, tx.Queryer, string) (dorm.Catalog, error)
 }
+
+type SocialStore interface {
+	ReadSocialRoomTx(context.Context, tx.Queryer, dorm.RoomTarget) (dorm.SocialRoomState, bool, error)
+	ListSocialRoomsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]dorm.SocialRoomState, error)
+	SaveSocialRoomTx(context.Context, tx.Tx, dorm.SocialRoomState, int64) error
+	PraiseCountsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]int64, error)
+	ActorPraisesTx(context.Context, tx.Queryer, identity.PlayerID, identity.PlayerID) (map[int64]dorm.HousePraise, error)
+	PraiseCountTx(context.Context, tx.Queryer, dorm.RoomTarget) (int64, error)
+	ReadPraiseTx(context.Context, tx.Queryer, dorm.RoomTarget, identity.PlayerID) (*dorm.HousePraise, error)
+	PagePraisesTx(context.Context, tx.Queryer, dorm.RoomTarget, int64, int64) ([]dorm.HousePraise, error)
+	InsertPraiseTx(context.Context, tx.Tx, dorm.HousePraise) error
+	ListLiveCommentsTx(context.Context, tx.Queryer, dorm.RoomTarget, identity.PlayerID) ([]dorm.ListedComment, error)
+	ReadCommentTx(context.Context, tx.Queryer, dorm.RoomTarget, int64) (*dorm.HouseComment, error)
+	CommentLikesTx(context.Context, tx.Queryer, dorm.RoomTarget, int64) (int64, error)
+	ReadCommentReactionTx(context.Context, tx.Queryer, dorm.RoomTarget, int64, identity.PlayerID) (*dorm.CommentReaction, error)
+	NextCommentIDTx(context.Context, tx.Tx) (int64, error)
+	InsertCommentTx(context.Context, tx.Tx, dorm.HouseComment) error
+	MarkCommentDeletedTx(context.Context, tx.Tx, dorm.HouseComment) error
+	DeleteCommentReactionsTx(context.Context, tx.Tx, dorm.RoomTarget, int64) error
+	DeleteCommentTx(context.Context, tx.Tx, dorm.RoomTarget, int64) error
+	InsertCommentReactionTx(context.Context, tx.Tx, dorm.RoomTarget, dorm.CommentReaction) error
+	VisitablePlayersTx(context.Context, tx.Queryer, []int64) (map[int64]bool, error)
+}
 type CharacterEXPOwner interface {
 	ApplyDormEXPLockedTx(context.Context, tx.Tx, character.HeroRef, int64, int64, string, time.Time) (character.Hero, bool, error)
 }

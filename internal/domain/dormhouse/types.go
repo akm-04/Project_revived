@@ -24,6 +24,7 @@ var (
 	ErrStaleTime     = errors.New("dorm: stale captured time")
 	ErrInUse         = errors.New("dorm: Hero or furniture in use")
 	ErrCooldown      = errors.New("dorm: resident change cooldown")
+	ErrHidden        = errors.New("dorm: room is hidden")
 )
 
 // Attributes are percent * 100, exactly representable as basis points. The

@@ -1430,6 +1430,9 @@
   },
   "petcampaign": {},
   "playerdirectory": {
+   "dormhouse": [
+    "Validate"
+   ],
    "libraryforum": [
     "Validate"
    ],
@@ -1485,6 +1488,9 @@
    ],
    "commerceprivilege": [
     "Validate"
+   ],
+   "dormhouse": [
+    "CanonicalPlayerIDs"
    ],
    "frienddm": [
     "CanonicalPlayerIDs",
@@ -3105,6 +3111,12 @@
     "*ReadHeroByPartnerIDTx",
     "*ReadRootTx"
    ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs"
+   ],
    "store:contentstore": [
     "*DormCatalogTx",
     "*DormInputsActive",
@@ -3112,24 +3124,47 @@
     "*HeroTemplateProgressionTx"
    ],
    "store:dormstore": [
+    "*ActorPraisesTx",
+    "*CommentLikesTx",
+    "*DeleteCommentReactionsTx",
+    "*DeleteCommentTx",
     "*EnsureHeroTx",
     "*EnsureRootTx",
+    "*InsertCommentReactionTx",
+    "*InsertCommentTx",
+    "*InsertPraiseTx",
     "*InsertRoomTx",
+    "*ListLiveCommentsTx",
     "*ListRoomsTx",
+    "*ListSocialRoomsTx",
     "*LockAdmissionTx",
     "*LockRootTx",
+    "*MarkCommentDeletedTx",
+    "*NextCommentIDTx",
+    "*PagePraisesTx",
+    "*PraiseCountTx",
+    "*PraiseCountsTx",
+    "*ReadCommentReactionTx",
+    "*ReadCommentTx",
     "*ReadGluePurchasesTx",
     "*ReadHeroTx",
+    "*ReadPraiseTx",
     "*ReadRoomTx",
     "*ReadRootTx",
+    "*ReadSocialRoomTx",
     "*SaveAdmissionTx",
     "*SaveGluePurchasesTx",
     "*SaveHeroTx",
     "*SaveRoomTx",
-    "*SaveRootTx"
+    "*SaveRootTx",
+    "*SaveSocialRoomTx",
+    "*VisitablePlayersTx"
    ],
    "store:i4store": [
-    "*LockPlayerRootsTx"
+    "*LockPlayerRootsTx",
+    "*PlayerIDBoundsTx",
+    "*ProfileTx",
+    "*ProfilesAfterTx"
    ],
    "store:kernelstore": [
     "*FindTx",

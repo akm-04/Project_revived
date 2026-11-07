@@ -1,0 +1,4 @@
+-- +goose Up
+ALTER TABLE player_dorm_admissions DROP CONSTRAINT player_dorm_admissions_family_check;
+ALTER TABLE player_dorm_admissions ADD CONSTRAINT player_dorm_admissions_family_check
+ CHECK(family IN ('DORM_OPEN','DORM_SAVE','DORM_EQUIP','DORM_ENTER','DORM_EXCHANGE','DORM_START','DORM_FINISH','DORM_BUY_GLUE','DORM_CHANGE_NAME','DORM_HIDE_HOUSE','DORM_PRAISE_HOUSE','DORM_COMMENT_HOUSE','DORM_PRAISE_COMMENT','DORM_DELETE_COMMENT'));

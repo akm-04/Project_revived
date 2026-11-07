@@ -19,6 +19,9 @@ import (
 func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission) (map[string]any, error) {
 	c := d.Command
 	at := d.DecisionAt
+	if socialFamily(c.Family) {
+		return s.applySocial(ctx, t, a, d)
+	}
 	catalog, e := s.Content.DormCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
 		return nil, e
@@ -337,7 +340,11 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 				return nil, e
 			}
 			rooms[id] = r
-			changed = append(changed, roomWire(r, hm, facts))
+			wire, wireErr := s.socialRoomWireTx(ctx, t, a.PlayerID, a.PlayerID)
+			if wireErr != nil {
+				return nil, wireErr
+			}
+			changed = append(changed, roomWire(r, hm, facts, wire))
 		}
 		body["changed_houses"] = changed
 		room = rooms[room.ID]
@@ -375,7 +382,11 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			return nil, e
 		}
 	}
-	body["house_info"] = roomWire(room, hm, facts)
+	wire, e := s.socialRoomWireTx(ctx, t, a.PlayerID, a.PlayerID)
+	if e != nil {
+		return nil, e
+	}
+	body["house_info"] = roomWire(room, hm, facts, wire)
 	changed := map[string]any{}
 	for _, h := range heroes {
 		f := facts[h.PartnerID]
