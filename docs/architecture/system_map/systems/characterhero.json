@@ -398,7 +398,8 @@
    "player_hero_live_entitlements",
    "player_hero_roots",
    "player_hero_skin_entitlements",
-   "player_heroes"
+   "player_heroes",
+   "player_library_hero_logs"
   ]
  },
  "tests": {

@@ -9993,14 +9993,7 @@
    "declared": true
   }
  ],
- "tables_without_owner_row": [
-  {
-   "table": "player_library_hero_logs",
-   "migrations": [
-    "migrations/00146_i9_10_intimacy_hero_logs.sql"
-   ]
-  }
- ],
+ "tables_without_owner_row": [],
  "unattributed_mids": [
   {
    "mid": 2,
