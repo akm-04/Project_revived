@@ -200,6 +200,15 @@ func (a pgAuthoritativeTime) Now(ctx context.Context) (time.Time, error) {
 	return now.UTC(), nil
 }
 
+func (h socialHarness) commandError(actor identity.ActorContext, command app.Command) error {
+	op, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+	if err != nil {
+		return err
+	}
+	_, err = h.service.Command(context.Background(), actor, command, op)
+	return err
+}
+
 func (h socialHarness) command(t *testing.T, actor identity.ActorContext, command app.Command) map[string]any {
 	t.Helper()
 	op, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})

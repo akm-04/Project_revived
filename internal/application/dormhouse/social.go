@@ -186,6 +186,9 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 	if !found {
 		state = dorm.SocialRoomState{Target: roomTarget, StateVersion: 0}
 	}
+	if target != actor.PlayerID && state.Hidden {
+		return nil, dorm.ErrHidden
+	}
 	viewer := actor.PlayerID
 	switch c.Family {
 	case ChangeName:
