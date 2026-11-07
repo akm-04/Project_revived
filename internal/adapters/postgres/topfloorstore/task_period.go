@@ -31,6 +31,15 @@ func (Store) ReadTaskPeriodTx(requestContext context.Context, query tx.Queryer, 
 	return period, true, period.Validate()
 }
 
+func (Store) TaskModeBanTablesTx(requestContext context.Context, query tx.Queryer, mode, rotation int64) ([]int64, error) {
+	if query == nil || mode < domain.TaskModeSingle || mode > domain.TaskModeCamp || rotation < 1 {
+		return nil, domain.ErrInvalid
+	}
+	var bannedTableIDs []int64
+	err := query.QueryRow(requestContext, `SELECT COALESCE(array_agg(banned_table_id ORDER BY banned_table_id), '{}'::bigint[]) FROM top_floor_task_bans WHERE mode_id=$1 AND rotation_number=$2`, mode, rotation).Scan(&bannedTableIDs)
+	return bannedTableIDs, err
+}
+
 func (Store) CreateTaskPeriodTx(requestContext context.Context, transaction tx.Tx, period domain.TaskModePeriod) error {
 	if transaction == nil || period.Validate() != nil || period.Ladder.Size != 0 || period.Ladder.StateVersion != 1 {
 		return domain.ErrConflict

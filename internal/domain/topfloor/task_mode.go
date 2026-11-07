@@ -66,6 +66,28 @@ func (catalog TaskModeCatalog) Rule(mode int64) (TaskModeRule, bool) {
 	return TaskModeRule{}, false
 }
 
+func (catalog TaskModeCatalog) WithOperatorBans(mode int64, bannedTables []int64) (TaskModeCatalog, error) {
+	updated := catalog
+	updated.Rules = slices.Clone(catalog.Rules)
+	for index, rule := range updated.Rules {
+		if rule.ID != mode {
+			continue
+		}
+		merged := slices.Clone(rule.BannedTables)
+		for _, table := range bannedTables {
+			if table <= 0 {
+				return TaskModeCatalog{}, ErrInvalid
+			}
+			if !slices.Contains(merged, table) {
+				merged = append(merged, table)
+			}
+		}
+		updated.Rules[index].BannedTables = merged
+		return updated, nil
+	}
+	return TaskModeCatalog{}, ErrUnavailable
+}
+
 func taskModeSourceDay(date string) (int64, error) {
 	parsed, err := time.Parse("20060102", date)
 	if err != nil {

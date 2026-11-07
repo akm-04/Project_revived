@@ -4584,6 +4584,20 @@
       "write_exceptions": [],
       "migration": "migrations/00096_i9_7a_top_floor_task.sql"
     },
+    "top_floor_task_bans": {
+      "owner": "TopFloor",
+      "allowed_query_owners": [
+        "TopFloor"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/topfloorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00143_i9_10_task_operator_bans.sql"
+    },
     "arena_tournament_periods": {
       "owner": "Arena",
       "allowed_query_owners": [
