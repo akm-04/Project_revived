@@ -17,4 +17,9 @@ test -s "$harness/psk/accounts.txt" || { echo "seed: missing credentials" >&2; e
 
 "$python" -I -B "$harness/bots.py" create
 "$python" -I -B "$harness/bots.py" enter
+
+# Test supplies for every account: 2 Sorcery Scrolls, 5 Dodgeball tickets (misc dodge_ticket).
+for login in $("$python" -I -B "$harness/helpers.py" players | cut -f1); do
+  "$python" -I -B "$harness/helpers.py" give "$login" --currency occult_ticket:2 --item 50001979:5 >/dev/null
+done
 echo "SEED_PASS"
