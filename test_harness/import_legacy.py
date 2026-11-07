@@ -1015,6 +1015,7 @@ def build_statements(player, revision, player_id, report):
         "player_heroes",
         "player_hero_skin_entitlements",
         "player_hero_live_entitlements",
+        "player_library_hero_logs",
         "player_library_heroes",
         "player_dorm_heroes",
         "player_course_heroes",
