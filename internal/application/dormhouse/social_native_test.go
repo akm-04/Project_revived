@@ -4,6 +4,7 @@ package dormhouse_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"strings"
@@ -356,6 +357,23 @@ func TestDormSocialModerationUsesPublishedProfileCorpus(t *testing.T) {
 	var name string
 	if err := h.pool.QueryRow(context.Background(), `SELECT house_name FROM player_dorm_room_social WHERE player_id=126701 AND house_id=1`).Scan(&name); err != nil || name != "" {
 		t.Fatalf("empty name did not restore the default: %q %v", name, err)
+	}
+	var rawRefs string
+	if err := h.pool.QueryRow(context.Background(), `SELECT operation_policy_refs::text FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain='dorm-house' AND operation=$2 ORDER BY recorded_at DESC LIMIT 1`, "126701", app.ChangeName).Scan(&rawRefs); err != nil {
+		t.Fatal(err)
+	}
+	refs := []struct{ Name, Version string }{}
+	if err := json.Unmarshal([]byte(rawRefs), &refs); err != nil {
+		t.Fatal(err)
+	}
+	moderationRef := ""
+	for _, ref := range refs {
+		if ref.Name == "profile-moderation" {
+			moderationRef = ref.Version
+		}
+	}
+	if moderationRef != "PROFILE_SCALAR_CASE_SENSITIVE_SPACE_MASK_V1" {
+		t.Fatalf("receipt moderation ref %q in %s", moderationRef, rawRefs)
 	}
 }
 
