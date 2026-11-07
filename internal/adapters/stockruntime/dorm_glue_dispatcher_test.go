@@ -51,5 +51,8 @@ func TestDormGlueDispatcherUsesStockEmptyRequestAndRejectsUnsafeSuccess(t *testi
 		if response.HTTPStatus != cell.status || response.Body["buy_glue_times"] != nil || response.Body["economy_"] != nil {
 			t.Fatal(response, cell)
 		}
+		if response.Body["error_code"] != int64(1) {
+			t.Fatalf("stock refusal body %v", response.Body)
+		}
 	}
 }

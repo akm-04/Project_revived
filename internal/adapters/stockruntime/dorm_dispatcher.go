@@ -204,9 +204,9 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if mid == 1845 {
 			status := http.StatusServiceUnavailable
 			if errors.Is(e, app.ErrRejected) || errors.Is(e, dorm.ErrGlueDailyLimit) {
-				status = http.StatusConflict
+				return conflictRefusal(1)
 			}
-			return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error": "dorm_glue_purchase_refused"}}
+			return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "dorm_glue_purchase_refused"}}
 		}
 		if mid >= 2518 && mid <= 2526 {
 			return failSocialDorm(e)

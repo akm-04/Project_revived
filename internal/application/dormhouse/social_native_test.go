@@ -6,10 +6,12 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
@@ -27,8 +29,6 @@ import (
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
-
-const socialRevision = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 type socialFence struct{}
 
@@ -78,7 +78,7 @@ func (socialHeroes) ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID)
 	return nil, nil
 }
 
-type socialContent struct{}
+type socialContent struct{ revision string }
 
 func (socialContent) DormCatalogTx(context.Context, tx.Queryer, string) (dorm.Catalog, error) {
 	return dorm.Catalog{}, nil
@@ -86,8 +86,8 @@ func (socialContent) DormCatalogTx(context.Context, tx.Queryer, string) (dorm.Ca
 func (socialContent) HeroTemplateProgressionTx(context.Context, tx.Queryer, string, int64) (character.HeroTemplateProgression, error) {
 	return character.HeroTemplateProgression{}, nil
 }
-func (socialContent) DormInputsActive(context.Context) (string, bool, error) {
-	return socialRevision, true, nil
+func (c socialContent) DormInputsActive(context.Context) (string, bool, error) {
+	return c.revision, true, nil
 }
 func (socialContent) DormInputsRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
 	return true, nil
@@ -174,18 +174,23 @@ func newSocialHarness(t *testing.T) socialHarness {
 		}
 	})
 	runner := tx.Runner{DB: pool}
+	revision, err := (contentstore.Store{Queryer: pool}).ActiveRevision(context.Background(), pool)
+	if err != nil {
+		t.Fatal(err)
+	}
 	service := app.Service{
-		Timed:     generation.TimedRunner{Binder: generation.Binder{Time: pgAuthoritativeTime{pool}}, Runner: runner},
-		Reads:     runner,
-		Heroes:    socialHeroes{},
-		Owner:     dormstore.Store{},
-		Content:   socialContent{},
-		Players:   socialPlayers{},
-		Fence:     socialFence{},
-		Values:    socialValues{},
-		Receipts:  kernelstore.Store{},
-		Social:    dormstore.Store{},
-		Directory: socialDirectory{},
+		Timed:      generation.TimedRunner{Binder: generation.Binder{Time: pgAuthoritativeTime{pool}}, Runner: runner},
+		Reads:      runner,
+		Heroes:     socialHeroes{},
+		Owner:      dormstore.Store{},
+		Content:    socialContent{revision: revision},
+		Players:    socialPlayers{},
+		Fence:      socialFence{},
+		Values:     socialValues{},
+		Receipts:   kernelstore.Store{},
+		Social:     dormstore.Store{},
+		Directory:  socialDirectory{},
+		Moderation: contentstore.Store{Queryer: pool},
 	}
 	return socialHarness{service: service, pool: pool, owner: socialActor(126701), viewer: socialActor(126702), author: socialActor(126703)}
 }
@@ -320,6 +325,37 @@ func TestDormSocialCommandMIDsThroughProductionPath(t *testing.T) {
 	houseInfos, _ := random["house_infos"].(map[string]any)
 	if hostInfo == nil || hostInfo["player_id"] == nil || houseInfos == nil || houseInfos["house_list"] == nil {
 		t.Fatalf("random visit reply %v", random)
+	}
+}
+
+func TestDormSocialModerationUsesPublishedProfileCorpus(t *testing.T) {
+	h := newSocialHarness(t)
+	blocked := func(err error) bool {
+		return errors.Is(err, app.ErrRejected) && strings.Contains(err.Error(), dorm.ErrModerated.Error())
+	}
+	if err := h.commandError(h.owner, app.Command{Family: app.ChangeName, HouseID: 1, HouseName: "Fuck"}); !blocked(err) {
+		t.Fatalf("blocked room name: %v", err)
+	}
+	var blockedRows int
+	if err := h.pool.QueryRow(context.Background(), `SELECT count(*) FROM player_dorm_room_social WHERE player_id=126701 AND house_id=1 AND house_name='Fuck'`).Scan(&blockedRows); err != nil || blockedRows != 0 {
+		t.Fatalf("blocked name persisted: %d %v", blockedRows, err)
+	}
+	if err := h.commandError(h.viewer, app.Command{Family: app.CommentHouse, HostID: 126701, HouseID: 1, Content: "hello Fuck"}); !blocked(err) {
+		t.Fatalf("blocked comment: %v", err)
+	}
+	if list, err := h.socialRead(t, h.viewer, 2524, 126701, 1, 0, 20); err != nil || list["comment_num"] != int64(0) {
+		t.Fatalf("blocked comment persisted: %v %v", list, err)
+	}
+	if body := h.command(t, h.viewer, app.Command{Family: app.CommentHouse, HostID: 126701, HouseID: 1, Content: "hello"}); body["comment_num"] != int64(1) {
+		t.Fatalf("clean comment refused: %v", body)
+	}
+	h.command(t, h.owner, app.Command{Family: app.ChangeName, HouseID: 1, HouseName: "hall"})
+	if body := h.command(t, h.owner, app.Command{Family: app.ChangeName, HouseID: 1, HouseName: ""}); len(body) != 0 {
+		t.Fatalf("empty name reply %v", body)
+	}
+	var name string
+	if err := h.pool.QueryRow(context.Background(), `SELECT house_name FROM player_dorm_room_social WHERE player_id=126701 AND house_id=1`).Scan(&name); err != nil || name != "" {
+		t.Fatalf("empty name did not restore the default: %q %v", name, err)
 	}
 }
 

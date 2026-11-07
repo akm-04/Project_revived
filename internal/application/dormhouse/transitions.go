@@ -16,11 +16,11 @@ import (
 // apply runs after the complete Character/Dorm prefix. All source/value plans
 // are prepared before the first mutation; all effects and the outer receipt
 // commit together. Root500 serializes every room/membership/equipment change.
-func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission) (map[string]any, error) {
+func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, moderationWords []string) (map[string]any, error) {
 	c := d.Command
 	at := d.DecisionAt
 	if socialFamily(c.Family) {
-		return s.applySocial(ctx, t, a, d)
+		return s.applySocial(ctx, t, a, d, moderationWords)
 	}
 	catalog, e := s.Content.DormCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {

@@ -25,6 +25,7 @@ var (
 	ErrInUse         = errors.New("dorm: Hero or furniture in use")
 	ErrCooldown      = errors.New("dorm: resident change cooldown")
 	ErrHidden        = errors.New("dorm: room is hidden")
+	ErrModerated     = errors.New("dorm: refused by the public-profile moderation policy")
 )
 
 // Attributes are percent * 100, exactly representable as basis points. The

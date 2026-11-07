@@ -1,7 +1,8 @@
 {
  "background": [],
  "content": [
-  "content_dorm_input_catalogs"
+  "content_dorm_input_catalogs",
+  "content_public_profile_policies"
  ],
  "contracts": [
   {
@@ -258,6 +259,7 @@
    "account_sessions",
    "accounts",
    "content_dorm_input_catalogs",
+   "content_public_profile_policies",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_hero_templates",

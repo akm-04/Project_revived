@@ -19,6 +19,16 @@ type ContentReader interface {
 	DormCatalogTx(context.Context, tx.Queryer, string) (dorm.Catalog, error)
 }
 
+// ModerationPolicy is the published public-profile corpus. Dorm writes reuse
+// it rather than defining a second list.
+type ModerationPolicy struct {
+	PolicyID string
+	Words    []string
+}
+type ModerationReader interface {
+	ModerationPolicyTx(context.Context, tx.Queryer, string) (ModerationPolicy, error)
+}
+
 type SocialStore interface {
 	ReadSocialRoomTx(context.Context, tx.Queryer, dorm.RoomTarget) (dorm.SocialRoomState, bool, error)
 	ListSocialRoomsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]dorm.SocialRoomState, error)

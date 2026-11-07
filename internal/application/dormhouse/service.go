@@ -234,6 +234,7 @@ type Service struct {
 	GluePrivileges GluePrivilegeReader
 	Social         SocialStore
 	Directory      playerdirectory.TxDiscoveryReader
+	Moderation     ModerationReader
 }
 
 func (s Service) complete() bool {
@@ -243,10 +244,23 @@ func (s Service) complete() bool {
 // Social commands do not touch Character progression, materials or exchange, so
 // they require only the ports their transaction uses.
 func (s Service) socialComplete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Values != nil && s.Receipts != nil && s.Social != nil && s.Directory != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Values != nil && s.Receipts != nil && s.Social != nil && s.Directory != nil && s.Moderation != nil
 }
 func receiptID(d Admission) receipt.Identity {
 	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(d.Actor.Player, 10), Domain: "dorm-house", Operation: d.Command.Family, SemanticKey: d.Operation.ID.String()}
+}
+
+// bindModerationPolicy retains the published corpus identity on the receipt,
+// as the public-profile writers do.
+func bindModerationPolicy(policies policy.Set, policyID string) (policy.Set, error) {
+	if value, ok := policies.Get("profile-moderation"); ok {
+		if value != policyID {
+			return policies, ErrProof
+		}
+		return policies, nil
+	}
+	refs := append(policies.Refs(), policy.Ref{Name: "profile-moderation", Version: policyID})
+	return policy.NewSet(refs...)
 }
 func fingerprint(c Command) ([32]byte, error) {
 	return receipt.FingerprintRequest(map[string]any{"command": c, "policy": LifecyclePolicy})
@@ -517,7 +531,20 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			return ErrUnavailable
 		}
 		out = Result{Schema: ResultSchema, Command: d.Command, Actor: d.Actor, OperationID: d.Operation.ID, Entropy: d.Operation.EntropySeed, ContentRevision: d.ContentRevision, DecisionAt: d.DecisionAt}
-		out.Body, e = s.apply(ctx, sc.Tx, a, d)
+		words := []string(nil)
+		if d.Command.Family == ChangeName || d.Command.Family == CommentHouse {
+			moderation, err := s.Moderation.ModerationPolicyTx(ctx, sc.Tx, d.ContentRevision)
+			if err != nil {
+				return err
+			}
+			bound, err := bindModerationPolicy(d.Operation.Policies, moderation.PolicyID)
+			if err != nil {
+				return err
+			}
+			d.Operation.Policies = bound
+			words = moderation.Words
+		}
+		out.Body, e = s.apply(ctx, sc.Tx, a, d, words)
 		if e != nil {
 			return e
 		}
@@ -591,7 +618,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 // Infrastructure/proof/unknown failures retain PENDING; only definite domain or
 // lifecycle rejection may advance a lane without its economic effect.
 func terminalRejection(e error) bool {
-	for _, x := range []error{dorm.ErrGlueDailyLimit, i5.ErrGluePurchaseLimit, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, dorm.ErrHidden, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
+	for _, x := range []error{dorm.ErrGlueDailyLimit, i5.ErrGluePurchaseLimit, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, dorm.ErrHidden, dorm.ErrModerated, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
 		if errors.Is(e, x) {
 			return true
 		}

@@ -10,6 +10,7 @@ import (
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	"gxb.local/backend/v2/internal/domain/profile"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
@@ -137,7 +138,24 @@ func boolFlag(value bool) int64 {
 	return 0
 }
 
-func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorContext, admission Admission) (map[string]any, error) {
+// moderatedSocialText applies the published public-profile corpus. A masked
+// span means the source moderation policy blocked the text, so Dorm refuses it
+// instead of storing a rewritten name or comment.
+func moderatedSocialText(text string, words []string) (string, error) {
+	if len(words) == 0 {
+		return "", ErrUnavailable
+	}
+	moderated, e := profile.ModerateIntro(text, words)
+	if e != nil {
+		return "", dorm.ErrInvalidFacts
+	}
+	if moderated != text {
+		return "", dorm.ErrModerated
+	}
+	return moderated, nil
+}
+
+func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorContext, admission Admission, moderationWords []string) (map[string]any, error) {
 	if s.Social == nil || s.Directory == nil {
 		return nil, ErrUnavailable
 	}
@@ -192,11 +210,14 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 	viewer := actor.PlayerID
 	switch c.Family {
 	case ChangeName:
-		// PRIVATE_POLICY: the display half-unit limit is the only name gate; the
-		// original name moderation corpus is UNKNOWN and is not invented here.
 		name, err := dorm.NormalizeRoomName(c.HouseName)
 		if err != nil {
 			return nil, err
+		}
+		if name != "" {
+			if name, err = moderatedSocialText(name, moderationWords); err != nil {
+				return nil, err
+			}
 		}
 		state.Name = name
 		return map[string]any{}, s.saveSocialRoom(ctx, t, state, at)
@@ -242,7 +263,11 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 		if err != nil {
 			return nil, err
 		}
-		plan, err := dorm.PlanComment(rows, roomTarget, viewer, id, c.Content, at)
+		content, err := moderatedSocialText(c.Content, moderationWords)
+		if err != nil {
+			return nil, err
+		}
+		plan, err := dorm.PlanComment(rows, roomTarget, viewer, id, content, at)
 		if err != nil {
 			return nil, err
 		}

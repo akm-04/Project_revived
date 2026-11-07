@@ -3143,7 +3143,8 @@
     "*DormCatalogTx",
     "*DormInputsActive",
     "*DormInputsRevisionTx",
-    "*HeroTemplateProgressionTx"
+    "*HeroTemplateProgressionTx",
+    "*ModerationPolicyTx"
    ],
    "store:dormstore": [
     "*ActorPraisesTx",
@@ -4787,6 +4788,9 @@
    "store:contentstore": [
     "*ActiveRevision",
     "*ReadPlayerDisplayCatalogTx"
+   ],
+   "store:dormstore": [
+    "*ComfortFactTx"
    ],
    "store:guildrentalread": [
     "*ProfileTx"

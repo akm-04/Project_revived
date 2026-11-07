@@ -1297,7 +1297,7 @@
    "tables": 0
   },
   {
-   "callees": 11,
+   "callees": 12,
    "callers": 1,
    "mids": 1,
    "name": "ranking",
