@@ -3,13 +3,17 @@
 package playerdisplay_test
 
 import (
+	"reflect"
 	"testing"
 
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-func TestPlaytestArenaRefreshOlderCardAndFormationsNative(t *testing.T) {
+// D507: a refresh keeps the previous issued lists fightable, an empty formation
+// and a never-offered opponent refuse as stock 409s, and a repeated FIGHT replays.
+func TestPlaytestArenaRecentOffersNative(t *testing.T) {
 	p := pool(t)
 	defer p.Close()
 	s := arenaService(t, p)
@@ -96,21 +100,61 @@ func TestPlaytestArenaRefreshOlderCardAndFormationsNative(t *testing.T) {
 	fight := func(enemy int64, formation []any) map[string]any {
 		return map[string]any{"enemy_id": enemy, "is_test": int64(1), "pet_id": int64(0), "campaign_id": int64(0), "formation": formation}
 	}
-	stale := dispatcher.Dispatch(ctx, playtestRequest(a, 773, fight(firstEnemy, fullFormation)))
-	t.Logf("MID773 against older card %d after refreshing to %d: HTTP %d body %#v", firstEnemy, secondEnemy, stale.HTTPStatus, stale.Body)
-	if stale.HTTPStatus != 400 || stale.Body["error"] != "arena_request_refused" {
-		t.Fatalf("stale-card response: %+v", stale)
+	matches := func() int64 {
+		return scalar(t, p, `SELECT count(*) FROM arena_matches WHERE attacker_id=$1`, int64(a.PlayerID))
+	}
+	fightSettledThroughDispatcher := func(enemy int64, formation []any) httpedge.Response {
+		for range 10 {
+			response := dispatcher.Dispatch(ctx, playtestRequest(a, 773, fight(enemy, formation)))
+			if response.HTTPStatus != 200 {
+				return response
+			}
+			switch reports := response.Body["battle_report"].(type) {
+			case []map[string]any:
+				if len(reports) > 0 {
+					return response
+				}
+			case []any:
+				if len(reports) > 0 {
+					return response
+				}
+			}
+		}
+		t.Fatalf("MID773 against %d never resolved", enemy)
+		return httpedge.Response{}
 	}
 
+	before := matches()
+	older := fightSettledThroughDispatcher(firstEnemy, fullFormation)
+	if older.HTTPStatus != 200 {
+		t.Fatalf("MID773 against older card %d after refreshing to %d: %+v", firstEnemy, secondEnemy, older)
+	}
+	if matches() != before+1 || scalar(t, p, `SELECT count(*) FROM arena_matches WHERE attacker_id=$1 AND defender_id=$2 AND status='SETTLED' AND COALESCE((outcome->>'forfeit')::boolean,false)=false`, int64(a.PlayerID), firstEnemy) != 1 {
+		t.Fatal("the older offered card did not start and settle one fight")
+	}
+
+	replay := dispatcher.Dispatch(ctx, playtestRequest(a, 773, fight(firstEnemy, fullFormation)))
+	if replay.HTTPStatus != 200 || !reflect.DeepEqual(replay.Body, older.Body) || matches() != before+1 {
+		t.Fatalf("duplicated MID773 did not replay its result: %+v", replay)
+	}
+
+	d, _ := oneOnOnePlayer(t, p, rankingServer(t, p))
+	if _, err = s.Info(ctx, d, op()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.ModifyDefence(ctx, d, arenaGirls(5), 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	beforeRefusals := matches()
+	notOffered := dispatcher.Dispatch(ctx, playtestRequest(a, 773, fight(int64(d.PlayerID), fullFormation)))
+	if notOffered.HTTPStatus != 409 || notOffered.Body["error_code"] != int64(30023) {
+		t.Fatalf("never-offered opponent: HTTP %d body %#v", notOffered.HTTPStatus, notOffered.Body)
+	}
 	empty := dispatcher.Dispatch(ctx, playtestRequest(a, 773, fight(secondEnemy, []any{})))
-	t.Logf("MID773 with empty formation: HTTP %d body %#v", empty.HTTPStatus, empty.Body)
-	if empty.HTTPStatus != 400 || empty.Body["error"] != "arena_request_refused" {
-		t.Fatalf("empty-formation response: %+v", empty)
+	if empty.HTTPStatus != 409 || empty.Body["error_code"] != int64(35006) {
+		t.Fatalf("empty formation: HTTP %d body %#v", empty.HTTPStatus, empty.Body)
 	}
-
-	partial := dispatcher.Dispatch(ctx, playtestRequest(a, 773, fight(secondEnemy, []any{arenaGirls(1)[0]})))
-	t.Logf("MID773 with one-hero formation: HTTP %d body %#v", partial.HTTPStatus, partial.Body)
-	if partial.HTTPStatus != 200 {
-		t.Fatalf("partial-formation response: %+v", partial)
+	if matches() != beforeRefusals {
+		t.Fatal("a refused MID773 changed the match ledger")
 	}
 }

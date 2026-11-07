@@ -32,7 +32,11 @@ func (p Player) Validate() error {
 	defense := len(p.Defense.Heroes) == 0 || len(p.Defense.Heroes) == TeamSize
 	streaks := p.DefenseWins >= 0 && p.DefenseWins < 3 && p.DefenseLosses >= 0 && p.DefenseLosses < 3
 	totals := p.TotalFight >= 0 && p.WinTimes >= 0 && p.WinTimes <= p.TotalFight && p.KeepWin >= 0 && p.KeepWin <= p.WinTimes
-	if !p.PlayerID.Valid() || p.Season < 0 || p.Star < 0 || p.Point < 0 || !defense || !streaks || !totals || len(p.Missions) > Missions ||
+	offers := len(p.RecentOffers) <= OfferLimit
+	for _, offer := range p.RecentOffers {
+		offers = offers && offer.Opponent.Valid() && offer.Opponent != p.PlayerID
+	}
+	if !p.PlayerID.Valid() || p.Season < 0 || p.Star < 0 || p.Point < 0 || !defense || !streaks || !totals || !offers || len(p.Missions) > Missions ||
 		p.Opponent == p.PlayerID || p.DailyFights < 0 || p.StateVersion < 1 {
 		return fmt.Errorf("%w: player %d", ErrConflict, p.PlayerID)
 	}

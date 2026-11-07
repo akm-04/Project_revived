@@ -105,6 +105,7 @@ type playerRow struct {
 	Defense       d.Lineup                 `json:"defense"`
 	Opponent      identity.PlayerID        `json:"opponent"`
 	Practice      bool                     `json:"practice"`
+	RecentOffers  []d.Offer                `json:"recent_offers"`
 	MatchCounter  int64                    `json:"match_counter"`
 	Missions      []d.MissionSlot          `json:"missions"`
 	MissionTime   time.Time                `json:"mission_time"`
@@ -116,7 +117,7 @@ type playerRow struct {
 	UpdatedAt     time.Time                `json:"updated_at"`
 }
 
-const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'season',season,'star',star,'point',point,'star_at',star_at,'total_fight',total_fight,'win_times',win_times,'keep_win',keep_win,'defense_wins',defense_wins,'defense_losses',defense_losses,'daily_day',daily_day,'daily_fights',daily_fights,'defense',defense,'opponent',COALESCE(opponent,0),'practice',practice,'match_counter',match_counter,'missions',missions,'mission_time',mission_time,'mission_draws',mission_draws,'exchange_times',jsonb_build_array(exchange_star,exchange_awaken,exchange_summon),'awards',awards,'version',state_version,'created_at',created_at,'updated_at',updated_at)`
+const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'season',season,'star',star,'point',point,'star_at',star_at,'total_fight',total_fight,'win_times',win_times,'keep_win',keep_win,'defense_wins',defense_wins,'defense_losses',defense_losses,'daily_day',daily_day,'daily_fights',daily_fights,'defense',defense,'opponent',COALESCE(opponent,0),'practice',practice,'recent_offers',recent_offers,'match_counter',match_counter,'missions',missions,'mission_time',mission_time,'mission_draws',mission_draws,'exchange_times',jsonb_build_array(exchange_star,exchange_awaken,exchange_summon),'awards',awards,'version',state_version,'created_at',created_at,'updated_at',updated_at)`
 
 func (Store) ReadPlayerTx(c context.Context, q tx.Queryer, pid identity.PlayerID, lock bool) (d.Player, bool, error) {
 	sql := `SELECT ` + playerObject + `::text FROM arena_players WHERE player_id=$1`
@@ -133,8 +134,8 @@ func (Store) ReadPlayerTx(c context.Context, q tx.Queryer, pid identity.PlayerID
 }
 
 type playerArgs struct {
-	defense, missions, awards string
-	opponent                  any
+	defense, missions, awards, offers string
+	opponent                          any
 }
 
 func argsOf(p d.Player) (playerArgs, error) {
@@ -147,6 +148,13 @@ func argsOf(p d.Player) (playerArgs, error) {
 		return a, e
 	}
 	if a.awards, e = encode(p.Awards); e != nil {
+		return a, e
+	}
+	offers := p.RecentOffers
+	if offers == nil {
+		offers = []d.Offer{}
+	}
+	if a.offers, e = encode(offers); e != nil {
 		return a, e
 	}
 	if p.Opponent != 0 {
@@ -163,9 +171,9 @@ func (Store) InsertPlayerTx(c context.Context, t tx.Tx, p d.Player, revision str
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `INSERT INTO arena_players(player_id,logical_server_id,competition_id,content_revision,season,star,point,star_at,total_fight,win_times,keep_win,defense_wins,defense_losses,daily_day,daily_fights,defense,opponent,practice,match_counter,missions,mission_time,mission_draws,exchange_star,exchange_awaken,exchange_summon,awards,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19,$20::jsonb,$21,$22,$23,$24,$25,$26::jsonb,1,$27,$27)`,
+	return one(t.Exec(c, `INSERT INTO arena_players(player_id,logical_server_id,competition_id,content_revision,season,star,point,star_at,total_fight,win_times,keep_win,defense_wins,defense_losses,daily_day,daily_fights,defense,opponent,practice,match_counter,missions,mission_time,mission_draws,exchange_star,exchange_awaken,exchange_summon,awards,recent_offers,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19,$20::jsonb,$21,$22,$23,$24,$25,$26::jsonb,$27::jsonb,1,$28,$28)`,
 		int64(p.PlayerID), int64(p.Server), d.CompetitionID, revision, p.Season, p.Star, p.Point, p.StarAt, p.TotalFight, p.WinTimes, p.KeepWin, p.DefenseWins, p.DefenseLosses, p.DailyDay, p.DailyFights,
-		a.defense, a.opponent, p.Practice, p.MatchCounter, a.missions, p.MissionTime, p.MissionDraws, p.ExchangeTimes[0], p.ExchangeTimes[1], p.ExchangeTimes[2], a.awards, p.CreatedAt))
+		a.defense, a.opponent, p.Practice, p.MatchCounter, a.missions, p.MissionTime, p.MissionDraws, p.ExchangeTimes[0], p.ExchangeTimes[1], p.ExchangeTimes[2], a.awards, a.offers, p.CreatedAt))
 }
 
 // SavePlayerTx advances one player version.
@@ -177,9 +185,9 @@ func (Store) SavePlayerTx(c context.Context, t tx.Tx, p d.Player, old int64) err
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `UPDATE arena_players SET season=$3,star=$4,point=$5,star_at=$6,total_fight=$7,win_times=$8,keep_win=$9,defense_wins=$10,defense_losses=$11,daily_day=$12,daily_fights=$13,defense=$14::jsonb,opponent=$15,practice=$16,match_counter=$17,missions=$18::jsonb,mission_time=$19,mission_draws=$20,exchange_star=$21,exchange_awaken=$22,exchange_summon=$23,awards=$24::jsonb,state_version=$25,updated_at=$26 WHERE player_id=$1 AND state_version=$2`,
+	return one(t.Exec(c, `UPDATE arena_players SET season=$3,star=$4,point=$5,star_at=$6,total_fight=$7,win_times=$8,keep_win=$9,defense_wins=$10,defense_losses=$11,daily_day=$12,daily_fights=$13,defense=$14::jsonb,opponent=$15,practice=$16,match_counter=$17,missions=$18::jsonb,mission_time=$19,mission_draws=$20,exchange_star=$21,exchange_awaken=$22,exchange_summon=$23,awards=$24::jsonb,recent_offers=$25::jsonb,state_version=$26,updated_at=$27 WHERE player_id=$1 AND state_version=$2`,
 		int64(p.PlayerID), old, p.Season, p.Star, p.Point, p.StarAt, p.TotalFight, p.WinTimes, p.KeepWin, p.DefenseWins, p.DefenseLosses, p.DailyDay, p.DailyFights,
-		a.defense, a.opponent, p.Practice, p.MatchCounter, a.missions, p.MissionTime, p.MissionDraws, p.ExchangeTimes[0], p.ExchangeTimes[1], p.ExchangeTimes[2], a.awards, p.StateVersion, p.UpdatedAt))
+		a.defense, a.opponent, p.Practice, p.MatchCounter, a.missions, p.MissionTime, p.MissionDraws, p.ExchangeTimes[0], p.ExchangeTimes[1], p.ExchangeTimes[2], a.awards, a.offers, p.StateVersion, p.UpdatedAt))
 }
 
 // StandingsTx lists every competitor's place in the season; rows of an older
@@ -257,6 +265,12 @@ func (s Store) ReadMatchTx(c context.Context, q tx.Queryer, id ids.UUID, lock bo
 // LatestMatchTx is the attacker's most recent match, open or finished.
 func (s Store) LatestMatchTx(c context.Context, q tx.Queryer, attacker identity.PlayerID) (d.Match, bool, error) {
 	return s.readMatch(c, q, `SELECT `+matchObject+`::text FROM arena_matches WHERE attacker_id=$1 ORDER BY started_at DESC,match_id LIMIT 1`, int64(attacker))
+}
+
+// SettledMatchByFingerprintTx finds a recorded FIGHT result so a duplicated
+// retry replays its receipt instead of fighting twice.
+func (s Store) SettledMatchByFingerprintTx(c context.Context, q tx.Queryer, attacker identity.PlayerID, fingerprint string) (d.Match, bool, error) {
+	return s.readMatch(c, q, `SELECT `+matchObject+`::text FROM arena_matches WHERE attacker_id=$1 AND fingerprint=$2 AND status='SETTLED' ORDER BY started_at DESC LIMIT 1`, int64(attacker), fingerprint)
 }
 
 // OpenMatchesTx lists started or fighting match ids started before the instant, oldest first.

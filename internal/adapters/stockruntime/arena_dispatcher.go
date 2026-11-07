@@ -113,7 +113,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 			return okI5(projection.Fight(d.FightView{Unresolved: true}))
 		}
 		if err != nil {
-			return failArena(err)
+			return failArenaFight(err)
 		}
 		return okI5(projection.Fight(v))
 	case 776:
@@ -197,6 +197,31 @@ func arenaTableIDs(raw any) ([]int64, error) {
 
 func failArena(err error) httpedge.Response {
 	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, d.ErrClosed) || errors.Is(err, economy.ErrInsufficientBalance) {
+		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "arena_request_refused"}}
+	}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "arena_unavailable"}}
+}
+
+// Stock message.lua rows for FIGHT refusals: 35006 is the only row mentioning
+// no available battle girl, 30023 is the generic stock match failure, and 31004
+// is the closed-Arena toast. D507/D426 keep malformed requests at 400.
+const (
+	arenaNoTeamError       = 35006
+	arenaMatchRefusedError = 30023
+	arenaClosedError       = 31004
+)
+
+func failArenaFight(err error) httpedge.Response {
+	switch {
+	case errors.Is(err, app.ErrNoTeam):
+		return conflictRefusal(arenaNoTeamError)
+	case errors.Is(err, d.ErrRefused):
+		return conflictRefusal(arenaMatchRefusedError)
+	case errors.Is(err, d.ErrClosed):
+		return conflictRefusal(arenaClosedError)
+	case errors.Is(err, economy.ErrInsufficientBalance):
+		return conflictRefusal(1)
+	case errors.Is(err, d.ErrInvalid):
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "arena_request_refused"}}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "arena_unavailable"}}
