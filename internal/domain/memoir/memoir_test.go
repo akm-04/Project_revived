@@ -163,6 +163,33 @@ func TestMemoirMapRejectsTeleportAndRepeatedBoxes(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// The exit's neighbours are the guardian and the last-column road, so the
+// stock walk reaches and stands on the final point without passing the
+// guardian. The exit is gated by GuardianWon (CanExit), not by topology.
+func TestMemoirExitIsGatedByTheGuardianFlagNotThePath(t *testing.T) {
+	catalog := sourceCatalog(t)
+	for seed := 0; seed < 100; seed++ {
+		board, err := catalog.NewBoard(catalog.Selected[seed%len(catalog.Selected)], seed%3+1, []int64{7, 8}, combat.NewStream(sha256.Sum256([]byte{byte(seed)})))
+		if err != nil {
+			t.Fatal(seed, err)
+		}
+		approach := FinalPosition - BoardColumns
+		if !reflect.DeepEqual(neighbors(FinalPosition), []int{GuardianPosition, approach}) {
+			t.Fatal("exit neighbours", seed, neighbors(FinalPosition))
+		}
+		if board.Cells[approach-1] != Road {
+			t.Fatal("stock road frame lost the exit approach", seed, approach)
+		}
+		if !board.reachable()[FinalPosition] || board.CanExit(FinalPosition) {
+			t.Fatal("stock walk stands on the exit; only CanExit gates it", seed)
+		}
+		if err = board.ClearEnemy(GuardianPosition); err != nil || !board.CanExit(FinalPosition) {
+			t.Fatal("guardian entitlement", seed, err)
+		}
+	}
+}
+
 func TestMemoirRefusalCausesNameTheBranch(t *testing.T) {
 	catalog := sourceCatalog(t)
 	board, err := catalog.NewBoard(catalog.Selected[0], 1, []int64{7}, combat.NewStream([32]byte{2}))

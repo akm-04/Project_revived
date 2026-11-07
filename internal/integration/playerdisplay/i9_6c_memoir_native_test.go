@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -75,6 +76,9 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 		t.Fatal("gate", err)
 	}
 	compositeLevel(t, pool, actor, revision, 100)
+	if _, err := mode.SaveMap(ctx, actor, memoir.InitialPosition, nil, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "inactive run") {
+		t.Fatal("save map cause", err)
+	}
 	bornHero(t, pool, actor, revision, 10001001, 1)
 	grantGenuine(t, pool, actor, revision, "memoir keys", []grant.Line{{Kind: grant.StackItem, ItemID: 50001400, Amount: 3}, {Kind: grant.StackItem, ItemID: 50001401, Amount: 8}})
 	if _, err := mode.Start(ctx, actor, 1, op()); !errors.Is(err, memoir.ErrInvalid) {
@@ -105,7 +109,7 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 	if _, err = mode.SaveMap(ctx, actor, memoir.FinalPosition, []int{memoir.FinalPosition}, op()); err != nil {
 		t.Fatal("stock walk stands on the final point", err)
 	}
-	if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) {
+	if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "exit at 54 is closed") {
 		t.Fatal("standing on the exit must not advance without the guardian", err)
 	}
 	saveOperation := op()
@@ -186,6 +190,9 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 		}
 		state = memoirRecord(t, pool, actor)
 		pending := *state.Pending
+		if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "battle is pending") {
+			t.Fatal("pending floor cause", err)
+		}
 		balance := energy()
 		if _, err = mode.StartFight(ctx, actor, memoir.GuardianPosition, op()); err != nil || energy() != balance {
 			t.Fatal("paid retry", err)
