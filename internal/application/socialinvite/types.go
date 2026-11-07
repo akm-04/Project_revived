@@ -25,7 +25,6 @@ const (
 	claimOperationClass = "I9_10E_SOCIAL_INVITE_CLAIM"
 	claimResultSchema   = "gxb.social.invite.claim.v1"
 
-	maxInviteeRows = 512
 	maxMissionRows = 512
 
 	// InviteeLimit and ClaimLimit bound the MID 384 projections.
