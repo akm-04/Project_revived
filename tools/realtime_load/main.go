@@ -62,9 +62,7 @@ func (loadEndpoints) EndpointFor(context.Context, domainrt.PhysicalRole) (app.En
 }
 
 type loadFanout struct {
-	registry  *stockruntime.ConnectionRegistry
-	publisher stockruntime.RealtimePublisher
-	player    int64
+	registry *stockruntime.ConnectionRegistry
 }
 
 func (fanout loadFanout) HandleSessionClientFrame(ctx context.Context, sender stockruntime.SessionHandle, admitted app.Admission, frame wireRT.Frame) ([]wireRT.Frame, error) {
@@ -91,7 +89,7 @@ func (fanout loadFanout) HandleSessionClientFrame(ctx context.Context, sender st
 		{Name: "np_info", Value: `{"title_info":"@@@@","bubble_info":"10001@0","conquer_lev":0,"conquer_loop_id":1}`},
 	}}
 	for _, target := range handles {
-		if err := fanout.publisher.PublishDirect(ctx, target, mids.MIDChatMessage, chat); err != nil {
+		if err := target.Send(ctx, wireRT.Frame{MID: mids.MIDChatMessage, Params: chat}, limits.Default()); err != nil {
 			return nil, err
 		}
 	}
@@ -104,12 +102,6 @@ func main() {
 	idle := flag.Duration("idle", 30*time.Second, "session idle timeout")
 	flag.Parse()
 
-	events, err := wireRT.NewEventRegistry([]wireRT.DirectRegistration{
-		{MID: mids.MIDChatMessage, Roles: []wireRT.Role{wireRT.World, wireRT.Guild, wireRT.Service}, Validate: wireRT.ValidateChannelChat},
-	}, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
 	registry := stockruntime.NewConnectionRegistry()
 	policy := stockruntime.DefaultRealtimePolicy()
 	policy.MaxConnections = 4096
@@ -118,7 +110,7 @@ func main() {
 	server := stockruntime.RealtimeServer{
 		Auth:   app.Service{Authority: loadAuthority{}, Endpoints: loadEndpoints{}},
 		Limits: limits.Default(), Policy: policy, Registry: registry,
-		SessionDispatcher: loadFanout{registry: registry, publisher: stockruntime.RealtimePublisher{Registry: events, Limits: limits.Default()}},
+		SessionDispatcher: loadFanout{registry: registry},
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
