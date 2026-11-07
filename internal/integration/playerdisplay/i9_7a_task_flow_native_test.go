@@ -160,6 +160,11 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	if err = service.SaveTaskDefense(ctx, actor, domain.TaskModeDefense{Heroes: []int64{hero.PartnerID + 999999}}, op()); err == nil {
 		t.Fatal("unowned special defense accepted")
 	}
+	// D512: the saved defense must be exactly the mode's girl count.
+	second := bornHero(t, database, actor, revision, 10001002, 2001)
+	if err = service.SaveTaskDefense(ctx, actor, domain.TaskModeDefense{Heroes: []int64{hero.PartnerID, second.PartnerID}}, op()); err == nil {
+		t.Fatal("two-girl defense accepted for a one-slot mode")
+	}
 	if _, err = service.PurchaseTask(ctx, actor, opPinned(revision), false); err == nil {
 		t.Fatal("buy before exhaustion accepted")
 	}
