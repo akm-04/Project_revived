@@ -49,7 +49,7 @@ func TestRelationshipPolicyVersionIsCanonical(t *testing.T) {
 	record := Relationship{
 		ID: identifier, Mentor: 125001, Student: 125002, Server: 1,
 		ContentRevision: strings.Repeat("a", 64), PolicyVersion: " I9_MENTOR_LEVEL_GAP_AT_LEAST_V1 ",
-		AcceptedAt: time.Now().UTC(), Version: 1,
+		AcceptedAt: time.Date(2026, 1, 2, 0, 0, 0, 0, time.UTC), Version: 1,
 	}
 	if err := record.Validate(); !errors.Is(err, ErrRelationship) {
 		t.Fatalf("padded policy version admitted: %v", err)

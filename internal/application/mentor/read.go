@@ -11,7 +11,6 @@ import (
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
-	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
@@ -60,7 +59,7 @@ func (service Service) Info(ctx context.Context, actor identity.ActorContext, op
 	return body, nil
 }
 
-func (service Service) readClassFacts(ctx context.Context, q tx.Tx, actor identity.PlayerID, at time.Time, catalog builtin.MentorInputCatalog, _ domain.Rules) (WireFacts, error) {
+func (service Service) readClassFacts(ctx context.Context, q tx.Tx, actor identity.PlayerID, at time.Time, catalog Catalog, _ domain.Rules) (WireFacts, error) {
 	level, err := playerLevel(ctx, service.Directory, q, actor)
 	if err != nil {
 		return WireFacts{}, fmt.Errorf("mentor level: %w", err)

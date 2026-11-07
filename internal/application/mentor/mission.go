@@ -4,13 +4,12 @@ import (
 	"context"
 	"time"
 
-	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func deriveMissions(catalog builtin.MentorInputCatalog, actor identity.PlayerID, level int64, relations []domain.Relationship, progress []MissionProgress, at time.Time) ([]domain.MissionState, []domain.MissionState, error) {
+func deriveMissions(catalog Catalog, actor identity.PlayerID, level int64, relations []domain.Relationship, progress []MissionProgress, at time.Time) ([]domain.MissionState, []domain.MissionState, error) {
 	missions := missionsFromCatalog(catalog)
 	stored := make(map[int64]MissionProgress, len(progress))
 	for _, row := range progress {

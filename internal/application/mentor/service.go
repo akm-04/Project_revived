@@ -7,7 +7,6 @@ import (
 
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerroot"
-	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
@@ -56,18 +55,18 @@ func (service Service) validForRead() bool {
 	return service.Timed.Runner.DB != nil && service.Timed.Binder.Time != nil && service.Store != nil && service.Directory != nil && service.Cards != nil && service.Content != nil
 }
 
-func (service Service) catalog() (builtin.MentorInputCatalog, error) {
+func (service Service) catalog() (Catalog, error) {
 	if service.Content == nil {
-		return builtin.MentorInputCatalog{}, ErrUnavailable
+		return Catalog{}, ErrUnavailable
 	}
 	catalog, err := service.Content.MentorCatalog()
 	if err != nil {
-		return builtin.MentorInputCatalog{}, ErrUnavailable
+		return Catalog{}, ErrUnavailable
 	}
 	return catalog, nil
 }
 
-func rulesFromCatalog(catalog builtin.MentorInputCatalog) domain.Rules {
+func rulesFromCatalog(catalog Catalog) domain.Rules {
 	minimumLevel := catalog.Rules.TeacherMinLevel
 	if catalog.Rules.TeacherLevel > minimumLevel {
 		minimumLevel = catalog.Rules.TeacherLevel
@@ -89,7 +88,7 @@ func rulesFromCatalog(catalog builtin.MentorInputCatalog) domain.Rules {
 	}
 }
 
-func missionsFromCatalog(catalog builtin.MentorInputCatalog) []domain.Mission {
+func missionsFromCatalog(catalog Catalog) []domain.Mission {
 	out := make([]domain.Mission, 0, len(catalog.Missions))
 	for _, mission := range catalog.Missions {
 		out = append(out, domain.Mission{ID: mission.ID, GiftID: mission.GiftID, Type: mission.Type, Category: mission.Category, Condition: mission.Condition, Level: mission.Level, IsHide: mission.IsHide})

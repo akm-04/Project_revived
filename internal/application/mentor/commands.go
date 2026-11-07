@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
@@ -392,7 +391,7 @@ func (service Service) Terminate(ctx context.Context, actor identity.ActorContex
 	return body, nil
 }
 
-func (service Service) sampleStudentFactsTx(ctx context.Context, t tx.Tx, catalog builtin.MentorInputCatalog, rules domain.Rules, relation domain.Relationship, at time.Time) error {
+func (service Service) sampleStudentFactsTx(ctx context.Context, t tx.Tx, catalog Catalog, rules domain.Rules, relation domain.Relationship, at time.Time) error {
 	missions := missionsFromCatalog(catalog)
 	studentLevel, err := playerLevel(ctx, service.Directory, t, relation.Student)
 	if err != nil {

@@ -45,6 +45,8 @@ type MentorGiftItem struct {
 }
 
 // MentorExam is the graduation battle drop (campaign 22608, dropbox 9700001).
+// PRIVATE_POLICY D508: each source dropbox roll at increase_rate 10000 grants one
+// unit; the source gives no separate quantity column.
 type MentorExam struct {
 	CampaignID int64            `json:"campaign_id"`
 	MissionID  int64            `json:"mission_id"`

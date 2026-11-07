@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/i5"
-	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
@@ -117,7 +116,7 @@ func (service Service) Claim(ctx context.Context, actor identity.ActorContext, m
 	return body, nil
 }
 
-func (service Service) missionCompleteTx(ctx context.Context, t tx.Tx, player identity.PlayerID, level int64, mission domain.Mission, progress MissionProgress, found bool, catalog builtin.MentorInputCatalog, at time.Time) (bool, error) {
+func (service Service) missionCompleteTx(ctx context.Context, t tx.Tx, player identity.PlayerID, level int64, mission domain.Mission, progress MissionProgress, found bool, catalog Catalog, at time.Time) (bool, error) {
 	switch mission.Type {
 	case domain.MissionTypeMentor:
 		if !found {
@@ -164,16 +163,16 @@ func progressValue(mission domain.Mission, level int64, complete bool) int64 {
 	return 0
 }
 
-func giftFor(catalog builtin.MentorInputCatalog, giftID int64) (builtin.MentorGift, bool) {
+func giftFor(catalog Catalog, giftID int64) (CatalogGift, bool) {
 	for _, gift := range catalog.Gifts {
 		if gift.ID == giftID {
 			return gift, true
 		}
 	}
-	return builtin.MentorGift{}, false
+	return CatalogGift{}, false
 }
 
-func giftLines(gift builtin.MentorGift) []grant.Line {
+func giftLines(gift CatalogGift) []grant.Line {
 	lines := make([]grant.Line, 0, len(gift.Items)+2)
 	if gift.Crystal > 0 {
 		lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: gift.Crystal})
@@ -189,7 +188,7 @@ func giftLines(gift builtin.MentorGift) []grant.Line {
 
 // graduateTx records the mentor's graduated-student high-water and ends the
 // relation. The graduate keeps no cooldown (D466/D508).
-func (service Service) graduateTx(ctx context.Context, t tx.Tx, catalog builtin.MentorInputCatalog, relation domain.Relationship, at time.Time) error {
+func (service Service) graduateTx(ctx context.Context, t tx.Tx, catalog Catalog, relation domain.Relationship, at time.Time) error {
 	if err := service.sampleStudentFactsTx(ctx, t, catalog, rulesFromCatalog(catalog), relation, at); err != nil {
 		return err
 	}
@@ -279,7 +278,7 @@ func (service Service) Exam(ctx context.Context, actor identity.ActorContext, is
 	return body, nil
 }
 
-func examLines(items []builtin.MentorGiftItem) []grant.Line {
+func examLines(items []CatalogGiftItem) []grant.Line {
 	lines := make([]grant.Line, 0, len(items))
 	for _, item := range items {
 		lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: item.ItemID, Amount: item.Quantity})

@@ -8,7 +8,6 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
-	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
@@ -144,7 +143,7 @@ type GrantOwner interface {
 }
 
 type ContentReader interface {
-	MentorCatalog() (builtin.MentorInputCatalog, error)
+	MentorCatalog() (Catalog, error)
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 }
 
