@@ -143,7 +143,7 @@ func (service Service) TaskPreFight(requestContext context.Context, actor identi
 	if err != nil || !found {
 		return errors.Join(err, domain.ErrRefused)
 	}
-	eligibility, err := service.TaskModeEligibilityTx(requestContext, service.Fresh, *catalog.TaskModes, actor, at)
+	eligibility, err := service.TaskModeEligibilityTx(requestContext, service.Fresh, *catalog.TaskModes, period, actor, at)
 	if err != nil {
 		return err
 	}

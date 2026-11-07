@@ -105,8 +105,8 @@ func TestI97ATaskRankingSubtype(t *testing.T) {
 
 func TestI97ATaskRefusalDoesNotInvokeStockSuccessCallback(t *testing.T) {
 	result := failTopFloorTask(domain.ErrRefused)
-	if result.HTTPStatus == 200 {
-		t.Fatal("stock client ignores error_code before success callback", result)
+	if result.HTTPStatus != 409 || result.Body["error_code"] != topFloorTaskNotOpen {
+		t.Fatalf("qualified-player refusal must be the stock not-open toast: %+v", result)
 	}
 }
 

@@ -150,7 +150,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 282,
    "name": "ARENA_MODE_INFO"
@@ -158,7 +158,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 283,
    "name": "ARENA_MODE_ENEMY_LIST"
@@ -166,7 +166,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 284,
    "name": "ARENA_MODE_DEFENCE"
@@ -174,7 +174,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 285,
    "name": "ARENA_MODE_FIGHT_PRE"
@@ -182,7 +182,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 286,
    "name": "ARENA_MODE_FIGHT"
@@ -190,7 +190,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 287,
    "name": "ARENA_MODE_BUY_TICKET"
@@ -254,7 +254,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 295,
    "name": "ARENA_MODE_QUERY_FORMATION"
@@ -262,7 +262,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 296,
    "name": "ARENA_MODE_RESET_TIME"
@@ -270,7 +270,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 298,
    "name": "ARENA_MODE_RECORD_DETAIL"
@@ -278,7 +278,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 299,
    "name": "ARENA_MODE_RECORD_PLAYER_INFO"
@@ -286,7 +286,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
-    "line": 43
+    "line": 50
    },
    "mid": 300,
    "name": "ARENA_MODE_SCHEDULE"
