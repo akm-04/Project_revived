@@ -90,7 +90,7 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 	// shortcut: an unqualified Hero-stat read leaves force 0 rather than
 	// refusing the join, upgrade when a gate needs force.
 	forces, _ := s.bestForces(c, []identity.PlayerID{a.PlayerID}, loaded.at)
-	if _, err = s.Rooms.Join(c, a, RoomFamilyRef(), roomID, op); err != nil {
+	if _, err = s.Rooms.Join(c, a, sr.JoinRequest{Family: RoomFamilyRef(), RoomID: roomID}, op); err != nil {
 		return nil, err
 	}
 	// Freeze it for the prepare and invite windows, the same shape Adventure
