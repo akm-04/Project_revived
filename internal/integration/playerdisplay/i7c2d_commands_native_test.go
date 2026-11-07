@@ -19,6 +19,7 @@ import (
 	dorm "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
+	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -80,6 +81,19 @@ func bookRoot(t *testing.T, p *pg.Pool, a identity.ActorContext) bookstore.Root 
 	}
 	return r
 }
+
+type unavailableReplayBookContent struct{}
+
+func (unavailableReplayBookContent) BookInputsActive(context.Context) (string, bool, error) {
+	return "", false, errors.New("replay must not consult active content")
+}
+func (unavailableReplayBookContent) BookInputsRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
+	return false, errors.New("replay must not consult content revision")
+}
+func (unavailableReplayBookContent) BookCatalogTx(context.Context, tx.Queryer, string) (book.Catalog, error) {
+	return book.Catalog{}, errors.New("replay must not consult a catalog")
+}
+
 func TestI7C2DBookComposeResearchSpeedReplayInputs(t *testing.T) {
 	p := pool(t)
 	a, rev, s := bookFixture(t, p)
@@ -89,7 +103,9 @@ func TestI7C2DBookComposeResearchSpeedReplayInputs(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	replay, e := s.Command(ctx, a, c, o)
+	replayService := s
+	replayService.Content = unavailableReplayBookContent{}
+	replay, e := replayService.Command(ctx, a, c, o)
 	if e != nil || replay.OperationID != first.OperationID {
 		t.Fatal("receipt", e)
 	}

@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-10-social-library-integration"
+COMPILER_VERSION = "i9-10a-workshop-integration"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -518,12 +518,30 @@ SOURCE_MANIFEST.append(('app/common/tables/CabinetTable.lua', '4936c47870e426eb6
 SOURCE_MANIFEST.append(('app/common/tables/CabinetBookTable.lua', 'd9a51975ef816382a18705e52d26c0b05de93a35191e5e48c4fd9d60656a76ea', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('app/common/tables/CabinetSkillTable.lua', '6b31896b2cb5fd60719c1392d96fea37fde7bf1b7319a150922004f795612b41', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('app/common/tables/CabinetSkillCostTable.lua', 'a9f6c4dcbf1751fe6b647993f9a0a7c5152f6aa3681daac5e4bd822b0efb8bb6', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_table.lua', '3fc5ce7c0c47231a680ca41b7697fe6e66b3611527950b95636d5e03ce1e53ce', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_administrator.lua', '96c53de0b59f4c9eb038031a310df91fca54ee0d7f34a56c6f5b277dfe5e674c', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_notice_board.lua', '678492ae81577b997e2ade914fb55de00f8a7dfadd75289040bf8c54af0de781', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_pet_table.lua', '71f6224aef7d1cccedb6df2542d10a38192c01a79c6d6aab3d92575c7713e4a0', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_bookshelf.lua', '2caa18336a1e8c7fab3521cefd8b261a7cc420bea594f684bbacc7e1221e50b0', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_recycle.lua', '8a60562844b71bd82e9b4e35061bfebdf32dc561c63f3b8aa54b19d0e0ae745e', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_cabinet.lua', '2bb59560151405d652f282a47276c7d31134866394259a328feeabc42022ae2b', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetbook.lua', '5a56863298b9ad883bbf684548d24c6e0124811b31d8447231d1415fc392b5b3', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_cabinetskill.lua', 'dddaa9ff5889a2803b0b42330399fd8d10509c69e34efe6de19eade300a31365', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/event_centre_skillcost.lua', 'f224e7ab52da1cb0a1fd533e4c9fd4abba3590e9851ce8fac6fa7fb02b2df73a', 'I7C2D_BOOK_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_conversion.lua', '44d50e00cb9865f7f2275e580cc69fac2149dca920572f4176c50160d6e07cac', 'I9_10A_ADMIN_CONVERSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/ConversionTable.lua', '7d33a78f57d5e2bce884eb765f731e113b4ff1699e602e0da692322ddc9a259a', 'I9_10A_ADMIN_CONVERSION_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_mission.lua', '4d26b4850fd97f5f92cbc29f1c11d50cd53d54677dc4ec7cdb50346b80c5aed5', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_hero.lua', 'ac685ab80b40aeec36a7eb32c8801f4e5416e6be7a73e1eef06f2fbcb9b84b45', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/event_centre_mission_award.lua', 'c3e04644e0b7b7a89ff090758f30c962c7f570cdadc95af38ddeb28d565ea9ca', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreProductionTable.lua', 'ec6fa4bafd34e7d81c7133b55f15eb68eb89297b1d8732fbf8f11d1e4318dc14', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreNoticeBoardTable.lua', 'c81e2fb5b566482b6279992d6c552350708ab9ed028f6965a1cd9a380df468c1', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreMissionTable.lua', 'bc0898bd3c0afc1053bb9f4412c12f090b57f384e37ca84cc2d1510ca6abfbb5', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreHeroTable.lua', 'a609785e971b0f0bd26f75ac527a49806699316853dff107f544b943c917c61e', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentreMissionAwardTable.lua', '5b8c9a2eea610524dafa617575682225529aff25114fe62785a8e4ac9b3390b3', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/common/tables/EventCentrePetRoomTable.lua', '11a83d174d7af3142e4b970bd874465ac278794e8e7824a26d3f7d026095ff14', 'I9_10A_WORKSHOP_CONTENT_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('app/windows/PetRoomWindow.lua', '729e8c517847a568c2e500ca0eb1c6c39a58c893a04e5fb3081c5b8645642f2e', 'I9_10A_WORKSHOP_PET_SELECTION_CALLER'))
+SOURCE_MANIFEST.append(('app/windows/MakeAccelerateWindow.lua', '468cff690fcd39fdc26446b9d18d89679ac76a9d8f82a7ea89ac18985106863c', 'I9_10A_WORKSHOP_MISC_CONSUMER'))
+SOURCE_MANIFEST.append(('app/windows/RecycleWindow.lua', 'fb77a6d778ac0c72a7544180f56554971939c99335b007a6b1f8dbb5675bf0d6', 'I9_10A_WORKSHOP_MISC_CONSUMER'))
 
 
 SOURCE_MANIFEST.append(('app/common/tables/ObjectBookColorTable.lua', '07f54c2c629c0dab488d719641b61bd6c50deabffcfba93d918d07c153b248a6', 'I7C2E_COURSE_SOURCE_BOUNDARY'))
@@ -2649,8 +2667,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if any(x["limit"] not in (0,1) for x in library_backgrounds) or any(x["item_id"]!=50001648 for x in library_cgs): raise CompileError("Library background/cg source shape drift")
     library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special,stages=library_stages,acts=library_acts,missions=library_missions,talks=library_talks,cgs=library_cgs,backgrounds=library_backgrounds,dialog_configs=library_dialog_configs,dialog_nodes=dialog_nodes,dialog_source_unknowns=dialog_source_unknowns,course_gift_boxes=library_course_boxes)
     from book_content import build_book
+    from eventcentre_content import build_administrator, build_workshop
     course_artifact=build_course(blobs,parse_generated_lua_table,items)
     book_artifact=build_book(blobs,parse_generated_lua_table,items)
+    workshop_artifact=build_workshop(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,parse_encoded_item_table,CompileError)
+    administrator_artifact=build_administrator(blobs,parse_generated_lua_table,CompileError)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table)
@@ -2685,6 +2706,8 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "inscription_input_catalog.json":build_inscription(blobs,parse_generated_lua_table,items),
         "course_input_catalog.json":course_artifact,
         "book_input_catalog.json":book_artifact,
+        "workshop_input_catalog.json":workshop_artifact,
+        "administrator_input_catalog.json":administrator_artifact,
         "dorm_input_catalog.json":dorm_artifact,
         "library_input_catalog.json":library_artifact,
         "player_display_catalog.json":display_artifact,

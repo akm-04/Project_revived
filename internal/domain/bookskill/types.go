@@ -1,6 +1,7 @@
 package bookskill
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -55,9 +56,10 @@ type Job struct {
 	Cost                      Cost
 }
 type Building struct {
-	Level  int64
-	Job    *Job
-	Recent bool
+	Level           int64
+	Job             *Job
+	Recent          bool
+	CatalogRevision string `json:",omitempty"`
 }
 type State struct {
 	Buildings   map[int64]Building
@@ -117,7 +119,18 @@ func validJob(j *Job) bool {
 	return j == nil || (j.Occurrence != "" && len(j.Revision) == 64 && !j.StartedAt.IsZero() && j.Duration >= 0 && j.Target > 0 && j.Subject > 0)
 }
 func (s State) Validate(c Catalog) error {
-	if s.Buildings == nil || s.Skills == nil || len(s.Buildings) != 3 || !validJob(s.Research) {
+	return s.ValidateWithCatalogs(c, nil)
+}
+func ValidCatalogRevision(revision string) bool {
+	if len(revision) != 64 {
+		return false
+	}
+	_, err := hex.DecodeString(revision)
+	return err == nil
+}
+func ExtensionBuilding(kind int64) bool { return kind == 2 || kind == 5 || kind == 6 || kind == 7 }
+func (s State) ValidateWithCatalogs(c Catalog, pinned map[string]Catalog) error {
+	if s.Buildings == nil || s.Skills == nil || len(s.Buildings) < 3 || len(s.Buildings) > 7 || !validJob(s.Research) {
 		return ErrUnqualified
 	}
 	for _, t := range []int64{1, 3, 4} {
@@ -129,6 +142,39 @@ func (s State) Validate(c Catalog) error {
 			return ErrUnqualified
 		}
 		if b.Job != nil && (b.Job.Subject != t || b.Job.Target != b.Level+1) {
+			return ErrUnqualified
+		}
+	}
+	for kind, building := range s.Buildings {
+		if kind == 1 || kind == 3 || kind == 4 {
+			if building.CatalogRevision != "" {
+				return ErrUnqualified
+			}
+			continue
+		}
+		if !ExtensionBuilding(kind) || building.Level < 1 || !ValidCatalogRevision(building.CatalogRevision) || !validJob(building.Job) {
+			return ErrUnqualified
+		}
+		catalog, found := pinned[building.CatalogRevision]
+		if !found {
+			return ErrUnqualified
+		}
+		rule, found := catalog.Buildings[[2]int64{kind, building.Level}]
+		if !found || rule.Type != kind || rule.Level != building.Level {
+			return ErrUnqualified
+		}
+		if building.Job == nil {
+			continue
+		}
+		if building.Job.Subject != kind || building.Job.Target != building.Level+1 || !ValidCatalogRevision(building.Job.Revision) {
+			return ErrUnqualified
+		}
+		catalog, found = pinned[building.Job.Revision]
+		if !found {
+			return ErrUnqualified
+		}
+		rule, found = catalog.Buildings[[2]int64{kind, building.Job.Target}]
+		if !found || rule.Type != kind || rule.Level != building.Job.Target {
 			return ErrUnqualified
 		}
 	}
@@ -173,6 +219,9 @@ func (s *State) Settle(at time.Time) (bool, error) {
 		}
 		if left == 0 {
 			b.Level = b.Job.Target
+			if ExtensionBuilding(t) {
+				b.CatalogRevision = b.Job.Revision
+			}
 			b.Job = nil
 			b.Recent = true
 			s.Buildings[t] = b

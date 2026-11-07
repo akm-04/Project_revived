@@ -39,4 +39,5 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00135: I9-10 1 on 1 D488 parity: each issued MATCH list stores the challenger and target ranks it showed; an offer without one is stale (35026).
 - 00136: I9-10 D512 special Top Floor is humans-only: a weekly period may start at size 0 instead of seeding robot ranks.
 - 00137: I9-10F Mentor/My Class relationship history, per-player application counters and break cooldown, application rows, mission high-water/award progress and graduation exam receipts. Empty on upgrade.
+- 00138: I9-10A Event Centre Workshop per-player root (recycle energy, desk/pet make jobs, administrator counters). Created lazily on the first command; empty on upgrade. sha256 cf2f39e518a4a5df37e87aa476e6a8c82d8d78e5ae90dad8da4a79469d57d1e7.
 - 00143: I9-10 D512 operator-configurable Top Floor girl bans by mode and rotation.

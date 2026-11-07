@@ -131,6 +131,7 @@
     "00135_i9_10_oneonone_offer_snapshot.sql": "829a770e13d2a0a0a6cc17ee142f5199f3534c27a6455b3359b627f4b5e9036c",
     "00136_i9_10_task_human_ladder.sql": "55b6620bd098548c70aa73fb88638c0f78179ac585fdfe839876388a4ed58da5",
     "00137_i9_10f_mentor.sql": "f17a5762fb11014bc2a4004d3ed5539c8d7ef5db81179418a994e020661bc8f9",
+    "00138_i9_10a_event_centre.sql": "cf2f39e518a4a5df37e87aa476e6a8c82d8d78e5ae90dad8da4a79469d57d1e7",
     "00141_i9_10_dorm_recent_visit.sql": "9e2dc165182f7ecb9af0ed00582010d9596dfcc71b8d62bc5a8a33b77895e891",
     "00143_i9_10_task_operator_bans.sql": "fd88eee059b6148ad1ae475035245912543e02ae4fcee7ada0fb00ca565f7980"
   },
