@@ -222,7 +222,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 			return d.Fight{}, err
 		}
 	}
-	defenders, pets, err := s.defenders(c, sc.Tx, catalog, enemy)
+	defenders, pets, err := s.defenders(c, sc.Tx, catalog, enemy, enemyRank)
 	if err != nil {
 		return d.Fight{}, err
 	}
@@ -281,13 +281,16 @@ func (s Service) opponent(c context.Context, q tx.Queryer, catalog d.Catalog, p 
 }
 
 // defenders freezes a robot team as TEMPLATE actors or a player's saved defense as OWNED_FOREIGN.
-func (s Service) defenders(c context.Context, q tx.Queryer, catalog d.Catalog, o d.Occupant) ([]combat.Participant, []combat.Participant, error) {
+func (s Service) defenders(c context.Context, q tx.Queryer, catalog d.Catalog, o d.Occupant, rank int64) ([]combat.Participant, []combat.Participant, error) {
 	heroes, pets := []combat.Participant{}, []combat.Participant{}
 	if o.IsRobot() {
 		team, _ := catalog.Team(o.Robot)
 		for _, id := range team.Heroes {
-			params, _ := catalog.RobotHeroParams(id)
+			params, _ := catalog.RobotHeroParamsAt(id, rank)
 			heroes = append(heroes, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: params["partner_id"].(int64), TemplateParams: params})
+		}
+		if pet, ok := catalog.RobotPet(o.Robot, rank); ok {
+			pets = append(pets, combat.Participant{Origin: cd.Template, Kind: cd.PetActor, Identity: pet["pet_id"].(int64), TemplateParams: pet})
 		}
 		return heroes, pets, nil
 	}

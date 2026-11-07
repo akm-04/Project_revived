@@ -2653,7 +2653,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     book_artifact=build_book(blobs,parse_generated_lua_table,items)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
-    top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table)
+    top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table, pet_artifact["templates"])
     top_floor_artifact["task_modes"] = build_task_modes(blobs, parse_generated_lua_table, parse_base64_indexed_lua_table, indexed_field)
     artifacts = {
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),

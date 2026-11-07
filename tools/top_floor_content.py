@@ -4,6 +4,24 @@ from one_on_one_content import _translations
 
 TEAM_COLUMNS = ('robot1', 'robot2', 'robot3', 'robot4', 'robot5')
 
+# PRIVATE_POLICY: the user's rank strength bands. Quality values are
+# xyd.EquipQuality (enums.lua:729-745): 16 red+1, 15 red, 13 orange+1,
+# 12 orange, 3 green+1. Values interpolate linearly between anchors and clamp
+# to the robot's own source level/quality/star; ranks beyond meeting_rank use
+# the source values unchanged.
+ROBOT_RANK_BANDS = dict(
+    label='PRIVATE_POLICY',
+    policy_id='I9_10_ROBOT_RANK_BANDS_V1_PRIVATE_POLICY',
+    meeting_rank=500,
+    anchors=[
+        dict(rank=1, quality=16, level=100, star=3, pet_level=100),
+        dict(rank=10, quality=16, level=100, star=3, pet_level=100),
+        dict(rank=11, quality=16, level=99, star=3, pet_level=99),
+        dict(rank=25, quality=15, level=90, star=3, pet_level=90),
+        dict(rank=26, quality=13, level=89, star=3, pet_level=89),
+        dict(rank=500, quality=3, level=14, star=1, pet_level=14),
+    ])
+
 
 def _ints(raw):
     return [int(x) for x in raw.split('|')]
@@ -16,7 +34,7 @@ def _ten_thousandths(raw):
     return int(value)
 
 
-def build_top_floor(blobs, parse):
+def build_top_floor(blobs, parse, pet_templates):
     table = lambda name: parse(blobs['data/tables/' + name + '.lua'].data)
     misc = {r['key']: r['value'] for r in table('misc')}
     functions = {r['id']: r for r in table('function')}
@@ -51,7 +69,14 @@ def build_top_floor(blobs, parse):
     names = {}
     for r in sorted(table('random_name'), key=lambda r: int(r['id'])):
         names.setdefault(r['name_type'], []).append(r['text'])
+    pet_pool = [dict(table_id=int(t['table_id']), initial_star=int(t['initial_star'])) for t in pet_templates if not t['is_awakened']]
+    if len(pet_pool) != 27 or [p['table_id'] for p in pet_pool] != sorted(p['table_id'] for p in pet_pool):
+        raise ValueError('top floor pet pool drift')
+    anchors = ROBOT_RANK_BANDS['anchors']
+    if [a['rank'] for a in anchors] != sorted(a['rank'] for a in anchors) or anchors[-1]['rank'] != ROBOT_RANK_BANDS['meeting_rank']:
+        raise ValueError('top floor robot rank band anchors drift')
     return dict(schema_version=1, contract_id='C5B_TOP_FLOOR_MODE_V1', policy_id='C5B_TOP_FLOOR_PRIVATE_POLICY_V1',
+                pet_pool=pet_pool, robot_rank_bands=ROBOT_RANK_BANDS,
                 function_id=4, required_level=10, free_tickets=5, buy_restore=int(misc['arena_buy_num']), cooldown_seconds=int(misc['arena_cooldown']),
                 reset_cost=int(misc['arena_refresh_cost']), match_hundredths=[int(Decimal(misc['arena_match_param_' + k]) * 100) for k in '123'],
                 cutoff_seconds=int(misc['arena_gift_time1']), freeze_end_seconds=int(misc['arena_gift_time2']), records_max=int(misc['arena_defense_list_max']),
