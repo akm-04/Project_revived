@@ -12,4 +12,5 @@ type TxDiscoveryReader interface {
 	ProfilesByExactNameTx(context.Context, tx.Tx, string, int) ([]Profile, error)
 	PlayerIDBoundsTx(context.Context, tx.Tx) (identity.PlayerID, identity.PlayerID, bool, error)
 	ProfilesAfterTx(context.Context, tx.Tx, identity.PlayerID, int) ([]Profile, error)
+	ProfilesByRecentActivityTx(context.Context, tx.Tx, identity.LogicalServerID, identity.PlayerID, int) ([]Profile, error)
 }

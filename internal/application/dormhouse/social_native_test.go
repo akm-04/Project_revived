@@ -14,6 +14,7 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
 	"gxb.local/backend/v2/internal/application/generation"
@@ -112,6 +113,18 @@ func (socialDirectory) ProfilesAfterTx(_ context.Context, _ tx.Tx, after identit
 	out := []playerdirectory.Profile{}
 	for _, player := range []identity.PlayerID{126701, 126702, 126703} {
 		if player > after {
+			out = append(out, playerdirectory.Profile{PlayerID: player, Name: "P" + playerString(player), Level: 10, AvatarID: 1})
+		}
+	}
+	return out, nil
+}
+func (socialDirectory) ProfilesByRecentActivityTx(_ context.Context, _ tx.Tx, server identity.LogicalServerID, exclude identity.PlayerID, limit int) ([]playerdirectory.Profile, error) {
+	if server != 1 || limit != 256 {
+		return nil, errors.New("unexpected recent-activity read")
+	}
+	out := []playerdirectory.Profile{}
+	for _, player := range []identity.PlayerID{126701, 126702, 126703} {
+		if player != exclude {
 			out = append(out, playerdirectory.Profile{PlayerID: player, Name: "P" + playerString(player), Level: 10, AvatarID: 1})
 		}
 	}
@@ -385,6 +398,119 @@ func TestDormSocialModerationUsesPublishedProfileCorpus(t *testing.T) {
 	}
 	if moderationRef != "PROFILE_SCALAR_CASE_SENSITIVE_SPACE_MASK_V1" {
 		t.Fatalf("receipt moderation ref %q in %s", moderationRef, rawRefs)
+	}
+}
+
+func TestDormRandomVisitUses256MostRecentActivePlayers(t *testing.T) {
+	h := newSocialHarness(t)
+	h.service.Directory = i4store.TransactionDiscoveryReader{}
+	const (
+		firstPlayer = identity.PlayerID(110001)
+		firstRecent = identity.PlayerID(110045)
+		lastPlayer  = identity.PlayerID(110300)
+		hidden      = identity.PlayerID(110046)
+	)
+	seedRecentActivityPlayers(t, h.pool, firstPlayer, firstRecent, lastPlayer, hidden)
+	viewer := socialActor(firstRecent)
+	operationContext := func(seed uint64) operation.Context {
+		id, err := ids.NewUUID()
+		if err != nil {
+			t.Fatal(err)
+		}
+		var entropy [32]byte
+		for index := 0; index < 8; index++ {
+			entropy[7-index] = byte(seed >> (8 * index))
+		}
+		return operation.Context{ID: id, StartedAt: time.Now().UTC(), EntropySeed: entropy}
+	}
+	visit := func(op operation.Context) identity.PlayerID {
+		body, err := h.service.SocialRead(context.Background(), viewer, op, 2519, 0, 0, 0, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, ok := body["host_info"].(map[string]any)
+		if !ok {
+			t.Fatalf("random visit reply %v", body)
+		}
+		target, ok := info["player_id"].(int64)
+		if !ok {
+			t.Fatalf("random visit host %v", info)
+		}
+		return identity.PlayerID(target)
+	}
+
+	if target := visit(operationContext(260)); target < firstRecent || target > lastPlayer {
+		t.Fatalf("visit target %d outside the 256 most recently active players", target)
+	}
+	replay := operationContext(260)
+	if first, second := visit(replay), visit(replay); first != second {
+		t.Fatalf("replayed operation changed target %d to %d", first, second)
+	}
+	if target := visit(operationContext(0)); target == viewer.PlayerID || target == hidden {
+		t.Fatalf("visit selected excluded player %d", target)
+	}
+}
+
+// seedRecentActivityPlayers creates first..last as same-server directory,
+// dorm and login-activity rows. firstRecent starts the most recent 256 by
+// login time; earlier players are older than every recent one.
+func seedRecentActivityPlayers(t *testing.T, pool *pg.Pool, first, firstRecent, last, hidden identity.PlayerID) {
+	t.Helper()
+	ctx := context.Background()
+	now := time.Now().UTC()
+	count := int(last - first + 1)
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM player_dorm_room_social WHERE player_id BETWEEN $1 AND $2`,
+			`DELETE FROM player_dorm_heroes WHERE player_id BETWEEN $1 AND $2`,
+			`DELETE FROM player_dorm_rooms WHERE player_id BETWEEN $1 AND $2`,
+			`DELETE FROM player_dorm_roots WHERE player_id BETWEEN $1 AND $2`,
+			`DELETE FROM player_directory_profiles WHERE player_id BETWEEN $1 AND $2`,
+			`DELETE FROM player_login_observations WHERE player_id BETWEEN $1 AND $2`,
+			`DELETE FROM players WHERE player_id BETWEEN $1 AND $2`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement, int64(first), int64(last)); err != nil {
+				t.Error(err)
+			}
+		}
+		if _, err := pool.Raw().Exec(context.Background(), `DELETE FROM accounts WHERE account_uid LIKE 'dormvisit-%'`); err != nil {
+			t.Error(err)
+		}
+	})
+	if _, err := pool.Raw().Exec(ctx, `
+WITH created AS (
+  INSERT INTO accounts(account_id,account_uid,status,created_at)
+  SELECT gen_random_uuid(),'dormvisit-'||g,'ACTIVE',$1 FROM generate_series(1,$2::int) g
+  RETURNING account_id,account_uid
+)
+INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)
+SELECT $3::bigint+split_part(account_uid,'-',2)::bigint,account_id,1,$1,'dormvisit-native'
+FROM created`, now, count, int64(first)-1); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Raw().Exec(ctx, `
+INSERT INTO player_directory_profiles(player_id,name,lev,created_at,updated_at)
+SELECT player_id,'Recent'||player_id,10,$1,$1 FROM players WHERE player_id BETWEEN $2 AND $3`, now, int64(first), int64(last)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Raw().Exec(ctx, `
+INSERT INTO player_dorm_roots(player_id,next_house_id,state_version,created_at,updated_at)
+SELECT player_id,2,1,$1,$1 FROM players WHERE player_id BETWEEN $2 AND $3`, now, int64(first), int64(last)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Raw().Exec(ctx, `
+INSERT INTO player_dorm_rooms(player_id,house_id,table_id,house_type,creation_revision,floor,position,comfort,expansion_level,state_version,furniture_record,created_at,updated_at)
+SELECT player_id,1,1000001,1,repeat('a',64),1,1,0,0,1,'{}',$1,$1 FROM players WHERE player_id BETWEEN $2 AND $3`, now, int64(first), int64(last)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Raw().Exec(ctx, `INSERT INTO player_dorm_room_social(player_id,house_id,house_name,is_hidden,state_version,updated_at) VALUES($1,1,'',true,1,$2)`, int64(hidden), now); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Raw().Exec(ctx, `
+INSERT INTO player_login_observations(player_id,logical_server_id,last_login_at,source_operation_id,state_version)
+SELECT player_id,1,CASE WHEN player_id<$2 THEN $1::timestamptz-interval '30 days' ELSE $1::timestamptz-make_interval(secs=>player_id-$2) END,gen_random_uuid(),1
+FROM players WHERE player_id BETWEEN $3 AND $4`, now, int64(firstRecent), int64(first), int64(last)); err != nil {
+		t.Fatal(err)
 	}
 }
 

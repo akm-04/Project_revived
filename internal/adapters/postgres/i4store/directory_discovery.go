@@ -52,6 +52,25 @@ FROM (
   LIMIT $2
 ) p`
 
+const recentActivityProfilesSQL = `
+SELECT COALESCE(jsonb_agg(jsonb_build_object(
+  'player_id',player_id,
+  'name',name,
+  'lev',lev,
+  'avatar_id',avatar_id,
+  'avatar_frame_id',avatar_frame_id,
+  'conquer_lev',conquer_lev,
+  'conquer_loop_id',conquer_loop_id
+) ORDER BY player_id),'[]'::jsonb)::text
+FROM (
+  SELECT p.player_id,p.name,p.lev,p.avatar_id,p.avatar_frame_id,p.conquer_lev,p.conquer_loop_id
+  FROM player_login_observations o
+  JOIN player_directory_profiles p ON p.player_id=o.player_id
+  WHERE o.logical_server_id=$1 AND o.player_id<>$2
+  ORDER BY o.last_login_at DESC,o.player_id DESC
+  LIMIT $3
+) p`
+
 func validDiscoveryLimit(limit int) bool { return limit > 0 && limit <= MaxDirectoryDiscoveryRead }
 
 func (r PlayerDirectoryReader) ProfilesByExactName(ctx context.Context, name string, limit int) ([]playerdirectory.Profile, error) {
@@ -86,6 +105,17 @@ func (r PlayerDirectoryReader) ProfilesAfter(ctx context.Context, afterPlayerID 
 		return nil, errors.New("invalid player directory discovery read")
 	}
 	return readProfileJSON(r.Queryer.QueryRow(ctx, profilesAfterSQL, int64(afterPlayerID), limit))
+}
+
+// ProfilesByRecentActivity returns up to limit profiles from one logical
+// server selected by the canonical login activity owner, excluding one player.
+// The selected set is ordered by last login then PlayerID; only the result is
+// returned in ascending PlayerID order shareable with ProfilesAfter.
+func (r PlayerDirectoryReader) ProfilesByRecentActivity(ctx context.Context, server identity.LogicalServerID, exclude identity.PlayerID, limit int) ([]playerdirectory.Profile, error) {
+	if r.Queryer == nil || !server.Valid() || !exclude.Valid() || !validDiscoveryLimit(limit) {
+		return nil, errors.New("invalid player directory recent-activity read")
+	}
+	return readProfileJSON(r.Queryer.QueryRow(ctx, recentActivityProfilesSQL, int32(server), int64(exclude), limit))
 }
 
 type discoveryProfileRow struct {
