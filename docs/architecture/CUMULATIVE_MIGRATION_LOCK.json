@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00131_i9_10_guild_name_weighted_length.sql",
+  "highest_migration": "00132_i9_10_arena_recent_offers.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -125,7 +125,8 @@
     "00128_i9_10c_dorm_social.sql": "22f24a0b5ab1633280ba3a493823120f4a2f7b5027230f5aeb763dd14b887be0",
     "00129_i9_10c_dorm_social_admission.sql": "d8f1c3a16aaa3aac12472a7605dc7899c222e483dbd2ee9541873f2f8c83f9da",
     "00130_i9_10e_social_invite.sql": "e96d34568e1fb4c18eaca28022914eba463173d2a4354faf6204a2f1cb5a6325",
-    "00131_i9_10_guild_name_weighted_length.sql": "1c281408c73d98848af2406367f4876ff8c3276e96f9dbe05ec409d824c3de0a"
+    "00131_i9_10_guild_name_weighted_length.sql": "1c281408c73d98848af2406367f4876ff8c3276e96f9dbe05ec409d824c3de0a",
+    "00132_i9_10_arena_recent_offers.sql": "22d0030d4238b7c0abab268400302253d681bed8372895ce671b59ad469b12c8"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,

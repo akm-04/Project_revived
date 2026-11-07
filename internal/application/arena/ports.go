@@ -66,6 +66,7 @@ type Store interface {
 	StandingsTx(context.Context, tx.Queryer, int64) ([]d.Standing, error)
 	ReadMatchTx(context.Context, tx.Queryer, ids.UUID, bool) (d.Match, bool, error)
 	LatestMatchTx(context.Context, tx.Queryer, identity.PlayerID) (d.Match, bool, error)
+	SettledMatchByFingerprintTx(context.Context, tx.Queryer, identity.PlayerID, string) (d.Match, bool, error)
 	OpenMatchesTx(context.Context, tx.Queryer, time.Time, int) ([]ids.UUID, error)
 	InsertMatchTx(context.Context, tx.Tx, d.Match) error
 	SaveMatchTx(context.Context, tx.Tx, d.Match, int64) error

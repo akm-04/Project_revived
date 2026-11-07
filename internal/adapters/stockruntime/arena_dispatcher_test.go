@@ -11,11 +11,13 @@ import (
 	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 type arenaFake struct {
 	fight      app.FightCommand
 	unresolved bool
+	fightErr   error
 	calls      int
 }
 
@@ -43,6 +45,9 @@ func (f *arenaFake) Start(context.Context, identity.ActorContext, operation.Cont
 func (f *arenaFake) Fight(_ context.Context, _ identity.ActorContext, r app.FightCommand, _ operation.Context) (d.FightView, error) {
 	f.calls++
 	f.fight = r
+	if f.fightErr != nil {
+		return d.FightView{}, f.fightErr
+	}
 	if f.unresolved {
 		return d.FightView{}, app.ErrUnresolved
 	}
@@ -135,5 +140,46 @@ func TestI7C5DArenaWireShapes(t *testing.T) {
 	}
 	if f.calls != before {
 		t.Fatal("invalid request reached the owner")
+	}
+}
+
+// D507/D426: FIGHT refusals answer stock 409 codes; malformed stays 400.
+func TestD507ArenaFightRefusals(t *testing.T) {
+	f := &arenaFake{}
+	dispatcher := ArenaDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: f}
+	n := func(v string) json.Number { return json.Number(v) }
+	call := func(p map[string]any) httpedge.Response {
+		return dispatcher.Dispatch(context.Background(), heroReq(t, 773, p))
+	}
+	params := func(formation []any) map[string]any {
+		return map[string]any{"enemy_id": n("200007"), "is_test": n("0"), "pet_id": n("0"), "campaign_id": n("0"), "formation": formation}
+	}
+	for _, tc := range []struct {
+		err    error
+		status int
+		code   int64
+	}{
+		{app.ErrNoTeam, 409, 35006},
+		{d.ErrRefused, 409, 30023},
+		{d.ErrClosed, 409, 31004},
+		{d.ErrInvalid, 400, 0},
+	} {
+		f.fightErr = tc.err
+		response := call(params([]any{n("11001")}))
+		if response.HTTPStatus != tc.status {
+			t.Fatal(tc.err, response)
+		}
+		if tc.code != 0 && response.Body["error_code"] != tc.code {
+			t.Fatal(tc.err, response)
+		}
+	}
+	f.fightErr = app.ErrNoTeam
+	empty := call(params([]any{}))
+	if empty.HTTPStatus != 409 || empty.Body["error_code"] != int64(35006) {
+		t.Fatal("an empty formation is a stock no-team refusal", empty)
+	}
+	before := f.calls
+	if malformed := call(map[string]any{"formation": []any{}}); malformed.HTTPStatus != 400 || f.calls != before {
+		t.Fatal("a malformed FIGHT stays 400 without reaching the owner", malformed)
 	}
 }
