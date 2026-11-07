@@ -331,30 +331,41 @@ func TestDormSocialCommandMIDsThroughProductionPath(t *testing.T) {
 
 func TestDormSocialModerationUsesPublishedProfileCorpus(t *testing.T) {
 	h := newSocialHarness(t)
-	blocked := func(err error) bool {
-		return errors.Is(err, app.ErrRejected) && strings.Contains(err.Error(), dorm.ErrModerated.Error())
+
+	if body := h.command(t, h.owner, app.Command{Family: app.ChangeName, HouseID: 1, HouseName: "Fuck"}); len(body) != 0 {
+		t.Fatalf("change name reply %v", body)
 	}
-	if err := h.commandError(h.owner, app.Command{Family: app.ChangeName, HouseID: 1, HouseName: "Fuck"}); !blocked(err) {
-		t.Fatalf("blocked room name: %v", err)
+	var name string
+	if err := h.pool.QueryRow(context.Background(), `SELECT house_name FROM player_dorm_room_social WHERE player_id=126701 AND house_id=1`).Scan(&name); err != nil || name != "****" {
+		t.Fatalf("blocked name stored %q %v", name, err)
 	}
-	var blockedRows int
-	if err := h.pool.QueryRow(context.Background(), `SELECT count(*) FROM player_dorm_room_social WHERE player_id=126701 AND house_id=1 AND house_name='Fuck'`).Scan(&blockedRows); err != nil || blockedRows != 0 {
-		t.Fatalf("blocked name persisted: %d %v", blockedRows, err)
+	hide := h.command(t, h.owner, app.Command{Family: app.HideHouse, HouseID: 1})
+	if info, _ := hide["house_info"].(map[string]any); info == nil || info["house_name"] != "****" {
+		t.Fatalf("masked name read %v", hide)
 	}
-	if err := h.commandError(h.viewer, app.Command{Family: app.CommentHouse, HostID: 126701, HouseID: 1, Content: "hello Fuck"}); !blocked(err) {
-		t.Fatalf("blocked comment: %v", err)
+	h.command(t, h.owner, app.Command{Family: app.HideHouse, HouseID: 1})
+
+	commentBody := h.command(t, h.viewer, app.Command{Family: app.CommentHouse, HostID: 126701, HouseID: 1, Content: "hello Fuck"})
+	if contents := commentContents(commentBody); commentBody["comment_num"] != int64(1) || len(contents) != 1 || contents[0] != "hello*****" {
+		t.Fatalf("blocked comment reply %v", commentBody)
 	}
-	if list, err := h.socialRead(t, h.viewer, 2524, 126701, 1, 0, 20); err != nil || list["comment_num"] != int64(0) {
-		t.Fatalf("blocked comment persisted: %v %v", list, err)
+	list, err := h.socialRead(t, h.viewer, 2524, 126701, 1, 0, 20)
+	if err != nil || list["comment_num"] != int64(1) || !containsComment(list, "hello*****") {
+		t.Fatalf("blocked comment read %v %v", list, err)
 	}
-	if body := h.command(t, h.viewer, app.Command{Family: app.CommentHouse, HostID: 126701, HouseID: 1, Content: "hello"}); body["comment_num"] != int64(1) {
-		t.Fatalf("clean comment refused: %v", body)
+
+	clean := strings.Repeat("a", 50)
+	cleanBody := h.command(t, h.viewer, app.Command{Family: app.CommentHouse, HostID: 126701, HouseID: 1, Content: clean})
+	if cleanBody["comment_num"] != int64(2) || !containsComment(cleanBody, clean) {
+		t.Fatalf("clean comment changed or refused: %v", cleanBody)
 	}
 	h.command(t, h.owner, app.Command{Family: app.ChangeName, HouseID: 1, HouseName: "hall"})
+	if err := h.pool.QueryRow(context.Background(), `SELECT house_name FROM player_dorm_room_social WHERE player_id=126701 AND house_id=1`).Scan(&name); err != nil || name != "hall" {
+		t.Fatalf("clean name changed: %q %v", name, err)
+	}
 	if body := h.command(t, h.owner, app.Command{Family: app.ChangeName, HouseID: 1, HouseName: ""}); len(body) != 0 {
 		t.Fatalf("empty name reply %v", body)
 	}
-	var name string
 	if err := h.pool.QueryRow(context.Background(), `SELECT house_name FROM player_dorm_room_social WHERE player_id=126701 AND house_id=1`).Scan(&name); err != nil || name != "" {
 		t.Fatalf("empty name did not restore the default: %q %v", name, err)
 	}
@@ -375,6 +386,28 @@ func TestDormSocialModerationUsesPublishedProfileCorpus(t *testing.T) {
 	if moderationRef != "PROFILE_SCALAR_CASE_SENSITIVE_SPACE_MASK_V1" {
 		t.Fatalf("receipt moderation ref %q in %s", moderationRef, rawRefs)
 	}
+}
+
+func commentContents(body map[string]any) []string {
+	out := []string{}
+	for _, key := range []string{"best_comments", "comment_list"} {
+		rows, _ := body[key].([]any)
+		for _, raw := range rows {
+			if row, ok := raw.(map[string]any); ok {
+				out = append(out, row["content"].(string))
+			}
+		}
+	}
+	return out
+}
+
+func containsComment(body map[string]any, want string) bool {
+	for _, content := range commentContents(body) {
+		if content == want {
+			return true
+		}
+	}
+	return false
 }
 
 func TestDormSocialRefusalsThroughProductionPath(t *testing.T) {
