@@ -41,6 +41,8 @@ var (
 	ErrRefused     = errors.New("oneonone: refused by rule")
 	// ErrClosedHours is answered in-band as source message 30002.
 	ErrClosedHours = errors.New("oneonone: outside 08:00-22:00")
+	// ErrOfferStale is source message 35026: the issued target list moved.
+	ErrOfferStale = errors.New("oneonone: offered rank changed")
 )
 
 type Level struct {

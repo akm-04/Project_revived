@@ -600,3 +600,44 @@ func TestI7C5COneOnOneRivalRegionWireNative(t *testing.T) {
 		t.Fatalf("the better rival on server %d was not offered: %v", b.LogicalServerID, offered)
 	}
 }
+
+// TestI9_10OneOnOneStaleTargetNative proves a target that moved out of the
+// better-ranked bands since MATCH is refused with the D488 rank-changed error.
+func TestI9_10OneOnOneStaleTargetNative(t *testing.T) {
+	p := pool(t)
+	defer p.Close()
+	s := oneOnOneService(t, p)
+	server := rankingServer(t, p)
+	a, heroesA := oneOnOnePlayer(t, p, server)
+	b, heroesB := oneOnOnePlayer(t, p, server)
+	c, heroesC := oneOnOnePlayer(t, p, server)
+	for _, actor := range []identity.ActorContext{a, b, c} {
+		if _, err := s.Load(ctx, actor, op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, x := range []struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}{{a, heroesA}, {b, heroesB}, {c, heroesC}} {
+		if err := s.ChangeTeams(ctx, x.actor, teamsOf(x.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := s.Match(ctx, a, op()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Match(ctx, c, op()); err != nil {
+		t.Fatal(err)
+	}
+	// Both issued lists showed B at a better rank; pin that issued target.
+	for _, actor := range []identity.ActorContext{a, c} {
+		exec(t, p, `UPDATE one_on_one_players SET offered=$2::jsonb,state_version=state_version+1 WHERE player_id=$1`, int64(actor.PlayerID), "["+strconv.FormatInt(int64(b.PlayerID), 10)+"]")
+	}
+	// A concurrent attacker settles and drops B below both challengers.
+	exec(t, p, `UPDATE one_on_one_players SET points=3000,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
+	_, err := s.Start(ctx, c, app.StartCommand{Formations: teamsOf(heroesC, 3), Enemy: b.PlayerID}, op())
+	if !errors.Is(err, d.ErrOfferStale) {
+		t.Fatalf("moved target START err=%v want ErrOfferStale", err)
+	}
+}

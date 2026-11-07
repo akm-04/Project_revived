@@ -133,6 +133,26 @@ func (c Catalog) Offer(ranked []Ranked, self identity.PlayerID, day, refresh int
 	return out
 }
 
+// OfferedRankCurrent reports whether target still sits in one of the three
+// better-ranked bands an offer for self is drawn from. D488 parity: an issued
+// offer is not a reservation, so a moved challenger or target is refused.
+func (c Catalog) OfferedRankCurrent(ranked []Ranked, self, target identity.PlayerID) bool {
+	me, ok := Find(ranked, self)
+	if !ok {
+		return false
+	}
+	other, ok := Find(ranked, target)
+	if !ok || other.Player == self || Group(other.Level) != Group(me.Level) {
+		return false
+	}
+	for _, band := range c.Bands(me.InGroup, me.Global) {
+		if other.InGroup >= band[0] && other.InGroup <= band[1] {
+			return true
+		}
+	}
+	return false
+}
+
 // Opening is the promotion opening: vacancy moves and promotion entrants.
 type Opening struct {
 	Moves    map[identity.PlayerID]Position
