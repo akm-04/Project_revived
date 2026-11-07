@@ -7,11 +7,21 @@ import (
 )
 
 // ModerateIntro applies the versioned scalar-safe case-sensitive source-list
-// policy. Literal ASCII spaces are traversed and included in a matched span;
-// the first terminal is masked. It never trusts prior client filtering.
+// policy to an introduction and enforces its 40-codepoint bound.
 func ModerateIntro(text string, words []string) (string, error) {
-	if !utf8.ValidString(text) || strings.ContainsRune(text, 0) || utf8.RuneCountInString(text) > 40 {
+	if utf8.RuneCountInString(text) > 40 {
 		return "", errors.New("invalid intro")
+	}
+	return MaskWords(text, words)
+}
+
+// MaskWords applies the same published corpus to text whose length the owning
+// domain already bounds. Literal ASCII spaces are traversed and included in a
+// matched span; the first terminal is masked. It never trusts prior client
+// filtering.
+func MaskWords(text string, words []string) (string, error) {
+	if !utf8.ValidString(text) || strings.ContainsRune(text, 0) {
+		return "", errors.New("invalid text")
 	}
 	type node struct {
 		end      bool
