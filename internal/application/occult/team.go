@@ -14,7 +14,9 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -36,7 +38,12 @@ func (s Mode) CreateTeam(c context.Context, a identity.ActorContext, chapterID i
 	if err != nil {
 		return nil, err
 	}
-	payload, err := d.NewRun(chapterID, d.MultiCampaignType).Encode()
+	// shortcut: an unqualified Hero-stat read leaves force 0 rather than
+	// refusing the room, upgrade when a gate needs force.
+	forces, _ := s.bestForces(c, []identity.PlayerID{a.PlayerID}, loaded.at)
+	state := d.NewRun(chapterID, d.MultiCampaignType)
+	state.SetForce(int64(a.PlayerID), forces[a.PlayerID])
+	payload, err := state.Encode()
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +87,19 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 	if err = s.requireBand(c, s.Fresh, loaded.catalog, room.Owner, a.PlayerID); err != nil {
 		return nil, err
 	}
+	// shortcut: an unqualified Hero-stat read leaves force 0 rather than
+	// refusing the join, upgrade when a gate needs force.
+	forces, _ := s.bestForces(c, []identity.PlayerID{a.PlayerID}, loaded.at)
 	if _, err = s.Rooms.Join(c, a, RoomFamilyRef(), roomID, op); err != nil {
+		return nil, err
+	}
+	// Freeze it for the prepare and invite windows, the same shape Adventure
+	// uses to keep Hero-stat reads out of room projections.
+	_, err = s.updateRoom(c, a, op, false, func(_ context.Context, _ gen.TimedScope, view *roomView) (map[string]any, error) {
+		view.state.SetForce(int64(a.PlayerID), forces[a.PlayerID])
+		return nil, nil
+	})
+	if err != nil {
 		return nil, err
 	}
 	return s.roomChange(c, a, op)
@@ -146,6 +165,39 @@ func (s Mode) bestForce(c context.Context, sc gen.TimedScope, player identity.Pl
 		return 0, err
 	}
 	return heroforce.Best15(c, sc, s.Heroes, s.Stats, player, revision, at)
+}
+
+// bestForces reads each player's best-15 AP in one read-only snapshot, copied
+// from Adventure's room service because create has no open transaction.
+func (s Mode) bestForces(c context.Context, players []identity.PlayerID, at time.Time) (map[identity.PlayerID]int64, error) {
+	forces := make(map[identity.PlayerID]int64, len(players))
+	if s.Stats == nil || len(players) == 0 {
+		return forces, nil
+	}
+	revision, err := s.Content.ActiveRevision(c, s.Fresh)
+	if err != nil {
+		return nil, err
+	}
+	id, err := ids.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
+	if err != nil {
+		return nil, err
+	}
+	op := operation.Context{ID: id, StartedAt: at, Policies: policies}
+	_, _, err = s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		for _, player := range players {
+			force, err := heroforce.Best15(c, sc, s.Heroes, s.Stats, player, revision, at)
+			if err != nil {
+				return err
+			}
+			forces[player] = force
+		}
+		return nil
+	})
+	return forces, err
 }
 
 // Kick answers 2370: the owner removes a member for the life of the room and the

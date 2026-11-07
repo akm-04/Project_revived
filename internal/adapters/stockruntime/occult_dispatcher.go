@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -209,7 +210,9 @@ func (o OccultDispatcher) create(ctx context.Context, a identity.ActorContext, p
 	chapter, chapterOK := topFloorInteger(params, "chapter_id", true)
 	campaignType, typeOK := topFloorInteger(params, "campaign_type", true)
 	if !chapterOK || !typeOK || chapter <= 0 || campaignType < d.MultiCampaignType || campaignType > d.SingleCampaignType || !onlyStockGameplayParams(params, "chapter_id", "campaign_type") {
-		return badHero("occult_invalid_parameter")
+		response := badHero("occult_invalid_parameter")
+		response.Cause = fmt.Errorf("2366 chapter_id=%d campaign_type=%d rejected", chapter, campaignType)
+		return response
 	}
 	create := o.Service.CreateTeam
 	if campaignType == d.SingleCampaignType {
@@ -306,14 +309,35 @@ func occultMonsterStatus(raw any) (map[int64]int64, bool) {
 func failOccult(err error) httpedge.Response {
 	var conflict *receipt.ConflictError
 	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("occult_invalid_parameter")
+		response := badHero("occult_invalid_parameter")
+		response.Cause = err
+		return response
 	}
 	for _, refusal := range occultRefusals {
 		if errors.Is(err, refusal) {
-			return conflictRefusal(1)
+			return occultRefusal(err)
 		}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "occult_unavailable"}}
+}
+
+// Stock room-system messages the client renders from error_code; code 1 has no
+// message row, so a bare refusal is silent on the phone.
+const (
+	occultRoomRefusedCode = 35002
+	occultNoScrollsCode   = 35003
+)
+
+// occultRefusal keeps the internal reason in Cause so the journal names the
+// branch while the client shows a stock toast.
+func occultRefusal(err error) httpedge.Response {
+	code := int64(occultRoomRefusedCode)
+	if errors.Is(err, economy.ErrInsufficientBalance) {
+		code = occultNoScrollsCode
+	}
+	response := conflictRefusal(code)
+	response.Cause = err
+	return response
 }
 
 var occultRefusals = []error{d.ErrRefused, economy.ErrInsufficientBalance, sr.ErrNotInRoom, sr.ErrAlreadyInRoom, sr.ErrNotFound,
