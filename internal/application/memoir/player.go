@@ -81,9 +81,6 @@ func (mode Mode) PlayerFight(ctx context.Context, actor identity.ActorContext, r
 	if err != nil {
 		return nil, err
 	}
-	if refusal := playerRefusal(response); refusal != nil {
-		return nil, refusal
-	}
 	if prior.Pending != nil && prior.Pending.Kind == memoir.Player && prior.Pending.Grid == request.Grid && slices.Equal(prior.Pending.Formation, request.Formation) && prior.Pending.Pet == request.Pet {
 		response, err = mode.run(ctx, actor, "player_start", request, operationContext, func(_ context.Context, _ scope, _ *memoir.State) (map[string]any, error) { return response, nil })
 		if err != nil {
