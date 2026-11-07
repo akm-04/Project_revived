@@ -305,3 +305,16 @@ func TestSliderEventUsesNativeCallbackAndUserPercent(t *testing.T) {
 	expect(t, client, "result.event", lua.LNumber(0))
 	expect(t, client, "result.programmatic", lua.LNumber(10))
 }
+
+func TestLabelLineCountIsNumeric(t *testing.T) {
+	client := engine(t, `label:getStringNumLines() label:setString("x")`, nil)
+	run(t, client, `local label = cc.Label:create()
+ result = {empty = label:getStringNumLines()}
+ label:setString("first line")
+ result.single = label:getStringNumLines()
+ label:setString("first\nsecond\nthird")
+ result.multiple = label:getStringNumLines()`)
+	expect(t, client, "result.empty", lua.LNumber(1))
+	expect(t, client, "result.single", lua.LNumber(1))
+	expect(t, client, "result.multiple", lua.LNumber(3))
+}

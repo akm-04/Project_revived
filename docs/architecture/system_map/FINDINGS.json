@@ -13,28 +13,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 4,
-   "name": "LOAD_GM_QUESTIONS",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/windows/ChatWindow.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 5,
-   "name": "ASK_GM_QUESTION",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/windows/ChatWindow.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 17,
    "name": "LOAD_PLAYER_INFO",
    "files": [
@@ -968,12 +946,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 583,
-  "window_sender_mid_count": 142,
+  "count": 581,
+  "window_sender_mid_count": 140,
   "non_window_sender_mid_count": 441,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 54,
+   "no_registration": 52,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -990,32 +968,6 @@
     "non_window_sender_files": [
      "app/model/SelfPlayer.lua"
     ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 4,
-    "name": "LOAD_GM_QUESTIONS",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/windows/ChatWindow.lua"
-    ],
-    "window_sender_files": [
-     "app/windows/ChatWindow.lua"
-    ],
-    "non_window_sender_files": [],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 5,
-    "name": "ASK_GM_QUESTION",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/windows/ChatWindow.lua"
-    ],
-    "window_sender_files": [
-     "app/windows/ChatWindow.lua"
-    ],
-    "non_window_sender_files": [],
     "runtime_reachability": "unknown"
    },
    {
@@ -9563,6 +9515,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "gmquestion",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -9617,6 +9570,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "gmquestion",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -9671,6 +9625,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "gmquestion",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -9784,6 +9739,7 @@
     "eventcentre",
     "frienddm",
     "generaldm",
+    "gmquestion",
     "guildbroadcast",
     "guildcampaign",
     "guildcore",

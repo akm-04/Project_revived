@@ -5687,6 +5687,20 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00137_i9_10f_mentor.sql"
+    },
+    "player_gm_questions": {
+      "owner": "gmquestion",
+      "allowed_read_paths": [
+        "internal/adapters/postgres/gmquestionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/gmquestionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00154_i9_10_gm_questions.sql",
+      "allowed_query_owners": [
+        "gmquestion"
+      ]
     }
   }
 }

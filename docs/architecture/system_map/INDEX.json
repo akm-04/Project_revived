@@ -416,7 +416,9 @@
    "384": "socialinvite",
    "385": "socialinvite",
    "386": "socialinvite",
+   "4": "gmquestion",
    "49": "characterhero",
+   "5": "gmquestion",
    "50": "summon",
    "51": "characterhero",
    "513": "generaldm",
@@ -701,6 +703,7 @@
    "player_element_roots": "elementequipment",
    "player_event_centre_board_reports": "eventcentre",
    "player_event_centre_roots": "eventcentre",
+   "player_gm_questions": "gmquestion",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
    "player_hero_evolution": "characterhero",
@@ -1059,12 +1062,21 @@
   },
   {
    "callees": 5,
-   "callers": 58,
+   "callers": 59,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
    "purpose": "",
    "tables": 0
+  },
+  {
+   "callees": 6,
+   "callers": 0,
+   "mids": 2,
+   "name": "gmquestion",
+   "path": "internal/application/gmquestion",
+   "purpose": "",
+   "tables": 1
   },
   {
    "callees": 10,
@@ -1167,7 +1179,7 @@
   },
   {
    "callees": 12,
-   "callers": 56,
+   "callers": 57,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1284,7 +1296,7 @@
   },
   {
    "callees": 0,
-   "callers": 5,
+   "callers": 6,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1311,7 +1323,7 @@
   },
   {
    "callees": 0,
-   "callers": 21,
+   "callers": 22,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",
