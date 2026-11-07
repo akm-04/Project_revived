@@ -114,7 +114,8 @@
  },
  "tests": {
   "integration": [
-   "socialactivation"
+   "socialactivation",
+   "socialprojection"
   ],
   "scenarios_naming": [],
   "unit": []

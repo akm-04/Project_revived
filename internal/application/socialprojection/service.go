@@ -156,11 +156,11 @@ func (s Service) load(c context.Context, a identity.ActorContext, op operation.C
 // ReadBasePreparedTx is the additive I7A6A same-transaction entry. The caller
 // already holds its complete ordered 315/360/361/363 plan, including recipient
 // root presence/absence. It performs reads only and never ensures a root.
-func (s Service) ReadBasePreparedTx(c context.Context, t tx.Tx, a identity.ActorContext, hasRoot bool) (Result, error) {
+func (s Service) ReadBasePreparedTx(c context.Context, t tx.Tx, a identity.ActorContext, hasRoot bool, operationContext operation.Context) (Result, error) {
 	if t == nil || s.Presentation == nil || s.Observer == nil || s.Relations == nil || s.Inbox == nil {
 		return Result{}, ErrInvalidRead
 	}
-	return s.loadTx(c, t, a, 0, hasRoot, operation.Context{})
+	return s.loadTx(c, t, a, 0, hasRoot, operationContext)
 }
 func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k ListKind, hasRoot bool, op operation.Context) (Result, error) {
 	out := emptyResult()

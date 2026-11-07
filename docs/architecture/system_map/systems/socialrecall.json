@@ -136,7 +136,8 @@
  },
  "tests": {
   "integration": [
-   "playerdisplay"
+   "playerdisplay",
+   "socialprojection"
   ],
   "scenarios_naming": [],
   "unit": [
