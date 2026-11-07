@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/publicprofile"
+	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
 	d "gxb.local/backend/v2/internal/domain/ranking"
@@ -51,6 +52,12 @@ type Recipient interface {
 type RecipientLedger interface {
 	ReadDisplayEntitlementsTx(context.Context, tx.Queryer, identity.PlayerID, string) ([]playerdisplay.Origin, error)
 }
+
+// ComfortFacts is DormHouse's typed score supply for the comfort board.
+type ComfortFacts interface {
+	ComfortFactTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) (dorm.ComfortFact, bool, error)
+}
+
 type Service struct {
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
@@ -58,6 +65,7 @@ type Service struct {
 	Cohort      Cohort
 	Directory   Directory
 	Metrics     publicprofile.ScopedMetricReader
+	Comfort     ComfortFacts
 	Content     Content
 	Fence       Fence
 	Players     playerroot.TxLocker

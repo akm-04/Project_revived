@@ -449,6 +449,9 @@
    "course": [
     "*SnapshotTx"
    ],
+   "dormhouse": [
+    "*ReadCosmeticPrivilegeTx"
+   ],
    "guildrental": [
     "*SnapshotTx"
    ],
@@ -1102,11 +1105,13 @@
     "*SettleGrantTx"
    ],
    "dormhouse": [
+    "*ApplyGluePurchaseTx",
     "*ApplyMaterialDebitTx",
     "*ApplyMaterialExchangeTx",
     "*FenceActorTx",
     "*ListStacksTx",
     "*LockDormPlayerStateTx",
+    "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
     "*ReadDormPlayerStateTx"
@@ -1437,6 +1442,9 @@
   },
   "petcampaign": {},
   "playerdirectory": {
+   "dormhouse": [
+    "Validate"
+   ],
    "libraryforum": [
     "Validate"
    ],
@@ -1492,6 +1500,9 @@
    ],
    "commerceprivilege": [
     "Validate"
+   ],
+   "dormhouse": [
+    "CanonicalPlayerIDs"
    ],
    "frienddm": [
     "CanonicalPlayerIDs",
@@ -3090,17 +3101,22 @@
    "characterhero": [
     "*ApplyDormEXPLockedTx"
    ],
+   "commerceprivilege": [
+    "*ReadCosmeticPrivilegeTx"
+   ],
    "generation": [
     "Bind",
     "DecisionAt",
     "Run"
    ],
    "i5": [
+    "*ApplyGluePurchaseTx",
     "*ApplyMaterialDebitTx",
     "*ApplyMaterialExchangeTx",
     "*FenceActorTx",
     "*ListStacksTx",
     "*LockDormPlayerStateTx",
+    "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
     "*ReadDormPlayerStateTx"
@@ -3117,29 +3133,61 @@
     "*ReadHeroByPartnerIDTx",
     "*ReadRootTx"
    ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "playerroot": [
+    "CanonicalPlayerIDs"
+   ],
    "store:contentstore": [
     "*DormCatalogTx",
     "*DormInputsActive",
     "*DormInputsRevisionTx",
-    "*HeroTemplateProgressionTx"
+    "*HeroTemplateProgressionTx",
+    "*ModerationPolicyTx"
    ],
    "store:dormstore": [
+    "*ActorPraisesTx",
+    "*CommentLikesTx",
+    "*DeleteCommentReactionsTx",
+    "*DeleteCommentTx",
     "*EnsureHeroTx",
     "*EnsureRootTx",
+    "*InsertCommentReactionTx",
+    "*InsertCommentTx",
+    "*InsertPraiseTx",
     "*InsertRoomTx",
+    "*ListLiveCommentsTx",
     "*ListRoomsTx",
+    "*ListSocialRoomsTx",
     "*LockAdmissionTx",
     "*LockRootTx",
+    "*MarkCommentDeletedTx",
+    "*NextCommentIDTx",
+    "*PagePraisesTx",
+    "*PraiseCountTx",
+    "*PraiseCountsTx",
+    "*ReadCommentReactionTx",
+    "*ReadCommentTx",
+    "*ReadGluePurchasesTx",
     "*ReadHeroTx",
+    "*ReadPraiseTx",
     "*ReadRoomTx",
     "*ReadRootTx",
+    "*ReadSocialRoomTx",
     "*SaveAdmissionTx",
+    "*SaveGluePurchasesTx",
     "*SaveHeroTx",
     "*SaveRoomTx",
-    "*SaveRootTx"
+    "*SaveRootTx",
+    "*SaveSocialRoomTx",
+    "*VisitablePlayersTx"
    ],
    "store:i4store": [
-    "*LockPlayerRootsTx"
+    "*LockPlayerRootsTx",
+    "*PlayerIDBoundsTx",
+    "*ProfileTx",
+    "*ProfilesAfterTx"
    ],
    "store:kernelstore": [
     "*FindTx",
@@ -3834,6 +3882,7 @@
     "*ResolvePetStarterPolicyTx",
     "*ResolveProgressionPolicyTx",
     "*ResolveResourceTx",
+    "*ScalarDailyFloorMinimumTx",
     "*SignInCatalogTx",
     "*SummonCatalogTx"
    ],
@@ -4739,6 +4788,9 @@
    "store:contentstore": [
     "*ActiveRevision",
     "*ReadPlayerDisplayCatalogTx"
+   ],
+   "store:dormstore": [
+    "*ComfortFactTx"
    ],
    "store:guildrentalread": [
     "*ProfileTx"

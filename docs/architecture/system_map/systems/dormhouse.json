@@ -1,7 +1,8 @@
 {
  "background": [],
  "content": [
-  "content_dorm_input_catalogs"
+  "content_dorm_input_catalogs",
+  "content_public_profile_policies"
  ],
  "contracts": [
   {
@@ -9,7 +10,7 @@
    "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
-   "count": 8,
+   "count": 18,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -75,13 +76,23 @@
   "unresolved_methods": []
  },
  "login": [
+  "GlueBootstrap",
+  "OverlayMID1",
   "OverlayRosterTx"
  ],
  "mids": [
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
+   },
+   "mid": 1845,
+   "name": "BUY_GLUE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
    },
    "mid": 2512,
    "name": "GET_HOUSE_LIST"
@@ -89,7 +100,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
    },
    "mid": 2513,
    "name": "OPEN_HOUSE"
@@ -97,7 +108,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
    },
    "mid": 2514,
    "name": "GET_HOUSE_DETAIL"
@@ -105,7 +116,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
    },
    "mid": 2515,
    "name": "SAVE_FURNITURES"
@@ -113,7 +124,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
    },
    "mid": 2516,
    "name": "HOUSE_EQUIP"
@@ -121,7 +132,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
    },
    "mid": 2517,
    "name": "ENTER_HERO"
@@ -129,7 +140,79 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
+   },
+   "mid": 2518,
+   "name": "CHANGE_HOUSE_NAME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2519,
+   "name": "VISIT_RANDOM_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2520,
+   "name": "HIDE_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2521,
+   "name": "PRAISE_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2522,
+   "name": "GET_DORM_PRAISE_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2523,
+   "name": "COMMENT_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2524,
+   "name": "GET_DORM_COMMENT_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2525,
+   "name": "PRAISE_COMMENT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2526,
+   "name": "DELETE_COMMENT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 26
    },
    "mid": 2693,
    "name": "EXCHANGE_DORM_KEY"
@@ -137,7 +220,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
    },
    "mid": 2694,
    "name": "START_EXPAND_HOUSE"
@@ -145,7 +228,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 26
    },
    "mid": 2695,
    "name": "FINISH_EXPAND_HOUSE"
@@ -163,7 +246,12 @@
  "tables": {
   "owned": [
    "player_dorm_admissions",
+   "player_dorm_comment_reactions",
+   "player_dorm_comments",
+   "player_dorm_glue_purchases",
    "player_dorm_heroes",
+   "player_dorm_praises",
+   "player_dorm_room_social",
    "player_dorm_rooms",
    "player_dorm_roots"
   ],
@@ -171,13 +259,20 @@
    "account_sessions",
    "accounts",
    "content_dorm_input_catalogs",
+   "content_public_profile_policies",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_hero_templates",
    "gxb_content_revisions",
    "gxb_operation_receipts",
+   "player_directory_profiles",
    "player_dorm_admissions",
+   "player_dorm_comment_reactions",
+   "player_dorm_comments",
+   "player_dorm_glue_purchases",
    "player_dorm_heroes",
+   "player_dorm_praises",
+   "player_dorm_room_social",
    "player_dorm_rooms",
    "player_dorm_roots",
    "player_economy_owners",
@@ -191,7 +286,12 @@
   "written": [
    "gxb_operation_receipts",
    "player_dorm_admissions",
+   "player_dorm_comment_reactions",
+   "player_dorm_comments",
+   "player_dorm_glue_purchases",
    "player_dorm_heroes",
+   "player_dorm_praises",
+   "player_dorm_room_social",
    "player_dorm_rooms",
    "player_dorm_roots"
   ]
@@ -200,7 +300,12 @@
   "integration": [
    "playerdisplay"
   ],
-  "scenarios_naming": [],
-  "unit": []
+  "scenarios_naming": [
+   "i9_10c_buy_glue_1845.json",
+   "i9_10c_dorm_social.json"
+  ],
+  "unit": [
+   "social_native_test.go"
+  ]
  }
 }

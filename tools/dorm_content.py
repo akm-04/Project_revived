@@ -1,6 +1,19 @@
 """Pure Dorm compiler: source facts plus two explicitly approved policies."""
 from decimal import Decimal
 
+def build_glue(misc, vip_rows, refresh_rows, error):
+    try:
+        daily_floor=int(misc['glue_time_get']);purchase_amount=int(misc['glue_buy_number']);purchase_start_limit=int(misc['glue_buy_limit'])
+    except KeyError as missing:raise error(f'Dorm glue source key {missing.args[0]} missing')
+    def field(row,name):
+        try:return int(row[name])
+        except KeyError:raise error(f'Dorm glue source column {name} missing')
+    vip_daily_caps=sorted((dict(vip=field(r,'id'),cap=field(r,'num_glue'))for r in vip_rows),key=lambda x:x['vip'])
+    purchase_costs=sorted((dict(ordinal=field(r,'id'),cost=field(r,'buy_glue_cost'))for r in refresh_rows),key=lambda x:x['ordinal'])
+    if len({x['vip']for x in vip_daily_caps})!=len(vip_daily_caps):raise error('Dorm glue VIP cap duplicate')
+    if len({x['ordinal']for x in purchase_costs})!=len(purchase_costs):raise error('Dorm glue purchase cost duplicate')
+    return dict(daily_floor=daily_floor,purchase_amount=purchase_amount,purchase_start_limit=purchase_start_limit,vip_daily_caps=vip_daily_caps,purchase_costs=purchase_costs)
+
 def build_dorm(blobs, parse_table, pipe_ints, hero_templates, partner_keys, partner_rows, super_keys, super_rows, indexed_field, items, error):
     def rows(name): return parse_table(blobs['data/tables/'+name+'.lua'].data)
     def bp(raw):
@@ -8,6 +21,7 @@ def build_dorm(blobs, parse_table, pipe_ints, hero_templates, partner_keys, part
         if n!=n.to_integral_value():raise error('Dorm growth precision exceeds basispoints')
         return int(n)
     misc={r['key']:r['value'] for r in rows('misc')}
+    glue=build_glue(misc,rows('vip'),rows('refresh_cost'),error)
     exchange=[dict(item_id=i,cement_per_key=int(misc['house_key_'+color])) for color in ('green','blue') for i in pipe_ints(misc['house_key_'+color+'_id'])]
     rooms=[]
     for r in rows('dorm_house'):
@@ -29,4 +43,4 @@ def build_dorm(blobs, parse_table, pipe_ints, hero_templates, partner_keys, part
     by_item={int(r['id']):r for r in items}
     equipment=[dict(item_id=i,required_level=int(by_item[i]['level']))for i in sorted(equipment_ids)]
     if (len(rooms),len(types),len(keys),len(expansions),len(furniture),len(templates))!=(16,4,18,3,267,568):raise error('Dorm selected source count drift')
-    return dict(schema_version=1,lounge_policy_id='C2C_LOUNGE_EXP_V1',random_key_policy_id='C2C_RANDOM_KEY_V1',original_server_policy_recovered=False,exchange_keys=exchange,rooms=sorted(rooms,key=lambda x:x['table_id']),types=types,keys=keys,expansions=expansions,furniture=sorted(furniture,key=lambda x:x['item_id']),hero_equipment=templates,equipment_items=equipment)
+    return dict(schema_version=2,lounge_policy_id='C2C_LOUNGE_EXP_V1',random_key_policy_id='C2C_RANDOM_KEY_V1',original_server_policy_recovered=False,glue=glue,exchange_keys=exchange,rooms=sorted(rooms,key=lambda x:x['table_id']),types=types,keys=keys,expansions=expansions,furniture=sorted(furniture,key=lambda x:x['item_id']),hero_equipment=templates,equipment_items=equipment)

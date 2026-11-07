@@ -81,6 +81,37 @@ func TestGirlsSnapshotRejectsIncompleteConflictingOrTamperedInputs(t *testing.T)
 		t.Fatal("mutated immutable snapshot")
 	}
 }
+func TestDormComfortBoardPublishesTopHundredWithoutTitles(t *testing.T) {
+	b, ok := BoardOfSubType(34)
+	if !ok || b.Policy != DormComfortPolicy || b.RowValue != "comfort" || b.Limit != 100 || b.TitledRanks != 0 || len(b.Titles) != 0 {
+		t.Fatal(b, ok)
+	}
+	at := time.Date(2026, 11, 1, 12, 0, 0, 0, time.UTC)
+	rev := strings.Repeat("a", 64)
+	op, _ := ids.NewUUID()
+	root, e := NewBoardRoot(b, 1, at)
+	if e != nil {
+		t.Fatal(e)
+	}
+	in := []BoardInput{}
+	for p := int64(1); p <= 101; p++ {
+		in = append(in, BoardInput{
+			Metric:  BoardMetric{Player: identity.PlayerID(p), Owner: b.SourceOwner, Policy: b.SourcePolicy, Semantics: b.SourceSemantics, Revision: rev, PopulationDigest: strings.Repeat("b", 64), FieldID: b.FieldID, Value: 102 - p, SourceVersion: 1, PopulationVersion: 1, ObservedAt: at},
+			Display: BoardPresentation{Player: identity.PlayerID(p), Name: "Player", Level: 1},
+		})
+	}
+	_, snapshot, e := BuildBoardSnapshot(root, at, rev, op, in)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if len(snapshot.Entries) != 100 || snapshot.Entries[0].Metric.Player != 1 || snapshot.Entries[99].Metric.Player != 100 {
+		t.Fatalf("top limit %d first=%d last=%d", len(snapshot.Entries), snapshot.Entries[0].Metric.Player, snapshot.Entries[len(snapshot.Entries)-1].Metric.Player)
+	}
+	if awards, e := snapshot.Awards(); e != nil || len(awards) != 0 {
+		t.Fatal("dorm comfort granted titles", awards, e)
+	}
+}
+
 func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *testing.T) {
 	r, at, rev, op := girlsFixture()
 	in := []BoardInput{}

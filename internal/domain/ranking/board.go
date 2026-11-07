@@ -19,6 +19,9 @@ import (
 const GirlsPolicy = "C4C_PRIVATE_GIRLS_SERVER_RANKING_V1"
 const AchievementPointPolicy = "C4F_PRIVATE_AP_SERVER_RANKING_V1"
 const SkinsPolicy = "C4F_PRIVATE_SKINS_SERVER_RANKING_V1"
+const DormComfortPolicy = "I9_10C_PRIVATE_DORM_COMFORT_RANKING_V1"
+const DormComfortSourcePolicy = "I9_10C_PRIVATE_DORM_COMFORT_FACT_V1"
+const DormComfortSemantics = "CURRENT_SUM_OWNED_ROOMS_INCLUDING_LOUNGE_V1"
 const ServerCohort = "I4_SERVER_ALL_PLAYERS_V1"
 const BoardTitleDuration int64 = 604800
 const BoardLockRank uint16 = 600
@@ -35,6 +38,8 @@ type Board struct {
 	// RowValue is the rank_info row field NewRankWindow.initInfoText reads for
 	// the rank table type: info_val for RankType.Power (2001), score for DEV_PARTNER_NUM.
 	RowValue string
+	// Limit truncates the published top entries; zero publishes the whole cohort.
+	Limit int64
 }
 
 var GirlsBoard = Board{Name: "girls", Policy: GirlsPolicy, SourceOwner: "CharacterHero", SourcePolicy: "C4C_PRIVATE_CURRENT_ROSTER_V1", SourceSemantics: "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1", FieldID: 1001, SubType: 37, TitleType: 8, TitledRanks: 20, Titles: []int64{100059, 100060, 100061, 100062}, RowValue: "score"}
@@ -45,7 +50,11 @@ var AchievementPointBoard = Board{Name: "achievement-point", Policy: Achievement
 // SkinsBoard is rank 38 (user Q4: the Girls ranking policy) over skin collection 1003.
 var SkinsBoard = Board{Name: "skins", Policy: SkinsPolicy, SourceOwner: "PlayerDisplay", SourcePolicy: "C4F_SKIN_COLLECTION_V1", SourceSemantics: "CURRENT_SKIN_FRAME_AVATAR_COLLECTION_V1", FieldID: 1003, SubType: 38, TitleType: 9, TitledRanks: 20, Titles: []int64{100063, 100064, 100065, 100066}, RowValue: "score"}
 
-var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard}
+// DormComfortBoard is rank 301 subtype 34. The score owner is DormHouse; this
+// board only orders the typed facts. It grants no titles.
+var DormComfortBoard = Board{Name: "dorm-comfort", Policy: DormComfortPolicy, SourceOwner: "DormHouse", SourcePolicy: DormComfortSourcePolicy, SourceSemantics: DormComfortSemantics, FieldID: 2001, SubType: 34, Titles: []int64{}, RowValue: "comfort", Limit: 100}
+
+var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard, DormComfortBoard}
 
 func BoardOf(policy string) (Board, bool) {
 	for _, b := range Boards {
@@ -264,6 +273,9 @@ func BuildBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID, in [
 	out.Entries = []BoardEntry{}
 	for _, v := range ordered {
 		out.Entries = append(out.Entries, byID[v.SubjectID])
+	}
+	if b.Limit > 0 && int64(len(out.Entries)) > b.Limit {
+		out.Entries = out.Entries[:b.Limit]
 	}
 	out.CohortDigest = out.cohortDigest()
 	out.Digest = out.hash()

@@ -374,6 +374,13 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			if err != nil {
 				return GrantResult{}, err
 			}
+			if !exists && policy.DailyFloorMinimum != nil {
+				st = economy.ScalarBalance{PlayerID: plan.PlayerID, ResourceKey: line.ResourceKey, StateVersion: 1, UpdatedAt: now}
+			}
+			st, exists, err = settleDailyFloorTx(ctx, t, s.Store, st, exists, policy.DailyFloorMinimum, now)
+			if err != nil {
+				return GrantResult{}, err
+			}
 			if !exists {
 				st = economy.ScalarBalance{PlayerID: plan.PlayerID, ResourceKey: line.ResourceKey, Amount: line.Amount, StateVersion: 1, UpdatedAt: now}
 			} else {

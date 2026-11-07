@@ -24,6 +24,8 @@ var (
 	ErrStaleTime     = errors.New("dorm: stale captured time")
 	ErrInUse         = errors.New("dorm: Hero or furniture in use")
 	ErrCooldown      = errors.New("dorm: resident change cooldown")
+	ErrHidden        = errors.New("dorm: room is hidden")
+	ErrModerated     = errors.New("dorm: refused by the public-profile moderation policy")
 )
 
 // Attributes are percent * 100, exactly representable as basis points. The
@@ -52,6 +54,25 @@ type EquipmentRule struct {
 	TemplateID int64
 	Items      [5]int64
 }
+
+// GlueRules carries the source purchase ladder. Nil on a Catalog means the
+// older schema 1 payload, which has no glue facts.
+type GlueRules struct {
+	DailyFloor, PurchaseAmount, PurchaseStartLimit int64
+	VIPDailyCaps                                   map[int64]int64
+	PurchaseCosts                                  map[int64]int64
+}
+
+func (g GlueRules) VIPDailyCap(vip int64) (int64, bool) {
+	dailyCap, ok := g.VIPDailyCaps[vip]
+	return dailyCap, ok
+}
+
+func (g GlueRules) PurchaseCost(ordinal int64) (int64, bool) {
+	cost, ok := g.PurchaseCosts[ordinal]
+	return cost, ok
+}
+
 type Catalog struct {
 	ExchangeRates  map[int64]int64
 	Furniture      map[int64]FurnitureRule
@@ -61,6 +82,7 @@ type Catalog struct {
 	Keys           map[int64]KeyRule
 	Expansions     map[int64]ExpansionRule
 	Equipment      map[int64]EquipmentRule
+	Glue           *GlueRules
 }
 
 type Root struct {

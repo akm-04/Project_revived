@@ -17,11 +17,18 @@ func heroWire(f dorm.HeroFacts, rooms map[int64]dorm.Room) map[string]any {
 	r := rooms[f.HouseID]
 	return map[string]any{"house_id": f.HouseID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": f.Equipment}
 }
-func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts) map[string]any {
+func unixOrZero(at time.Time) int64 {
+	if at.IsZero() {
+		return 0
+	}
+	return at.Unix()
+}
+
+func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire) map[string]any {
 	residents := []any{}
 	for _, p := range r.Residents {
 		h := heroes[p]
-		row := map[string]any{"partner_id": p, "table_id": h.TableID, "star": h.Star, "color": h.Color, "lev": h.Level, "exp": h.Exp, "skills": h.RawSkills.Levels, "skill_ids": h.RawSkills.ChoiceIDs, "equips": h.Equipment, "fumos": h.Fumo, "practice_attr": h.Practice, "is_like": h.IsLike, "current_skin_id": h.CurrentSkinID, "illusion_skin_id": h.IllusionSkinID, "twice_awake_stage": 0, "house_id": r.ID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": facts[p].Equipment}
+		row := map[string]any{"partner_id": p, "table_id": h.TableID, "star": h.Star, "color": h.Color, "lev": h.Level, "exp": h.Exp, "skills": h.RawSkills.Levels, "skill_ids": h.RawSkills.ChoiceIDs, "equips": h.Equipment, "fumos": h.Fumo, "practice_attr": h.Practice, "is_like": h.IsLike, "current_skin_id": h.CurrentSkinID, "illusion_skin_id": h.IllusionSkinID, "twice_awake_stage": 0, "house_id": r.ID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": facts[p].Equipment, "house_enter_time": unixOrZero(facts[p].LoungeAnchor)}
 		if h.Kind == character.SuperHero {
 			row["partner_type"] = 2
 		}
@@ -34,18 +41,25 @@ func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm
 	if !r.LastEnterAt.IsZero() {
 		last = r.LastEnterAt.Unix()
 	}
-	return map[string]any{"house_id": r.ID, "table_id": r.TableID, "floor": r.Floor, "pos": r.Position, "comfort": r.Comfort, "expand_lev": r.ExpansionLevel, "expand_start_time": start, "last_enter_time": last, "partner_infos": residents, "house_name": "", "is_hide": 0, "praise_num": 0, "is_has_praise": 0}
+	state := wire.Social[r.ID]
+	return map[string]any{"house_id": r.ID, "table_id": r.TableID, "house_type": r.MainType, "floor": r.Floor, "pos": r.Position, "comfort": r.Comfort, "expand_lev": r.ExpansionLevel, "expand_start_time": start, "last_enter_time": last, "partner_infos": residents, "house_name": state.Name, "is_hide": boolFlag(state.Hidden), "praise_num": wire.PraiseCounts[r.ID], "is_has_praise": boolFlag(wire.ActorPraises[r.ID].Actor != 0)}
 }
-func listWire(rooms map[int64]dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts) [][]any {
+func listWire(rooms map[int64]dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire, includeHidden bool) [][]any {
 	out := [][]any{{}, {}, {}, {}}
 	ids := []int64{}
 	for id := range rooms {
+		if !includeHidden && wire.Social[id].Hidden {
+			continue
+		}
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 	for _, id := range ids {
 		r := rooms[id]
-		out[r.MainType-1] = append(out[r.MainType-1], roomWire(r, heroes, facts))
+		if r.MainType < 1 || r.MainType > 4 {
+			return out
+		}
+		out[r.MainType-1] = append(out[r.MainType-1], roomWire(r, heroes, facts, wire))
 	}
 	return out
 }
@@ -130,6 +144,10 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if _, ok := values.Functions[71]; !ok {
 			return dorm.ErrUnqualified
 		}
+		wire, e := s.socialRoomWireTx(ctx, sc.Tx, pid, a.PlayerID)
+		if e != nil {
+			return e
+		}
 		body = map[string]any{}
 		if mid == 2512 {
 			functions := []int64{}
@@ -138,13 +156,16 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 					functions = append(functions, id)
 				}
 			}
-			body["house_list"] = listWire(rooms, hm, facts)
+			body["house_list"] = listWire(rooms, hm, facts, wire, pid == a.PlayerID)
 			body["open_functions"] = functions
 			return nil
 		}
 		r, ok := rooms[house]
 		if !ok {
 			return dorm.ErrInvalidFacts
+		}
+		if pid != a.PlayerID && wire.Social[house].Hidden {
+			return dorm.ErrHidden
 		}
 		if at.Before(r.UpdatedAt) {
 			return ErrStale
@@ -201,7 +222,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 				used[strconv.FormatInt(item, 10)] += n
 			}
 		}
-		body["house_info"] = roomWire(r, hm, facts)
+		body["house_info"] = roomWire(r, hm, facts, wire)
 		body["house_detail"] = map[string]any{"house_id": r.ID, "record": r.Layout}
 		body["item_record"] = used
 		if own {

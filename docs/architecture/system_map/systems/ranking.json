@@ -80,6 +80,7 @@
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/dormstore",
   "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
@@ -105,6 +106,9 @@
    "gxb_operation_receipts",
    "player_cosmetic_entitlements",
    "player_directory_profiles",
+   "player_dorm_heroes",
+   "player_dorm_rooms",
+   "player_dorm_roots",
    "players",
    "ranking_girls_awards",
    "ranking_girls_birth_tracking",

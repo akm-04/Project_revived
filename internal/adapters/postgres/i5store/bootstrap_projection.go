@@ -215,6 +215,11 @@ func (b BootstrapProjection) overlayEconomy(ctx context.Context, q tx.Queryer, p
 		return fmt.Errorf("MID1 max-level policy: %w", err)
 	}
 	out["max_lev"] = activeProgression.MaxLevel()
+	glue, err := appi5.EffectiveScalarTx(ctx, q, Store{}, b.Content, pid, appi5.GlueResourceKey, now)
+	if err != nil {
+		return fmt.Errorf("MID1 glue floor: %w", err)
+	}
+	out[appi5.GlueResourceKey] = glue
 
 	var temporalRaw string
 	qsql := `SELECT COALESCE(jsonb_agg(jsonb_build_object('resource_key',r.resource_key,'stored_amount',r.stored_amount,'regen_anchor_at',r.regen_anchor_at,'policy_version',r.policy_version,'content_revision',COALESCE(r.content_revision,''),'state_version',r.state_version,'updated_at',r.updated_at) ORDER BY r.resource_key),'[]'::jsonb)::text FROM player_temporal_resources r WHERE r.player_id=$1`

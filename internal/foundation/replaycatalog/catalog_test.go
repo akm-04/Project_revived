@@ -113,6 +113,19 @@ func TestI9MissionAndChestReceiptFamiliesAreClassified(t *testing.T) {
 	}
 }
 
+func TestDormGluePurchaseReplayClassification(t *testing.T) {
+	for _, family := range Enabled {
+		if family.Name != "i7c2c.dorm-buy-glue" {
+			continue
+		}
+		if family.OwnerKind != "player" || family.Domain != "dorm-house" || family.Operation != "DORM_BUY_GLUE" || family.IdentityClass != CallerSemantic || !family.Consumptive || family.ReceiptSchema != "gxb.dormhouse.command.v1" || family.SemanticSource == "" || family.Residual == "" {
+			t.Fatalf("incomplete glue purchase replay classification: %#v", family)
+		}
+		return
+	}
+	t.Fatal("glue purchase replay classification missing")
+}
+
 func TestSocialExchangeAndRecallReceiptFamiliesAreClassified(t *testing.T) {
 	expected := map[string]string{"socialexchange": "gxb.social.exchange.v1", "socialrecall": "gxb.social.recall.start.v1"}
 	for _, family := range Enabled {

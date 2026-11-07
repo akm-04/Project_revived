@@ -1,6 +1,7 @@
 {
  "login_composition": {
   "DetailContributors": [
+   "appdorm.GlueBootstrap",
    "appi5.AwakeningBootstrap",
    "appi5.SignInBootstrap",
    "appi5.MissionBootstrap",
@@ -162,6 +163,7 @@
    "1841": "profilefeedback",
    "1842": "profilefeedback",
    "1844": "publicprofile",
+   "1845": "dormhouse",
    "185": "socialrelation",
    "186": "socialrelation",
    "187": "socialrelation",
@@ -278,6 +280,15 @@
    "2515": "dormhouse",
    "2516": "dormhouse",
    "2517": "dormhouse",
+   "2518": "dormhouse",
+   "2519": "dormhouse",
+   "2520": "dormhouse",
+   "2521": "dormhouse",
+   "2522": "dormhouse",
+   "2523": "dormhouse",
+   "2524": "dormhouse",
+   "2525": "dormhouse",
+   "2526": "dormhouse",
    "2561": "i5",
    "2563": "guildcore",
    "2564": "guildcore",
@@ -644,7 +655,12 @@
    "player_course_roots": "course",
    "player_directory_profiles": "playerdirectory",
    "player_dorm_admissions": "dormhouse",
+   "player_dorm_comment_reactions": "dormhouse",
+   "player_dorm_comments": "dormhouse",
+   "player_dorm_glue_purchases": "dormhouse",
    "player_dorm_heroes": "dormhouse",
+   "player_dorm_praises": "dormhouse",
+   "player_dorm_room_social": "dormhouse",
    "player_dorm_rooms": "dormhouse",
    "player_dorm_roots": "dormhouse",
    "player_element_admissions": "elementequipment",
@@ -904,7 +920,7 @@
   },
   {
    "callees": 7,
-   "callers": 15,
+   "callers": 16,
    "mids": 3,
    "name": "commerceprivilege",
    "path": "internal/application/commerceprivilege",
@@ -957,13 +973,13 @@
    "tables": 1
   },
   {
-   "callees": 9,
+   "callees": 12,
    "callers": 3,
-   "mids": 9,
+   "mids": 19,
    "name": "dormhouse",
    "path": "internal/application/dormhouse",
    "purpose": "",
-   "tables": 4
+   "tables": 9
   },
   {
    "callees": 12,
@@ -1201,7 +1217,7 @@
   },
   {
    "callees": 0,
-   "callers": 3,
+   "callers": 4,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1228,7 +1244,7 @@
   },
   {
    "callees": 0,
-   "callers": 19,
+   "callers": 20,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",
@@ -1281,7 +1297,7 @@
    "tables": 0
   },
   {
-   "callees": 11,
+   "callees": 12,
    "callers": 1,
    "mids": 1,
    "name": "ranking",

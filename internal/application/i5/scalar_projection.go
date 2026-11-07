@@ -22,8 +22,9 @@ type ScalarProjectionStore interface {
 }
 
 type ScalarProjector struct {
-	Runner tx.Runner
-	Store  ScalarProjectionStore
+	FloorPolicies ScalarDailyFloorPolicySource
+	Runner        tx.Runner
+	Store         ScalarProjectionStore
 }
 
 var _ CurrentScalarProjectionPort = ScalarProjector{}
@@ -38,14 +39,9 @@ func (p ScalarProjector) CurrentScalar(ctx context.Context, pid identity.PlayerI
 	}
 	var amount int64
 	_, err := p.Runner.Run(ctx, op, scalarProjectionProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(txctx context.Context, scope tx.Scope) error {
-		b, exists, err := p.Store.ReadScalarTx(txctx, scope.Tx, pid, key)
-		if err != nil {
-			return err
-		}
-		if exists {
-			amount = b.Amount
-		}
-		return nil
+		var err error
+		amount, err = EffectiveScalarTx(txctx, scope.Tx, p.Store, p.FloorPolicies, pid, key, op.StartedAt)
+		return err
 	})
 	return amount, err
 }

@@ -62,6 +62,8 @@ func main() {
 // scenario is one I8.5-5 scenario (D55): a provisioned player (D56), steps after MainScene and what the run must show.
 type scenario struct {
 	FriendFixture bool `json:"friend_fixture"`
+	// DormSocialFixture opens Dorm function 71 through the production stage owner and births one peer whose praise, comments and reactions the scenario reads.
+	DormSocialFixture bool `json:"dorm_social_fixture"`
 	// GuildRentalFixture births the peer that joins the guild and lends one girl.
 	GuildRentalFixture bool   `json:"guild_rental_fixture"`
 	Name               string `json:"name"`
@@ -169,7 +171,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.FriendFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.AdventureEventFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.AdventureEventFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -237,7 +239,7 @@ func (run run) play() ([]string, error) {
 			return nil, err
 		}
 	}
-	if run.scenario.FriendFixture || run.scenario.GuildRentalFixture {
+	if run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.GuildRentalFixture {
 		peer, err := run.bornPeer(ctx, secret)
 		if err != nil {
 			return nil, fmt.Errorf("peer: %w", err)
@@ -247,6 +249,11 @@ func (run run) play() ([]string, error) {
 			if err := provision.FriendFixture(ctx, run.databaseURL, session.AccountID, peer); err != nil {
 				return nil, err
 			}
+		}
+	}
+	if run.scenario.DormSocialFixture {
+		if err := provision.DormSocialFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
 		}
 	}
 	groups, resumeFiles := [][]string{{}}, []string{""}

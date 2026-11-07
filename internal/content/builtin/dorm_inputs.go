@@ -17,6 +17,22 @@ type DormInputCatalog struct {
 	Furniture                     []DormFurnitureRule     `json:"furniture"`
 	HeroEquipment                 []DormHeroEquipmentRule `json:"hero_equipment"`
 	EquipmentItems                []DormEquipmentItemRule `json:"equipment_items"`
+	Glue                          *DormGlueRules          `json:"glue,omitempty"`
+}
+type DormGlueRules struct {
+	DailyFloor         int64              `json:"daily_floor"`
+	PurchaseAmount     int64              `json:"purchase_amount"`
+	PurchaseStartLimit int64              `json:"purchase_start_limit"`
+	VIPDailyCaps       []DormVIPDailyCap  `json:"vip_daily_caps"`
+	PurchaseCosts      []DormPurchaseCost `json:"purchase_costs"`
+}
+type DormVIPDailyCap struct {
+	VIP int64 `json:"vip"`
+	Cap int64 `json:"cap"`
+}
+type DormPurchaseCost struct {
+	Ordinal int64 `json:"ordinal"`
+	Cost    int64 `json:"cost"`
 }
 type DormExchangeKey struct {
 	ItemID       int64 `json:"item_id"`
@@ -84,7 +100,7 @@ type DormEquipmentItemRule struct {
 var errDormInput = errors.New("builtin: invalid selected Dorm input profile")
 
 func (c DormInputCatalog) Validate() error {
-	if c.SchemaVersion != 1 || c.LoungePolicyID != "C2C_LOUNGE_EXP_V1" || c.RandomKeyPolicyID != "C2C_RANDOM_KEY_V1" || c.OriginalServerPolicyRecovered || len(c.Rooms) != 16 || len(c.Types) != 4 || len(c.Keys) != 18 || len(c.Expansions) != 3 || len(c.Furniture) != 267 || len(c.HeroEquipment) != 568 {
+	if (c.SchemaVersion != 1 && c.SchemaVersion != 2) || c.LoungePolicyID != "C2C_LOUNGE_EXP_V1" || c.RandomKeyPolicyID != "C2C_RANDOM_KEY_V1" || c.OriginalServerPolicyRecovered || len(c.Rooms) != 16 || len(c.Types) != 4 || len(c.Keys) != 18 || len(c.Expansions) != 3 || len(c.Furniture) != 267 || len(c.HeroEquipment) != 568 {
 		return errDormInput
 	}
 	rooms := map[int64]DormRoomRule{}
@@ -176,6 +192,36 @@ func (c DormInputCatalog) Validate() error {
 				return errDormInput
 			}
 		}
+	}
+	if c.SchemaVersion == 1 {
+		if c.Glue != nil {
+			return errDormInput
+		}
+		return nil
+	}
+	if c.Glue == nil {
+		return errDormInput
+	}
+	return c.Glue.validate()
+}
+
+func (g DormGlueRules) validate() error {
+	if g.DailyFloor < 0 || g.PurchaseAmount < 0 || g.PurchaseStartLimit < 0 || len(g.VIPDailyCaps) == 0 || len(g.PurchaseCosts) == 0 {
+		return errDormInput
+	}
+	lastOrdinal := int64(0)
+	for _, r := range g.PurchaseCosts {
+		if r.Ordinal != lastOrdinal+1 || r.Cost < 0 {
+			return errDormInput
+		}
+		lastOrdinal = r.Ordinal
+	}
+	lastVIP := int64(-1)
+	for _, r := range g.VIPDailyCaps {
+		if r.VIP <= lastVIP || r.Cap < 0 || r.Cap > lastOrdinal {
+			return errDormInput
+		}
+		lastVIP = r.VIP
 	}
 	return nil
 }

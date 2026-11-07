@@ -205,6 +205,10 @@ func (s Service) preflightGrantTx(ctx context.Context, t tx.Tx, plan grant.Plan,
 
 		switch line.Kind {
 		case grant.ScalarCurrency:
+			policy.DailyFloorMinimum, err = dailyFloorMinimumTx(ctx, t, s.Content, line.ResourceKey)
+			if err != nil {
+				return grantPreflight{}, err
+			}
 			needsEconomyOwner = true
 			if err := appendGrantLock(&reqs, grantLockRankScalar, "i5.scalar", grantChildIdentity(plan.PlayerID, line.ResourceKey), grantLockScalar, line.ResourceKey, 0, 0); err != nil {
 				return grantPreflight{}, err

@@ -256,3 +256,15 @@ func TestMaterialExchangePreparedReplayCannotDoubleDebitOrCredit(t *testing.T) {
 		t.Fatalf("prepared replay duplicated effects: debit %d->%d credit %d->%d", debitAfter, store.stacks[100].Quantity, creditAfter, store.stacks[200].Quantity)
 	}
 }
+
+func TestMaterialExchangeRejectsScalarCrossSideCollision(t *testing.T) {
+	cost := MaterialCost{Scalars: []ScalarMaterialCost{{ResourceKey: "glue", Amount: 1}}}
+	plan := grant.Plan{Lines: []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "glue", Amount: 50}}}
+	if err := rejectMaterialExchangeCollisions(cost, plan); !errors.Is(err, ErrMaterialExchangeResourceCollision) {
+		t.Fatal(err)
+	}
+	plan.Lines[0].ResourceKey = "crystal"
+	if err := rejectMaterialExchangeCollisions(cost, plan); err != nil {
+		t.Fatal(err)
+	}
+}
