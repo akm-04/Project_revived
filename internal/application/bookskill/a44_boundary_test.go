@@ -34,9 +34,13 @@ func (o *a44Owner) ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (b
 func (o *a44Owner) LockRootTx(context.Context, tx.Tx, identity.PlayerID) (book.Root, error) {
 	return book.Root{}, errors.New("a44 fixture does not lock")
 }
-func (o *a44Owner) SaveRootTx(context.Context, tx.Tx, book.Root, int64) error {
+func (o *a44Owner) SaveRootTx(_ context.Context, _ tx.Tx, root book.Root, oldVersion int64) error {
+	if o.root.Version != oldVersion || root.Version != oldVersion+1 {
+		return errors.New("a44 fixture received an invalid root version")
+	}
+	o.root = root
 	o.writes++
-	return errors.New("a44 fixture does not save")
+	return nil
 }
 func (*a44Owner) LockAdmissionTx(context.Context, tx.Tx, identity.PlayerID, string) (Admission, bool, error) {
 	return Admission{}, false, errors.New("a44 fixture does not admit")
@@ -129,17 +133,15 @@ func TestA44BookInputsLegacyRootSevenRuleCatalog(t *testing.T) {
 	}
 }
 
-// The command boundary is independent of catalogs: type 2/5/6/7 is refused
-// before any content lookup.
-func TestA44CommandRejectsExtensionTypesToday(t *testing.T) {
-	for _, buildingType := range []int64{2, 5, 6, 7} {
-		if e := (Command{Family: Start, Type: buildingType}).Validate(); !errors.Is(e, book.ErrInvalid) {
-			t.Fatalf("extension type %d admitted: %v", buildingType, e)
+func TestCommandValidatesLegacyAndExtensionBuildingTypes(t *testing.T) {
+	for _, family := range []string{Start, Cancel, Speed, Confirm} {
+		for _, buildingType := range []int64{1, 2, 3, 4, 5, 6, 7} {
+			if err := (Command{Family: family, Type: buildingType}).Validate(); err != nil {
+				t.Fatalf("family %s building type %d refused: %v", family, buildingType, err)
+			}
 		}
-	}
-	for _, buildingType := range []int64{1, 3, 4} {
-		if e := (Command{Family: Start, Type: buildingType}).Validate(); e != nil {
-			t.Fatalf("legacy type %d refused: %v", buildingType, e)
+		if err := (Command{Family: family, Type: 8}).Validate(); !errors.Is(err, book.ErrInvalid) {
+			t.Fatalf("family %s unknown building type admitted: %v", family, err)
 		}
 	}
 }

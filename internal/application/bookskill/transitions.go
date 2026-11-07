@@ -137,19 +137,30 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	valueop.StartedAt = at
 	switch cmd.Family {
 	case Start:
-		b := st.Buildings[cmd.Type]
-		if b.Job == nil {
-			dur, co, e := c.BuildingPlan(st, cmd.Type)
-			if e != nil {
-				return nil, e
+		building, exists := st.Buildings[cmd.Type]
+		if !exists {
+			if !book.ExtensionBuilding(cmd.Type) || !book.ValidCatalogRevision(d.ContentRevision) {
+				return nil, book.ErrInvalid
 			}
-			cost = co
-			b.Job = &book.Job{Occurrence: d.Operation.ID.String(), Revision: d.ContentRevision, StartedAt: at, Duration: dur, Target: b.Level + 1, Subject: cmd.Type, Cost: co}
-			b.Recent = false
-			st.Buildings[cmd.Type] = b
+			building = book.Building{Level: 1, CatalogRevision: d.ContentRevision}
+			st.Buildings[cmd.Type] = building
+		}
+		if building.Job == nil {
+			duration, buildingCost, err := c.BuildingPlan(st, cmd.Type)
+			if err != nil {
+				return nil, err
+			}
+			cost = buildingCost
+			building.Job = &book.Job{Occurrence: d.Operation.ID.String(), Revision: d.ContentRevision, StartedAt: at, Duration: duration, Target: building.Level + 1, Subject: cmd.Type, Cost: buildingCost}
+			building.Recent = false
+			st.Buildings[cmd.Type] = building
 		}
 	case Cancel:
-		b := st.Buildings[cmd.Type]
+		building, exists := st.Buildings[cmd.Type]
+		if !exists {
+			return nil, book.ErrInvalid
+		}
+		b := building
 		ids := []int64{}
 		nums := []int64{}
 		if b.Job != nil {
@@ -177,7 +188,10 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		}
 		body["return_res_id"], body["return_res_num"] = ids, nums
 	case Speed:
-		b := st.Buildings[cmd.Type]
+		b, exists := st.Buildings[cmd.Type]
+		if !exists {
+			return nil, book.ErrInvalid
+		}
 		if b.Job != nil {
 			left, e := book.Remaining(b.Job, at)
 			if e != nil {
@@ -197,7 +211,10 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			return nil, book.ErrInvalid
 		}
 	case Confirm:
-		b := st.Buildings[cmd.Type]
+		b, exists := st.Buildings[cmd.Type]
+		if !exists {
+			return nil, book.ErrInvalid
+		}
 		if b.Job != nil {
 			return nil, book.ErrInvalid
 		}

@@ -226,6 +226,7 @@
   "scenarios_naming": [],
   "unit": [
    "a44_boundary_test.go",
+   "extension_start_test.go",
    "pinned_buildings_test.go",
    "pins_a55_test.go"
   ]
