@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -714,19 +715,26 @@ func (session *httpPollSession) removeSocket(socket *pollSocketState, runError e
 }
 
 func writePollConflict(w http.ResponseWriter) {
+	body := []byte(`{"error_code":409}`)
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 	w.WriteHeader(http.StatusConflict)
-	_, _ = io.WriteString(w, `{"error_code":409}`)
+	_, _ = w.Write(body)
 }
 
 func writePollReply(w http.ResponseWriter, sessionID string, frames []pollOutboundFrame) {
 	if frames == nil {
 		frames = make([]pollOutboundFrame, 0)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(pollReply{SessionID: sessionID, Frames: frames}); err != nil {
+	body, err := json.Marshal(pollReply{SessionID: sessionID, Frames: frames})
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(body)
 }
 
 var _ net.Error = pollTimeoutError{}
