@@ -62,6 +62,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialexchangestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialinvitestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrecallstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
@@ -114,6 +115,7 @@ import (
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
+	"gxb.local/backend/v2/internal/application/socialinvite"
 	"gxb.local/backend/v2/internal/application/socialprojection"
 	"gxb.local/backend/v2/internal/application/socialrecall"
 	"gxb.local/backend/v2/internal/application/socialrelation"
@@ -591,6 +593,15 @@ func main() {
 	recallAwarder := socialrecall.Awarder{Players: i4store.PlayerRootLocker{}, Owner: socialrecallstore.Store{}, Content: contentDB, Current: recallTargets, Grants: i5svc}
 	recallClaim := socialrecall.ClaimService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Awarder: recallAwarder, Values: i5db, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
 	mustRegister(194, stockruntime.SocialRecallAwardDispatcher{Authority: authority, Service: recallClaim})
+	inviteStore := socialinvitestore.Store{}
+	inviteFacts := socialinvitestore.FactsReader{Directory: i4store.TransactionDiscoveryReader{}, Accounts: i4store.PlayerAccounts{}, Progression: i5db, Heroes: characterstore.HeroLevelReader{Store: heroDB}, Privilege: privileges, Servers: i4store.ServerNames{}}
+	inviteReader := socialinvitestore.Reader{Owner: inviteStore, Facts: inviteFacts}
+	inviteRead := socialinvite.ReadService{Timed: socialTimed, Content: contentDB, Reader: inviteReader}
+	inviteBind := socialinvite.BindService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Owner: inviteStore, Facts: inviteFacts, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	inviteClaim := socialinvite.ClaimService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Owner: inviteStore, Reader: inviteReader, Grants: i5svc, Settings: inviteStore, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	for _, mid := range []uint16{384, 385, 386} {
+		mustRegister(mid, stockruntime.SocialInviteDispatcher{Authority: authority, Read: inviteRead, Bind: inviteBind, Claim: inviteClaim})
+	}
 	socialInboxDB := socialinboxstore.Store{}
 	socialPresentation := socialpresentation.TransactionReader{Display: displayService}
 	socialCommands := socialrelation.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Store: socialRelationDB, Inbox: socialinbox.RelationService{Store: socialInboxDB}, Presentation: socialPresentation}

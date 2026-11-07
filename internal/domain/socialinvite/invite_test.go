@@ -1,6 +1,7 @@
 package socialinvite
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -95,6 +96,33 @@ func TestBindingIsImmutableAndOnce(t *testing.T) {
 	}
 	if first.Invitee != candidate.Invitee || !first.BoundAt.Equal(inviteBoundAt) {
 		t.Fatalf("existing binding mutated: %+v", first)
+	}
+}
+
+func TestInviteCodeIsCanonicalUniqueAndValidated(t *testing.T) {
+	seen := map[string]bool{}
+	for _, player := range []identity.PlayerID{100001, 125001, 12525385, 999999999} {
+		code, err := EncodeCode(player)
+		if err != nil || code == "" || seen[code] {
+			t.Fatalf("encode %d = %q, %v", player, code, err)
+		}
+		seen[code] = true
+		decoded, err := DecodeCode(code)
+		if err != nil || decoded != player {
+			t.Fatalf("round trip %d -> %q -> %d, %v", player, code, decoded, err)
+		}
+		decoded, err = DecodeCode(strings.ToLower(code))
+		if err != nil || decoded != player {
+			t.Fatalf("case-insensitive decode %q failed: %d, %v", code, decoded, err)
+		}
+	}
+	if _, err := EncodeCode(0); err == nil {
+		t.Fatal("zero player encoded")
+	}
+	for _, malformed := range []string{"", " ", "0", "0001", "not a code", "-1", "ABCDEFGHIJKLMN", "1.5"} {
+		if _, err := DecodeCode(malformed); err == nil {
+			t.Fatalf("malformed code accepted: %q", malformed)
+		}
 	}
 }
 

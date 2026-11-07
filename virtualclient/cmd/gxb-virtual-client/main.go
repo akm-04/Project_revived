@@ -65,8 +65,10 @@ type scenario struct {
 	// DormSocialFixture opens Dorm function 71 through the production stage owner and births one peer whose praise, comments and reactions the scenario reads.
 	DormSocialFixture bool `json:"dorm_social_fixture"`
 	// GuildRentalFixture births the peer that joins the guild and lends one girl.
-	GuildRentalFixture bool   `json:"guild_rental_fixture"`
-	Name               string `json:"name"`
+	GuildRentalFixture bool `json:"guild_rental_fixture"`
+	// SocialInviteFixture births the invited peer and binds it to the driven player's code.
+	SocialInviteFixture bool   `json:"social_invite_fixture"`
+	Name                string `json:"name"`
 	// Level and Heroes progress the player stock MID1 births; the stock client then summons each hero through MID59.
 	Level  int64        `json:"level"`
 	VIP    int64        `json:"vip"`
@@ -239,7 +241,7 @@ func (run run) play() ([]string, error) {
 			return nil, err
 		}
 	}
-	if run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.GuildRentalFixture {
+	if run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.GuildRentalFixture || run.scenario.SocialInviteFixture {
 		peer, err := run.bornPeer(ctx, secret)
 		if err != nil {
 			return nil, fmt.Errorf("peer: %w", err)
@@ -253,6 +255,11 @@ func (run run) play() ([]string, error) {
 	}
 	if run.scenario.DormSocialFixture {
 		if err := provision.DormSocialFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.SocialInviteFixture {
+		if err := provision.SocialInviteBindFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
 			return nil, err
 		}
 	}

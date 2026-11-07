@@ -68,7 +68,8 @@
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
-  "internal/adapters/postgres/socialexchangestore"
+  "internal/adapters/postgres/socialexchangestore",
+  "internal/adapters/postgres/socialinvitestore"
  ],
  "tables": {
   "owned": [
@@ -82,7 +83,8 @@
    "gxb_content_revisions",
    "gxb_operation_receipts",
    "players",
-   "social_exchange_tuning"
+   "social_exchange_tuning",
+   "social_invite_tuning"
   ],
   "written": [
    "gxb_operation_receipts"
