@@ -250,6 +250,20 @@ func (scoped Service) PetTx(ctx context.Context, sc ca.CoherentReadScope, ref ch
 	return Result{Stats: result, View: view, OwnerStateVersion: b.StateVersion, Profile: "C3B_PET_CANONICAL_OWNED_V1"}, nil
 }
 func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref character.HeroRef, view View) (Result, error) {
+	return s.heroTx(ctx, sc, ref, view, 0, 0, 0)
+}
+
+// ScaledHeroTx evaluates the same canonical hero at an overridden level, star
+// and colour. The observed owned hero still authorizes the read; only the stat
+// snapshot changes, so a scaled projection uses the one force formula.
+func (s Service) ScaledHeroTx(ctx context.Context, sc ca.CoherentReadScope, ref character.HeroRef, view View, level, star, color int64) (Result, error) {
+	if level < 1 || level > character.MaxHeroLevel || star < 1 || star > character.MaxHeroStar || color < 1 || color > 16 {
+		return Result{}, ErrUnqualified
+	}
+	return s.heroTx(ctx, sc, ref, view, level, star, color)
+}
+
+func (s Service) heroTx(ctx context.Context, sc ca.CoherentReadScope, ref character.HeroRef, view View, levelOverride, starOverride, colorOverride int64) (Result, error) {
 	var out Result
 	if !scopeValid(sc) || ref.Validate() != nil || view.validate(ref.PlayerID) != nil || s.Skills == nil || s.Awakening == nil || s.Library == nil || s.Dorm == nil || s.Book == nil || s.Courses == nil || s.Inscription == nil || s.Element == nil || s.Spirit == nil || s.Evolution == nil || s.Conquer == nil {
 		return out, ErrUnqualified
@@ -266,6 +280,16 @@ func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref charac
 		return out, ErrUnqualified
 	}
 	b := o.Base
+	level, star, color := b.Level, b.Star, b.Color
+	if levelOverride > 0 {
+		level = levelOverride
+	}
+	if starOverride > 0 {
+		star = starOverride
+	}
+	if colorOverride > 0 {
+		color = colorOverride
+	}
 	model := "NormalHero"
 	if b.Kind == character.SuperHero {
 		model = "SuperHero"
@@ -352,7 +376,7 @@ func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref charac
 	if !sameHero(cq.Hero, b, sc) || !pinned(cq.Observation.ContentRevision, cq.Observation.ObservedAt, sc) || cq.PopulationVersion != pop || cq.Observation.Facts.Player != pid || !cq.Observation.Facts.Known() {
 		return out, ErrUnqualified
 	}
-	eq, prom, fumo, e := m.Inputs.Equipment(model, b.TableID, int(b.Color), slots(o.Equipment.Value))
+	eq, prom, fumo, e := m.Inputs.Equipment(model, b.TableID, int(color), slots(o.Equipment.Value))
 	if e != nil {
 		return out, e
 	}
@@ -378,7 +402,7 @@ func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref charac
 			return out, ErrUnqualified
 		}
 		for i, v := range dh.Facts.Equipment {
-			if v > 0 && int64(i) < b.Star {
+			if v > 0 && int64(i) < star {
 				a, e := m.Inputs.Item(r.Items[i])
 				if e != nil {
 					return out, e
@@ -407,7 +431,7 @@ func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref charac
 		}
 		bookAttrs[r.AttrID-1] += v * float64(count)
 	}
-	base, e := m.BaseGrowth(b.TableID, int(b.Star), int(b.Level))
+	base, e := m.BaseGrowth(b.TableID, int(star), int(level))
 	if e != nil {
 		return out, e
 	}
@@ -522,7 +546,7 @@ func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref charac
 	vectors["getStoneEvolutionAttr"] = evolution
 	vectors["getConquerSchoolAttr"] = conq
 	extra := eq[19] + prom[19] + bookAttrs[19] + award[19] + display[19] + conq[19] + courseAttrs[19] + album[19]
-	skillAttrs, skillForce, e := m.SkillNumbers(n.SkillState{Model: model, TemplateID: b.TableID, Level: int(b.Level), Star: int(b.Star), Color: int(b.Color), Raw: raw.Facts.Levels, IDs: raw.ResolvedIDs, Twice: aw.RawStage == 3, BookshelfCap: float64(bk.Bookshelf.UpperLimit), Extra: extra})
+	skillAttrs, skillForce, e := m.SkillNumbers(n.SkillState{Model: model, TemplateID: b.TableID, Level: int(level), Star: int(star), Color: int(color), Raw: raw.Facts.Levels, IDs: raw.ResolvedIDs, Twice: aw.RawStage == 3, BookshelfCap: float64(bk.Bookshelf.UpperLimit), Extra: extra})
 	if e != nil {
 		return out, e
 	}
@@ -548,7 +572,7 @@ func (s Service) HeroTx(ctx context.Context, sc ca.CoherentReadScope, ref charac
 	if model == "SuperHero" {
 		delete(in, "getEquipFumoAttr")
 	}
-	result, e := m.Engine.Evaluate(rules.Snapshot{Model: model, TemplateID: b.TableID, Level: int(b.Level), Star: int(b.Star), Color: int(b.Color), ActorReference: actor, ObservationID: fmt.Sprint(sc.Operation.ID), ContentRevision: rev, PolicyID: rules.PolicyID, ObservedAt: at, Inputs: in})
+	result, e := m.Engine.Evaluate(rules.Snapshot{Model: model, TemplateID: b.TableID, Level: int(level), Star: int(star), Color: int(color), ActorReference: actor, ObservationID: fmt.Sprint(sc.Operation.ID), ContentRevision: rev, PolicyID: rules.PolicyID, ObservedAt: at, Inputs: in})
 	if e != nil {
 		return out, e
 	}

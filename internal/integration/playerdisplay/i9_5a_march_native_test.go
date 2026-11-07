@@ -16,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/marchstore"
+	combat "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/march"
@@ -34,13 +35,17 @@ import (
 )
 
 func marchMode(t *testing.T, p *pg.Pool) app.Mode {
+	mode, _ := marchModeWithCombat(t, p)
+	return mode
+}
+func marchModeWithCombat(t *testing.T, p *pg.Pool) (app.Mode, combat.Service) {
 	values, content := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}
 	fight := combatService(t, p)
 	owner := compositeI5(p)
 	owner.MissionFresh = p
 	owner.MissionTime = pg.AuthoritativeTime{Queryer: p}
 	owner.Missions = &i5.MissionMaterializer{Store: values, Catalog: content, Activity: content, Observations: missioninputs.Reader{Spending: values, Heroes: characterstore.Store{Queryer: p}, Progression: values, Campaigns: campaignstore.Store{}, Privileges: privilegeProvider(p), Books: bookService(p, p)}}
-	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}, fight
 }
 func marchRecord(t *testing.T, p *pg.Pool, a identity.ActorContext) d.Run {
 	t.Helper()

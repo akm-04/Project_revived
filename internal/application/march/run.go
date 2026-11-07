@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
@@ -112,6 +113,13 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 	if err != nil {
 		return err
 	}
+	owned := candidates[:0]
+	for _, candidate := range candidates {
+		if candidate.Player != int64(a.PlayerID) {
+			owned = append(owned, candidate)
+		}
+	}
+	candidates = owned
 	if len(candidates) == 0 {
 		return d.ErrUnavailable
 	}
@@ -184,6 +192,9 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		}
 		for _, hero := range enemy.Heroes {
 			hero["mp"] = v.catalog.Factors("expedition_init_mana")[stage]
+		}
+		if err = s.scaleEnemy(c, sc, a, v, &enemy, target); err != nil {
+			return fmt.Errorf("scale stage %d: %w", stage+1, err)
 		}
 		enemies = append(enemies, enemy)
 	}
