@@ -92,13 +92,17 @@ type Misc struct {
 }
 
 type Catalog struct {
-	Desk        map[int64]DeskRule
-	Recycle     map[int64]RecycleRule
-	Admin       map[[2]int64]AdminRule
-	AdminLevels map[int64][]int64
-	Recipes     map[int64]Recipe
-	PetCrafting map[int64][][]int64
-	Misc        Misc
+	Desk         map[int64]DeskRule
+	Recycle      map[int64]RecycleRule
+	Admin        map[[2]int64]AdminRule
+	AdminLevels  map[int64][]int64
+	Recipes      map[int64]Recipe
+	PetCrafting  map[int64][][]int64
+	Misc         Misc
+	Board        map[int64]BoardRule
+	Missions     map[int64]MissionRule
+	HeroProfiles map[int64]HeroProfileRule
+	Awards       map[int64]AwardRule
 }
 
 func ParseDecimal(value string) (*big.Rat, error) {
@@ -112,6 +116,12 @@ func ParseDecimal(value string) (*big.Rat, error) {
 func (c Catalog) Validate() error {
 	if len(c.Desk) != 8 || len(c.Recycle) != 6 || len(c.Admin) != 180 || len(c.AdminLevels) != 5 || len(c.Recipes) == 0 || len(c.PetCrafting) != 54 {
 		return ErrUnqualified
+	}
+	if len(c.Board) != 5 || len(c.Missions) != 273 || len(c.HeroProfiles) != 91 || len(c.Awards) != 29 {
+		return ErrUnqualified
+	}
+	if err := c.validateBoard(); err != nil {
+		return err
 	}
 	if c.Misc.CritParam == nil || c.Misc.CritParam.Sign() < 0 || c.Misc.CritMultiplier < 1 || c.Misc.SaturationInit <= 0 || c.Misc.SaturationSeconds <= 0 || c.Misc.AccelerateItemID <= 0 || c.Misc.AccelerateSeconds <= 0 || c.Misc.PetColorAccelerateSeconds < 0 || len(c.Misc.PetCostItemIDs) != 2 {
 		return ErrUnqualified
@@ -455,10 +465,11 @@ type State struct {
 	Pet      MakeState
 	Admin    map[string]int64
 	AdminDay int64
+	Board    BoardState
 }
 
 func Seed() State {
-	return State{Admin: map[string]int64{}}
+	return State{Admin: map[string]int64{}, Board: BoardState{NextReportID: 1}}
 }
 
 func (s State) Clone() State {
@@ -467,6 +478,9 @@ func (s State) Clone() State {
 	_ = json.Unmarshal(raw, &out)
 	if out.Admin == nil {
 		out.Admin = map[string]int64{}
+	}
+	if out.Board.NextReportID < 1 {
+		out.Board.NextReportID = 1
 	}
 	return out
 }
@@ -490,6 +504,9 @@ func (s State) Validate() error {
 	}
 	if s.Admin == nil {
 		return ErrUnqualified
+	}
+	if err := s.Board.Validate(); err != nil {
+		return err
 	}
 	for key, count := range s.Admin {
 		source, destination, ok := ParseAdminKey(key)

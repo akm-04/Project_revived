@@ -19,7 +19,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission) (map[string]any, error) {
+func (s Service) apply(ctx context.Context, sc tx.Scope, a identity.ActorContext, d Admission) (map[string]any, error) {
+	t := sc.Tx
 	at := d.DecisionAt
 	root, exists, err := s.Owner.LockRootTx(ctx, t, a.PlayerID)
 	if err != nil {
@@ -68,6 +69,8 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		body, err = s.applyAccelerateMake(ctx, t, a, d, catalog, &state, valueop)
 	case AdminExchange:
 		body, err = s.applyAdminExchange(ctx, t, a, d, catalog, inputs, &state, valueop)
+	case BoardReceive, BoardGiveUp, BoardConfirm:
+		body, err = s.applyBoard(ctx, sc, a, d, catalog, inputs, &state, valueop)
 	default:
 		return nil, ErrUnqualified
 	}

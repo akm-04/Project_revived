@@ -430,6 +430,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("I7C-5B Combat composition: %v", err)
 	}
+	eventCentreSvc.Heroes = characterstore.Store{Queryer: pool}
+	eventCentreSvc.Levels = i5db
+	eventCentreSvc.Stats = publicStats
+	eventCentreSvc.Combat = fight
 	rentalRuntime := guildRentalRuntime{Service: rentalSvc, Reads: rentalReads}
 	campaignCatalog, err := guildcampaigncatalog.LoadBuiltin()
 	if err != nil {
@@ -712,7 +716,7 @@ func main() {
 		mustRegister(mid, observing(authority, achievements, "Book", bookD))
 	}
 	eventCentreD := stockruntime.EventCentreDispatcher{Authority: authority, Service: eventCentreSvc}
-	for _, mid := range []uint16{1072, 1073, 1074, 1075, 1076, 1081, 1082, 1088, 1089, 1090, 1091} {
+	for _, mid := range []uint16{1072, 1073, 1074, 1075, 1076, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091} {
 		mustRegister(mid, observing(authority, achievements, "EventCentre", eventCentreD))
 	}
 	dormD := stockruntime.DormDispatcher{Authority: authority, Service: dormSvc}

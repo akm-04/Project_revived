@@ -57,6 +57,11 @@
    "1080": "bookskill",
    "1081": "eventcentre",
    "1082": "eventcentre",
+   "1083": "eventcentre",
+   "1084": "eventcentre",
+   "1085": "eventcentre",
+   "1086": "eventcentre",
+   "1087": "eventcentre",
    "1088": "eventcentre",
    "1089": "eventcentre",
    "1090": "eventcentre",
@@ -694,6 +699,7 @@
    "player_element_admissions": "elementequipment",
    "player_element_heroes": "elementequipment",
    "player_element_roots": "elementequipment",
+   "player_event_centre_board_reports": "eventcentre",
    "player_event_centre_roots": "eventcentre",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
@@ -890,7 +896,7 @@
   },
   {
    "callees": 4,
-   "callers": 36,
+   "callers": 37,
    "mids": 0,
    "name": "characterasset",
    "path": "internal/application/characterasset",
@@ -944,7 +950,7 @@
   },
   {
    "callees": 10,
-   "callers": 18,
+   "callers": 19,
    "mids": 0,
    "name": "combat",
    "path": "internal/application/combat",
@@ -1024,13 +1030,13 @@
    "tables": 3
   },
   {
-   "callees": 7,
+   "callees": 11,
    "callers": 0,
-   "mids": 11,
+   "mids": 16,
    "name": "eventcentre",
    "path": "internal/application/eventcentre",
    "purpose": "",
-   "tables": 1
+   "tables": 2
   },
   {
    "callees": 7,
@@ -1349,7 +1355,7 @@
   },
   {
    "callees": 13,
-   "callers": 7,
+   "callers": 8,
    "mids": 0,
    "name": "publicstats",
    "path": "internal/application/publicstats",

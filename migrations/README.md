@@ -42,3 +42,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00138: I9-10A Event Centre Workshop per-player root (recycle energy, desk/pet make jobs, administrator counters). Created lazily on the first command; empty on upgrade. sha256 cf2f39e518a4a5df37e87aa476e6a8c82d8d78e5ae90dad8da4a79469d57d1e7.
 - 00141: I9-10 D510 random Dorm visits: login-activity index for the 256 most recently active same-server players.
 - 00143: I9-10 D512 operator-configurable Top Floor girl bans by mode and rotation.
+- 00150: I9-10A Event Centre notice board (MIDs 1083-1087) stored server combat reports, one row per player report id retained by the board history. Empty on upgrade.

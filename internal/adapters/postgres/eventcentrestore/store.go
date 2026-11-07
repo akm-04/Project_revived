@@ -34,6 +34,9 @@ func scan(row tx.Row) (eventcentre.Root, bool, error) {
 	if root.Facts.Admin == nil {
 		root.Facts.Admin = map[string]int64{}
 	}
+	if root.Facts.Board.NextReportID < 1 {
+		root.Facts.Board.NextReportID = 1
+	}
 	if err := root.Validate(); err != nil {
 		return eventcentre.Root{}, false, err
 	}
@@ -57,6 +60,37 @@ func (Store) EnsureRootTx(ctx context.Context, t tx.Tx, player identity.PlayerID
 		return err
 	}
 	_, err = t.Exec(ctx, `INSERT INTO player_event_centre_roots(player_id,state_version,creation_revision,facts,created_at,updated_at)VALUES($1,1,$2,$3::jsonb,$4,$4)ON CONFLICT(player_id)DO NOTHING`, int64(player), revision, string(raw), at)
+	return err
+}
+
+func (Store) InsertBoardReportTx(ctx context.Context, t tx.Tx, player identity.PlayerID, reportID int64, content string, at time.Time) error {
+	if !player.Valid() || reportID <= 0 || content == "" || at.IsZero() {
+		return eventcentre.ErrUnqualified
+	}
+	_, err := t.Exec(ctx, `INSERT INTO player_event_centre_board_reports(player_id,report_id,content,created_at)VALUES($1,$2,$3,$4)`, int64(player), reportID, content, at)
+	return err
+}
+
+func (Store) ReadBoardReportTx(ctx context.Context, q tx.Queryer, player identity.PlayerID, reportID int64) (string, bool, error) {
+	if !player.Valid() || reportID <= 0 {
+		return "", false, eventcentre.ErrUnqualified
+	}
+	var content string
+	err := q.QueryRow(ctx, `SELECT content FROM player_event_centre_board_reports WHERE player_id=$1 AND report_id=$2`, int64(player), reportID).Scan(&content)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return "", false, nil
+	}
+	if err != nil {
+		return "", false, err
+	}
+	return content, true, nil
+}
+
+func (Store) DeleteBoardReportsExceptTx(ctx context.Context, t tx.Tx, player identity.PlayerID, keep []int64) error {
+	if !player.Valid() {
+		return eventcentre.ErrUnqualified
+	}
+	_, err := t.Exec(ctx, `DELETE FROM player_event_centre_board_reports WHERE player_id=$1 AND report_id <> ALL($2)`, int64(player), keep)
 	return err
 }
 
