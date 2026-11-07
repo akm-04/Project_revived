@@ -282,6 +282,8 @@
    "2492": "playerdisplay",
    "2493": "playerdisplay",
    "2494": "playerdisplay",
+   "2497": "librarylocal",
+   "2498": "librarylocal",
    "2500": "course",
    "2512": "dormhouse",
    "2513": "dormhouse",
@@ -1185,7 +1187,7 @@
   {
    "callees": 13,
    "callers": 5,
-   "mids": 23,
+   "mids": 25,
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
    "purpose": "",

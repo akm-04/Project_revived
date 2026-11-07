@@ -29,7 +29,7 @@
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
-   "count": 23,
+   "count": 25,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -271,6 +271,22 @@
    },
    "mid": 857,
    "name": "SET_BG"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2497,
+   "name": "GET_RECOMMEND_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2498,
+   "name": "GET_HERO_RECOMMEND_DETAIL"
   },
   {
    "handler": {

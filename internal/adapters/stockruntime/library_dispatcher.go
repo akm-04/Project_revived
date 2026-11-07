@@ -38,7 +38,9 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	allowed := []string{}
 	var e error
 	switch mid {
-	case 836, 2784:
+	case 836, 2784, 2497:
+	case 2498:
+		allowed = []string{"table_id"}
 	case 853, 854, 72:
 		allowed = []string{"partner_id"}
 	case 837:
@@ -75,14 +77,21 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	if !onlyStockGameplayParams(params, allowed...) {
 		return badHero("invalid_library_params")
 	}
-	if mid != 836 && mid != 839 && mid != 851 && mid != 855 && mid != 856 && mid != 857 && mid != 2784 && mid != 2785 {
+	if mid != 836 && mid != 839 && mid != 851 && mid != 855 && mid != 856 && mid != 857 && mid != 2497 && mid != 2498 && mid != 2784 && mid != 2785 {
 		c.PartnerID, e = requiredInt64(params, "partner_id")
 		if e != nil || c.PartnerID <= 0 {
 			return badHero("invalid_library_partner")
 		}
 	}
-	if mid == 836 || mid == 838 || mid == 841 || mid == 842 || mid == 2784 || mid == 853 {
-		body, e := d.Service.Read(ctx, actor, req.Envelope.Operation, mid, c.PartnerID)
+	targetIdentifier := c.PartnerID
+	if mid == 2498 {
+		targetIdentifier, e = requiredInt64(params, "table_id")
+		if e != nil || targetIdentifier <= 0 {
+			return badHero("invalid_library_table")
+		}
+	}
+	if mid == 836 || mid == 838 || mid == 841 || mid == 842 || mid == 2784 || mid == 853 || mid == 2497 || mid == 2498 {
+		body, e := d.Service.Read(ctx, actor, req.Envelope.Operation, mid, targetIdentifier)
 		if e != nil {
 			return failLibraryMode(e)
 		}

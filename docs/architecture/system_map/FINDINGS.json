@@ -837,26 +837,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 2497,
-   "name": "GET_RECOMMEND_INFO",
-   "files": [
-    "app/model/HeroRecommend.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 2498,
-   "name": "GET_HERO_RECOMMEND_DETAIL",
-   "files": [
-    "app/model/HeroRecommend.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 2499,
    "name": "GET_FORCE_RANK_LIST",
    "files": [
@@ -1128,12 +1108,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 599,
+  "count": 597,
   "window_sender_mid_count": 142,
-  "non_window_sender_mid_count": 457,
+  "non_window_sender_mid_count": 455,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 70,
+   "no_registration": 68,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -5254,32 +5234,6 @@
    {
     "mid": 2496,
     "name": "GET_HERO_SCORE",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/HeroRecommend.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/HeroRecommend.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 2497,
-    "name": "GET_RECOMMEND_INFO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/HeroRecommend.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/HeroRecommend.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 2498,
-    "name": "GET_HERO_RECOMMEND_DETAIL",
     "registration_status": "no_registration",
     "senders": [
      "app/model/HeroRecommend.lua"

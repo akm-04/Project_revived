@@ -225,7 +225,7 @@ func bit(v bool) int64 {
 	}
 	return 0
 }
-func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation.Context, mid uint16, partner int64) (map[string]any, error) {
+func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation.Context, mid uint16, targetIdentifier int64) (map[string]any, error) {
 	var body map[string]any
 	if !s.complete() {
 		return nil, ErrUnavailable
@@ -242,11 +242,11 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 			return ErrUnavailable
 		}
 		if mid == 841 {
-			if e := s.ensurePartnerMissionsTx(ctx, sc.Tx, a.PlayerID, partner, revision, sc.Operation.DecisionAt()); e != nil {
+			if e := s.ensurePartnerMissionsTx(ctx, sc.Tx, a.PlayerID, targetIdentifier, revision, sc.Operation.DecisionAt()); e != nil {
 				return e
 			}
 		}
-		return s.ReadBodyTx(ctx, sc.Tx, a, revision, sc.Operation.DecisionAt(), mid, partner, &body)
+		return s.ReadBodyTx(ctx, sc.Tx, a, revision, sc.Operation.DecisionAt(), mid, targetIdentifier, &body)
 	})
 	if e != nil {
 		return nil, e
@@ -256,7 +256,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 	}
 	return body, nil
 }
-func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorContext, revision string, at time.Time, mid uint16, partner int64, out *map[string]any) error {
+func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorContext, revision string, at time.Time, mid uint16, targetIdentifier int64, out *map[string]any) error {
 	scope := InputScope{a.PlayerID, revision, at}
 	if q == nil || out == nil || !scope.valid() {
 		return lib.ErrUnqualified
@@ -276,8 +276,17 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		*out = body
 		return nil
 	}
+	// PRIVATE_POLICY: No authoritative ranking or formation producer exists. shortcut: return client-safe no-data views until a producer is approved.
+	if mid == 2497 {
+		*out = map[string]any{"sub_rank_list": map[string]any{}, "total_rank_list": []any{}}
+		return nil
+	}
+	if mid == 2498 {
+		*out = map[string]any{}
+		return nil
+	}
 	if mid == 853 {
-		f, e := s.HeroLibraryInputsTx(ctx, q, scope, partner)
+		f, e := s.HeroLibraryInputsTx(ctx, q, scope, targetIdentifier)
 		if e != nil {
 			return e
 		}
@@ -303,10 +312,10 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		return nil
 	}
 	if mid == 841 {
-		return s.readPartnerMissions(ctx, q, a.PlayerID, partner, out)
+		return s.readPartnerMissions(ctx, q, a.PlayerID, targetIdentifier, out)
 	}
 	if mid == 838 || mid == 842 {
-		return s.readPartnerDialogsOrActs(ctx, q, a, scope, partner, mid, out)
+		return s.readPartnerDialogsOrActs(ctx, q, a, scope, targetIdentifier, mid, out)
 	}
 	if mid != 836 {
 		return errors.New("library: unsupported read")

@@ -712,7 +712,7 @@ func main() {
 		mustRegister(mid, observing(authority, achievements, "Dorm", dormD))
 	}
 	libraryD := stockruntime.LibraryDispatcher{Authority: authority, Service: librarySvc}
-	for _, mid := range []uint16{72, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 851, 852, 853, 854, 855, 856, 857, 2784, 2785} {
+	for _, mid := range []uint16{72, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 851, 852, 853, 854, 855, 856, 857, 2497, 2498, 2784, 2785} {
 		mustRegister(mid, libraryD)
 	}
 	forumD := stockruntime.LibraryForumDispatcher{Authority: authority, Service: forumSvc}
