@@ -33,3 +33,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00128: I9-10C Dorm room social metadata, lifetime praises, comments and comment reactions. Empty on upgrade.
 - 00129: I9-10C Dorm social admission lanes for CHANGE_NAME, HIDE_HOUSE, PRAISE_HOUSE, COMMENT_HOUSE, PRAISE_COMMENT and DELETE_COMMENT.
 - 00130: I9-10E friend invitation binding (one immutable inviter per invitee) and once-only invitation mission claims. Empty on upgrade.
+- 00131: I9-10 bug 29: guild name check allows 20 characters so the stock weighted length (English letters count half) is not refused by the table.

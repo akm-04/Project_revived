@@ -170,6 +170,14 @@ func TestPlaytestGuildKickThenReapplyAnswers409AndWritesNoApplication(t *testing
 	}
 }
 
+// Bug 29: the stock weighted length allows 20 half-width characters; the table check once refused more than 10.
+func TestPlaytestGuildCreateAcceptsLongHalfWidthName(t *testing.T) {
+	_, actors, core, c := playtestGuildPool(t)
+	if _, err := core.Create(c, actors[0], guildcore.CreateRequest{Name: fmt.Sprintf("Guildless %d", actors[0].PlayerID), Icon: core.Policy.Policy.GuildIcons[0]}, applyNoticeOps(t, policy.Set{})); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestPlaytestGuildLogMergesMembershipEvents(t *testing.T) {
 	pool, actors, core, c := playtestGuildPool(t)
 	leader, applicant := actors[0], actors[1]
