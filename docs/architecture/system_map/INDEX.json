@@ -11,7 +11,7 @@
    "guildprojection.BootstrapProjection",
    "guildprojection.TeaProjection",
    "mentorstore.BootstrapProjection",
-   "characterstore.HeroBootstrapProjection",
+   "heroBootstrap",
    "librarystore.BootstrapProjection",
    "bookstore.BootstrapProjection",
    "coursestore.BootstrapProjection",

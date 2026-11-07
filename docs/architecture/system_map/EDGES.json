@@ -1655,7 +1655,8 @@
     "*HeroTx"
    ],
    "march": [
-    "*HeroTx"
+    "*HeroTx",
+    "*ScaledHeroTx"
    ],
    "publicprofile": [
     "*HeroTx",
@@ -4294,7 +4295,8 @@
     "*OverlayMID1"
    ],
    "publicstats": [
-    "*HeroTx"
+    "*HeroTx",
+    "*ScaledHeroTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",

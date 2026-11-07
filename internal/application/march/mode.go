@@ -191,8 +191,8 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 	return out, err
 }
 func (s Mode) Load(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	return s.run(c, a, "load", struct{}{}, nil, op, func(_ context.Context, _ gen.TimedScope, _ view, r *d.Run) (map[string]any, error) {
-		return r.Projection(), nil
+	return s.run(c, a, "load", struct{}{}, nil, op, func(c context.Context, sc gen.TimedScope, _ view, r *d.Run) (map[string]any, error) {
+		return s.projectionWithStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), *r)
 	})
 }
 func (s Mode) Reset(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
@@ -203,7 +203,7 @@ func (s Mode) Reset(c context.Context, a identity.ActorContext, op operation.Con
 		if err := s.initialize(c, sc, a, v, r, true); err != nil {
 			return nil, err
 		}
-		return r.Projection(), nil
+		return s.projectionWithStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), *r)
 	})
 }
 func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorContext, _ bool, at time.Time, detail map[string]any) error {
@@ -218,7 +218,17 @@ func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorConte
 		return nil
 	}
 	r.Refresh(modes.Day(at))
-	detail["336"] = r.Projection()
+	// The MID1 contributor carries only the store; without a roster port the
+	// projection stays as saved rather than failing the whole bootstrap.
+	if s.Roster == nil {
+		detail["336"] = r.Projection()
+		return nil
+	}
+	out, err := s.projectionWithStatuses(c, q, a, at, r)
+	if err != nil {
+		return err
+	}
+	detail["336"] = out
 	return nil
 }
 func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op operation.Context) (map[string]any, error) {
@@ -299,7 +309,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		}
 		r.HasFight = true
 		r.Version++
-		return r.Projection(), nil
+		return s.projectionWithStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), *r)
 	})
 }
 func sameFormation(a, b []int64) bool {
