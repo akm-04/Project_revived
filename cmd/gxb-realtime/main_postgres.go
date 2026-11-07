@@ -144,6 +144,13 @@ func run() error {
 			log.Fatalf("invalid realtime HTTP poll idle timeout: %q", value)
 		}
 	}
+	httpPollHoldTimeout := stockruntime.DefaultHTTPPollHoldTimeout
+	if value := os.Getenv("GXB_REALTIME_HTTP_HOLD_TIMEOUT"); value != "" {
+		httpPollHoldTimeout, err = time.ParseDuration(value)
+		if err != nil || httpPollHoldTimeout <= 0 {
+			log.Fatalf("invalid realtime HTTP poll hold timeout: %q", value)
+		}
+	}
 	admission, err := stockruntime.NewAdmissionLimiter(runtimePolicy)
 	if err != nil {
 		log.Fatalf("invalid realtime admission policy: %v", err)
@@ -421,7 +428,7 @@ func run() error {
 			<-generalDone
 			return err
 		}
-		pollServer, err := stockruntime.NewHTTPPollServer(ctx, server, httpPollIdleTimeout)
+		pollServer, err := stockruntime.NewHTTPPollServer(ctx, server, httpPollIdleTimeout, httpPollHoldTimeout)
 		if err != nil {
 			_ = pollListener.Close()
 			stop()
