@@ -65,7 +65,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1856,
    "name": "GET_CLASS_INFO"
@@ -73,7 +73,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1857,
    "name": "APPLY_RELATION"
@@ -81,7 +81,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1858,
    "name": "GET_CLASS_FINDING_LIST"
@@ -89,7 +89,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1859,
    "name": "ACCEPT_TEACH_APPLY"
@@ -97,7 +97,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1860,
    "name": "DENY_TEACH_APPLY"
@@ -105,7 +105,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1861,
    "name": "TERMINATE_RELATION"
@@ -113,7 +113,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1862,
    "name": "GET_CLASS_MISSION_AWARD"
@@ -121,7 +121,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 1863,
    "name": "STUDENT_OVER_FIGHT_RESULT"

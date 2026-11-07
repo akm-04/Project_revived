@@ -8,6 +8,7 @@ import (
 	mentor "gxb.local/backend/v2/internal/application/mentor"
 	authentication "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
+	domainmentor "gxb.local/backend/v2/internal/domain/mentor"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -171,7 +172,7 @@ func mentorFailure(err error) httpedge.Response {
 		return conflictRefusal(refusal.Code)
 	}
 	var conflict *receipt.ConflictError
-	if errors.As(err, &conflict) {
+	if errors.As(err, &conflict) || errors.Is(err, domainmentor.ErrRelationshipConflict) || errors.Is(err, domainmentor.ErrRelationship) || errors.Is(err, domainmentor.ErrApplication) || errors.Is(err, domainmentor.ErrMission) {
 		return conflictRefusal(1)
 	}
 	switch {
