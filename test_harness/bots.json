@@ -13,7 +13,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -28,7 +36,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -43,7 +59,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -58,7 +82,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -73,7 +105,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -88,7 +128,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -103,7 +151,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -118,7 +174,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -133,7 +197,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -148,7 +220,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -163,7 +243,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -178,7 +266,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -193,7 +289,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -208,7 +312,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -223,7 +335,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -238,7 +358,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -253,7 +381,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -268,7 +404,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -283,7 +427,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     },
     {
@@ -298,7 +450,15 @@
         "star_cap": 5,
         "color_cap": 16,
         "currency_scale": 1.0,
-        "filter_functions": false
+        "filter_functions": false,
+        "pets": {
+          "pool": "playable",
+          "count": 3,
+          "seed": "login",
+          "star": "max",
+          "level": 100,
+          "color": "max"
+        }
       }
     }
   ]

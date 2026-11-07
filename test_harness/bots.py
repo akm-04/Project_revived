@@ -7,6 +7,7 @@ Temporary test tool, not product code.
 """
 
 import argparse
+import hashlib
 import json
 import sys
 import urllib.error
@@ -33,7 +34,44 @@ SCENARIO_DIRECTORY = HARNESS_DIRECTORY / "scenarios"
 CONTENT_DIRECTORY = (
     HARNESS_DIRECTORY / "backend" / "internal" / "content" / "builtin" / "generated"
 )
+PET_CORE_CATALOG_PATH = CONTENT_DIRECTORY / "pet_core_catalog.json"
+PET_PROGRESSION_CATALOG_PATH = CONTENT_DIRECTORY / "pet_progression_catalog.json"
 DEFAULT_SOURCE_SAVE = "preserve/server_state/players/12525385/player.json"
+
+PLAYABLE_PET_TEMPLATE_COUNT = 54
+MAXIMUM_PET_STAR = 5
+MAXIMUM_PET_COLOR = 16
+PET_ROW_COLUMNS = (
+    "player_id",
+    "pet_id",
+    "table_id",
+    "origin_table_id",
+    "star",
+    "level",
+    "exp",
+    "color",
+    "birthday",
+    "is_show",
+    "skill_1",
+    "skill_2",
+    "skill_3",
+    "skill_4",
+    "skill_5",
+    "equip_1",
+    "equip_2",
+    "equip_3",
+    "fumo_1",
+    "fumo_2",
+    "fumo_3",
+    "practice_str",
+    "practice_int",
+    "practice_agi",
+    "active_style",
+    "creation_content_revision",
+    "state_version",
+    "created_at",
+    "updated_at",
+)
 
 FUNCTION_TOP_FLOOR = 4
 FUNCTION_ONE_ON_ONE = 16
@@ -462,7 +500,7 @@ def build_overrides(player, specification, content):
     return overrides
 
 
-def import_roster_entry(entry, content):
+def import_roster_entry(entry, content, pet_content=None):
     save_path = HARNESS_DIRECTORY / entry.get("source_save", DEFAULT_SOURCE_SAVE)
     save = json.loads(save_path.read_text(encoding="utf-8"))
     specification = entry["overrides"]
@@ -482,6 +520,17 @@ def import_roster_entry(entry, content):
         fail(f"{entry['login']}: v2 refused a scaled hero: {refused_heroes[:3]}")
     if not report["player_id"]:
         fail(f"{entry['login']}: import produced no player id")
+    pet_specification = specification.get("pets")
+    if pet_specification is not None:
+        if pet_content is None:
+            pet_content = load_active_pet_catalog()
+        player_id = int(report["player_id"])
+        root_state = pet_root_states([player_id]).get(player_id)
+        if root_state is None:
+            fail(f"{entry['login']}: imported player has no Pet root")
+        report["pets_written"] = grant_pet_rows(
+            entry["login"], player_id, pet_specification, pet_content, root_state
+        )
     return report
 
 
@@ -540,7 +589,7 @@ def pet_query(player_ids):
     sql = (
         "SELECT COALESCE(json_agg(json_build_object("
         "'player_id',p.player_id,'pet_id',p.pet_id,'table_id',p.table_id,"
-        "'star',p.star,'level',p.level,'color',p.color)),'[]'::json)::text"
+        "'origin_table_id',p.origin_table_id,'star',p.star,'level',p.level,'color',p.color)),'[]'::json)::text"
         " FROM player_pets p"
         f" WHERE p.player_id IN ({identifiers})"
     )
@@ -549,6 +598,319 @@ def pet_query(player_ids):
     for row in rows:
         pets.setdefault(int(row["player_id"]), []).append(row)
     return pets
+
+
+def expected_pet_template_origins(template_rows):
+    expected = {}
+    for template in template_rows:
+        table_id = int(template["table_id"])
+        origin_table_id = int(template["origin_table_id"])
+        if table_id <= 0 or origin_table_id <= 0 or table_id in expected:
+            fail("Pet catalog contains an invalid or duplicate template ID")
+        expected[table_id] = origin_table_id
+    origin_counts = {}
+    for origin_table_id in expected.values():
+        origin_counts[origin_table_id] = origin_counts.get(origin_table_id, 0) + 1
+    if len(expected) != PLAYABLE_PET_TEMPLATE_COUNT or len(origin_counts) != 27:
+        fail("Pet catalog does not describe all 54 playable templates")
+    if any(count != 2 for count in origin_counts.values()):
+        fail("Pet catalog does not contain paired base and awakened templates")
+    if any(expected.get(origin_table_id) != origin_table_id for origin_table_id in origin_counts):
+        fail("Pet catalog is missing a base template for an origin")
+    return expected
+
+
+def pet_templates_from_rows(template_rows, expected_origins):
+    actual_origins = {}
+    for row in template_rows:
+        table_id = int(row["table_id"])
+        origin_table_id = int(row["origin_table_id"])
+        if table_id in actual_origins:
+            fail("Pet content contains duplicate template IDs")
+        actual_origins[table_id] = origin_table_id
+    if actual_origins != expected_origins:
+        fail("active Pet templates do not match the 54-template playable pool")
+    return [
+        {"table_id": table_id, "origin_table_id": expected_origins[table_id]}
+        for table_id in sorted(expected_origins)
+    ]
+
+
+def pet_experience_by_level(exp_rows):
+    experience_by_level = {}
+    for row in exp_rows:
+        level = int(row["level"])
+        if level in experience_by_level:
+            fail("Pet progression contains duplicate levels")
+        experience_by_level[level] = int(row["total_exp"])
+    if not experience_by_level:
+        fail("Pet progression content is empty")
+    return experience_by_level
+
+
+def pet_skill_content(progression_catalog):
+    slots_by_template = {}
+    for row in progression_catalog["skill_slots"]:
+        slots_by_template.setdefault(int(row["table_id"]), {})[int(row["slot"])] = row
+    return {
+        "policy_by_slot": {
+            int(row["slot"]): row for row in progression_catalog["slot_policy"]
+        },
+        "slots_by_template": slots_by_template,
+    }
+
+
+def pet_skill_levels(template, level, star, color, skill_content):
+    # Highest raw level each slot accepts (backend characterpet/progression.go
+    # skill upgrade guard); a locked or empty slot keeps the column default 1.
+    awakened = int(template["table_id"]) != int(template["origin_table_id"])
+    slots = skill_content["slots_by_template"].get(int(template["table_id"]), {})
+    levels = {}
+    for slot in range(1, 6):
+        definition = slots.get(slot)
+        policy = skill_content["policy_by_slot"][slot]
+        if policy["requires_awakened"]:
+            unlocked = awakened
+        else:
+            unlocked = color >= int(policy["min_color"])
+        if definition is None or int(definition["source_skill_id"]) == 0 or not unlocked:
+            levels[f"skill_{slot}"] = 1
+            continue
+        star_bonus = int(definition["star_bonus"]) if slot <= star - 1 else 0
+        levels[f"skill_{slot}"] = max(1, level + star_bonus - int(policy["effective_offset"]))
+    return levels
+
+
+def load_pet_catalog_files():
+    core_catalog = json.loads(PET_CORE_CATALOG_PATH.read_text(encoding="utf-8"))
+    progression_catalog = json.loads(
+        PET_PROGRESSION_CATALOG_PATH.read_text(encoding="utf-8")
+    )
+    expected_origins = expected_pet_template_origins(core_catalog["templates"])
+    return {
+        "templates": pet_templates_from_rows(core_catalog["templates"], expected_origins),
+        "experience_by_level": pet_experience_by_level(
+            progression_catalog["exp_rows"]
+        ),
+        "skill_content": pet_skill_content(progression_catalog),
+    }
+
+
+def load_active_pet_catalog():
+    static_catalog = load_pet_catalog_files()
+    revision_id = import_legacy.active_revision()
+    active_content = query_json(
+        "SELECT json_build_object("
+        "'templates',COALESCE((SELECT json_agg(json_build_object("
+        "'table_id',table_id,'origin_table_id',origin_table_id) ORDER BY table_id)"
+        " FROM gxb_content_pet_templates"
+        f" WHERE revision_id={import_legacy.quote(revision_id)}),'[]'::json),"
+        "'exp_rows',COALESCE((SELECT json_agg(json_build_object("
+        "'level',level,'total_exp',total_exp) ORDER BY level)"
+        " FROM gxb_content_pet_exp"
+        f" WHERE revision_id={import_legacy.quote(revision_id)}),'[]'::json)"
+        ")::text"
+    )
+    if not isinstance(active_content, dict):
+        fail("active Pet content is missing")
+    expected_origins = {
+        int(template["table_id"]): int(template["origin_table_id"])
+        for template in static_catalog["templates"]
+    }
+    return {
+        "revision_id": revision_id,
+        "templates": pet_templates_from_rows(
+            active_content.get("templates") or [], expected_origins
+        ),
+        "experience_by_level": pet_experience_by_level(
+            active_content.get("exp_rows") or []
+        ),
+        # shortcut: skill ceilings come from the generated catalog the harness deployed, not the DB revision; read the DB if they ever diverge.
+        "skill_content": static_catalog["skill_content"],
+    }
+
+
+def select_pet_templates(login, specification, templates):
+    if not isinstance(specification, dict):
+        fail(f"{login}: Pet override must be an object")
+    if specification.get("pool") != "playable":
+        fail(f"{login}: Pet pool must be playable")
+    if specification.get("seed") != "login":
+        fail(f"{login}: Pet selection seed must be login")
+    count = int(specification["count"])
+    origins = {int(template["origin_table_id"]) for template in templates}
+    if count < 1 or count > len(origins):
+        fail(f"{login}: Pet count exceeds distinct playable origins")
+    login_seed = login.casefold()
+    ordered_templates = sorted(
+        templates,
+        key=lambda template: (
+            hashlib.sha256(
+                f"{login_seed}:{int(template['table_id'])}".encode("utf-8")
+            ).digest(),
+            int(template["table_id"]),
+        ),
+    )
+    selected_templates = []
+    selected_origins = set()
+    for template in ordered_templates:
+        origin_table_id = int(template["origin_table_id"])
+        if origin_table_id in selected_origins:
+            continue
+        selected_templates.append(template)
+        selected_origins.add(origin_table_id)
+        if len(selected_templates) == count:
+            break
+    if len(selected_templates) != count:
+        fail(f"{login}: could not select the configured number of Pets")
+    return selected_templates
+
+
+def build_pet_rows(
+    login,
+    specification,
+    content,
+    revision_id,
+    player_id,
+    next_pet_id,
+    existing_origins=(),
+    created_at=None,
+):
+    if not isinstance(specification, dict):
+        fail(f"{login}: Pet override must be an object")
+    if len(revision_id) != 64:
+        fail("Pet grant requires a valid content revision")
+    if created_at is None:
+        created_at = datetime.now(timezone.utc)
+    if created_at.tzinfo is None:
+        fail("Pet grant timestamp must include a timezone")
+    experience_by_level = content["experience_by_level"]
+    level = int(specification["level"])
+    if level not in experience_by_level:
+        fail(f"{login}: Pet level {level} has no progression content")
+    star_value = specification["star"]
+    star = MAXIMUM_PET_STAR if star_value == "max" else int(star_value)
+    if not 1 <= star <= MAXIMUM_PET_STAR:
+        fail(f"{login}: Pet star is outside the supported range")
+    color_value = specification.get("color", 1)
+    color = MAXIMUM_PET_COLOR if color_value == "max" else int(color_value)
+    if not 1 <= color <= MAXIMUM_PET_COLOR:
+        fail(f"{login}: Pet color is outside the supported range")
+    existing_origin_ids = {int(origin_table_id) for origin_table_id in existing_origins}
+    rows = []
+    for template in select_pet_templates(login, specification, content["templates"]):
+        origin_table_id = int(template["origin_table_id"])
+        if origin_table_id in existing_origin_ids:
+            continue
+        pet_id = int(next_pet_id) + len(rows)
+        row = {
+            "player_id": int(player_id),
+            "pet_id": pet_id,
+            "table_id": int(template["table_id"]),
+            "origin_table_id": origin_table_id,
+            "star": star,
+            "level": level,
+            "exp": int(experience_by_level[level]),
+            "color": color,
+            "birthday": int(created_at.timestamp()),
+            "is_show": True,
+            "creation_content_revision": revision_id,
+            "state_version": 1,
+            "created_at": created_at.isoformat(),
+            "updated_at": created_at.isoformat(),
+        }
+        row.update(
+            pet_skill_levels(template, level, star, color, content["skill_content"])
+        )
+        row.update({f"equip_{slot}": 0 for slot in range(1, 4)})
+        row.update({f"fumo_{slot}": 0 for slot in range(1, 4)})
+        row.update({"practice_str": 0, "practice_int": 0, "practice_agi": 0})
+        row["active_style"] = 0
+        rows.append(row)
+    return rows
+
+
+def pet_root_states(player_ids):
+    if not player_ids:
+        return {}
+    identifiers = ",".join(str(int(player_id)) for player_id in player_ids)
+    rows = query_json(
+        "SELECT COALESCE(json_agg(json_build_object("
+        "'player_id',root.player_id,'next_pet_id',root.next_pet_id,"
+        "'state_version',root.state_version,'existing_origins',COALESCE("
+        "(SELECT json_agg(pet.origin_table_id ORDER BY pet.origin_table_id)"
+        " FROM player_pets pet WHERE pet.player_id=root.player_id),'[]'::json))"
+        " ORDER BY root.player_id),'[]'::json)::text"
+        " FROM player_pet_roots root"
+        f" WHERE root.player_id IN ({identifiers})"
+    ) or []
+    return {int(row["player_id"]): row for row in rows}
+
+
+def pet_row_insert_sql(row):
+    values = []
+    for column in PET_ROW_COLUMNS:
+        value = import_legacy.quote(row[column])
+        if column in ("created_at", "updated_at"):
+            value += "::timestamptz"
+        values.append(value)
+    return (
+        f"INSERT INTO player_pets({','.join(PET_ROW_COLUMNS)}) "
+        f"VALUES({','.join(values)});"
+    )
+
+
+def pet_grant_transaction_sql(player_id, root_state, rows):
+    expected_next_pet_id = int(root_state["next_pet_id"])
+    expected_state_version = int(root_state["state_version"])
+    inserts = "\n".join(pet_row_insert_sql(row) for row in rows)
+    return (
+        "BEGIN;\n"
+        "SET LOCAL lock_timeout = '5s';\n"
+        "DO $pet_grant$\n"
+        "DECLARE\n"
+        "    current_next_pet_id bigint;\n"
+        "    current_state_version bigint;\n"
+        "BEGIN\n"
+        "    SELECT next_pet_id,state_version INTO current_next_pet_id,current_state_version\n"
+        "    FROM player_pet_roots\n"
+        f"    WHERE player_id={int(player_id)} FOR UPDATE;\n"
+        "    IF NOT FOUND THEN\n"
+        "        RAISE EXCEPTION 'Pet root is missing';\n"
+        "    END IF;\n"
+        f"    IF current_next_pet_id <> {expected_next_pet_id} OR "
+        f"current_state_version <> {expected_state_version} THEN\n"
+        "        RAISE EXCEPTION 'Pet root changed; rerun grant-pets';\n"
+        "    END IF;\n"
+        f"{inserts}\n"
+        "    UPDATE player_pet_roots\n"
+        f"    SET next_pet_id=current_next_pet_id+{len(rows)},"
+        "state_version=current_state_version+1,updated_at=transaction_timestamp()\n"
+        f"    WHERE player_id={int(player_id)};\n"
+        "    IF NOT FOUND THEN\n"
+        "        RAISE EXCEPTION 'Pet root update failed';\n"
+        "    END IF;\n"
+        "END\n"
+        "$pet_grant$;\n"
+        "COMMIT;\n"
+    )
+
+
+def grant_pet_rows(login, player_id, specification, content, root_state):
+    rows = build_pet_rows(
+        login,
+        specification,
+        content,
+        content["revision_id"],
+        player_id,
+        root_state["next_pet_id"],
+        root_state.get("existing_origins") or [],
+    )
+    if rows:
+        import_legacy.run_psql(
+            pet_grant_transaction_sql(player_id, root_state, rows)
+        )
+    return len(rows)
 
 
 def login_token(login, accounts):
@@ -747,16 +1109,71 @@ def prove_battle(login, accounts, state, heroes, pets, catalogue):
         fail(f"{login}: battle proof covered {settled} of {len(ordered_heroes)} scaled heroes")
 
 
+def command_grant_pets(arguments):
+    roster = load_roster()
+    for entry in roster:
+        if not isinstance(entry.get("overrides", {}).get("pets"), dict):
+            fail(f"{entry['login']}: missing pets override")
+    pet_content = load_active_pet_catalog()
+    _, states = state_query([entry["login"] for entry in roster])
+    player_ids = [int(states[entry["login"]]["player_id"]) for entry in roster]
+    root_states = pet_root_states(player_ids)
+    for entry, player_id in zip(roster, player_ids):
+        if player_id not in root_states:
+            fail(f"{entry['login']}: player has no Pet root")
+        build_pet_rows(
+            entry["login"],
+            entry["overrides"]["pets"],
+            pet_content,
+            pet_content["revision_id"],
+            player_id,
+            root_states[player_id]["next_pet_id"],
+            root_states[player_id].get("existing_origins") or [],
+        )
+    for entry, player_id in zip(roster, player_ids):
+        count = grant_pet_rows(
+            entry["login"],
+            player_id,
+            entry["overrides"]["pets"],
+            pet_content,
+            root_states[player_id],
+        )
+        print(f"grant-pets {entry['login']} added={count}")
+    pets_by_player = pet_query(player_ids)
+    for entry, player_id in zip(roster, player_ids):
+        expected_origins = {
+            int(template["origin_table_id"])
+            for template in select_pet_templates(
+                entry["login"],
+                entry["overrides"]["pets"],
+                pet_content["templates"],
+            )
+        }
+        actual_origins = {
+            int(pet["origin_table_id"])
+            for pet in pets_by_player.get(player_id, [])
+        }
+        if not expected_origins <= actual_origins:
+            fail(f"{entry['login']}: Pet grant did not persist all selected origins")
+    result = command_enter(arguments)
+    if result != 0:
+        return result
+    print(f"BOTS_GRANT_PETS_PASS {len(roster)} bots")
+    return 0
+
+
 def command_create(arguments):
     roster = load_roster()
     content = load_scaling_content()
+    pet_content = load_active_pet_catalog()
     catalogue = load_team_roles()
     for entry in roster:
-        report = import_roster_entry(entry, content)
+        report = import_roster_entry(entry, content, pet_content)
         print(
             f"create {entry['login']} pid={report['player_id']} "
             f"level={entry['overrides']['player_level']} "
             f"heroes={report['rows_written'].get('player_heroes', 0)} "
+            f"pets={report.get('pets_written', 0)} "
             f"refused={len(report['content_refused'])}"
         )
     accounts, states = state_query([entry["login"] for entry in roster])
@@ -796,6 +1213,147 @@ def command_enter(arguments):
         print(f"enter {login} pid={state['player_id']} level={state['level']} {modes}")
     print(f"BOTS_ENTER_PASS {len(roster)} bots")
     return 0
+
+
+def selfcheck_pet_grants():
+    content = load_pet_catalog_files()
+    roster = load_roster()
+    if len(roster) != 20:
+        fail("bots.json must contain the 20 configured Pet bots")
+    choices_by_login = {}
+    for entry in roster:
+        login = entry["login"]
+        specification = entry["overrides"].get("pets")
+        selected_templates = select_pet_templates(
+            login, specification, content["templates"]
+        )
+        selected_template_ids = tuple(
+            int(template["table_id"]) for template in selected_templates
+        )
+        repeated_template_ids = tuple(
+            int(template["table_id"])
+            for template in select_pet_templates(
+                login, specification, content["templates"]
+            )
+        )
+        selected_origins = {
+            int(template["origin_table_id"]) for template in selected_templates
+        }
+        if selected_template_ids != repeated_template_ids:
+            fail(f"{login}: Pet template selection is not deterministic")
+        if len(selected_templates) != int(specification["count"]):
+            fail(f"{login}: Pet template selection returned the wrong count")
+        if len(selected_origins) != len(selected_templates):
+            fail(f"{login}: Pet template selection repeats a unique origin")
+        choices_by_login[login] = selected_template_ids
+    if len(set(choices_by_login.values())) < 2:
+        fail("Pet template selection did not vary across logins")
+    if content["experience_by_level"].get(100) != 1_980_095:
+        fail("Pet level-100 experience does not match the generated progression catalog")
+
+    base_skills = pet_skill_levels(
+        {"table_id": 10010001, "origin_table_id": 10010001},
+        100, MAXIMUM_PET_STAR, MAXIMUM_PET_COLOR, content["skill_content"],
+    )
+    awakened_skills = pet_skill_levels(
+        {"table_id": 110010001, "origin_table_id": 10010001},
+        100, MAXIMUM_PET_STAR, MAXIMUM_PET_COLOR, content["skill_content"],
+    )
+    low_color_skills = pet_skill_levels(
+        {"table_id": 10010001, "origin_table_id": 10010001},
+        100, MAXIMUM_PET_STAR, 1, content["skill_content"],
+    )
+    if list(base_skills.values()) != [100, 110, 80, 60, 1]:
+        fail(f"Pet skill ceilings wrong for a base Pet: {base_skills}")
+    if list(awakened_skills.values()) != [100, 110, 80, 60, 40]:
+        fail(f"Pet skill ceilings wrong for an awakened Pet: {awakened_skills}")
+    if list(low_color_skills.values()) != [100, 1, 1, 1, 1]:
+        fail(f"Pet skill slots unlocked below their color: {low_color_skills}")
+
+    login = roster[0]["login"]
+    specification = roster[0]["overrides"]["pets"]
+    selected_templates = select_pet_templates(
+        login, specification, content["templates"]
+    )
+    created_at = datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc)
+    revision_id = "a" * 64
+    rows = build_pet_rows(
+        login,
+        specification,
+        content,
+        revision_id,
+        12345,
+        17,
+        created_at=created_at,
+    )
+    if len(rows) != len(selected_templates):
+        fail("Pet grant row builder returned the wrong number of rows")
+    expected_values = {
+        "player_id": 12345,
+        "star": MAXIMUM_PET_STAR,
+        "level": 100,
+        "exp": 1_980_095,
+        "color": MAXIMUM_PET_COLOR,
+        "birthday": int(created_at.timestamp()),
+        "is_show": True,
+        "creation_content_revision": revision_id,
+        "state_version": 1,
+        "created_at": created_at.isoformat(),
+        "updated_at": created_at.isoformat(),
+        "equip_1": 0,
+        "equip_2": 0,
+        "equip_3": 0,
+        "fumo_1": 0,
+        "fumo_2": 0,
+        "fumo_3": 0,
+        "practice_str": 0,
+        "practice_int": 0,
+        "practice_agi": 0,
+        "active_style": 0,
+    }
+    for index, (row, template) in enumerate(zip(rows, selected_templates)):
+        expected_row = dict(
+            expected_values,
+            pet_id=17 + index,
+            table_id=int(template["table_id"]),
+            origin_table_id=int(template["origin_table_id"]),
+            **pet_skill_levels(
+                template, 100, MAXIMUM_PET_STAR, MAXIMUM_PET_COLOR, content["skill_content"]
+            ),
+        )
+        if row != expected_row or set(row) != set(PET_ROW_COLUMNS):
+            fail("Pet grant row values do not match the selected templates")
+    completed_rows = build_pet_rows(
+        login,
+        specification,
+        content,
+        revision_id,
+        12345,
+        17,
+        existing_origins=[template["origin_table_id"] for template in selected_templates],
+        created_at=created_at,
+    )
+    if completed_rows:
+        fail("Pet grant row builder did not skip existing origins")
+    partial_rows = build_pet_rows(
+        login,
+        specification,
+        content,
+        revision_id,
+        12345,
+        17,
+        existing_origins=[selected_templates[0]["origin_table_id"]],
+        created_at=created_at,
+    )
+    if len(partial_rows) != len(rows) - 1 or partial_rows[0]["pet_id"] != 17:
+        fail("Pet grant row builder did not allocate missing rows contiguously")
+    grant_sql = pet_grant_transaction_sql(
+        12345, {"next_pet_id": 17, "state_version": 7}, rows
+    )
+    if grant_sql.count("INSERT INTO player_pets(") != len(rows):
+        fail("Pet grant SQL did not write each generated row")
+    if "FOR UPDATE" not in grant_sql or "current_next_pet_id+3" not in grant_sql:
+        fail("Pet grant SQL did not lock and advance the Pet root")
 
 
 def command_selfcheck(arguments):
@@ -883,7 +1441,8 @@ def command_selfcheck(arguments):
     )
     if second_pet_id != 802 or select_pet([], [], catalogue) != 0:
         fail("pet selection failed ownership or empty-roster checks")
-    print("BOTS_SELFCHECK_PASS teams=3 pets=2 network=none database=none")
+    selfcheck_pet_grants()
+    print("BOTS_SELFCHECK_PASS teams=3 pet_templates=54 network=none database=none")
     return 0
 
 
@@ -947,9 +1506,13 @@ def command_scenario(arguments):
     scenario = json.loads(path.read_text(encoding="utf-8"))
     content = load_scaling_content()
     catalogue = load_team_roles()
+    scenario_players = scenario.get("players") or []
+    pet_content = None
+    if any(entry.get("overrides", {}).get("pets") is not None for entry in scenario_players):
+        pet_content = load_active_pet_catalog()
     logins = []
-    for entry in scenario.get("players") or []:
-        report = import_roster_entry(entry, content)
+    for entry in scenario_players:
+        report = import_roster_entry(entry, content, pet_content)
         logins.append(entry["login"])
         print(f"scenario {name}: import {entry['login']} pid={report['player_id']}")
     born_accounts = import_legacy.load_accounts()
@@ -960,7 +1523,7 @@ def command_scenario(arguments):
         player_ids = [state["player_id"] for state in states.values()]
         heroes_by_player = hero_query(player_ids)
         pets_by_player = pet_query(player_ids)
-        for entry in scenario["players"]:
+        for entry in scenario_players:
             login = entry["login"]
             state = states[login]
             player_id = int(state["player_id"])
@@ -983,12 +1546,17 @@ def command_scenario(arguments):
 
 def main(arguments):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["create", "enter", "status", "scenario", "selfcheck"])
+    parser.add_argument(
+        "command",
+        choices=["create", "grant-pets", "enter", "status", "scenario", "selfcheck"],
+    )
     parser.add_argument("name", nargs="?")
     parsed = parser.parse_args(arguments)
     try:
         if parsed.command == "create":
             return command_create(parsed)
+        if parsed.command == "grant-pets":
+            return command_grant_pets(parsed)
         if parsed.command == "enter":
             return command_enter(parsed)
         if parsed.command == "status":
