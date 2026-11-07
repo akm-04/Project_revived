@@ -44,8 +44,13 @@ type SeatStage string
 
 const (
 	SeatSeated SeatStage = "SEATED"
-	SeatLeft   SeatStage = "LEFT"
+	// SeatLeft is a player who left voluntarily; no removal frame is sent.
+	SeatLeft SeatStage = "LEFT"
+	// SeatKicked is a player removed by the owner; the removal frame is sent.
 	SeatKicked SeatStage = "KICKED"
+	// SeatClosed is a seat still occupied when the room ended (owner left, the
+	// last member left, or the lease expired); the removal frame is sent.
+	SeatClosed SeatStage = "CLOSED"
 )
 
 // KickCooldown is how long a kicked player stays out of that room. PRIVATE_POLICY:
@@ -220,7 +225,7 @@ func (r *Room) Leave(player identity.PlayerID, at time.Time) error {
 		return nil
 	}
 	if !at.Before(r.ExpiresAt) {
-		r.close(at)
+		r.close(at, player)
 		return nil
 	}
 	index := r.seatIndex(player)
@@ -228,12 +233,12 @@ func (r *Room) Leave(player identity.PlayerID, at time.Time) error {
 		return nil
 	}
 	if player == r.Owner {
-		r.close(at)
+		r.close(at, player)
 		return nil
 	}
 	r.Seats[index].Stage, r.Seats[index].Ready = SeatLeft, false
 	if r.activeCount() == 0 {
-		r.close(at)
+		r.close(at, player)
 		return nil
 	}
 	r.touch(at)
@@ -308,7 +313,7 @@ func (r *Room) Close(at time.Time) bool {
 	if r.Status != StatusOpen {
 		return false
 	}
-	r.close(at)
+	r.close(at, 0)
 	return true
 }
 
@@ -317,7 +322,7 @@ func (r *Room) Expire(at time.Time) bool {
 	if r.Status != StatusOpen || at.Before(r.ExpiresAt) {
 		return false
 	}
-	r.close(at)
+	r.close(at, 0)
 	return true
 }
 
@@ -331,11 +336,17 @@ func (r *Room) enter(at time.Time) error {
 	return nil
 }
 
-func (r *Room) close(at time.Time) {
+func (r *Room) close(at time.Time, voluntary identity.PlayerID) {
 	for index := range r.Seats {
-		if r.Seats[index].Stage == SeatSeated {
-			r.Seats[index].Stage, r.Seats[index].Ready = SeatLeft, false
+		if r.Seats[index].Stage != SeatSeated {
+			continue
 		}
+		r.Seats[index].Ready = false
+		if r.Seats[index].Player == voluntary {
+			r.Seats[index].Stage = SeatLeft
+			continue
+		}
+		r.Seats[index].Stage = SeatClosed
 	}
 	r.Status = StatusClosed
 	stamp := at.UTC()
@@ -398,7 +409,7 @@ func validFamily(family string) bool {
 
 func validStage(stage SeatStage) bool {
 	switch stage {
-	case SeatSeated, SeatLeft, SeatKicked:
+	case SeatSeated, SeatLeft, SeatKicked, SeatClosed:
 		return true
 	default:
 		return false

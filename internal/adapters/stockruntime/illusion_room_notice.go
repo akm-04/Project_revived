@@ -72,9 +72,10 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 	} else {
 		out.Seated = room.Members()
 		for _, seat := range room.Seats {
-			if seat.Stage != sharedroom.SeatSeated {
-				out.Removed = append(out.Removed, seat.Player)
+			if seat.Stage == sharedroom.SeatSeated || seat.Stage == sharedroom.SeatLeft {
+				continue
 			}
+			out.Removed = append(out.Removed, seat.Player)
 		}
 	}
 	profile, found, err := r.Directory.ProfileTx(c, r.Queryer, room.Owner)
@@ -94,9 +95,13 @@ func illusionStage(members []identity.PlayerID) int64 {
 	return 0
 }
 
+// seatPlayers is the removal set: everyone except players who left voluntarily.
 func seatPlayers(room sharedroom.Room) []identity.PlayerID {
 	out := make([]identity.PlayerID, 0, len(room.Seats))
 	for _, seat := range room.Seats {
+		if seat.Stage == sharedroom.SeatLeft {
+			continue
+		}
 		out = append(out, seat.Player)
 	}
 	return out

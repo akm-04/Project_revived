@@ -104,6 +104,9 @@ func (s Mode) removedBodies(c context.Context, room sharedroom.Room, state d.Roo
 		if seat.Stage == sharedroom.SeatSeated && room.Status == sharedroom.StatusOpen {
 			continue
 		}
+		if seat.Stage == sharedroom.SeatLeft {
+			continue
+		}
 		current, found, err := s.RoomStore.ReadPlayerRoomTx(c, s.Fresh, seat.Player, family.Name, family.Slot)
 		if err != nil {
 			return nil, err
