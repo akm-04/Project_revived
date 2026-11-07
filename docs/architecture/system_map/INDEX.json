@@ -826,7 +826,7 @@
    "tables": 3
   },
   {
-   "callees": 14,
+   "callees": 15,
    "callers": 2,
    "mids": 39,
    "name": "arena",

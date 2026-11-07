@@ -2213,6 +2213,9 @@
     "*SettleGrantTx",
     "Validate"
    ],
+   "interface:arena.OwnedHeroReader": [
+    "*ListHeroesTx"
+   ],
    "interface:arena.Roster": [
     "*OverlayMID1"
    ],
