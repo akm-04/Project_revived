@@ -57,7 +57,7 @@ func (service BindService) Bind(ctx context.Context, actor identity.ActorContext
 	if inviter == actor.PlayerID || logicalserver.PlayerRegion(inviter) != actor.LogicalServerID {
 		return nil, ErrBindRefused
 	}
-	identityValue := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "socialinvite", Operation: "bind", SemanticKey: strconv.FormatInt(int64(actor.PlayerID), 10)}
+	identityValue := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "socialinvite", Operation: "bind", SemanticKey: current.ID.String()}
 	fingerprint, err := receipt.FingerprintRequest(struct {
 		Player identity.PlayerID
 		Server identity.LogicalServerID

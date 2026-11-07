@@ -66,7 +66,7 @@ func (service ClaimService) Claim(ctx context.Context, actor identity.ActorConte
 	if !actor.PlayerID.Valid() || !actor.LogicalServerID.Valid() || logicalserver.PlayerRegion(actor.PlayerID) != actor.LogicalServerID || actor.AccountUID == "" || actor.ContextID.UUID().IsZero() || current.ID.IsZero() || current.StartedAt.IsZero() || missionID <= 0 {
 		return nil, ErrFacts
 	}
-	identityValue := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "socialinvite", Operation: "claim", SemanticKey: strconv.FormatInt(missionID, 10)}
+	identityValue := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "socialinvite", Operation: "claim", SemanticKey: current.ID.String()}
 	fingerprint, err := receipt.FingerprintRequest(struct {
 		Player  identity.PlayerID
 		Server  identity.LogicalServerID
