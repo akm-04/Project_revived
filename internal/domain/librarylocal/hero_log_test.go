@@ -3,6 +3,7 @@ package librarylocal
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestHeroLogThresholds(t *testing.T) {
@@ -26,6 +27,45 @@ func TestHeroLogThresholds(t *testing.T) {
 	}
 	if got := DialogueLogIDsReached(0, 0); len(got) != 0 {
 		t.Fatalf("dialogue zero %v", got)
+	}
+}
+
+func TestHoldTimeLogsReached(t *testing.T) {
+	acquired := time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC)
+	cases := []struct {
+		name string
+		at   time.Time
+		want []int64
+	}{
+		{"29 days", acquired.AddDate(0, 0, 29), []int64{}},
+		{"30 days", acquired.AddDate(0, 0, 30), []int64{50001}},
+		{"89 days", acquired.AddDate(0, 0, 89), []int64{50001}},
+		{"90 days", acquired.AddDate(0, 0, 90), []int64{50001, 50002}},
+		{"179 days", acquired.AddDate(0, 0, 179), []int64{50001, 50002}},
+		{"180 days", acquired.AddDate(0, 0, 180), []int64{50001, 50002, 50003}},
+		{"364 days", acquired.AddDate(0, 0, 364), []int64{50001, 50002, 50003}},
+		{"365 days", acquired.AddDate(0, 0, 365), []int64{50001, 50002, 50003, 50004}},
+		{"before acquisition", acquired.AddDate(0, 0, -1), []int64{}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := HoldTimeLogsReached(acquired, c.at)
+			ids := make([]int64, len(got))
+			for i, milestone := range got {
+				ids[i] = milestone.LogID
+			}
+			if !reflect.DeepEqual(ids, c.want) {
+				t.Fatalf("milestones %v, want %v", ids, c.want)
+			}
+		})
+	}
+
+	got := HoldTimeLogsReached(acquired, acquired.AddDate(0, 0, 365))
+	if want := acquired.AddDate(0, 0, 30); !got[0].OccurredAt.Equal(want) {
+		t.Fatalf("50001 time %v, want %v", got[0].OccurredAt, want)
+	}
+	if want := acquired.AddDate(0, 0, 365); !got[3].OccurredAt.Equal(want) {
+		t.Fatalf("50004 time %v, want %v", got[3].OccurredAt, want)
 	}
 }
 

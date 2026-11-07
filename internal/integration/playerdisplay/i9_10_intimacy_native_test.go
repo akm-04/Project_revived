@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"testing"
+	"time"
 
 	app "gxb.local/backend/v2/internal/application/librarylocal"
 )
@@ -70,5 +71,51 @@ func TestI9_10IntimacyFavorBandsVisitDialogsAndLog(t *testing.T) {
 	}
 	if acts, ok := response.Body["partner_acts"].([]app.ActSlot); !ok || len(acts) != 2 {
 		t.Fatalf("acts above favor 100 %T %+v", response.Body["partner_acts"], response.Body["partner_acts"])
+	}
+}
+
+// TestI9_10HoldTimeLogDerivation covers bug 53 type 5: 836 derives the
+// hold-time entries from acquisition, without a stored log row.
+func TestI9_10HoldTimeLogDerivation(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	bornHero(t, p, a, rev, 10001001, 1)
+
+	acquired := time.Now().UTC().Truncate(time.Second).AddDate(0, 0, -31)
+	exec(t, p, `UPDATE player_library_hero_logs SET occurred_at=$3 WHERE player_id=$1 AND partner_id=$2 AND log_id=10001`, int64(a.PlayerID), 1, acquired)
+
+	body, e := libraryService(p, p).Read(ctx, a, op(), 836, 0)
+	if e != nil {
+		t.Fatal(e)
+	}
+	logs := body["library_infos"].(map[string]any)["1"].(map[string]any)["partner_logs"].(map[string]any)
+	entry, ok := logs["50001"].(map[string]any)
+	if !ok {
+		t.Fatalf("acquired 31 days ago has no 50001 %+v", logs)
+	}
+	if want := acquired.AddDate(0, 0, 30).Unix(); entry["time"] != want {
+		t.Fatalf("50001 time %v, want %d", entry["time"], want)
+	}
+	if _, present := logs["50002"]; present {
+		t.Fatalf("31 days cannot reach 90 days %+v", logs)
+	}
+
+	// A backfilled facet has no acquisition row; its Library creation time is
+	// the second acquisition source.
+	exec(t, p, `DELETE FROM player_library_hero_logs WHERE player_id=$1 AND partner_id=$2 AND log_id=10001`, int64(a.PlayerID), 1)
+	exec(t, p, `UPDATE player_library_heroes SET created_at=$3 WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), 1, acquired)
+
+	body, e = libraryService(p, p).Read(ctx, a, op(), 836, 0)
+	if e != nil {
+		t.Fatal(e)
+	}
+	logs = body["library_infos"].(map[string]any)["1"].(map[string]any)["partner_logs"].(map[string]any)
+	entry, ok = logs["50001"].(map[string]any)
+	if !ok {
+		t.Fatalf("created 31 days ago has no 50001 %+v", logs)
+	}
+	if want := acquired.AddDate(0, 0, 30).Unix(); entry["time"] != want {
+		t.Fatalf("50001 from creation time %v, want %d", entry["time"], want)
 	}
 }
