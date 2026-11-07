@@ -1091,6 +1091,12 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-10-social-library-integration" {
 		expectedSources, expectedArtifacts = 548, 56
 	}
+	if manifest.CompilerVersion == "i9-10-event-centre-buildings" {
+		expectedSources, expectedArtifacts = 422, 55
+	}
+	if manifest.CompilerVersion == "i9-10a-workshop-integration" {
+		expectedSources, expectedArtifacts = 566, 56
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}

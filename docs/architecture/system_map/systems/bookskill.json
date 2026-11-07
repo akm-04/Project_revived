@@ -224,6 +224,10 @@
    "playerdisplay"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "a44_boundary_test.go",
+   "pinned_buildings_test.go",
+   "pins_a55_test.go"
+  ]
  }
 }
