@@ -5,7 +5,7 @@
  ],
  "contracts": [
   {
-   "count": 15,
+   "count": 17,
    "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
   },
   {
@@ -38,6 +38,10 @@
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
   },
   {
@@ -53,27 +57,27 @@
    "file": "docs/i9/I9_ILLUSION_V1.json"
   },
   {
-   "count": 1,
+   "count": 2,
    "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
   },
   {
-   "count": 1,
+   "count": 2,
    "file": "docs/i9/I9_MEMOIR_PRIVATE_POLICY_V1.json"
   },
   {
-   "count": 2,
+   "count": 3,
    "file": "docs/i9/I9_MEMOIR_V1.json"
   },
   {
-   "count": 15,
+   "count": 17,
    "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
   },
   {
-   "count": 15,
+   "count": 17,
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
-   "count": 21,
+   "count": 23,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -87,6 +91,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_PET_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_SKILL_LEVEL_PRIVATE_POLICY_V1.json"
   },
   {
    "count": 1,
@@ -166,7 +174,15 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
+   },
+   "mid": 39,
+   "name": "SET_ALL_SKILL_LEVEL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 81
    },
    "mid": 49,
    "name": "LOAD_HEROS"
@@ -174,7 +190,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 51,
    "name": "POWERUP_HERO"
@@ -182,7 +198,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 52,
    "name": "EVOLVE_HERO"
@@ -190,7 +206,15 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
+   },
+   "mid": 53,
+   "name": "SET_SKILL_LEVEL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 81
    },
    "mid": 54,
    "name": "SET_HERO_EQUIP"
@@ -198,7 +222,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 55,
    "name": "USE_EXP_ITEM"
@@ -206,7 +230,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 57,
    "name": "ONE_CLICK_JINJIE"
@@ -214,7 +238,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 58,
    "name": "FUMO"
@@ -222,7 +246,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 59,
    "name": "STONE_SUMMON_HERO"
@@ -230,7 +254,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 60,
    "name": "SKIN_ON"
@@ -238,7 +262,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 61,
    "name": "SKIN_CANCEL"
@@ -246,7 +270,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 62,
    "name": "ONE_CLICK_EQUIP"
@@ -254,7 +278,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 63,
    "name": "USE_EXP_ITEMS"
@@ -262,7 +286,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 67,
    "name": "LOAD_HERO_PIECES"
@@ -270,7 +294,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 68,
    "name": "UNLOCK_DYNAMIC_CARD"
@@ -278,7 +302,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 69,
    "name": "SHOW_DYNAMIC_CARD"
@@ -286,7 +310,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 89,
    "name": "SAVA_SORT_TYPE"
@@ -294,7 +318,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 304,
    "name": "UPGRADE_SUPER_EQUIP"
@@ -302,7 +326,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 305,
    "name": "SUMMON_SUPER_HERO"
@@ -310,7 +334,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 2144,
    "name": "CHANGE_PARTNER_SKILL"
@@ -318,7 +342,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 2979,
    "name": "USE_ILLUSION_SKIN_ITEM"
@@ -326,7 +350,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 75
+    "line": 81
    },
    "mid": 3116,
    "name": "HERO_COLLOCATION"
@@ -442,7 +466,8 @@
    "promotion_restoration_test.go",
    "promotion_service_test.go",
    "raw_skill_receipt_test.go",
-   "service_test.go"
+   "service_test.go",
+   "skill_level_test.go"
   ]
  }
 }

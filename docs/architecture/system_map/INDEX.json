@@ -411,6 +411,7 @@
    "384": "socialinvite",
    "385": "socialinvite",
    "386": "socialinvite",
+   "39": "characterhero",
    "49": "characterhero",
    "50": "summon",
    "51": "characterhero",
@@ -418,6 +419,7 @@
    "515": "frienddm",
    "52": "characterhero",
    "528": "workplace",
+   "53": "characterhero",
    "530": "workplace",
    "531": "workplace",
    "532": "workplace",
@@ -845,7 +847,7 @@
   },
   {
    "callees": 9,
-   "callers": 5,
+   "callers": 6,
    "mids": 11,
    "name": "bookskill",
    "path": "internal/application/bookskill",
@@ -898,9 +900,9 @@
    "tables": 0
   },
   {
-   "callees": 23,
+   "callees": 25,
    "callers": 15,
-   "mids": 21,
+   "mids": 23,
    "name": "characterhero",
    "path": "internal/application/characterhero",
    "purpose": "",

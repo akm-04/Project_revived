@@ -98,6 +98,20 @@ func (s Service) HeroBookInputsTx(ctx context.Context, q tx.Queryer, scope Input
 	}
 	return out, nil
 }
+func (s Service) LockHeroSkillCapTx(ctx context.Context, t tx.Tx, player identity.PlayerID, revision string, observedAt time.Time, ref character.HeroRef) (int64, error) {
+	if t == nil || player != ref.PlayerID || ref.Validate() != nil || s.Owner == nil {
+		return 0, book.ErrUnqualified
+	}
+	if _, err := s.Owner.LockRootTx(ctx, t, player); err != nil {
+		return 0, err
+	}
+	inputs, err := s.HeroBookInputsTx(ctx, t, InputScope{Player: player, ContentRevision: revision, ObservedAt: observedAt}, ref)
+	if err != nil {
+		return 0, err
+	}
+	return inputs.Bookshelf.UpperLimit, nil
+}
+
 func (s Service) BookshelfInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
 	return s.BookInputsTx(ctx, q, scope)
 }

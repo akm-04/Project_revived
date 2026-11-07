@@ -154,26 +154,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 39,
-   "name": "SET_ALL_SKILL_LEVEL",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 53,
-   "name": "SET_SKILL_LEVEL",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 64,
    "name": "EXPAND_HERO_SLOTS",
    "files": [
@@ -1018,12 +998,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 588,
+  "count": 586,
   "window_sender_mid_count": 142,
-  "non_window_sender_mid_count": 446,
+  "non_window_sender_mid_count": 444,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 59,
+   "no_registration": 57,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -1234,32 +1214,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/Shop.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 39,
-    "name": "SET_ALL_SKILL_LEVEL",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 53,
-    "name": "SET_SKILL_LEVEL",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
     ],
     "runtime_reachability": "unknown"
    },
@@ -9603,7 +9557,7 @@
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-   "line": 328,
+   "line": 383,
    "code": 30001,
    "kind": "stock_code"
   },
