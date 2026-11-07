@@ -37,4 +37,5 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00132: I9-10 Arena D507: the last three issued match-list opponents per player stay fightable after a refresh.
 - 00133: I9-10 bugs 38: shared-room seat stage CLOSED for a seat still occupied when the room ended, distinct from the voluntary LEFT that sends no removal frame.
 - 00135: I9-10 1 on 1 D488 parity: each issued MATCH list stores the challenger and target ranks it showed; an offer without one is stale (35026).
+- 00136: I9-10 D512 special Top Floor is humans-only: a weekly period may start at size 0 instead of seeding robot ranks.
 - 00137: I9-10F Mentor/My Class relationship history, per-player application counters and break cooldown, application rows, mission high-water/award progress and graduation exam receipts. Empty on upgrade.

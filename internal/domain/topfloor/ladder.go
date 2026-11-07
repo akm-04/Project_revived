@@ -276,10 +276,8 @@ func OfferSeed(server identity.LogicalServerID, player identity.PlayerID, day, r
 	return binary.BigEndian.Uint64(sum[:8])
 }
 
-// OfferRanks lists candidate ranks per band in the private-policy probe order;
-// callers take the first eligible occupant of each band, then nearest better
-// ranks. Rank 1 has nobody above it, so its fallback keeps the lower ranks.
-func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
+// bandProbes lists the better-rank bands in private-policy probe order.
+func (c Catalog) bandProbes(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
 	out := [][]int64{}
 	for i, band := range c.Bands(rank) {
 		size := band[1] - band[0] + 1
@@ -290,6 +288,20 @@ func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.Pla
 		}
 		out = append(out, probe)
 	}
+	return out
+}
+
+// BetterOfferRanks is the D512 special-mode probe set: only the better-rank
+// bands, never the lower-rank fallback, so rank 1 gets no offers.
+func (c Catalog) BetterOfferRanks(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
+	return c.bandProbes(server, player, rank, day, refresh)
+}
+
+// OfferRanks lists candidate ranks per band in the private-policy probe order;
+// callers take the first eligible occupant of each band, then nearest better
+// ranks. Rank 1 has nobody above it, so its fallback keeps the lower ranks.
+func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
+	out := c.bandProbes(server, player, rank, day, refresh)
 	near := []int64{}
 	for step := int64(1); len(near) < 3 && step < 8; step++ {
 		r := rank - step

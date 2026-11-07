@@ -34,7 +34,7 @@ func TestI97ATaskPlayerStorageNative(t *testing.T) {
 	if err = store.CreateTaskPeriodTx(ctx, transaction, period); err != nil {
 		t.Fatal(err)
 	}
-	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, domain.RobotTeams+1, actor.PlayerID); err != nil {
+	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, 1, actor.PlayerID); err != nil {
 		t.Fatal(err)
 	}
 	period.Ladder.Size++
@@ -42,7 +42,7 @@ func TestI97ATaskPlayerStorageNative(t *testing.T) {
 	if err = store.SaveTaskPeriodTx(ctx, transaction, period, 1); err != nil {
 		t.Fatal(err)
 	}
-	player := domain.TaskModePlayer{Player: (domain.Catalog{FreeTickets: 5}).NewPlayer(actor.PlayerID, server, revision, domain.RobotTeams+1, at), PeriodNumber: period.Rotation.Number}
+	player := domain.TaskModePlayer{Player: (domain.Catalog{FreeTickets: 5}).NewPlayer(actor.PlayerID, server, revision, 1, at), PeriodNumber: period.Rotation.Number}
 	if err = store.InsertTaskPlayerTx(ctx, transaction, player, period); err != nil {
 		t.Fatal(err)
 	}

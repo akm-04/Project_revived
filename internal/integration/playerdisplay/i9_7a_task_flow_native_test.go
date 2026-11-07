@@ -61,24 +61,13 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	service := topFloorService(t, database)
 	server := rankingServer(t, database)
 	actor, revision, hero := topFloorPlayer(t, database, server)
-	clock := &workplaceTime{at: time.Now().UTC()}
-	service.Timed.Binder.Time = clock
 	catalog, err := (contentstore.Store{Queryer: database}).TopFloorCatalogTx(ctx, database, revision)
 	if err != nil {
 		t.Fatal(err)
 	}
+	clock := &workplaceTime{at: taskRotationForRule(t, catalog, func(rule domain.TaskModeRule) bool { return rule.HeroSlots == 1 })}
+	service.Timed.Binder.Time = clock
 	const admissionGap = 301 * time.Second
-	walkFrozen := func(start time.Time) bool {
-		for challenge := 0; challenge < 10; challenge++ {
-			if catalog.Frozen(start.Add(time.Duration(challenge) * admissionGap)) {
-				return true
-			}
-		}
-		return false
-	}
-	for walkFrozen(clock.at) {
-		clock.at = clock.at.Add(admissionGap)
-	}
 	exec(t, database, `UPDATE player_directory_profiles SET lev=60 WHERE player_id=$1`, int64(actor.PlayerID))
 	current, err := service.Load(ctx, actor, op())
 	if err != nil {
@@ -114,6 +103,52 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	if err != nil || count != 10 {
 		t.Fatalf("genuine weekly admissions: %d %v", count, err)
 	}
+	// D512 humans-only ladder: seed three humans above the actor so the acting
+	// player enters at rank 4 and sees three better-ranked offers.
+	period, err := catalog.TaskModes.NewPeriod(server, revision, clock.at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transaction, err = database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.CreateTaskPeriodTx(ctx, transaction, period); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	for rank := int64(1); rank <= 3; rank++ {
+		opponent, _, opponentHero := topFloorPlayer(t, database, server)
+		opponentPlayer := catalog.NewPlayer(opponent.PlayerID, server, revision, rank, clock.at)
+		opponentPlayer.Defense = []int64{opponentHero.PartnerID}
+		transaction, err = database.Begin(ctx, tx.Options{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = store.InsertTaskPlayerTx(ctx, transaction, domain.TaskModePlayer{Player: opponentPlayer, PeriodNumber: period.Rotation.Number}, period); err == nil {
+			err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, rank, opponent.PlayerID)
+		}
+		if err != nil {
+			transaction.Rollback(ctx)
+			t.Fatal(err)
+		}
+		if err = transaction.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+	transaction, err = database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	period.Ladder.Size, period.Ladder.StateVersion, period.Ladder.UpdatedAt = 3, 2, clock.at
+	if err = store.SaveTaskPeriodTx(ctx, transaction, period, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
 	service.Timed.Runner.DB = taskCommitFaultDatabase{database}
 	view, err := service.LoadTask(ctx, actor, op(), false)
 	if err != nil {
@@ -124,6 +159,11 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	}
 	if err = service.SaveTaskDefense(ctx, actor, domain.TaskModeDefense{Heroes: []int64{hero.PartnerID + 999999}}, op()); err == nil {
 		t.Fatal("unowned special defense accepted")
+	}
+	// D512: the saved defense must be exactly the mode's girl count.
+	second := bornHero(t, database, actor, revision, 10001002, 2001)
+	if err = service.SaveTaskDefense(ctx, actor, domain.TaskModeDefense{Heroes: []int64{hero.PartnerID, second.PartnerID}}, op()); err == nil {
+		t.Fatal("two-girl defense accepted for a one-slot mode")
 	}
 	if _, err = service.PurchaseTask(ctx, actor, opPinned(revision), false); err == nil {
 		t.Fatal("buy before exhaustion accepted")
@@ -170,7 +210,7 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	exec(t, database, `INSERT INTO gxb_content_revisions(revision_id,content_sha256,schema_version,compiler_version,parser_version,manifest) SELECT $2,decode($2,'hex'),schema_version,$3,parser_version,$4::jsonb FROM gxb_content_revisions WHERE revision_id=$1`, revision, historicalRevision, historicalCompiler, string(historicalPayload))
 	exec(t, database, `INSERT INTO content_top_floor_catalogs(revision_id,payload) SELECT $2,payload FROM content_top_floor_catalogs WHERE revision_id=$1`, revision, historicalRevision)
 	exec(t, database, `UPDATE top_floor_task_periods SET content_revision=$3 WHERE logical_server_id=$1 AND period_number=$2`, int64(server), view.Rotation.Number, historicalRevision)
-	exec(t, database, `UPDATE top_floor_task_players SET payload=jsonb_set(payload,'{player,ContentRevision}',to_jsonb($2::text)) WHERE player_id=$1`, int64(actor.PlayerID), historicalRevision)
+	exec(t, database, `UPDATE top_floor_task_players SET payload=jsonb_set(payload,'{player,ContentRevision}',to_jsonb($3::text)) WHERE logical_server_id=$1 AND period_number=$2`, int64(server), view.Rotation.Number, historicalRevision)
 	normalRecords := scalar(t, database, `SELECT count(*) FROM top_floor_records WHERE owner_player_id=$1`, int64(actor.PlayerID))
 	command := application.TaskStartCommand{StartCommand: application.StartCommand{Formation: defense.Heroes, Enemy: view.Enemies[0].Occupant.TableID()}, Leader: defense.Leader}
 	result, err := service.StartTask(ctx, actor, command, op())
@@ -196,7 +236,7 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	if result.AwardCrystal != 0 {
 		t.Fatal("normal best-rank award leaked")
 	}
-	period, present, err := store.ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
+	period, present, err = store.ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
 	if err != nil || !present {
 		t.Fatal("period", err)
 	}

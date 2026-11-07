@@ -142,17 +142,64 @@ func TestI9_10TopFloorTaskStaleOffersAndRevengeNative(t *testing.T) {
 	if rule.ID == d.TaskModeLeader {
 		defense.Leader = hero.PartnerID
 	}
+
+	// D512 humans-only ladder: three humans above the actor; it enters at rank 4.
+	store := topfloorstore.Store{}
+	period, err := catalog.TaskModes.NewPeriod(server, revision, clock.at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transaction, err := database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.CreateTaskPeriodTx(ctx, transaction, period); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	for rank := int64(1); rank <= 3; rank++ {
+		opponent, _, opponentHero := topFloorPlayer(t, database, server)
+		opponentPlayer := catalog.NewPlayer(opponent.PlayerID, server, revision, rank, clock.at)
+		opponentPlayer.Defense = []int64{opponentHero.PartnerID}
+		transaction, err = database.Begin(ctx, tx.Options{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = store.InsertTaskPlayerTx(ctx, transaction, d.TaskModePlayer{Player: opponentPlayer, PeriodNumber: period.Rotation.Number}, period); err == nil {
+			err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, rank, opponent.PlayerID)
+		}
+		if err != nil {
+			transaction.Rollback(ctx)
+			t.Fatal(err)
+		}
+		if err = transaction.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+	transaction, err = database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	period.Ladder.Size, period.Ladder.StateVersion, period.Ladder.UpdatedAt = 3, 2, clock.at
+	if err = store.SaveTaskPeriodTx(ctx, transaction, period, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
 	view, err := service.LoadTask(ctx, actor, op(), false)
-	if err != nil || len(view.Enemies) < 2 {
-		t.Fatalf("load task offers: %v", err)
+	if err != nil || len(view.Enemies) != 3 {
+		t.Fatalf("load task offers: %v offers=%d", err, len(view.Enemies))
 	}
 	if err = service.SaveTaskDefense(ctx, actor, defense, op()); err != nil {
 		t.Fatal(err)
 	}
 
 	removed := view.Enemies[0]
-	if !removed.Occupant.IsRobot() {
-		t.Fatalf("expected a task robot target: %+v", removed.Occupant)
+	if removed.Occupant.IsRobot() {
+		t.Fatalf("expected a human task target: %+v", removed.Occupant)
 	}
 	exec(t, database, `DELETE FROM top_floor_task_ranks WHERE logical_server_id=$1 AND period_number=$2 AND rank=$3`, int64(server), view.Rotation.Number, removed.Rank)
 	dispatcher := stockruntime.TopFloorTaskDispatcher{Authority: playtestAuthority{actor}, Service: service}
@@ -195,50 +242,58 @@ func TestI9_10TopFloorTaskStaleOffersAndRevengeNative(t *testing.T) {
 	if err != nil || len(refreshed.Enemies) == 0 {
 		t.Fatalf("refresh task offers: %v", err)
 	}
-	bot := refreshed.Enemies[0]
-	if !bot.Occupant.IsRobot() {
-		t.Fatalf("expected a refreshed task robot target: %+v", bot.Occupant)
+	human := refreshed.Enemies[0]
+	if human.Occupant.IsRobot() {
+		t.Fatalf("expected a refreshed human task target: %+v", human.Occupant)
 	}
-	if result, startErr := service.StartTask(ctx, actor, taskCommand(bot, false), op()); startErr != nil || len(result.Report) == 0 {
-		t.Fatalf("refreshed task bot START: report=%d err=%v", len(result.Report), startErr)
+	if result, startErr := service.StartTask(ctx, actor, taskCommand(human, false), op()); startErr != nil || len(result.Report) == 0 {
+		t.Fatalf("refreshed task human START: report=%d err=%v", len(result.Report), startErr)
 	}
 
-	period, found, err := (topfloorstore.Store{}).ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
+	period, found, err = store.ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
 	if err != nil || !found {
 		t.Fatalf("read task period: found=%t err=%v", found, err)
 	}
-	actorRank, found, err := (topfloorstore.Store{}).TaskRankOfTx(ctx, database, server, period.Rotation.Number, d.Occupant{Player: actor.PlayerID})
-	if err != nil || !found || actorRank <= 1 {
+	actorRank, found, err := store.TaskRankOfTx(ctx, database, server, period.Rotation.Number, d.Occupant{Player: actor.PlayerID})
+	if err != nil || !found || actorRank < 1 {
 		t.Fatalf("read actor task rank: rank=%d found=%t err=%v", actorRank, found, err)
 	}
+	// Pin the actor at rank 4 so the revenge range is deterministic, then place
+	// the avenged opponent just above it in the rank freed by the removed target.
+	if actorRank != 4 {
+		fourth, err := store.TaskRangeTx(ctx, database, server, period.Rotation.Number, 4, 4)
+		if err != nil || len(fourth) != 1 {
+			t.Fatalf("fourth task rank: %v rows=%d", err, len(fourth))
+		}
+		transaction, err = database.Begin(ctx, tx.Options{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = store.SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number, d.Ranked{Rank: actorRank, Occupant: d.Occupant{Player: actor.PlayerID}}, fourth[0]); err != nil {
+			transaction.Rollback(ctx)
+			t.Fatal(err)
+		}
+		if err = transaction.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+		actorRank = 4
+	}
 	other, _, otherHero := topFloorPlayer(t, database, server)
-	otherRank := period.Ladder.Size + 1
-	otherPlayer := d.TaskModePlayer{PeriodNumber: period.Rotation.Number, Player: catalog.NewPlayer(other.PlayerID, server, period.Ladder.ContentRevision, otherRank, clock.at)}
+	otherPlayer := d.TaskModePlayer{PeriodNumber: period.Rotation.Number, Player: catalog.NewPlayer(other.PlayerID, server, period.Ladder.ContentRevision, actorRank-1, clock.at)}
 	otherPlayer.Player.Defense = []int64{otherHero.PartnerID}
-	if rule.ID == d.TaskModeLeader {
-		otherPlayer.Leader = otherHero.PartnerID
-	}
-	swapTargetRows, err := (topfloorstore.Store{}).TaskRangeTx(ctx, database, server, period.Rotation.Number, actorRank-1, actorRank-1)
-	if err != nil || len(swapTargetRows) != 1 {
-		t.Fatalf("read revenge rank: %v rows=%d", err, len(swapTargetRows))
-	}
-	transaction, err := database.Begin(ctx, tx.Options{})
+	transaction, err = database.Begin(ctx, tx.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = (topfloorstore.Store{}).InsertTaskPlayerTx(ctx, transaction, otherPlayer, period); err == nil {
-		err = (topfloorstore.Store{}).AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, otherRank, other.PlayerID)
+	if err = store.InsertTaskPlayerTx(ctx, transaction, otherPlayer, period); err == nil {
+		err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, actorRank-1, other.PlayerID)
 	}
 	if err == nil {
 		previous := period.Ladder.StateVersion
 		period.Ladder.Size++
 		period.Ladder.StateVersion++
 		period.Ladder.UpdatedAt = clock.at
-		err = (topfloorstore.Store{}).SaveTaskPeriodTx(ctx, transaction, period, previous)
-	}
-	if err == nil {
-		err = (topfloorstore.Store{}).SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number,
-			d.Ranked{Rank: otherRank, Occupant: d.Occupant{Player: other.PlayerID}}, swapTargetRows[0])
+		err = store.SaveTaskPeriodTx(ctx, transaction, period, previous)
 	}
 	if err != nil {
 		transaction.Rollback(ctx)

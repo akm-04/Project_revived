@@ -34,9 +34,16 @@ type TopFloorTaskDispatcher struct {
 	Service   TopFloorTaskPort
 }
 
+// topFloorTaskNotOpen is the stock message.lua row 40001 ("活動未開啟" /
+// "Event hasn't started!"), the closest recovered "not open" text.
+const topFloorTaskNotOpen int64 = 40001
+
 func failTopFloorTask(err error) httpedge.Response {
 	if errors.Is(err, domain.ErrInvalid) {
 		return badHero("invalid_top_floor_task_parameter")
+	}
+	if errors.Is(err, domain.ErrRefused) {
+		return conflictRefusal(topFloorTaskNotOpen)
 	}
 	return failTopFloor(err)
 }

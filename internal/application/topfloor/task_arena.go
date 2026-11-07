@@ -60,7 +60,7 @@ func (service Service) taskStateTx(requestContext context.Context, scope gen.Tim
 	if err = service.open(requestContext, scope.Tx, catalog, actor.PlayerID, at); err != nil {
 		return catalog, period, domain.TaskModePlayer{}, err
 	}
-	eligibility, err := service.TaskModeEligibilityTx(requestContext, scope.Tx, *catalog.TaskModes, actor, at)
+	eligibility, err := service.TaskModeEligibilityTx(requestContext, scope.Tx, *catalog.TaskModes, period, actor, at)
 	if err != nil {
 		return catalog, period, domain.TaskModePlayer{}, err
 	}
@@ -188,7 +188,8 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 func (service Service) taskOffers(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, player domain.Player, rank int64, at time.Time) ([]domain.Occupant, error) {
 	result := []domain.Occupant{}
 	seen := map[int64]bool{}
-	for _, probe := range catalog.OfferRanks(player.Server, player.PlayerID, rank, player.TicketDay, player.RefreshCount) {
+	// D512: special offers come from better-ranked humans only; rank 1 gets none.
+	for _, probe := range catalog.BetterOfferRanks(player.Server, player.PlayerID, rank, player.TicketDay, player.RefreshCount) {
 		if len(probe) == 0 {
 			continue
 		}
@@ -221,6 +222,37 @@ func (service Service) taskOffers(requestContext context.Context, query tx.Query
 	}
 	return result, nil
 }
+
+// taskViewer is the D512 read-only mode state for a player who is not admitted to
+// the current period: special rank 0, empty defense and offers. The stock client
+// renders it (ArenaWindow.lua:1460-1468 shows the NPC slot for zero offers).
+func (service Service) taskViewer(requestContext context.Context, actor identity.ActorContext) (TaskArenaView, error) {
+	catalog, at, err := service.readContext(requestContext)
+	if err != nil {
+		return TaskArenaView{}, err
+	}
+	if catalog.TaskModes == nil {
+		return TaskArenaView{}, domain.ErrUnavailable
+	}
+	if err = service.open(requestContext, service.Fresh, catalog, actor.PlayerID, at); err != nil {
+		return TaskArenaView{}, err
+	}
+	maximumLevel, err := service.Directory.ServerMaximumLevelTx(requestContext, service.Fresh, actor.LogicalServerID)
+	if err != nil {
+		return TaskArenaView{}, err
+	}
+	if maximumLevel < catalog.TaskModes.ServerLevel {
+		return TaskArenaView{}, domain.ErrRefused
+	}
+	_, period, _, err := service.taskCatalog(requestContext, service.Fresh, actor.LogicalServerID, at)
+	if err != nil {
+		return TaskArenaView{}, err
+	}
+	viewer := domain.Player{PlayerID: actor.PlayerID, Server: actor.LogicalServerID, TicketDay: domain.TicketDay(at),
+		Defense: []int64{}, Offered: []domain.Occupant{}, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC()}
+	return TaskArenaView{ArenaView: ArenaView{Player: viewer, ServerTime: at}, Rotation: period.Rotation}, nil
+}
+
 func (service Service) LoadTask(requestContext context.Context, actor identity.ActorContext, op operation.Context, refresh bool) (TaskArenaView, error) {
 	var result TaskArenaView
 	if !service.ready() {
@@ -263,6 +295,10 @@ func (service Service) LoadTask(requestContext context.Context, actor identity.A
 		}
 		return service.saveOfferSnapshot(requestContext, scope.Tx, actor.LogicalServerID, actor.PlayerID, domain.OfferScopeSpecial, period.Rotation.Number, rank, result.Enemies, at)
 	})
+	if errors.Is(err, domain.ErrRefused) {
+		// D512: an unqualified player still sees the switch and special tab.
+		return service.taskViewer(requestContext, actor)
+	}
 	return result, err
 }
 func (service Service) SaveTaskDefense(requestContext context.Context, actor identity.ActorContext, defense domain.TaskModeDefense, op operation.Context) error {

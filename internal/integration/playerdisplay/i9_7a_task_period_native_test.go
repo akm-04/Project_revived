@@ -16,6 +16,7 @@ func TestI97ATaskPeriodStorageIsolationNative(t *testing.T) {
 	database := pool(t)
 	server := rankingServer(t, database)
 	actor, revision, _ := topFloorPlayer(t, database, server)
+	other, _, _ := topFloorPlayer(t, database, server)
 	normal, err := topFloorService(t, database).Load(ctx, actor, op())
 	if err != nil {
 		t.Fatal(err)
@@ -25,6 +26,9 @@ func TestI97ATaskPeriodStorageIsolationNative(t *testing.T) {
 	first, err := catalog.NewPeriod(server, revision, at)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if first.Ladder.Size != 0 {
+		t.Fatalf("D512 period seeds %d robot ranks", first.Ladder.Size)
 	}
 	next, err := catalog.NewPeriod(server, revision, at.Add(7*24*time.Hour))
 	if err != nil {
@@ -49,8 +53,8 @@ func TestI97ATaskPeriodStorageIsolationNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	ranks, err := store.TaskRangeTx(ctx, database, server, first.Rotation.Number, 1, 2)
-	if err != nil || len(ranks) != 2 || ranks[0].Occupant.Robot != domain.RobotTeams {
-		t.Fatalf("source robot seed %+v %v", ranks, err)
+	if err != nil || len(ranks) != 0 {
+		t.Fatalf("D512 period must start with no ranks %+v %v", ranks, err)
 	}
 	transaction, err = database.Begin(ctx, tx.Options{})
 	if err != nil {
@@ -61,10 +65,13 @@ func TestI97ATaskPeriodStorageIsolationNative(t *testing.T) {
 	if err != nil || !found {
 		t.Fatal("period missing", err)
 	}
-	if err = store.AppendTaskPlayerTx(ctx, transaction, server, first.Rotation.Number, domain.RobotTeams+1, actor.PlayerID); err != nil {
+	if err = store.AppendTaskPlayerTx(ctx, transaction, server, first.Rotation.Number, 1, actor.PlayerID); err != nil {
 		t.Fatal(err)
 	}
-	locked.Ladder.Size++
+	if err = store.AppendTaskPlayerTx(ctx, transaction, server, first.Rotation.Number, 2, other.PlayerID); err != nil {
+		t.Fatal(err)
+	}
+	locked.Ladder.Size += 2
 	locked.Ladder.StateVersion++
 	locked.Ladder.UpdatedAt = at.Add(time.Minute)
 	if err = store.SaveTaskPeriodTx(ctx, transaction, locked, first.Ladder.StateVersion); err != nil {
@@ -78,24 +85,29 @@ func TestI97ATaskPeriodStorageIsolationNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer transaction.Rollback(ctx)
-	challenger := domain.Ranked{Rank: domain.RobotTeams + 1, Occupant: domain.Occupant{Player: actor.PlayerID}}
-	if err = store.SwapTaskRanksTx(ctx, transaction, server, first.Rotation.Number, challenger, ranks[0]); err != nil {
+	challenger := domain.Ranked{Rank: 1, Occupant: domain.Occupant{Player: actor.PlayerID}}
+	defender := domain.Ranked{Rank: 2, Occupant: domain.Occupant{Player: other.PlayerID}}
+	if err = store.SwapTaskRanksTx(ctx, transaction, server, first.Rotation.Number, challenger, defender); err != nil {
 		t.Fatal(err)
 	}
 	if err = transaction.Commit(ctx); err != nil {
 		t.Fatal("deferred uniqueness swap", err)
 	}
 	rank, found, err := store.TaskRankOfTx(ctx, database, server, first.Rotation.Number, challenger.Occupant)
-	if err != nil || !found || rank != 1 {
+	if err != nil || !found || rank != 2 {
 		t.Fatalf("special player rank %d %v %v", rank, found, err)
+	}
+	rank, found, err = store.TaskRankOfTx(ctx, database, server, first.Rotation.Number, defender.Occupant)
+	if err != nil || !found || rank != 1 {
+		t.Fatalf("special defender rank %d %v %v", rank, found, err)
 	}
 	rank, found, err = store.RankOfTx(ctx, database, server, challenger.Occupant)
 	if err != nil || !found || rank != normal.Rank {
 		t.Fatal("normal ladder changed", rank, normal.Rank, err)
 	}
-	rank, found, err = store.TaskRankOfTx(ctx, database, server, next.Rotation.Number, ranks[0].Occupant)
-	if err != nil || !found || rank != 1 {
-		t.Fatal("next period changed", rank, err)
+	ranks, err = store.TaskRangeTx(ctx, database, server, next.Rotation.Number, 1, 2)
+	if err != nil || len(ranks) != 0 {
+		t.Fatal("next period started with ranks", ranks, err)
 	}
 	transaction, err = database.Begin(ctx, tx.Options{})
 	if err != nil {

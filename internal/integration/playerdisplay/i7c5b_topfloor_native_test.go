@@ -658,10 +658,7 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	clock.at = taskRotationForRule(t, catalog, func(rule d.TaskModeRule) bool {
-		if !rule.PetAllowed || rule.ID == d.TaskModeCamp {
-			return false
-		}
-		return !slices.Contains(rule.BannedTables, storedHero.TableID)
+		return rule.HeroSlots == 1 && !slices.Contains(rule.BannedTables, storedHero.TableID)
 	})
 	rotation, err := catalog.TaskModes.Rotation(clock.at)
 	if err != nil {
@@ -673,11 +670,56 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	}
 	earnTaskChallenges(t, database, service, actor, hero, clock)
 
-	pet := statPet(t, database, actor, revision)
-	defense := d.TaskModeDefense{Heroes: []int64{hero.PartnerID}, Pet: pet.PetID}
-	if rule.LeaderAllowed {
-		defense.Leader = hero.PartnerID
+	// D512 humans-only ladder: before the actor enters at rank 4, seed three
+	// humans at ranks 1-3. Each fixture player is built outside the rank
+	// transaction so the slow bootstrap does not hold it open.
+	store := topfloorstore.Store{}
+	period, err := catalog.TaskModes.NewPeriod(server, revision, clock.at)
+	if err != nil {
+		t.Fatal(err)
 	}
+	transaction, err := database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.CreateTaskPeriodTx(ctx, transaction, period); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	for rank := int64(1); rank <= 3; rank++ {
+		opponent, _, opponentHero := topFloorPlayer(t, database, server)
+		opponentPlayer := catalog.NewPlayer(opponent.PlayerID, server, revision, rank, clock.at)
+		opponentPlayer.Defense = []int64{opponentHero.PartnerID}
+		transaction, err = database.Begin(ctx, tx.Options{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = store.InsertTaskPlayerTx(ctx, transaction, d.TaskModePlayer{Player: opponentPlayer, PeriodNumber: period.Rotation.Number}, period); err == nil {
+			err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, rank, opponent.PlayerID)
+		}
+		if err != nil {
+			transaction.Rollback(ctx)
+			t.Fatal(err)
+		}
+		if err = transaction.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+	transaction, err = database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	period.Ladder.Size, period.Ladder.StateVersion, period.Ladder.UpdatedAt = 3, 2, clock.at
+	if err = store.SaveTaskPeriodTx(ctx, transaction, period, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	defense := d.TaskModeDefense{Heroes: []int64{hero.PartnerID}}
 	if err = service.SaveTaskDefense(ctx, actor, defense, op()); err != nil {
 		t.Fatal("save task defense", err)
 	}
@@ -689,8 +731,7 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 		t.Fatalf("load task offers %d", len(view.Enemies))
 	}
 
-	store := topfloorstore.Store{}
-	period, found, err := store.ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
+	period, found, err = store.ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
 	if err != nil || !found {
 		t.Fatal("task period", err, found)
 	}
@@ -724,7 +765,7 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 		t.Fatalf("player force %d, want the exact unqualified 0", formValue(t, ownRow, "force"))
 	}
 	ownHeroes, ok := ownRow["heros"].([]map[string]any)
-	if !ok || len(ownHeroes) != 1 {
+	if !ok || len(ownHeroes) != rule.HeroSlots {
 		t.Fatalf("player heroes %#v", ownRow["heros"])
 	}
 	if formValue(t, ownHeroes[0], "partner_id") != hero.PartnerID || formValue(t, ownHeroes[0], "lev") <= 0 || formValue(t, ownHeroes[0], "star") <= 0 || formValue(t, ownHeroes[0], "color") <= 0 {
@@ -739,60 +780,27 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	assertNumericList(t, ownHeroes[0], "spirit_equip", 6)
 	assertList(t, ownHeroes[0], "spirit_item", 6)
 	assertMap(t, ownHeroes[0], "skin_ids")
-	ownPet, ok := ownRow["pet"].(map[string]any)
-	if !ok {
-		t.Fatalf("player pet row %#v", ownRow["pet"])
-	}
-	if formValue(t, ownPet, "pet_id") != pet.PetID || formValue(t, ownPet, "table_id") != pet.TableID {
-		t.Fatalf("pet identity %+v", ownPet)
-	}
-	if formValue(t, ownPet, "star") <= 0 || formValue(t, ownPet, "lev") <= 0 || formValue(t, ownPet, "color") <= 0 {
-		t.Fatalf("pet populate fields %+v", ownPet)
-	}
-	assertNumericList(t, ownPet, "skills", 1)
 
-	robotRows, err := store.TaskRangeTx(ctx, database, server, period.Rotation.Number, 5, 5)
-	if err != nil || len(robotRows) != 1 || !robotRows[0].Occupant.IsRobot() {
-		t.Fatal("robot rank fixture", err, len(robotRows))
-	}
-	robotDisplay, err := service.TaskFormation(ctx, actor, int64(server)*d.RegionStride+robotRows[0].Occupant.Robot)
+	// D512: a new weekly ladder seeds no robot rows; an unrecruited robot wire
+	// therefore has no formation.
+	rows, err := store.TaskRangeTx(ctx, database, server, period.Rotation.Number, 1, period.Ladder.Size)
 	if err != nil {
-		t.Fatal("295 robot formation", err)
+		t.Fatal(err)
 	}
-	robotRow := projection.Formation(robotDisplay)
-	if robotRow["is_robot"] != true {
-		t.Fatalf("robot row is_robot = %#v, want the boolean true", robotRow["is_robot"])
-	}
-	robotHeroes, ok := robotRow["heros"].([]map[string]any)
-	if !ok || len(robotHeroes) == 0 {
-		t.Fatalf("robot heroes %#v", robotRow["heros"])
-	}
-	for _, robotHero := range robotHeroes {
-		partner := formValue(t, robotHero, "partner_id")
-		if partner <= 0 || formValue(t, robotHero, "table_id") != partner {
-			t.Fatalf("robot hero template ids %+v", robotHero)
+	for _, row := range rows {
+		if row.Occupant.IsRobot() {
+			t.Fatalf("D512 period seeded robot rank %+v", row)
 		}
-		if _, known := catalog.TaskModes.HeroCamps[partner]; !known {
-			t.Fatalf("robot template %d has no Hero.populate table", partner)
-		}
-		if formValue(t, robotHero, "lev") <= 0 || formValue(t, robotHero, "star") <= 0 || formValue(t, robotHero, "color") <= 0 {
-			t.Fatalf("robot hero populate fields %+v", robotHero)
-		}
-		assertNumericList(t, robotHero, "skills", 6)
-		assertNumericList(t, robotHero, "equips", 6)
-		assertNumericList(t, robotHero, "fumos", 6)
-		assertList(t, robotHero, "spirit_equip", 0)
-		assertList(t, robotHero, "spirit_item", 0)
-		assertMap(t, robotHero, "skin_ids")
 	}
-	if _, present := robotRow["pet"]; present {
-		t.Fatal("robot formation must not carry a pet")
+	if _, err = service.TaskFormation(ctx, actor, int64(server)*d.RegionStride+1); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("robot wire must have no D512 formation, got %v", err)
 	}
 
 	// A second occupant with no saved defense sits at the first probe of the
 	// challenger's best band, so 282 and the special rank list must omit it.
 	other, _, _ := topFloorPlayer(t, database, server)
-	otherPlayer := catalog.NewPlayer(other.PlayerID, server, revision, d.RobotTeams+2, clock.at)
+	nextRank := period.Ladder.Size + 1
+	otherPlayer := catalog.NewPlayer(other.PlayerID, server, revision, nextRank, clock.at)
 	probes := catalog.OfferRanks(server, actor.PlayerID, selfRank, self.Player.TicketDay, self.Player.RefreshCount)
 	if len(probes) == 0 || len(probes[0]) == 0 {
 		t.Fatal("no offer probe")
@@ -802,17 +810,17 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	if err != nil || len(defender) != 1 {
 		t.Fatal("target rank", err, len(defender))
 	}
-	transaction, err := database.Begin(ctx, tx.Options{})
+	transaction, err = database.Begin(ctx, tx.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err = store.InsertTaskPlayerTx(ctx, transaction, d.TaskModePlayer{Player: otherPlayer, PeriodNumber: period.Rotation.Number}, period); err != nil {
 		t.Fatal("insert undefended task player", err)
 	}
-	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, d.RobotTeams+2, other.PlayerID); err != nil {
+	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, nextRank, other.PlayerID); err != nil {
 		t.Fatal("append undefended rank", err)
 	}
-	if err = store.SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number, d.Ranked{Rank: d.RobotTeams + 2, Occupant: d.Occupant{Player: other.PlayerID}}, defender[0]); err != nil {
+	if err = store.SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number, d.Ranked{Rank: nextRank, Occupant: d.Occupant{Player: other.PlayerID}}, defender[0]); err != nil {
 		t.Fatal("place undefended rank", err)
 	}
 	if err = transaction.Commit(ctx); err != nil {
@@ -826,7 +834,7 @@ func TestI9_10TopFloorTaskPopupAndEmptyDefenseNative(t *testing.T) {
 	if err != nil {
 		t.Fatalf("282 must skip an empty-defense occupant in a probed band: %v", err)
 	}
-	if len(offers.Enemies) != 3 {
+	if len(offers.Enemies) != 2 {
 		t.Fatalf("load task offers %d after skip", len(offers.Enemies))
 	}
 	for _, enemy := range offers.Enemies {
@@ -899,15 +907,61 @@ func TestI9_10TopFloorInvalidTaskDefensePropagatesNative(t *testing.T) {
 	service.Timed.Binder.Time = clock
 	clock.at = taskRotationForRule(t, catalog, func(rule d.TaskModeRule) bool { return rule.HeroSlots == 1 })
 	earnTaskChallenges(t, database, service, actor, actorHero, clock)
+	// D512 humans-only: two humans above the actor make its best band rank 2.
+	store := topfloorstore.Store{}
+	period, err := catalog.TaskModes.NewPeriod(server, revision, clock.at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transaction, err := database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.CreateTaskPeriodTx(ctx, transaction, period); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	for rank := int64(1); rank <= 2; rank++ {
+		opponent, _, opponentHero := topFloorPlayer(t, database, server)
+		opponentPlayer := catalog.NewPlayer(opponent.PlayerID, server, revision, rank, clock.at)
+		opponentPlayer.Defense = []int64{opponentHero.PartnerID}
+		transaction, err = database.Begin(ctx, tx.Options{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = store.InsertTaskPlayerTx(ctx, transaction, d.TaskModePlayer{Player: opponentPlayer, PeriodNumber: period.Rotation.Number}, period); err == nil {
+			err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, rank, opponent.PlayerID)
+		}
+		if err != nil {
+			transaction.Rollback(ctx)
+			t.Fatal(err)
+		}
+		if err = transaction.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+	transaction, err = database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	period.Ladder.Size, period.Ladder.StateVersion, period.Ladder.UpdatedAt = 2, 2, clock.at
+	if err = store.SaveTaskPeriodTx(ctx, transaction, period, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
 	view, err := service.LoadTask(ctx, actor, op(), false)
 	if err != nil {
 		t.Fatal("load task", err)
 	}
-	store := topfloorstore.Store{}
 	period, found, err := store.ReadTaskPeriodTx(ctx, database, server, view.Rotation.Number, false)
 	if err != nil || !found {
 		t.Fatal("task period", err, found)
 	}
+	nextRank := period.Ladder.Size + 1
 	self, found, err := store.ReadTaskPlayerTx(ctx, database, actor.PlayerID, period, false)
 	if err != nil || !found {
 		t.Fatal("task player", err, found)
@@ -923,7 +977,7 @@ func TestI9_10TopFloorInvalidTaskDefensePropagatesNative(t *testing.T) {
 	if err != nil {
 		t.Fatal("second invalid-defense hero", err)
 	}
-	invalidPlayer := catalog.NewPlayer(invalid.PlayerID, server, revision, d.RobotTeams+2, clock.at)
+	invalidPlayer := catalog.NewPlayer(invalid.PlayerID, server, revision, nextRank, clock.at)
 	invalidPlayer.Defense = []int64{invalidHero.PartnerID, summoned.Ref().PartnerID}
 	invalidTaskPlayer := d.TaskModePlayer{Player: invalidPlayer, PeriodNumber: period.Rotation.Number}
 	rule, found := catalog.TaskModes.Rule(view.Rotation.Mode)
@@ -975,17 +1029,17 @@ func TestI9_10TopFloorInvalidTaskDefensePropagatesNative(t *testing.T) {
 	if err != nil || len(defender) != 1 {
 		t.Fatal("target rank", err, len(defender))
 	}
-	transaction, err := database.Begin(ctx, tx.Options{})
+	transaction, err = database.Begin(ctx, tx.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err = store.InsertTaskPlayerTx(ctx, transaction, invalidTaskPlayer, period); err != nil {
 		t.Fatal("insert invalid-defense task player", err)
 	}
-	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, d.RobotTeams+2, invalid.PlayerID); err != nil {
+	if err = store.AppendTaskPlayerTx(ctx, transaction, server, period.Rotation.Number, nextRank, invalid.PlayerID); err != nil {
 		t.Fatal("append invalid-defense rank", err)
 	}
-	if err = store.SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number, d.Ranked{Rank: d.RobotTeams + 2, Occupant: d.Occupant{Player: invalid.PlayerID}}, defender[0]); err != nil {
+	if err = store.SwapTaskRanksTx(ctx, transaction, server, period.Rotation.Number, d.Ranked{Rank: nextRank, Occupant: d.Occupant{Player: invalid.PlayerID}}, defender[0]); err != nil {
 		t.Fatal("place invalid-defense rank", err)
 	}
 	if err = transaction.Commit(ctx); err != nil {

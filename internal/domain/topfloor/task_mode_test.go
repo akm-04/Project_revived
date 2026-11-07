@@ -27,8 +27,36 @@ func TestTaskModeRotationSourceBoundaryAndContinuation(t *testing.T) {
 	}
 }
 
+func TestTaskModeRotationSkipsFactionMode(t *testing.T) {
+	catalog := TaskModeCatalog{Schedule: []TaskModeScheduleEntry{
+		{Date: "20170811", Mode: TaskModeSingle},
+		{Date: "20170818", Mode: TaskModeCamp, Submode: 2},
+		{Date: "20170825", Mode: TaskModeTriple},
+	}}
+	base := time.Date(2017, 8, 10, 21, 0, 0, 0, time.UTC)
+	rotation, err := catalog.Rotation(base.Add(7 * 24 * time.Hour))
+	if err != nil || rotation.Number != 2 || rotation.Mode != TaskModeTriple || rotation.Submode != 0 {
+		t.Fatalf("faction entry must resolve to the next non-6 entry: %+v %v", rotation, err)
+	}
+}
+
+func TestTaskModeSpecialOffersHaveNoLowerRankFallback(t *testing.T) {
+	catalog := Catalog{MatchHundredths: [3]int64{30, 50, 98}}
+	if probes := catalog.BetterOfferRanks(1, 100001, 1, 1, 0); len(probes) != 0 {
+		t.Fatalf("rank 1 must have no special offers: %v", probes)
+	}
+	probes := catalog.BetterOfferRanks(1, 100001, 4, 1, 0)
+	if len(probes) != 3 || probes[0][0] != 3 || probes[1][0] != 2 || probes[2][0] != 1 {
+		t.Fatalf("better-rank bands for rank 4: %v", probes)
+	}
+}
+
 func TestTaskModeFormationTrustBoundaries(t *testing.T) {
 	heroes := []TaskModeHero{{InstanceID: 1001, TableID: 10001001, Camp: 1}, {InstanceID: 1002, TableID: 10001002, Camp: 1}}
+	five := make([]TaskModeHero, 5)
+	for index := range five {
+		five[index] = TaskModeHero{InstanceID: int64(1001 + index), TableID: int64(10001001 + index), Camp: 1}
+	}
 	single := TaskModeRule{ID: TaskModeSingle, HeroSlots: 1}
 	if single.ValidateFormation(heroes[:1], 0, 0, 0) != nil {
 		t.Fatal("single valid refused")
@@ -36,32 +64,43 @@ func TestTaskModeFormationTrustBoundaries(t *testing.T) {
 	if single.ValidateFormation(heroes, 0, 0, 0) == nil || single.ValidateFormation(heroes[:1], 7, 0, 0) == nil {
 		t.Fatal("single admitted excess actors")
 	}
+	if single.ValidateFormation(nil, 0, 0, 0) == nil {
+		t.Fatal("empty formation admitted")
+	}
 	leader := TaskModeRule{ID: TaskModeLeader, HeroSlots: 5, PetAllowed: true, LeaderAllowed: true}
-	if leader.ValidateFormation(heroes, 7, 10001001, 0) == nil {
+	if leader.ValidateFormation(heroes, 7, 1001, 0) == nil {
+		t.Fatal("short formation admitted for a five-slot rule")
+	}
+	if leader.ValidateFormation(five, 7, 10001001, 0) == nil {
 		t.Fatal("table id mistaken for owned leader")
 	}
-	if leader.ValidateFormation(heroes, 7, 1001, 0) != nil {
+	if leader.ValidateFormation(five, 7, 1001, 0) != nil {
 		t.Fatal("valid owned leader refused")
 	}
-	if leader.ValidateFormation([]TaskModeHero{heroes[0], heroes[0]}, 0, 1001, 0) == nil {
+	duplicate := append([]TaskModeHero(nil), five...)
+	duplicate[1] = duplicate[0]
+	if leader.ValidateFormation(duplicate, 0, 1001, 0) == nil {
 		t.Fatal("duplicate instance admitted")
 	}
 	banned := TaskModeRule{ID: TaskModeBanned, HeroSlots: 5, BannedTables: []int64{10001002}}
-	if banned.ValidateFormation(heroes, 0, 0, 0) == nil {
+	if banned.ValidateFormation(five, 0, 0, 0) == nil {
 		t.Fatal("banned template admitted")
 	}
 	camp := TaskModeRule{ID: TaskModeCamp, HeroSlots: 5, PetAllowed: true, BuffGroups: [][]int64{{11}, {22}, {33}, {44}}}
-	if camp.ValidateFormation(heroes, 7, 0, 1) != nil {
+	if camp.ValidateFormation(five, 7, 0, 1) != nil {
 		t.Fatal("same-camp formation refused")
 	}
-	if camp.ValidateFormation(heroes, 7, 0, 2) == nil {
+	if camp.ValidateFormation(five, 7, 0, 2) == nil {
 		t.Fatal("wrong rotation camp admitted")
 	}
-	qun := []TaskModeHero{{InstanceID: 1003, TableID: 10001003, Camp: 4}}
+	qun := make([]TaskModeHero, 5)
+	for index := range qun {
+		qun[index] = TaskModeHero{InstanceID: int64(2001 + index), TableID: int64(10002001 + index), Camp: 4}
+	}
 	if camp.ValidateFormation(qun, 0, 0, 10) != nil || camp.ValidateFormation(qun, 0, 0, 4) == nil {
 		t.Fatal("selection enum 10 must map to Hero faction 4, selection 4 is ASSIST")
 	}
-	mixed := append([]TaskModeHero(nil), heroes...)
+	mixed := append([]TaskModeHero(nil), five...)
 	mixed[1].Camp = 2
 	if camp.ValidateFormation(mixed, 0, 0, 0) == nil {
 		t.Fatal("mixed camps admitted")
@@ -95,11 +134,11 @@ func TestTaskModeCatalogValidationAndAdmission(t *testing.T) {
 	if err := catalog.Validate(); err != nil {
 		t.Fatal(err)
 	}
-	if catalog.Admit(200, 10, 60) != nil {
+	if catalog.Admit(200, 60) != nil {
 		t.Fatal("inclusive admission boundary refused")
 	}
-	for _, values := range [][3]int64{{201, 10, 60}, {200, 9, 60}, {200, 10, 59}, {0, 10, 60}, {200, -1, 60}} {
-		if catalog.Admit(values[0], values[1], values[2]) == nil {
+	for _, values := range [][2]int64{{201, 60}, {200, 59}, {0, 60}, {-1, 60}} {
+		if catalog.Admit(values[0], values[1]) == nil {
 			t.Fatalf("invalid admission %+v", values)
 		}
 	}
@@ -142,6 +181,18 @@ func TestTaskModeExactCompiledCatalog(t *testing.T) {
 	if len(catalog.Rules) != 6 || len(catalog.Schedule) != 91 || len(catalog.Rewards) != 17 || len(catalog.HeroCamps) != 569 {
 		t.Fatal("exact source profile changed")
 	}
+	// D512: the compiled schedule still contains mode 6, but no week may run it;
+	// a faction entry resolves to the next non-faction entry without shifting weeks.
+	base := time.Date(2017, 8, 10, 21, 0, 0, 0, time.UTC)
+	for index, entry := range catalog.Schedule {
+		rotation, err := catalog.Rotation(base.Add(time.Duration(index) * 7 * 24 * time.Hour))
+		if err != nil || rotation.Number != int64(index+1) || rotation.Mode == TaskModeCamp {
+			t.Fatalf("schedule %d faction resolution: %+v %v", index, rotation, err)
+		}
+		if entry.Mode != TaskModeCamp && rotation.Mode != entry.Mode {
+			t.Fatalf("schedule %d non-faction mode changed: %+v", index, rotation)
+		}
+	}
 }
 
 func TestTaskModePeriodDailyCutoffAndRetiredPeriod(t *testing.T) {
@@ -150,6 +201,9 @@ func TestTaskModePeriodDailyCutoffAndRetiredPeriod(t *testing.T) {
 	period, err := catalog.NewPeriod(1, strings.Repeat("a", 64), at)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if period.Ladder.Size != 0 {
+		t.Fatalf("D512 period seeds %d robot ranks", period.Ladder.Size)
 	}
 	cutoff := time.Date(2026, 10, 23, 12, 30, 0, 0, time.UTC)
 	if len(period.Unsettled(cutoff.Add(-time.Nanosecond))) != 0 || len(period.Unsettled(cutoff)) != 1 {
