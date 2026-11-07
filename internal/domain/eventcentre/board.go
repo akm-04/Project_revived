@@ -32,6 +32,7 @@ const (
 	BoardMissingOfferPolicy   = "NO_OFFER_ROW_REFUSES_START"
 	BoardCampaignType         = int64(96)
 	BoardTerminalKind         = "EVENT_CENTRE_BOARD_RESULT"
+	BoardClosedKind           = "EVENT_CENTRE_BOARD_CLOSED"
 	BoardReportContentPolicy  = "STORED_COMBAT_REPORT_JSON_STRING"
 	BoardAwardLogPolicy       = "GRANTED_AWARDS_UNTIL_CONFIRM"
 	BoardMinPlayerLevelByTier = "1,10,20"

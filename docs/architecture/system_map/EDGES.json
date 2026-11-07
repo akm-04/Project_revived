@@ -378,6 +378,7 @@
     "*StartTx"
    ],
    "eventcentre": [
+    "*CloseTx",
     "*Resolve",
     "*StartTx",
     "*TerminalTx"
@@ -3349,6 +3350,7 @@
     "NewCoherentReadScope"
    ],
    "combat": [
+    "*CloseTx",
     "*Resolve",
     "*StartTx",
     "*TerminalTx"

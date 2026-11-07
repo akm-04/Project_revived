@@ -2,6 +2,7 @@ package eventcentre
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"reflect"
@@ -363,12 +364,18 @@ func (s Service) BoardInfo(ctx context.Context, a identity.ActorContext, op oper
 	if len(due) == 0 {
 		return body, nil
 	}
+	unresolvable := map[string]bool{}
 	for _, mission := range due {
 		attempt, err := ids.ParseUUID(mission.Attempt)
 		if err != nil {
 			return nil, ErrUnavailable
 		}
-		if _, err = s.Combat.Resolve(ctx, valueop, attempt); err != nil {
+		_, err = s.Combat.Resolve(ctx, valueop, attempt)
+		if errors.Is(err, cd.ErrResolverPermanent) {
+			unresolvable[mission.Attempt] = true
+			continue
+		}
+		if err != nil {
 			return nil, ErrUnavailable
 		}
 	}
@@ -385,7 +392,7 @@ func (s Service) BoardInfo(ctx context.Context, a identity.ActorContext, op oper
 			return err
 		}
 		for _, mission := range state.Board.DueMissions(at.Unix(), catalog) {
-			if err = s.settleBoardMission(ctx, sc.Tx, a, valueop, catalog, &state.Board, mission); err != nil {
+			if err = s.settleBoardMission(ctx, sc.Tx, a, valueop, catalog, &state.Board, mission, unresolvable[mission.Attempt]); err != nil {
 				return err
 			}
 		}
@@ -472,13 +479,28 @@ func boolInt(value bool) int64 {
 	return 0
 }
 
-func (s Service) settleBoardMission(ctx context.Context, t tx.Tx, a identity.ActorContext, op operation.Context, catalog Catalog, board *ec.BoardState, mission ec.BoardMission) error {
+func (s Service) settleBoardMission(ctx context.Context, t tx.Tx, a identity.ActorContext, op operation.Context, catalog Catalog, board *ec.BoardState, mission ec.BoardMission, unresolvable bool) error {
 	if _, err := ids.ParseUUID(mission.Attempt); err != nil {
 		return ErrUnavailable
 	}
 	at := op.StartedAt
-	settled, err := s.Combat.TerminalTx(ctx, t, appcombat.TerminalRequest{Locator: boardLocator(a, mission), GenerationRef: boardGeneration(mission), TerminalKind: ec.BoardTerminalKind,
-		SemanticReceiptID: "event-centre-board:" + mission.Attempt, At: at})
+	terminal := appcombat.TerminalRequest{Locator: boardLocator(a, mission), GenerationRef: boardGeneration(mission), TerminalKind: ec.BoardTerminalKind,
+		SemanticReceiptID: "event-centre-board:" + mission.Attempt, At: at}
+	d := Admission{Operation: op, Command: Command{MissionID: mission.MissionID}}
+	// A fight the resolver can never finish would otherwise hold the board on every
+	// 1083; close it, free the heroes and refund as for a loss, with no report.
+	if unresolvable {
+		terminal.TerminalKind = ec.BoardClosedKind
+		if _, err := s.Combat.CloseTx(ctx, t, terminal); err != nil {
+			return err
+		}
+		if err := s.refundBoardDeposit(ctx, t, a, d, catalog, mission, op); err != nil {
+			return err
+		}
+		board.RemoveDoing(mission.MissionID)
+		return nil
+	}
+	settled, err := s.Combat.TerminalTx(ctx, t, terminal)
 	if err != nil {
 		return err
 	}
@@ -491,7 +513,6 @@ func (s Service) settleBoardMission(ctx context.Context, t tx.Tx, a identity.Act
 		return err
 	}
 	win := settled.Resolution.Outcome.Star > 0
-	d := Admission{Operation: op, Command: Command{MissionID: mission.MissionID}}
 	if win {
 		award, known := catalog.Award(mission.AwardID)
 		if !known {
@@ -501,20 +522,26 @@ func (s Service) settleBoardMission(ctx context.Context, t tx.Tx, a identity.Act
 			return err
 		}
 		board.AppendAward(ec.BoardAward{MissionID: mission.MissionID, Type: mission.Type, AwardID: mission.AwardID, WishCrystal: boolInt(mission.WishCrystal)})
-	} else if mission.Type == ec.BoardTaskTypeDeposit {
-		rule, known := catalog.Mission(mission.MissionID)
-		if !known {
-			return ErrInvalid
-		}
-		if rule.Deposit > 0 {
-			if err = s.boardGrant(ctx, t, a, d, "board-deposit-refund", []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: ec.BoardDepositResourceKey, Amount: rule.Deposit}}, op); err != nil {
-				return err
-			}
-		}
+	} else if err = s.refundBoardDeposit(ctx, t, a, d, catalog, mission, op); err != nil {
+		return err
 	}
 	board.AppendHistory(ec.BoardRun{MissionID: mission.MissionID, Win: win, ReportID: reportID})
 	board.RemoveDoing(mission.MissionID)
 	return nil
+}
+
+func (s Service) refundBoardDeposit(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, catalog Catalog, mission ec.BoardMission, op operation.Context) error {
+	if mission.Type != ec.BoardTaskTypeDeposit {
+		return nil
+	}
+	rule, known := catalog.Mission(mission.MissionID)
+	if !known {
+		return ErrInvalid
+	}
+	if rule.Deposit <= 0 {
+		return nil
+	}
+	return s.boardGrant(ctx, t, a, d, "board-deposit-refund", []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: ec.BoardDepositResourceKey, Amount: rule.Deposit}}, op)
 }
 
 func awardLines(catalog Catalog, award ec.AwardRule, wish bool) []grant.Line {

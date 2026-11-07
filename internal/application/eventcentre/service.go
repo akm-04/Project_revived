@@ -151,6 +151,7 @@ type BoardCombat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, appcombat.StartRequest) (appcombat.Started, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (appcombat.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, appcombat.TerminalRequest) (appcombat.Settled, error)
+	CloseTx(context.Context, tx.Tx, appcombat.TerminalRequest) (appcombat.Closed, error)
 }
 
 type Service struct {
