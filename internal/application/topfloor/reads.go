@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -140,26 +141,35 @@ func (s Service) RecordInfo(c context.Context, a identity.ActorContext, recordID
 
 // Formation resolves a wire player id (table_id + region*100000): a ranked player
 // holding that id first, otherwise the robot team with that table id.
-func (s Service) Formation(c context.Context, a identity.ActorContext, wire int64) (d.Display, error) {
-	catalog, now, err := s.readContext(c)
-	if err != nil {
-		return d.Display{}, err
+func (s Service) Formation(c context.Context, a identity.ActorContext, wire int64, op operation.Context) (d.Display, error) {
+	if !s.ready() {
+		return d.Display{}, d.ErrUnavailable
 	}
-	table := wire % d.RegionStride
-	if wire/d.RegionStride != int64(a.LogicalServerID) || table <= 0 {
-		return d.Display{}, d.ErrInvalid
-	}
-	o := d.Occupant{Player: identity.PlayerID(wire)}
-	if _, ranked, err := s.Store.RankOfTx(c, s.Fresh, a.LogicalServerID, o); err != nil || !ranked {
+	var out d.Display
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		_, catalog, err := s.catalogTx(c, sc.Tx)
 		if err != nil {
-			return d.Display{}, err
+			return err
 		}
-		o = d.Occupant{Robot: table}
-		if !o.Valid() {
-			return d.Display{}, d.ErrRefused
+		table := wire % d.RegionStride
+		if wire/d.RegionStride != int64(a.LogicalServerID) || table <= 0 {
+			return d.ErrInvalid
 		}
-	}
-	return s.display(c, s.Fresh, catalog, a.LogicalServerID, o, now)
+		o := d.Occupant{Player: identity.PlayerID(wire)}
+		if _, ranked, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, o); err != nil || !ranked {
+			if err != nil {
+				return err
+			}
+			o = d.Occupant{Robot: table}
+			if !o.Valid() {
+				return d.ErrRefused
+			}
+		}
+		out, err = s.display(c, sc.Tx, catalog, a.LogicalServerID, o, at)
+		return err
+	})
+	return out, err
 }
 
 func (s Service) RankList(c context.Context, a identity.ActorContext) (RankList, error) {

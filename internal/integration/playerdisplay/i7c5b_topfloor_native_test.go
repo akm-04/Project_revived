@@ -45,7 +45,7 @@ func topFloorService(t *testing.T, p *pg.Pool) app.Service {
 	values, content := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
 		Fence: values, Functions: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, FrameStacks: values, Mail: i5.SettlementMail{Store: values},
-		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
+		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, HeroPower: fight.Inputs.Stats,
 		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
@@ -1044,4 +1044,44 @@ func TestI9_10TopFloorInvalidTaskDefensePropagatesNative(t *testing.T) {
 		t.Fatalf("nonempty invalid task defense must be ErrInvalid from the special rank list, got %v", err)
 	}
 	unchanged(before)
+}
+
+// TestI9_10TopFloorFormationProjectsHeroPowerNative proves the 291/295 ranking
+// popup row carries the canonical owner force the stock enemy board reads.
+func TestI9_10TopFloorFormationProjectsHeroPowerNative(t *testing.T) {
+	p := pool(t)
+	defer p.Close()
+	s := topFloorService(t, p)
+	server := rankingServer(t, p)
+	a, _, _ := topFloorPlayer(t, p, server)
+	b, _, refB := topFloorPlayer(t, p, server)
+	if _, err := s.Load(ctx, a, op()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Load(ctx, b, op()); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SaveDefense(ctx, b, []int64{refB.PartnerID}, 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	display, err := s.Formation(ctx, a, int64(b.PlayerID), op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	row := projection.Formation(display)
+	heroes, ok := row["heros"].([]map[string]any)
+	if !ok || len(heroes) == 0 {
+		t.Fatalf("formation heroes %#v", row["heros"])
+	}
+	var total int64
+	for _, hero := range heroes {
+		force := formValue(t, hero, "force")
+		if force <= 0 {
+			t.Fatalf("hero force %d is not the canonical owner power", force)
+		}
+		total += force
+	}
+	if total <= 0 || formValue(t, row, "force") != total {
+		t.Fatalf("team force %d != hero sum %d", formValue(t, row, "force"), total)
+	}
 }

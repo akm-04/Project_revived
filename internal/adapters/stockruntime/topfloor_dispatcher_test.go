@@ -57,7 +57,7 @@ func (f *topFloorFake) Report(context.Context, string) ([]byte, error) { return 
 func (f *topFloorFake) RecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, d.Record, error) {
 	return app.RecordInfo{Opponent: topFloorRobot, AvengeType: 3}, d.Record{}, nil
 }
-func (f *topFloorFake) Formation(context.Context, identity.ActorContext, int64) (d.Display, error) {
+func (f *topFloorFake) Formation(context.Context, identity.ActorContext, int64, operation.Context) (d.Display, error) {
 	return topFloorRobot, nil
 }
 
