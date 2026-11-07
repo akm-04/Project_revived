@@ -596,6 +596,8 @@ type Catalog struct {
 	InscriptionInputs        InscriptionInputCatalog
 	CourseInputs             CourseInputCatalog
 	BookInputs               BookInputCatalog
+	Workshop                 WorkshopInputCatalog
+	Administrator            AdministratorInputCatalog
 	DormInputs               DormInputCatalog
 	LibraryInputs            LibraryInputCatalog
 	PlayerDisplay            PlayerDisplayCatalog
@@ -819,6 +821,14 @@ func Load() (*Catalog, error) {
 	if err := decodeAndVerify("book_input_catalog.json", manifest.ArtifactSHA256s, &bookInputs); err != nil {
 		return nil, err
 	}
+	var workshopInputs WorkshopInputCatalog
+	if err := decodeAndVerify("workshop_input_catalog.json", manifest.ArtifactSHA256s, &workshopInputs); err != nil {
+		return nil, err
+	}
+	var administratorInputs AdministratorInputCatalog
+	if err := decodeAndVerify("administrator_input_catalog.json", manifest.ArtifactSHA256s, &administratorInputs); err != nil {
+		return nil, err
+	}
 	var dormInputs DormInputCatalog
 	if err := decodeAndVerify("dorm_input_catalog.json", manifest.ArtifactSHA256s, &dormInputs); err != nil {
 		return nil, err
@@ -885,6 +895,8 @@ func Load() (*Catalog, error) {
 		InscriptionInputs:        inscriptionInputs,
 		CourseInputs:             courseInputs,
 		BookInputs:               bookInputs,
+		Workshop:                 workshopInputs,
+		Administrator:            administratorInputs,
 		DormInputs:               dormInputs,
 		LibraryInputs:            libraryInputs,
 		PlayerDisplay:            playerDisplay,
@@ -1095,7 +1107,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 		expectedSources, expectedArtifacts = 422, 55
 	}
 	if manifest.CompilerVersion == "i9-10a-workshop-integration" {
-		expectedSources, expectedArtifacts = 566, 56
+		expectedSources, expectedArtifacts = 566, 58
 	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
@@ -1191,6 +1203,12 @@ func validateCatalog(c *Catalog) error {
 		return err
 	}
 	if err := c.CourseInputs.Validate(); err != nil {
+		return err
+	}
+	if err := c.Workshop.Validate(); err != nil {
+		return err
+	}
+	if err := c.Administrator.Validate(); err != nil {
 		return err
 	}
 	if err := c.BookInputs.Validate(); err != nil {

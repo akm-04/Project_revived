@@ -3,6 +3,7 @@ package builtin
 import (
 	"errors"
 	"regexp"
+	"strconv"
 )
 
 var errWorkshopInput = errors.New("workshop content: unqualified payload")
@@ -20,6 +21,7 @@ type WorkshopInputCatalog struct {
 	HeroProfiles  []WorkshopHeroProfileRule `json:"hero_profiles"`
 	Awards        []WorkshopAwardRule       `json:"awards"`
 	ItemRecipes   []WorkshopItemRecipeRule  `json:"item_recipes"`
+	PetCrafting   []WorkshopPetCraftRule    `json:"pet_crafting"`
 	Misc          WorkshopMiscRule          `json:"misc"`
 }
 
@@ -85,7 +87,14 @@ type WorkshopItemRecipeRule struct {
 	ResolveEnergy      int64   `json:"resolve_energy"`
 }
 
+type WorkshopPetCraftRule struct {
+	TableID int64     `json:"table_id"`
+	Levels  [][]int64 `json:"levels"`
+}
+
 type WorkshopMiscRule struct {
+	CritParam                     string  `json:"event_centre_crit_param"`
+	CritProportion                string  `json:"event_centre_crit_proportion"`
 	SaturationInit                int64   `json:"event_centre_saturation_init"`
 	SaturationTimeSeconds         int64   `json:"event_centre_saturation_time"`
 	AccelerateItemID              int64   `json:"event_centre_accelerate_item"`
@@ -95,10 +104,10 @@ type WorkshopMiscRule struct {
 }
 
 func (c WorkshopInputCatalog) Validate() error {
-	if c.SchemaVersion != 1 || len(c.Desk) != 8 || len(c.Recycle) != 6 || len(c.Board) != 5 || len(c.Missions) != 273 || len(c.HeroProfiles) != 91 || len(c.Awards) != 29 || len(c.ItemRecipes) != 268 || c.Misc.Validate() != nil {
+	if c.SchemaVersion != 1 || len(c.Desk) != 8 || len(c.Recycle) != 6 || len(c.Board) != 5 || len(c.Missions) != 273 || len(c.HeroProfiles) != 91 || len(c.Awards) != 29 || len(c.ItemRecipes) != 268 || len(c.PetCrafting) != 54 || c.Misc.Validate() != nil {
 		return errWorkshopInput
 	}
-	if c.validateDesk() != nil || c.validateRecycle() != nil || c.validateBoard() != nil || c.validateMissions() != nil || c.validateHeroProfiles() != nil || c.validateAwards() != nil || c.validateItemRecipes() != nil {
+	if c.validateDesk() != nil || c.validateRecycle() != nil || c.validateBoard() != nil || c.validateMissions() != nil || c.validateHeroProfiles() != nil || c.validateAwards() != nil || c.validateItemRecipes() != nil || c.validatePetCrafting() != nil {
 		return errWorkshopInput
 	}
 	return nil
@@ -281,8 +290,92 @@ func (c WorkshopInputCatalog) validateItemRecipes() error {
 	return nil
 }
 
+func (c WorkshopInputCatalog) validatePetCrafting() error {
+	recipes := map[int64]WorkshopItemRecipeRule{}
+	for _, rule := range c.ItemRecipes {
+		recipes[rule.ItemID] = rule
+	}
+	seen := map[int64]bool{}
+	for _, rule := range c.PetCrafting {
+		if rule.TableID <= 0 || seen[rule.TableID] || len(rule.Levels) != 5 {
+			return errWorkshopInput
+		}
+		seen[rule.TableID] = true
+		for _, level := range rule.Levels {
+			if len(level) == 0 {
+				return errWorkshopInput
+			}
+			for _, identifier := range level {
+				recipe, exists := recipes[identifier]
+				if !exists || identifier <= 0 || len(recipe.MakeResourceIDs) == 0 || recipe.MakeTime <= 0 {
+					return errWorkshopInput
+				}
+			}
+		}
+	}
+	return nil
+}
+
+var workshopCritProportion = regexp.MustCompile(`^(1|[1-9][0-9]*)(\.[0-9]+)?$`)
+
 func (m WorkshopMiscRule) Validate() error {
-	if m.SaturationInit <= 0 || m.SaturationTimeSeconds <= 0 || m.AccelerateItemID <= 0 || m.AccelerateTimeSeconds <= 0 || m.PetColorAccelerateTimeSeconds < 0 || len(m.PetCostItemIDs) != 2 || m.PetCostItemIDs[0] <= 0 || m.PetCostItemIDs[1] <= 0 || m.PetCostItemIDs[0] == m.PetCostItemIDs[1] {
+	if !workshopExactDecimal.MatchString(m.CritParam) || !workshopCritProportion.MatchString(m.CritProportion) || m.SaturationInit <= 0 || m.SaturationTimeSeconds <= 0 || m.AccelerateItemID <= 0 || m.AccelerateTimeSeconds <= 0 || m.PetColorAccelerateTimeSeconds < 0 || len(m.PetCostItemIDs) != 2 || m.PetCostItemIDs[0] <= 0 || m.PetCostItemIDs[1] <= 0 || m.PetCostItemIDs[0] == m.PetCostItemIDs[1] {
+		return errWorkshopInput
+	}
+	return nil
+}
+
+type AdministratorRule struct {
+	Destination int64            `json:"destination"`
+	Ordinal     int64            `json:"ordinal"`
+	Credit      int64            `json:"credit"`
+	Costs       map[string]int64 `json:"costs"`
+}
+
+type AdministratorLevelRule struct {
+	Level  int64   `json:"level"`
+	Unlock []int64 `json:"unlock"`
+}
+
+type AdministratorInputCatalog struct {
+	SchemaVersion int                      `json:"schema_version"`
+	Rules         []AdministratorRule      `json:"rules"`
+	LevelUnlocks  []AdministratorLevelRule `json:"level_unlocks"`
+}
+
+var administratorDestinations = map[int64]bool{11: true, 12: true, 13: true}
+
+func (c AdministratorInputCatalog) Validate() error {
+	if c.SchemaVersion != 1 || len(c.Rules) != 180 || len(c.LevelUnlocks) != 5 {
+		return errWorkshopInput
+	}
+	seenRules := map[[2]int64]bool{}
+	for _, rule := range c.Rules {
+		key := [2]int64{rule.Destination, rule.Ordinal}
+		if !administratorDestinations[rule.Destination] || rule.Ordinal < 1 || rule.Ordinal > 60 || seenRules[key] || rule.Credit <= 0 || len(rule.Costs) != 4 {
+			return errWorkshopInput
+		}
+		seenRules[key] = true
+		for currency, amount := range rule.Costs {
+			identifier, parseErr := strconv.ParseInt(currency, 10, 64)
+			if parseErr != nil || !workshopResourceIDs[identifier] && identifier != 2 || identifier == rule.Destination || amount <= 0 {
+				return errWorkshopInput
+			}
+		}
+	}
+	for index, level := range c.LevelUnlocks {
+		if level.Level != int64(index+1) || len(level.Unlock) == 0 {
+			return errWorkshopInput
+		}
+		seen := map[int64]bool{}
+		for _, identifier := range level.Unlock {
+			if !workshopResourceIDs[identifier] && identifier != 2 || seen[identifier] {
+				return errWorkshopInput
+			}
+			seen[identifier] = true
+		}
+	}
+	if len(c.LevelUnlocks[4].Unlock) != 5 {
 		return errWorkshopInput
 	}
 	return nil

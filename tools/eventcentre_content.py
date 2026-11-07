@@ -17,6 +17,12 @@ def _amount(value, label, error):
     return int(amount)
 
 
+ADMINISTRATOR_COLUMNS = frozenset((
+    "id", "name", "type", "desc", "resources_id", "resources_num", "time",
+    "type_request", "function_request_level", "unlock",
+))
+
+
 def build_administrator(blobs, parse_table, error):
     rows = parse_table(blobs["data/tables/event_centre_conversion.lua"].data)
     columns_by_currency = {currency: column for column, currency in SOURCE_COLUMNS.items()}
@@ -60,12 +66,35 @@ def build_administrator(blobs, parse_table, error):
     if missing:
         raise error(f"missing administrator conversion ids: {missing}")
     ordered = [rules[identifier] for identifier in sorted(rules)]
-    return {"schema_version": 1, "rules": ordered}
+
+    level_rows = parse_table(blobs["data/tables/event_centre_administrator.lua"].data)
+    if len(level_rows) != 5:
+        raise error(f"administrator level table has {len(level_rows)} rows, want 5")
+    level_unlocks = []
+    known_currencies = set(SOURCE_COLUMNS.values())
+    for level, row in enumerate(level_rows, start=1):
+        if set(row) != ADMINISTRATOR_COLUMNS:
+            raise error(f"administrator level row {level} has an unexpected column set")
+        if _amount(row["id"], f"administrator level {level} id", error) != level:
+            raise error(f"administrator level {level} is not the expected source level")
+        unlock = [
+            _amount(part, f"administrator level {level} unlock", error)
+            for part in row["unlock"].split("|")
+            if part != ""
+        ]
+        if not unlock or len(unlock) != len(set(unlock)) or any(currency not in known_currencies for currency in unlock):
+            raise error(f"administrator level {level} has an invalid unlock set")
+        level_unlocks.append({"level": level, "unlock": unlock})
+    if set(level_unlocks[-1]["unlock"]) != known_currencies:
+        raise error("administrator level 5 does not unlock every source currency")
+    return {"schema_version": 1, "rules": ordered, "level_unlocks": level_unlocks}
 
 
 WORKSHOP_SCHEMA_VERSION = 1
 WORKSHOP_RESOURCE_KEYS = {1: "mana", 11: "magic_dust", 12: "magic_liquid", 13: "magic_energy", 14: "magic_exp"}
 WORKSHOP_MISC_KEYS = (
+    "event_centre_crit_param",
+    "event_centre_crit_proportion",
     "event_centre_saturation_init",
     "event_centre_saturation_time",
     "event_centre_accelerate_item",
@@ -364,12 +393,18 @@ def build_workshop(blobs, parse_table, parse_indexed_table, parse_items, error):
         raise error(f"award grade distribution differs from source: {grade_counts}")
 
     pet_keys, pet_rows = parse_indexed_table(blobs["data/tables/pet.lua"].data)
+    pet_crafting = []
     pet_item_ids = set()
     for row_id in sorted(pet_rows):
         raw = _workshop_indexed_value(pet_keys, pet_rows[row_id], "table_item_id", row_id, error)
+        levels = []
         for level_items in raw.split("@"):
-            for identifier in _workshop_vector(level_items, f"pet {row_id} table_item_id", error, positive=True):
-                pet_item_ids.add(identifier)
+            identifiers = _workshop_vector(level_items, f"pet {row_id} table_item_id", error, positive=True)
+            if not identifiers or len(identifiers) != len(set(identifiers)):
+                raise error(f"pet {row_id} has an empty or duplicate level item list")
+            levels.append(identifiers)
+            pet_item_ids.update(identifiers)
+        pet_crafting.append({"table_id": row_id, "levels": levels})
     for identifier in pet_item_ids:
         if identifier not in items:
             raise error(f"pet selection references unknown item {identifier}")
@@ -427,6 +462,8 @@ def build_workshop(blobs, parse_table, parse_indexed_table, parse_items, error):
         if identifier not in items:
             raise error(f"misc.event_centre_pet_cost_item references unknown item {identifier}")
     misc = {
+        "event_centre_crit_param": _workshop_exact_decimal(misc_by_key["event_centre_crit_param"], "misc.event_centre_crit_param", error),
+        "event_centre_crit_proportion": _workshop_exact_decimal(misc_by_key["event_centre_crit_proportion"], "misc.event_centre_crit_proportion", error),
         "event_centre_saturation_init": _workshop_integer(misc_by_key["event_centre_saturation_init"], "misc.event_centre_saturation_init", error, allow_zero=False),
         "event_centre_saturation_time": _workshop_integer(misc_by_key["event_centre_saturation_time"], "misc.event_centre_saturation_time", error, allow_zero=False),
         "event_centre_accelerate_item": _workshop_integer(misc_by_key["event_centre_accelerate_item"], "misc.event_centre_accelerate_item", error, allow_zero=False),
@@ -444,5 +481,6 @@ def build_workshop(blobs, parse_table, parse_indexed_table, parse_items, error):
         "hero_profiles": hero_profiles,
         "awards": awards,
         "item_recipes": item_recipes,
+        "pet_crafting": pet_crafting,
         "misc": misc,
     }

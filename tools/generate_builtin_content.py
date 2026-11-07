@@ -2667,8 +2667,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     if any(x["limit"] not in (0,1) for x in library_backgrounds) or any(x["item_id"]!=50001648 for x in library_cgs): raise CompileError("Library background/cg source shape drift")
     library_artifact=dict(schema_version=1,seed_policy_id="LIBRARY_NEUTRAL_SEED_V1",feed_policy_id="LIBRARY_FEED_RECONSTRUCTION_V1",original_server_probability_recovered=False,favor_limit=2000,templates=library_templates,gifts=library_gifts,feeding=dict(axes=axes,methods=methods,decrease_begin_percent=misc_int("library_feed_decr_begin")),normal_collections=normal,special_collections=special,stages=library_stages,acts=library_acts,missions=library_missions,talks=library_talks,cgs=library_cgs,backgrounds=library_backgrounds,dialog_configs=library_dialog_configs,dialog_nodes=dialog_nodes,dialog_source_unknowns=dialog_source_unknowns,course_gift_boxes=library_course_boxes)
     from book_content import build_book
+    from eventcentre_content import build_administrator, build_workshop
     course_artifact=build_course(blobs,parse_generated_lua_table,items)
     book_artifact=build_book(blobs,parse_generated_lua_table,items)
+    workshop_artifact=build_workshop(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,parse_encoded_item_table,CompileError)
+    administrator_artifact=build_administrator(blobs,parse_generated_lua_table,CompileError)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
     top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table)
@@ -2703,6 +2706,8 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "inscription_input_catalog.json":build_inscription(blobs,parse_generated_lua_table,items),
         "course_input_catalog.json":course_artifact,
         "book_input_catalog.json":book_artifact,
+        "workshop_input_catalog.json":workshop_artifact,
+        "administrator_input_catalog.json":administrator_artifact,
         "dorm_input_catalog.json":dorm_artifact,
         "library_input_catalog.json":library_artifact,
         "player_display_catalog.json":display_artifact,

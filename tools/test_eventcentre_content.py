@@ -91,6 +91,16 @@ class AdministratorContentCompilerTests(unittest.TestCase):
         with self.assertRaises(compiler.CompileError):
             self.build_with_rows(malformed)
 
+    def test_level_unlocks_match_the_administrator_table(self):
+        catalog = self.build()
+        self.assertEqual(catalog["level_unlocks"], [
+            {"level": 1, "unlock": [2]},
+            {"level": 2, "unlock": [2, 13]},
+            {"level": 3, "unlock": [2, 13, 12]},
+            {"level": 4, "unlock": [2, 13, 12, 11]},
+            {"level": 5, "unlock": [2, 13, 12, 11, 1]},
+        ])
+
     def test_rejects_duplicate_ids(self):
         rows = self.source_rows()
         rows[1]["id"] = rows[0]["id"]
@@ -333,6 +343,8 @@ class WorkshopContentCompilerTests(unittest.TestCase):
     def test_misc_uses_exact_source_keys(self):
         misc = self.build()["misc"]
         self.assertEqual(misc, {
+            "event_centre_crit_param": "0.1",
+            "event_centre_crit_proportion": "2",
             "event_centre_saturation_init": 10000,
             "event_centre_saturation_time": 15,
             "event_centre_accelerate_item": 50005024,
@@ -340,6 +352,18 @@ class WorkshopContentCompilerTests(unittest.TestCase):
             "event_centre_pet_cost_item": [50001086, 50001094],
             "event_centre_pet_color_accelerate_time": 1800,
         })
+
+    def test_pet_crafting_preserves_each_source_level_list(self):
+        crafting = {rule["table_id"]: rule for rule in self.build()["pet_crafting"]}
+        self.assertEqual(len(crafting), 54)
+        self.assertEqual(crafting[10010001]["levels"], [
+            [80001027],
+            [80001023],
+            [80001013, 80001055],
+            [80001059, 80001063],
+            [80001086],
+        ])
+        self.assertTrue(all(len(rule["levels"]) == 5 for rule in crafting.values()))
 
     def test_compilation_is_deterministic_and_writes_scratch_payload(self):
         first = compiler.canonical_json_bytes(self.build())

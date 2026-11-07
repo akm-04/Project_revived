@@ -35,24 +35,7 @@
     "name": "I7C2D_BOOK_INPUTS"
    }
   ],
-  "ranks": [
-   {
-    "name": "course.RootLockRank",
-    "rank": 520
-   },
-   {
-    "name": "elementequipment.RootLockRank",
-    "rank": 560
-   },
-   {
-    "name": "inscription.RootLockRank",
-    "rank": 540
-   },
-   {
-    "name": "spirit.RootLockRank",
-    "rank": 580
-   }
-  ],
+  "ranks": [],
   "row_lock_methods": {
    "account_sessions": [
     "i5store.FenceActorTx"
@@ -182,14 +165,9 @@
  "stores": [
   "internal/adapters/postgres/bookstore",
   "internal/adapters/postgres/contentstore",
-  "internal/adapters/postgres/coursestore",
-  "internal/adapters/postgres/dormstore",
-  "internal/adapters/postgres/elementstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
-  "internal/adapters/postgres/inscriptionstore",
-  "internal/adapters/postgres/kernelstore",
-  "internal/adapters/postgres/spiritstore"
+  "internal/adapters/postgres/kernelstore"
  ],
  "tables": {
   "owned": [

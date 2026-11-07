@@ -576,76 +576,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 1072,
-   "name": "GET_RECYCLE_INFO",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1073,
-   "name": "RECYCLE_ITEMS",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1074,
-   "name": "GET_DESKP_INFO",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1075,
-   "name": "MAKE_ITEM",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1076,
-   "name": "CANCEL_MAKE_ITEM",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1081,
-   "name": "GET_ADMIN_INFO",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1082,
-   "name": "ADMIN_CONVERSION",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 1083,
    "name": "GET_NOTICE_BOARD_INFO",
    "files": [
@@ -688,46 +618,6 @@
   {
    "mid": 1087,
    "name": "GET_NOTICE_BOARD_REPORT",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1088,
-   "name": "CONFIRM_MAKE_ITEM",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1089,
-   "name": "ACCELERATE_MAKE_ITEM",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1090,
-   "name": "GET_PET_ROOM_INFO",
-   "files": [
-    "app/model/EventCentre.lua"
-   ],
-   "family": "EVENT_CENTRE_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 1091,
-   "name": "MAKE_PET_ITEM",
    "files": [
     "app/model/EventCentre.lua"
    ],
@@ -1209,12 +1099,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 607,
+  "count": 596,
   "window_sender_mid_count": 142,
-  "non_window_sender_mid_count": 465,
+  "non_window_sender_mid_count": 454,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 78,
+   "no_registration": 67,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -2643,97 +2533,6 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 1072,
-    "name": "GET_RECYCLE_INFO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1073,
-    "name": "RECYCLE_ITEMS",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1074,
-    "name": "GET_DESKP_INFO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1075,
-    "name": "MAKE_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1076,
-    "name": "CANCEL_MAKE_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1081,
-    "name": "GET_ADMIN_INFO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1082,
-    "name": "ADMIN_CONVERSION",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 1083,
     "name": "GET_NOTICE_BOARD_INFO",
     "registration_status": "no_registration",
@@ -2788,58 +2587,6 @@
    {
     "mid": 1087,
     "name": "GET_NOTICE_BOARD_REPORT",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1088,
-    "name": "CONFIRM_MAKE_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1089,
-    "name": "ACCELERATE_MAKE_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1090,
-    "name": "GET_PET_ROOM_INFO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/EventCentre.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/EventCentre.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1091,
-    "name": "MAKE_PET_ITEM",
     "registration_status": "no_registration",
     "senders": [
      "app/model/EventCentre.lua"
@@ -10115,6 +9862,7 @@
     "dodgeball",
     "dormhouse",
     "elementequipment",
+    "eventcentre",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -10168,6 +9916,7 @@
     "dodgeball",
     "dormhouse",
     "elementequipment",
+    "eventcentre",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -10221,6 +9970,7 @@
     "dodgeball",
     "dormhouse",
     "elementequipment",
+    "eventcentre",
     "godstrial",
     "guildbroadcast",
     "guildcampaign",
@@ -10331,6 +10081,7 @@
     "dodgeball",
     "dormhouse",
     "elementequipment",
+    "eventcentre",
     "frienddm",
     "generaldm",
     "guildbroadcast",

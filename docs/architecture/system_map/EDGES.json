@@ -41,6 +41,9 @@
    "achievement": [
     "*BookInputsTx"
    ],
+   "eventcentre": [
+    "*BookInputsTx"
+   ],
    "missioninputs": [
     "*BookInputsTx"
    ],
@@ -510,9 +513,6 @@
    "achievement": [
     "*CompletedCourseCountTx"
    ],
-   "bookskill": [
-    "*EnsureRootTx"
-   ],
    "elementequipment": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
@@ -561,6 +561,7 @@
     "*CoherentHeroInputsTx"
    ]
   },
+  "eventcentre": {},
   "frienddm": {
    "realtimewakeup": [
     "*ReloadAndDeliver"
@@ -657,6 +658,10 @@
     "Bind",
     "DecisionAt",
     "Run"
+   ],
+   "eventcentre": [
+    "Bind",
+    "DecisionAt"
    ],
    "frienddm": [
     "DecisionAt",
@@ -1151,6 +1156,12 @@
     "*ReadProgressionTx",
     "*SettleGrantTx"
    ],
+   "eventcentre": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareMaterialDebitTx",
+    "*SettleGrantTx"
+   ],
    "frienddm": [
     "*PrepareEmoticonEntitlementTx"
    ],
@@ -1409,9 +1420,6 @@
   "inscription": {
    "achievement": [
     "*CompleteSuitCountTx"
-   ],
-   "bookskill": [
-    "*EnsureRootTx"
    ],
    "course": [
     "*EnsureHeroTx",
@@ -1908,9 +1916,6 @@
    ]
   },
   "spirit": {
-   "bookskill": [
-    "*EnsureRootTx"
-   ],
    "course": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
@@ -2252,9 +2257,6 @@
    ]
   },
   "bookskill": {
-   "course": [
-    "*EnsureRootTx"
-   ],
    "generation": [
     "Bind",
     "DecisionAt",
@@ -2270,22 +2272,18 @@
     "*ReadScalarTx",
     "*SettleGrantTx"
    ],
-   "inscription": [
-    "*EnsureRootTx"
-   ],
    "interface:bookskill.BackfillHeroPort": [
     "*ListHeroRootPlayerIDsTx",
     "*LockRootTx"
+   ],
+   "interface:bookskill.BackfillPort": [
+    "*EnsureRootTx"
    ],
    "interface:bookskill.HeroPort": [
     "*ReadHeroByPartnerIDTx",
     "*ReadRootTx"
    ],
-   "spirit": [
-    "*EnsureRootTx"
-   ],
    "store:bookstore": [
-    "*EnsureRootTx",
     "*LockAdmissionTx",
     "*LockRootTx",
     "*ReadRootTx",
@@ -2296,12 +2294,6 @@
     "*BookCatalogTx",
     "*BookInputsActive",
     "*BookInputsRevisionTx"
-   ],
-   "store:dormstore": [
-    "*EnsureRootTx"
-   ],
-   "store:elementstore": [
-    "*EnsureRootTx"
    ],
    "store:i4store": [
     "*LockPlayerRootsTx"
@@ -3304,6 +3296,35 @@
     "*SaveAdmissionTx",
     "*SaveHeroTx",
     "*SaveRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ]
+  },
+  "eventcentre": {
+   "bookskill": [
+    "*BookInputsTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareMaterialDebitTx",
+    "*SettleGrantTx"
+   ],
+   "interface:eventcentre.PetPort": [
+    "*FindPetByIDTx"
+   ],
+   "store:contentstore": [
+    "*WorkshopInputsActive",
+    "*WorkshopInputsTx"
    ],
    "store:i4store": [
     "*LockPlayerRootsTx"
@@ -5588,6 +5609,9 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "elementequipment": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
+  "eventcentre": [
    "cmd/gxb-api/main_postgres.go"
   ],
   "frienddm": [
