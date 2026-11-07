@@ -1,6 +1,7 @@
 package topfloor
 
 import (
+	"reflect"
 	"testing"
 	"time"
 )
@@ -111,5 +112,22 @@ func TestCalendarAndTickets(t *testing.T) {
 	}
 	if rolled := c.Rolled(bought, noon.Add(24*time.Hour)); rolled.Purchases != 0 || rolled.TicketsLeft != 5 {
 		t.Fatal("daily roll")
+	}
+}
+
+func TestRobotHeroParamsCarrySourceEquipment(t *testing.T) {
+	c := Catalog{RobotHeroes: []RobotHero{{ID: 77001005, Level: 77, PartnerID: 10001005, Quality: 9, Star: 3, EquipFlags: []int64{1, 0, 1, 1, 1, 1}}}}
+	params, ok := c.RobotHeroParams(77001005)
+	if !ok {
+		t.Fatal("robot hero missing")
+	}
+	if params["lev"] != int64(77) || params["star"] != int64(3) || params["color"] != int64(9) || params["partner_id"] != int64(10001005) {
+		t.Fatalf("source params %v", params)
+	}
+	if !reflect.DeepEqual(params["equips"], []any{int64(1), int64(0), int64(1), int64(1), int64(1), int64(1)}) {
+		t.Fatalf("source equip flags %v", params["equips"])
+	}
+	if !reflect.DeepEqual(params["skills"], []any{1, 1, 1, 1, 1, 1}) {
+		t.Fatalf("client-default skill levels %v", params["skills"])
 	}
 }

@@ -222,14 +222,26 @@ func (c Catalog) RobotName(team int64) string {
 	return first + " " + last
 }
 
-// RobotHeroParams are the TEMPLATE populate params of one robot hero. Source
-// equip flags have no recovered item mapping, so robots field no equipment.
+// RobotHeroParams are the TEMPLATE populate params of one robot hero at its
+// source strength. The robot_hero equip column is the stock per-slot equip
+// value: 0 empty, 1 equipped at enhancement level 0 (NormalHero.equips_ - 1).
 func (c Catalog) RobotHeroParams(id int64) (map[string]any, bool) {
 	h, ok := c.robotHeroIndex()[id]
 	if !ok {
 		return nil, false
 	}
 	return map[string]any{"player_id": 0, "partner_id": h.PartnerID, "table_id": h.PartnerID, "lev": h.Level, "star": h.Star, "color": h.Quality,
-		"skin_ids": map[string]any{}, "spirit_equip": []any{}, "spirit_item": []any{}, "equips": []any{0, 0, 0, 0, 0, 0}, "fumos": []any{0, 0, 0, 0, 0, 0},
+		"skin_ids": map[string]any{}, "spirit_equip": []any{}, "spirit_item": []any{}, "equips": robotEquipSlots(h.EquipFlags), "fumos": []any{0, 0, 0, 0, 0, 0},
 		"skills": []any{1, 1, 1, 1, 1, 1}}, true
+}
+
+func robotEquipSlots(flags []int64) []any {
+	out := make([]any, 6)
+	for i := range out {
+		out[i] = int64(0)
+		if i < len(flags) {
+			out[i] = flags[i]
+		}
+	}
+	return out
 }
