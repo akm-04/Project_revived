@@ -30,6 +30,7 @@
  },
  "tests": {
   "integration": [
+   "playerdisplay",
    "socialprojection"
   ],
   "scenarios_naming": [],

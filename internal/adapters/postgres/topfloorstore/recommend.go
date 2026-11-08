@@ -18,13 +18,12 @@ func (Store) HeroRecommendSourceTx(c context.Context, q tx.Queryer, server ident
 		return out, d.ErrUnavailable
 	}
 	var popularity string
-	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('partner_id',partner_id,'player_id',player_id,'score',score) ORDER BY score DESC,partner_id),'[]'::jsonb)::text FROM(
-		SELECT partner_id,player_id,score FROM(
-			SELECT u.partner_id,u.player_id,SUM(u.fights+2*u.wins+u.kill_count)OVER(PARTITION BY u.partner_id)AS score,
-			 ROW_NUMBER()OVER(PARTITION BY u.partner_id ORDER BY(u.fights+2*u.wins+u.kill_count)DESC,u.player_id)AS rn
-			FROM top_floor_partner_usage u JOIN top_floor_players p ON p.player_id=u.player_id
-			WHERE p.logical_server_id=$1
-		)ranked WHERE rn=1 ORDER BY score DESC,partner_id LIMIT $2
+	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('partner_id',partner_id,'player_id',player_id,'score',score) ORDER BY score DESC,player_id,partner_id),'[]'::jsonb)::text FROM(
+		SELECT u.partner_id,u.player_id,SUM(u.fights+2*u.wins+u.kill_count)AS score
+		FROM top_floor_partner_usage u JOIN top_floor_players p ON p.player_id=u.player_id
+		WHERE p.logical_server_id=$1
+		GROUP BY u.player_id,u.partner_id
+		ORDER BY score DESC,u.player_id,u.partner_id LIMIT $2
 	)x`, int64(server), limit).Scan(&popularity); e != nil {
 		return out, e
 	}
