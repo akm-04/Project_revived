@@ -424,6 +424,7 @@ func main() {
 	var profileHistory apppublicprofile.HistoryReader
 	// The title origin route copied above never reads metrics.
 	boardRanking.Metrics = profileMetrics
+	boardRanking.TopForce = profileMetrics
 	boardRanking.Comfort = dormstore.Store{Queryer: pool}
 	rentalPolicy, err := guildrentalpolicy.LoadBuiltin()
 	if err != nil {

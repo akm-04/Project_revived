@@ -1182,11 +1182,11 @@
   },
   {
    "callees": 4,
-   "callers": 3,
+   "callers": 4,
    "mids": 0,
    "name": "heroforce",
    "path": "internal/application/heroforce",
-   "purpose": "is the shared \"best 15 AP\" projection: the sum of a player's fifteen strongest heroes' qualified public force",
+   "purpose": "is the shared \"best hero force\" projection: the sum of a player's strongest heroes' qualified public force",
    "tables": 0
   },
   {
@@ -1370,7 +1370,7 @@
    "tables": 3
   },
   {
-   "callees": 23,
+   "callees": 24,
    "callers": 2,
    "mids": 8,
    "name": "publicprofile",

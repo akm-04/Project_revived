@@ -29,6 +29,8 @@
  "tests": {
   "integration": [],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "best_test.go"
+  ]
  }
 }

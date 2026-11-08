@@ -803,6 +803,7 @@
    ],
    "publicprofile": [
     "DecisionAt",
+    "NewTimedOperation",
     "Operation",
     "Run"
    ],
@@ -979,6 +980,9 @@
    ],
    "occult": [
     "Best15"
+   ],
+   "publicprofile": [
+    "Best"
    ]
   },
   "i5": {
@@ -1670,7 +1674,8 @@
     "Validate"
    ],
    "ranking": [
-    "*ReadMetricsScopeTx"
+    "*ReadMetricsScopeTx",
+    "*ReadTopForceMetricScopeTx"
    ]
   },
   "publicstats": {
@@ -4871,11 +4876,15 @@
    ],
    "generation": [
     "DecisionAt",
+    "NewTimedOperation",
     "Operation",
     "Run"
    ],
    "guildcore": [
     "*ReadPublicGuildTx"
+   ],
+   "heroforce": [
+    "Best"
    ],
    "i5": [
     "*FenceActorTx",
@@ -5020,7 +5029,8 @@
     "Validate"
    ],
    "publicprofile": [
-    "*ReadMetricsScopeTx"
+    "*ReadMetricsScopeTx",
+    "*ReadTopForceMetricScopeTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",

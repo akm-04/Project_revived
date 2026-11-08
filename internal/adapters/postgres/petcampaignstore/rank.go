@@ -25,3 +25,22 @@ func (Store) RanksTx(c context.Context, q tx.Queryer, server identity.LogicalSer
 	}
 	return out, my, e
 }
+
+// EliteRanksTx is the same owner's elite ladder: EliteMax replaces Max and only
+// players who opened the elite floors are listed.
+func (Store) EliteRanksTx(c context.Context, q tx.Queryer, server identity.LogicalServerID, self d.State) ([]app.RankCandidate, int64, error) {
+	var raw string
+	e := q.QueryRow(c, `SELECT COALESCE(json_agg(r)::text,'[]') FROM (SELECT player_id AS "Player",(payload->>'EliteMax')::bigint AS "Floor" FROM petcampaign_players WHERE (payload->>'Server')::bigint=$1 AND (payload->>'EliteMax')::bigint>0 ORDER BY (payload->>'EliteMax')::bigint DESC,(payload->>'Attained')::bigint,player_id LIMIT 100)r`, int64(server)).Scan(&raw)
+	if e != nil {
+		return nil, 0, e
+	}
+	out := []app.RankCandidate{}
+	if e = json.Unmarshal([]byte(raw), &out); e != nil {
+		return nil, 0, e
+	}
+	my := int64(0)
+	if self.EliteMax > 0 {
+		e = q.QueryRow(c, `SELECT 1+count(*) FROM petcampaign_players WHERE (payload->>'Server')::bigint=$1 AND ((payload->>'EliteMax')::bigint>$2 OR ((payload->>'EliteMax')::bigint=$2 AND ((payload->>'Attained')::bigint<$3 OR ((payload->>'Attained')::bigint=$3 AND player_id<$4))))`, int64(server), self.EliteMax, self.Attained, self.Player).Scan(&my)
+	}
+	return out, my, e
+}

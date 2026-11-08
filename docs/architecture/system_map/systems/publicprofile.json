@@ -214,7 +214,8 @@
    "rich_records_test.go",
    "roster_metrics_test.go",
    "selected_metrics_test.go",
-   "showcase_test.go"
+   "showcase_test.go",
+   "top_force_metric_test.go"
   ]
  }
 }
