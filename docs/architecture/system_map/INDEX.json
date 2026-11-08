@@ -282,6 +282,7 @@
    "2492": "playerdisplay",
    "2493": "playerdisplay",
    "2494": "playerdisplay",
+   "2496": "herorecommend",
    "2497": "herorecommend",
    "2498": "herorecommend",
    "2499": "herorecommend",
@@ -633,6 +634,7 @@
    "guild_tea_gifts": "guildcore",
    "guild_tea_wishes": "guildcore",
    "guilds": "guildcore",
+   "hero_recommend_snapshots": "herorecommend",
    "illusion_attempts": "illusion",
    "illusion_occurrence_results": "illusion",
    "illusion_occurrences": "illusion",
@@ -1141,13 +1143,13 @@
    "tables": 0
   },
   {
-   "callees": 16,
+   "callees": 15,
    "callers": 0,
-   "mids": 3,
+   "mids": 4,
    "name": "herorecommend",
    "path": "internal/application/herorecommend",
    "purpose": "",
-   "tables": 0
+   "tables": 1
   },
   {
    "callees": 12,
@@ -1295,7 +1297,7 @@
   },
   {
    "callees": 0,
-   "callers": 22,
+   "callers": 21,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",

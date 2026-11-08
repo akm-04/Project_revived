@@ -2,7 +2,7 @@
   "schema_version": 1,
   "policy_id": "I9_10_HERO_RECOMMEND_PRIVATE_POLICY_V1",
   "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
-  "mids": [2497, 2498, 2499],
+  "mids": [2496, 2497, 2498, 2499],
   "source_evidence": {
     "categories": "data/tables/hero_recommend_type.lua:9-52",
     "rules": "data/tables/translation.lua:13956-13958",
@@ -17,7 +17,12 @@
     {
       "id": "on_demand_refresh",
       "classification": "PRIVATE_POLICY",
-      "value": "A read on a logical server without the current generation builds it inside the request's serializable transaction. The periodic generation reconcile provider performs the same bounded refresh for servers that own player roots."
+      "value": "A read on a logical server without the current generation builds it inside the request's serializable transaction. The periodic provider pages at most 50 logical servers with player roots per tick using a process-local keyset cursor; it does not enumerate player roots. Each page calls the same bounded refresh for those servers."
+    },
+    {
+      "id": "reconcile_interval",
+      "classification": "PRIVATE_POLICY",
+      "value": "The periodic refresh provider defaults to a 30s interval and can be adjusted with GXB_HERO_RECOMMEND_RECONCILE_INTERVAL."
     },
     {
       "id": "snapshot_scope",
@@ -27,7 +32,7 @@
     {
       "id": "source_scan_cap",
       "classification": "PRIVATE_POLICY",
-      "value": "At most 100 rows are read from each category source per refresh. Fantasy reads at most 200 resolved attempts. Every scan is bounded."
+      "value": "At most 100 rows are read from each category source per refresh, including at most 100 resolved Fantasy attempts. Every scan is bounded."
     },
     {
       "id": "formation_cap",
@@ -72,7 +77,7 @@
     {
       "id": "popularity_weight_fantasy",
       "classification": "PRIVATE_POLICY",
-      "value": "sum(resolved attempt damage) per partner over at most 200 server attempts; attempts are the only retained formation source"
+      "value": "sum(resolved attempt damage) per partner over at most 100 server attempts; attempts are the only retained formation source"
     },
     {
       "id": "popularity_weight_guild_event",
@@ -115,6 +120,11 @@
       "value": "2498 returns {} when the hero has no derived detail (no owning candidate and no force row). A recommended hero always has at least one owning candidate by construction."
     },
     {
+      "id": "empty_detail_formations",
+      "classification": "PRIVATE_POLICY",
+      "value": "A known recommended hero's 2498 response always contains recommend_formations as an object, including an empty object when no source formation includes the hero."
+    },
+    {
       "id": "guild_event_history",
       "classification": "PRIVATE_POLICY",
       "value": "No historical Guild Event formation is fabricated. Only new completed records with the captured owned formation partner ids contribute; the category is legitimately empty until such records exist."
@@ -123,6 +133,16 @@
       "id": "summoned_heroes",
       "classification": "PRIVATE_POLICY",
       "value": "Arena table ids that the owner's stock roster does not contain (summoned or otherwise unowned girls) are omitted from a formation and contribute no force, rather than inventing an owned row."
+    },
+    {
+      "id": "hero_template_identity",
+      "classification": "PRIVATE_POLICY",
+      "value": "Popularity and detail keys use the source exemplar's stock roster origin_table_id. A raw source table_id must resolve to an owned roster row; formations retain their current hero rows but group under origin_table_id."
+    },
+    {
+      "id": "unsupported_legacy_mid",
+      "classification": "PRIVATE_POLICY",
+      "value": "MID 2496 GET_HERO_SCORE has no client caller beyond its unused model wrapper and no recovered success shape; it is explicitly refused with HTTP 409 and error_code 1 rather than returning a fabricated success body."
     }
   ],
   "capabilities": {

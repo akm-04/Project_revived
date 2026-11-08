@@ -412,10 +412,10 @@ func main() {
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
 	heroRecommend := canonicalHeroRecommend(pool, runner, contentDB, owners, publicStats)
 	heroRecommendD := stockruntime.HeroRecommendDispatcher{Authority: authority, Service: heroRecommend}
-	for _, mid := range []uint16{2497, 2498, 2499} {
+	for _, mid := range []uint16{2496, 2497, 2498, 2499} {
 		mustRegister(mid, heroRecommendD)
 	}
-	go runReconcile(ctx, pool, appherorecommend.Reconciler{Service: heroRecommend})
+	go runReconcileWithInterval(ctx, pool, &appherorecommend.Reconciler{Service: heroRecommend}, envPositiveDuration("GXB_HERO_RECOMMEND_RECONCILE_INTERVAL", defaultReconcileInterval))
 	profileMetrics := canonicalProfileMetrics(contentDB, publicStats, displayService, achievements)
 	profileRecords := apppublicprofile.RosterRecords{Heroes: owners.roster(contentDB), Pets: characterstore.PetBootstrapProjection{Content: contentDB}, Awakening: publicStats.Awakening, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: contentDB, Heroes: characterstore.Store{Queryer: pool}, Kinds: contentDB, Players: i4store.PlayerRootLocker{}}}
 	var profileHistory apppublicprofile.HistoryReader

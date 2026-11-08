@@ -1590,9 +1590,6 @@
     "CanonicalPlayerIDs",
     "LockKey"
    ],
-   "herorecommend": [
-    "Validate"
-   ],
    "occult": [
     "CanonicalPlayerIDs"
    ],
@@ -3960,9 +3957,6 @@
    "playerdirectory": [
     "Validate"
    ],
-   "playerroot": [
-    "Validate"
-   ],
    "publicstats": [
     "*HeroTx"
    ],
@@ -3977,7 +3971,7 @@
     "*ReadMembershipTx"
    ],
    "store:i4store": [
-    "*ListPlayerRootsTx",
+    "*ListLogicalServersAfterTx",
     "*ProfileTx"
    ],
    "store:leaguestore": [

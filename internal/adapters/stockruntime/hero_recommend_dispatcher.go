@@ -34,6 +34,9 @@ func (h HeroRecommendDispatcher) Dispatch(ctx context.Context, req httpedge.Disp
 	}
 	params, o, mid := req.Envelope.Params, req.Envelope.Operation, req.Envelope.MID
 	switch mid {
+	case 2496:
+		// PRIVATE_POLICY: no client caller or success shape is recovered for GET_HERO_SCORE.
+		return conflictRefusal(1)
 	case 2497:
 		if !onlyStockGameplayParams(params) {
 			return badHero("invalid_hero_recommend_params")

@@ -24,15 +24,13 @@ const (
 // Private caps. Every source surface is bounded; these are the PRIVATE_POLICY
 // caps recorded in docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json.
 const (
-	MaxSourceScan          = 100
-	MaxSourceFormations    = 20
-	MaxCategoryHeroes      = 50
-	MaxTotalHeroes         = 50
-	MaxForceRows           = 50
-	MaxDetailFormations    = 3
-	MaxCandidateOwners     = 64
-	MaxChampionMatchScan   = 100
-	MaxIllusionAttemptScan = 200
+	MaxSourceScan       = 100
+	MaxSourceFormations = 20
+	MaxCategoryHeroes   = 50
+	MaxTotalHeroes      = 50
+	MaxForceRows        = 50
+	MaxDetailFormations = 3
+	MaxCandidateOwners  = 64
 )
 
 var ErrUnavailable = errors.New("herorecommend: unavailable provider")

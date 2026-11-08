@@ -7,7 +7,6 @@ import (
 	"gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
-	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
@@ -61,9 +60,9 @@ type HeroPower interface {
 	HeroTx(context.Context, characterasset.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
 }
 
-// Cohort is the I4-owned player enumeration used by the reconcile provider.
+// Cohort is the I4-owned bounded logical-server enumeration used by reconciliation.
 type Cohort interface {
-	ListPlayerRootsTx(context.Context, tx.Queryer) ([]playerroot.Root, error)
+	ListLogicalServersAfterTx(context.Context, tx.Queryer, identity.LogicalServerID, int) ([]identity.LogicalServerID, error)
 }
 
 type Service struct {

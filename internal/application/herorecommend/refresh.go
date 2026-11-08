@@ -91,6 +91,7 @@ type ownerState struct {
 	card      d.PlayerCard
 	byPartner map[int64]map[string]any
 	byTable   map[int64]map[string]any
+	byOrigin  map[int64]map[string]any
 	pets      map[int64]map[string]any
 }
 
@@ -134,14 +135,18 @@ func (s Service) build(ctx context.Context, sc gen.TimedScope, server identity.L
 			scores[source.category] = map[int64]int64{}
 		}
 		for _, row := range source.data.Popularity {
-			tableID := row.TableID
-			if tableID <= 0 {
-				state, ok := owners[row.PlayerID]
-				if !ok {
-					continue
-				}
-				tableID = rowTableID(state.byPartner[row.PartnerID])
+			state, ok := owners[row.PlayerID]
+			if !ok {
+				continue
 			}
+			hero := state.byPartner[row.PartnerID]
+			if row.TableID > 0 {
+				hero = state.byTable[row.TableID]
+				if hero == nil {
+					hero = state.byOrigin[row.TableID]
+				}
+			}
+			tableID := recommendationTableID(hero)
 			if tableID <= 0 || row.Score <= 0 {
 				continue
 			}
@@ -243,7 +248,7 @@ func (s Service) loadOwner(ctx context.Context, q tx.Queryer, playerID identity.
 	}
 	heroes, _ := detail["49"].(map[string]any)
 	rows, _ := heroes["heros"].(map[string]any)
-	state := ownerState{card: card, byPartner: map[int64]map[string]any{}, byTable: map[int64]map[string]any{}, pets: map[int64]map[string]any{}}
+	state := ownerState{card: card, byPartner: map[int64]map[string]any{}, byTable: map[int64]map[string]any{}, byOrigin: map[int64]map[string]any{}, pets: map[int64]map[string]any{}}
 	for _, value := range rows {
 		row, ok := value.(map[string]any)
 		if !ok {
@@ -251,11 +256,15 @@ func (s Service) loadOwner(ctx context.Context, q tx.Queryer, playerID identity.
 		}
 		partnerID := rowNumber(row, "partner_id")
 		tableID := rowNumber(row, "table_id")
+		originTableID := recommendationTableID(row)
 		if partnerID > 0 {
 			state.byPartner[partnerID] = row
 		}
 		if tableID > 0 {
 			state.byTable[tableID] = row
+		}
+		if originTableID > 0 {
+			state.byOrigin[originTableID] = row
 		}
 	}
 	petDetail := map[string]any{}
@@ -280,9 +289,12 @@ func resolveFormation(state ownerState, row d.Formation) (resolvedFormation, boo
 	for _, tableID := range row.TableIDs {
 		hero, owned := state.byTable[tableID]
 		if !owned {
+			hero, owned = state.byOrigin[tableID]
+		}
+		if !owned {
 			continue
 		}
-		out.tableIDs = append(out.tableIDs, tableID)
+		out.tableIDs = append(out.tableIDs, recommendationTableID(hero))
 		out.heroes = append(out.heroes, hero)
 	}
 	if len(out.heroes) == 0 {
@@ -291,7 +303,7 @@ func resolveFormation(state ownerState, row d.Formation) (resolvedFormation, boo
 			if !owned {
 				continue
 			}
-			out.tableIDs = append(out.tableIDs, rowTableID(hero))
+			out.tableIDs = append(out.tableIDs, recommendationTableID(hero))
 			out.heroes = append(out.heroes, hero)
 		}
 	}
@@ -340,7 +352,7 @@ func (s Service) buildDetails(ctx context.Context, scope ca.CoherentReadScope, o
 	for _, tableID := range rankScores(totals, d.MaxTotalHeroes) {
 		rows := []d.ForceRow{}
 		for playerID, state := range owners {
-			hero, owned := state.byTable[tableID]
+			hero, owned := state.byOrigin[tableID]
 			if !owned {
 				continue
 			}
@@ -364,7 +376,7 @@ func (s Service) buildDetails(ctx context.Context, scope ca.CoherentReadScope, o
 		}
 		top := rows[0]
 		topState := owners[top.Player.PlayerID]
-		topHero := copyRow(topState.byTable[tableID])
+		topHero := copyRow(topState.byOrigin[tableID])
 		topHero["force"] = top.Force
 		details[strconv.FormatInt(tableID, 10)] = d.Detail{
 			Score:      totals[tableID],
@@ -436,6 +448,14 @@ func rowNumber(row map[string]any, key string) int64 {
 }
 
 func rowTableID(row map[string]any) int64 { return rowNumber(row, "table_id") }
+
+func recommendationTableID(row map[string]any) int64 {
+	originTableID := rowNumber(row, "origin_table_id")
+	if originTableID > 0 {
+		return originTableID
+	}
+	return rowTableID(row)
+}
 
 func number(value any) int64 {
 	switch typed := value.(type) {

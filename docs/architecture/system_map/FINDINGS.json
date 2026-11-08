@@ -827,16 +827,6 @@
    "stage": "I9-10"
   },
   {
-   "mid": 2496,
-   "name": "GET_HERO_SCORE",
-   "files": [
-    "app/model/HeroRecommend.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 2501,
    "name": "GET_HERO_RECOMMEND_SCORES",
    "files": [
@@ -1098,12 +1088,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 596,
+  "count": 595,
   "window_sender_mid_count": 142,
-  "non_window_sender_mid_count": 454,
+  "non_window_sender_mid_count": 453,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 67,
+   "no_registration": 66,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -5218,19 +5208,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/SnowBall.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 2496,
-    "name": "GET_HERO_SCORE",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/HeroRecommend.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/HeroRecommend.lua"
     ],
     "runtime_reachability": "unknown"
    },
@@ -10173,14 +10150,7 @@
    "declared": true
   }
  ],
- "tables_without_owner_row": [
-  {
-   "table": "hero_recommend_snapshots",
-   "migrations": [
-    "migrations/00144_i9_10_hero_recommend.sql"
-   ]
-  }
- ],
+ "tables_without_owner_row": [],
  "unattributed_mids": [
   {
    "mid": 2,

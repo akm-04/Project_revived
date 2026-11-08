@@ -40,3 +40,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00136: I9-10 D512 special Top Floor is humans-only: a weekly period may start at size 0 instead of seeding robot ranks.
 - 00137: I9-10F Mentor/My Class relationship history, per-player application counters and break cooldown, application rows, mission high-water/award progress and graduation exam receipts. Empty on upgrade.
 - 00143: I9-10 D512 operator-configurable Top Floor girl bans by mode and rotation.
+- 00153: I9-10 Hero Recommend per-logical-server weekly derived snapshot.

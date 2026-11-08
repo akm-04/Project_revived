@@ -1,11 +1,5 @@
 {
- "background": [
-  {
-   "binary": "gxb-api",
-   "entry": "appherorecommend.Reconciler",
-   "kind": "reconcile"
-  }
- ],
+ "background": [],
  "content": [],
  "contracts": [
   {
@@ -13,11 +7,11 @@
    "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
   },
   {
-   "count": 3,
+   "count": 4,
    "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
   },
   {
-   "count": 3,
+   "count": 4,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -48,6 +42,14 @@
  },
  "login": [],
  "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2496,
+   "name": "GET_HERO_SCORE"
+  },
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
@@ -89,18 +91,26 @@
   "internal/adapters/postgres/topfloorstore"
  ],
  "tables": {
-  "owned": [],
+  "owned": [
+   "hero_recommend_snapshots"
+  ],
   "read": [
    "guild_memberships",
    "guilds",
    "gxb_content_activation",
+   "hero_recommend_snapshots",
+   "logical_servers",
    "player_directory_profiles",
    "players"
   ],
-  "written": []
+  "written": [
+   "hero_recommend_snapshots"
+  ]
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "playerdisplay"
+  ],
   "scenarios_naming": [],
   "unit": [
    "service_test.go"

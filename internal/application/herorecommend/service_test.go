@@ -6,18 +6,18 @@ import (
 	"testing"
 	"time"
 
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
 	d "gxb.local/backend/v2/internal/domain/herorecommend"
 	"gxb.local/backend/v2/internal/domain/identity"
+	statrules "gxb.local/backend/v2/internal/domain/statrules"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	statrules "gxb.local/backend/v2/internal/domain/statrules"
 )
 
 const testRevision = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -75,11 +75,37 @@ func (s *fakeSource) HeroRecommendSourceTx(context.Context, tx.Queryer, identity
 	return s.data, nil
 }
 
+type fakeCohort struct {
+	servers []identity.LogicalServerID
+	afters  []identity.LogicalServerID
+	limits  []int
+}
+
+func (c *fakeCohort) ListLogicalServersAfterTx(_ context.Context, _ tx.Queryer, after identity.LogicalServerID, limit int) ([]identity.LogicalServerID, error) {
+	c.afters = append(c.afters, after)
+	c.limits = append(c.limits, limit)
+	out := make([]identity.LogicalServerID, 0, limit)
+	for _, server := range c.servers {
+		if server <= after {
+			continue
+		}
+		out = append(out, server)
+		if len(out) == limit {
+			break
+		}
+	}
+	return out, nil
+}
+
 type fakeContent struct{}
 
-func (fakeContent) ActiveRevision(context.Context, tx.Queryer) (string, error) { return testRevision, nil }
+func (fakeContent) ActiveRevision(context.Context, tx.Queryer) (string, error) {
+	return testRevision, nil
+}
 
-type fakeDirectory struct{ profiles map[identity.PlayerID]playerdirectory.Profile }
+type fakeDirectory struct {
+	profiles map[identity.PlayerID]playerdirectory.Profile
+}
 
 func (d fakeDirectory) ProfileTx(_ context.Context, _ tx.Queryer, pid identity.PlayerID) (playerdirectory.Profile, bool, error) {
 	profile, ok := d.profiles[pid]
@@ -135,7 +161,6 @@ func itoa(id int64) string {
 
 func testService(t *testing.T) (Service, *fakeStore, *fakeTime) {
 	t.Helper()
-	server := int64(1)
 	player := identity.PlayerID(100001)
 	other := identity.PlayerID(100002)
 	first := map[string]any{"partner_id": int64(55), "table_id": int64(10001001), "lev": int64(10)}
@@ -161,8 +186,8 @@ func testService(t *testing.T) (Service, *fakeStore, *fakeTime) {
 	store := &fakeStore{}
 	clock := &fakeTime{now: time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)}
 	service := Service{
-		Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: fakeBeginner{}}},
-		Store: store,
+		Timed:   gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: fakeBeginner{}}},
+		Store:   store,
 		Sources: Sources{TopFloor: topFloor, OneOnOne: oneOnOne, Arena: arena, Fantasy: fantasy, GuildEvent: &fakeSource{}, Champion: champion},
 		Content: fakeContent{},
 		Directory: fakeDirectory{profiles: map[identity.PlayerID]playerdirectory.Profile{
@@ -174,12 +199,12 @@ func testService(t *testing.T) (Service, *fakeStore, *fakeTime) {
 		Pets:      fakeRoster{},
 		HeroPower: fakePower{force: map[[2]int64]int64{{int64(player), 55}: 100, {int64(player), 56}: 200, {int64(other), 57}: 300}},
 	}
-	_ = server
 	return service, store, clock
 }
 
 func testActor() identity.ActorContext {
-	return identity.ActorContext{PlayerID: 100001, LogicalServerID: 1, AccountUID: 9001, ContextID: identity.ContextID(ids.UUID{15: 1})}
+	contextID, _ := identity.ContextIDFrom(ids.UUID{15: 1})
+	return identity.ActorContext{PlayerID: 100001, LogicalServerID: 1, AccountUID: identity.AccountUID("20000007"), ContextID: contextID}
 }
 
 func testOperation(at time.Time) operation.Context {
@@ -251,6 +276,67 @@ func TestOverviewAndDetailPayloads(t *testing.T) {
 	}
 }
 
+func TestAwakenedHeroRecommendationUsesOriginID(t *testing.T) {
+	service, _, _ := testService(t)
+	roster := service.Heroes.(fakeRoster)
+	awakened := roster.heroes[int64(testActor().PlayerID)][0]
+	awakened["table_id"] = int64(10001011)
+	awakened["origin_table_id"] = int64(10001001)
+	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+
+	overview, err := service.Overview(context.Background(), testActor(), testOperation(at))
+	if err != nil {
+		t.Fatal(err)
+	}
+	subRankList := overview["sub_rank_list"].(map[string][]int64)
+	if len(subRankList["1"]) != 2 || subRankList["1"][0] != 10001001 {
+		t.Fatalf("awakened recommendation IDs %+v", subRankList["1"])
+	}
+	totalRankList := overview["total_rank_list"].([]map[string]any)
+	if totalRankList[0]["table_id"] != int64(10001001) {
+		t.Fatalf("awakened total recommendation %+v", totalRankList[0])
+	}
+
+	detail, err := service.Detail(context.Background(), testActor(), testOperation(at), 10001001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	forceInfo := detail["force_info"].(map[string]any)
+	if forceInfo["top_hero_info"].(map[string]any)["table_id"] != int64(10001011) {
+		t.Fatalf("detail lost the current hero form: %+v", forceInfo["top_hero_info"])
+	}
+	formations := detail["recommend_formations"].(map[string]any)
+	formation := formations["1"].(map[string]any)["formation"].([]map[string]any)
+	if formation[0]["table_id"] != int64(10001011) {
+		t.Fatalf("formation lost the current hero form: %+v", formation)
+	}
+
+	rank, err := service.ForceRank(context.Background(), testActor(), testOperation(at), 10001001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	myRank := rank["my_rank"].(map[string]any)
+	if myRank["rank"] != int64(1) || myRank["force"] != int64(100) {
+		t.Fatalf("origin ID did not resolve the viewer hero: %+v", myRank)
+	}
+}
+
+func TestDetailAlwaysReturnsAnEmptyFormationMap(t *testing.T) {
+	service, _, _ := testService(t)
+	for _, source := range []Source{service.Sources.TopFloor, service.Sources.OneOnOne, service.Sources.Arena, service.Sources.Fantasy, service.Sources.GuildEvent, service.Sources.Champion} {
+		source.(*fakeSource).data.Formations = nil
+	}
+	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	detail, err := service.Detail(context.Background(), testActor(), testOperation(at), 10001001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	formations, ok := detail["recommend_formations"].(map[string]any)
+	if !ok || len(formations) != 0 {
+		t.Fatalf("recommend_formations %+v", detail["recommend_formations"])
+	}
+}
+
 func TestForceRankPayload(t *testing.T) {
 	service, _, _ := testService(t)
 	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
@@ -294,6 +380,50 @@ func TestMissingRecordAndRefusalAreContractSafe(t *testing.T) {
 	}
 	if _, err := service.ForceRank(context.Background(), testActor(), testOperation(at), -1); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("negative table id %v", err)
+	}
+}
+
+func TestReconcilerPagesLogicalServersAndWraps(t *testing.T) {
+	service, _, _ := testService(t)
+	service.Fresh = fakeTx{}
+	cohort := &fakeCohort{servers: []identity.LogicalServerID{1, 2, 3}}
+	service.Cohort = cohort
+	reconciler := Reconciler{Service: service}
+	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	timedOperation, err := gen.NewTimedOperation(testOperation(at), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	first, err := reconciler.Reconcile(context.Background(), timedOperation, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Scanned != 2 || first.Settled != 2 {
+		t.Fatalf("first page %+v", first)
+	}
+	second, err := reconciler.Reconcile(context.Background(), timedOperation, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Scanned != 1 || second.Settled != 1 {
+		t.Fatalf("second page %+v", second)
+	}
+	third, err := reconciler.Reconcile(context.Background(), timedOperation, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if third.Scanned != 2 || third.Settled != 2 {
+		t.Fatalf("wrapped page %+v", third)
+	}
+	wantAfters := []identity.LogicalServerID{0, 2, 3, 0}
+	if len(cohort.afters) != len(wantAfters) {
+		t.Fatalf("page cursors %+v", cohort.afters)
+	}
+	for index, after := range wantAfters {
+		if cohort.afters[index] != after || cohort.limits[index] != 2 {
+			t.Fatalf("page %d after=%d limit=%d", index, cohort.afters[index], cohort.limits[index])
+		}
 	}
 }
 

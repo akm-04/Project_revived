@@ -25,6 +25,7 @@ import (
 type i9Process struct {
 	t       *testing.T
 	command *osexec.Cmd
+	log     *os.File
 	origin  string
 	bearer  string
 	running bool
@@ -76,7 +77,7 @@ func startI9Process(t *testing.T, p *pg.Pool, actor identity.ActorContext) *i9Pr
 		resp, e := http.Get(origin + "/profile-media/missing")
 		if e == nil {
 			resp.Body.Close()
-			process := &i9Process{t: t, command: command, origin: origin, bearer: bearer, running: true}
+			process := &i9Process{t: t, command: command, log: log, origin: origin, bearer: bearer, running: true}
 			t.Cleanup(process.stop)
 			return process
 		}
@@ -118,6 +119,11 @@ func (process *i9Process) stop() {
 	process.running = false
 	process.command.Process.Signal(os.Interrupt)
 	process.command.Wait()
+	if process.t.Failed() {
+		if raw, err := os.ReadFile(process.log.Name()); err == nil {
+			process.t.Logf("API process log: %s", raw)
+		}
+	}
 }
 
 func i9Number(t *testing.T, value any) int64 {

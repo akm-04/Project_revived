@@ -35,10 +35,10 @@ func (s Service) Detail(ctx context.Context, a identity.ActorContext, o operatio
 		return map[string]any{}, nil
 	}
 	forceInfo := map[string]any{"top_player_info": cardBody(detail.TopPlayer, 0), "top_hero_info": detail.TopHero}
-	body := map[string]any{"recommend_score": detail.Score, "force_info": forceInfo}
-	if len(detail.Formations) > 0 {
-		body["recommend_formations"] = detail.Formations
+	if detail.Formations == nil {
+		detail.Formations = map[string]any{}
 	}
+	body := map[string]any{"recommend_score": detail.Score, "force_info": forceInfo, "recommend_formations": detail.Formations}
 	force, owned, err := s.viewerForce(ctx, a, o, tableID)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (s Service) viewerForce(ctx context.Context, a identity.ActorContext, o ope
 		var partnerID int64
 		for _, value := range rows {
 			row, ok := value.(map[string]any)
-			if ok && rowNumber(row, "table_id") == tableID {
+			if ok && (rowNumber(row, "table_id") == tableID || recommendationTableID(row) == tableID) {
 				partnerID = rowNumber(row, "partner_id")
 				break
 			}
