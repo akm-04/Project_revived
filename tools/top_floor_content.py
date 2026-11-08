@@ -1,8 +1,20 @@
 """Top Floor source tables plus the labelled C5B private ladder policy inputs."""
+import json
 from decimal import Decimal
+from pathlib import Path
 from one_on_one_content import _translations
 
 TEAM_COLUMNS = ('robot1', 'robot2', 'robot3', 'robot4', 'robot5')
+
+# PRIVATE_POLICY: role-balanced lineups for robots inside the rank band. The
+# checkout holds the extracted team_catalog data so generation never reads tmp/.
+ROBOT_LINEUP_SOURCE = Path(__file__).resolve().with_name('top_floor_robot_lineups.json')
+POSITION_DISTANCE_TYPES = {'front': 2, 'middle': 3, 'rear': 4}
+ROBOT_LINEUP_POLICY = dict(
+    label='PRIVATE_POLICY',
+    policy_id='I9_10_ROBOT_LINEUPS_V1_PRIVATE_POLICY',
+    selection='fnv1a64(decimal rank) modulo lineup count',
+)
 
 # PRIVATE_POLICY: the user's rank strength bands. Quality values are
 # xyd.EquipQuality (enums.lua:729-745): 16 red+1, 15 red, 13 orange+1,
@@ -34,7 +46,65 @@ def _ten_thousandths(raw):
     return int(value)
 
 
-def build_top_floor(blobs, parse, pet_templates):
+def _lineup_failure(entry, partner_rows, partner_keys, indexed_field):
+    heroes = entry.get('heroes')
+    if not isinstance(heroes, list) or len(heroes) != 5:
+        return 'expected five heroes'
+    partner_ids = [hero.get('partner_id') for hero in heroes]
+    if len(set(partner_ids)) != 5:
+        return 'duplicate partner id'
+    counts = {position: 0 for position in POSITION_DISTANCE_TYPES}
+    previous = 0
+    for hero in heroes:
+        position = hero.get('position')
+        if position not in POSITION_DISTANCE_TYPES:
+            return 'unknown position ' + str(position)
+        distance = POSITION_DISTANCE_TYPES[position]
+        if distance < previous:
+            return 'heroes not ordered front to rear'
+        previous = distance
+        counts[position] += 1
+        partner_id = hero.get('partner_id')
+        values = partner_rows.get(partner_id)
+        if values is None:
+            return 'partner %s is not in the client partner table' % partner_id
+        if indexed_field(partner_keys, values, 'first_table_id', row_id=partner_id) != '0':
+            return 'partner %s is not a base obtainable hero' % partner_id
+        if indexed_field(partner_keys, values, 'librart_show', row_id=partner_id) != '1':
+            return 'partner %s is not library visible' % partner_id
+        if int(indexed_field(partner_keys, values, 'distance_type', row_id=partner_id)) != distance:
+            return 'partner %s distance_type does not match %s' % (partner_id, position)
+    for position, count in counts.items():
+        if not 1 <= count <= 2:
+            return '%s count %d is outside 1-2' % (position, count)
+    return ''
+
+
+def build_robot_lineups(partner_keys, partner_rows, indexed_field):
+    # PRIVATE_POLICY: every extracted lineup is revalidated against the client
+    # partner table; a failing lineup is dropped as a whole and recorded.
+    source = json.loads(ROBOT_LINEUP_SOURCE.read_bytes())
+    source_sha256 = source.get('source_sha256')
+    if not isinstance(source_sha256, str) or len(source_sha256) != 64:
+        raise ValueError('top floor robot lineup provenance drift')
+    entries = source.get('lineups')
+    if not isinstance(entries, list) or not entries:
+        raise ValueError('top floor robot lineup source empty')
+    lineups, dropped = [], []
+    for entry in entries:
+        reason = _lineup_failure(entry, partner_rows, partner_keys, indexed_field)
+        if reason:
+            dropped.append(dict(id=entry.get('id', 'UNKNOWN'), reason=reason))
+            continue
+        lineups.append(dict(id=entry['id'], name=entry.get('name', ''), tier=entry.get('tier', ''),
+                            heroes=[dict(partner_id=int(hero['partner_id']), position=hero['position']) for hero in entry['heroes']]))
+    if not lineups:
+        raise ValueError('top floor robot lineups: every lineup failed validation')
+    return dict(**ROBOT_LINEUP_POLICY, source=source.get('source', ''), source_sha256=source_sha256,
+                lineups=lineups, dropped=dropped)
+
+
+def build_top_floor(blobs, parse, pet_templates, robot_lineups):
     table = lambda name: parse(blobs['data/tables/' + name + '.lua'].data)
     misc = {r['key']: r['value'] for r in table('misc')}
     functions = {r['id']: r for r in table('function')}
@@ -76,7 +146,7 @@ def build_top_floor(blobs, parse, pet_templates):
     if [a['rank'] for a in anchors] != sorted(a['rank'] for a in anchors) or anchors[-1]['rank'] != ROBOT_RANK_BANDS['meeting_rank']:
         raise ValueError('top floor robot rank band anchors drift')
     return dict(schema_version=1, contract_id='C5B_TOP_FLOOR_MODE_V1', policy_id='C5B_TOP_FLOOR_PRIVATE_POLICY_V1',
-                pet_pool=pet_pool, robot_rank_bands=ROBOT_RANK_BANDS,
+                pet_pool=pet_pool, robot_rank_bands=ROBOT_RANK_BANDS, robot_lineups=robot_lineups,
                 function_id=4, required_level=10, free_tickets=5, buy_restore=int(misc['arena_buy_num']), cooldown_seconds=int(misc['arena_cooldown']),
                 reset_cost=int(misc['arena_refresh_cost']), match_hundredths=[int(Decimal(misc['arena_match_param_' + k]) * 100) for k in '123'],
                 cutoff_seconds=int(misc['arena_gift_time1']), freeze_end_seconds=int(misc['arena_gift_time2']), records_max=int(misc['arena_defense_list_max']),

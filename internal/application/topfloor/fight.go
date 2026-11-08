@@ -284,10 +284,12 @@ func (s Service) opponent(c context.Context, q tx.Queryer, catalog d.Catalog, p 
 func (s Service) defenders(c context.Context, q tx.Queryer, catalog d.Catalog, o d.Occupant, rank int64) ([]combat.Participant, []combat.Participant, error) {
 	heroes, pets := []combat.Participant{}, []combat.Participant{}
 	if o.IsRobot() {
-		team, _ := catalog.Team(o.Robot)
-		for _, id := range team.Heroes {
-			params, _ := catalog.RobotHeroParamsAt(id, rank)
-			heroes = append(heroes, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: params["partner_id"].(int64), TemplateParams: params})
+		params, ok := catalog.RobotHeroesAt(o.Robot, rank)
+		if !ok {
+			return nil, nil, d.ErrRefused
+		}
+		for _, hero := range params {
+			heroes = append(heroes, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: hero["partner_id"].(int64), TemplateParams: hero})
 		}
 		if pet, ok := catalog.RobotPet(o.Robot, rank); ok {
 			pets = append(pets, combat.Participant{Origin: cd.Template, Kind: cd.PetActor, Identity: pet["pet_id"].(int64), TemplateParams: pet})

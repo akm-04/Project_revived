@@ -334,10 +334,11 @@ func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, ser
 		if band, ok := catalog.RobotBand(rank); ok && band.Level > view.Level {
 			view.Level = band.Level
 		}
-		for _, id := range team.Heroes {
-			params, _ := catalog.RobotHeroParamsAt(id, rank)
-			view.Heroes = append(view.Heroes, params)
+		heroes, ok := catalog.RobotHeroesAt(o.Robot, rank)
+		if !ok {
+			return d.Display{}, d.ErrConflict
 		}
+		view.Heroes = append(view.Heroes, heroes...)
 		if pet, ok := catalog.RobotPet(o.Robot, rank); ok {
 			view.Pet = pet
 		}

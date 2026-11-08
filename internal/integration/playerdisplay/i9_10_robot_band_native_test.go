@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	app "gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/identity"
+	n "gxb.local/backend/v2/internal/domain/statinputs"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -58,7 +59,7 @@ func TestI9_10TopFloorRobotRankBandNative(t *testing.T) {
 		if _, err = s.Start(ctx, a, command, op()); err != nil {
 			t.Fatal(err)
 		}
-		assertFightBand(t, pool, a.PlayerID, 100, 16, 3, 100, catalog)
+		assertFightBand(t, pool, a.PlayerID, first.Occupant.Robot, 1, 100, 16, 3, 100, catalog)
 	}
 
 	// Rank 30: orange+1, level 88, level-88 pet; source star and equipment kept.
@@ -102,6 +103,71 @@ func TestI9_10TopFloorRobotRankBandNative(t *testing.T) {
 			t.Fatalf("rank 600 hero %d display %v want source %v", id, display, params)
 		}
 	}
+}
+
+// TestI9_10TopFloorRobotLineupForceNative resolves every banded rank through
+// the production materializer, so a lineup girl who borrows a source equip flag
+// for a slot her own colour row does not provide still yields a force.
+func TestI9_10TopFloorRobotLineupForceNative(t *testing.T) {
+	database := pool(t)
+	defer database.Close()
+	store := contentstore.Store{Queryer: database}
+	revision, err := store.ActiveRevision(ctx, database)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := store.TopFloorCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	inputs, err := store.StatInputCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	statRules, err := store.StatCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	materializer, err := n.New(revision, inputs, statRules)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lineups := map[string]bool{}
+	for rank := int64(1); rank <= catalog.RobotRankBands.MeetingRank; rank++ {
+		lineup, ok := catalog.RobotLineup(rank)
+		if !ok {
+			t.Fatalf("rank %d has no lineup", rank)
+		}
+		lineups[lineup.ID] = true
+		heroes, ok := catalog.RobotHeroesAt(d.RobotTeams+1-rank, rank)
+		if !ok {
+			t.Fatalf("rank %d robot heroes", rank)
+		}
+		for slot, hero := range heroes {
+			flags := equipFlags(t, hero)
+			force, err := materializer.RobotHeroForce("NormalHero", hero["table_id"].(int64), int(hero["lev"].(int64)), int(hero["star"].(int64)), int(hero["color"].(int64)), flags)
+			if err != nil || force <= 0 {
+				t.Fatalf("rank %d slot %d girl %d force %v err %v", rank, slot, hero["partner_id"], force, err)
+			}
+		}
+	}
+	if len(lineups) != len(catalog.RobotLineups.Lineups) {
+		t.Fatalf("walked %d lineups want %d", len(lineups), len(catalog.RobotLineups.Lineups))
+	}
+}
+
+func equipFlags(t *testing.T, hero map[string]any) []int64 {
+	t.Helper()
+	slots, ok := hero["equips"].([]any)
+	if !ok {
+		t.Fatalf("hero %v has no equip slots", hero["partner_id"])
+	}
+	flags := make([]int64, len(slots))
+	for i, slot := range slots {
+		flags[i] = slot.(int64)
+	}
+	return flags
 }
 
 func ranksOf(view app.ArenaView) []int64 {
@@ -161,15 +227,25 @@ func assertDisplayBand(t *testing.T, catalog d.Catalog, display d.Display, level
 	if display.Rank < 1 || display.Level != level {
 		t.Fatalf("rank %d display level %d want %d", display.Rank, display.Level, level)
 	}
-	team, source := sourceTeam(t, catalog, display.Rank)
 	if display.Occupant.Robot != d.RobotTeams+1-display.Rank {
 		t.Fatalf("rank %d occupant robot %d", display.Rank, display.Occupant.Robot)
 	}
-	if len(display.Heroes) != len(team.Heroes) {
-		t.Fatalf("rank %d display %d heroes want %d", display.Rank, len(display.Heroes), len(team.Heroes))
+	want, ok := catalog.RobotHeroesAt(display.Occupant.Robot, display.Rank)
+	if !ok {
+		t.Fatalf("rank %d robot heroes", display.Rank)
+	}
+	lineup, banded := catalog.RobotLineup(display.Rank)
+	if !banded || len(lineup.Heroes) != len(want) {
+		t.Fatalf("rank %d lineup %+v", display.Rank, lineup)
+	}
+	if len(display.Heroes) != len(want) {
+		t.Fatalf("rank %d display %d heroes want %d", display.Rank, len(display.Heroes), len(want))
 	}
 	for i, hero := range display.Heroes {
-		assertHeroBand(t, hero, source[i], level, quality, star)
+		if hero["partner_id"] != lineup.Heroes[i].PartnerID {
+			t.Fatalf("rank %d hero %d partner %v want lineup %d", display.Rank, i, hero["partner_id"], lineup.Heroes[i].PartnerID)
+		}
+		assertHeroBand(t, hero, want[i], level, quality, star)
 	}
 }
 
@@ -191,19 +267,19 @@ func assertPet(t *testing.T, pet map[string]any, level int64, catalog d.Catalog)
 	t.Fatalf("pet %v not from the source pool", pet)
 }
 
-func assertHeroBand(t *testing.T, hero map[string]any, source d.RobotHero, level, quality, star int64) {
+func assertHeroBand(t *testing.T, hero, want map[string]any, level, quality, star int64) {
 	t.Helper()
 	if hero["lev"] != level || hero["color"] != quality || hero["star"] != star {
 		t.Fatalf("hero %v want lev %d color %d star %d", hero, level, quality, star)
 	}
-	if hero["partner_id"] != source.PartnerID {
-		t.Fatalf("hero partner %v want source %d", hero["partner_id"], source.PartnerID)
+	if hero["partner_id"] != want["partner_id"] {
+		t.Fatalf("hero partner %v want lineup %v", hero["partner_id"], want["partner_id"])
 	}
-	if !reflect.DeepEqual(hero["equips"], robotEquipSlots(source.EquipFlags)) {
-		t.Fatalf("hero %d equipment %v want source %v", source.PartnerID, hero["equips"], source.EquipFlags)
+	if !reflect.DeepEqual(hero["equips"], want["equips"]) {
+		t.Fatalf("hero %v equipment %v want source slot %v", want["partner_id"], hero["equips"], want["equips"])
 	}
 	if !reflect.DeepEqual(hero["skills"], []any{1, 1, 1, 1, 1, 1}) {
-		t.Fatalf("hero %d skills %v", source.PartnerID, hero["skills"])
+		t.Fatalf("hero %v skills %v", want["partner_id"], hero["skills"])
 	}
 }
 
@@ -229,9 +305,16 @@ type frozenActorParams struct {
 	TableID   int64   `json:"table_id"`
 }
 
-func assertFightBand(t *testing.T, pool *pg.Pool, player identity.PlayerID, level, quality, star, petLevel int64, catalog d.Catalog) {
+func assertFightBand(t *testing.T, pool *pg.Pool, player identity.PlayerID, robot, rank, level, quality, star, petLevel int64, catalog d.Catalog) {
 	t.Helper()
-	_, source := sourceTeam(t, catalog, 1)
+	want, ok := catalog.RobotHeroesAt(robot, rank)
+	if !ok {
+		t.Fatalf("rank %d fight robot heroes", rank)
+	}
+	lineup, banded := catalog.RobotLineup(rank)
+	if !banded || len(lineup.Heroes) != len(want) {
+		t.Fatalf("rank %d fight lineup %+v", rank, lineup)
+	}
 	var raw []byte
 	if err := pool.QueryRow(ctx, `SELECT cs.canonical FROM combat_attempts ca JOIN combat_snapshots cs ON cs.snapshot_hash=ca.snapshot_hash WHERE ca.actor_player_id=$1 ORDER BY ca.started_at DESC,ca.attempt_id DESC LIMIT 1`, int64(player)).Scan(&raw); err != nil {
 		t.Fatal(err)
@@ -249,17 +332,27 @@ func assertFightBand(t *testing.T, pool *pg.Pool, player identity.PlayerID, leve
 	if err := json.Unmarshal(raw, &snapshot); err != nil {
 		t.Fatal(err)
 	}
-	if len(snapshot.Battle.WavesB) != 1 || len(snapshot.Battle.WavesB[0]) != len(source) {
-		t.Fatalf("fight robot waves %+v want %d", snapshot.Battle.WavesB, len(source))
+	if len(snapshot.Battle.WavesB) != 1 || len(snapshot.Battle.WavesB[0]) != len(want) {
+		t.Fatalf("fight robot waves %+v want %d", snapshot.Battle.WavesB, len(want))
 	}
 	for i, actor := range snapshot.Battle.WavesB[0] {
 		var params frozenActorParams
 		if err := json.Unmarshal(actor.Params, &params); err != nil {
 			t.Fatal(err)
 		}
-		want := source[i]
-		if params.Lev != level || params.Color != quality || params.Star != star || params.PartnerID != want.PartnerID || !reflect.DeepEqual(params.Equips, want.EquipFlags) || !reflect.DeepEqual(params.Skills, []int64{1, 1, 1, 1, 1, 1}) {
-			t.Fatalf("fight hero %d params %+v want lev %d color %d star %d equips %v", params.PartnerID, params, level, quality, star, want.EquipFlags)
+		wanted, err := json.Marshal(want[i])
+		if err != nil {
+			t.Fatal(err)
+		}
+		var expected frozenActorParams
+		if err = json.Unmarshal(wanted, &expected); err != nil {
+			t.Fatal(err)
+		}
+		if params.Lev != level || params.Color != quality || params.Star != star || params.PartnerID != expected.PartnerID || !reflect.DeepEqual(params.Equips, expected.Equips) || !reflect.DeepEqual(params.Skills, []int64{1, 1, 1, 1, 1, 1}) {
+			t.Fatalf("fight hero %d params %+v want lev %d color %d star %d equips %v", params.PartnerID, params, level, quality, star, expected.Equips)
+		}
+		if params.PartnerID != lineup.Heroes[i].PartnerID {
+			t.Fatalf("fight hero %d partner %d want lineup %d", i, params.PartnerID, lineup.Heroes[i].PartnerID)
 		}
 	}
 	if len(snapshot.Battle.PetsB) != 1 {

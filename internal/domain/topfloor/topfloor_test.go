@@ -173,6 +173,98 @@ func TestRobotRankBandTable(t *testing.T) {
 	}
 }
 
+func lineupTestCatalog() Catalog {
+	c := bandTestCatalog()
+	c.Robots = []RobotTeam{
+		{Level: 79, Heroes: []int64{1, 2}},
+		{Level: 70, Heroes: []int64{1}},
+	}
+	c.RobotHeroes = append(c.RobotHeroes, RobotHero{ID: 2, Level: 50, PartnerID: 10001032, Quality: 5, Star: 1, EquipFlags: []int64{0, 1}})
+	c.RobotLineups = RobotLineupPolicy{Label: "PRIVATE_POLICY", PolicyID: "I9_10_ROBOT_LINEUPS_V1_PRIVATE_POLICY",
+		Selection: "fnv1a64(decimal rank) modulo lineup count",
+		Lineups: []RobotLineup{
+			{ID: "team_catalog:1", Heroes: []RobotLineupHero{{PartnerID: 10001001, Position: "front"}, {PartnerID: 10001002, Position: "front"}, {PartnerID: 10001003, Position: "middle"}, {PartnerID: 10001004, Position: "middle"}, {PartnerID: 10001005, Position: "rear"}}},
+			{ID: "team_catalog:2", Heroes: []RobotLineupHero{{PartnerID: 10001006, Position: "front"}, {PartnerID: 10001007, Position: "middle"}, {PartnerID: 10001008, Position: "middle"}, {PartnerID: 10001009, Position: "rear"}, {PartnerID: 10001010, Position: "rear"}}},
+		}}
+	return c
+}
+
+func TestRobotLineupSelectionIsDeterministicAndBanded(t *testing.T) {
+	c := lineupTestCatalog()
+	first, ok := c.RobotLineup(1)
+	if !ok || len(first.Heroes) != DefenseSlots {
+		t.Fatalf("rank 1 lineup %+v ok=%v", first, ok)
+	}
+	again, _ := c.RobotLineup(1)
+	other := lineupTestCatalog()
+	third, _ := other.RobotLineup(1)
+	if !reflect.DeepEqual(first, again) || !reflect.DeepEqual(first, third) {
+		t.Fatal("lineup choice must be stable for the same rank across catalogs")
+	}
+	if _, ok = c.RobotLineup(501); ok {
+		t.Fatal("ranks beyond the meeting rank must keep the source team")
+	}
+}
+
+func TestRobotLineupRolesAreOneOrTwoPerRow(t *testing.T) {
+	c := lineupTestCatalog()
+	for _, lineup := range c.RobotLineups.Lineups {
+		counts := map[string]int{}
+		previous := 0
+		for _, hero := range lineup.Heroes {
+			counts[hero.Position]++
+			rank := lineupPositionRank[hero.Position]
+			if rank < previous {
+				t.Fatalf("lineup %s is not ordered front to rear", lineup.ID)
+			}
+			previous = rank
+		}
+		for position := range lineupPositionRank {
+			if counts[position] < 1 || counts[position] > 2 {
+				t.Fatalf("lineup %s has %d %s", lineup.ID, counts[position], position)
+			}
+		}
+	}
+	broken := lineupTestCatalog()
+	broken.RobotLineups.Lineups[0].Heroes[1].Position = "front"
+	broken.RobotLineups.Lineups[0].Heroes[2].Position = "front"
+	if err := broken.RobotLineups.Validate(); err == nil {
+		t.Fatal("three front-row heroes must be rejected")
+	}
+}
+
+func TestRobotHeroesAtKeepsSourceBelowBandAndUsesLineupInside(t *testing.T) {
+	c := lineupTestCatalog()
+	source, ok := c.RobotHeroesAt(1, 600)
+	if !ok || len(source) != 2 {
+		t.Fatalf("rank 600 source heroes %v", source)
+	}
+	first, _ := c.RobotHeroParams(1)
+	second, _ := c.RobotHeroParams(2)
+	if !reflect.DeepEqual(source, []map[string]any{first, second}) {
+		t.Fatalf("below-band heroes %v want source", source)
+	}
+	lineup, _ := c.RobotLineup(1)
+	banded, ok := c.RobotHeroesAt(1, 1)
+	if !ok || len(banded) != DefenseSlots {
+		t.Fatalf("rank 1 lineup heroes %v", banded)
+	}
+	for i, hero := range banded {
+		if hero["partner_id"] != lineup.Heroes[i].PartnerID || hero["table_id"] != lineup.Heroes[i].PartnerID {
+			t.Fatalf("rank 1 hero %d %v want lineup %+v", i, hero, lineup.Heroes[i])
+		}
+		if hero["lev"] != int64(100) || hero["color"] != int64(16) || hero["star"] != int64(3) {
+			t.Fatalf("rank 1 hero %d band stats %v", i, hero)
+		}
+	}
+	if !reflect.DeepEqual(banded[0]["equips"], []any{int64(1), int64(1), int64(0), int64(1), int64(1), int64(1)}) {
+		t.Fatalf("rank 1 slot 0 equipment %v", banded[0]["equips"])
+	}
+	if !reflect.DeepEqual(banded[1]["equips"], []any{int64(0), int64(1), int64(0), int64(0), int64(0), int64(0)}) {
+		t.Fatalf("rank 1 slot 1 equipment %v", banded[1]["equips"])
+	}
+}
+
 func TestRobotBandRaisesSourceHeroAndAddsPet(t *testing.T) {
 	c := bandTestCatalog()
 	params, ok := c.RobotHeroParamsAt(1, 1)

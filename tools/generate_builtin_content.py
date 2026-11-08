@@ -662,7 +662,7 @@ from stat_content import build_stat_rules
 from stat_input_content import build_stat_inputs
 from privilege_content import build_privilege
 from achievement_content import build_achievement
-from top_floor_content import build_top_floor, build_task_modes
+from top_floor_content import build_robot_lineups, build_top_floor, build_task_modes
 SOURCE_MANIFEST.append(('data/tables/march_road.lua', '474778332bf29181e142a0560e70336596b584a81e314d938063fd3dc98d4923', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/march_advance.lua', 'efd627223ba3e7777a90f03c79b368bfc3e6dbd391764cfdbca3aa706dafd38d', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/march_recommend_hero.lua', 'ed4dd7fbb6fa11f97b31f7408e62d4510e4052eab5d803e62e67193b6eced3a9', 'I9_5A_MARCH_SOURCE_BOUNDARY'))
@@ -2674,7 +2674,8 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     administrator_artifact=build_administrator(blobs,parse_generated_lua_table,CompileError)
     from dorm_content import build_dorm
     dorm_artifact=build_dorm(blobs,parse_generated_lua_table,pipe_ints,hero_artifact["templates"],partner_keys,partner_rows,super_keys,super_rows,indexed_field,items,CompileError)
-    top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table, pet_artifact["templates"])
+    top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table, pet_artifact["templates"],
+                                         build_robot_lineups(partner_keys, partner_rows, indexed_field))
     top_floor_artifact["task_modes"] = build_task_modes(blobs, parse_generated_lua_table, parse_base64_indexed_lua_table, indexed_field)
     artifacts = {
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
