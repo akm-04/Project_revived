@@ -27,7 +27,7 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 	}
 	rules := rulesFromCatalog(catalog)
 	var body map[string]any
-	err = service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+	err = service.runReceipted(ctx, actor, op, "apply", map[string]any{"target": int64(target), "relation_type": relationType, "message": message}, &body, func(ctx context.Context, t tx.Tx, at time.Time) error {
 		if err := lockPlayerRoots(ctx, service.Players, t, actor.LogicalServerID, actor.PlayerID, target); err != nil {
 			return err
 		}
@@ -154,7 +154,7 @@ func (service Service) Accept(ctx context.Context, actor identity.ActorContext, 
 	}
 	rules := rulesFromCatalog(catalog)
 	var body map[string]any
-	err = service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+	err = service.runReceipted(ctx, actor, op, "accept", map[string]any{"from": int64(from)}, &body, func(ctx context.Context, t tx.Tx, at time.Time) error {
 		if err := lockPlayerRoots(ctx, service.Players, t, actor.LogicalServerID, actor.PlayerID, from); err != nil {
 			return err
 		}
@@ -286,7 +286,8 @@ func (service Service) Deny(ctx context.Context, actor identity.ActorContext, fr
 	if !service.validForMutation() || (!denyAll && (!from.Valid() || from == actor.PlayerID)) {
 		return map[string]any{}, ErrInvalid
 	}
-	err := service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+	body := map[string]any{}
+	err := service.runReceipted(ctx, actor, op, "deny", map[string]any{"from": int64(from), "deny_all": denyAll}, &body, func(ctx context.Context, t tx.Tx, at time.Time) error {
 		players := []identity.PlayerID{actor.PlayerID}
 		if !denyAll {
 			players = append(players, from)
@@ -329,7 +330,7 @@ func (service Service) Deny(ctx context.Context, actor identity.ActorContext, fr
 	if err != nil {
 		return nil, err
 	}
-	return map[string]any{}, nil
+	return body, nil
 }
 
 // Terminate implements MID 1861 TERMINATE_RELATION. Only the raiser is punished.
@@ -343,7 +344,7 @@ func (service Service) Terminate(ctx context.Context, actor identity.ActorContex
 	}
 	rules := rulesFromCatalog(catalog)
 	var body map[string]any
-	err = service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+	err = service.runReceipted(ctx, actor, op, "terminate", map[string]any{"relation_type": relationType}, &body, func(ctx context.Context, t tx.Tx, at time.Time) error {
 		existing, err := service.Store.ReadRelationshipsTx(ctx, t, actor.PlayerID, actor.LogicalServerID)
 		if err != nil {
 			return err

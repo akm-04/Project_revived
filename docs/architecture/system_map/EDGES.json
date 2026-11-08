@@ -4575,6 +4575,10 @@
     "*ProfilesAfterTx",
     "*ProfilesByExactNameTx"
    ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ],
    "store:librarystore": [
     "*BackgroundCountTx"
    ]

@@ -3,6 +3,8 @@
 package playerdisplay_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -65,12 +67,13 @@ func mentorService(p *pg.Pool) appmentor.Service {
 		Backgrounds: librarystore.Store{},
 		Grants:      grant,
 		Content:     content,
+		Receipts:    kernelstore.Store{},
 	}
 }
 
-func mentorCall(t *testing.T, service appmentor.Service, actor identity.ActorContext, mid uint16, params map[string]any) httpedge.Response {
+func mentorOperation(t *testing.T, p *pg.Pool) operation.Context {
 	t.Helper()
-	revision, err := (contentstore.Store{Queryer: poolForService}).ActiveRevision(ctx, poolForService)
+	revision, err := (contentstore.Store{Queryer: p}).ActiveRevision(ctx, p)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,13 +81,21 @@ func mentorCall(t *testing.T, service appmentor.Service, actor identity.ActorCon
 	if err != nil {
 		t.Fatal(err)
 	}
-	at := time.Now().UTC()
+	return operation.Context{ID: uuid(), StartedAt: time.Now().UTC(), Policies: policies}
+}
+
+func mentorCallWith(t *testing.T, service appmentor.Service, actor identity.ActorContext, mid uint16, params map[string]any, op operation.Context) httpedge.Response {
+	t.Helper()
 	params["token"] = "bearer"
 	params["region"] = int64(actor.LogicalServerID)
-	op := operation.Context{ID: uuid(), StartedAt: at, Policies: policies}
-	request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: op, MID: mid, ReceivedAt: at, Params: params, Claims: wire.CredentialClaims{Token: "bearer", Region: int64(actor.LogicalServerID)}}}
+	request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: op, MID: mid, ReceivedAt: op.StartedAt, Params: params, Claims: wire.CredentialClaims{Token: "bearer", Region: int64(actor.LogicalServerID)}}}
 	dispatcher := stockruntime.MentorDispatcher{Authority: unpinnedDispatchAuthority{actor: actor}, Service: service}
 	return dispatcher.Dispatch(ctx, request)
+}
+
+func mentorCall(t *testing.T, service appmentor.Service, actor identity.ActorContext, mid uint16, params map[string]any) httpedge.Response {
+	t.Helper()
+	return mentorCallWith(t, service, actor, mid, params, mentorOperation(t, poolForService))
 }
 
 func expectMentorOK(t *testing.T, response httpedge.Response, mid uint16) map[string]any {
@@ -325,4 +336,171 @@ func TestI9_10FMentorDenyBondAndLoginProjection(t *testing.T) {
 	if relations[1].(map[string]any)["player_id"] != int64(student.PlayerID) {
 		t.Fatalf("login 1856 relation %#v", relations)
 	}
+}
+
+func expectSameMentorReply(t *testing.T, mid uint16, first, replay map[string]any) {
+	t.Helper()
+	encodedFirst, err := json.Marshal(first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	encodedReplay, err := json.Marshal(replay)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(encodedFirst) != string(encodedReplay) {
+		t.Fatalf("MID %d exact-operation replay drifted: %s vs %s", mid, encodedFirst, encodedReplay)
+	}
+}
+
+func mentorReceiptCount(t *testing.T, p *pg.Pool, player identity.PlayerID, command string, op operation.Context) int64 {
+	t.Helper()
+	var count int64
+	if err := p.QueryRow(ctx, `SELECT count(*) FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain=$2 AND operation=$3 AND semantic_key=$4`, fmt.Sprint(int64(player)), appmentor.ReceiptDomain, command, op.ID.String()).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	return count
+}
+
+func mentorRelationCount(t *testing.T, p *pg.Pool, mentor, student identity.PlayerID, active bool) int64 {
+	t.Helper()
+	condition := "ended_at IS NOT NULL"
+	if active {
+		condition = "ended_at IS NULL"
+	}
+	var count int64
+	if err := p.QueryRow(ctx, `SELECT count(*) FROM mentor_relations WHERE mentor_id=$1 AND student_id=$2 AND `+condition, int64(mentor), int64(student)).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	return count
+}
+
+// TestI9_10FMentorExactOperationRetry replays each state-changing mentor
+// command with the same operation context through the production dispatcher.
+func TestI9_10FMentorExactOperationRetry(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+
+	apply := func(actor identity.ActorContext, target identity.PlayerID) {
+		t.Helper()
+		expectMentorOK(t, mentorCall(t, service, actor, 1857, map[string]any{"to_player_id": int64(target), "relation_type": int64(1), "msg": "retry"}), 1857)
+	}
+	accept := func(actor identity.ActorContext, from identity.PlayerID) {
+		t.Helper()
+		expectMentorOK(t, mentorCall(t, service, actor, 1859, map[string]any{"from_player_id": int64(from)}), 1859)
+	}
+
+	t.Run("1858 refusal", func(t *testing.T) {
+		actor := mentorActor(t, p, 20)
+		response := mentorCallWith(t, service, actor, 1858, map[string]any{"relation_type": int64(3)}, mentorOperation(t, p))
+		if response.HTTPStatus != 400 {
+			t.Fatalf("1858 malformed relation_type status=%d body=%v", response.HTTPStatus, response.Body)
+		}
+	})
+
+	t.Run("1857 apply", func(t *testing.T) {
+		teacher := mentorActor(t, p, 60)
+		student := mentorActor(t, p, 20)
+		op := mentorOperation(t, p)
+		params := func() map[string]any {
+			return map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": "retry"}
+		}
+		first := expectMentorOK(t, mentorCallWith(t, service, student, 1857, params(), op), 1857)
+		replay := expectMentorOK(t, mentorCallWith(t, service, student, 1857, params(), op), 1857)
+		expectSameMentorReply(t, 1857, first, replay)
+		if count := mentorReceiptCount(t, p, student.PlayerID, "apply", op); count != 1 {
+			t.Fatalf("apply receipts=%d", count)
+		}
+		var applications int64
+		if err := p.QueryRow(ctx, `SELECT count(*) FROM mentor_applications WHERE applicant_id=$1 AND target_id=$2`, int64(student.PlayerID), int64(teacher.PlayerID)).Scan(&applications); err != nil || applications != 1 {
+			t.Fatalf("applications=%d err=%v", applications, err)
+		}
+	})
+
+	t.Run("1859 accept", func(t *testing.T) {
+		teacher := mentorActor(t, p, 60)
+		student := mentorActor(t, p, 20)
+		apply(student, teacher.PlayerID)
+		op := mentorOperation(t, p)
+		params := func() map[string]any { return map[string]any{"from_player_id": int64(student.PlayerID)} }
+		first := expectMentorOK(t, mentorCallWith(t, service, teacher, 1859, params(), op), 1859)
+		replay := expectMentorOK(t, mentorCallWith(t, service, teacher, 1859, params(), op), 1859)
+		expectSameMentorReply(t, 1859, first, replay)
+		if count := mentorReceiptCount(t, p, teacher.PlayerID, "accept", op); count != 1 {
+			t.Fatalf("accept receipts=%d", count)
+		}
+		if count := mentorRelationCount(t, p, teacher.PlayerID, student.PlayerID, true); count != 1 {
+			t.Fatalf("active relations=%d", count)
+		}
+	})
+
+	t.Run("1860 deny", func(t *testing.T) {
+		teacher := mentorActor(t, p, 60)
+		student := mentorActor(t, p, 20)
+		apply(student, teacher.PlayerID)
+		op := mentorOperation(t, p)
+		params := func() map[string]any { return map[string]any{"from_player_id": int64(student.PlayerID)} }
+		first := expectMentorOK(t, mentorCallWith(t, service, teacher, 1860, params(), op), 1860)
+		replay := expectMentorOK(t, mentorCallWith(t, service, teacher, 1860, params(), op), 1860)
+		expectSameMentorReply(t, 1860, first, replay)
+		if count := mentorReceiptCount(t, p, teacher.PlayerID, "deny", op); count != 1 {
+			t.Fatalf("deny receipts=%d", count)
+		}
+		var status string
+		if err := p.QueryRow(ctx, `SELECT status FROM mentor_applications WHERE applicant_id=$1 AND target_id=$2`, int64(student.PlayerID), int64(teacher.PlayerID)).Scan(&status); err != nil || status != "DENIED" {
+			t.Fatalf("application status=%q err=%v", status, err)
+		}
+	})
+
+	t.Run("1861 terminate", func(t *testing.T) {
+		teacher := mentorActor(t, p, 60)
+		student := mentorActor(t, p, 20)
+		apply(student, teacher.PlayerID)
+		accept(teacher, student.PlayerID)
+		exec(t, p, `UPDATE mentor_relations SET accepted_at=accepted_at-interval '25 hours' WHERE mentor_id=$1 AND student_id=$2 AND ended_at IS NULL`, int64(teacher.PlayerID), int64(student.PlayerID))
+		op := mentorOperation(t, p)
+		params := func() map[string]any { return map[string]any{"relation_type": int64(2)} }
+		first := expectMentorOK(t, mentorCallWith(t, service, teacher, 1861, params(), op), 1861)
+		replay := expectMentorOK(t, mentorCallWith(t, service, teacher, 1861, params(), op), 1861)
+		expectSameMentorReply(t, 1861, first, replay)
+		if count := mentorReceiptCount(t, p, teacher.PlayerID, "terminate", op); count != 1 {
+			t.Fatalf("terminate receipts=%d", count)
+		}
+		if count := mentorRelationCount(t, p, teacher.PlayerID, student.PlayerID, true); count != 0 {
+			t.Fatalf("active relations=%d", count)
+		}
+		if count := mentorRelationCount(t, p, teacher.PlayerID, student.PlayerID, false); count != 1 {
+			t.Fatalf("ended relations=%d", count)
+		}
+	})
+
+	t.Run("1863 exam and 1862 claim", func(t *testing.T) {
+		teacher := mentorActor(t, p, 60)
+		student := mentorActor(t, p, 20)
+		apply(student, teacher.PlayerID)
+		accept(teacher, student.PlayerID)
+		exec(t, p, `UPDATE player_progression SET level=90 WHERE player_id=$1`, int64(student.PlayerID))
+		exec(t, p, `UPDATE player_directory_profiles SET lev=90 WHERE player_id=$1`, int64(student.PlayerID))
+
+		examOp := mentorOperation(t, p)
+		examParams := func() map[string]any { return map[string]any{"is_win": int64(1), "formation": "1|2|3"} }
+		firstExam := expectMentorOK(t, mentorCallWith(t, service, student, 1863, examParams(), examOp), 1863)
+		replayExam := expectMentorOK(t, mentorCallWith(t, service, student, 1863, examParams(), examOp), 1863)
+		expectSameMentorReply(t, 1863, firstExam, replayExam)
+		if count := mentorReceiptCount(t, p, student.PlayerID, "exam", examOp); count != 1 {
+			t.Fatalf("exam receipts=%d", count)
+		}
+
+		claimOp := mentorOperation(t, p)
+		claimParams := func() map[string]any { return map[string]any{"mission_id": int64(100025)} }
+		firstClaim := expectMentorOK(t, mentorCallWith(t, service, student, 1862, claimParams(), claimOp), 1862)
+		replayClaim := expectMentorOK(t, mentorCallWith(t, service, student, 1862, claimParams(), claimOp), 1862)
+		expectSameMentorReply(t, 1862, firstClaim, replayClaim)
+		if count := mentorReceiptCount(t, p, student.PlayerID, "claim", claimOp); count != 1 {
+			t.Fatalf("claim receipts=%d", count)
+		}
+		if count := mentorRelationCount(t, p, teacher.PlayerID, student.PlayerID, true); count != 0 {
+			t.Fatalf("graduation left active relations=%d", count)
+		}
+	})
 }

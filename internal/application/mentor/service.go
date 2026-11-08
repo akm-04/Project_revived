@@ -2,7 +2,9 @@ package mentor
 
 import (
 	"context"
+	"encoding/json"
 	"sort"
+	"strconv"
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -11,6 +13,8 @@ import (
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -41,14 +45,21 @@ type Service struct {
 	Backgrounds BackgroundReader
 	Grants      GrantOwner
 	Content     ContentReader
+	Receipts    receipt.Store
 }
+
+const (
+	ReceiptDomain         = "mentor"
+	ReceiptSchema         = "gxb.mentor.command.v1"
+	ReceiptOperationClass = "I9_10F_MENTOR"
+)
 
 func DefaultProfile() tx.Profile {
 	return tx.Profile{Name: "I9_10F_MENTOR", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 8 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 12 * time.Second}
 }
 
 func (service Service) validForMutation() bool {
-	return service.Timed.Runner.DB != nil && service.Timed.Binder.Time != nil && service.Players != nil && service.Store != nil && service.Directory != nil && service.Cards != nil && service.Friendships != nil && service.Content != nil
+	return service.Timed.Runner.DB != nil && service.Timed.Binder.Time != nil && service.Players != nil && service.Store != nil && service.Directory != nil && service.Cards != nil && service.Friendships != nil && service.Content != nil && service.Receipts != nil
 }
 
 func (service Service) validForRead() bool {
@@ -118,6 +129,71 @@ func (service Service) run(ctx context.Context, actor identity.ActorContext, op 
 		return domain.ErrRelationshipConflict
 	}
 	return nil
+}
+
+// bindContentRevision pins the active immutable revision on the operation the
+// I5 grant settles under; a fresh HTTP operation carries no content ref.
+func bindContentRevision(op operation.Context, revision string) (operation.Context, error) {
+	if current, ok := op.Policies.Get("content"); ok {
+		if current != revision {
+			return operation.Context{}, ErrUnavailable
+		}
+		return op, nil
+	}
+	refs := append(op.Policies.Refs(), policy.Ref{Name: "content", Version: revision})
+	set, err := policy.NewSet(refs...)
+	if err != nil {
+		return operation.Context{}, err
+	}
+	op.Policies = set
+	return op, nil
+}
+
+func commandReceiptID(actor identity.ActorContext, command string, op operation.Context) receipt.Identity {
+	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: ReceiptDomain, Operation: command, SemanticKey: op.ID.String()}
+}
+
+// runReceipted replays an exact operation from its stored reply, so a retry
+// after an unknown commit cannot apply the command twice.
+func (service Service) runReceipted(ctx context.Context, actor identity.ActorContext, op operation.Context, command string, request any, body *map[string]any, apply func(context.Context, tx.Tx, time.Time) error) error {
+	fingerprint, err := receipt.FingerprintRequest(request)
+	if err != nil {
+		return err
+	}
+	identity := commandReceiptID(actor, command, op)
+	return service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+		prior, found, err := service.Receipts.FindTx(ctx, t, identity)
+		if err != nil {
+			return err
+		}
+		if found {
+			if prior.RequestFingerprint != fingerprint {
+				return &receipt.ConflictError{Identity: identity}
+			}
+			return json.Unmarshal(prior.ResultPayload, body)
+		}
+		if err := apply(ctx, t, at); err != nil {
+			return err
+		}
+		raw, err := json.Marshal(*body)
+		if err != nil {
+			return err
+		}
+		record, err := receipt.New(op, identity, ReceiptOperationClass, ReceiptSchema, raw, fingerprint)
+		if err != nil {
+			return err
+		}
+		record.PolicyVersion = MentorPolicyVersion
+		record.RecordedAt = at
+		put, err := service.Receipts.PutTx(ctx, t, record)
+		if err != nil {
+			return err
+		}
+		if !put.Inserted {
+			return &receipt.ConflictError{Identity: identity}
+		}
+		return nil
+	})
 }
 
 func lockPlayerRoots(ctx context.Context, locker playerroot.TxLocker, t tx.Tx, server identity.LogicalServerID, players ...identity.PlayerID) error {
