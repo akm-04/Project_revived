@@ -131,7 +131,18 @@ func callRecommendSource(t *testing.T, source interface {
 
 func assertPopularity(t *testing.T, label string, source d.Source, want []d.Popularity) {
 	t.Helper()
-	if !reflect.DeepEqual(source.Popularity, want) {
+	// The gate shares one DB and one on one usage is global, so other tests' players appear.
+	players := map[int64]bool{}
+	for _, row := range want {
+		players[row.PlayerID] = true
+	}
+	var got []d.Popularity
+	for _, row := range source.Popularity {
+		if players[row.PlayerID] {
+			got = append(got, row)
+		}
+	}
+	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("%s popularity got %+v want %+v", label, source.Popularity, want)
 	}
 }
