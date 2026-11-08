@@ -53,6 +53,11 @@ func (s Service) apply(ctx context.Context, sc tx.Scope, a identity.ActorContext
 	if err = state.SettleMakes(at); err != nil {
 		return nil, err
 	}
+	// A fresh player has no persisted energy anchor; without this the first
+	// recycle cannot succeed and the failed transaction never saves one.
+	if state.Recycle.EnergyAt.IsZero() {
+		state.Recycle.EnergyAt = at
+	}
 	valueop := d.Operation
 	valueop.StartedAt = at
 	var body map[string]any

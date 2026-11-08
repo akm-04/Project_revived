@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -153,6 +154,10 @@ type BoardCombat interface {
 	TerminalTx(context.Context, tx.Tx, appcombat.TerminalRequest) (appcombat.Settled, error)
 	CloseTx(context.Context, tx.Tx, appcombat.TerminalRequest) (appcombat.Closed, error)
 }
+type FactsPort interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
+}
 
 type Service struct {
 	Timed    gen.TimedRunner
@@ -170,6 +175,7 @@ type Service struct {
 	Levels   BoardLevels
 	Stats    BoardStats
 	Combat   BoardCombat
+	Facts    FactsPort
 }
 
 func (s Service) complete() bool {

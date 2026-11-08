@@ -1206,7 +1206,9 @@
     "*ApplyMaterialDebitTx",
     "*FenceActorTx",
     "*PrepareMaterialDebitTx",
+    "*PrepareTx",
     "*ReadProgressionTx",
+    "*RecordTx",
     "*SettleGrantTx"
    ],
    "frienddm": [
@@ -3435,7 +3437,9 @@
     "*ApplyMaterialDebitTx",
     "*FenceActorTx",
     "*PrepareMaterialDebitTx",
+    "*PrepareTx",
     "*ReadProgressionTx",
+    "*RecordTx",
     "*SettleGrantTx"
    ],
    "interface:eventcentre.BoardHeroes": [
