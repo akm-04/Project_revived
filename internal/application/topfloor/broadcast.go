@@ -1,13 +1,15 @@
 package topfloor
 
 import (
+	"slices"
+
 	"gxb.local/backend/v2/internal/application/broadcast"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 )
 
 // PRIVATE_POLICY: the source names no Top Floor win-streak milestone. The
 // tunable list is docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json.
-var winStreakMilestones = []int64{5, 10, 15, 20, 25, 30, 35, 40, 45, 50}
+var winStreakMilestones = []int64{5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100}
 
 func nextWinStreak(previous int64, attack, won bool) int64 {
 	if !attack {
@@ -20,12 +22,7 @@ func nextWinStreak(previous int64, attack, won bool) int64 {
 }
 
 func announcesWinStreak(streak int64) bool {
-	for _, milestone := range winStreakMilestones {
-		if streak == milestone {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(winStreakMilestones, streak)
 }
 
 // topThreeRank reports the rank a settlement announces on SYSTEM_BROADCAST 3003.

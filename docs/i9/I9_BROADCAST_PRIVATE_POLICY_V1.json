@@ -5,7 +5,7 @@
   "status": "IMPLEMENTATION_IN_PROGRESS_NOT_ACCEPTED",
   "original_algorithm": "UNKNOWN; the source announce table names the 3002 arguments but no Top Floor streak milestone",
   "parameters": {
-    "arena_win_streak_milestones": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    "arena_win_streak_milestones": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
   },
   "notes": {
     "arena_win_streak_milestones": "SYSTEM_BROADCAST 3002 fires only when the consecutive Top Floor attack-win streak exactly equals one entry; below the first milestone never announces",
