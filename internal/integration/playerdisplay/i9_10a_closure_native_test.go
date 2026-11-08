@@ -178,14 +178,16 @@ func TestI910ARecycleConcurrencyAndRetryNative(t *testing.T) {
 	if stack := workshopStack(t, database, actor.PlayerID, 30001006); stack != 0 {
 		t.Fatalf("1073 stack after concurrency = %d", stack)
 	}
-	if awarded := workshopScalar(t, database, actor.PlayerID, "magic_dust") - dustBefore; awarded != 4 {
+	// Recycle may crit (RecycleCritPolicy), doubling the 4 dust.
+	if awarded := workshopScalar(t, database, actor.PlayerID, "magic_dust") - dustBefore; awarded != 4 && awarded != 8 {
 		t.Fatalf("1073 awarded %d dust", awarded)
 	}
 	requireRetrySame(t, "1073", dispatcher, winnerRequest, winner.Body)
 	if stack := workshopStack(t, database, actor.PlayerID, 30001006); stack != 0 {
 		t.Fatalf("1073 retry spent a second item: %d", stack)
 	}
-	if awarded := workshopScalar(t, database, actor.PlayerID, "magic_dust") - dustBefore; awarded != 4 {
+	// Recycle may crit (RecycleCritPolicy), doubling the 4 dust.
+	if awarded := workshopScalar(t, database, actor.PlayerID, "magic_dust") - dustBefore; awarded != 4 && awarded != 8 {
 		t.Fatalf("1073 retry awarded again: %d", awarded)
 	}
 }
