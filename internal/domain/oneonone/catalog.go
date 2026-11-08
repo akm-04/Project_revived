@@ -43,7 +43,15 @@ var (
 	ErrClosedHours = errors.New("oneonone: outside 08:00-22:00")
 	// ErrOfferStale is source message 35026: the issued target list moved.
 	ErrOfferStale = errors.New("oneonone: offered rank changed")
+	// ErrOpponentLowPoints is source message 30003: the opponent's points are
+	// below the challenge floor.
+	ErrOpponentLowPoints = errors.New("oneonone: opponent below challenge points floor")
 )
+
+// LowPointsChallengeFloor is the defender points below which START answers
+// source message 30003. Private policy: the client text names 1000 points and
+// has no local check; the value compared is the defender's current points.
+const LowPointsChallengeFloor int64 = 1000
 
 type Level struct {
 	Level             int64 `json:"level"`

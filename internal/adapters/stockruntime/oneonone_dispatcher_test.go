@@ -15,10 +15,11 @@ import (
 )
 
 type oneOnOneFake struct {
-	teams  []d.Team
-	start  app.StartCommand
-	closed bool
-	calls  int
+	teams     []d.Team
+	start     app.StartCommand
+	closed    bool
+	lowPoints bool
+	calls     int
 }
 
 var oneOnOneRanked = d.Ranked{Standing: d.Standing{Player: 200007, Server: 2, Position: d.Position{Level: d.LevelSenior, Slot: 512, Points: 4700}}, Global: 512, InGroup: 12, ServerRank: 3}
@@ -50,6 +51,9 @@ func (f *oneOnOneFake) Start(_ context.Context, _ identity.ActorContext, r app.S
 	f.start = r
 	if f.closed {
 		return d.MatchView{}, d.ErrClosedHours
+	}
+	if f.lowPoints {
+		return d.MatchView{}, d.ErrOpponentLowPoints
 	}
 	return d.MatchView{Arena: f.arena(), ReportKeys: []string{"a", "", "c"}, Wins: []int64{1, 1}, Win: true}, nil
 }
@@ -158,5 +162,13 @@ func TestOneOnOneStaleOfferIsRankChangedConflict(t *testing.T) {
 	response := failOneOnOne(fmt.Errorf("moved: %w", d.ErrOfferStale))
 	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(oneOnOneRankChangedError) {
 		t.Fatalf("stale offer response=%+v", response)
+	}
+}
+
+func TestOneOnOneLowPointsAnswersInBand30003(t *testing.T) {
+	dispatcher := OneOnOneDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &oneOnOneFake{lowPoints: true}}
+	response := dispatcher.Dispatch(context.Background(), heroReq(t, 2484, map[string]any{"formations": []any{"3"}, "enemy_id": json.Number("200007")}))
+	if response.HTTPStatus != 200 || response.Body["error_code"] != int64(30003) {
+		t.Fatalf("low points response=%+v", response)
 	}
 }
