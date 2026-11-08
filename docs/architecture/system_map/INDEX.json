@@ -298,6 +298,10 @@
    "2492": "playerdisplay",
    "2493": "playerdisplay",
    "2494": "playerdisplay",
+   "2496": "herorecommend",
+   "2497": "herorecommend",
+   "2498": "herorecommend",
+   "2499": "herorecommend",
    "2500": "course",
    "2512": "dormhouse",
    "2513": "dormhouse",
@@ -651,6 +655,7 @@
    "guild_tea_gifts": "guildcore",
    "guild_tea_wishes": "guildcore",
    "guilds": "guildcore",
+   "hero_recommend_snapshots": "herorecommend",
    "illusion_attempts": "illusion",
    "illusion_occurrence_results": "illusion",
    "illusion_occurrences": "illusion",
@@ -840,7 +845,7 @@
   },
   {
    "callees": 15,
-   "callers": 2,
+   "callers": 3,
    "mids": 39,
    "name": "arena",
    "path": "internal/application/arena",
@@ -912,7 +917,7 @@
   },
   {
    "callees": 4,
-   "callers": 37,
+   "callers": 38,
    "mids": 0,
    "name": "characterasset",
    "path": "internal/application/characterasset",
@@ -1074,7 +1079,7 @@
   },
   {
    "callees": 5,
-   "callers": 59,
+   "callers": 60,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1110,7 +1115,7 @@
   },
   {
    "callees": 7,
-   "callers": 1,
+   "callers": 2,
    "mids": 14,
    "name": "guildcampaign",
    "path": "internal/application/guildcampaign",
@@ -1190,6 +1195,15 @@
    "tables": 0
   },
   {
+   "callees": 16,
+   "callers": 0,
+   "mids": 4,
+   "name": "herorecommend",
+   "path": "internal/application/herorecommend",
+   "purpose": "",
+   "tables": 1
+  },
+  {
    "callees": 12,
    "callers": 57,
    "mids": 25,
@@ -1209,7 +1223,7 @@
   },
   {
    "callees": 16,
-   "callers": 0,
+   "callers": 1,
    "mids": 17,
    "name": "illusion",
    "path": "internal/application/illusion",
@@ -1290,7 +1304,7 @@
   },
   {
    "callees": 12,
-   "callers": 2,
+   "callers": 3,
    "mids": 10,
    "name": "oneonone",
    "path": "internal/application/oneonone",
@@ -1308,7 +1322,7 @@
   },
   {
    "callees": 0,
-   "callers": 6,
+   "callers": 7,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1380,7 +1394,7 @@
   },
   {
    "callees": 13,
-   "callers": 8,
+   "callers": 9,
    "mids": 0,
    "name": "publicstats",
    "path": "internal/application/publicstats",
@@ -1560,7 +1574,7 @@
   },
   {
    "callees": 14,
-   "callers": 4,
+   "callers": 5,
    "mids": 23,
    "name": "topfloor",
    "path": "internal/application/topfloor",

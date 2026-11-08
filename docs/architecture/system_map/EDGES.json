@@ -29,6 +29,9 @@
    ]
   },
   "arena": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
    ],
@@ -151,6 +154,9 @@
     "Validate"
    ],
    "heroforce": [
+    "NewCoherentReadScope"
+   ],
+   "herorecommend": [
     "NewCoherentReadScope"
    ],
    "illusion": [
@@ -734,6 +740,11 @@
    "heroforce": [
     "Operation"
    ],
+   "herorecommend": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
    "i5": [
     "Bind",
     "DecisionAt",
@@ -898,6 +909,9 @@
    "guildcore": [
     "*CloseGuildTx",
     "*RemoveMemberTx"
+   ],
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
    ]
   },
   "guildcore": {
@@ -985,6 +999,7 @@
     "Best"
    ]
   },
+  "herorecommend": {},
   "i5": {
    "achievement": [
     "*FenceActorTx",
@@ -1457,7 +1472,11 @@
    ]
   },
   "identitylifecycle": {},
-  "illusion": {},
+  "illusion": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ]
+  },
   "inscription": {
    "achievement": [
     "*CompleteSuitCountTx"
@@ -1516,6 +1535,9 @@
   },
   "occult": {},
   "oneonone": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
    ],
@@ -1529,6 +1551,9 @@
     "Validate"
    ],
    "gmquestion": [
+    "Validate"
+   ],
+   "herorecommend": [
     "Validate"
    ],
    "libraryforum": [
@@ -1687,6 +1712,9 @@
     "*HeroTx"
    ],
    "heroforce": [
+    "*HeroTx"
+   ],
+   "herorecommend": [
     "*HeroTx"
    ],
    "illusion": [
@@ -2013,6 +2041,9 @@
   },
   "summon": {},
   "topfloor": {
+   "herorecommend": [
+    "*HeroRecommendSourceTx"
+   ],
    "march": [
     "*MarchCandidatesTx"
    ],
@@ -4024,6 +4055,61 @@
     "*HeroTx"
    ]
   },
+  "herorecommend": {
+   "arena": [
+    "*HeroRecommendSourceTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "guildcampaign": [
+    "*HeroRecommendSourceTx"
+   ],
+   "illusion": [
+    "*HeroRecommendSourceTx"
+   ],
+   "interface:herorecommend.Roster": [
+    "*OverlayMID1"
+   ],
+   "oneonone": [
+    "*HeroRecommendSourceTx"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ],
+   "store:characterstore": [
+    "*HeroOriginTableIDsTx",
+    "*OverlayMID1"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision"
+   ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
+   "store:guildstore": [
+    "*ReadGuildTx",
+    "*ReadMembershipTx"
+   ],
+   "store:i4store": [
+    "*ListLogicalServersAfterTx",
+    "*ProfileTx"
+   ],
+   "store:leaguestore": [
+    "*HeroRecommendSourceTx"
+   ],
+   "topfloor": [
+    "*HeroRecommendSourceTx"
+   ]
+  },
   "i5": {
    "adventure": [
     "*ObserveTx"
@@ -5816,6 +5902,9 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "heroforce": [],
+  "herorecommend": [
+   "cmd/gxb-api/hero_recommend_postgres.go"
+  ],
   "i5": [
    "cmd/gxb-api/main_postgres.go"
   ],

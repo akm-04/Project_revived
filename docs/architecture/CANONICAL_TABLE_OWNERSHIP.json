@@ -5718,6 +5718,20 @@
         "internal/adapters/postgres/broadcaststore/"
       ],
       "write_exceptions": []
+    },
+    "hero_recommend_snapshots": {
+      "owner": "HeroRecommend",
+      "allowed_query_owners": [
+        "HeroRecommend"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/herorecommendstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/herorecommendstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00157_i9_10_hero_recommend.sql"
     }
   }
 }

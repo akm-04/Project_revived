@@ -566,7 +566,15 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 	if err != nil {
 		return Settled{}, err
 	}
-	if err := m.ModeStore.UpsertServerRecordTx(c, t, a.LogicalServerID, request.CopyID, int64(a.PlayerID), guildID, damage, []byte("[]"), at); err != nil {
+	partners, err := parseFormation(request.Formation)
+	if err != nil {
+		return Settled{}, err
+	}
+	partnersJSON, err := json.Marshal(partners)
+	if err != nil {
+		return Settled{}, err
+	}
+	if err := m.ModeStore.UpsertServerRecordTx(c, t, a.LogicalServerID, request.CopyID, int64(a.PlayerID), guildID, damage, partnersJSON, at); err != nil {
 		return Settled{}, err
 	}
 	if copy.Win {

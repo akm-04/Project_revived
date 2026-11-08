@@ -41,6 +41,20 @@ type HeroBootstrapProjection struct {
 	Content            HeroBootstrapContent
 }
 
+// HeroOriginTableIDsTx exposes each owned hero's stored origin identity, which
+// the stock MID1 roster wire does not carry.
+func (HeroBootstrapProjection) HeroOriginTableIDsTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) (map[int64]int64, error) {
+	heroes, err := Store{}.ListHeroesTx(ctx, q, playerID)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[int64]int64, len(heroes))
+	for _, hero := range heroes {
+		out[hero.PartnerID] = hero.OriginTableID
+	}
+	return out, nil
+}
+
 func (HeroBootstrapProjection) Name() string     { return "ca6.hero-bootstrap" }
 func (HeroBootstrapProjection) Claims() []string { return []string{"49"} }
 func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, actor identity.ActorContext, _ bool, observedAt time.Time, detail map[string]any) error {

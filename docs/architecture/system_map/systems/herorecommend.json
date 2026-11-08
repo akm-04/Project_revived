@@ -1,0 +1,127 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/hero_recommend_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I9_10_HERO_RECOMMEND"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
+    "line": 28
+   },
+   "mid": 2496,
+   "name": "GET_HERO_SCORE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
+    "line": 28
+   },
+   "mid": 2497,
+   "name": "GET_RECOMMEND_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
+    "line": 28
+   },
+   "mid": 2498,
+   "name": "GET_HERO_RECOMMEND_DETAIL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
+    "line": 28
+   },
+   "mid": 2499,
+   "name": "GET_FORCE_RANK_LIST"
+  }
+ ],
+ "name": "herorecommend",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/arenastore",
+  "internal/adapters/postgres/characterstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildcampaignstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/herorecommendstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/illusionstore",
+  "internal/adapters/postgres/leaguestore",
+  "internal/adapters/postgres/oneononestore",
+  "internal/adapters/postgres/topfloorstore"
+ ],
+ "tables": {
+  "owned": [
+   "hero_recommend_snapshots"
+  ],
+  "read": [
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "hero_recommend_snapshots",
+   "logical_servers",
+   "player_directory_profiles",
+   "player_hero_roots",
+   "player_heroes",
+   "players"
+  ],
+  "written": [
+   "hero_recommend_snapshots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}
