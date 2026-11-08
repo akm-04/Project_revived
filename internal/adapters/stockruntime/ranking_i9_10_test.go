@@ -59,7 +59,7 @@ func boardSnapshotForTest(t *testing.T, board d.Board, at time.Time, revision st
 func TestRankingMID301ServesStarAndAwakenCountBoards(t *testing.T) {
 	at := time.Date(2026, 11, 8, 4, 0, 0, 0, time.UTC)
 	revision := strings.Repeat("a", 64)
-	for _, board := range []d.Board{d.StarCountBoard, d.AwakenCountBoard} {
+	for _, board := range []d.Board{d.StarCountBoard, d.AwakenCountBoard, d.TopForceBoard} {
 		snapshot := boardSnapshotForTest(t, board, at, revision)
 		dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: boardSnapshotFixture{boards: map[string]d.BoardSnapshot{board.Policy: snapshot}}}
 		request := env(301, nil, time.Now().UTC())

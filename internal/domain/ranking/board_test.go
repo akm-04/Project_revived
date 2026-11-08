@@ -178,10 +178,22 @@ func TestI9_10DStarsAndAwakenBoardsUseExistingRosterMetrics(t *testing.T) {
 			t.Fatal("invented titles", board)
 		}
 	}
-	if _, ok := BoardOfSubType(9); ok {
-		t.Fatal("subtype 9 has no delivered score owner and must stay unserved")
-	}
 	if _, ok := BoardOfSubType(23); ok {
 		t.Fatal("Sky Tower elite stays on the PetCampaign owner path")
+	}
+}
+
+func TestI9_10ETopFiveForceBoardUsesCharacterHeroMetric(t *testing.T) {
+	board, ok := BoardOfSubType(9)
+	if !ok || board.Policy != TopForcePolicy || board.FieldID != 1012 || board.SourceOwner != "CharacterHero" || board.SourcePolicy != TopForceSourcePolicy || board.SourceSemantics != TopForceSemantics || board.RowValue != "info_val" {
+		t.Fatal(board)
+	}
+	if len(board.Titles) != 0 {
+		t.Fatal("invented titles", board)
+	}
+	for _, subtype := range []int64{13, 14, 28, 29, 35, 36, 40, 41} {
+		if _, ok := BoardOfSubType(subtype); ok {
+			t.Fatal("owner not delivered, board must stay unserved:", subtype)
+		}
 	}
 }

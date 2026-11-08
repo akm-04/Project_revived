@@ -24,6 +24,9 @@ const DormComfortSourcePolicy = "I9_10C_PRIVATE_DORM_COMFORT_FACT_V1"
 const DormComfortSemantics = "CURRENT_SUM_OWNED_ROOMS_INCLUDING_LOUNGE_V1"
 const StarCountPolicy = "I9_10D_PRIVATE_STAR_COUNT_SERVER_RANKING_V1"
 const AwakenCountPolicy = "I9_10D_PRIVATE_AWAKEN_COUNT_SERVER_RANKING_V1"
+const TopForcePolicy = "I9_10E_PRIVATE_TOP_FIVE_FORCE_SERVER_RANKING_V1"
+const TopForceSourcePolicy = "I9_10E_PRIVATE_TOP_FIVE_FORCE_V1"
+const TopForceSemantics = "CURRENT_SUM_TOP_FIVE_OWNED_HERO_PUBLIC_FORCE_SELF_V1"
 const RosterMetricSourcePolicy = "C4C_PRIVATE_CURRENT_ROSTER_V1"
 const RosterMetricSourceSemantics = "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1"
 const ServerCohort = "I4_SERVER_ALL_PLAYERS_V1"
@@ -66,7 +69,12 @@ var StarCountBoard = Board{Name: "star-count", Policy: StarCountPolicy, SourceOw
 // heroes that have awakened. It ranks the existing roster metric 1009.
 var AwakenCountBoard = Board{Name: "awaken-count", Policy: AwakenCountPolicy, SourceOwner: "CharacterHero", SourcePolicy: RosterMetricSourcePolicy, SourceSemantics: RosterMetricSourceSemantics, FieldID: 1009, SubType: 12, RowValue: "info_val"}
 
-var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard, DormComfortBoard, StarCountBoard, AwakenCountBoard}
+// TopForceBoard is rank 2002 "TF AP Rank" (subtype 9): the total public force
+// of the five strongest owned heroes. The count is a private tunable in
+// docs/i9/I9_10E_TOP_FIVE_FORCE_POLICY_V1.json.
+var TopForceBoard = Board{Name: "top-five-force", Policy: TopForcePolicy, SourceOwner: "CharacterHero", SourcePolicy: TopForceSourcePolicy, SourceSemantics: TopForceSemantics, FieldID: 1012, SubType: 9, RowValue: "info_val"}
+
+var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard, DormComfortBoard, StarCountBoard, AwakenCountBoard, TopForceBoard}
 
 func BoardOf(policy string) (Board, bool) {
 	for _, b := range Boards {

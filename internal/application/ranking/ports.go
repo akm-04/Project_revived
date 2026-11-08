@@ -58,6 +58,12 @@ type ComfortFacts interface {
 	ComfortFactTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) (dorm.ComfortFact, bool, error)
 }
 
+// TopForceFacts is CharacterHero's top-five public-force read port for the
+// subtype 9 board.
+type TopForceFacts interface {
+	ReadTopForceMetricScopeTx(context.Context, tx.Scope, publicprofile.MetricRequest) (publicprofile.MetricObservation, error)
+}
+
 type Service struct {
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
@@ -66,6 +72,7 @@ type Service struct {
 	Directory   Directory
 	Metrics     publicprofile.ScopedMetricReader
 	Comfort     ComfortFacts
+	TopForce    TopForceFacts
 	Content     Content
 	Fence       Fence
 	Players     playerroot.TxLocker
