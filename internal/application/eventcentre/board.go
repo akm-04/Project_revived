@@ -19,6 +19,7 @@ import (
 	ec "gxb.local/backend/v2/internal/domain/eventcentre"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -27,7 +28,7 @@ import (
 )
 
 func (s Service) boardReady() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Owner != nil && s.Content != nil && s.Book != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil && s.Heroes != nil && s.Levels != nil && s.Stats != nil && s.Combat != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Owner != nil && s.Content != nil && s.Book != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil && s.Heroes != nil && s.Levels != nil && s.Stats != nil && s.Combat != nil && s.Facts != nil
 }
 
 func (s Service) boardPin(ctx context.Context, op operation.Context) (operation.Context, string, error) {
@@ -391,8 +392,12 @@ func (s Service) BoardInfo(ctx context.Context, a identity.ActorContext, op oper
 		if err = s.refreshBoard(ctx, sc.Tx, a, &state.Board, catalog, inputs, at); err != nil {
 			return err
 		}
+		prepared, err := s.Facts.PrepareTx(ctx, sc.Tx, a.PlayerID, timed)
+		if err != nil {
+			return err
+		}
 		for _, mission := range state.Board.DueMissions(at.Unix(), catalog) {
-			if err = s.settleBoardMission(ctx, sc.Tx, a, valueop, catalog, &state.Board, mission, unresolvable[mission.Attempt]); err != nil {
+			if err = s.settleBoardMission(prepared, sc.Tx, a, valueop, catalog, &state.Board, mission, unresolvable[mission.Attempt]); err != nil {
 				return err
 			}
 		}
@@ -527,7 +532,7 @@ func (s Service) settleBoardMission(ctx context.Context, t tx.Tx, a identity.Act
 	}
 	board.AppendHistory(ec.BoardRun{MissionID: mission.MissionID, Win: win, ReportID: reportID})
 	board.RemoveDoing(mission.MissionID)
-	return nil
+	return s.Facts.RecordTx(ctx, t, op, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "event-centre", SourceBusinessKey: mission.Attempt, Kind: objective.VoyageFinishedKind, Delta: 1})
 }
 
 func (s Service) refundBoardDeposit(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, catalog Catalog, mission ec.BoardMission, op operation.Context) error {

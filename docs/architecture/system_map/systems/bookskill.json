@@ -205,7 +205,9 @@
    "missions",
    "playerdisplay"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_10a_event_centre.json"
+  ],
   "unit": [
    "a44_boundary_test.go",
    "extension_start_test.go",

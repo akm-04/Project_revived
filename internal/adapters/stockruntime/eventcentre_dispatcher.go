@@ -133,6 +133,9 @@ func eventCentreCommand(mid uint16, params map[string]any) (app.Command, []strin
 		if firstErr != nil || secondErr != nil || thirdErr != nil || len(partners) > 5 {
 			return command, nil, errors.New("invalid notice board receive request")
 		}
+		if partners == nil {
+			partners = []int64{}
+		}
 		command = app.Command{Family: app.BoardReceive, MissionID: missionID, Leader: leader, Partners: partners, WishCrystal: wish}
 		return command, []string{"mission_id", "leader", "partners", "wish_crystal"}, nil
 	case 1085:

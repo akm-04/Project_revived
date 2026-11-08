@@ -44,6 +44,7 @@ func boardService(t *testing.T, database *pg.Pool, books appbook.Service) appeve
 		Levels:   values,
 		Stats:    rawBirthStats(database),
 		Combat:   combatService(t, database),
+		Facts:    i5.ObjectiveFacts{Owner: missionOwner(database), Open: i5store.Store{Queryer: database}},
 	}
 }
 

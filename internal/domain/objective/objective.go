@@ -52,6 +52,10 @@ const CampaignSweepKind = "CAMPAIGN_SWEEP"
 // feeds mission 10029 and Adventure 10002 (C17, D481).
 const IntimacyImprovedKind = "INTIMACY_IMPROVED"
 
+// VoyageFinishedKind is one notice board mission the Event Centre settled; it
+// feeds mission 10030 (fact 125, I9-MISSION-PRODUCERS).
+const VoyageFinishedKind = "VOYAGE_FINISHED"
+
 func (f Fact) Validate() error {
 	if !f.PlayerID.Valid() || strings.TrimSpace(f.SourceDomain) == "" || strings.TrimSpace(f.SourceBusinessKey) == "" || strings.TrimSpace(f.Kind) == "" {
 		return errors.New("invalid objective fact")

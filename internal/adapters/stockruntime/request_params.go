@@ -15,6 +15,10 @@ func int64List(params map[string]any, key string) ([]int64, error) {
 	if direct, ok := value.([]int64); ok {
 		return append([]int64(nil), direct...), nil
 	}
+	// The stock client's Lua encoder sends an empty array as {}.
+	if object, ok := value.(map[string]any); ok && len(object) == 0 {
+		return nil, nil
+	}
 	entries, ok := value.([]any)
 	if !ok {
 		return nil, fmt.Errorf("%s is not a list", key)
