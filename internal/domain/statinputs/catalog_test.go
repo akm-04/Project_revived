@@ -31,9 +31,10 @@ func materializer(t *testing.T) *n.Materializer {
 	}
 	return m
 }
+
 // A lineup girl borrows a source slot's equip flags, but only slots her own
-// colour row provides can be equipped; she shares this row with robot 10001214,
-// who has no slot-0 equipment in orange2.
+// colour row provides can be equipped; girl 10001214 has no slot-0 equipment in
+// orange2.
 func TestRobotHeroForceSkipsSlotsTheTemplateLacks(t *testing.T) {
 	m := materializer(t)
 	flagged, e := m.RobotHeroForce("NormalHero", 10001214, 88, 3, 13, []int64{1, 1, 1, 1, 1, 1})
