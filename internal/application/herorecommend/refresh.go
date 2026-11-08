@@ -210,7 +210,8 @@ func (s Service) build(ctx context.Context, sc gen.TimedScope, server identity.L
 	if err != nil {
 		return d.Snapshot{}, err
 	}
-	snapshot := d.Snapshot{Schema: d.Schema, Server: int64(server), Generation: generation, Revision: revision, ObservedAt: at.UTC(), Overview: overview, Details: details}
+	// timestamptz keeps microseconds; the payload copy must match it or the stored row never validates.
+	snapshot := d.Snapshot{Schema: d.Schema, Server: int64(server), Generation: generation, Revision: revision, ObservedAt: at.UTC().Truncate(time.Microsecond), Overview: overview, Details: details}
 	raw, err := json.Marshal(snapshot)
 	if err != nil {
 		return d.Snapshot{}, err
