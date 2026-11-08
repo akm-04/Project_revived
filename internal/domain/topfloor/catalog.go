@@ -430,7 +430,7 @@ func (c Catalog) RobotLineup(rank int64) (RobotLineup, bool) {
 }
 
 // RobotHeroesAt returns the ordered TEMPLATE params a robot fields at a rank:
-// the PRIVATE_POLICY lineup inside the band, the source team outside it.
+// the PRIVATE_POLICY lineup inside the band, otherwise the (banded) source team.
 func (c Catalog) RobotHeroesAt(team, rank int64) ([]map[string]any, bool) {
 	source, found := c.Team(team)
 	if !found {
@@ -440,7 +440,7 @@ func (c Catalog) RobotHeroesAt(team, rank int64) ([]map[string]any, bool) {
 	if !banded {
 		out := make([]map[string]any, 0, len(source.Heroes))
 		for _, id := range source.Heroes {
-			params, ok := c.RobotHeroParams(id)
+			params, ok := c.RobotHeroParamsAt(id, rank)
 			if !ok {
 				return nil, false
 			}
