@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"math"
 	"sort"
 	"strconv"
@@ -18,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -42,6 +44,17 @@ func WeekStart(at time.Time) time.Time {
 	return start
 }
 
+// pinContent binds the active revision to the operation so the public stat
+// engine accepts the coherent read scope.
+func pinContent(op operation.Context, revision string) (operation.Context, error) {
+	if bound, ok := op.Policies.Get("content"); ok && bound == revision {
+		return op, nil
+	}
+	set, err := policy.NewSet(append(op.Policies.Refs(), policy.Ref{Name: "content", Version: revision})...)
+	op.Policies = set
+	return op, err
+}
+
 func (s Service) Snapshot(ctx context.Context, a identity.ActorContext, o operation.Context) (d.Snapshot, error) {
 	if !s.complete() || !a.PlayerID.Valid() || !a.LogicalServerID.Valid() || o.ID.IsZero() || o.StartedAt.IsZero() {
 		return d.Snapshot{}, d.ErrUnavailable
@@ -55,6 +68,10 @@ func (s Service) ensureSnapshot(ctx context.Context, o operation.Context, server
 		at := sc.Operation.DecisionAt()
 		generation := WeekStart(at).Unix()
 		latest, ok, err := s.Store.LatestSnapshotTx(ctx, sc.Tx, server)
+		// A derived snapshot that does not round-trip is rebuilt, never served as an outage.
+		if errors.Is(err, d.ErrUnavailable) {
+			ok, err = false, nil
+		}
 		if err != nil {
 			return err
 		}
@@ -181,7 +198,11 @@ func (s Service) build(ctx context.Context, sc gen.TimedScope, server identity.L
 	}
 
 	overview, totals := buildOverview(scores)
-	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, revision, at)
+	operationContext, err := pinContent(sc.Operation.Operation(), revision)
+	if err != nil {
+		return d.Snapshot{}, err
+	}
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: operationContext, Attempt: sc.Attempt, Options: sc.Options}, revision, at)
 	if err != nil {
 		return d.Snapshot{}, err
 	}
@@ -222,6 +243,31 @@ func candidateOwners(gathered []categorySource) []int64 {
 	return out
 }
 
+// rosterRows loads the stock MID1 hero rows and restores the origin identity
+// the wire omits, so recommendation groups awakened forms under their base hero.
+func (s Service) rosterRows(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, at time.Time) (map[string]any, error) {
+	detail := map[string]any{}
+	if err := s.Heroes.OverlayMID1(ctx, q, identity.ActorContext{PlayerID: playerID}, false, at, detail); err != nil {
+		return nil, err
+	}
+	heroes, _ := detail["49"].(map[string]any)
+	rows, _ := heroes["heros"].(map[string]any)
+	origins, err := s.Heroes.HeroOriginTableIDsTx(ctx, q, playerID)
+	if err != nil {
+		return nil, err
+	}
+	for _, value := range rows {
+		row, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+		if origin := origins[rowNumber(row, "partner_id")]; origin > 0 {
+			row["origin_table_id"] = origin
+		}
+	}
+	return rows, nil
+}
+
 func (s Service) loadOwner(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, at time.Time) (ownerState, bool, error) {
 	profile, found, err := s.Directory.ProfileTx(ctx, q, playerID)
 	if err != nil {
@@ -242,12 +288,10 @@ func (s Service) loadOwner(ctx context.Context, q tx.Queryer, playerID identity.
 			card.GuildName = guildRow.Name
 		}
 	}
-	detail := map[string]any{}
-	if err = s.Heroes.OverlayMID1(ctx, q, identity.ActorContext{PlayerID: playerID}, false, at, detail); err != nil {
+	rows, err := s.rosterRows(ctx, q, playerID, at)
+	if err != nil {
 		return ownerState{}, false, err
 	}
-	heroes, _ := detail["49"].(map[string]any)
-	rows, _ := heroes["heros"].(map[string]any)
 	state := ownerState{card: card, byPartner: map[int64]map[string]any{}, byTable: map[int64]map[string]any{}, byOrigin: map[int64]map[string]any{}, pets: map[int64]map[string]any{}}
 	for _, value := range rows {
 		row, ok := value.(map[string]any)

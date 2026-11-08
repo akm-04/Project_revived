@@ -41,10 +41,10 @@ var ErrRefused = errors.New("herorecommend: refused")
 // owner-local partner id that the producer resolves through that player's
 // stock roster.
 type Popularity struct {
-	PlayerID  int64
-	PartnerID int64
-	TableID   int64
-	Score     int64
+	PlayerID  int64 `json:"player_id"`
+	PartnerID int64 `json:"partner_id"`
+	TableID   int64 `json:"table_id"`
+	Score     int64 `json:"score"`
 }
 
 // Formation is one source formation. PartnerIDs is the stored team order;

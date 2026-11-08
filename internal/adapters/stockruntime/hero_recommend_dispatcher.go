@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -74,5 +75,6 @@ func failHeroRecommend(e error) httpedge.Response {
 	if errors.Is(e, d.ErrRefused) {
 		return conflictRefusal(1)
 	}
+	log.Printf("hero recommend unavailable: %v", e)
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_recommend_unavailable"}}
 }

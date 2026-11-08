@@ -19,10 +19,13 @@ func (Store) HeroRecommendSourceTx(c context.Context, q tx.Queryer, server ident
 	}
 	var popularity string
 	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'player_id',player_id,'score',score) ORDER BY score DESC,table_id),'[]'::jsonb)::text FROM(
-		SELECT u.table_id,u.player_id,SUM(u.fights+2*u.wins+u.kill_count)OVER(PARTITION BY u.table_id)AS score,
-		 ROW_NUMBER()OVER(PARTITION BY u.table_id ORDER BY(u.fights+2*u.wins+u.kill_count)DESC,u.player_id)AS rn
-		FROM arena_partner_usage u JOIN arena_players p ON p.player_id=u.player_id
-		WHERE p.logical_server_id=$1)x WHERE rn=1 ORDER BY score DESC,table_id LIMIT $2`, int64(server), limit).Scan(&popularity); e != nil {
+		SELECT table_id,player_id,score FROM(
+			SELECT u.table_id,u.player_id,SUM(u.fights+2*u.wins+u.kill_count)OVER(PARTITION BY u.table_id)AS score,
+			 ROW_NUMBER()OVER(PARTITION BY u.table_id ORDER BY(u.fights+2*u.wins+u.kill_count)DESC,u.player_id)AS rn
+			FROM arena_partner_usage u JOIN arena_players p ON p.player_id=u.player_id
+			WHERE p.logical_server_id=$1
+		)ranked WHERE rn=1 ORDER BY score DESC,table_id LIMIT $2
+	)x`, int64(server), limit).Scan(&popularity); e != nil {
 		return out, e
 	}
 	if e := json.Unmarshal([]byte(popularity), &out.Popularity); e != nil {

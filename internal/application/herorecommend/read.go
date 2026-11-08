@@ -93,12 +93,10 @@ func (s Service) viewerForce(ctx context.Context, a identity.ActorContext, o ope
 	var owned bool
 	_, _, err := s.Timed.Run(ctx, o, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(ctx context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
-		detail := map[string]any{}
-		if err := s.Heroes.OverlayMID1(ctx, sc.Tx, a, false, at, detail); err != nil {
+		rows, err := s.rosterRows(ctx, sc.Tx, a.PlayerID, at)
+		if err != nil {
 			return err
 		}
-		heroes, _ := detail["49"].(map[string]any)
-		rows, _ := heroes["heros"].(map[string]any)
 		var partnerID int64
 		for _, value := range rows {
 			row, ok := value.(map[string]any)
@@ -114,7 +112,11 @@ func (s Service) viewerForce(ctx context.Context, a identity.ActorContext, o ope
 		if err != nil {
 			return err
 		}
-		scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, revision, at)
+		operationContext, err := pinContent(sc.Operation.Operation(), revision)
+		if err != nil {
+			return err
+		}
+		scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: operationContext, Attempt: sc.Attempt, Options: sc.Options}, revision, at)
 		if err != nil {
 			return err
 		}

@@ -4085,6 +4085,10 @@
    "publicstats": [
     "*HeroTx"
    ],
+   "store:characterstore": [
+    "*HeroOriginTableIDsTx",
+    "*OverlayMID1"
+   ],
    "store:contentstore": [
     "*ActiveRevision"
    ],

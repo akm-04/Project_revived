@@ -55,6 +55,12 @@ type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+// HeroRoster adds the owner-local origin identity the stock MID1 wire omits.
+type HeroRoster interface {
+	Roster
+	HeroOriginTableIDsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]int64, error)
+}
+
 // HeroPower is the canonical public force producer (Self view only).
 type HeroPower interface {
 	HeroTx(context.Context, characterasset.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
@@ -73,7 +79,7 @@ type Service struct {
 	Content   Content
 	Directory Directory
 	Guilds    Guilds
-	Heroes    Roster
+	Heroes    HeroRoster
 	Pets      Roster
 	HeroPower HeroPower
 	Cohort    Cohort

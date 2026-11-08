@@ -123,6 +123,18 @@ func (fakeGuilds) ReadGuildTx(context.Context, tx.Queryer, guild.ID) (guild.Guil
 
 type fakeRoster struct{ heroes map[int64][]map[string]any }
 
+func (r fakeRoster) HeroOriginTableIDsTx(_ context.Context, _ tx.Queryer, playerID identity.PlayerID) (map[int64]int64, error) {
+	out := map[int64]int64{}
+	for _, row := range r.heroes[int64(playerID)] {
+		if origin, ok := row["origin_table_id"].(int64); ok {
+			out[row["partner_id"].(int64)] = origin
+			continue
+		}
+		out[row["partner_id"].(int64)] = row["table_id"].(int64)
+	}
+	return out, nil
+}
+
 func (r fakeRoster) OverlayMID1(_ context.Context, _ tx.Queryer, actor identity.ActorContext, _ bool, _ time.Time, detail map[string]any) error {
 	rows := map[string]any{}
 	for _, row := range r.heroes[int64(actor.PlayerID)] {
