@@ -316,6 +316,7 @@ func main() {
 		Backgrounds: librarystore.Store{},
 		Grants:      i5svc,
 		Content:     contentDB,
+		Receipts:    receipts,
 	}
 	petSvc := apppet.Service{Awakening: heroDB, Runner: runner, Timed: petTimed, Store: heroDB, Fencer: i5db, Content: contentDB, Progression: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Acquisition: petAcquisitionDebit, MaterialCosts: heroMaterialCosts, Scalar: i5CrossOwner, PetExp: petExpDebit, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, RestorationModifier: characterasset.IdentityRestorationModifier{}, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB}
 	heroSvc.AwakeningEquipment, petSvc.AwakeningEquipment = &i5svc, &i5svc

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
 	"gxb.local/backend/v2/internal/application/generation"
 	i5dom "gxb.local/backend/v2/internal/application/i5"
@@ -30,6 +32,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 type socialFence struct{}
@@ -560,5 +564,157 @@ func TestDormSocialRefusalsThroughProductionPath(t *testing.T) {
 	}
 	if err := command(h.owner, app.Command{Family: app.DeleteComment, HouseID: 1, CommentID: 999}); !errors.Is(err, app.ErrRejected) {
 		t.Fatalf("missing comment delete: %v", err)
+	}
+}
+
+func (h socialHarness) commandWithOperation(t *testing.T, actor identity.ActorContext, command app.Command, op operation.Context) map[string]any {
+	t.Helper()
+	result, err := h.service.Command(context.Background(), actor, command, op)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return result.Body
+}
+
+func (h socialHarness) fixedOperation(t *testing.T) operation.Context {
+	t.Helper()
+	op, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return op
+}
+
+func dormReceiptCount(t *testing.T, p *pg.Pool, player identity.PlayerID, family string, op operation.Context) int64 {
+	t.Helper()
+	var count int64
+	if err := p.QueryRow(context.Background(), `SELECT count(*) FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain='dorm-house' AND operation=$2 AND semantic_key=$3`, strconv.FormatInt(int64(player), 10), family, op.ID.String()).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	return count
+}
+
+func sameSocialReply(t *testing.T, mid uint16, first, replay map[string]any) {
+	t.Helper()
+	encodedFirst, err := json.Marshal(first)
+	if err != nil {
+		t.Fatal(err)
+	}
+	encodedReplay, err := json.Marshal(replay)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(encodedFirst) != string(encodedReplay) {
+		t.Fatalf("MID %d exact-operation replay drifted: %s vs %s", mid, encodedFirst, encodedReplay)
+	}
+}
+
+func TestDormSocialExactOperationRetryReceipts(t *testing.T) {
+	h := newSocialHarness(t)
+
+	t.Run("2518 change name", func(t *testing.T) {
+		op := h.fixedOperation(t)
+		command := app.Command{Family: app.ChangeName, HouseID: 1, HouseName: "retry-name"}
+		first := h.commandWithOperation(t, h.owner, command, op)
+		replay := h.commandWithOperation(t, h.owner, command, op)
+		sameSocialReply(t, 2518, first, replay)
+		if count := dormReceiptCount(t, h.pool, h.owner.PlayerID, app.ChangeName, op); count != 1 {
+			t.Fatalf("change-name receipts=%d", count)
+		}
+		var name string
+		if err := h.pool.QueryRow(context.Background(), `SELECT house_name FROM player_dorm_room_social WHERE player_id=$1 AND house_id=1`, int64(h.owner.PlayerID)).Scan(&name); err != nil || name != "retry-name" {
+			t.Fatalf("stored name=%q err=%v", name, err)
+		}
+	})
+
+	t.Run("2520 hide house", func(t *testing.T) {
+		op := h.fixedOperation(t)
+		command := app.Command{Family: app.HideHouse, HouseID: 1}
+		first := h.commandWithOperation(t, h.owner, command, op)
+		replay := h.commandWithOperation(t, h.owner, command, op)
+		sameSocialReply(t, 2520, first, replay)
+		if count := dormReceiptCount(t, h.pool, h.owner.PlayerID, app.HideHouse, op); count != 1 {
+			t.Fatalf("hide receipts=%d", count)
+		}
+		info, _ := replay["house_info"].(map[string]any)
+		if info == nil || (info["is_hide"] != int64(1) && info["is_hide"] != float64(1)) {
+			t.Fatalf("hide replay toggled twice: %v", replay)
+		}
+		h.commandWithOperation(t, h.owner, command, h.fixedOperation(t))
+	})
+
+	t.Run("2523 comment house", func(t *testing.T) {
+		op := h.fixedOperation(t)
+		command := app.Command{Family: app.CommentHouse, HostID: int64(h.owner.PlayerID), HouseID: 1, Content: "retry-comment"}
+		first := h.commandWithOperation(t, h.viewer, command, op)
+		replay := h.commandWithOperation(t, h.viewer, command, op)
+		sameSocialReply(t, 2523, first, replay)
+		if count := dormReceiptCount(t, h.pool, h.viewer.PlayerID, app.CommentHouse, op); count != 1 {
+			t.Fatalf("comment receipts=%d", count)
+		}
+		var comments int64
+		if err := h.pool.QueryRow(context.Background(), `SELECT count(*) FROM player_dorm_comments WHERE player_id=$1 AND house_id=1 AND content='retry-comment' AND deleted_at IS NULL`, int64(h.owner.PlayerID)).Scan(&comments); err != nil || comments != 1 {
+			t.Fatalf("comments=%d err=%v", comments, err)
+		}
+	})
+
+	t.Run("2526 delete comment", func(t *testing.T) {
+		body := h.command(t, h.viewer, app.Command{Family: app.CommentHouse, HostID: int64(h.owner.PlayerID), HouseID: 1, Content: "retry-delete"})
+		commentID := body["best_comments"].([]any)[0].(map[string]any)["comment_id"].(int64)
+		op := h.fixedOperation(t)
+		command := app.Command{Family: app.DeleteComment, HouseID: 1, CommentID: commentID}
+		first := h.commandWithOperation(t, h.owner, command, op)
+		replay := h.commandWithOperation(t, h.owner, command, op)
+		sameSocialReply(t, 2526, first, replay)
+		if count := dormReceiptCount(t, h.pool, h.owner.PlayerID, app.DeleteComment, op); count != 1 {
+			t.Fatalf("delete receipts=%d", count)
+		}
+		var deleted bool
+		if err := h.pool.QueryRow(context.Background(), `SELECT deleted_at IS NOT NULL FROM player_dorm_comments WHERE comment_id=$1`, commentID).Scan(&deleted); err != nil || !deleted {
+			t.Fatalf("comment deleted=%v err=%v", deleted, err)
+		}
+	})
+}
+
+type socialDispatchAuthority struct{ actor identity.ActorContext }
+
+func (a socialDispatchAuthority) ResolveGameplayBearer(context.Context, string, time.Time) (identity.ActorContext, error) {
+	return a.actor, nil
+}
+
+func socialDispatchRequest(t *testing.T, actor identity.ActorContext, mid uint16, params map[string]any) httpedge.DispatchRequest {
+	t.Helper()
+	op, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	params["token"] = "bearer"
+	params["region"] = int64(actor.LogicalServerID)
+	return httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: op, MID: mid, ReceivedAt: op.StartedAt, Params: params, Claims: wire.CredentialClaims{Token: "bearer", Region: int64(actor.LogicalServerID)}}}
+}
+
+func TestDormDeleteCommentHostOnlyThroughDispatcher(t *testing.T) {
+	h := newSocialHarness(t)
+	body := h.command(t, h.viewer, app.Command{Family: app.CommentHouse, HostID: int64(h.owner.PlayerID), HouseID: 1, Content: "host-only"})
+	commentID := body["best_comments"].([]any)[0].(map[string]any)["comment_id"].(int64)
+
+	nonHost := stockruntime.DormDispatcher{Authority: socialDispatchAuthority{actor: h.author}, Service: h.service}
+	refusal := nonHost.Dispatch(context.Background(), socialDispatchRequest(t, h.author, 2526, map[string]any{"house_id": int64(1), "comment_id": commentID}))
+	if refusal.HTTPStatus != 409 || refusal.Body["error_code"] != int64(1) {
+		t.Fatalf("non-host delete status=%d body=%v", refusal.HTTPStatus, refusal.Body)
+	}
+	page, err := h.socialRead(t, h.viewer, 2524, int64(h.owner.PlayerID), 1, 0, 20)
+	if err != nil || page["comment_num"] != int64(1) {
+		t.Fatalf("non-host delete removed the comment: %v %v", page, err)
+	}
+
+	host := stockruntime.DormDispatcher{Authority: socialDispatchAuthority{actor: h.owner}, Service: h.service}
+	accepted := host.Dispatch(context.Background(), socialDispatchRequest(t, h.owner, 2526, map[string]any{"house_id": int64(1), "comment_id": commentID}))
+	if accepted.HTTPStatus != 200 {
+		t.Fatalf("host delete status=%d body=%v", accepted.HTTPStatus, accepted.Body)
+	}
+	page, err = h.socialRead(t, h.viewer, 2524, int64(h.owner.PlayerID), 1, 0, 20)
+	if err != nil || page["comment_num"] != int64(0) {
+		t.Fatalf("host delete left the comment: %v %v", page, err)
 	}
 }

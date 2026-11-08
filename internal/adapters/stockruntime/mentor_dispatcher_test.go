@@ -105,6 +105,17 @@ func TestMentorDispatcherRefusalIsConflict(t *testing.T) {
 	}
 }
 
+// The 1858 windows check only xyd.error.OK, so a business refusal must be a
+// 409 carrying a code the stock message table knows (34011: search level limit).
+func TestMentorDispatcherFindingRefusalIsConflict(t *testing.T) {
+	service := &mentorTestService{err: &mentor.Refusal{Code: 34011}}
+	dispatcher := MentorDispatcher{Authority: mentorTestAuthority{actor: mentorTestActor()}, Service: service}
+	got := dispatcher.Dispatch(context.Background(), mentorTestRequest(1858, map[string]any{"relation_type": int64(1)}))
+	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(34011) {
+		t.Fatalf("1858 refusal %d %#v", got.HTTPStatus, got.Body)
+	}
+}
+
 func TestMentorDispatcherSuccessShapes(t *testing.T) {
 	dispatcher := MentorDispatcher{Authority: mentorTestAuthority{actor: mentorTestActor()}, Service: &mentorTestService{}}
 	for _, tc := range []struct {

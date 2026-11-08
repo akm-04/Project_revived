@@ -34,7 +34,7 @@ func (service Service) Claim(ctx context.Context, actor identity.ActorContext, m
 		return nil, refusal(34010)
 	}
 	var body map[string]any
-	err = service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+	err = service.runReceipted(ctx, actor, op, "claim", map[string]any{"mission_id": missionID}, &body, func(ctx context.Context, t tx.Tx, at time.Time) error {
 		players := []identity.PlayerID{actor.PlayerID}
 		if missionID == catalog.Rules.FinishMissionID {
 			existing, err := service.Store.ReadRelationshipsTx(ctx, t, actor.PlayerID, actor.LogicalServerID)
@@ -113,7 +113,15 @@ func (service Service) Claim(ctx context.Context, actor identity.ActorContext, m
 		if plan.Validate() != nil {
 			return ErrInvalid
 		}
-		result, err := service.Grants.SettleGrantTx(ctx, t, actor, plan, op, i5.GrantTxOptions{AllowOverflowMail: true})
+		revision, err := service.Content.ActiveRevision(ctx, t)
+		if err != nil {
+			return ErrUnavailable
+		}
+		bound, err := bindContentRevision(op, revision)
+		if err != nil {
+			return err
+		}
+		result, err := service.Grants.SettleGrantTx(ctx, t, actor, plan, bound, i5.GrantTxOptions{AllowOverflowMail: true})
 		if err != nil {
 			return err
 		}
@@ -237,7 +245,7 @@ func (service Service) Exam(ctx context.Context, actor identity.ActorContext, is
 		return nil, ErrUnavailable
 	}
 	var body map[string]any
-	err = service.run(ctx, actor, op, true, func(ctx context.Context, t tx.Tx, at time.Time) error {
+	err = service.runReceipted(ctx, actor, op, "exam", map[string]any{"is_win": isWin}, &body, func(ctx context.Context, t tx.Tx, at time.Time) error {
 		if err := lockPlayerRoots(ctx, service.Players, t, actor.LogicalServerID, actor.PlayerID); err != nil {
 			return err
 		}
@@ -273,7 +281,15 @@ func (service Service) Exam(ctx context.Context, actor identity.ActorContext, is
 		if plan.Validate() != nil {
 			return ErrInvalid
 		}
-		if _, err := service.Grants.SettleGrantTx(ctx, t, actor, plan, op, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
+		revision, err := service.Content.ActiveRevision(ctx, t)
+		if err != nil {
+			return ErrUnavailable
+		}
+		bound, err := bindContentRevision(op, revision)
+		if err != nil {
+			return err
+		}
+		if _, err := service.Grants.SettleGrantTx(ctx, t, actor, plan, bound, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 			return err
 		}
 		items := make([]ExamItem, 0, len(catalog.Exam.Items))

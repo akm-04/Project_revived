@@ -132,6 +132,7 @@
  "stores": [
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/kernelstore",
   "internal/adapters/postgres/librarystore",
   "internal/adapters/postgres/mentorstore"
  ],
@@ -145,6 +146,7 @@
   ],
   "read": [
    "gxb_content_activation",
+   "gxb_operation_receipts",
    "mentor_applications",
    "mentor_exam_receipts",
    "mentor_mission_progress",
@@ -155,6 +157,7 @@
    "players"
   ],
   "written": [
+   "gxb_operation_receipts",
    "mentor_applications",
    "mentor_exam_receipts",
    "mentor_mission_progress",
@@ -166,7 +169,9 @@
   "integration": [
    "playerdisplay"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_10f_mentor.json"
+  ],
   "unit": []
  }
 }
