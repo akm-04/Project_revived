@@ -199,6 +199,7 @@ func main() {
 		}()
 	}
 	runner := tx.Runner{DB: pool, Admission: tx.NewSemaphore(64), Hooks: observability.TxHooks{Metrics: txMetrics}}
+	broadcastEmitter := postgres.BroadcastEmitter{}
 	// Deployment must apply migrations first. Gate all HTTP traffic on content readiness.
 	contentCtx, contentCancel := context.WithTimeout(ctx, 3*registry.DefaultWriteProfile().OperationTimeout)
 	active, contentErr := (registry.Service{Runner: runner, Repo: contentstore.Store{}, Fresh: pool, Providers: registry.DefaultProviderSet()}).ValidateActiveReadiness(contentCtx)
@@ -275,8 +276,10 @@ func main() {
 	librarySvc.Achievements = appachievement.Service{Store: achievementstore.Store{}, Content: contentDB, Population: librarySvc}
 	librarySvc.Stacks = i5db
 	librarySvc.Skins = heroDB
+	librarySvc.Broadcast = broadcastEmitter
 	forumSvc := applibraryforum.Service{Timed: heroSvc.Timed, Reads: runner, Store: libraryforumstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Directory: i4store.PlayerDirectoryReader{}, Characters: heroDB}
 	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts, GluePurchases: dormstore.Store{}, GlueValues: i5svc, GluePrivileges: privileges, Social: dormstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Moderation: contentDB}
+	dormSvc.Broadcast = broadcastEmitter
 	bookSvc := appbook.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: bookstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
 	eventCentreSvc := appeventcentre.Service{Timed: heroSvc.Timed, Reads: runner, Owner: eventcentrestore.Store{}, Book: bookSvc, Content: contentDB, Pets: characterstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Grants: i5svc, Receipts: receipts}
 	courseSvc := appcourse.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.CourseHeroPort{Store: heroDB}, Owner: coursestore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts, Privileges: privileges}
@@ -343,6 +346,7 @@ func main() {
 		Fence: i5db, Players: i4store.PlayerRootLocker{}, Policy: appguildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}}
 	vending := appsummon.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Fresh: pool, Store: summonstore.Store{}, Content: contentDB, Fence: i5db,
 		Heroes: heroSvc, HeroWire: heroproj.StockHero, Grants: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+	vending.Broadcast = broadcastEmitter
 	charge := commerceprivilege.Charge{
 		Timed:       appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 		Fresh:       pool,
@@ -467,6 +471,7 @@ func main() {
 		ranking.Illusion = illusion
 		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites)
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners)
+		topFloor.Broadcast = broadcastEmitter
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
 			mustRegister(mid, stockruntime.MemoirDispatcher{Authority: authority, Service: memoir})
@@ -485,6 +490,7 @@ func main() {
 			mustRegister(mid, stockruntime.PetCampaignDispatcher{Authority: authority, Service: petCampaign})
 		}
 		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, rentalReads)
+		workplace.Broadcast = broadcastEmitter
 		for _, mid := range stockruntime.WorkplaceMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.WorkplaceDispatcher{Authority: authority, Service: workplace}))
 		}
@@ -530,6 +536,7 @@ func main() {
 		}
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight)
+		conquer.Broadcast = broadcastEmitter
 		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight)
 		campaign.StarCaps = rentalStarCaps(rentalPolicy.Policy)
 		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}

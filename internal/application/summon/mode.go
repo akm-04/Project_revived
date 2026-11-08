@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/broadcast"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -44,6 +45,7 @@ type Mode struct {
 	Privileges  i5.PrivilegeSnapshotProvider
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+	Broadcast   broadcast.Emitter
 }
 
 type Store interface {
@@ -232,7 +234,7 @@ func (s Mode) Summon(c context.Context, a identity.ActorContext, q Pull, op oper
 		if firstSmall && state.Counters[d.Small] >= 1 {
 			itemID, amount = v.catalog.Reward.ItemID, v.catalog.Reward.ItemNum
 		}
-		if out["result"], err = s.deliver(c, sc, a, v, slots, reward(itemID, amount, out)); err != nil {
+		if out["result"], err = s.deliver(c, sc, a, v, slots, reward(itemID, amount, out), false); err != nil {
 			return nil, state, err
 		}
 		out["summon_info"] = info(&v.catalog, state, v.day)
@@ -260,7 +262,7 @@ func (s Mode) sx(c context.Context, sc gen.TimedScope, a identity.ActorContext, 
 	slots, state := v.catalog.DrawSX(state, main[selector-1], cd.NewStream(sc.Operation.Operation().Derive("summon.sx/v1", 0)))
 	out := map[string]any{}
 	itemID, amount := v.catalog.Juice(b)
-	if out["result"], err = s.deliver(c, sc, a, v, slots, reward(itemID, amount, out)); err != nil {
+	if out["result"], err = s.deliver(c, sc, a, v, slots, reward(itemID, amount, out), true); err != nil {
 		return nil, state, err
 	}
 	out["summon_info"] = info(&v.catalog, state, v.day)
@@ -277,13 +279,22 @@ func reward(itemID, amount int64, out map[string]any) []grant.Line {
 }
 
 // deliver materializes the slots, settles their items with extra and records one SUMMON fact per slot.
-func (s Mode) deliver(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, slots []d.Slot, extra []grant.Line) ([]any, error) {
-	rows, lines, err := s.materialize(c, sc, a.PlayerID, &v.catalog, v.revision, slots)
+// announce is set for SX pulls, whose new rare girls are the SYSTEM_BROADCAST 3001 event.
+func (s Mode) deliver(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, slots []d.Slot, extra []grant.Line, announce bool) ([]any, error) {
+	rows, lines, newHeroes, err := s.materialize(c, sc, a.PlayerID, &v.catalog, v.revision, slots)
 	if err != nil {
 		return nil, err
 	}
 	if err = s.settle(c, sc, a, "classic", append(lines, extra...)); err != nil {
 		return nil, err
+	}
+	if announce && s.Broadcast != nil {
+		for _, tableID := range newHeroes {
+			message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.SXHero, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{HeroTableID: tableID}}
+			if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+				return nil, err
+			}
+		}
 	}
 	return rows, s.recordPull(c, sc, a, slots)
 }
@@ -322,7 +333,7 @@ func (s Mode) Magic(c context.Context, a identity.ActorContext, q MagicPull, op 
 			return nil, state, err
 		}
 		slots, fragments := v.catalog.DrawMagic(b, cd.NewStream(sc.Operation.Operation().Derive("summon.magic/v1", 0)))
-		rows, lines, err := s.materialize(c, sc, a.PlayerID, &v.catalog, v.revision, slots)
+		rows, lines, _, err := s.materialize(c, sc, a.PlayerID, &v.catalog, v.revision, slots)
 		if err != nil {
 			return nil, state, err
 		}
@@ -405,8 +416,8 @@ func (s Mode) debit(c context.Context, sc gen.TimedScope, pid identity.PlayerID,
 
 // materialize creates new heroes in slot order; an owned hero (also one
 // created earlier in the same pull) becomes its stone fragments (to_stone).
-func (s Mode) materialize(c context.Context, sc gen.TimedScope, pid identity.PlayerID, catalog *d.Catalog, revision string, slots []d.Slot) ([]any, []grant.Line, error) {
-	rows, lines := make([]any, 0, len(slots)), []grant.Line{}
+func (s Mode) materialize(c context.Context, sc gen.TimedScope, pid identity.PlayerID, catalog *d.Catalog, revision string, slots []d.Slot) ([]any, []grant.Line, []int64, error) {
+	rows, lines, newHeroes := make([]any, 0, len(slots)), []grant.Line{}, []int64{}
 	for _, slot := range slots {
 		if slot.Kind == d.ItemKind {
 			rows = append(rows, map[string]any{"table_id": slot.ItemID, "item_num": slot.ItemNum})
@@ -415,12 +426,12 @@ func (s Mode) materialize(c context.Context, sc gen.TimedScope, pid identity.Pla
 		}
 		h, admission, err := s.Heroes.AwardStoryPartnerTx(c, sc.Tx, pid, slot.ItemID, revision, sc.Operation.Operation())
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 		if admission == nil {
 			stone, err := catalog.Fragments(slot.ItemID)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
 			}
 			rows = append(rows, map[string]any{"table_id": stone[0], "item_num": stone[1], "to_stone": true})
 			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: stone[0], Amount: stone[1]})
@@ -428,12 +439,15 @@ func (s Mode) materialize(c context.Context, sc gen.TimedScope, pid identity.Pla
 		}
 		row, err := s.HeroWire(h)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 		row["is_partner"] = true
 		rows = append(rows, row)
+		if h.Star >= 5 {
+			newHeroes = append(newHeroes, h.TableID)
+		}
 	}
-	return rows, lines, nil
+	return rows, lines, newHeroes, nil
 }
 
 func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorContext, name string, lines []grant.Line) error {

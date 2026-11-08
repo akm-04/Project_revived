@@ -386,6 +386,9 @@
    "topfloor.json",
    "topfloor_battle.json"
   ],
-  "unit": []
+  "unit": [
+   "broadcast_native_test.go",
+   "broadcast_test.go"
+  ]
  }
 }

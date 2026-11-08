@@ -136,6 +136,7 @@ var familyNoticeRoutes = []string{
 	"realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices}",
 	"realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices}",
 	"realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices}",
+	"realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices}",
 }
 
 var familyNoticeSchemas = map[string]bool{
@@ -145,6 +146,7 @@ var familyNoticeSchemas = map[string]bool{
 	"internal/adapters/stockruntime/adventure_room_notice.go": true,
 	"internal/adapters/stockruntime/guild_fight_notice.go":    true,
 	"internal/adapters/stockruntime/guild_apply_notice.go":    true,
+	"internal/adapters/stockruntime/broadcast_notice.go":      true,
 }
 
 func genericWakeupRoutes(realtime string) int {

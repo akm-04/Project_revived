@@ -2,6 +2,7 @@ package workplace
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -88,6 +89,7 @@ type Mode struct {
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
 	Rental      RentalOffers
+	Broadcast   broadcast.Emitter
 }
 
 // RentalOffers is the guild rental admission read (I9_GUILD_RENTAL_V1 C14).

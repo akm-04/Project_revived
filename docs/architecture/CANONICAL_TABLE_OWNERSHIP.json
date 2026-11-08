@@ -3492,7 +3492,10 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "alter_migrations": [
+        "migrations/00155_i9_10_topfloor_win_streak.sql"
+      ]
     },
     "top_floor_fights": {
       "owner": "TopFloor",
@@ -5701,6 +5704,20 @@
       "allowed_query_owners": [
         "gmquestion"
       ]
+    },
+    "broadcast_outbox": {
+      "owner": "broadcast",
+      "migration": "migrations/00156_i9_10_broadcast_outbox.sql",
+      "allowed_query_owners": [
+        "broadcast"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/broadcaststore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/broadcaststore/"
+      ],
+      "write_exceptions": []
     }
   }
 }
