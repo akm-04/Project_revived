@@ -41,6 +41,10 @@ const (
 	MIDPlayerNotice     uint16 = 36854
 	MIDForceReload      uint16 = 36855
 	MIDGuildBroadcast   uint16 = 36863
+	// MIDActivityBroadcast and MIDSystemBroadcast are the stock lobby marquee
+	// pushes (4096/4101). The client maps both to events and indexes params.msg.
+	MIDActivityBroadcast uint16 = 4096
+	MIDSystemBroadcast   uint16 = 4101
 
 	MIDTCPLogin          uint16 = 32771
 	MIDChatRoomEntered   uint16 = 32779
@@ -121,7 +125,7 @@ func Lookup(mid uint16) (Descriptor, bool) {
 		d.Encoding = AMF3
 		d.Direction = S2C
 		d.Status = ResearchedUnimplemented
-	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast, MIDGuildFightNotice:
+	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast, MIDGuildFightNotice, MIDActivityBroadcast, MIDSystemBroadcast:
 		d.Transport = TCP
 		d.Encoding = AMF3
 		d.Direction = S2C

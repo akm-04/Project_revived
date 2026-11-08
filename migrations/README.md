@@ -44,3 +44,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00143: I9-10 D512 operator-configurable Top Floor girl bans by mode and rotation.
 - 00150: I9-10A Event Centre notice board (MIDs 1083-1087) stored server combat reports, one row per player report id retained by the board history. Empty on upgrade.
 - 00151: I9-10 bugs 51-53: Girls Log milestones (player, hero, log id) written by the summon facet, favor stages, dialogue awards, marriage, star-up, promotion and awakening. Empty on upgrade.
+- 00152: I9-10 lobby announcements (SYSTEM_BROADCAST 4101, ACTIVITY_BROADCAST 4096): one outbox row per produced announce, removed by the realtime listener after it fans out to the producing logical server. Empty on upgrade.

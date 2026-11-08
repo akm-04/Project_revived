@@ -5687,6 +5687,20 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00137_i9_10f_mentor.sql"
+    },
+    "broadcast_outbox": {
+      "owner": "broadcast",
+      "migration": "migrations/00152_i9_10_broadcast_outbox.sql",
+      "allowed_query_owners": [
+        "broadcast"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/broadcaststore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/broadcaststore/"
+      ],
+      "write_exceptions": []
     }
   }
 }

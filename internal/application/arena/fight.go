@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -602,6 +603,20 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 			}
 		}
 	}
+	// PRIVATE_POLICY: the stock announce names a top-3 rank, so a winning
+	// ranked fight that lands in the top three announces its new rank.
+	if ranked && outcome.Win && !outcome.Forfeit && s.Broadcast != nil {
+		standings, err := s.Store.StandingsTx(c, sc.Tx, attacker.Season)
+		if err != nil {
+			return err
+		}
+		if rank := d.Rank(d.Order(standings), m.Attacker); rank > 0 && rank <= 3 {
+			message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.ArenaTop3, Server: attacker.Server, Player: m.Attacker, Enemy: m.Defender, Fields: broadcast.Fields{Rank: rank}}
+			if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+				return err
+			}
+		}
+	}
 	outcome.Star, outcome.Point = attacker.Star, attacker.Point
 	done := m
 	stamp := at.UTC()
@@ -640,7 +655,18 @@ func (s Service) applyRanked(c context.Context, sc gen.TimedScope, catalog d.Cat
 			return err
 		}
 	}
-	return s.Achievements.ObserveArenaWinStreakTx(c, sc.Tx, m.Attacker, revision, attacker.KeepWin, at)
+	if err := s.Achievements.ObserveArenaWinStreakTx(c, sc.Tx, m.Attacker, revision, attacker.KeepWin, at); err != nil {
+		return err
+	}
+	// PRIVATE_POLICY: the source names no streak milestone, so every ranked win
+	// announces its current streak.
+	if s.Broadcast != nil && outcome.Win && !outcome.Forfeit && attacker.KeepWin > 0 {
+		message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.ArenaWins, Server: attacker.Server, Player: m.Attacker, Fields: broadcast.Fields{KeepWinTimes: attacker.KeepWin}}
+		if err := s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // close ends a match whose battle can no longer produce a result; the attempt

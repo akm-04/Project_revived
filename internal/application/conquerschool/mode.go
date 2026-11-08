@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -52,6 +53,7 @@ type Mode struct {
 	Projection  Projection
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+	Broadcast   broadcast.Emitter
 }
 
 type ModeStore interface {
@@ -480,6 +482,11 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result
 		}
 		if settled.Promoted {
 			err = s.Projection.ProjectConquerTx(c, sc.Tx, a.PlayerID, settled.Progress.Level, settled.Progress.Loop, at)
+		}
+		if err == nil && settled.Promoted && s.Broadcast != nil {
+			message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.ConquerSchool, Server: a.LogicalServerID, Player: a.PlayerID,
+				Fields: broadcast.Fields{Region: view.Region, ConquerLoopID: settled.Attempt.Loop, ConquerLev: settled.Progress.Level}}
+			err = s.Broadcast.EmitTx(c, sc.Tx, message)
 		}
 		return view, err
 	})

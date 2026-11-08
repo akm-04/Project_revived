@@ -55,6 +55,7 @@
    ]
   },
   "bootstrap": {},
+  "broadcast": {},
   "campaign": {
    "missioninputs": [
     "*ReadTx"
@@ -2356,6 +2357,7 @@
     "*Name"
    ]
   },
+  "broadcast": {},
   "campaign": {
    "characterasset": [
     "NewCoherentReadScope"
@@ -5666,6 +5668,7 @@
   "bootstrap": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "broadcast": [],
   "campaign": [
    "cmd/gxb-api/top_floor_postgres.go"
   ],

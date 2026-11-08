@@ -43,6 +43,7 @@ import (
 	"gxb.local/backend/v2/internal/application/achievement"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	apparena "gxb.local/backend/v2/internal/application/arena"
+	appbroadcast "gxb.local/backend/v2/internal/application/broadcast"
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
@@ -350,10 +351,18 @@ func run() error {
 	roomInviteNotices := stockruntime.RoomInviteNoticeListHandler{Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()},
 		Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
 		OnDeliveryError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
+	broadcastEvents, err := stockruntime.NewBroadcastNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	broadcastNotices := stockruntime.BroadcastNoticeHandler{DB: pool, Names: i4store.PlayerRootLocker{}, Registry: connectionsRegistry,
+		Publisher: stockruntime.RealtimePublisher{Registry: broadcastEvents, Limits: limits.Default()}, MaxHandles: runtimePolicy.MaxConnections,
+		OnDeliveryError: func(err error) { log.Printf("broadcast delivery degraded: %v", err) }}
 	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}, realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices},
 		realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms},
 		realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices},
 		realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices},
+		realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices},
 		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices})
 	if err != nil {
 		log.Fatal(err)

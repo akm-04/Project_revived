@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
@@ -281,6 +282,7 @@ type Service struct {
 	Facts        FactsPort
 	Stacks       StackReader
 	Skins        SkinPort
+	Broadcast    broadcast.Emitter
 }
 
 func Profile() tx.Profile {
@@ -768,6 +770,12 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if !wasMarried && facts.Married {
 				if _, e = s.Library.InsertHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: lib.LogMarried, OccurredAt: d.DecisionAt}); e != nil {
 					return e
+				}
+				if s.Broadcast != nil {
+					message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.Married, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{HeroTableID: h.TableID}}
+					if e = s.Broadcast.EmitTx(ctx, sc.Tx, message); e != nil {
+						return e
+					}
 				}
 			}
 			if d.Command.Family == TalkAward && out.HasDialog && out.Dialog.IsAwarded {

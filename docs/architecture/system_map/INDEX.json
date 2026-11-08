@@ -588,6 +588,7 @@
    "arena_settlements": "arena",
    "arena_tournament_periods": "arena",
    "arena_tournament_rooms": "arena",
+   "broadcast_outbox": "broadcast",
    "campaign_nodes": "campaign",
    "campaign_players": "campaign",
    "client_log_capabilities": "clientlog",
@@ -867,6 +868,15 @@
    "path": "internal/application/bootstrap",
    "purpose": "",
    "tables": 10
+  },
+  {
+   "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "broadcast",
+   "path": "internal/application/broadcast",
+   "purpose": "owns the lobby scrolling announcements the stock client receives on SYSTEM_BROADCAST (4101) and ACTIVITY_BROADCAST (4096)",
+   "tables": 1
   },
   {
    "callees": 13,
