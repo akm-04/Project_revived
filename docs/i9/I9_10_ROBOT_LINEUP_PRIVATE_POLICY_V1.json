@@ -1,0 +1,21 @@
+{
+  "contract_id": "I9_10_ROBOT_LINEUP_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY",
+  "source": "tmp/teamcombo/team_catalog.json",
+  "source_sha256": "937de3456e119baad3d3acc1703bc92bba9a3ae14c28e2490e49bcbf4eaa9dd3",
+  "catalog_block": "robot_lineups",
+  "decisions": [
+    "R11"
+  ],
+  "rules": {
+    "applies_to": "Top Floor ladder robots at ranks <= robot_rank_bands.meeting_rank only",
+    "selection": "fnv1a64(decimal rank) modulo lineup count",
+    "lineup_order": "extracted team_catalog order, stable by content revision",
+    "hero_params": "band level, quality and star; source slot equipment; source slot values never reduced",
+    "wire_order": "front, middle, rear; the client also sorts by partner distance",
+    "pet": "unchanged from the robot rank band pet pool"
+  },
+  "lineup_source": "tools/top_floor_robot_lineups.json",
+  "dropped_lineups": []
+}

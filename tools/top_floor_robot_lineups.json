@@ -1,0 +1,816 @@
+{
+  "source": "tmp/teamcombo/team_catalog.json",
+  "source_sha256": "937de3456e119baad3d3acc1703bc92bba9a3ae14c28e2490e49bcbf4eaa9dd3",
+  "lineups": [
+    {
+      "id": "team_catalog:1",
+      "name": "Ricky balanced formation 1",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001021,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001066,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001113,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001253,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001214,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:2",
+      "name": "Pengpeng balanced formation 2",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001234,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001012,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001072,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001142,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001243,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:3",
+      "name": "Ross balanced formation 3",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001093,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001031,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001007,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001132,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001124,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:4",
+      "name": "Bobo balanced formation 4",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001039,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001222,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001052,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001223,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001030,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:5",
+      "name": "Yoba balanced formation 5",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001008,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001009,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001017,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001112,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001143,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:6",
+      "name": "Ricika balanced formation 6",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001102,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001031,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001164,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001203,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001063,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:7",
+      "name": "Casper balanced formation 7",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001067,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001154,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001092,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001004,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001224,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:8",
+      "name": "Haro balanced formation 8",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001006,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001172,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001175,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001144,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001043,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:9",
+      "name": "Fran balanced formation 9",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001056,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001234,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001173,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001028,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001204,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:10",
+      "name": "Bunny balanced formation 10",
+      "tier": "top",
+      "heroes": [
+        {
+          "partner_id": 10001008,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001097,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001163,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001015,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001225,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:11",
+      "name": "Kulo balanced formation 11",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001067,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001215,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001002,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001083,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001254,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:12",
+      "name": "Eira balanced formation 12",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001039,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001104,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001004,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001003,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001073,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:13",
+      "name": "Leo balanced formation 13",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001006,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001222,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001148,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001265,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001094,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:14",
+      "name": "Dodo balanced formation 14",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001067,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001145,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001014,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001177,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001208,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:15",
+      "name": "Tudu balanced formation 15",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001039,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001276,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001020,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001198,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001074,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:16",
+      "name": "Yoyo balanced formation 16",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001234,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001032,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001002,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001235,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001134,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:17",
+      "name": "Fluffy balanced formation 17",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001008,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001155,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001023,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001004,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001077,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:18",
+      "name": "Merlin balanced formation 18",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001081,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001168,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001013,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001184,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001114,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:19",
+      "name": "Ollie balanced formation 19",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001116,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001234,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001174,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001275,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001019,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:20",
+      "name": "Hiyo balanced formation 20",
+      "tier": "high",
+      "heroes": [
+        {
+          "partner_id": 10001039,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001156,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001020,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001195,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001125,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:21",
+      "name": "Kuro balanced formation 21",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001021,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001066,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001084,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001255,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001270,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:22",
+      "name": "Crabby balanced formation 22",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001010,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001066,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001229,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001034,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001237,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:23",
+      "name": "Harmon balanced formation 23",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001008,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001108,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001033,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001064,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001019,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:24",
+      "name": "Blixem balanced formation 24",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001068,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001100,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001054,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001178,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001055,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:25",
+      "name": "Coco balanced formation 25",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001140,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001206,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001044,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001209,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001277,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:26",
+      "name": "Momo balanced formation 26",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001234,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001012,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001065,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001205,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001267,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:27",
+      "name": "Foxay balanced formation 27",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001158,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001016,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001024,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001036,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001117,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:28",
+      "name": "Ricky balanced formation 28",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001067,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001136,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001028,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001005,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001200,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:29",
+      "name": "Pengpeng balanced formation 29",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001039,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001162,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001029,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001058,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001167,
+          "position": "rear"
+        }
+      ]
+    },
+    {
+      "id": "team_catalog:30",
+      "name": "Ross balanced formation 30",
+      "tier": "mid",
+      "heroes": [
+        {
+          "partner_id": 10001008,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001047,
+          "position": "front"
+        },
+        {
+          "partner_id": 10001002,
+          "position": "middle"
+        },
+        {
+          "partner_id": 10001095,
+          "position": "rear"
+        },
+        {
+          "partner_id": 10001165,
+          "position": "rear"
+        }
+      ]
+    }
+  ]
+}

@@ -95,6 +95,36 @@ type RobotBand struct {
 	PetLevel int64
 }
 
+// RobotLineupHero is one lineup member in formation order (front to rear).
+type RobotLineupHero struct {
+	PartnerID int64  `json:"partner_id"`
+	Position  string `json:"position"`
+}
+
+// RobotLineup is one PRIVATE_POLICY role-balanced lineup; ID keeps its
+// team_catalog provenance.
+type RobotLineup struct {
+	ID     string            `json:"id"`
+	Name   string            `json:"name"`
+	Tier   string            `json:"tier"`
+	Heroes []RobotLineupHero `json:"heroes"`
+}
+
+// RobotLineupPolicy is the labelled PRIVATE_POLICY lineup block. Selection
+// names the deterministic rank-to-lineup rule and is tunable from content.
+type RobotLineupPolicy struct {
+	Label        string        `json:"label"`
+	PolicyID     string        `json:"policy_id"`
+	Selection    string        `json:"selection"`
+	Source       string        `json:"source"`
+	SourceSHA256 string        `json:"source_sha256"`
+	Lineups      []RobotLineup `json:"lineups"`
+	Dropped      []struct {
+		ID     string `json:"id"`
+		Reason string `json:"reason"`
+	} `json:"dropped"`
+}
+
 type Catalog struct {
 	TaskModes        *TaskModeCatalog    `json:"task_modes,omitempty"`
 	SchemaVersion    int                 `json:"schema_version"`
@@ -122,6 +152,7 @@ type Catalog struct {
 	RobotHeroes      []RobotHero         `json:"robot_heroes"`
 	PetPool          []RobotPetTemplate  `json:"pet_pool"`
 	RobotRankBands   RobotRankBandPolicy `json:"robot_rank_bands"`
+	RobotLineups     RobotLineupPolicy   `json:"robot_lineups"`
 	FirstNames       []string            `json:"first_names"`
 	LastNames        []string            `json:"last_names"`
 }
@@ -164,8 +195,46 @@ func (c Catalog) Validate() error {
 	if err := c.RobotRankBands.Validate(); err != nil {
 		return err
 	}
+	if err := c.RobotLineups.Validate(); err != nil {
+		return err
+	}
 	return nil
 }
+
+func (p RobotLineupPolicy) Validate() error {
+	if p.Label != "PRIVATE_POLICY" || p.PolicyID == "" || p.Selection == "" || len(p.Lineups) == 0 {
+		return fmt.Errorf("%w: robot lineup policy", ErrUnavailable)
+	}
+	for i, lineup := range p.Lineups {
+		if lineup.ID == "" || len(lineup.Heroes) != DefenseSlots {
+			return fmt.Errorf("%w: robot lineup %d", ErrUnavailable, i)
+		}
+		counts := map[string]int{}
+		seen := map[int64]bool{}
+		previous := 0
+		for _, hero := range lineup.Heroes {
+			if hero.PartnerID <= 0 || seen[hero.PartnerID] {
+				return fmt.Errorf("%w: robot lineup %d hero", ErrUnavailable, i)
+			}
+			seen[hero.PartnerID] = true
+			rank, ok := lineupPositionRank[hero.Position]
+			if !ok || rank < previous {
+				return fmt.Errorf("%w: robot lineup %d position", ErrUnavailable, i)
+			}
+			previous = rank
+			counts[hero.Position]++
+		}
+		for position := range lineupPositionRank {
+			if counts[position] < 1 || counts[position] > 2 {
+				return fmt.Errorf("%w: robot lineup %d %s count", ErrUnavailable, i, position)
+			}
+		}
+	}
+	return nil
+}
+
+// lineupPositionRank orders the wire: the client places the array front to rear.
+var lineupPositionRank = map[string]int{"front": 2, "middle": 3, "rear": 4}
 
 func (p RobotRankBandPolicy) Validate() error {
 	if p.Label != "PRIVATE_POLICY" || p.PolicyID == "" || p.MeetingRank < 1 || len(p.Anchors) < 2 {
@@ -344,6 +413,65 @@ func (c Catalog) RobotHeroParamsAt(id, rank int64) (map[string]any, bool) {
 		params["star"] = band.Star
 	}
 	return params, true
+}
+
+// RobotLineup picks the PRIVATE_POLICY lineup for a ladder rank. The choice
+// depends only on the rank, so it is stable across restarts and servers.
+func (c Catalog) RobotLineup(rank int64) (RobotLineup, bool) {
+	if len(c.RobotLineups.Lineups) == 0 {
+		return RobotLineup{}, false
+	}
+	if _, banded := c.RobotBand(rank); !banded {
+		return RobotLineup{}, false
+	}
+	digest := fnv.New64a()
+	fmt.Fprintf(digest, "%d", rank)
+	return c.RobotLineups.Lineups[digest.Sum64()%uint64(len(c.RobotLineups.Lineups))], true
+}
+
+// RobotHeroesAt returns the ordered TEMPLATE params a robot fields at a rank:
+// the PRIVATE_POLICY lineup inside the band, the source team outside it.
+func (c Catalog) RobotHeroesAt(team, rank int64) ([]map[string]any, bool) {
+	source, found := c.Team(team)
+	if !found {
+		return nil, false
+	}
+	lineup, banded := c.RobotLineup(rank)
+	if !banded {
+		out := make([]map[string]any, 0, len(source.Heroes))
+		for _, id := range source.Heroes {
+			params, ok := c.RobotHeroParams(id)
+			if !ok {
+				return nil, false
+			}
+			out = append(out, params)
+		}
+		return out, true
+	}
+	band, _ := c.RobotBand(rank)
+	out := make([]map[string]any, 0, len(lineup.Heroes))
+	for slot, hero := range lineup.Heroes {
+		out = append(out, c.lineupHeroParams(hero, slot, source, band))
+	}
+	return out, true
+}
+
+// lineupHeroParams gives a lineup member the band strength and the source
+// slot's equipment, never reducing the source slot's level, colour or star.
+func (c Catalog) lineupHeroParams(hero RobotLineupHero, slot int, source RobotTeam, band RobotBand) map[string]any {
+	level, quality, star := band.Level, band.Quality, band.Star
+	var equipFlags []int64
+	if slot < len(source.Heroes) {
+		if origin, ok := c.robotHeroIndex()[source.Heroes[slot]]; ok {
+			level = max(level, origin.Level)
+			quality = max(quality, origin.Quality)
+			star = max(star, origin.Star)
+			equipFlags = origin.EquipFlags
+		}
+	}
+	return map[string]any{"player_id": 0, "partner_id": hero.PartnerID, "table_id": hero.PartnerID, "lev": level, "star": star, "color": quality,
+		"skin_ids": map[string]any{}, "spirit_equip": []any{}, "spirit_item": []any{}, "equips": robotEquipSlots(equipFlags), "fumos": []any{0, 0, 0, 0, 0, 0},
+		"skills": []any{1, 1, 1, 1, 1, 1}}
 }
 
 // RobotPet picks a deterministic playable pet for a robot at a ladder rank. The
