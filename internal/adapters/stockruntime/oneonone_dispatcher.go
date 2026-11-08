@@ -107,6 +107,10 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return badHero("invalid_one_on_one_parameter")
 		}
 		v, err := o.Service.Start(ctx, a, app.StartCommand{Formations: teams, Enemy: identity.PlayerID(enemy)}, op)
+		if errors.Is(err, d.ErrOpponentLowPoints) {
+			// Source message 30003 "Your opponent has lower than 1000 points, can't fight", answered in-band.
+			return okI5(map[string]any{"error_code": int64(30003)})
+		}
 		if errors.Is(err, d.ErrClosedHours) {
 			// Source message 30002 "1 on 1 opens from 8:00 to 22:00 everyday", answered in-band.
 			return okI5(map[string]any{"error_code": int64(30002)})
