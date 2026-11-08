@@ -100,6 +100,7 @@ import (
 	"gxb.local/backend/v2/internal/application/guildcore"
 	appguildtea "gxb.local/backend/v2/internal/application/guildtea"
 	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
+	appherorecommend "gxb.local/backend/v2/internal/application/herorecommend"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
@@ -419,6 +420,12 @@ func main() {
 	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher { return stockruntime.Decorated{Next: d} }
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
+	heroRecommend := canonicalHeroRecommend(pool, runner, contentDB, owners, publicStats)
+	heroRecommendD := stockruntime.HeroRecommendDispatcher{Authority: authority, Service: heroRecommend}
+	for _, mid := range []uint16{2496, 2497, 2498, 2499} {
+		mustRegister(mid, heroRecommendD)
+	}
+	go runReconcileWithInterval(ctx, pool, &appherorecommend.Reconciler{Service: heroRecommend}, envPositiveDuration("GXB_HERO_RECOMMEND_RECONCILE_INTERVAL", defaultReconcileInterval))
 	profileMetrics := canonicalProfileMetrics(contentDB, publicStats, displayService, achievements)
 	profileRecords := apppublicprofile.RosterRecords{Heroes: owners.roster(contentDB), Pets: characterstore.PetBootstrapProjection{Content: contentDB}, Awakening: publicStats.Awakening, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: contentDB, Heroes: characterstore.Store{Queryer: pool}, Kinds: contentDB, Players: i4store.PlayerRootLocker{}}}
 	var profileHistory apppublicprofile.HistoryReader

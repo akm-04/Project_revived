@@ -166,11 +166,17 @@ func canonicalTopFloor(p *postgres.Pool, r tx.Runner, content contentstore.Store
 		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, HeroPower: stats, OwnedHeroes: characterstore.Store{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
-// runReconcile runs one mode's owed settlements and abandoned matches every 30 s (in-process reconcile provider).
+const defaultReconcileInterval = 30 * time.Second
+
+// runReconcile runs one mode's in-process reconcile provider at the shared cadence.
 func runReconcile(ctx context.Context, p *postgres.Pool, provider appgeneration.ReconcileProvider) {
+	runReconcileWithInterval(ctx, p, provider, defaultReconcileInterval)
+}
+
+func runReconcileWithInterval(ctx context.Context, p *postgres.Pool, provider appgeneration.ReconcileProvider, interval time.Duration) {
 	operations := operation.Factory{Clock: clock.System{}}
 	binder := appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
 		select {
