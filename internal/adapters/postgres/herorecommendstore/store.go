@@ -46,7 +46,7 @@ func (Store) InsertSnapshotTx(c context.Context, t tx.Tx, s d.Snapshot) error {
 	if e != nil {
 		return e
 	}
-	_, e = t.Exec(c, `INSERT INTO hero_recommend_snapshots(logical_server_id,generation,content_revision,observed_at,digest,payload)VALUES($1,$2,$3,$4,$5,$6::jsonb) ON CONFLICT(logical_server_id,generation) DO NOTHING`,
+	_, e = t.Exec(c, `INSERT INTO hero_recommend_snapshots(logical_server_id,generation,content_revision,observed_at,digest,payload)VALUES($1,$2,$3,$4,$5,$6::jsonb) ON CONFLICT(logical_server_id,generation) DO UPDATE SET content_revision=EXCLUDED.content_revision,observed_at=EXCLUDED.observed_at,digest=EXCLUDED.digest,payload=EXCLUDED.payload`,
 		s.Server, s.Generation, s.Revision, s.ObservedAt, s.Digest, string(raw))
 	return e
 }
