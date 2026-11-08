@@ -738,6 +738,12 @@ def select_pet_templates(login, specification, templates):
     if specification.get("seed") != "login":
         fail(f"{login}: Pet selection seed must be login")
     count = int(specification["count"])
+    # The stock client has no models for several awakened pets (e.g. 110250001), so seed base forms only.
+    templates = [
+        template
+        for template in templates
+        if int(template["table_id"]) == int(template["origin_table_id"])
+    ]
     origins = {int(template["origin_table_id"]) for template in templates}
     if count < 1 or count > len(origins):
         fail(f"{login}: Pet count exceeds distinct playable origins")
