@@ -469,6 +469,7 @@ func main() {
 		ranking.Illusion = illusion
 		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites)
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
+		topFloor.Broadcast = broadcastEmitter
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
 			mustRegister(mid, stockruntime.MemoirDispatcher{Authority: authority, Service: memoir})
@@ -511,7 +512,6 @@ func main() {
 		}
 		go runReconcile(ctx, pool, apponeonone.Reconciler{Service: oneOnOne})
 		arena := canonicalArena(pool, runner, contentDB, i5db, i5svc, fight, owners)
-		arena.Broadcast = broadcastEmitter
 		ranking.Arena = arena
 		for _, mid := range stockruntime.ArenaMIDs {
 			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})

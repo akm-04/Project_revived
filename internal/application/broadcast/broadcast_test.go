@@ -38,4 +38,8 @@ func TestMessageValidate(t *testing.T) {
 	if err := top3.Validate(); err != nil {
 		t.Fatal(err)
 	}
+	robotTop3 := Message{MID: SystemMID, MsgType: ArenaTop3, Server: 1, Player: 100001, Fields: Fields{Rank: 2, EnemyName: "Robot Name"}}
+	if err := robotTop3.Validate(); err != nil {
+		t.Fatal(err)
+	}
 }

@@ -3492,7 +3492,10 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "alter_migrations": [
+        "migrations/00155_i9_10_topfloor_win_streak.sql"
+      ]
     },
     "top_floor_fights": {
       "owner": "TopFloor",

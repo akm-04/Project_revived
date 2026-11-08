@@ -1,0 +1,15 @@
+{
+  "contract_id": "I9_BROADCAST_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY",
+  "status": "IMPLEMENTATION_IN_PROGRESS_NOT_ACCEPTED",
+  "original_algorithm": "UNKNOWN; the source announce table names the 3002 arguments but no Top Floor streak milestone",
+  "parameters": {
+    "arena_win_streak_milestones": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+  },
+  "notes": {
+    "arena_win_streak_milestones": "SYSTEM_BROADCAST 3002 fires only when the consecutive Top Floor attack-win streak exactly equals one entry; below the first milestone never announces",
+    "streak_reset": "an attack loss or forfeit resets the streak to zero; defence results leave it unchanged",
+    "arena_top3": "SYSTEM_BROADCAST 3003 fires only when an attack win strictly improves the challenger into rank 1, 2 or 3"
+  }
+}

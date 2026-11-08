@@ -36,16 +36,17 @@ var ErrInvalidMessage = errors.New("invalid broadcast message")
 // Fields are the source-named numeric arguments each announce row formats.
 // The handler sends only the fields the client callback for MsgType indexes.
 type Fields struct {
-	Region        int64 `json:"region,omitempty"`
-	HeroTableID   int64 `json:"hero_table_id,omitempty"`
-	KeepWinTimes  int64 `json:"keep_win_times,omitempty"`
-	Rank          int64 `json:"rank,omitempty"`
-	ConquerLoopID int64 `json:"conquer_loop_id,omitempty"`
-	ConquerLev    int64 `json:"conquer_lev,omitempty"`
-	CrystalAward  int64 `json:"crystal_award,omitempty"`
-	KeyItem       int64 `json:"key_item,omitempty"`
-	CGID          int64 `json:"cg_id,omitempty"`
-	TableID       int64 `json:"table_id,omitempty"`
+	Region        int64  `json:"region,omitempty"`
+	HeroTableID   int64  `json:"hero_table_id,omitempty"`
+	KeepWinTimes  int64  `json:"keep_win_times,omitempty"`
+	Rank          int64  `json:"rank,omitempty"`
+	ConquerLoopID int64  `json:"conquer_loop_id,omitempty"`
+	ConquerLev    int64  `json:"conquer_lev,omitempty"`
+	CrystalAward  int64  `json:"crystal_award,omitempty"`
+	KeyItem       int64  `json:"key_item,omitempty"`
+	CGID          int64  `json:"cg_id,omitempty"`
+	TableID       int64  `json:"table_id,omitempty"`
+	EnemyName     string `json:"enemy_name,omitempty"`
 }
 
 type Message struct {
@@ -67,7 +68,7 @@ func (m Message) Validate() error {
 	case ArenaWins:
 		return requireSystem(m, m.Fields.KeepWinTimes > 0)
 	case ArenaTop3:
-		return requireSystem(m, m.Enemy.Valid() && m.Fields.Rank > 0)
+		return requireSystem(m, (m.Enemy.Valid() || m.Fields.EnemyName != "") && m.Fields.Rank > 0)
 	case Married:
 		return requireSystem(m, m.Fields.HeroTableID > 0)
 	case ConquerSchool:

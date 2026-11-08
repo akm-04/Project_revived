@@ -107,6 +107,7 @@ type Player struct {
 	DefenseSetAt    *time.Time
 	Fights          int64
 	Wins            int64
+	WinStreak       int64
 	StateVersion    int64
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -114,7 +115,8 @@ type Player struct {
 
 func (p Player) Validate() error {
 	if !p.PlayerID.Valid() || !p.Server.Valid() || int64(p.PlayerID)/RegionStride != int64(p.Server) || len(p.ContentRevision) != 64 || p.BestRank < 1 || p.TicketsLeft < 0 || p.Purchases < 0 ||
-		p.RefreshCount < 0 || len(p.Offered) > 3 || len(p.Defense) > DefenseSlots || p.DefensePet < 0 || p.Fights < 0 || p.Wins < 0 || p.Wins > p.Fights || p.StateVersion < 1 || p.CreatedAt.IsZero() || p.UpdatedAt.Before(p.CreatedAt) {
+		p.RefreshCount < 0 || len(p.Offered) > 3 || len(p.Defense) > DefenseSlots || p.DefensePet < 0 || p.Fights < 0 || p.Wins < 0 || p.Wins > p.Fights || p.WinStreak < 0 || p.WinStreak > p.Wins ||
+		p.StateVersion < 1 || p.CreatedAt.IsZero() || p.UpdatedAt.Before(p.CreatedAt) {
 		return ErrConflict
 	}
 	seen := map[int64]bool{}

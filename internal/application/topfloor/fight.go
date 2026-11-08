@@ -462,6 +462,7 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 	if !f.Defender.IsRobot() {
 		sides = append(sides, fightSide{f.Defender.Player, false, !outcome.Win, "B", d.Occupant{Player: f.Challenger}})
 	}
+	challengerStreak := players[f.Challenger].WinStreak
 	for _, side := range sides {
 		p := players[side.player]
 		next := p
@@ -471,6 +472,8 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 		}
 		if side.attack {
 			next.BestRank = outcome.BestAfter
+			next.WinStreak = nextWinStreak(p.WinStreak, side.attack, side.won)
+			challengerStreak = next.WinStreak
 		}
 		next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
 		if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion); err != nil {
@@ -485,6 +488,13 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 		}
 		if err = s.Store.AddUsageTx(c, sc.Tx, side.player, uses); err != nil {
 			return err
+		}
+	}
+	if s.Broadcast != nil {
+		for _, message := range settlementMessages(catalog, f, outcome, challengerStreak) {
+			if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+				return err
+			}
 		}
 	}
 	fact := objective.Fact{PlayerID: f.Challenger, SourceDomain: "top-floor", SourceBusinessKey: f.AttemptID.String(), Kind: objective.PVPFightKind, Delta: 1}

@@ -9,7 +9,6 @@ import (
 	"context"
 	"time"
 
-	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -165,7 +164,6 @@ type Service struct {
 	Servers      Servers
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
-	Broadcast    broadcast.Emitter
 }
 
 func (s Service) ready() bool {

@@ -200,8 +200,8 @@ func (h BroadcastNoticeHandler) ReloadAndDeliver(ctx context.Context, raw string
 		t.Rollback(ctx)
 		return err
 	}
-	enemyName := ""
-	if m.Enemy.Valid() {
+	enemyName := m.Fields.EnemyName
+	if enemyName == "" && m.Enemy.Valid() {
 		enemy, e := h.Names.ReadNameSnapshotTx(ctx, t, m.Enemy)
 		if e != nil {
 			t.Rollback(ctx)
