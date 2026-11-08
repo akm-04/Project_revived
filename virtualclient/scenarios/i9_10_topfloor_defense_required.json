@@ -1,8 +1,8 @@
 {
  "name": "i9_10_topfloor_defense_required",
- "note": "D487 through the stock Top Floor window: a fresh player opens the arena, preflights an offered opponent (294), enters the stock formation window, selects the team and confirms START (280) without ever saving a defense. The server refuses before any ticket debit, so no battle window opens, the formation window stays, and a stock LOAD_ARENA read afterwards still reports 5 tickets.",
+ "note": "D487 through the stock Top Floor window: a fresh player who owns none of the D511 preset girls (so no preset defense is written) opens the arena, preflights an offered opponent (294), enters the stock formation window, selects the team and confirms START (280) without ever saving a defense. The server refuses before any ticket debit, so no battle window opens, the formation window stays, and a stock LOAD_ARENA read afterwards still reports 5 tickets.",
  "level": 60,
- "heroes": [10001001, 10001002, 10001003, 10001004, 10001005],
+ "heroes": [10001005, 10001006, 10001007, 10001008, 10001009],
  "settle_seconds": 10,
  "steps": [
   "wait:60",

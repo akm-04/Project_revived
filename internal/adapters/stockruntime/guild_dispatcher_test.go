@@ -185,6 +185,13 @@ func TestFailGuildKeepsUnknownErrorsOpaque(t *testing.T) {
 	}
 }
 
+func TestFailGuildRefusesGuildlessViewRead(t *testing.T) {
+	r := failGuild(guildview.ErrForbidden)
+	if r.HTTPStatus != 403 || r.Body["error"] != "guild_forbidden" {
+		t.Fatalf("%+v", r)
+	}
+}
+
 func TestGuildDispatcher616AlwaysAnswersEmptySuccess(t *testing.T) {
 	actor := actorForHTTP(t)
 	now := time.Unix(100, 0).UTC()

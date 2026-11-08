@@ -347,7 +347,7 @@ func failGuild(err error) httpedge.Response {
 	switch {
 	case errors.Is(err, guildcore.ErrGuildNotFound), errors.Is(err, guildcore.ErrApplicationNotFound), errors.Is(err, guildcore.ErrInviteNotFound):
 		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "guild_not_found"}}
-	case errors.Is(err, guildcore.ErrGuildPermission), errors.Is(err, guildcore.ErrNotGuildMember):
+	case errors.Is(err, guildcore.ErrGuildPermission), errors.Is(err, guildcore.ErrNotGuildMember), errors.Is(err, guildview.ErrForbidden):
 		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "guild_forbidden"}}
 	case errors.Is(err, guildcore.ErrAlreadyInGuild), errors.Is(err, guildcore.ErrGuildRetired), errors.Is(err, guildcore.ErrGuildClosed),
 		errors.Is(err, guildcore.ErrGuildFull), errors.Is(err, guildcore.ErrGuildApplicationFull), errors.Is(err, guildcore.ErrGuildNameTaken), errors.Is(err, guildcore.ErrApplicationLimit), errors.Is(err, guildcore.ErrJoinLimit),
