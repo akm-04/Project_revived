@@ -32,6 +32,8 @@ var boardReceipts = map[string]boardReceipt{
 	d.AchievementPointPolicy: {metricPin: "force-metric", refreshClass: "I7C4FA_AP_RANKING_REFRESH", settlementClass: "I7C4FA_AP_RANKING_WEEKLY_TITLES"},
 	d.SkinsPolicy:            {metricPin: "skin-metric", refreshClass: "I7C4FC_SKINS_RANKING_REFRESH", settlementClass: "I7C4FC_SKINS_RANKING_WEEKLY_TITLES"},
 	d.DormComfortPolicy:      {metricPin: "comfort-metric", refreshClass: "I9_10C_DORM_COMFORT_RANKING_REFRESH", settlementClass: "I9_10C_DORM_COMFORT_RANKING_WEEKLY_TITLES"},
+	d.StarCountPolicy:        {metricPin: "roster-metrics", refreshClass: "I9_10D_STAR_COUNT_RANKING_REFRESH", settlementClass: "I9_10D_STAR_COUNT_RANKING_WEEKLY_TITLES"},
+	d.AwakenCountPolicy:      {metricPin: "roster-metrics", refreshClass: "I9_10D_AWAKEN_COUNT_RANKING_REFRESH", settlementClass: "I9_10D_AWAKEN_COUNT_RANKING_WEEKLY_TITLES"},
 }
 
 func refreshSchema(b d.Board) string { return "gxb.ranking." + b.Name + "-refresh.v1" }

@@ -22,6 +22,10 @@ const SkinsPolicy = "C4F_PRIVATE_SKINS_SERVER_RANKING_V1"
 const DormComfortPolicy = "I9_10C_PRIVATE_DORM_COMFORT_RANKING_V1"
 const DormComfortSourcePolicy = "I9_10C_PRIVATE_DORM_COMFORT_FACT_V1"
 const DormComfortSemantics = "CURRENT_SUM_OWNED_ROOMS_INCLUDING_LOUNGE_V1"
+const StarCountPolicy = "I9_10D_PRIVATE_STAR_COUNT_SERVER_RANKING_V1"
+const AwakenCountPolicy = "I9_10D_PRIVATE_AWAKEN_COUNT_SERVER_RANKING_V1"
+const RosterMetricSourcePolicy = "C4C_PRIVATE_CURRENT_ROSTER_V1"
+const RosterMetricSourceSemantics = "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1"
 const ServerCohort = "I4_SERVER_ALL_PLAYERS_V1"
 const BoardTitleDuration int64 = 604800
 const BoardLockRank uint16 = 600
@@ -54,7 +58,15 @@ var SkinsBoard = Board{Name: "skins", Policy: SkinsPolicy, SourceOwner: "PlayerD
 // board only orders the typed facts. It grants no titles.
 var DormComfortBoard = Board{Name: "dorm-comfort", Policy: DormComfortPolicy, SourceOwner: "DormHouse", SourcePolicy: DormComfortSourcePolicy, SourceSemantics: DormComfortSemantics, FieldID: 2001, SubType: 34, Titles: []int64{}, RowValue: "comfort", Limit: 100}
 
-var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard, DormComfortBoard}
+// StarCountBoard is rank 2003 "BG Star Rank" (subtype 10): the sum of the
+// current owned heroes' stars. It ranks the existing roster metric 1008.
+var StarCountBoard = Board{Name: "star-count", Policy: StarCountPolicy, SourceOwner: "CharacterHero", SourcePolicy: RosterMetricSourcePolicy, SourceSemantics: RosterMetricSourceSemantics, FieldID: 1008, SubType: 10, RowValue: "info_val"}
+
+// AwakenCountBoard is rank 5001 "Awaken" (subtype 12): the count of owned
+// heroes that have awakened. It ranks the existing roster metric 1009.
+var AwakenCountBoard = Board{Name: "awaken-count", Policy: AwakenCountPolicy, SourceOwner: "CharacterHero", SourcePolicy: RosterMetricSourcePolicy, SourceSemantics: RosterMetricSourceSemantics, FieldID: 1009, SubType: 12, RowValue: "info_val"}
+
+var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard, DormComfortBoard, StarCountBoard, AwakenCountBoard}
 
 func BoardOf(policy string) (Board, bool) {
 	for _, b := range Boards {
