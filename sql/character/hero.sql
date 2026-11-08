@@ -119,3 +119,7 @@ WHERE player_id=$1 AND partner_id=$2 AND state_version=$5;
 -- name: SaveHeroSkillChoice :execrows
 UPDATE player_heroes SET raw_skill_id_1=$3,raw_skill_id_2=$4,raw_skill_id_3=$5,raw_skill_id_4=$6,raw_skill_id_5=$7,raw_skill_id_6=$8,state_version=state_version+1,updated_at=$9
 WHERE player_id=$1 AND partner_id=$2 AND state_version=$10;
+
+-- name: SaveHeroSkillLevels :execrows
+UPDATE player_heroes SET raw_skill_1=$3,raw_skill_2=$4,raw_skill_3=$5,raw_skill_4=$6,raw_skill_5=$7,raw_skill_6=$8,state_version=state_version+1,updated_at=$9
+WHERE player_id=$1 AND partner_id=$2 AND state_version=$10;

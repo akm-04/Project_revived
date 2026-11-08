@@ -14,6 +14,10 @@
     "march_coin_per_stage": 20,
     "reagents_per_stage": 1,
     "result_window_seconds": 600,
-    "candidate_limit": 200
+    "candidate_limit": 200,
+    "rival_force_tolerance_per_10000": 500,
+    "rival_scale_min_level": 1,
+    "rival_scale_min_color": 1,
+    "rival_scale_min_star": 1
   }
 }

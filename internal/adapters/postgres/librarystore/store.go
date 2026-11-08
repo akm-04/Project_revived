@@ -195,7 +195,10 @@ func (Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef
 	if tag.RowsAffected() != 1 {
 		return errors.New("library: fresh facet insert count")
 	}
-	return nil
+	// A new hero starts the Girls Log with its acquisition entry (type 1).
+	// PRIVATE_POLICY: every owned creation path records the Vending source.
+	_, e = t.Exec(ctx, `INSERT INTO player_library_hero_logs(player_id,partner_id,log_id,occurred_at)VALUES($1,$2,$3,$4)ON CONFLICT(player_id,partner_id,log_id)DO NOTHING`, int64(ref.PlayerID), ref.PartnerID, library.LogAcquired, now.UTC())
+	return e
 }
 
 // BackfillMissingHeroTx preserves an explicit existing facet, including previews.

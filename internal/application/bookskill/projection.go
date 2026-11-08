@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"reflect"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -47,7 +48,7 @@ func (s Service) BookInputsTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if e = root.Facts.Validate(c); e != nil {
+	if e = s.validateFacts(ctx, q, root.Facts, c, scope.ContentRevision); e != nil {
 		return out, e
 	}
 	applied := root.Facts.Clone()
@@ -97,6 +98,20 @@ func (s Service) HeroBookInputsTx(ctx context.Context, q tx.Queryer, scope Input
 	}
 	return out, nil
 }
+func (s Service) LockHeroSkillCapTx(ctx context.Context, t tx.Tx, player identity.PlayerID, revision string, observedAt time.Time, ref character.HeroRef) (int64, error) {
+	if t == nil || player != ref.PlayerID || ref.Validate() != nil || s.Owner == nil {
+		return 0, book.ErrUnqualified
+	}
+	if _, err := s.Owner.LockRootTx(ctx, t, player); err != nil {
+		return 0, err
+	}
+	inputs, err := s.HeroBookInputsTx(ctx, t, InputScope{Player: player, ContentRevision: revision, ObservedAt: observedAt}, ref)
+	if err != nil {
+		return 0, err
+	}
+	return inputs.Bookshelf.UpperLimit, nil
+}
+
 func (s Service) BookshelfInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
 	return s.BookInputsTx(ctx, q, scope)
 }
@@ -152,7 +167,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, mid uint16, 
 		if e != nil {
 			return e
 		}
-		if e = r.Facts.Validate(c); e != nil {
+		if e = s.validateFacts(ctx, sc.Tx, r.Facts, c, rev); e != nil {
 			return e
 		}
 		before := r.Facts.Clone()
@@ -238,4 +253,47 @@ func (s Service) TitleProgressTx(ctx context.Context, q tx.Queryer, player ident
 		return 0, 0, e
 	}
 	return inputs.Applied.Buildings[4].Level, inputs.OwnerVersion, nil
+}
+
+func (s Service) validateFacts(ctx context.Context, query tx.Queryer, facts book.State, caller book.Catalog, revision string) error {
+	if len(facts.Buildings) > 7 {
+		return book.ErrUnqualified
+	}
+	revisions := map[string]bool{}
+	for kind, building := range facts.Buildings {
+		if !book.ExtensionBuilding(kind) {
+			continue
+		}
+		if !book.ValidCatalogRevision(building.CatalogRevision) {
+			return book.ErrUnqualified
+		}
+		revisions[building.CatalogRevision] = true
+		if building.Job != nil {
+			if !book.ValidCatalogRevision(building.Job.Revision) {
+				return book.ErrUnqualified
+			}
+			revisions[building.Job.Revision] = true
+		}
+	}
+	keys := make([]string, 0, len(revisions))
+	for key := range revisions {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	pinned := map[string]book.Catalog{}
+	for _, key := range keys {
+		if key == revision {
+			pinned[key] = caller
+			continue
+		}
+		catalog, err := s.Content.BookCatalogTx(ctx, query, key)
+		if err != nil {
+			return err
+		}
+		if err := catalog.Validate(); err != nil {
+			return err
+		}
+		pinned[key] = catalog
+	}
+	return facts.ValidateWithCatalogs(caller, pinned)
 }

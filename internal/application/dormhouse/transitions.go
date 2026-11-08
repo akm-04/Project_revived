@@ -2,6 +2,7 @@ package dormhouse
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
@@ -368,6 +369,14 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 				return nil, e
 			}
 			room = rooms[room.ID]
+			if s.Broadcast != nil {
+				if rule, ok := catalog.Types[room.MainType]; ok && rule.MaxExpansion > 0 && room.ExpansionLevel >= rule.MaxExpansion {
+					message := broadcast.Message{MID: broadcast.ActivityMID, MsgType: broadcast.DormExpand, Server: a.LogicalServerID, Player: a.PlayerID}
+					if e = s.Broadcast.EmitTx(ctx, t, message); e != nil {
+						return nil, e
+					}
+				}
+			}
 		}
 	}
 	if c.Family != Open && mutated {

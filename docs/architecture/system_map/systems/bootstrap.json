@@ -12,6 +12,26 @@
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_10A_NOTICEBOARD_POLICY.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10D_RANKBOARDS_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10E_TOP_FIVE_FORCE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10_R5_POLICY_V1.json"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
   },
   {
@@ -37,6 +57,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_AWAKENING_MISSIONS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
   },
   {
    "count": 1,
@@ -173,6 +197,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_SHARED_ROOM_CORE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_SKILL_LEVEL_PRIVATE_POLICY_V1.json"
   },
   {
    "count": 1,

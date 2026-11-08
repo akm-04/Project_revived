@@ -85,7 +85,8 @@ func TestPlaytestMarchRefusalsAreConflictsAndCloseTheAttempt(t *testing.T) {
 		t.Fatalf("START %+v", response)
 	}
 	rejected := marchReport(marchRecord(t, p, a), int64(a.PlayerID), team, true)
-	rejected.Report.Enemies = rejected.Report.Enemies[:len(rejected.Report.Enemies)-1]
+	// An unknown enemy keeps the summary well formed when the stage opponent has one girl.
+	rejected.Report.Enemies[len(rejected.Report.Enemies)-1].Identity = 999999999
 	playtestConflict(t, dispatcher.Dispatch(ctx, playtestRequest(a, 338, playtestReport(rejected))), "rejected summary")
 	if record := marchRecord(t, p, a); record.Pending != "" || len(record.Heroes) != 0 {
 		t.Fatalf("rejected attempt not closed: %+v", record)

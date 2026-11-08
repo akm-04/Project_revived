@@ -58,18 +58,24 @@ type HeroBookmarkServicePort interface {
 type HeroSkillChoicePort interface {
 	ChangeSkill(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.SkillChoiceResult, error)
 }
+
+type HeroSkillLevelPort interface {
+	SetSkillLevel(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.HeroSkillLevelResult, error)
+	SetAllSkillLevels(context.Context, identity.ActorContext, int64, []apphero.HeroSkillLevelChange, operation.Context) (apphero.HeroSkillLevelResult, error)
+}
 type HeroRosterBodyPort interface {
 	Read(context.Context, identity.ActorContext, operation.Context, uint16, int64) (map[string]any, error)
 }
 type HeroDispatcher struct {
-	Roster     HeroRosterBodyPort
-	Skills     HeroSkillChoicePort
-	Bookmark   HeroBookmarkServicePort
-	Authority  apprealtime.GameplayAuthorityPort
-	Service    HeroServicePort
-	Appearance HeroAppearanceServicePort
-	LIVE       HeroLIVEAppearanceServicePort
-	Economy    HeroEconomyProjectionPort
+	Roster      HeroRosterBodyPort
+	Skills      HeroSkillChoicePort
+	SkillLevels HeroSkillLevelPort
+	Bookmark    HeroBookmarkServicePort
+	Authority   apprealtime.GameplayAuthorityPort
+	Service     HeroServicePort
+	Appearance  HeroAppearanceServicePort
+	LIVE        HeroLIVEAppearanceServicePort
+	Economy     HeroEconomyProjectionPort
 }
 
 func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -81,6 +87,55 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_unavailable"}}
 	}
 	switch req.Envelope.MID {
+	case 53:
+		if d.SkillLevels == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skill_levels_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_index") {
+			return badHero("invalid_hero_skill_level")
+		}
+		partner, partnerErr := requiredInt64(req.Envelope.Params, "partner_id")
+		slot, slotErr := requiredInt64(req.Envelope.Params, "skill_index")
+		if partnerErr != nil || slotErr != nil || partner <= 0 || slot < 1 || slot > 6 {
+			return badHero("invalid_hero_skill_level")
+		}
+		result, err := d.SkillLevels.SetSkillLevel(ctx, actor, partner, slot, req.Envelope.Operation)
+		if err != nil {
+			return failHeroSkillLevel(err)
+		}
+		body := map[string]any{"skill_point": result.SkillPoint, "skill_time": result.SkillTime}
+		if !result.Success {
+			body["error_code"] = int64(1)
+			return httpedge.Response{HTTPStatus: http.StatusConflict, Body: body}
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	case 39:
+		if d.SkillLevels == nil {
+			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skill_levels_unavailable"}}
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_colors", "skill_counts") {
+			return badHero("invalid_hero_skill_levels")
+		}
+		partner, partnerErr := requiredInt64(req.Envelope.Params, "partner_id")
+		colors, colorsErr := requiredPipeIntegers(req.Envelope.Params, "skill_colors")
+		counts, countsErr := requiredPipeIntegers(req.Envelope.Params, "skill_counts")
+		if partnerErr != nil || colorsErr != nil || countsErr != nil || partner <= 0 || len(colors) != len(counts) || len(colors) == 0 || len(colors) > 6 {
+			return badHero("invalid_hero_skill_levels")
+		}
+		changes := make([]apphero.HeroSkillLevelChange, len(colors))
+		for index := range colors {
+			changes[index] = apphero.HeroSkillLevelChange{Slot: colors[index], Count: counts[index]}
+		}
+		result, err := d.SkillLevels.SetAllSkillLevels(ctx, actor, partner, changes, req.Envelope.Operation)
+		if err != nil {
+			return failHeroSkillLevel(err)
+		}
+		body := map[string]any{"skills": result.SkillString(), "is_success": result.SuccessValue(), "skill_point": result.SkillPoint, "skill_time": result.SkillTime}
+		if !result.Success {
+			body["error_code"] = int64(1)
+			return httpedge.Response{HTTPStatus: http.StatusConflict, Body: body}
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 2144:
 		if d.Skills == nil {
 			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skills_unavailable"}}
@@ -617,6 +672,36 @@ func liveStockStrings(in []apphero.LIVEResultState) (string, string, error) {
 		}
 	}
 	return strings.Join(models, "|"), strings.Join(states, "|"), nil
+}
+
+func requiredPipeIntegers(params map[string]any, key string) ([]int64, error) {
+	value, ok := params[key].(string)
+	if !ok || value == "" {
+		return nil, errors.New("missing stock integer list")
+	}
+	parts := strings.Split(value, "|")
+	values := make([]int64, len(parts))
+	for index, part := range parts {
+		parsed, err := strconv.ParseInt(part, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		values[index] = parsed
+	}
+	return values, nil
+}
+
+func failHeroSkillLevel(err error) httpedge.Response {
+	if errors.Is(err, apphero.ErrHeroSkillLevelRequest) {
+		return badHero("invalid_hero_skill_level")
+	}
+	if errors.Is(err, apphero.ErrHeroSkillLevelInactive) {
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_skill_content_inactive"}}
+	}
+	if errors.Is(err, apphero.ErrHeroSkillLevelStaleTime) {
+		return httpedge.Response{HTTPStatus: http.StatusConflict, Cause: err, Body: map[string]any{"error_code": int64(1)}}
+	}
+	return failHero(err)
 }
 
 func badHero(code string) httpedge.Response {

@@ -30,17 +30,20 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/achievement"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	apparena "gxb.local/backend/v2/internal/application/arena"
+	appbroadcast "gxb.local/backend/v2/internal/application/broadcast"
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
@@ -238,9 +241,11 @@ func run() error {
 		return err
 	}
 	channelService := channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{},
-		Owners: channelchat.Owners{Illusion: channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
+		Owners: channelchat.Owners{Arena: channelchatread.ArenaReportReader{TopFloor: topfloorstore.Store{}, Arena: arenastore.Store{}, League: leaguestore.Store{}, Content: contentstore.Store{}},
+			Illusion:          channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
 			AdventureIllusion: channelchatread.AdventureIllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
-			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}}}}
+			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}},
+			Defense:           channelchatread.DefenseRoomReader{Store: sharedroomstore.Store{}}}}
 	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
 	if err != nil {
 		return err
@@ -346,10 +351,18 @@ func run() error {
 	roomInviteNotices := stockruntime.RoomInviteNoticeListHandler{Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()},
 		Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
 		OnDeliveryError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
+	broadcastEvents, err := stockruntime.NewBroadcastNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	broadcastNotices := stockruntime.BroadcastNoticeHandler{DB: pool, Names: i4store.PlayerRootLocker{}, Registry: connectionsRegistry,
+		Publisher: stockruntime.RealtimePublisher{Registry: broadcastEvents, Limits: limits.Default()}, MaxHandles: runtimePolicy.MaxConnections,
+		OnDeliveryError: func(err error) { log.Printf("broadcast delivery degraded: %v", err) }}
 	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}, realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices},
 		realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms},
 		realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices},
 		realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices},
+		realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices},
 		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices})
 	if err != nil {
 		log.Fatal(err)

@@ -343,6 +343,10 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 	if e != nil {
 		return e
 	}
+	heroLogs, e := s.Library.ListHeroLogsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
 	root, e := s.Library.ReadRootTx(ctx, q, a.PlayerID)
 	if e != nil {
 		return e
@@ -357,6 +361,19 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		missionsByPartner[m.PartnerID] = append(missionsByPartner[m.PartnerID], map[string]any{
 			"mission_id": m.MissionID, "process": m.Process, "mission_state": m.MissionState,
 		})
+	}
+	logsByPartner := map[int64]map[string]any{}
+	acquiredAtByPartner := map[int64]time.Time{}
+	for _, row := range heroLogs {
+		entries := logsByPartner[row.PartnerID]
+		if entries == nil {
+			entries = map[string]any{}
+			logsByPartner[row.PartnerID] = entries
+		}
+		entries[strconv.FormatInt(row.LogID, 10)] = map[string]any{"time": row.OccurredAt.Unix()}
+		if row.LogID == lib.LogAcquired {
+			acquiredAtByPartner[row.PartnerID] = row.OccurredAt
+		}
 	}
 
 	infos := map[string]any{}
@@ -373,13 +390,26 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		if partnerMissions == nil {
 			partnerMissions = []any{}
 		}
+		partnerLogs := logsByPartner[h.PartnerID]
+		if partnerLogs == nil {
+			partnerLogs = map[string]any{}
+		}
+		acquiredAt := acquiredAtByPartner[h.PartnerID]
+		if acquiredAt.IsZero() {
+			// A backfilled facet keeps the Library row's creation time; the
+			// store persists it (librarystore/store.go:180, inserted at :206).
+			acquiredAt = f.Facts.CreatedAt
+		}
+		for _, milestone := range lib.HoldTimeLogsReached(acquiredAt, at) {
+			partnerLogs[strconv.FormatInt(milestone.LogID, 10)] = map[string]any{"time": milestone.OccurredAt.Unix()}
+		}
 		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{
 			"favor_degree":     f.Facts.Favor,
 			"is_married":       bit(f.Facts.Married),
 			"partner_dialogs":  projectPartnerDialogs(catalog, rule.DialogEnabled, f.Facts.Favor, f.Facts.Married, h.PartnerID, dialogsByPartner[h.PartnerID]),
 			"partner_missions": partnerMissions,
-			"partner_acts":     projectPartnerActs(h.PartnerID, awards),
-			"partner_logs":     map[string]any{},
+			"partner_acts":     projectPartnerActs(catalog, h.PartnerID, f.Facts.Favor, awards),
+			"partner_logs":     partnerLogs,
 		}
 	}
 
@@ -479,7 +509,7 @@ func (s Service) readPartnerDialogsOrActs(ctx context.Context, q tx.Queryer, a i
 		if e != nil {
 			return e
 		}
-		*out = map[string]any{"partner_acts": projectPartnerActs(partnerID, awards)}
+		*out = map[string]any{"partner_acts": projectPartnerActs(catalog, partnerID, inputs.Facts.Favor, awards)}
 		return nil
 	}
 	stored, e := s.Library.ListDialogsTx(ctx, q, a.PlayerID)
@@ -528,8 +558,10 @@ func projectPartnerDialogs(catalog lib.Catalog, enabled bool, favor int64, marri
 	return dialogs
 }
 
-// projectPartnerActs returns the dense 4-slot act view the client indexes.
-func projectPartnerActs(partnerID int64, awards []lib.ActAwardFact) []ActSlot {
+// projectPartnerActs returns the unlocked prefix the client indexes. The stock
+// touch window hides a button whose slot is nil (HeroTouchGameWindow.lua:164-181),
+// and library_amour stages unlock acts in order, so a shorter array gates them.
+func projectPartnerActs(catalog lib.Catalog, partnerID, favor int64, awards []lib.ActAwardFact) []ActSlot {
 	awarded := map[int64]bool{}
 	for _, award := range awards {
 		if award.PartnerID == partnerID {
@@ -538,6 +570,9 @@ func projectPartnerActs(partnerID int64, awards []lib.ActAwardFact) []ActSlot {
 	}
 	slots := make([]ActSlot, 0, lib.ActCount)
 	for id := int64(1); id <= lib.ActCount; id++ {
+		if !catalog.ActUnlocked(id, favor) {
+			break
+		}
 		slots = append(slots, ActSlot{IsAwarded: bit(awarded[id])})
 	}
 	return slots

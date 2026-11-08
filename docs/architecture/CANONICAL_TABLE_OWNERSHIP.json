@@ -2516,6 +2516,22 @@
       ],
       "write_exceptions": []
     },
+    "player_library_hero_logs": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00151_i9_10_intimacy_hero_logs.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": []
+    },
     "player_library_admissions": {
       "owner": "library-local-progression",
       "migration": "migrations/00049_i7c2b_library_inputs.sql",
@@ -2755,6 +2771,34 @@
       "allowed_write_paths": [
         "sql/book/",
         "internal/adapters/postgres/bookstore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_event_centre_roots": {
+      "owner": "event-centre",
+      "migration": "migrations/00138_i9_10a_event_centre.sql",
+      "allowed_query_owners": [
+        "event-centre"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventcentrestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventcentrestore/"
+      ],
+      "write_exceptions": []
+    },
+    "player_event_centre_board_reports": {
+      "owner": "event-centre",
+      "migration": "migrations/00150_i9_10a_notice_board_reports.sql",
+      "allowed_query_owners": [
+        "event-centre"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventcentrestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventcentrestore/"
       ],
       "write_exceptions": []
     },
@@ -3448,7 +3492,10 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "alter_migrations": [
+        "migrations/00155_i9_10_topfloor_win_streak.sql"
+      ]
     },
     "top_floor_fights": {
       "owner": "TopFloor",
@@ -5644,6 +5691,34 @@
       "write_exceptions": [],
       "migration": "migrations/00137_i9_10f_mentor.sql"
     },
+    "player_gm_questions": {
+      "owner": "gmquestion",
+      "allowed_read_paths": [
+        "internal/adapters/postgres/gmquestionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/gmquestionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00154_i9_10_gm_questions.sql",
+      "allowed_query_owners": [
+        "gmquestion"
+      ]
+    },
+    "broadcast_outbox": {
+      "owner": "broadcast",
+      "migration": "migrations/00156_i9_10_broadcast_outbox.sql",
+      "allowed_query_owners": [
+        "broadcast"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/broadcaststore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/broadcaststore/"
+      ],
+      "write_exceptions": []
+    },
     "hero_recommend_snapshots": {
       "owner": "HeroRecommend",
       "allowed_query_owners": [
@@ -5656,7 +5731,7 @@
         "internal/adapters/postgres/herorecommendstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00153_i9_10_hero_recommend.sql"
+      "migration": "migrations/00157_i9_10_hero_recommend.sql"
     }
   }
 }

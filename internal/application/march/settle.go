@@ -36,6 +36,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 				return nil, err
 			}
 			out["error_code"] = cd.FightExistCode
+			if err := s.fillStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), out); err != nil {
+				return nil, err
+			}
 			return out, nil
 		}
 		if len(q.Report.Formation) == 0 {
@@ -80,8 +83,16 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		if q.Report.Win {
 			out["reward"] = r.Rewards[strconv.FormatInt(r.NextStage(), 10)]
 		}
+		// LastResult replays this reply from the saved run, so it keeps only
+		// carried state; the read-time fresh rows are added after the save.
 		r.LastResult, err = json.Marshal(out)
-		return out, err
+		if err != nil {
+			return nil, err
+		}
+		if err = s.fillStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), out); err != nil {
+			return nil, err
+		}
+		return out, nil
 	})
 	if err == nil && (refused || refusalReply(out)) {
 		err = fmt.Errorf("%w: summary rejected or no open attempt", d.ErrRefused)

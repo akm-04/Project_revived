@@ -812,3 +812,47 @@ func oneOnOneGlobalRank(t *testing.T, p *pg.Pool, pid identity.PlayerID) int64 {
 	}
 	return ranked.Global
 }
+
+// TestI9_10OneOnOneLowPointsRefusalNative proves source message 30003 is
+// returned in-band through the production dispatcher and consumes no try.
+func TestI9_10OneOnOneLowPointsRefusalNative(t *testing.T) {
+	p := pool(t)
+	defer p.Close()
+	s := oneOnOneService(t, p)
+	server := rankingServer(t, p)
+	a, heroesA := oneOnOnePlayer(t, p, server)
+	b, heroesB := oneOnOnePlayer(t, p, server)
+	for _, actor := range []identity.ActorContext{a, b} {
+		if _, err := s.Load(ctx, actor, op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, x := range []struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}{{a, heroesA}, {b, heroesB}} {
+		if err := s.ChangeTeams(ctx, x.actor, teamsOf(x.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// The revision's floor is 3000, so pin the low-point opponent directly.
+	exec(t, p, `UPDATE one_on_one_players SET level=5,slot=NULL,points=999,mode=1,candidates='[]',opponent=NULL,state_version=state_version+1 WHERE player_id=$1`, int64(b.PlayerID))
+	pinOneOnOneOffer(t, p, a, b.PlayerID)
+	if !oneOnOneCatalog(t, p).Open(time.Now()) {
+		t.Skip("1 on 1 START is closed outside 08:00-22:00 GMT+8")
+	}
+	beforeTries := scalar(t, p, `SELECT tries_left FROM one_on_one_players WHERE player_id=$1`, int64(a.PlayerID))
+	response := stockruntime.OneOnOneDispatcher{Authority: fixedSocialAuthority{actor: a}, Service: s}.Dispatch(ctx,
+		httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 2484, Operation: op(), ReceivedAt: time.Now().UTC(),
+			Claims: wire.CredentialClaims{Token: "fixture", Region: int64(a.LogicalServerID)},
+			Params: map[string]any{"formations": []any{"1", "2", "3"}, "enemy_id": json.Number(strconv.FormatInt(int64(b.PlayerID), 10))}}})
+	if response.HTTPStatus != http.StatusOK || response.Body["error_code"] != int64(30003) {
+		t.Fatalf("low-point START response=%+v", response)
+	}
+	if scalar(t, p, `SELECT tries_left FROM one_on_one_players WHERE player_id=$1`, int64(a.PlayerID)) != beforeTries {
+		t.Fatal("a refused low-point challenge consumed a try")
+	}
+	if scalar(t, p, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1`, int64(a.PlayerID)) != 0 {
+		t.Fatal("a refused low-point challenge created a match")
+	}
+}

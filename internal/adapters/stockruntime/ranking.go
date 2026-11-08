@@ -37,7 +37,7 @@ type ArenaRanks interface {
 	RankList(context.Context, identity.ActorContext) (arena.RankList, error)
 }
 type PetCampaignRanks interface {
-	RankList(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
+	RankList(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 }
 type IllusionRanks interface {
 	RankList(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
@@ -95,8 +95,8 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 		return okI5(body)
 	}
 
-	if subtype == 22 && d.PetCampaign != nil {
-		body, e := d.PetCampaign.RankList(c, a, r.Envelope.Operation)
+	if (subtype == 22 || subtype == 23) && d.PetCampaign != nil {
+		body, e := d.PetCampaign.RankList(c, a, subtype, r.Envelope.Operation)
 		if e != nil {
 			return fail(http.StatusServiceUnavailable)
 		}

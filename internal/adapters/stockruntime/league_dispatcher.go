@@ -132,7 +132,7 @@ func (o LeagueDispatcher) Dispatch(c context.Context, req httpedge.DispatchReque
 		if cmd.RecordID > 0 {
 			return okI5(projection.Report(v.Report))
 		}
-		return okI5(projection.RecordRows(v.Records, a.PlayerID))
+		return httpedge.Response{HTTPStatus: http.StatusOK, JSON: projection.RecordRows(v.Records, a.PlayerID)}
 	case 2804:
 		awards := v.Awards
 		if awards == nil {

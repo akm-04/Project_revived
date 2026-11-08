@@ -1,0 +1,59 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "broadcast",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/broadcast_notice.go",
+   "kind": "direct",
+   "line": 118,
+   "mid": 4096,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/broadcast_notice.go",
+   "kind": "direct",
+   "line": 117,
+   "mid": 4101,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "broadcast_outbox"
+  ],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [],
+  "scenarios_naming": [],
+  "unit": [
+   "broadcast_test.go"
+  ]
+ }
+}

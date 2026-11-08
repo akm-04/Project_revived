@@ -1,0 +1,243 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_NOTICEBOARD_POLICY.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 16,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/eventcentre_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I9_10A_EVENT_CENTRE"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_event_centre_roots": [
+    "eventcentrestore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_event_centre_roots",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1072,
+   "name": "GET_RECYCLE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1073,
+   "name": "RECYCLE_ITEMS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1074,
+   "name": "GET_DESKP_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1075,
+   "name": "MAKE_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1076,
+   "name": "CANCEL_MAKE_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1081,
+   "name": "GET_ADMIN_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1082,
+   "name": "ADMIN_CONVERSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1083,
+   "name": "GET_NOTICE_BOARD_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1084,
+   "name": "RECEIVE_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1085,
+   "name": "GIVE_UP_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1086,
+   "name": "CONFIRM_NEW_AWARD_LOG"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1087,
+   "name": "GET_NOTICE_BOARD_REPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1088,
+   "name": "CONFIRM_MAKE_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1089,
+   "name": "ACCELERATE_MAKE_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1090,
+   "name": "GET_PET_ROOM_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
+    "line": 29
+   },
+   "mid": 1091,
+   "name": "MAKE_PET_ITEM"
+  }
+ ],
+ "name": "eventcentre",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/eventcentrestore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_event_centre_board_reports",
+   "player_event_centre_roots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_event_centre_board_reports",
+   "player_event_centre_roots",
+   "player_heroes",
+   "player_pets",
+   "player_progression",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_event_centre_board_reports",
+   "player_event_centre_roots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

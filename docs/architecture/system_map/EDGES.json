@@ -44,6 +44,12 @@
    "achievement": [
     "*BookInputsTx"
    ],
+   "characterhero": [
+    "*LockHeroSkillCapTx"
+   ],
+   "eventcentre": [
+    "*BookInputsTx"
+   ],
    "missioninputs": [
     "*BookInputsTx"
    ],
@@ -55,6 +61,7 @@
    ]
   },
   "bootstrap": {},
+  "broadcast": {},
   "campaign": {
    "missioninputs": [
     "*ReadTx"
@@ -129,6 +136,9 @@
    "elementequipment": [
     "Queryer",
     "Validate"
+   ],
+   "eventcentre": [
+    "NewCoherentReadScope"
    ],
    "godstrial": [
     "NewCoherentReadScope"
@@ -377,6 +387,12 @@
     "*AttestDerivedTx",
     "*StartTx"
    ],
+   "eventcentre": [
+    "*CloseTx",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
    "godstrial": [
     "*AttestSummaryTx",
     "*StartTx",
@@ -516,9 +532,6 @@
    "achievement": [
     "*CompletedCourseCountTx"
    ],
-   "bookskill": [
-    "*EnsureRootTx"
-   ],
    "elementequipment": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
@@ -567,6 +580,7 @@
     "*CoherentHeroInputsTx"
    ]
   },
+  "eventcentre": {},
   "frienddm": {
    "realtimewakeup": [
     "*ReloadAndDeliver"
@@ -664,12 +678,20 @@
     "DecisionAt",
     "Run"
    ],
+   "eventcentre": [
+    "Bind",
+    "DecisionAt"
+   ],
    "frienddm": [
     "DecisionAt",
     "Operation",
     "Run"
    ],
    "generaldm": [
+    "DecisionAt",
+    "Run"
+   ],
+   "gmquestion": [
     "DecisionAt",
     "Run"
    ],
@@ -705,6 +727,9 @@
     "Run"
    ],
    "guildrental": [
+    "NewTimedOperation"
+   ],
+   "guildtea": [
     "NewTimedOperation"
    ],
    "heroevolution": [
@@ -789,6 +814,7 @@
    ],
    "publicprofile": [
     "DecisionAt",
+    "NewTimedOperation",
     "Operation",
     "Run"
    ],
@@ -869,6 +895,7 @@
     "Run"
    ]
   },
+  "gmquestion": {},
   "godstrial": {},
   "guildbroadcast": {
    "generation": [
@@ -967,6 +994,9 @@
    ],
    "occult": [
     "Best15"
+   ],
+   "publicprofile": [
+    "Best"
    ]
   },
   "herorecommend": {},
@@ -1040,6 +1070,7 @@
    "characterhero": [
     "*ApplyHeroEquipmentResourceDebitTx",
     "*ApplyHeroPromotionResourcesTx",
+    "*ApplyHeroSkillLevelCostTx",
     "*ApplyStrictRestorationTx",
     "*CommitAwakeningEquipmentTx",
     "*DebitHeroEvolutionTx",
@@ -1057,6 +1088,7 @@
     "*PrepareCharacterFunctionsTx",
     "*PrepareHeroEquipmentResourcesTx",
     "*PrepareHeroPromotionResourcesTx",
+    "*PrepareHeroSkillLevelCostTx",
     "*PrepareStrictRestorationTx",
     "Blood",
     "Complete",
@@ -1170,8 +1202,18 @@
     "*ReadProgressionTx",
     "*SettleGrantTx"
    ],
+   "eventcentre": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
+    "*SettleGrantTx"
+   ],
    "frienddm": [
     "*PrepareEmoticonEntitlementTx"
+   ],
+   "gmquestion": [
+    "*FenceActorTx"
    ],
    "godstrial": [
     "*DebitTemporalTx",
@@ -1218,6 +1260,7 @@
     "*DebitMaterialCostTx",
     "*FenceActorTx",
     "*ListStacksTx",
+    "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
     "DefaultProfile"
@@ -1438,9 +1481,6 @@
    "achievement": [
     "*CompleteSuitCountTx"
    ],
-   "bookskill": [
-    "*EnsureRootTx"
-   ],
    "course": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
@@ -1508,6 +1548,9 @@
   "petcampaign": {},
   "playerdirectory": {
    "dormhouse": [
+    "Validate"
+   ],
+   "gmquestion": [
     "Validate"
    ],
    "herorecommend": [
@@ -1583,6 +1626,9 @@
     "CanonicalPlayerIDs",
     "Validate"
    ],
+   "gmquestion": [
+    "Validate"
+   ],
    "guildbroadcast": [
     "Validate"
    ],
@@ -1653,13 +1699,17 @@
     "Validate"
    ],
    "ranking": [
-    "*ReadMetricsScopeTx"
+    "*ReadMetricsScopeTx",
+    "*ReadTopForceMetricScopeTx"
    ]
   },
   "publicstats": {
    "combat": [
     "*HeroTx",
     "*PetTx"
+   ],
+   "eventcentre": [
+    "*HeroTx"
    ],
    "heroforce": [
     "*HeroTx"
@@ -1671,14 +1721,16 @@
     "*HeroTx"
    ],
    "march": [
-    "*HeroTx"
+    "*HeroTx",
+    "*ScaledHeroTx"
    ],
    "publicprofile": [
     "*HeroTx",
     "*PetTx"
    ],
    "topfloor": [
-    "*HeroTx"
+    "*HeroTx",
+    "*RobotForceTx"
    ],
    "workplace": [
     "*HeroTx"
@@ -1956,9 +2008,6 @@
    ]
   },
   "spirit": {
-   "bookskill": [
-    "*EnsureRootTx"
-   ],
    "course": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
@@ -2234,6 +2283,9 @@
     "*SettleGrantTx",
     "Validate"
    ],
+   "interface:arena.OwnedHeroReader": [
+    "*ListHeroesTx"
+   ],
    "interface:arena.Roster": [
     "*OverlayMID1"
    ],
@@ -2303,9 +2355,6 @@
    ]
   },
   "bookskill": {
-   "course": [
-    "*EnsureRootTx"
-   ],
    "generation": [
     "Bind",
     "DecisionAt",
@@ -2321,22 +2370,18 @@
     "*ReadScalarTx",
     "*SettleGrantTx"
    ],
-   "inscription": [
-    "*EnsureRootTx"
-   ],
    "interface:bookskill.BackfillHeroPort": [
     "*ListHeroRootPlayerIDsTx",
     "*LockRootTx"
+   ],
+   "interface:bookskill.BackfillPort": [
+    "*EnsureRootTx"
    ],
    "interface:bookskill.HeroPort": [
     "*ReadHeroByPartnerIDTx",
     "*ReadRootTx"
    ],
-   "spirit": [
-    "*EnsureRootTx"
-   ],
    "store:bookstore": [
-    "*EnsureRootTx",
     "*LockAdmissionTx",
     "*LockRootTx",
     "*ReadRootTx",
@@ -2347,12 +2392,6 @@
     "*BookCatalogTx",
     "*BookInputsActive",
     "*BookInputsRevisionTx"
-   ],
-   "store:dormstore": [
-    "*EnsureRootTx"
-   ],
-   "store:elementstore": [
-    "*EnsureRootTx"
    ],
    "store:i4store": [
     "*LockPlayerRootsTx"
@@ -2377,6 +2416,7 @@
     "*Name"
    ]
   },
+  "broadcast": {},
   "campaign": {
    "characterasset": [
     "NewCoherentReadScope"
@@ -2554,6 +2594,9 @@
    ]
   },
   "characterhero": {
+   "bookskill": [
+    "*LockHeroSkillCapTx"
+   ],
    "characterasset": [
     "*ModifyRestoration",
     "BuildEffectiveHeroAppearance",
@@ -2575,6 +2618,7 @@
    "i5": [
     "*ApplyHeroEquipmentResourceDebitTx",
     "*ApplyHeroPromotionResourcesTx",
+    "*ApplyHeroSkillLevelCostTx",
     "*ApplyStrictRestorationTx",
     "*CommitAwakeningEquipmentTx",
     "*DebitHeroEvolutionTx",
@@ -2592,6 +2636,7 @@
     "*PrepareCharacterFunctionsTx",
     "*PrepareHeroEquipmentResourcesTx",
     "*PrepareHeroPromotionResourcesTx",
+    "*PrepareHeroSkillLevelCostTx",
     "*PrepareStrictRestorationTx",
     "Blood",
     "Complete",
@@ -2649,6 +2694,10 @@
    "interface:characterhero.HeroRosterTxAppearanceStore": [
     "*ListHeroLIVEEntitlementsTx",
     "*ListHeroSkinEntitlementsTx"
+   ],
+   "interface:characterhero.HeroSkillLevelStore": [
+    "*LockHeroByPartnerIDTx",
+    "*SaveHeroSkillLevelsTx"
    ],
    "interface:characterhero.ProgressionStore": [
     "*ListHeroesTx",
@@ -2726,6 +2775,9 @@
     "*Find",
     "*FindTx",
     "*PutTx"
+   ],
+   "store:librarystore": [
+    "*RecordHeroLogTx"
    ],
    "workplace": [
     "*Now"
@@ -3363,6 +3415,51 @@
     "*PutTx"
    ]
   },
+  "eventcentre": {
+   "bookskill": [
+    "*BookInputsTx"
+   ],
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
+   "combat": [
+    "*CloseTx",
+    "*Resolve",
+    "*StartTx",
+    "*TerminalTx"
+   ],
+   "generation": [
+    "Bind",
+    "DecisionAt"
+   ],
+   "i5": [
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
+    "*SettleGrantTx"
+   ],
+   "interface:eventcentre.BoardHeroes": [
+    "*ListHeroesTx"
+   ],
+   "interface:eventcentre.PetPort": [
+    "*FindPetByIDTx"
+   ],
+   "publicstats": [
+    "*HeroTx"
+   ],
+   "store:contentstore": [
+    "*WorkshopInputsActive",
+    "*WorkshopInputsTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ]
+  },
   "frienddm": {
    "generation": [
     "DecisionAt",
@@ -3434,6 +3531,30 @@
    ],
    "workplace": [
     "*Now"
+   ]
+  },
+  "gmquestion": {
+   "generation": [
+    "DecisionAt",
+    "Run"
+   ],
+   "i5": [
+    "*FenceActorTx"
+   ],
+   "playerdirectory": [
+    "Validate"
+   ],
+   "playerroot": [
+    "Validate"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*Find",
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "godstrial": {
@@ -3795,10 +3916,14 @@
    ]
   },
   "guildtea": {
+   "generation": [
+    "NewTimedOperation"
+   ],
    "i5": [
     "*DebitMaterialCostTx",
     "*FenceActorTx",
     "*ListStacksTx",
+    "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
     "DefaultProfile"
@@ -4293,11 +4418,13 @@
     "*EnsurePlayerRootTx",
     "*InsertActAwardTx",
     "*InsertCGClaimTx",
+    "*InsertHeroLogTx",
     "*InsertTalkClaimTx",
     "*ListActAwardsTx",
     "*ListBackgroundsTx",
     "*ListCGClaimsTx",
     "*ListDialogsTx",
+    "*ListHeroLogsTx",
     "*ListHeroesTx",
     "*ListMissionsTx",
     "*ListTalkClaimsTx",
@@ -4347,7 +4474,8 @@
     "*OverlayMID1"
    ],
    "publicstats": [
-    "*HeroTx"
+    "*HeroTx",
+    "*ScaledHeroTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -4830,11 +4958,15 @@
    ],
    "generation": [
     "DecisionAt",
+    "NewTimedOperation",
     "Operation",
     "Run"
    ],
    "guildcore": [
     "*ReadPublicGuildTx"
+   ],
+   "heroforce": [
+    "Best"
    ],
    "i5": [
     "*FenceActorTx",
@@ -4979,7 +5111,8 @@
     "Validate"
    ],
    "publicprofile": [
-    "*ReadMetricsScopeTx"
+    "*ReadMetricsScopeTx",
+    "*ReadTopForceMetricScopeTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -5532,7 +5665,8 @@
     "*OverlayMID1"
    ],
    "publicstats": [
-    "*HeroTx"
+    "*HeroTx",
+    "*RobotForceTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -5683,6 +5817,7 @@
   "bootstrap": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "broadcast": [],
   "campaign": [
    "cmd/gxb-api/top_floor_postgres.go"
   ],
@@ -5725,6 +5860,9 @@
   "elementequipment": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "eventcentre": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "frienddm": [
    "cmd/gxb-api/main_postgres.go"
   ],
@@ -5732,6 +5870,9 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "generation": [],
+  "gmquestion": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "godstrial": [
    "cmd/gxb-api/godstrial_postgres.go"
   ],

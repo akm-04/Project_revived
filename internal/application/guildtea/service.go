@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
@@ -139,6 +140,7 @@ type Costs interface {
 }
 
 type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
@@ -421,6 +423,16 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		if err != nil {
 			return err
 		}
+		// The mission view must be prepared in the same transaction as the fact,
+		// before any grant (I5 mission-fact contract).
+		timed, err := gen.NewTimedOperation(bound, op.StartedAt)
+		if err != nil {
+			return err
+		}
+		prepared, err := s.Facts.PrepareTx(c, t, a.PlayerID, timed)
+		if err != nil {
+			return err
+		}
 		presentation := fmt.Sprintf("tea:%d:%d:%d", int64(receiver), int64(a.PlayerID), day)
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "guildtea", Operation: "present", BusinessKey: presentation, Occurrence: op.ID.String(), PolicyVersion: policyVersion},
 			Lines: []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "friend_medal", Amount: s.Policy.DonorFriendMedalPerScroll}}}
@@ -430,7 +442,7 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		if _, err := s.Costs.DebitMaterialCostTx(c, t, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: wish.ItemID, Amount: 1}}}, bound); err != nil {
 			return err
 		}
-		if err := s.Facts.RecordTx(c, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: presentation, Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
+		if err := s.Facts.RecordTx(prepared, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: presentation, Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
 			return err
 		}
 		out, err = s.stateTx(c, t, a, day, false)

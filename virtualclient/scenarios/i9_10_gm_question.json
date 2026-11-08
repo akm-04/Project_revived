@@ -1,0 +1,21 @@
+{
+ "name": "i9_10_gm_question",
+ "level": 50,
+ "steps": [
+  "wait:2",
+  "window:chat",
+  "wait:3",
+  "lua:_G.vcGM=xyd.WindowManager.get():getWindow('chat') if not vcGM then error('gm-window-missing') end vcGM:enterRoom(vcGM.messageManager.GM_CHANNEL)",
+  "wait:3",
+  "lua:local m=vcGM.messageManager if #m.messageList_[m.GM_CHANNEL]~=0 then error('gm-new-history-not-empty') end vcGM:sendMsg('gm47 first inquiry')",
+  "wait:3",
+  "lua:local m=vcGM.messageManager if not m.waitGmAnswer or #m.messageList_[m.GM_CHANNEL]~=1 then error('gm-local-send-callback') end vcGM:sendMsg('gm47 second inquiry')",
+  "wait:3",
+  "lua:vcGM:enterRoom(vcGM.messageManager.GM_CHANNEL)",
+  "wait:3",
+  "lua:local m=vcGM.messageManager if not m.waitGmAnswer or #m.messageList_[m.GM_CHANNEL]~=2 then error('gm-durable-reload-count-'..tostring(#m.messageList_[m.GM_CHANNEL])) end"
+ ],
+ "settle_seconds": 3,
+ "expect_ok": [4,5],
+ "note": "Stock ChatWindow GM channel enterRoom/sendMsg and MessageManager callbacks; no response injection. MID4 reload restores both durable inquiries despite the stock local pending-row replacement. Operator answers and masked GM transport remain deferred."
+}

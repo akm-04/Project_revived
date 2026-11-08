@@ -105,20 +105,19 @@ func structuredFixtureRead(c net.Conn) (rt.Frame, error) {
 	}
 }
 func TestStructuredFixturePublicationUsesCanonicalCampBeforeSend(t *testing.T) {
-	for _, mode := range []string{"fixtureenabled", "productiondisabled", "unknownread", "forgedcamp", "retiredsender"} {
+	for _, mode := range []string{"fixtureenabled", "unavailableowner", "unknownread", "forgedcamp", "retiredsender"} {
 		t.Run(mode, func(t *testing.T) {
 			reg := NewConnectionRegistry()
 			defer reg.CloseAll()
 			db := &structuredFixtureDB{unknown: mode == "unknownread"}
 			svc := cc.Service{Runner: tx.Runner{DB: db}, Operations: operation.Factory{Clock: clock.System{}}, Reader: structuredFixtureReader{}, Owners: cc.Owners{Camp: structuredFixtureCamp{}}}
+			if mode == "unavailableowner" {
+				svc.Owners = cc.Owners{}
+			}
 			events, _ := rt.NewChannelChatEventRegistry()
 			d, e := NewChannelChatDispatcher(reg, svc, RealtimePublisher{Registry: events, Limits: limits.Default()}, DefaultChannelChatPolicy(16))
 			if e != nil {
 				t.Fatal(e)
-			}
-			// This private switch is reachable only in this same-package test, never product assembly.
-			if mode != "productiondisabled" {
-				d.structuredEnabled = true
 			}
 			a := ar.Admission{Domain: registryAdmission(t, "33333333-3333-4333-8333-333333333333", 100001, dr.Service, 99999)}
 			w, _, self := newRegistryPipeWriter(t)
@@ -159,8 +158,9 @@ func TestStructuredFixturePublicationUsesCanonicalCampBeforeSend(t *testing.T) {
 				if e != nil || <-readErr != nil || rt.ValidateChannelChat(frame.Params) != nil || report.Outcomes[ChatTransportWriteRecorded] != 1 || report.Outcomes[ChatIneligible] != 1 {
 					t.Fatal(frame, e, report)
 				}
-			} else if mode == "productiondisabled" {
-				if e != nil || !report.ProviderGated {
+			} else if mode == "unavailableowner" || mode == "forgedcamp" {
+				// A refused owner reference is silent; the sender keeps its session.
+				if e != nil || !report.ProviderGated || db.active.Load() != 0 {
 					t.Fatal(e, report)
 				}
 			} else if e == nil {

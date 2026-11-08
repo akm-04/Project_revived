@@ -39,5 +39,12 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00135: I9-10 1 on 1 D488 parity: each issued MATCH list stores the challenger and target ranks it showed; an offer without one is stale (35026).
 - 00136: I9-10 D512 special Top Floor is humans-only: a weekly period may start at size 0 instead of seeding robot ranks.
 - 00137: I9-10F Mentor/My Class relationship history, per-player application counters and break cooldown, application rows, mission high-water/award progress and graduation exam receipts. Empty on upgrade.
+- 00138: I9-10A Event Centre Workshop per-player root (recycle energy, desk/pet make jobs, administrator counters). Created lazily on the first command; empty on upgrade. sha256 cf2f39e518a4a5df37e87aa476e6a8c82d8d78e5ae90dad8da4a79469d57d1e7.
+- 00141: I9-10 D510 random Dorm visits: login-activity index for the 256 most recently active same-server players.
 - 00143: I9-10 D512 operator-configurable Top Floor girl bans by mode and rotation.
-- 00153: I9-10 Hero Recommend per-logical-server weekly derived snapshot.
+- 00150: I9-10A Event Centre notice board (MIDs 1083-1087) stored server combat reports, one row per player report id retained by the board history. Empty on upgrade.
+- 00151: I9-10 bugs 51-53: Girls Log milestones (player, hero, log id) written by the summon facet, favor stages, dialogue awards, marriage, star-up, promotion and awakening. Empty on upgrade.
+- 00154: I9-10 GM question foundation (MIDs 4/5): player questions per player and logical server, history index for the latest 100. Operator replies are I11. Empty on upgrade.
+- 00155: I9-10 SYSTEM_BROADCAST 3002: consecutive Top Floor attack wins on the player row, reset by an attack loss or forfeit. Existing players start at 0.
+- 00156: I9-10 lobby announcements (SYSTEM_BROADCAST 4101, ACTIVITY_BROADCAST 4096): one outbox row per produced announce, removed by the realtime listener after it fans out to the producing logical server. Empty on upgrade.
+- 00157: I9-10 Hero Recommend per-logical-server weekly derived snapshot.

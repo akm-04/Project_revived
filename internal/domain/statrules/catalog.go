@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -143,6 +144,21 @@ type Engine struct {
 	templates map[int64]Template
 	scores    [49]float64
 	leaves    map[string]bool
+}
+
+// LeafNames lists the observation inputs one model reads. A caller filling
+// genuinely absent owner facts uses it to provide explicit zero observations
+// instead of leaving a required leaf undefined.
+func (e *Engine) LeafNames(model string) []string {
+	prefix := model + "/"
+	out := []string{}
+	for name := range e.leaves {
+		if strings.HasPrefix(name, prefix) {
+			out = append(out, strings.TrimPrefix(name, prefix))
+		}
+	}
+	sort.Strings(out)
+	return out
 }
 
 func NewEngine(revision string, c Catalog) (*Engine, error) {

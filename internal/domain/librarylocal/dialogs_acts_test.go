@@ -37,7 +37,8 @@ func TestDialogOpenedAndActUnlock(t *testing.T) {
 		{2, 100, false, true},
 		{3, 0, false, false},
 		{3, 0, true, true},
-		{12, 99, false, false},
+		// Act 1 is open in the [0,100] band, so its dialog is too.
+		{12, 99, false, true},
 		{12, 100, false, true},
 		{15, 2000, true, false},
 		{17, 2000, true, false},
@@ -51,8 +52,12 @@ func TestDialogOpenedAndActUnlock(t *testing.T) {
 	if len(ids) != 3 || ids[0] != 1 || ids[1] != 2 || ids[2] != 12 {
 		t.Fatalf("OpenDialogIDs %v", ids)
 	}
-	if catalog.ActUnlocked(1, 99) || !catalog.ActUnlocked(1, 100) || catalog.ActUnlocked(2, 299) || !catalog.ActUnlocked(2, 300) || catalog.ActUnlocked(4, 2000) {
-		t.Fatal("act unlock boundary")
+	// library_amour stages are bands: [0,100] act 1, (100,300] acts 1,2.
+	if !catalog.ActUnlocked(1, 0) || catalog.ActUnlocked(2, 0) {
+		t.Fatal("act unlock lower bands")
+	}
+	if !catalog.ActUnlocked(1, 100) || catalog.ActUnlocked(2, 100) || !catalog.ActUnlocked(2, 101) || !catalog.ActUnlocked(2, 300) {
+		t.Fatal("act unlock upper bands")
 	}
 }
 

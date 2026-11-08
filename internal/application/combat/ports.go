@@ -92,6 +92,9 @@ type Roster interface {
 
 type Stats interface {
 	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+	// ScaledHeroTx evaluates the same hero at an overridden level/star/colour
+	// for a mode that scales a copied opponent snapshot.
+	ScaledHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View, int64, int64, int64) (publicstats.Result, error)
 	PetTx(context.Context, ca.CoherentReadScope, character.PetRef, publicstats.View) (publicstats.Result, error)
 }
 

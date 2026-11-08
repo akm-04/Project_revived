@@ -78,6 +78,10 @@ func (s Mode) Advance(c context.Context, a identity.ActorContext, q Fight, op op
 		if err = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), objective.Fact{PlayerID: a.PlayerID, SourceDomain: "march", SourceBusinessKey: r.Occurrence + "/advance", Kind: "MARCH_FINISHED", Delta: count}); err != nil {
 			return nil, err
 		}
-		return map[string]any{"map_info": r.Projection()["map_info"], "hero_status": r.Projection()["hero_status"], "award": all, "economy": []any{}, "power_drink": drinks}, nil
+		out, err := s.projectionWithStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), *r)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]any{"map_info": out["map_info"], "hero_status": out["hero_status"], "award": all, "economy": []any{}, "power_drink": drinks}, nil
 	})
 }

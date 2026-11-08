@@ -13,6 +13,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	tf "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -323,9 +324,27 @@ func (s Service) Info(c context.Context, a identity.ActorContext, op operation.C
 					return err
 				}
 			}
+			before := p
+			if len(p.Defense.Heroes) == 0 && (!found || p.Season != catalog.SeasonAt(at).Number) {
+				owned, readErr := s.OwnedHeroes.ListHeroesTx(c, sc.Tx, a.PlayerID)
+				if readErr != nil {
+					return readErr
+				}
+				preset, selectErr := tf.SelectPresetDefense(owned, a.PlayerID)
+				if selectErr != nil {
+					return selectErr
+				}
+				// PRIVATE_POLICY D511: Arena leaves incomplete presets empty because only complete defenses can be matched.
+				if len(preset) == d.TeamSize {
+					p.Defense.Heroes = make([]int64, 0, len(preset))
+					for _, hero := range preset {
+						p.Defense.Heroes = append(p.Defense.Heroes, hero.TableID)
+					}
+				}
+			}
 			next := catalog.Rolled(p, at)
-			if !samePlayer(p, next) {
-				if err = s.save(c, sc.Tx, p, next, at); err != nil {
+			if !samePlayer(before, next) {
+				if err = s.save(c, sc.Tx, before, next, at); err != nil {
 					return err
 				}
 			}

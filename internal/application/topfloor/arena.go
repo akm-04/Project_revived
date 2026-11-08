@@ -213,23 +213,13 @@ func (s Service) presetDefense(c context.Context, q tx.Queryer, pid identity.Pla
 	if err != nil {
 		return nil, err
 	}
-	chosen := make([]int64, 0, len(d.PresetDefenseGirls))
-	for _, girl := range d.PresetDefenseGirls {
-		best, bestLevel := int64(0), int64(0)
-		for _, hero := range heroes {
-			if hero.ValidatePersistent() != nil || hero.PlayerID != pid {
-				return nil, d.ErrConflict
-			}
-			if hero.OriginTableID != girl {
-				continue
-			}
-			if hero.Level > bestLevel || (hero.Level == bestLevel && (best == 0 || hero.PartnerID < best)) {
-				best, bestLevel = hero.PartnerID, hero.Level
-			}
-		}
-		if best != 0 {
-			chosen = append(chosen, best)
-		}
+	selected, err := d.SelectPresetDefense(heroes, pid)
+	if err != nil {
+		return nil, err
+	}
+	chosen := make([]int64, 0, len(selected))
+	for _, hero := range selected {
+		chosen = append(chosen, hero.PartnerID)
 	}
 	if err = defenseShape(chosen, 0); err != nil {
 		return nil, err
@@ -341,10 +331,20 @@ func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, ser
 			return d.Display{}, d.ErrConflict
 		}
 		view := d.Display{Occupant: o, Rank: rank, Name: catalog.RobotName(o.Robot), Level: team.Level, AvatarID: catalog.RobotAvatarID, FrameID: catalog.RobotFrameID}
+		if band, ok := catalog.RobotBand(rank); ok && band.Level > view.Level {
+			view.Level = band.Level
+		}
 		for _, id := range team.Heroes {
-			params, _ := catalog.RobotHeroParams(id)
+			params, _ := catalog.RobotHeroParamsAt(id, rank)
 			view.Heroes = append(view.Heroes, params)
 		}
+		if pet, ok := catalog.RobotPet(o.Robot, rank); ok {
+			view.Pet = pet
+		}
+		if err = s.fillRobotForce(c, q, view.Heroes, at); err != nil {
+			return d.Display{}, err
+		}
+		view.Force = teamForce(view.Heroes)
 		return view, nil
 	}
 	view, err := s.playerDisplay(c, q, o)
@@ -374,22 +374,8 @@ func (s Service) fillHeroForce(c context.Context, q tx.Queryer, owner identity.P
 	if s.HeroPower == nil || len(heroes) == 0 {
 		return nil
 	}
-	// The stock board read runs on the fresh pool outside a transaction; force
-	// is projected only where the owner read already holds a transaction.
-	raw, ok := q.(tx.Tx)
-	if !ok {
-		return nil
-	}
-	revision, err := s.Content.ActiveRevision(c, q)
-	if err != nil {
-		return err
-	}
-	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
-	if err != nil {
-		return err
-	}
-	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: raw, Operation: operation.Context{ID: ids.UUID{15: 1}, StartedAt: at.UTC(), Policies: policies}, Attempt: 1, Options: tx.Options{Isolation: tx.Serializable}}, revision, at)
-	if err != nil {
+	scope, ok, err := s.readScope(c, q, at)
+	if err != nil || !ok {
 		return err
 	}
 	for _, row := range heroes {
@@ -408,6 +394,74 @@ func (s Service) fillHeroForce(c context.Context, q tx.Queryer, owner identity.P
 		row["force"] = int64(force)
 	}
 	return nil
+}
+
+// fillRobotForce gives each robot hero row the power of the same banded team a
+// Top Floor fight resolves, so the enemy board and the team popup show it.
+func (s Service) fillRobotForce(c context.Context, q tx.Queryer, heroes []map[string]any, at time.Time) error {
+	if s.HeroPower == nil || len(heroes) == 0 {
+		return nil
+	}
+	scope, ok, err := s.readScope(c, q, at)
+	if err != nil || !ok {
+		return err
+	}
+	for _, row := range heroes {
+		tableID, _ := row["table_id"].(int64)
+		level, _ := row["lev"].(int64)
+		star, _ := row["star"].(int64)
+		color, _ := row["color"].(int64)
+		flags := integerRows(row["equips"])
+		result, err := s.HeroPower.RobotForceTx(c, scope, tableID, level, star, color, flags)
+		if err != nil {
+			return err
+		}
+		force := math.Round(result.Stats.Force)
+		if math.IsNaN(force) || math.IsInf(force, 0) || force < 0 || force > 100000000000 {
+			return d.ErrUnavailable
+		}
+		row["force"] = int64(force)
+	}
+	return nil
+}
+
+func integerRows(raw any) []int64 {
+	items, _ := raw.([]any)
+	out := make([]int64, 0, len(items))
+	for _, item := range items {
+		switch value := item.(type) {
+		case int64:
+			out = append(out, value)
+		case int:
+			out = append(out, int64(value))
+		case float64:
+			out = append(out, int64(value))
+		}
+	}
+	return out
+}
+
+// readScope is the coherent read the force projection needs. The stock rank
+// list reads on the fresh pool outside a transaction; force is projected only
+// where the owner read already holds one.
+func (s Service) readScope(c context.Context, q tx.Queryer, at time.Time) (ca.CoherentReadScope, bool, error) {
+	raw, ok := q.(tx.Tx)
+	if !ok {
+		return ca.CoherentReadScope{}, false, nil
+	}
+	revision, err := s.Content.ActiveRevision(c, q)
+	if err != nil {
+		return ca.CoherentReadScope{}, false, err
+	}
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
+	if err != nil {
+		return ca.CoherentReadScope{}, false, err
+	}
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: raw, Operation: operation.Context{ID: ids.UUID{15: 1}, StartedAt: at.UTC(), Policies: policies}, Attempt: 1, Options: tx.Options{Isolation: tx.Serializable}}, revision, at)
+	if err != nil {
+		return ca.CoherentReadScope{}, false, err
+	}
+	return scope, true, nil
 }
 
 // team reads the owner's current roster rows for the given heroes and pet.

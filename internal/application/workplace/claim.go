@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -120,6 +121,12 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 			if _, err = s.Values.SettleGrantTx(c, sc.Tx, a, plan, bound, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 				return nil, err
 			}
+			if amount := externalCrystalAward(o.Award); amount > 0 && s.Broadcast != nil {
+				message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.TreasureDiamond, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{CrystalAward: amount}}
+				if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+					return nil, err
+				}
+			}
 		}
 		entry := map[string]any{"team_id": teamID, "treasure_type": o.Job, "award": o.Award, "partners_info": o.PartnersInfo, "with_battle": int64(0), "is_win": int64(0), "time": sc.Operation.DecisionAt().Unix()}
 		if o.Attempt != "" {
@@ -142,3 +149,24 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 type fixedTime struct{ at time.Time }
 
 func (f fixedTime) Now(context.Context) (time.Time, error) { return f.at, nil }
+
+// externalCrystalAward reads the job's bounty bonus, which the store decodes
+// from jsonb as json.Number.
+func externalCrystalAward(award map[string]any) int64 {
+	switch value := award["externa_crystal_award"].(type) {
+	case int64:
+		return value
+	case int32:
+		return int64(value)
+	case float64:
+		return int64(value)
+	case json.Number:
+		amount, err := value.Int64()
+		if err != nil {
+			return 0
+		}
+		return amount
+	default:
+		return 0
+	}
+}

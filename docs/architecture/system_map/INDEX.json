@@ -11,7 +11,7 @@
    "guildprojection.BootstrapProjection",
    "guildprojection.TeaProjection",
    "mentorstore.BootstrapProjection",
-   "characterstore.HeroBootstrapProjection",
+   "heroBootstrap",
    "librarystore.BootstrapProjection",
    "bookstore.BootstrapProjection",
    "coursestore.BootstrapProjection",
@@ -46,10 +46,26 @@
    "1059": "bookskill",
    "1060": "bookskill",
    "1061": "bookskill",
+   "1072": "eventcentre",
+   "1073": "eventcentre",
+   "1074": "eventcentre",
+   "1075": "eventcentre",
+   "1076": "eventcentre",
    "1077": "bookskill",
    "1078": "bookskill",
    "1079": "bookskill",
    "1080": "bookskill",
+   "1081": "eventcentre",
+   "1082": "eventcentre",
+   "1083": "eventcentre",
+   "1084": "eventcentre",
+   "1085": "eventcentre",
+   "1086": "eventcentre",
+   "1087": "eventcentre",
+   "1088": "eventcentre",
+   "1089": "eventcentre",
+   "1090": "eventcentre",
+   "1091": "eventcentre",
    "112": "campaign",
    "113": "campaign",
    "114": "campaign",
@@ -404,13 +420,17 @@
    "384": "socialinvite",
    "385": "socialinvite",
    "386": "socialinvite",
+   "39": "characterhero",
+   "4": "gmquestion",
    "49": "characterhero",
+   "5": "gmquestion",
    "50": "summon",
    "51": "characterhero",
    "513": "generaldm",
    "515": "frienddm",
    "52": "characterhero",
    "528": "workplace",
+   "53": "characterhero",
    "530": "workplace",
    "531": "workplace",
    "532": "workplace",
@@ -576,6 +596,7 @@
    "arena_settlements": "arena",
    "arena_tournament_periods": "arena",
    "arena_tournament_rooms": "arena",
+   "broadcast_outbox": "broadcast",
    "campaign_nodes": "campaign",
    "campaign_players": "campaign",
    "client_log_capabilities": "clientlog",
@@ -688,6 +709,9 @@
    "player_element_admissions": "elementequipment",
    "player_element_heroes": "elementequipment",
    "player_element_roots": "elementequipment",
+   "player_event_centre_board_reports": "eventcentre",
+   "player_event_centre_roots": "eventcentre",
+   "player_gm_questions": "gmquestion",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
    "player_hero_evolution": "characterhero",
@@ -707,6 +731,7 @@
    "player_library_backgrounds": "librarylocal",
    "player_library_cg_claims": "librarylocal",
    "player_library_dialogs": "librarylocal",
+   "player_library_hero_logs": "librarylocal",
    "player_library_heroes": "librarylocal",
    "player_library_partner_missions": "librarylocal",
    "player_library_roots": "librarylocal",
@@ -819,7 +844,7 @@
    "tables": 3
   },
   {
-   "callees": 14,
+   "callees": 15,
    "callers": 3,
    "mids": 39,
    "name": "arena",
@@ -837,8 +862,8 @@
    "tables": 0
   },
   {
-   "callees": 13,
-   "callers": 4,
+   "callees": 9,
+   "callers": 6,
    "mids": 11,
    "name": "bookskill",
    "path": "internal/application/bookskill",
@@ -853,6 +878,15 @@
    "path": "internal/application/bootstrap",
    "purpose": "",
    "tables": 10
+  },
+  {
+   "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "broadcast",
+   "path": "internal/application/broadcast",
+   "purpose": "owns the lobby scrolling announcements the stock client receives on SYSTEM_BROADCAST (4101) and ACTIVITY_BROADCAST (4096)",
+   "tables": 1
   },
   {
    "callees": 13,
@@ -883,7 +917,7 @@
   },
   {
    "callees": 4,
-   "callers": 37,
+   "callers": 38,
    "mids": 0,
    "name": "characterasset",
    "path": "internal/application/characterasset",
@@ -891,9 +925,9 @@
    "tables": 0
   },
   {
-   "callees": 23,
+   "callees": 26,
    "callers": 15,
-   "mids": 21,
+   "mids": 23,
    "name": "characterhero",
    "path": "internal/application/characterhero",
    "purpose": "",
@@ -937,7 +971,7 @@
   },
   {
    "callees": 10,
-   "callers": 18,
+   "callers": 19,
    "mids": 0,
    "name": "combat",
    "path": "internal/application/combat",
@@ -964,7 +998,7 @@
   },
   {
    "callees": 11,
-   "callers": 7,
+   "callers": 6,
    "mids": 16,
    "name": "course",
    "path": "internal/application/course",
@@ -1017,6 +1051,15 @@
    "tables": 3
   },
   {
+   "callees": 11,
+   "callers": 0,
+   "mids": 16,
+   "name": "eventcentre",
+   "path": "internal/application/eventcentre",
+   "purpose": "",
+   "tables": 2
+  },
+  {
    "callees": 7,
    "callers": 2,
    "mids": 1,
@@ -1036,12 +1079,21 @@
   },
   {
    "callees": 5,
-   "callers": 57,
+   "callers": 60,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
    "purpose": "",
    "tables": 0
+  },
+  {
+   "callees": 6,
+   "callers": 0,
+   "mids": 2,
+   "name": "gmquestion",
+   "path": "internal/application/gmquestion",
+   "purpose": "",
+   "tables": 1
   },
   {
    "callees": 10,
@@ -1107,7 +1159,7 @@
    "tables": 0
   },
   {
-   "callees": 6,
+   "callees": 7,
    "callers": 0,
    "mids": 4,
    "name": "guildtea",
@@ -1135,11 +1187,11 @@
   },
   {
    "callees": 4,
-   "callers": 3,
+   "callers": 4,
    "mids": 0,
    "name": "heroforce",
    "path": "internal/application/heroforce",
-   "purpose": "is the shared \"best 15 AP\" projection: the sum of a player's fifteen strongest heroes' qualified public force",
+   "purpose": "is the shared \"best hero force\" projection: the sum of a player's strongest heroes' qualified public force",
    "tables": 0
   },
   {
@@ -1153,7 +1205,7 @@
   },
   {
    "callees": 12,
-   "callers": 55,
+   "callers": 57,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1180,7 +1232,7 @@
   },
   {
    "callees": 12,
-   "callers": 7,
+   "callers": 6,
    "mids": 8,
    "name": "inscription",
    "path": "internal/application/inscription",
@@ -1203,7 +1255,7 @@
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
    "purpose": "",
-   "tables": 9
+   "tables": 10
   },
   {
    "callees": 13,
@@ -1270,7 +1322,7 @@
   },
   {
    "callees": 0,
-   "callers": 6,
+   "callers": 7,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1297,7 +1349,7 @@
   },
   {
    "callees": 0,
-   "callers": 21,
+   "callers": 22,
    "mids": 0,
    "name": "playerroot",
    "path": "internal/application/playerroot",
@@ -1332,7 +1384,7 @@
    "tables": 3
   },
   {
-   "callees": 23,
+   "callees": 24,
    "callers": 2,
    "mids": 8,
    "name": "publicprofile",
@@ -1342,7 +1394,7 @@
   },
   {
    "callees": 13,
-   "callers": 8,
+   "callers": 9,
    "mids": 0,
    "name": "publicstats",
    "path": "internal/application/publicstats",
@@ -1504,7 +1556,7 @@
   },
   {
    "callees": 11,
-   "callers": 8,
+   "callers": 7,
    "mids": 9,
    "name": "spirit",
    "path": "internal/application/spirit",

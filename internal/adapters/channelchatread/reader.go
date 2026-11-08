@@ -13,8 +13,23 @@ import (
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
+	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+// shareableRoom is the owner-side card gate: the room exists on the sender's
+// logical server, is still open with a free seat, and the sender occupies one.
+func shareableRoom(room sharedroom.Room, a apprealtime.Admission) bool {
+	if room.Status != sharedroom.StatusOpen || room.LogicalServerID != a.Domain.Actor.LogicalServerID || len(room.Members()) >= int(room.Capacity) {
+		return false
+	}
+	for _, member := range room.Members() {
+		if member == a.Domain.Actor.PlayerID {
+			return true
+		}
+	}
+	return false
+}
 
 type Reader struct{}
 

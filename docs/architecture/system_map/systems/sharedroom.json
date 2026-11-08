@@ -83,7 +83,8 @@
  },
  "tests": {
   "integration": [
-   "playerdisplay"
+   "playerdisplay",
+   "socialactivation"
   ],
   "scenarios_naming": [],
   "unit": [

@@ -222,7 +222,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 			return d.Fight{}, err
 		}
 	}
-	defenders, pets, err := s.defenders(c, sc.Tx, catalog, enemy)
+	defenders, pets, err := s.defenders(c, sc.Tx, catalog, enemy, enemyRank)
 	if err != nil {
 		return d.Fight{}, err
 	}
@@ -281,13 +281,16 @@ func (s Service) opponent(c context.Context, q tx.Queryer, catalog d.Catalog, p 
 }
 
 // defenders freezes a robot team as TEMPLATE actors or a player's saved defense as OWNED_FOREIGN.
-func (s Service) defenders(c context.Context, q tx.Queryer, catalog d.Catalog, o d.Occupant) ([]combat.Participant, []combat.Participant, error) {
+func (s Service) defenders(c context.Context, q tx.Queryer, catalog d.Catalog, o d.Occupant, rank int64) ([]combat.Participant, []combat.Participant, error) {
 	heroes, pets := []combat.Participant{}, []combat.Participant{}
 	if o.IsRobot() {
 		team, _ := catalog.Team(o.Robot)
 		for _, id := range team.Heroes {
-			params, _ := catalog.RobotHeroParams(id)
+			params, _ := catalog.RobotHeroParamsAt(id, rank)
 			heroes = append(heroes, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: params["partner_id"].(int64), TemplateParams: params})
+		}
+		if pet, ok := catalog.RobotPet(o.Robot, rank); ok {
+			pets = append(pets, combat.Participant{Origin: cd.Template, Kind: cd.PetActor, Identity: pet["pet_id"].(int64), TemplateParams: pet})
 		}
 		return heroes, pets, nil
 	}
@@ -459,6 +462,7 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 	if !f.Defender.IsRobot() {
 		sides = append(sides, fightSide{f.Defender.Player, false, !outcome.Win, "B", d.Occupant{Player: f.Challenger}})
 	}
+	challengerStreak := players[f.Challenger].WinStreak
 	for _, side := range sides {
 		p := players[side.player]
 		next := p
@@ -468,6 +472,8 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 		}
 		if side.attack {
 			next.BestRank = outcome.BestAfter
+			next.WinStreak = nextWinStreak(p.WinStreak, side.attack, side.won)
+			challengerStreak = next.WinStreak
 		}
 		next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
 		if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion); err != nil {
@@ -482,6 +488,13 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 		}
 		if err = s.Store.AddUsageTx(c, sc.Tx, side.player, uses); err != nil {
 			return err
+		}
+	}
+	if s.Broadcast != nil {
+		for _, message := range settlementMessages(catalog, f, outcome, challengerStreak) {
+			if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+				return err
+			}
 		}
 	}
 	fact := objective.Fact{PlayerID: f.Challenger, SourceDomain: "top-floor", SourceBusinessKey: f.AttemptID.String(), Kind: objective.PVPFightKind, Delta: 1}

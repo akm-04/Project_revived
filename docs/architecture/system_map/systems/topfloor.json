@@ -9,6 +9,10 @@
  "content": [],
  "contracts": [
   {
+   "count": 2,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
    "count": 1,
    "file": "docs/i9/I9_GACHA_V1.json"
   },
@@ -114,7 +118,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 272,
    "name": "LOAD_ARENA"
@@ -122,7 +126,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 273,
    "name": "LOAD_ARENA_PLAYER_LIST"
@@ -130,7 +134,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 278,
    "name": "SAVE_ARENA_DEFENSE"
@@ -138,7 +142,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 280,
    "name": "START_FIGHT"
@@ -146,7 +150,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 281,
    "name": "ARENA_BUY_TICKET"
@@ -202,7 +206,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 288,
    "name": "ARENA_RESET_TIMER"
@@ -210,7 +214,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 289,
    "name": "LOAD_ARENA_FIGHT_RECORDS"
@@ -218,7 +222,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 290,
    "name": "LOAD_ARENA_FIGHT_REPORT"
@@ -226,7 +230,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 291,
    "name": "query_arena_formation"
@@ -234,7 +238,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 292,
    "name": "SEAL_HERO"
@@ -242,7 +246,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 293,
    "name": "ARENA_GET_RCORD_PLAYER_INFO"
@@ -250,7 +254,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
-    "line": 86
+    "line": 87
    },
    "mid": 294,
    "name": "ARENA_PRE_FIGHT"
@@ -386,6 +390,9 @@
    "topfloor.json",
    "topfloor_battle.json"
   ],
-  "unit": []
+  "unit": [
+   "broadcast_native_test.go",
+   "broadcast_test.go"
+  ]
  }
 }

@@ -1,6 +1,7 @@
 package topfloor
 
 import (
+	"reflect"
 	"testing"
 	"time"
 )
@@ -111,5 +112,89 @@ func TestCalendarAndTickets(t *testing.T) {
 	}
 	if rolled := c.Rolled(bought, noon.Add(24*time.Hour)); rolled.Purchases != 0 || rolled.TicketsLeft != 5 {
 		t.Fatal("daily roll")
+	}
+}
+
+func TestRobotHeroParamsCarrySourceEquipment(t *testing.T) {
+	c := Catalog{RobotHeroes: []RobotHero{{ID: 77001005, Level: 77, PartnerID: 10001005, Quality: 9, Star: 3, EquipFlags: []int64{1, 0, 1, 1, 1, 1}}}}
+	params, ok := c.RobotHeroParams(77001005)
+	if !ok {
+		t.Fatal("robot hero missing")
+	}
+	if params["lev"] != int64(77) || params["star"] != int64(3) || params["color"] != int64(9) || params["partner_id"] != int64(10001005) {
+		t.Fatalf("source params %v", params)
+	}
+	if !reflect.DeepEqual(params["equips"], []any{int64(1), int64(0), int64(1), int64(1), int64(1), int64(1)}) {
+		t.Fatalf("source equip flags %v", params["equips"])
+	}
+	if !reflect.DeepEqual(params["skills"], []any{1, 1, 1, 1, 1, 1}) {
+		t.Fatalf("client-default skill levels %v", params["skills"])
+	}
+}
+
+func bandTestCatalog() Catalog {
+	return Catalog{
+		RobotHeroes: []RobotHero{{ID: 1, Level: 79, PartnerID: 10001031, Quality: 10, Star: 2, EquipFlags: []int64{1, 1, 0, 1, 1, 1}}},
+		PetPool:     []RobotPetTemplate{{TableID: 10010001, InitialStar: 1}, {TableID: 10020001, InitialStar: 3}},
+		RobotRankBands: RobotRankBandPolicy{Label: "PRIVATE_POLICY", PolicyID: "I9_10_ROBOT_RANK_BANDS_V1_PRIVATE_POLICY", MeetingRank: 500,
+			Anchors: []RobotRankAnchor{
+				{Rank: 1, Quality: 16, Level: 100, Star: 3, PetLevel: 100},
+				{Rank: 10, Quality: 16, Level: 100, Star: 3, PetLevel: 100},
+				{Rank: 11, Quality: 16, Level: 99, Star: 3, PetLevel: 99},
+				{Rank: 25, Quality: 15, Level: 90, Star: 3, PetLevel: 90},
+				{Rank: 26, Quality: 13, Level: 89, Star: 3, PetLevel: 89},
+				{Rank: 500, Quality: 3, Level: 14, Star: 1, PetLevel: 14},
+			}},
+	}
+}
+
+func TestRobotRankBandTable(t *testing.T) {
+	c := bandTestCatalog()
+	for _, tc := range []struct {
+		rank           int64
+		quality, level int64
+		star, petLevel int64
+	}{
+		{1, 16, 100, 3, 100},
+		{10, 16, 100, 3, 100},
+		{11, 16, 99, 3, 99},
+		{25, 15, 90, 3, 90},
+		{26, 13, 89, 3, 89},
+		{30, 13, 88, 3, 88},
+		{500, 3, 14, 1, 14},
+	} {
+		band, ok := c.RobotBand(tc.rank)
+		if !ok || band.Quality != tc.quality || band.Level != tc.level || band.Star != tc.star || band.PetLevel != tc.petLevel {
+			t.Fatalf("rank %d band %+v ok=%v want %+v", tc.rank, band, ok, tc)
+		}
+	}
+	if _, ok := c.RobotBand(501); ok {
+		t.Fatal("ranks after the meeting rank must use source values")
+	}
+}
+
+func TestRobotBandRaisesSourceHeroAndAddsPet(t *testing.T) {
+	c := bandTestCatalog()
+	params, ok := c.RobotHeroParamsAt(1, 1)
+	if !ok || params["lev"] != int64(100) || params["color"] != int64(16) || params["star"] != int64(3) {
+		t.Fatalf("rank 1 hero %v", params)
+	}
+	if !reflect.DeepEqual(params["equips"], []any{int64(1), int64(1), int64(0), int64(1), int64(1), int64(1)}) {
+		t.Fatalf("rank 1 source equipment %v", params["equips"])
+	}
+	pet, ok := c.RobotPet(3, 1)
+	if !ok || pet["lev"] != int64(100) || (pet["table_id"] != int64(10010001) && pet["table_id"] != int64(10020001)) {
+		t.Fatalf("rank 1 pet %v", pet)
+	}
+	again, _ := c.RobotPet(3, 1)
+	if !reflect.DeepEqual(pet, again) {
+		t.Fatal("robot pet must be deterministic")
+	}
+	source, ok := c.RobotHeroParamsAt(1, 600)
+	if !ok || source["lev"] != int64(79) || source["color"] != int64(10) || source["star"] != int64(2) {
+		t.Fatalf("rank 600 source hero %v", source)
+	}
+	if _, ok := c.RobotPet(3, 600); ok {
+		t.Fatal("rank 600 source robot carries no pet")
 	}
 }

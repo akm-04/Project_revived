@@ -5,6 +5,7 @@ package playerdisplay_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/memoirstore"
@@ -18,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -74,6 +76,9 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 		t.Fatal("gate", err)
 	}
 	compositeLevel(t, pool, actor, revision, 100)
+	if _, err := mode.SaveMap(ctx, actor, memoir.InitialPosition, nil, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "inactive run") {
+		t.Fatal("save map cause", err)
+	}
 	bornHero(t, pool, actor, revision, 10001001, 1)
 	grantGenuine(t, pool, actor, revision, "memoir keys", []grant.Line{{Kind: grant.StackItem, ItemID: 50001400, Amount: 3}, {Kind: grant.StackItem, ItemID: 50001401, Amount: 8}})
 	if _, err := mode.Start(ctx, actor, 1, op()); !errors.Is(err, memoir.ErrInvalid) {
@@ -101,8 +106,11 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 	if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) {
 		t.Fatal("guardian bypass", err)
 	}
-	if _, err = mode.SaveMap(ctx, actor, memoir.FinalPosition, []int{memoir.FinalPosition}, op()); !errors.Is(err, memoir.ErrRefused) {
-		t.Fatal("teleport", err)
+	if _, err = mode.SaveMap(ctx, actor, memoir.FinalPosition, []int{memoir.FinalPosition}, op()); err != nil {
+		t.Fatal("stock walk stands on the final point", err)
+	}
+	if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "exit at 54 is closed") {
+		t.Fatal("standing on the exit must not advance without the guardian", err)
 	}
 	saveOperation := op()
 	saved, err := mode.SaveMap(ctx, actor, 10, []int{1, 2, 10, 11, 19}, saveOperation)
@@ -182,6 +190,9 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 		}
 		state = memoirRecord(t, pool, actor)
 		pending := *state.Pending
+		if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "battle is pending") {
+			t.Fatal("pending floor cause", err)
+		}
 		balance := energy()
 		if _, err = mode.StartFight(ctx, actor, memoir.GuardianPosition, op()); err != nil || energy() != balance {
 			t.Fatal("paid retry", err)
@@ -448,6 +459,58 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	right, _ = combat.CanonicalJSON(repeated)
 	if err != nil || string(left) != string(right) {
 		t.Fatal("old operation lost after abandon", err)
+	}
+}
+
+// permanentMemoirWorker makes the real combat owner record and return a
+// permanent resolver failure, as the launcher does for bad snapshots.
+type permanentMemoirWorker struct{}
+
+func (permanentMemoirWorker) Resolve(context.Context, []byte, string, [32]byte) (applicationcombat.WorkerOutput, error) {
+	return applicationcombat.WorkerOutput{}, fmt.Errorf("%w: injected", combat.ErrResolverPermanent)
+}
+
+func TestI9_6CMemoirNativePlayerResolutionFailureIsRefused(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	compositeLevel(t, pool, actor, revision, 100)
+	bornHero(t, pool, actor, revision, 10001001, 1)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = mode.Start(ctx, actor, catalog.Selected[0], op()); err != nil {
+		t.Fatal(err)
+	}
+	state := memoirRecord(t, pool, actor)
+	grid := 0
+	for index, kind := range state.Board.Cells {
+		if kind == memoir.Player {
+			grid = index + 1
+			break
+		}
+	}
+	if grid == 0 {
+		t.Fatal("no player encounter")
+	}
+	original := mode.Combat.(applicationcombat.Service)
+	broken := original
+	broken.Worker = permanentMemoirWorker{}
+	mode.Combat = broken
+	request := application.PlayerFight{Grid: grid, Formation: []int64{1}}
+	response, err := mode.PlayerFight(ctx, actor, request, op())
+	if !errors.Is(err, memoir.ErrFightUnavailable) || response != nil {
+		t.Fatal("permanent resolution must refuse, not answer a success body", err, response)
+	}
+	if memoirRecord(t, pool, actor).Pending != nil {
+		t.Fatal("refused attempt left a pending battle")
+	}
+	mode.Combat = original
+	response, err = mode.PlayerFight(ctx, actor, request, op())
+	if err != nil || response["battle_info"] == nil {
+		t.Fatal("the encounter must stay playable after the refusal", err, response)
 	}
 }
 

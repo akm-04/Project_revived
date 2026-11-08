@@ -3,8 +3,10 @@ package memoir
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 
 	"gxb.local/backend/v2/internal/content/builtin"
@@ -122,10 +124,19 @@ func TestMemoirMapRejectsTeleportAndRepeatedBoxes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	before, _ := json.Marshal(board)
-	if err = board.SaveMap(FinalPosition, []int{FinalPosition}); err == nil {
-		t.Fatal("entered locked endpoint")
+	if board.CanExit(FinalPosition) {
+		t.Fatal("exit before guardian")
 	}
+	if err = board.SaveMap(FinalPosition, []int{FinalPosition}); err != nil {
+		t.Fatal("stock walk stands on the final point before the guardian", err)
+	}
+	if board.CanExit(FinalPosition) {
+		t.Fatal("standing on the final point must not open the exit")
+	}
+	if err = board.SaveMap(InitialPosition, nil); err != nil {
+		t.Fatal(err)
+	}
+	before, _ := json.Marshal(board)
 	if err = board.SaveMap(InitialPosition, []int{BoardCells + 1}); err == nil {
 		t.Fatal("out of bounds visibility accepted")
 	}
@@ -152,6 +163,57 @@ func TestMemoirMapRejectsTeleportAndRepeatedBoxes(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// The exit's neighbours are the guardian and the last-column road, so the
+// stock walk reaches and stands on the final point without passing the
+// guardian. The exit is gated by GuardianWon (CanExit), not by topology.
+func TestMemoirExitIsGatedByTheGuardianFlagNotThePath(t *testing.T) {
+	catalog := sourceCatalog(t)
+	for seed := 0; seed < 100; seed++ {
+		board, err := catalog.NewBoard(catalog.Selected[seed%len(catalog.Selected)], seed%3+1, []int64{7, 8}, combat.NewStream(sha256.Sum256([]byte{byte(seed)})))
+		if err != nil {
+			t.Fatal(seed, err)
+		}
+		approach := FinalPosition - BoardColumns
+		if !reflect.DeepEqual(neighbors(FinalPosition), []int{GuardianPosition, approach}) {
+			t.Fatal("exit neighbours", seed, neighbors(FinalPosition))
+		}
+		if board.Cells[approach-1] != Road {
+			t.Fatal("stock road frame lost the exit approach", seed, approach)
+		}
+		if !board.reachable()[FinalPosition] || board.CanExit(FinalPosition) {
+			t.Fatal("stock walk stands on the exit; only CanExit gates it", seed)
+		}
+		if err = board.ClearEnemy(GuardianPosition); err != nil || !board.CanExit(FinalPosition) {
+			t.Fatal("guardian entitlement", seed, err)
+		}
+	}
+}
+
+func TestMemoirRefusalCausesNameTheBranch(t *testing.T) {
+	catalog := sourceCatalog(t)
+	board, err := catalog.NewBoard(catalog.Selected[0], 1, []int64{7}, combat.NewStream([32]byte{2}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	monster := 0
+	for index, kind := range board.Cells {
+		if kind == Monster {
+			monster = index + 1
+			break
+		}
+	}
+	if monster == 0 {
+		t.Fatal("no monster")
+	}
+	if err = board.SaveMap(monster, nil); !errors.Is(err, ErrRefused) || !strings.Contains(err.Error(), "not reachable") {
+		t.Fatal("unreachable move cause", err)
+	}
+	if err = board.SaveMap(InitialPosition, []int{BoardCells + 1}); !errors.Is(err, ErrInvalid) || !strings.Contains(err.Error(), "outside the reachable component") {
+		t.Fatal("opened cell cause", err)
+	}
+}
+
 func TestMemoirReviveAndAbandonKeepIndependentFacts(t *testing.T) {
 	catalog := sourceCatalog(t)
 	state := State{Occurrence: "run", Heroes: map[int64]combat.ActorStatus{8: {Identity: 8}}, MaxFloor: map[int64]int{catalog.Selected[0]: 2}, Sequence: 4}
