@@ -385,8 +385,10 @@ func (m *Materializer) RobotHeroForce(model string, tableID int64, level, star, 
 		if flag <= 0 {
 			continue
 		}
+		// A lineup robot carries flags borrowed from a source slot, so a slot
+		// this template does not equip at this colour contributes nothing.
 		if index >= len(current) || current[index] <= 0 {
-			return 0, ErrUnqualified
+			continue
 		}
 		slots = append(slots, Slot{ID: int64(current[index])})
 	}

@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	app "gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/identity"
+	n "gxb.local/backend/v2/internal/domain/statinputs"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -102,6 +103,71 @@ func TestI9_10TopFloorRobotRankBandNative(t *testing.T) {
 			t.Fatalf("rank 600 hero %d display %v want source %v", id, display, params)
 		}
 	}
+}
+
+// TestI9_10TopFloorRobotLineupForceNative resolves every banded rank through
+// the production materializer, so a lineup girl who borrows a source equip flag
+// for a slot her own colour row does not provide still yields a force.
+func TestI9_10TopFloorRobotLineupForceNative(t *testing.T) {
+	database := pool(t)
+	defer database.Close()
+	store := contentstore.Store{Queryer: database}
+	revision, err := store.ActiveRevision(ctx, database)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := store.TopFloorCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	inputs, err := store.StatInputCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	statRules, err := store.StatCatalogTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	materializer, err := n.New(revision, inputs, statRules)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lineups := map[string]bool{}
+	for rank := int64(1); rank <= catalog.RobotRankBands.MeetingRank; rank++ {
+		lineup, ok := catalog.RobotLineup(rank)
+		if !ok {
+			t.Fatalf("rank %d has no lineup", rank)
+		}
+		lineups[lineup.ID] = true
+		heroes, ok := catalog.RobotHeroesAt(d.RobotTeams+1-rank, rank)
+		if !ok {
+			t.Fatalf("rank %d robot heroes", rank)
+		}
+		for slot, hero := range heroes {
+			flags := equipFlags(t, hero)
+			force, err := materializer.RobotHeroForce("NormalHero", hero["table_id"].(int64), int(hero["lev"].(int64)), int(hero["star"].(int64)), int(hero["color"].(int64)), flags)
+			if err != nil || force <= 0 {
+				t.Fatalf("rank %d slot %d girl %d force %v err %v", rank, slot, hero["partner_id"], force, err)
+			}
+		}
+	}
+	if len(lineups) != len(catalog.RobotLineups.Lineups) {
+		t.Fatalf("walked %d lineups want %d", len(lineups), len(catalog.RobotLineups.Lineups))
+	}
+}
+
+func equipFlags(t *testing.T, hero map[string]any) []int64 {
+	t.Helper()
+	slots, ok := hero["equips"].([]any)
+	if !ok {
+		t.Fatalf("hero %v has no equip slots", hero["partner_id"])
+	}
+	flags := make([]int64, len(slots))
+	for i, slot := range slots {
+		flags[i] = slot.(int64)
+	}
+	return flags
 }
 
 func ranksOf(view app.ArenaView) []int64 {

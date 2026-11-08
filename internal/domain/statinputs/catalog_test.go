@@ -31,6 +31,24 @@ func materializer(t *testing.T) *n.Materializer {
 	}
 	return m
 }
+// A lineup girl borrows a source slot's equip flags, but only slots her own
+// colour row provides can be equipped; she shares this row with robot 10001214,
+// who has no slot-0 equipment in orange2.
+func TestRobotHeroForceSkipsSlotsTheTemplateLacks(t *testing.T) {
+	m := materializer(t)
+	flagged, e := m.RobotHeroForce("NormalHero", 10001214, 88, 3, 13, []int64{1, 1, 1, 1, 1, 1})
+	if e != nil || flagged <= 0 {
+		t.Fatalf("force %v err %v", flagged, e)
+	}
+	bare, e := m.RobotHeroForce("NormalHero", 10001214, 88, 3, 13, []int64{0, 0, 0, 0, 0, 0})
+	if e != nil || bare <= 0 {
+		t.Fatalf("bare force %v err %v", bare, e)
+	}
+	if flagged <= bare {
+		t.Fatalf("equipped force %v must exceed bare %v", flagged, bare)
+	}
+}
+
 func TestOriginalLuaRawSkillLevelBuffAndForcePaths(t *testing.T) {
 	m := materializer(t)
 	b, e := os.ReadFile("../../../testdata/sourcefacts/i7c3b_skill_input_vectors.json")
