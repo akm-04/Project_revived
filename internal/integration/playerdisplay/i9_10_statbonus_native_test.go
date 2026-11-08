@@ -28,6 +28,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	inscriptiondomain "gxb.local/backend/v2/internal/domain/inscription"
 	librarydomain "gxb.local/backend/v2/internal/domain/librarylocal"
 	spiritdomain "gxb.local/backend/v2/internal/domain/spirit"
 	"gxb.local/backend/v2/internal/domain/statinputs"
@@ -255,7 +256,46 @@ func r10SetInscription(t *testing.T, pool *pg.Pool, actor identity.ActorContext,
 	if !found || item.Position < 1 || item.Position > 3 || len(item.Battle) == 0 {
 		t.Fatal("Hero has no battle inscription source")
 	}
+	var slots [3]int64
+	slots[item.Position-1] = item.ID
+	r10SaveInscription(t, pool, actor, heroReference, catalog, slots)
+}
 
+func r10SetInscriptionSuit(t *testing.T, pool *pg.Pool, actor identity.ActorContext, revision string, heroReference character.HeroRef) {
+	t.Helper()
+	catalog, err := (contentstore.Store{Queryer: pool}).InscriptionCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var slots [3]int64
+	for _, row := range catalog.Tables["suits"] {
+		itemIDs, parseError := statinputs.Numbers(row["item_id"])
+		if parseError != nil {
+			t.Fatal(parseError)
+		}
+		var candidate [3]int64
+		distinctPositions := true
+		for _, rawID := range itemIDs {
+			item, found := catalog.Item(int64(rawID))
+			if !found || item.Position < 1 || item.Position > 3 || candidate[item.Position-1] != 0 {
+				distinctPositions = false
+				break
+			}
+			candidate[item.Position-1] = item.ID
+		}
+		if distinctPositions {
+			slots = candidate
+			break
+		}
+	}
+	if slots == [3]int64{} {
+		t.Fatal("inscription content has no position-distinct suit")
+	}
+	r10SaveInscription(t, pool, actor, heroReference, catalog, slots)
+}
+
+func r10SaveInscription(t *testing.T, pool *pg.Pool, actor identity.ActorContext, heroReference character.HeroRef, catalog inscriptiondomain.Catalog, slots [3]int64) {
+	t.Helper()
 	transaction, err := pool.Begin(ctx, tx.Options{})
 	if err != nil {
 		t.Fatal(err)
@@ -271,7 +311,7 @@ func r10SetInscription(t *testing.T, pool *pg.Pool, actor identity.ActorContext,
 	}
 	previousVersion := facts.Version
 	facts.Version++
-	facts.Facts.Slots[item.Position-1] = item.ID
+	facts.Facts.Slots = slots
 	if err = facts.Facts.Validate(catalog); err != nil {
 		t.Fatal(err)
 	}
@@ -566,6 +606,7 @@ func TestI9_10R10TopFloorPublicStatsResolverSourceParityNative(t *testing.T) {
 		{name: "dorm growth", mutate: r10SetDormGrowth, wantNonzero: true},
 		{name: "bookshelf", mutate: r10SetBookshelf, wantNonzero: true},
 		{name: "inscription", mutate: r10SetInscription, wantNonzero: true},
+		{name: "inscription suit", mutate: r10SetInscriptionSuit, wantNonzero: true},
 		{name: "Conquer School", mutate: r10SetConquerSchool, wantNonzero: true},
 		{name: "Spirit equipment and two-piece", mutate: r10SetSpirit, wantNonzero: true},
 		{name: "awakening", mutate: r10SetAwakening, wantNonzero: false},
