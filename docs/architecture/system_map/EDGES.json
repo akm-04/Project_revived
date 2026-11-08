@@ -1320,7 +1320,6 @@
    ],
    "mentor": [
     "*SettleGrantTx",
-    "StockMID369Rewards",
     "StockRepresentableBulkAwards"
    ],
    "missioninputs": [
@@ -4555,7 +4554,6 @@
    ],
    "i5": [
     "*SettleGrantTx",
-    "StockMID369Rewards",
     "StockRepresentableBulkAwards"
    ],
    "playerdirectory": [

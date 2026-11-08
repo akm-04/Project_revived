@@ -189,7 +189,8 @@ func TestI9_10FMentorGraduationExamAndClaim(t *testing.T) {
 	exec(t, p, `UPDATE player_directory_profiles SET lev=90 WHERE player_id=$1`, int64(student.PlayerID))
 
 	exam := expectMentorOK(t, mentorCall(t, service, student, 1863, map[string]any{"is_win": int64(1), "formation": "1|2|3"}), 1863)
-	if items, _ := exam["items"].([]map[string]any); len(items) != 3 {
+	items, _ := exam["items"].([]map[string]any)
+	if len(items) != 3 || items[0]["item_id"] == nil || items[0]["item_num"] == nil {
 		t.Fatalf("1863 items %#v", exam)
 	}
 	expectMentorRefusal(t, mentorCall(t, service, student, 1863, map[string]any{"is_win": int64(1), "formation": "1|2|3"}), 1863, 30005)

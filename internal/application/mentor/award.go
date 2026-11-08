@@ -273,13 +273,15 @@ func (service Service) Exam(ctx context.Context, actor identity.ActorContext, is
 		if plan.Validate() != nil {
 			return ErrInvalid
 		}
-		result, err := service.Grants.SettleGrantTx(ctx, t, actor, plan, op, i5.GrantTxOptions{AllowOverflowMail: true})
-		if err != nil {
+		if _, err := service.Grants.SettleGrantTx(ctx, t, actor, plan, op, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 			return err
 		}
 		items := make([]ExamItem, 0, len(catalog.Exam.Items))
+		// BattleCreate.lua STUDENT_OVER_FIGHT_RESULT loops items[].item_id/item_num.
+		wire := make([]map[string]any, 0, len(catalog.Exam.Items))
 		for _, item := range catalog.Exam.Items {
 			items = append(items, ExamItem{ItemID: item.ItemID, Quantity: item.Quantity})
+			wire = append(wire, map[string]any{"item_id": item.ItemID, "item_num": item.Quantity})
 		}
 		if err := service.Store.InsertExamReceiptTx(ctx, t, ExamReceipt{StudentID: actor.PlayerID, MissionID: mission.ID, RelationID: relation.ID, WonAt: at.UTC(), Items: items, Version: 1}); err != nil {
 			return err
@@ -287,7 +289,7 @@ func (service Service) Exam(ctx context.Context, actor identity.ActorContext, is
 		if _, _, err := completedMissionTx(ctx, t, service.Store, actor.PlayerID, mission, 1, at); err != nil {
 			return err
 		}
-		body = map[string]any{"items": i5.StockMID369Rewards(result.Awards)}
+		body = map[string]any{"items": wire}
 		return nil
 	})
 	if err != nil {
