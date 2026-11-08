@@ -181,6 +181,11 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if !slices.Contains(chosen, r.Enemy) || !sameGroup || locked {
 		return d.Match{}, d.ErrRefused
 	}
+	// Source message 30003 refuses a challenge against a low-point opponent;
+	// checked before admission so the refusal consumes no try.
+	if defender.Points < d.LowPointsChallengeFloor {
+		return d.Match{}, d.ErrOpponentLowPoints
+	}
 	// D488 parity: the issued list is not a reservation. If the challenger or the
 	// selected target moved to another rank since MATCH, answer with the stock
 	// rank-changed refusal instead of fighting a stale target.

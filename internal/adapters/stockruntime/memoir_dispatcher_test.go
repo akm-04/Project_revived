@@ -3,10 +3,13 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	application "gxb.local/backend/v2/internal/application/memoir"
 	"gxb.local/backend/v2/internal/domain/identity"
+	domain "gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"math"
+	"strings"
 	"testing"
 )
 
@@ -66,6 +69,67 @@ func TestMemoirStockMapReportBoundary(t *testing.T) {
 		t.Fatal("invalid report reached owner", probe.results)
 	}
 }
+
+type memoirRefusalProbe struct {
+	MemoirPort
+	err error
+}
+
+func (probe memoirRefusalProbe) PlayerFight(context.Context, identity.ActorContext, application.PlayerFight, operation.Context) (map[string]any, error) {
+	return nil, probe.err
+}
+
+func TestMemoirPlayerFightRefusalsAreCodedConflicts(t *testing.T) {
+	actor := actorForHTTP(t)
+	for _, test := range []struct {
+		name string
+		err  error
+		code int64
+	}{
+		{"expired", fmt.Errorf("%w: window ended", domain.ErrReportExpired), domain.ReportExpiredCode},
+		{"unavailable", fmt.Errorf("%w: resolver failed", domain.ErrFightUnavailable), domain.FightUnavailableCode},
+		{"refused", fmt.Errorf("%w: exit is closed", domain.ErrRefused), 1},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			dispatcher := MemoirDispatcher{Authority: httpAuthority{actor}, Service: memoirRefusalProbe{err: test.err}}
+			response := dispatcher.Dispatch(context.Background(), heroReq(t, 2311, map[string]any{"grid_pos": 4, "formation": "7", "pet_id": 0}))
+			if response.HTTPStatus != 409 || response.Body["error_code"] != test.code || response.Cause == nil {
+				t.Fatalf("response=%+v", response)
+			}
+		})
+	}
+}
+
+type memoirBranchProbe struct {
+	MemoirPort
+	saveCause  error
+	floorCause error
+}
+
+func (probe memoirBranchProbe) SaveMap(context.Context, identity.ActorContext, int, []int, operation.Context) (map[string]any, error) {
+	return nil, probe.saveCause
+}
+func (probe memoirBranchProbe) NextFloor(context.Context, identity.ActorContext, int, operation.Context) (map[string]any, error) {
+	return nil, probe.floorCause
+}
+
+// The journal cause column is what selects the 2306/2308 refusal branch; the
+// coded body alone cannot tell them apart.
+func TestMemoirSaveMapAndNextFloorKeepTheBranchCause(t *testing.T) {
+	actor := actorForHTTP(t)
+	saveCause := fmt.Errorf("%w: position 54 is not reachable from 12", domain.ErrRefused)
+	floorCause := fmt.Errorf("%w: exit at 54 is closed (guardian_won=false)", domain.ErrRefused)
+	dispatcher := MemoirDispatcher{Authority: httpAuthority{actor}, Service: memoirBranchProbe{saveCause: saveCause, floorCause: floorCause}}
+	saved := dispatcher.Dispatch(context.Background(), heroReq(t, 2306, map[string]any{"now_pos": 54, "open_grids": []any{}}))
+	if saved.HTTPStatus != 409 || saved.Body["error_code"] != int64(1) || !strings.Contains(fmt.Sprint(saved.Cause), "position 54 is not reachable from 12") {
+		t.Fatalf("save response=%+v", saved)
+	}
+	floor := dispatcher.Dispatch(context.Background(), heroReq(t, 2308, map[string]any{"grid_pos": 54}))
+	if floor.HTTPStatus != 409 || floor.Body["error_code"] != int64(1) || !strings.Contains(fmt.Sprint(floor.Cause), "exit at 54 is closed") {
+		t.Fatalf("floor response=%+v", floor)
+	}
+}
+
 func TestMemoirOpenGridBoundary(t *testing.T) {
 	for _, raw := range []any{nil, "1|2", []any{1, 1}, []any{55}, []any{1.5}, map[string]any{"1": true}} {
 		if _, valid := memoirOpened(raw); valid {

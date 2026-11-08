@@ -53,7 +53,7 @@ type Command struct {
 func (c Command) Validate() error {
 	switch c.Family {
 	case Start, Cancel, Speed, Confirm:
-		if c.Type != 1 && c.Type != 3 && c.Type != 4 {
+		if c.Type != 1 && c.Type != 3 && c.Type != 4 && !book.ExtensionBuilding(c.Type) {
 			return book.ErrInvalid
 		}
 	case Learn, GiveUp, SpeedSkill:

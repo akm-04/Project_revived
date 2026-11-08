@@ -10,6 +10,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -140,6 +141,11 @@ func (s Service) ApplyAwakeningHeroLockedTx(c context.Context, t tx.Tx, h appi5.
 	}
 	if e := s.Awakening.SaveHeroAwakeningTx(c, t, next, h.Hero.StateVersion); e != nil {
 		return h, e
+	}
+	if next.TableID != h.Hero.TableID {
+		if e := s.recordHeroJournalTx(c, t, next.PlayerID, next.PartnerID, lib.LogAwakened, at); e != nil {
+			return h, e
+		}
 	}
 	h.Hero = next
 	return h, nil

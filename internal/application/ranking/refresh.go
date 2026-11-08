@@ -32,6 +32,9 @@ var boardReceipts = map[string]boardReceipt{
 	d.AchievementPointPolicy: {metricPin: "force-metric", refreshClass: "I7C4FA_AP_RANKING_REFRESH", settlementClass: "I7C4FA_AP_RANKING_WEEKLY_TITLES"},
 	d.SkinsPolicy:            {metricPin: "skin-metric", refreshClass: "I7C4FC_SKINS_RANKING_REFRESH", settlementClass: "I7C4FC_SKINS_RANKING_WEEKLY_TITLES"},
 	d.DormComfortPolicy:      {metricPin: "comfort-metric", refreshClass: "I9_10C_DORM_COMFORT_RANKING_REFRESH", settlementClass: "I9_10C_DORM_COMFORT_RANKING_WEEKLY_TITLES"},
+	d.StarCountPolicy:        {metricPin: "roster-metrics", refreshClass: "I9_10D_STAR_COUNT_RANKING_REFRESH", settlementClass: "I9_10D_STAR_COUNT_RANKING_WEEKLY_TITLES"},
+	d.AwakenCountPolicy:      {metricPin: "roster-metrics", refreshClass: "I9_10D_AWAKEN_COUNT_RANKING_REFRESH", settlementClass: "I9_10D_AWAKEN_COUNT_RANKING_WEEKLY_TITLES"},
+	d.TopForcePolicy:         {metricPin: "top-force-metric", refreshClass: "I9_10E_TOP_FIVE_FORCE_RANKING_REFRESH", settlementClass: "I9_10E_TOP_FIVE_FORCE_RANKING_WEEKLY_TITLES"},
 }
 
 func refreshSchema(b d.Board) string { return "gxb.ranking." + b.Name + "-refresh.v1" }
@@ -49,9 +52,23 @@ func refreshFingerprint(b d.Board, a identity.ActorContext) ([32]byte, error) {
 	return receipt.FingerprintRequest(map[string]any{"player": int64(a.PlayerID), "server": int64(a.LogicalServerID), "subtype": b.SubType, "policy": b.Policy})
 }
 
+func boardMetricOf(m publicprofile.MetricObservation) d.BoardMetric {
+	return d.BoardMetric{Player: m.PlayerID, Owner: m.Owner, Policy: m.PrivatePolicy, Semantics: m.Semantics, Revision: m.ContentRevision, PopulationDigest: m.PopulationDigest, FieldID: m.FieldID, Value: m.Value, SourceVersion: m.SourceVersion, PopulationVersion: m.PopulationVersion, ObservedAt: m.ObservedAt}
+}
+
 // boardMetric reads one score from its owner. Zero Player marks a subject with
 // no owned fact, which is skipped rather than ranked as an invented zero.
 func (s Service) boardMetric(c context.Context, b d.Board, scope tx.Scope, player identity.PlayerID, rev string, at time.Time) (d.BoardMetric, error) {
+	if b.Policy == d.TopForcePolicy {
+		if s.TopForce == nil {
+			return d.BoardMetric{}, ErrUnavailable
+		}
+		m, e := s.TopForce.ReadTopForceMetricScopeTx(c, scope, publicprofile.MetricRequest{PlayerID: player, IDs: []int64{b.FieldID}, ContentRevision: rev, ObservedAt: at})
+		if e != nil {
+			return d.BoardMetric{}, e
+		}
+		return boardMetricOf(m), nil
+	}
 	if b.Policy != d.DormComfortPolicy {
 		ms, e := s.Metrics.ReadMetricsScopeTx(c, scope, publicprofile.MetricRequest{PlayerID: player, IDs: []int64{b.FieldID}, ContentRevision: rev, ObservedAt: at})
 		if e != nil {
@@ -60,8 +77,7 @@ func (s Service) boardMetric(c context.Context, b d.Board, scope tx.Scope, playe
 		if len(ms) != 1 {
 			return d.BoardMetric{}, ErrUnavailable
 		}
-		m := ms[0]
-		return d.BoardMetric{Player: m.PlayerID, Owner: m.Owner, Policy: m.PrivatePolicy, Semantics: m.Semantics, Revision: m.ContentRevision, PopulationDigest: m.PopulationDigest, FieldID: m.FieldID, Value: m.Value, SourceVersion: m.SourceVersion, PopulationVersion: m.PopulationVersion, ObservedAt: m.ObservedAt}, nil
+		return boardMetricOf(ms[0]), nil
 	}
 	if s.Comfort == nil {
 		return d.BoardMetric{}, ErrUnavailable

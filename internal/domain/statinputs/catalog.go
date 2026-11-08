@@ -5,10 +5,12 @@ package statinputs
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	rules "gxb.local/backend/v2/internal/domain/statrules"
 	"math"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const PolicyID = "C3B_SRC64_NUMERIC_INPUT_V1"
@@ -302,6 +304,7 @@ type Materializer struct {
 	Inputs    Catalog
 	Rules     rules.Catalog
 	Engine    *rules.Engine
+	revision  string
 	templates map[int64]rules.Template
 	skills    map[int64]map[string]string
 	weights   [49]float64
@@ -320,7 +323,7 @@ func New(rev string, c Catalog, r rules.Catalog) (*Materializer, error) {
 	if err = json.Unmarshal(raw, &own); err != nil {
 		return nil, err
 	}
-	m := &Materializer{Inputs: c, Rules: own, Engine: e, templates: map[int64]rules.Template{}, skills: map[int64]map[string]string{}}
+	m := &Materializer{Inputs: c, Rules: own, Engine: e, revision: rev, templates: map[int64]rules.Template{}, skills: map[int64]map[string]string{}}
 	for _, t := range own.Templates {
 		m.templates[t.ID] = t
 	}
@@ -358,6 +361,61 @@ func (m *Materializer) BaseGrowth(id int64, star, level int) (Vector, error) {
 		v[i] = n * float64(level)
 	}
 	return v, nil
+}
+
+// RobotHeroForce is the canonical getZhandouli of an unowned source template:
+// basic growth, colour promotion, the equipped slots of the current colour and
+// default skill levels. Owned-only inputs (book, dorm, practice, inscription,
+// element, spirit, evolution, course, conquer, feed, album) are genuinely
+// absent for a mode robot, so their leaves are explicit zeros.
+func (m *Materializer) RobotHeroForce(model string, tableID int64, level, star, color int, equipFlags []int64) (float64, error) {
+	if m == nil || (model != "NormalHero" && model != "SuperHero") || tableID <= 0 || level < 1 || star < 1 || color < 1 || color > len(colors) {
+		return 0, ErrUnqualified
+	}
+	row, err := m.Inputs.Row(table(model), tableID)
+	if err != nil {
+		return 0, err
+	}
+	current, err := Numbers(row[colors[color-1]])
+	if err != nil {
+		return 0, err
+	}
+	slots := []Slot{}
+	for index, flag := range equipFlags {
+		if flag <= 0 {
+			continue
+		}
+		if index >= len(current) || current[index] <= 0 {
+			return 0, ErrUnqualified
+		}
+		slots = append(slots, Slot{ID: int64(current[index])})
+	}
+	equip, promotion, fumo, err := m.Inputs.Equipment(model, tableID, color, slots)
+	if err != nil {
+		return 0, err
+	}
+	raw := [6]int64{1, 1, 1, 1, 1, 1}
+	skillAttrs, skillForce, err := m.SkillNumbers(SkillState{Model: model, TemplateID: tableID, Level: level, Star: star, Color: color, Raw: raw})
+	if err != nil {
+		return 0, err
+	}
+	actor := fmt.Sprintf("TEMPLATE/%s/%d/%d/%d/%d", model, tableID, level, star, color)
+	zeros := Vector{}.Map()
+	zeros[0] = 0
+	in := map[string]rules.Observation{}
+	for _, name := range m.Engine.LeafNames(model) {
+		in[name] = rules.Observation{Reference: actor, Values: zeros}
+	}
+	for name, vector := range map[string]Vector{"getEquipAttr": equip, "getJinjieEquipAttr": promotion, "getEquipFumoAttr": fumo, "getSkillAttr": skillAttrs} {
+		in[name] = rules.Observation{Reference: actor, Values: vector.Map()}
+	}
+	in["getSkillForce"] = rules.Observation{Reference: actor, Values: map[int]float64{0: skillForce}}
+	result, err := m.Engine.Evaluate(rules.Snapshot{Model: model, TemplateID: tableID, Level: level, Star: star, Color: color, ActorReference: actor,
+		ObservationID: "TEMPLATE_FORCE", ContentRevision: m.revision, PolicyID: rules.PolicyID, ObservedAt: time.Unix(0, 0).UTC(), Inputs: in})
+	if err != nil {
+		return 0, err
+	}
+	return result.Force, nil
 }
 
 type SkillState struct {

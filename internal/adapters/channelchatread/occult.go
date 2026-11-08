@@ -10,7 +10,6 @@ import (
 	app "gxb.local/backend/v2/internal/application/occult"
 	ar "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/occult"
-	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -20,7 +19,7 @@ type OccultRoomReader struct {
 	Store sharedroomstore.Store
 }
 
-func (r OccultRoomReader) ReadOccultTx(c context.Context, t tx.Tx, _ ar.Admission, _ time.Time, selection channelchat.RoomSelection) (channelchat.Owned[channelchat.Occult], error) {
+func (r OccultRoomReader) ReadOccultTx(c context.Context, t tx.Tx, a ar.Admission, _ time.Time, selection channelchat.RoomSelection) (channelchat.Owned[channelchat.Occult], error) {
 	if t == nil || selection.RoomID <= 0 {
 		return channelchat.Owned[channelchat.Occult]{}, channelchat.ErrInvalidStructured
 	}
@@ -28,7 +27,7 @@ func (r OccultRoomReader) ReadOccultTx(c context.Context, t tx.Tx, _ ar.Admissio
 	if err != nil {
 		return channelchat.Owned[channelchat.Occult]{}, err
 	}
-	if !found || room.Family != app.RoomFamily || room.Slot != app.RoomSlot || room.Status != sharedroom.StatusOpen {
+	if !found || room.Family != app.RoomFamily || room.Slot != app.RoomSlot || !shareableRoom(room, a) {
 		return channelchat.Owned[channelchat.Occult]{}, channelchat.ErrInvalidStructured
 	}
 	state, err := d.LoadRunState(room.Payload)

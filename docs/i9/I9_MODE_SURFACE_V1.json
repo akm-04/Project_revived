@@ -62,8 +62,8 @@
    "name": "LOAD_GM_QUESTIONS",
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
-   "target": "I9-11",
-   "v2": "unimplemented",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -71,8 +71,8 @@
    "name": "ASK_GM_QUESTION",
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
-   "target": "I9-11",
-   "v2": "unimplemented",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": null
   },
   {

@@ -436,7 +436,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	if e != nil || actual.TableID != 110010001 {
 		t.Fatal("same pet awakening persisted", actual, e)
 	}
-	board, e := s.RankList(ctx, a, op())
+	board, e := s.RankList(ctx, a, 22, op())
 	if e != nil || len(board["rank_list"].([]map[string]any)) != 1 {
 		t.Fatal("rank22", board, e)
 	}

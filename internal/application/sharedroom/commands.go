@@ -13,12 +13,15 @@ import (
 )
 
 // OpenRequest creates a room. Capacity and Lease are family policy, and Payload
-// is the family's opaque room state.
+// is the family's opaque room state. Apply, when set, completes the payload
+// inside the create transaction after the room id exists; a failure there
+// leaves no room.
 type OpenRequest struct {
 	Family   Family
 	Capacity int64
 	Lease    time.Duration
 	Payload  json.RawMessage
+	Apply    func(context.Context, gen.TimedScope, *d.Room) error
 }
 
 // LeaveResult reports the room after the leave; Closed says whether that leave
@@ -59,6 +62,17 @@ func (s Service) Open(c context.Context, actor identity.ActorContext, request Op
 		if err != nil {
 			return err
 		}
+		if request.Apply != nil {
+			before := stored.StateVersion
+			if err := request.Apply(c, sc, &stored); err != nil {
+				return err
+			}
+			if stored.StateVersion != before {
+				if err := s.Store.SaveRoomTx(c, sc.Tx, stored); err != nil {
+					return err
+				}
+			}
+		}
 		if err := s.Store.WakeRoomTx(c, sc.Tx, stored.ID, request.Family.Route); err != nil {
 			return err
 		}
@@ -68,9 +82,18 @@ func (s Service) Open(c context.Context, actor identity.ActorContext, request Op
 	return room, err
 }
 
+// JoinRequest takes a seat by room id. Apply, when set, completes the family
+// payload inside the join transaction, so a failed family step leaves no seat.
+type JoinRequest struct {
+	Family Family
+	RoomID int64
+	Apply  func(context.Context, gen.TimedScope, *d.Room) error
+}
+
 // Join admits the actor by room id. Membership is idempotent; a kicked player
 // is refused for the lifetime of that room.
-func (s Service) Join(c context.Context, actor identity.ActorContext, family Family, roomID int64, op operation.Context) (d.Room, error) {
+func (s Service) Join(c context.Context, actor identity.ActorContext, request JoinRequest, op operation.Context) (d.Room, error) {
+	family, roomID := request.Family, request.RoomID
 	if err := family.validate(); err != nil {
 		return d.Room{}, err
 	}
@@ -107,6 +130,11 @@ func (s Service) Join(c context.Context, actor identity.ActorContext, family Fam
 		before := locked.StateVersion
 		if err := locked.Join(actor.PlayerID, at); err != nil {
 			return err
+		}
+		if request.Apply != nil {
+			if err := request.Apply(c, sc, &locked); err != nil {
+				return err
+			}
 		}
 		if err := s.saveAndWake(c, sc.Tx, locked, before, family.Route); err != nil {
 			return err

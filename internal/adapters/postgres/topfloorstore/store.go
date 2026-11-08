@@ -190,12 +190,13 @@ type playerRow struct {
 	DefenseSetAt    *time.Time               `json:"defense_set_at"`
 	Fights          int64                    `json:"fights"`
 	Wins            int64                    `json:"wins"`
+	WinStreak       int64                    `json:"win_streak"`
 	StateVersion    int64                    `json:"version"`
 	CreatedAt       time.Time                `json:"created_at"`
 	UpdatedAt       time.Time                `json:"updated_at"`
 }
 
-const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'best_rank',best_rank,'ticket_day',ticket_day,'tickets_left',tickets_left,'purchases',purchases,'last_match_at',last_match_at,'refresh_count',refresh_count,'offered_day',offered_day,'offered',offered,'defense',defense,'defense_pet',defense_pet,'defense_set_at',defense_set_at,'fights',fights,'wins',wins,'version',state_version,'created_at',created_at,'updated_at',updated_at)::text`
+const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'best_rank',best_rank,'ticket_day',ticket_day,'tickets_left',tickets_left,'purchases',purchases,'last_match_at',last_match_at,'refresh_count',refresh_count,'offered_day',offered_day,'offered',offered,'defense',defense,'defense_pet',defense_pet,'defense_set_at',defense_set_at,'fights',fights,'wins',wins,'win_streak',win_streak,'version',state_version,'created_at',created_at,'updated_at',updated_at)::text`
 
 func (Store) ReadPlayerTx(c context.Context, q tx.Queryer, pid identity.PlayerID, lock bool) (d.Player, bool, error) {
 	sql := `SELECT ` + playerObject + ` FROM top_floor_players WHERE player_id=$1`
@@ -287,8 +288,8 @@ func (Store) InsertPlayerTx(c context.Context, t tx.Tx, p d.Player) error {
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `INSERT INTO top_floor_players(player_id,logical_server_id,content_revision,best_rank,ticket_day,tickets_left,purchases,last_match_at,refresh_count,offered_day,offered,defense,defense_pet,defense_set_at,fights,wins,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15,$16,1,$17,$17)`,
-		int64(p.PlayerID), int64(p.Server), p.ContentRevision, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.CreatedAt))
+	return one(t.Exec(c, `INSERT INTO top_floor_players(player_id,logical_server_id,content_revision,best_rank,ticket_day,tickets_left,purchases,last_match_at,refresh_count,offered_day,offered,defense,defense_pet,defense_set_at,fights,wins,win_streak,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15,$16,$17,1,$18,$18)`,
+		int64(p.PlayerID), int64(p.Server), p.ContentRevision, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.WinStreak, p.CreatedAt))
 }
 
 func (Store) SavePlayerTx(c context.Context, t tx.Tx, p d.Player, old int64) error {
@@ -299,8 +300,8 @@ func (Store) SavePlayerTx(c context.Context, t tx.Tx, p d.Player, old int64) err
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `UPDATE top_floor_players SET best_rank=$3,ticket_day=$4,tickets_left=$5,purchases=$6,last_match_at=$7,refresh_count=$8,offered_day=$9,offered=$10::jsonb,defense=$11::jsonb,defense_pet=$12,defense_set_at=$13,fights=$14,wins=$15,state_version=$16,updated_at=$17 WHERE player_id=$1 AND state_version=$2`,
-		int64(p.PlayerID), old, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.StateVersion, p.UpdatedAt))
+	return one(t.Exec(c, `UPDATE top_floor_players SET best_rank=$3,ticket_day=$4,tickets_left=$5,purchases=$6,last_match_at=$7,refresh_count=$8,offered_day=$9,offered=$10::jsonb,defense=$11::jsonb,defense_pet=$12,defense_set_at=$13,fights=$14,wins=$15,win_streak=$16,state_version=$17,updated_at=$18 WHERE player_id=$1 AND state_version=$2`,
+		int64(p.PlayerID), old, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.WinStreak, p.StateVersion, p.UpdatedAt))
 }
 
 type fightRow struct {

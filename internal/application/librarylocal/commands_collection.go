@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	"gxb.local/backend/v2/internal/application/broadcast"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -31,6 +32,12 @@ func (s Service) claimCGTx(ctx context.Context, t tx.Tx, a identity.ActorContext
 	result, e := s.Grants.SettleGrantTx(ctx, t, a, plan, d.Operation, i5.GrantTxOptions{AllowOverflowMail: true})
 	if e != nil {
 		return nil, e
+	}
+	if s.Broadcast != nil {
+		message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.UnlockCG, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{CGID: rule.ID}}
+		if e = s.Broadcast.EmitTx(ctx, t, message); e != nil {
+			return nil, e
+		}
 	}
 	return result.Awards, nil
 }

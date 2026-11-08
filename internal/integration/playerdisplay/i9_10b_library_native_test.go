@@ -150,7 +150,7 @@ func TestI9_10BLibrary836FullPayload(t *testing.T) {
 		t.Fatalf("favor row %+v", row)
 	}
 	dialogs, ok := row["partner_dialogs"].([]app.DialogRow)
-	if !ok || len(dialogs) != 2 {
+	if !ok || len(dialogs) != 3 {
 		t.Fatalf("partner_dialogs %T %+v", row["partner_dialogs"], row["partner_dialogs"])
 	}
 	if opened := dialogs[0]; opened.DialogID != int64(1) || opened.IsRead != int64(0) || opened.IsAwarded != int64(0) || opened.SelectID != int64(0) {
@@ -159,6 +159,9 @@ func TestI9_10BLibrary836FullPayload(t *testing.T) {
 	dialog := dialogs[1]
 	if dialog.DialogID != int64(3) || dialog.IsRead != int64(1) || dialog.IsAwarded != int64(1) || dialog.SelectID != int64(9) {
 		t.Fatalf("dialog row %+v", dialog)
+	}
+	if dialogs[2].DialogID != int64(12) {
+		t.Fatalf("act 1 dialog missing %+v", dialogs)
 	}
 	missions, ok := row["partner_missions"].([]any)
 	if !ok || len(missions) != 1 {
@@ -169,16 +172,19 @@ func TestI9_10BLibrary836FullPayload(t *testing.T) {
 		t.Fatalf("mission row %+v", mission)
 	}
 	acts, ok := row["partner_acts"].([]app.ActSlot)
-	if !ok || len(acts) != lib.ActCount {
+	if !ok || len(acts) != 1 {
 		t.Fatalf("partner_acts %T %+v", row["partner_acts"], row["partner_acts"])
 	}
-	for i, want := range []int64{0, 1, 0, 0} {
-		if got := acts[i].IsAwarded; got != want {
-			t.Fatalf("act %d is_awarded %v want %d", i+1, got, want)
-		}
+	if acts[0].IsAwarded != int64(0) {
+		t.Fatalf("act 1 is_awarded %v", acts[0].IsAwarded)
 	}
-	if logs, ok := row["partner_logs"].(map[string]any); !ok || len(logs) != 0 {
+	// The fresh facet records the acquisition milestone (type 1).
+	logs, ok := row["partner_logs"].(map[string]any)
+	if !ok || len(logs) != 1 {
 		t.Fatalf("partner_logs %T %+v", row["partner_logs"], row["partner_logs"])
+	}
+	if _, present := logs["10001"]; !present {
+		t.Fatalf("acquisition log missing %+v", logs)
 	}
 	talks, ok := body["library_talk_infos"].(map[string]any)
 	if !ok || len(talks) != 23 || talks["1001"] != int64(1) || talks["1002"] != int64(0) {

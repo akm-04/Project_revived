@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00143_i9_10_task_operator_bans.sql",
+  "highest_migration": "00156_i9_10_broadcast_outbox.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -131,8 +131,14 @@
     "00135_i9_10_oneonone_offer_snapshot.sql": "829a770e13d2a0a0a6cc17ee142f5199f3534c27a6455b3359b627f4b5e9036c",
     "00136_i9_10_task_human_ladder.sql": "55b6620bd098548c70aa73fb88638c0f78179ac585fdfe839876388a4ed58da5",
     "00137_i9_10f_mentor.sql": "f17a5762fb11014bc2a4004d3ed5539c8d7ef5db81179418a994e020661bc8f9",
+    "00138_i9_10a_event_centre.sql": "cf2f39e518a4a5df37e87aa476e6a8c82d8d78e5ae90dad8da4a79469d57d1e7",
     "00141_i9_10_dorm_recent_visit.sql": "9e2dc165182f7ecb9af0ed00582010d9596dfcc71b8d62bc5a8a33b77895e891",
-    "00143_i9_10_task_operator_bans.sql": "fd88eee059b6148ad1ae475035245912543e02ae4fcee7ada0fb00ca565f7980"
+    "00143_i9_10_task_operator_bans.sql": "fd88eee059b6148ad1ae475035245912543e02ae4fcee7ada0fb00ca565f7980",
+    "00150_i9_10a_notice_board_reports.sql": "8f460b5acda5e81c36ac92a400d13aeca3dad5a9351f6743b595987304a94fef",
+    "00151_i9_10_intimacy_hero_logs.sql": "77afa242ec73d5d647e899b7946ae3c899b5635bd324e1b11c91ec21a88e44c7",
+    "00154_i9_10_gm_questions.sql": "b0867a018ae9ae31a95ef9e254d2f9dbfd953a105af59f53371944af684b9d00",
+    "00155_i9_10_topfloor_win_streak.sql": "dfb7d7258f4ec24b9a54256221ddccf8422d89b764cf5b6ff86889871e8779cf",
+    "00156_i9_10_broadcast_outbox.sql": "2ce70f43974e85a2e7ec6fdc618af214f66c719b1bafb48bff03afe56a6cb056"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,

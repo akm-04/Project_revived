@@ -9,7 +9,7 @@ type fixedRandom uint64
 
 func (r fixedRandom) Uniform(n uint64) uint64 { return uint64(r) % n }
 func testCatalog() Catalog {
-	c := Catalog{Schema: 1, Contract: ContractID, PolicyID: PolicyID, PolicySHA: strings.Repeat("a", 64), Policy: Policy{SuperChance: 100, ManaPerLevel: 1000, MarchCoin: 20, Reagents: 1, ResultWindow: 600, CandidateLimit: 200}, Pools: map[string][][3]int64{}, Misc: map[string]string{}, Milestones: []int64{600, 780, 960, 1140}}
+	c := Catalog{Schema: 1, Contract: ContractID, PolicyID: PolicyID, PolicySHA: strings.Repeat("a", 64), Policy: Policy{SuperChance: 100, ManaPerLevel: 1000, MarchCoin: 20, Reagents: 1, ResultWindow: 600, CandidateLimit: 200, RivalForceTolerance: 500, RivalScaleMinLevel: 1, RivalScaleMinColor: 1, RivalScaleMinStar: 1}, Pools: map[string][][3]int64{}, Misc: map[string]string{}, Milestones: []int64{600, 780, 960, 1140}}
 	for key, n := range map[string]int{"130001": 1, "130002": 1, "130003": 1, "130004": 1, "200012": 226, "200013": 64, "200015": 165, "200016": 40} {
 		rows := make([][3]int64, n)
 		for i := range rows {

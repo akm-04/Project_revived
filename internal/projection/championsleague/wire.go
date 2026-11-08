@@ -71,7 +71,7 @@ func Fight(v d.Reply) map[string]any {
 	}
 	return map[string]any{"self_formation": m.SelfRows, "enemy_formation": enemy, "battle_report": report(v.Report), "report_key": key, "is_win": flag(m.Win), "partner_favor": map[string]any{}, "award_crystal": int64(0), "items": []any{}}
 }
-func RecordRows(records []d.Match, self identity.PlayerID) map[string]any {
+func RecordRows(records []d.Match, self identity.PlayerID) []map[string]any {
 	out := []map[string]any{}
 	for _, m := range records {
 		attack := m.Attacker == self
@@ -90,7 +90,7 @@ func RecordRows(records []d.Match, self identity.PlayerID) map[string]any {
 		}
 		out = append(out, row)
 	}
-	return map[string]any{"records": out, "reports": map[string]any{}}
+	return out
 }
 func Report(raw []byte) map[string]any {
 	if len(raw) == 0 {

@@ -640,7 +640,10 @@ func (s Service) applyRanked(c context.Context, sc gen.TimedScope, catalog d.Cat
 			return err
 		}
 	}
-	return s.Achievements.ObserveArenaWinStreakTx(c, sc.Tx, m.Attacker, revision, attacker.KeepWin, at)
+	if err := s.Achievements.ObserveArenaWinStreakTx(c, sc.Tx, m.Attacker, revision, attacker.KeepWin, at); err != nil {
+		return err
+	}
+	return nil
 }
 
 // close ends a match whose battle can no longer produce a result; the attempt

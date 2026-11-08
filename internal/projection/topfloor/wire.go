@@ -137,6 +137,23 @@ func Records(records []Record) map[string]any {
 	return map[string]any{"records": rows}
 }
 
+// RecordReplay is LOAD_ARENA_FIGHT_RECORDS with fighter_id and id: the client
+// reads the single record object from records and opens arena_share.
+func RecordReplay(record d.Record, self, opponent d.Display, raw []byte) map[string]any {
+	if record.ID == 0 {
+		return map[string]any{"records": map[string]any{}}
+	}
+	attacker, defender := self, opponent
+	if !record.Attack {
+		attacker, defender = opponent, self
+	}
+	return map[string]any{"records": map[string]any{
+		"report": report(raw), "is_attack": flag(record.Attack), "win": flag(record.Win),
+		"attack_name": attacker.Name, "attack_lev": attacker.Level, "attack_avatar": attacker.AvatarID, "attack_avatar_frame": attacker.FrameID,
+		"defend_name": defender.Name, "defend_lev": defender.Level, "defend_avatar": defender.AvatarID, "defend_avatar_frame": defender.FrameID,
+	}}
+}
+
 func RecordInfo(v d.Display, canAvenge bool, avengeType int64) map[string]any {
 	row := Enemy(v)
 	row["can_avenge"], row["avenge_type"], row["is_robot"] = flag(canAvenge), avengeType, v.Occupant.IsRobot()

@@ -86,8 +86,9 @@ func TestI9_10B838DialogArrayAnd837ReadFlag(t *testing.T) {
 	if response.HTTPStatus != 200 {
 		t.Fatalf("838 status %d body %+v", response.HTTPStatus, response.Body)
 	}
+	// Act 1 is open in the [0,100] band, so its type-5 dialog 12 is open too.
 	rows := libraryDialogRows(t, response.Body)
-	if len(rows) != 1 || rows[0]["dialog_id"] != int64(1) || rows[0]["is_read"] != int64(0) || rows[0]["is_awarded"] != int64(0) || rows[0]["select_id"] != int64(0) {
+	if len(rows) != 2 || rows[0]["dialog_id"] != int64(1) || rows[1]["dialog_id"] != int64(12) || rows[0]["is_read"] != int64(0) || rows[0]["is_awarded"] != int64(0) || rows[0]["select_id"] != int64(0) {
 		t.Fatalf("opened dialogs at zero favor %+v", rows)
 	}
 
@@ -108,7 +109,7 @@ func TestI9_10B838DialogArrayAnd837ReadFlag(t *testing.T) {
 
 	response = libraryCall(t, p, a, 838, map[string]any{"partner_id": int64(1)})
 	rows = libraryDialogRows(t, response.Body)
-	if len(rows) != 1 || rows[0]["is_read"] != int64(1) {
+	if len(rows) != 2 || rows[0]["is_read"] != int64(1) || rows[1]["dialog_id"] != int64(12) {
 		t.Fatalf("838 after read %+v", rows)
 	}
 
@@ -170,38 +171,32 @@ func TestI9_10B842ActSlotsAnd844OnceOnly(t *testing.T) {
 	if response.HTTPStatus != 200 {
 		t.Fatalf("842 status %d body %+v", response.HTTPStatus, response.Body)
 	}
+	// Favor 0 is the [0,100] band, so only act 1 is addressable.
 	acts, ok := response.Body["partner_acts"].([]app.ActSlot)
-	if !ok || len(acts) != 4 {
+	if !ok || len(acts) != 1 {
 		t.Fatalf("partner_acts %T %+v", response.Body["partner_acts"], response.Body["partner_acts"])
 	}
-	for i, act := range acts {
-		if act.IsAwarded != int64(0) {
-			t.Fatalf("act %d awarded at zero favor", i+1)
-		}
+	if acts[0].IsAwarded != int64(0) {
+		t.Fatalf("act 1 awarded at zero favor")
 	}
 
-	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
-		t.Fatalf("locked act status %d body %+v", response.HTTPStatus, response.Body)
-	}
-
-	setLibraryFavor(t, p, a, 1, 100)
 	awardOperation := op()
 	response = libraryDispatch(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)}, awardOperation)
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(105) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(5) {
 		t.Fatalf("act award status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatch(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)}, awardOperation)
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(105) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(5) {
 		t.Fatalf("act award replay status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
 	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
 		t.Fatalf("second act award status %d body %+v", response.HTTPStatus, response.Body)
 	}
+	setLibraryFavor(t, p, a, 1, 100)
 	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(2)})
 	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
-		t.Fatalf("act 2 before favor 300 status %d body %+v", response.HTTPStatus, response.Body)
+		t.Fatalf("act 2 at the 100 band edge status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(5)})
 	if response.HTTPStatus != 400 {
@@ -216,7 +211,10 @@ func TestI9_10B842ActSlotsAnd844OnceOnly(t *testing.T) {
 
 	response = libraryCall(t, p, a, 842, map[string]any{"partner_id": int64(1)})
 	acts = response.Body["partner_acts"].([]app.ActSlot)
-	for i, want := range []int64{1, 1, 0, 0} {
+	if len(acts) != 3 {
+		t.Fatalf("acts at favor 305 %+v", acts)
+	}
+	for i, want := range []int64{1, 1, 0} {
 		if got := acts[i].IsAwarded; got != want {
 			t.Fatalf("act %d is_awarded %v want %d", i+1, got, want)
 		}
@@ -268,7 +266,7 @@ func TestI9_10B836And838ShareDialogProjection(t *testing.T) {
 	if !reflect.DeepEqual(from836, response.Body["partner_dialogs"]) {
 		t.Fatalf("836 %+v differs from 838 %+v", from836, response.Body["partner_dialogs"])
 	}
-	if len(from836) != 2 || from836[0].DialogID != int64(1) || from836[1].DialogID != int64(3) {
+	if len(from836) != 3 || from836[0].DialogID != int64(1) || from836[1].DialogID != int64(3) || from836[2].DialogID != int64(12) {
 		t.Fatalf("sorted dialog union %+v", from836)
 	}
 	stored, e := store.ListDialogsTx(ctx, p, a.PlayerID)
@@ -325,11 +323,12 @@ func TestI9_10B840PostGiftProjectionAndExactRetry(t *testing.T) {
 	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(113) {
 		t.Fatalf("840 status %d body %+v", response.HTTPStatus, response.Body)
 	}
+	// Favor 113 opens type-2 dialog 2 and the act 1/2 dialogs 12 and 13.
 	dialogs, ok := response.Body["partner_dialogs"].([]app.DialogRow)
-	if !ok || len(dialogs) != 3 {
+	if !ok || len(dialogs) != 4 {
 		t.Fatalf("post-gift dialogs %T %+v", response.Body["partner_dialogs"], response.Body["partner_dialogs"])
 	}
-	for index, wantID := range []int64{1, 2, 12} {
+	for index, wantID := range []int64{1, 2, 12, 13} {
 		if got := dialogs[index].DialogID; got != wantID {
 			t.Fatalf("post-gift dialog %d id %v want %d", index, got, wantID)
 		}
@@ -337,11 +336,12 @@ func TestI9_10B840PostGiftProjectionAndExactRetry(t *testing.T) {
 	if read := dialogs[0].IsRead; read != int64(1) {
 		t.Fatalf("pre-read dialog state lost %+v", dialogs[0])
 	}
+	// Favor 113 is the (100,300] band: acts 1 and 2 are addressable.
 	acts, ok := response.Body["partner_acts"].([]app.ActSlot)
-	if !ok || len(acts) != lib.ActCount {
+	if !ok || len(acts) != 2 {
 		t.Fatalf("post-gift acts %T %+v", response.Body["partner_acts"], response.Body["partner_acts"])
 	}
-	for index, want := range []int64{1, 0, 0, 0} {
+	for index, want := range []int64{1, 0} {
 		if got := acts[index].IsAwarded; got != want {
 			t.Fatalf("post-gift act %d %v want %d", index+1, got, want)
 		}

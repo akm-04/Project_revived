@@ -5,6 +5,8 @@ import (
 	"math"
 	"strconv"
 	"strings"
+
+	"gxb.local/backend/v2/internal/domain/character"
 )
 
 type Advance struct {
@@ -12,13 +14,20 @@ type Advance struct {
 	Rates  []int64   `json:"rates"`
 	Counts [][]int64 `json:"counts"`
 }
+
+// Policy is PRIVATE_POLICY. Rival scaling steps a copied opponent snapshot
+// down to the stage target without ever scaling up.
 type Policy struct {
-	SuperChance    int64 `json:"super_chance_per_10000"`
-	ManaPerLevel   int64 `json:"mana_per_academy_level"`
-	MarchCoin      int64 `json:"march_coin_per_stage"`
-	Reagents       int64 `json:"reagents_per_stage"`
-	ResultWindow   int64 `json:"result_window_seconds"`
-	CandidateLimit int64 `json:"candidate_limit"`
+	SuperChance         int64 `json:"super_chance_per_10000"`
+	ManaPerLevel        int64 `json:"mana_per_academy_level"`
+	MarchCoin           int64 `json:"march_coin_per_stage"`
+	Reagents            int64 `json:"reagents_per_stage"`
+	ResultWindow        int64 `json:"result_window_seconds"`
+	CandidateLimit      int64 `json:"candidate_limit"`
+	RivalForceTolerance int64 `json:"rival_force_tolerance_per_10000"`
+	RivalScaleMinLevel  int64 `json:"rival_scale_min_level"`
+	RivalScaleMinColor  int64 `json:"rival_scale_min_color"`
+	RivalScaleMinStar   int64 `json:"rival_scale_min_star"`
 }
 type Catalog struct {
 	Schema          int64                 `json:"schema_version"`
@@ -43,6 +52,9 @@ func (c Catalog) Validate() error {
 	}
 	p := c.Policy
 	if p.SuperChance < 0 || p.SuperChance > 10000 || p.ManaPerLevel <= 0 || p.ManaPerLevel > 1000000 || p.MarchCoin < 0 || p.MarchCoin > 10000 || p.Reagents < 0 || p.Reagents > 100 || p.ResultWindow < 60 || p.ResultWindow > 86400 || p.CandidateLimit < 15 || p.CandidateLimit > 1000 {
+		return ErrInvalid
+	}
+	if p.RivalForceTolerance < 0 || p.RivalForceTolerance > 10000 || p.RivalScaleMinLevel < 1 || p.RivalScaleMinLevel > character.MaxHeroLevel || p.RivalScaleMinColor < 1 || p.RivalScaleMinColor > 16 || p.RivalScaleMinStar < 1 || p.RivalScaleMinStar > character.MaxHeroStar {
 		return ErrInvalid
 	}
 	for i, a := range c.Advances {

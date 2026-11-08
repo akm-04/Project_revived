@@ -69,7 +69,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	}
 	rank := d.Order(*players, p.Season, p.Group)
 	ar, br := d.Rank(rank, p.ID), d.Rank(rank, enemy.ID)
-	if ar == 0 || br == 0 || br < ar-cat.OpponentRadius || br > ar+cat.OpponentRadius || at.Before(cat.Protection(enemy.LastAttacked, at)) {
+	if !cat.CanChallenge(ar, br) || at.Before(cat.Protection(enemy.LastAttacked, at)) {
 		return d.Match{}, d.ErrRefused
 	}
 	selfRows, _, e := s.rows(c, sc.Tx, p.ID, cmd.Lineup, at)

@@ -406,6 +406,15 @@ func Rank(players []Player, id identity.PlayerID) int64 {
 	}
 	return 0
 }
+func (c Catalog) CanChallenge(attackerRank, defenderRank int64) bool {
+	if attackerRank < 1 || defenderRank < 1 || attackerRank == defenderRank {
+		return false
+	}
+	if defenderRank < attackerRank {
+		return true
+	}
+	return defenderRank-attackerRank <= c.OpponentRadius
+}
 func (c Catalog) Attack(a, b Player, win bool, at time.Time) (Player, Player, int64) {
 	delta := c.Transfer(b.Points, a.Points)
 	if win {

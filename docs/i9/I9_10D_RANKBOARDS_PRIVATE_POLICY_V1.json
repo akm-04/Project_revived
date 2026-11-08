@@ -1,0 +1,34 @@
+{
+  "policy_id": "I9_10D_RANKBOARDS_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "cohort": "I4_SERVER_ALL_PLAYERS_V1",
+  "order": {
+    "primary": "score descending",
+    "tie_break": "stable player id"
+  },
+  "week_start": "Monday 00:00 UTC",
+  "settlement": "on read; no titles awarded by these boards",
+  "boards": {
+    "10": {
+      "name": "BG Star Rank",
+      "source": "CharacterHero roster metric 1008 (sum of current stars)",
+      "row_field": "info_val"
+    },
+    "12": {
+      "name": "Awaken",
+      "source": "CharacterHero roster metric 1009 (awakened distinct-origin heroes)",
+      "row_field": "info_val"
+    },
+    "23": {
+      "name": "Sky Tower Elite Rank",
+      "source": "PetCampaign owner state EliteMax",
+      "row_field": "max_floor"
+    }
+  },
+  "unserved": {
+    "13": "no delivered purify owner",
+    "14": "no delivered blood-awaken count owner",
+    "28,29,35,36,40,41": "I10 event/activity owners"
+  }
+}

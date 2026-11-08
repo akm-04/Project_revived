@@ -161,3 +161,39 @@ func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *test
 		t.Fatal(none, e)
 	}
 }
+
+func TestI9_10DStarsAndAwakenBoardsUseExistingRosterMetrics(t *testing.T) {
+	for _, want := range []struct {
+		subtype, fieldID int64
+		policy           string
+	}{
+		{10, 1008, StarCountPolicy},
+		{12, 1009, AwakenCountPolicy},
+	} {
+		board, ok := BoardOfSubType(want.subtype)
+		if !ok || board.Policy != want.policy || board.FieldID != want.fieldID || board.SourceOwner != "CharacterHero" || board.SourcePolicy != RosterMetricSourcePolicy || board.SourceSemantics != RosterMetricSourceSemantics || board.RowValue != "info_val" {
+			t.Fatal(want, board)
+		}
+		if len(board.Titles) != 0 {
+			t.Fatal("invented titles", board)
+		}
+	}
+	if _, ok := BoardOfSubType(23); ok {
+		t.Fatal("Sky Tower elite stays on the PetCampaign owner path")
+	}
+}
+
+func TestI9_10ETopFiveForceBoardUsesCharacterHeroMetric(t *testing.T) {
+	board, ok := BoardOfSubType(9)
+	if !ok || board.Policy != TopForcePolicy || board.FieldID != 1012 || board.SourceOwner != "CharacterHero" || board.SourcePolicy != TopForceSourcePolicy || board.SourceSemantics != TopForceSemantics || board.RowValue != "info_val" {
+		t.Fatal(board)
+	}
+	if len(board.Titles) != 0 {
+		t.Fatal("invented titles", board)
+	}
+	for _, subtype := range []int64{13, 14, 28, 29, 35, 36, 40, 41} {
+		if _, ok := BoardOfSubType(subtype); ok {
+			t.Fatal("owner not delivered, board must stay unserved:", subtype)
+		}
+	}
+}

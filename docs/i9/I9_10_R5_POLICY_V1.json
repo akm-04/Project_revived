@@ -1,0 +1,27 @@
+{
+  "policy_id": "I9_10_R5_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "scope": "I9-10 leaf r5codes: 1 on 1 30003, Arena 31005, MID 1411, is_old_top",
+  "tunables": {
+    "one_on_one_low_points_challenge_floor": 1000
+  },
+  "rules": [
+    "R1 One-on-one START refuses a challenge when the defender's points are below one_on_one_low_points_challenge_floor and answers HTTP 200 error_code 30003 in-band, before admission consumes a try.",
+    "R2 The compared value is the defender's current points (message 30003: the opponent has lower than 1000 points). The stock client only renders the toast and performs no local check. The revision's own floor is 3000, so the guard is defensive for stored legacy positions.",
+    "R3 Arena 31005 (opponent seal hero changed) is not produced: this backend has no seal/ban hero state, and the Arena info reply carries no is_ban_open or ban_hero_id.",
+    "R4 MID 1411 REGION_START_FIGHT is dead: its only caller RegionEnemyItem is never instantiated, and the live Region Arena entry uses SelectTeamRearenaWindow with REARENA_FIGHT 773, which Arena case 773 already serves.",
+    "R5 is_old_top is fixed at 0 in the login reply, so the legacy Peak Arena screen is never selected."
+  ],
+  "source": {
+    "paths": [
+      "app/windows/SelectPeakTeamWindow.lua",
+      "data/tables/message.lua",
+      "app/windows/RegionEnemyItem.lua",
+      "app/windows/FoundEnemyWindow.lua",
+      "app/windows/SelectTeamRearenaWindow.lua",
+      "app/windows/SubArenaWindow.lua",
+      "app/scenes/LoadingScene.lua"
+    ]
+  }
+}

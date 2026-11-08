@@ -12,8 +12,16 @@
  ],
  "contracts": [
   {
+   "count": 1,
+   "file": "docs/i9/I9_10_R5_POLICY_V1.json"
+  },
+  {
    "count": 8,
    "file": "docs/i9/I9_FRIEND_FIGHT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
   },
   {
    "count": 3,
@@ -533,6 +541,7 @@
    "logical_servers",
    "player_currency_balances",
    "player_directory_profiles",
+   "player_heroes",
    "players"
   ],
   "written": [

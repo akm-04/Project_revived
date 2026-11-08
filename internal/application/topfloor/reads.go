@@ -85,11 +85,56 @@ func (s Service) face(c context.Context, catalog d.Catalog, server identity.Logi
 	if o.IsRobot() {
 		return s.display(c, s.Fresh, catalog, server, o, now)
 	}
+	return s.recordDisplay(c, catalog, o)
+}
+
+// recordDisplay is the record-row face, which needs no rank or roster.
+func (s Service) recordDisplay(c context.Context, catalog d.Catalog, o d.Occupant) (d.Display, error) {
+	if o.IsRobot() {
+		team, found := catalog.Team(o.Robot)
+		if !found {
+			return d.Display{}, d.ErrConflict
+		}
+		return d.Display{Occupant: o, Name: catalog.RobotName(o.Robot), Level: team.Level, AvatarID: catalog.RobotAvatarID, FrameID: catalog.RobotFrameID}, nil
+	}
 	profile, found, err := s.Directory.ProfileTx(c, s.Fresh, o.Player)
 	if err != nil || !found {
 		return d.Display{}, errors.Join(err, d.ErrUnavailable)
 	}
 	return d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID}, nil
+}
+
+// RecordReplay loads one retained record and its stored report for a chat-card
+// replay; an unknown or expired record answers empty, which the client shows as
+// ARENA_RECORD_OUT_OF_DATE.
+func (s Service) RecordReplay(c context.Context, recordID int64) (RecordReplay, error) {
+	catalog, now, err := s.readContext(c)
+	if err != nil || recordID <= 0 {
+		return RecordReplay{}, err
+	}
+	record, found, err := s.Store.RecordTx(c, s.Fresh, recordID)
+	if err != nil || !found {
+		return RecordReplay{}, err
+	}
+	self, err := s.recordDisplay(c, catalog, d.Occupant{Player: record.Owner})
+	if err != nil {
+		return RecordReplay{}, err
+	}
+	opponent, err := s.recordDisplay(c, catalog, record.Opponent)
+	if err != nil {
+		return RecordReplay{}, err
+	}
+	view := RecordReplay{Record: record, Self: self, Opponent: opponent}
+	retained, err := s.Store.RetainedTx(c, s.Fresh, record.AttemptID)
+	if err != nil || !retained {
+		return view, err
+	}
+	result, _, err := s.Combat.ReplayTx(c, s.Fresh, record.AttemptID, reportRetention, now)
+	if err != nil {
+		return RecordReplay{}, err
+	}
+	view.Report = result.Report
+	return view, nil
 }
 
 // reportRetention is the top floor replay window (D25a private policy, at the D9 Q6 ceiling).

@@ -8,6 +8,7 @@ import (
 	"context"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -103,6 +104,9 @@ type Roster interface {
 // each hero row instead of recomputing it.
 type HeroPower interface {
 	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+	// RobotForceTx is the same engine over an unowned source hero template, so
+	// mode robots carry the power of the team their fight would resolve.
+	RobotForceTx(context.Context, ca.CoherentReadScope, int64, int64, int64, int64, []int64) (publicstats.Result, error)
 }
 
 // OwnedHeroReader is the CharacterHero-owned roster read used to build the D511 preset defense.
@@ -148,6 +152,7 @@ type Service struct {
 	Facts        Facts
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
+	Broadcast    broadcast.Emitter
 }
 
 func (s Service) ready() bool {
@@ -182,6 +187,14 @@ type RecordInfo struct {
 	Opponent   d.Display
 	AvengeType int64
 	CanAvenge  bool
+}
+
+// RecordReplay is one retained record and its stored report for a chat-card replay.
+type RecordReplay struct {
+	Record   d.Record
+	Self     d.Display
+	Opponent d.Display
+	Report   []byte
 }
 
 type RankList struct {

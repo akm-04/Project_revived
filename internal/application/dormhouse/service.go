@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
@@ -235,6 +236,7 @@ type Service struct {
 	Social         SocialStore
 	Directory      playerdirectory.TxDiscoveryReader
 	Moderation     ModerationReader
+	Broadcast      broadcast.Emitter
 }
 
 func (s Service) complete() bool {
