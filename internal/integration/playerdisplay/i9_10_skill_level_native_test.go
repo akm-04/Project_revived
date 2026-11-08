@@ -42,6 +42,7 @@ func heroSkillLevelFixture(t *testing.T, database *pg.Pool, revision string, man
 	t.Helper()
 	actor := privilegeActor(t, database, revision)
 	skillHero(t, database, actor, revision, 11001144, 1)
+	exec(t, database, `UPDATE player_heroes SET level=2 WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
 	transaction, err := database.Begin(ctx, tx.Options{})
 	if err != nil {
 		t.Fatal(err)
