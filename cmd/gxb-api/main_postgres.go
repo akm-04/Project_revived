@@ -693,8 +693,9 @@ func main() {
 	mustRegister(1793, savedPresetD)
 	bookmarkSvc := apphero.BookmarkService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts}
 	skillSvc := apphero.SkillChoiceService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Inventory: i5db, Content: contentDB}
-	heroD := observing(authority, achievements, "Hero", stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection})
-	for _, mid := range []uint16{2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 89, 304, 305, 2979} {
+	skillLevelSvc := apphero.HeroSkillLevelService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Books: bookSvc, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Resources: i5svc, DiscountBasisPoints: 10000}
+	heroD := observing(authority, achievements, "Hero", stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, SkillLevels: skillLevelSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection})
+	for _, mid := range []uint16{39, 53, 2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 89, 304, 305, 2979} {
 		mustRegister(mid, heroD)
 	}
 	evolutionD := stockruntime.EvolutionDispatcher{Authority: authority, Service: evolutionSvc}

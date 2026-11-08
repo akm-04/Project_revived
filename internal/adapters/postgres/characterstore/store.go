@@ -278,3 +278,17 @@ func (Store) SaveHeroSkillChoiceTx(ctx context.Context, t tx.Tx, h character.Her
 	}
 	return nil
 }
+
+func (Store) SaveHeroSkillLevelsTx(ctx context.Context, t tx.Tx, h character.Hero, oldVersion int64) error {
+	if t == nil || h.ValidatePersistent() != nil || oldVersion < 1 || h.StateVersion != oldVersion+1 {
+		return errors.New("character store: invalid Hero skill level update")
+	}
+	tag, err := t.Exec(ctx, characterqueries.SaveHeroSkillLevels, int64(h.PlayerID), h.PartnerID, h.RawSkills.Levels[0], h.RawSkills.Levels[1], h.RawSkills.Levels[2], h.RawSkills.Levels[3], h.RawSkills.Levels[4], h.RawSkills.Levels[5], h.UpdatedAt.UTC(), oldVersion)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return errors.New("character store: Hero skill level update lost race")
+	}
+	return nil
+}

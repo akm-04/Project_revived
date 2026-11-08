@@ -41,6 +41,9 @@
    "achievement": [
     "*BookInputsTx"
    ],
+   "characterhero": [
+    "*LockHeroSkillCapTx"
+   ],
    "eventcentre": [
     "*BookInputsTx"
    ],
@@ -1047,6 +1050,7 @@
    "characterhero": [
     "*ApplyHeroEquipmentResourceDebitTx",
     "*ApplyHeroPromotionResourcesTx",
+    "*ApplyHeroSkillLevelCostTx",
     "*ApplyStrictRestorationTx",
     "*CommitAwakeningEquipmentTx",
     "*DebitHeroEvolutionTx",
@@ -1064,6 +1068,7 @@
     "*PrepareCharacterFunctionsTx",
     "*PrepareHeroEquipmentResourcesTx",
     "*PrepareHeroPromotionResourcesTx",
+    "*PrepareHeroSkillLevelCostTx",
     "*PrepareStrictRestorationTx",
     "Blood",
     "Complete",
@@ -2551,6 +2556,9 @@
    ]
   },
   "characterhero": {
+   "bookskill": [
+    "*LockHeroSkillCapTx"
+   ],
    "characterasset": [
     "*ModifyRestoration",
     "BuildEffectiveHeroAppearance",
@@ -2572,6 +2580,7 @@
    "i5": [
     "*ApplyHeroEquipmentResourceDebitTx",
     "*ApplyHeroPromotionResourcesTx",
+    "*ApplyHeroSkillLevelCostTx",
     "*ApplyStrictRestorationTx",
     "*CommitAwakeningEquipmentTx",
     "*DebitHeroEvolutionTx",
@@ -2589,6 +2598,7 @@
     "*PrepareCharacterFunctionsTx",
     "*PrepareHeroEquipmentResourcesTx",
     "*PrepareHeroPromotionResourcesTx",
+    "*PrepareHeroSkillLevelCostTx",
     "*PrepareStrictRestorationTx",
     "Blood",
     "Complete",
@@ -2646,6 +2656,10 @@
    "interface:characterhero.HeroRosterTxAppearanceStore": [
     "*ListHeroLIVEEntitlementsTx",
     "*ListHeroSkinEntitlementsTx"
+   ],
+   "interface:characterhero.HeroSkillLevelStore": [
+    "*LockHeroByPartnerIDTx",
+    "*SaveHeroSkillLevelsTx"
    ],
    "interface:characterhero.ProgressionStore": [
     "*ListHeroesTx",
