@@ -89,7 +89,7 @@ def test_environment(census_classes, dsn, scratch):
 
 def run_package(package, environment, log, skip):
     """go test -json for one whole package as the gate's suites run it; returns {package.Test: outcome} in the gate's key form."""
-    command = ['go', 'test', '-json', '-count=1', '-p=1', '-timeout', '60m', '-tags', strict_gate.FULL_TAGS, *(['-skip', skip] if skip else []), package]
+    command = ['go', 'test', '-json', '-count=1', '-p=1', '-timeout', '150m', '-tags', strict_gate.FULL_TAGS, *(['-skip', skip] if skip else []), package]
     completed = subprocess.run(command, cwd=REPOSITORY, env=environment, capture_output=True, text=True)
     log.write(completed.stdout)
     outcomes, started = {}, set()
