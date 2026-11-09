@@ -37,6 +37,28 @@ type scaledHero struct {
 // generation; every stage and every binary-search probe reuses it.
 type frozenTeam map[character.HeroRef]*publicstats.FrozenHero
 
+// frozenOwner reads one owner's canonical inputs once per opponent hero and
+// reuses them for the candidate force and every scaling probe.
+func (s Mode) frozenOwner(c context.Context, sc gen.TimedScope, a identity.ActorContext, ref character.HeroRef, revision string, frozen frozenTeam) (*publicstats.FrozenHero, error) {
+	if owner, ok := frozen[ref]; ok {
+		return owner, nil
+	}
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, revision, sc.Operation.DecisionAt())
+	if err != nil {
+		return nil, err
+	}
+	kind := publicstats.Self
+	if ref.PlayerID != a.PlayerID {
+		kind = publicstats.Foreign
+	}
+	owner, err := s.Stats.FreezeHeroTx(c, scope, ref, publicstats.View{Kind: kind, Viewer: a.PlayerID})
+	if err != nil {
+		return nil, err
+	}
+	frozen[ref] = owner
+	return owner, nil
+}
+
 // scaleEnemy brings a copied opponent snapshot within the stage's force
 // tolerance by stepping level first, then colour, then star down to the source
 // table floors. It never scales up and never leaves the stored force behind.
@@ -98,21 +120,9 @@ func (s Mode) scaledHeroes(c context.Context, sc gen.TimedScope, a identity.Acto
 			return nil, d.ErrUnavailable
 		}
 		ref := character.HeroRef{PlayerID: identity.PlayerID(enemy.Player), PartnerID: partner}
-		owner, ok := frozen[ref]
-		if !ok {
-			scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, v.revision, sc.Operation.DecisionAt())
-			if err != nil {
-				return nil, err
-			}
-			kind := publicstats.Self
-			if ref.PlayerID != a.PlayerID {
-				kind = publicstats.Foreign
-			}
-			owner, err = s.Stats.FreezeHeroTx(c, scope, ref, publicstats.View{Kind: kind, Viewer: a.PlayerID})
-			if err != nil {
-				return nil, err
-			}
-			frozen[ref] = owner
+		owner, err := s.frozenOwner(c, sc, a, ref, v.revision, frozen)
+		if err != nil {
+			return nil, err
 		}
 		heroes = append(heroes, scaledHero{
 			row:    row,

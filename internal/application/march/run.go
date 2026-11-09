@@ -140,28 +140,27 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 	if err != nil {
 		return err
 	}
+	frozen := frozenTeam{}
 	forces := []int64{}
 	for key := range rows {
 		id, err := strconv.ParseInt(key, 10, 64)
 		if err != nil || id <= 0 {
 			return d.ErrUnavailable
 		}
-		force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision)
+		force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision, frozen)
 		if err != nil {
 			return err
 		}
 		forces = append(forces, force)
 	}
-	// The candidate projection already carries the summed canonical force of
-	// its displayed heroes. Only a projection without one falls back to the
-	// per-hero read, so a populated server does not recompute every opponent.
 	for i := range candidates {
 		e := &candidates[i]
-		if e.Robot != 0 || e.Force > 0 {
+		if e.Robot != 0 {
 			continue
 		}
+		e.Force = 0
 		for _, row := range e.Heroes {
-			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: identity.PlayerID(e.Player), PartnerID: number(row["source_partner_id"])}, v.revision)
+			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: identity.PlayerID(e.Player), PartnerID: number(row["source_partner_id"])}, v.revision, frozen)
 			if err != nil {
 				return err
 			}
@@ -177,7 +176,6 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		power += f
 	}
 	rng := cd.NewStream(sc.Operation.Operation().Derive("march.match/v1", 0))
-	frozen := frozenTeam{}
 	enemies := make([]d.Enemy, 0, d.Stages)
 	for stage, factor := range v.catalog.Factors("expedition_rival_param") {
 		target := float64(power) * factor

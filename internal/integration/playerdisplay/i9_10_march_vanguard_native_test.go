@@ -81,6 +81,7 @@ func TestI9_10MarchNativeVanguardSweepSettlesSourcePrefix(t *testing.T) {
 	}
 	r := marchRecord(t, p, a)
 	cleared := r.Passed
+	t.Logf("canonical level-100 team cleared %d of 15", cleared)
 	if cleared < 1 || cleared > 14 {
 		t.Fatalf("cleared %d outside the source prefix", cleared)
 	}

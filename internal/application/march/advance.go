@@ -29,11 +29,12 @@ func (s Mode) Advance(c context.Context, a identity.ActorContext, q Fight, op op
 			recommended[id] = true
 		}
 		power := int64(0)
+		frozen := frozenTeam{}
 		for _, id := range q.Formation {
 			if id == 0 {
 				continue
 			}
-			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision)
+			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision, frozen)
 			if err != nil {
 				return nil, err
 			}

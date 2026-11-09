@@ -3,6 +3,8 @@ package publicstats
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
 
 	book "gxb.local/backend/v2/internal/application/bookskill"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -20,14 +22,15 @@ import (
 	n "gxb.local/backend/v2/internal/domain/statinputs"
 	rules "gxb.local/backend/v2/internal/domain/statrules"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	"time"
 )
 
 // FrozenHero is one qualified owned Hero whose owner facts were read once.
 // Overridden level, star and colour evaluate against the same snapshot, so a
 // scaled projection costs one owner read instead of one per candidate value.
 type FrozenHero struct {
-	input frozenHeroInput
+	input   frozenHeroInput
+	mu      sync.Mutex
+	results map[[3]int64]Result
 }
 
 type frozenHeroInput struct {
@@ -217,8 +220,30 @@ func (s Service) freezeDormEquipment(ctx context.Context, q tx.Queryer, rev stri
 }
 
 // Evaluate computes the canonical result at the requested level, star and
-// colour from the frozen inputs.
+// colour from the frozen inputs. Repeated probes of one candidate (the same
+// stage target sequence on another stage) reuse the earlier evaluation.
 func (h *FrozenHero) Evaluate(level, star, color int64) (Result, error) {
+	key := [3]int64{level, star, color}
+	h.mu.Lock()
+	cached, ok := h.results[key]
+	h.mu.Unlock()
+	if ok {
+		return cached, nil
+	}
+	result, err := h.evaluate(level, star, color)
+	if err != nil {
+		return Result{}, err
+	}
+	h.mu.Lock()
+	if h.results == nil {
+		h.results = map[[3]int64]Result{}
+	}
+	h.results[key] = result
+	h.mu.Unlock()
+	return result, nil
+}
+
+func (h *FrozenHero) evaluate(level, star, color int64) (Result, error) {
 	if level < 1 || level > character.MaxHeroLevel || star < 1 || star > character.MaxHeroStar || color < 1 || color > 16 {
 		return Result{}, ErrUnqualified
 	}
