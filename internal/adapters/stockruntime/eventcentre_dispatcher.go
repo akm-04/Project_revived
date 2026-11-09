@@ -72,7 +72,7 @@ func (d EventCentreDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 	}
 	result, err := d.Service.Command(ctx, a, command, req.Envelope.Operation)
 	if err != nil {
-		return failEventCentre(err)
+		return failEventCentreCommand(err, command)
 	}
 	return okI5(result.Body)
 }
@@ -159,6 +159,20 @@ func eventCentreCommand(mid uint16, params map[string]any) (app.Command, []strin
 	default:
 		return command, nil, errors.New("unsupported event centre mid")
 	}
+}
+
+// Stock message.lua rows only cover diamond (crystal) and coin (mana) deficits;
+// recycle saturation energy and magic materials have no message row.
+func failEventCentreCommand(err error, command app.Command) httpedge.Response {
+	if errors.Is(err, economy.ErrInsufficientBalance) && command.Family == app.AdminExchange {
+		switch command.FromType {
+		case 2:
+			return conflictRefusal(20005)
+		case 1:
+			return conflictRefusal(20006)
+		}
+	}
+	return failEventCentre(err)
 }
 
 func failEventCentre(err error) httpedge.Response {

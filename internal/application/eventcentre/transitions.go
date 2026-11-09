@@ -53,11 +53,6 @@ func (s Service) apply(ctx context.Context, sc tx.Scope, a identity.ActorContext
 	if err = state.SettleMakes(at); err != nil {
 		return nil, err
 	}
-	// A fresh player has no persisted energy anchor; without this the first
-	// recycle cannot succeed and the failed transaction never saves one.
-	if state.Recycle.EnergyAt.IsZero() {
-		state.Recycle.EnergyAt = at
-	}
 	valueop := d.Operation
 	valueop.StartedAt = at
 	var body map[string]any
@@ -143,9 +138,9 @@ func (s Service) applyRecycle(ctx context.Context, t tx.Tx, a identity.ActorCont
 
 func (s Service) applyMake(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, catalog Catalog, inputs appbook.Inputs, state *State, valueop operation.Context) (map[string]any, error) {
 	buildingType := d.Command.BuildingType
-	building, exists := inputs.Applied.Buildings[buildingType]
+	building := inputs.Applied.Buildings[buildingType]
 	level := buildingLevel(inputs, buildingType)
-	if !exists || level < 1 || building.Job != nil {
+	if level < 1 || building.Job != nil {
 		return nil, ErrInvalid
 	}
 	section := &state.Desk
@@ -269,9 +264,9 @@ func (s Service) applyAccelerateMake(ctx context.Context, t tx.Tx, a identity.Ac
 }
 
 func (s Service) applyAdminExchange(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, catalog Catalog, inputs appbook.Inputs, state *State, valueop operation.Context) (map[string]any, error) {
-	building, exists := inputs.Applied.Buildings[AdminBuilding]
+	building := inputs.Applied.Buildings[AdminBuilding]
 	level := buildingLevel(inputs, AdminBuilding)
-	if !exists || level < 1 || building.Job != nil {
+	if level < 1 || building.Job != nil {
 		return nil, ErrInvalid
 	}
 	day := modesDay(d.DecisionAt)

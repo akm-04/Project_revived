@@ -31,7 +31,9 @@ const (
 
 // PRIVATE_POLICY I9-10A: unrecovered original-server laws adopted as named values.
 const (
-	RecycleInitialEnergyPolicy = "ZERO_AT_FIRST_MATERIALIZATION"
+	// Bug #74: neither the stock Lua nor V1 states the starting energy; the
+	// player's real-client recollection is that it starts full.
+	RecycleInitialEnergyPolicy = "FULL_AT_FIRST_MATERIALIZATION"
 	RecycleCritPolicy          = "CRIT_PARAM_PLUS_BUILDING_CRIT_UP_ONE_ROLL_PER_RESOLVED_RESOURCE"
 	MakeCancelRefundPolicy     = "PRORATED_FLOOR_PER_COST_LINE"
 	MakeConfirmOutputPolicy    = "ONE_MADE_ITEM_PER_CONFIRM"
@@ -599,6 +601,8 @@ func SettleRecycle(recycle *RecycleState, limit, seconds int64, at time.Time) er
 		recycle.Energy = limit
 	}
 	if recycle.EnergyAt.IsZero() {
+		// PRIVATE_POLICY FULL_AT_FIRST_MATERIALIZATION (bug #74).
+		recycle.Energy = limit
 		recycle.EnergyAt = at
 		return nil
 	}
