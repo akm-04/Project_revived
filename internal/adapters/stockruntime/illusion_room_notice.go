@@ -35,6 +35,7 @@ type IllusionRoomNotice struct {
 	DamageResults map[string]json.RawMessage
 	ParadiseID    int64
 	Master        playerdirectory.Profile
+	Chats         []d.ChatMessage
 }
 
 type IllusionRoomNoticeReader struct {
@@ -60,8 +61,8 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 	if err != nil {
 		return out, false, d.ErrInvalid
 	}
-	out = IllusionRoomNotice{RoomID: room.ID, Status: illusionStage(room.Members()), TeamInfo: state.TeamInfo, ReportID: state.ReportID,
-		DamageResults: state.DamageResults, ParadiseID: state.ParadiseID, Ready: map[identity.PlayerID]bool{}}
+	out = IllusionRoomNotice{RoomID: room.ID, Status: state.Status(len(room.Members())), TeamInfo: state.TeamInfo, ReportID: state.ReportID,
+		DamageResults: state.DamageResults, ParadiseID: state.ParadiseID, Chats: state.Chats, Ready: map[identity.PlayerID]bool{}}
 	for _, seat := range room.Seats {
 		if seat.Stage == sharedroom.SeatSeated {
 			out.Ready[seat.Player] = seat.Ready
@@ -86,13 +87,6 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 		out.Master = profile
 	}
 	return out, true, nil
-}
-
-func illusionStage(members []identity.PlayerID) int64 {
-	if len(members) >= int(d.TeamSeats) {
-		return 1
-	}
-	return 0
 }
 
 // seatPlayers is the removal set: everyone except players who left voluntarily.
@@ -140,7 +134,10 @@ func ValidateIllusionRoomNotice(value any) error {
 
 func NewIllusionRoomNoticeRegistry() (rt.EventRegistry, error) {
 	return rt.NewEventRegistry(
-		[]rt.DirectRegistration{{MID: mids.MIDIllusionNotice, Roles: []rt.Role{rt.World}, Validate: ValidateIllusionRoomNotice}},
+		[]rt.DirectRegistration{
+			{MID: mids.MIDIllusionNotice, Roles: []rt.Role{rt.World}, Validate: ValidateIllusionRoomNotice},
+			{MID: mids.MIDChatFromFriend, Roles: []rt.Role{rt.World}, Validate: rt.ValidateFriendDM},
+		},
 		nil,
 	)
 }
@@ -160,14 +157,16 @@ type IllusionRoomNoticeHandler struct {
 	OnDeliveryError func(error)
 }
 
-// RoomNoticeLedger remembers each room's one-shot removal notices: the wakeup
-// carries only the room, and the room keeps departed seats.
+// RoomNoticeLedger remembers each room's one-shot removal notices and each
+// member's last delivered chat serial: the wakeup carries only the room.
 // shortcut: in memory, so a realtime restart repeats them once for a live room;
 // persist delivery if that repeat ever reaches a player seated elsewhere.
 type RoomNoticeLedger struct {
 	mu       sync.Mutex
 	rooms    map[int64]map[roomOneShot]bool
 	observed map[int64]*roomObservation
+	// chats is the last chat serial delivered to each room member.
+	chats map[int64]map[identity.PlayerID]int64
 }
 
 type roomOneShot struct {
@@ -176,7 +175,26 @@ type roomOneShot struct {
 }
 
 func NewRoomNoticeLedger() *RoomNoticeLedger {
-	return &RoomNoticeLedger{rooms: map[int64]map[roomOneShot]bool{}, observed: map[int64]*roomObservation{}}
+	return &RoomNoticeLedger{rooms: map[int64]map[roomOneShot]bool{}, observed: map[int64]*roomObservation{},
+		chats: map[int64]map[identity.PlayerID]int64{}}
+}
+
+// chatUndelivered reports whether the recipient has not yet seen this serial.
+func (l *RoomNoticeLedger) chatUndelivered(room int64, player identity.PlayerID, serial int64) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.chats[room][player] < serial
+}
+
+func (l *RoomNoticeLedger) markChat(room int64, player identity.PlayerID, serial int64) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.chats[room] == nil {
+		l.chats[room] = map[identity.PlayerID]int64{}
+	}
+	if l.chats[room][player] < serial {
+		l.chats[room][player] = serial
+	}
 }
 
 func (l *RoomNoticeLedger) undelivered(room int64, mid uint16, players []identity.PlayerID) []identity.PlayerID {
@@ -214,6 +232,7 @@ func (l *RoomNoticeLedger) forget(room int64) {
 	defer l.mu.Unlock()
 	delete(l.rooms, room)
 	delete(l.observed, room)
+	delete(l.chats, room)
 }
 
 func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference string) error {
@@ -268,10 +287,40 @@ func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference
 			}
 		}
 	}
+	if len(view.Chats) > 0 {
+		seated := make(map[identity.PlayerID]bool, len(view.Seated))
+		for _, player := range view.Seated {
+			seated[player] = true
+		}
+		for _, chat := range view.Chats {
+			if chat.Serial <= 0 {
+				continue
+			}
+			frame := illusionChatFrame(chat)
+			for _, raw := range chat.Recipients {
+				player := identity.PlayerID(raw)
+				if !seated[player] || !h.Delivered.chatUndelivered(view.RoomID, player, chat.Serial) {
+					continue
+				}
+				if err := h.deliver(c, player, mids.MIDChatFromFriend, frame); err != nil {
+					return err
+				}
+				h.Delivered.markChat(view.RoomID, player, chat.Serial)
+			}
+		}
+	}
 	if len(view.Seated) == 0 {
 		h.Delivered.forget(view.RoomID)
 	}
 	return nil
+}
+
+func illusionChatFrame(chat d.ChatMessage) *amf3.Object {
+	return &amf3.Object{Properties: []amf3.Property{
+		{Name: "friend_id", Value: chat.Sender},
+		{Name: "message", Value: chat.Message},
+		{Name: "time", Value: chat.At},
+	}}
 }
 
 func (h IllusionRoomNoticeHandler) deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
@@ -306,7 +355,7 @@ func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID
 		if delivery.Authority.ValidateActor(c, actor, at) != nil {
 			continue
 		}
-		if mid == mids.MIDIllusionNotice || mid == mids.MIDForceReload {
+		if mid == mids.MIDIllusionNotice || mid == mids.MIDForceReload || mid == mids.MIDChatFromFriend {
 			err = delivery.Publisher.PublishDirect(c, handle, mid, frame)
 		} else {
 			err = delivery.Publisher.PublishNotice(c, handle, mid, rt.NoticeNamespaceGeneric, frame)

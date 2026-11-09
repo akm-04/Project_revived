@@ -227,7 +227,17 @@
   {
    "file": "internal/adapters/stockruntime/illusion_room_notice.go",
    "kind": "direct",
-   "line": 143,
+   "line": 139,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/illusion_room_notice.go",
+   "kind": "direct",
+   "line": 138,
    "mid": 518,
    "roles": [
     "Role",

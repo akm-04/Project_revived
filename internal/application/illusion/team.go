@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +17,7 @@ import (
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/friendmessage"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
@@ -123,9 +125,43 @@ func (s Mode) RoomInfo(c context.Context, a identity.ActorContext, _ operation.C
 	return s.teamInfo(c, s.Fresh, room, state, at)
 }
 
-// Prepare answers 1351 and Ready answers 1357 with the same per-seat flag.
+// Prepare answers 1351: the master's prepare-room button opens the hero pick
+// for the full team. Ready answers 1357 with the per-seat flag.
 func (s Mode) Prepare(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	return s.setReady(c, a, true, op)
+	if err := s.roomReady(); err != nil {
+		return nil, err
+	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
+	var info map[string]any
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		if room.Owner != a.PlayerID {
+			return fmt.Errorf("%w: only the master starts selection", d.ErrRefused)
+		}
+		seats := room.Members()
+		if len(seats) != int(d.TeamSeats) {
+			return fmt.Errorf("%w: three seats", d.ErrRefused)
+		}
+		state, err := d.LoadRoomState(room.Payload)
+		if err != nil {
+			return err
+		}
+		if state.Stage != d.StageSelectHero {
+			state.Stage = d.StageSelectHero
+			state.Picks = nil
+		}
+		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		return s.storeTeamInfo(sc, room, state, info)
+	}}, op)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
 }
 
 func (s Mode) Ready(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
@@ -253,6 +289,12 @@ func (s Mode) SetPartner(c context.Context, a identity.ActorContext, request Par
 		if index < 0 {
 			return d.ErrRefused
 		}
+		if state.Status(len(seats)) != d.StageSelectHero {
+			return fmt.Errorf("%w: selection is not open", d.ErrRefused)
+		}
+		if err := turnReady(state, seats, index); err != nil {
+			return err
+		}
 		pick, err := s.validatePick(c, sc, state, seats, index, request, sc.Operation.DecisionAt())
 		if err != nil {
 			return err
@@ -271,6 +313,42 @@ func (s Mode) SetPartner(c context.Context, a identity.ActorContext, request Par
 		return nil, err
 	}
 	return info, nil
+}
+
+// SendRoomChat answers a 515 whose selectType is ILLUSION: the line is stored
+// on the room and the room wakeup pushes 516 to the addressed team mate.
+func (s Mode) SendRoomChat(c context.Context, a identity.ActorContext, recipient identity.PlayerID, message friendmessage.Message, op operation.Context) error {
+	if err := s.roomReady(); err != nil {
+		return err
+	}
+	if recipient == a.PlayerID || !recipient.Valid() {
+		return d.ErrInvalid
+	}
+	payload, err := message.Canonical()
+	if err != nil {
+		return d.ErrInvalid
+	}
+	op, err = s.pin(c, op)
+	if err != nil {
+		return err
+	}
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		if !seatedIn(*room, recipient) {
+			return fmt.Errorf("%w: not a room mate", d.ErrRefused)
+		}
+		state, err := d.LoadRoomState(room.Payload)
+		if err != nil {
+			return err
+		}
+		state.AddChat(d.ChatMessage{Sender: int64(a.PlayerID), Recipients: []int64{int64(recipient)},
+			Message: payload, At: sc.Operation.DecisionAt().Unix()})
+		raw, err := state.Encode()
+		if err != nil {
+			return err
+		}
+		return room.SetPayload(raw, sc.Operation.DecisionAt())
+	}}, op)
+	return err
 }
 
 // Invite answers 1360: the target's level band is checked and the room wakeup
@@ -517,7 +595,7 @@ func (s Mode) storeTeamInfo(sc gen.TimedScope, room *sharedroom.Room, state d.Ro
 // up to two mates in seat order.
 func (s Mode) teamInfo(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState, at time.Time) (map[string]any, error) {
 	seats := room.Members()
-	out := map[string]any{"room_id": room.ID, "status": stageOf(seats)}
+	out := map[string]any{"room_id": room.ID, "status": state.Status(len(seats))}
 	slots := []struct{ idName, infoName, prefix string }{
 		{"master_id", "master_id_info", "master"}, {"mate_1", "mate_1_info", "mate_1"}, {"mate_2", "mate_2_info", "mate_2"}}
 	for index, slot := range slots {
@@ -583,11 +661,24 @@ func playerInfo(profile playerdirectory.Profile, force int64) map[string]any {
 		"conquer_lev": profile.ConquerLevel, "conquer_loop_id": profile.ConquerLoopID}
 }
 
-func stageOf(seats []identity.PlayerID) int64 {
-	if len(seats) >= int(d.TeamSeats) {
-		return 1
+// turnReady enforces the stock turn order: the master picks one hero and the
+// pet, then mate 1 picks two heroes, then mate 2. A later seat may not start
+// before every earlier seat's pick is complete.
+func turnReady(state d.RoomState, seats []identity.PlayerID, index int) error {
+	for earlier := 0; earlier < index; earlier++ {
+		expected := d.MasterHeroes
+		if earlier > 0 {
+			expected = d.MateHeroes
+		}
+		pick := state.Pick(int64(seats[earlier]))
+		if len(pick.Heroes) < expected || slices.Contains(pick.Heroes[:expected], 0) {
+			return fmt.Errorf("%w: seat %d picks first", d.ErrRefused, earlier)
+		}
+		if earlier == 0 && pick.PetID <= 0 {
+			return fmt.Errorf("%w: seat 0 picks a pet first", d.ErrRefused)
+		}
 	}
-	return 0
+	return nil
 }
 
 func readyOf(room sharedroom.Room, player identity.PlayerID) int64 {

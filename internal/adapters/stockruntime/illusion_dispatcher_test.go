@@ -99,6 +99,24 @@ func TestIllusionForgedAndRentedInputIsBadRequest(t *testing.T) {
 	}
 }
 
+type illusionRoomStub struct {
+	IllusionRoomPort
+	err error
+}
+
+func (s illusionRoomStub) SetPartner(context.Context, identity.ActorContext, app.PartnerRequest, operation.Context) (map[string]any, error) {
+	return nil, s.err
+}
+
+func TestIllusionOutOfTurnPickIsConflict(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	dispatcher := IllusionRoomDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionRoomStub{err: d.ErrRefused}}
+	got := dispatcher.Dispatch(context.Background(), illusionRequest(1356, map[string]any{"partner_str": "10001005|10001006", "pet_id": int64(0)}, now))
+	if got.HTTPStatus != 409 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
+		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
+	}
+}
+
 func TestIllusionConflictMapsToBadRequest(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := IllusionDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionStub{err: d.ErrInvalid}}

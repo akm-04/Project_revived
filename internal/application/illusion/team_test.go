@@ -48,7 +48,7 @@ func TestTeamInfoCarriesSeatsStatusPartnersAndPet(t *testing.T) {
 	if err = room.SetReady(identity.PlayerID(1), true, at); err != nil {
 		t.Fatal(err)
 	}
-	state := d.RoomState{ParadiseID: 100001, MasterLevel: 70}
+	state := d.RoomState{ParadiseID: 100001, MasterLevel: 70, Stage: d.StageSelectHero}
 	state.SetPick(1, d.TeamPick{Heroes: []int64{101}, PetID: 55, Force: 100})
 	state.SetPick(2, d.TeamPick{Heroes: []int64{201, 202}, Force: 80})
 	state.SetPick(3, d.TeamPick{})
@@ -94,6 +94,40 @@ func TestTeamInfoKeepsEmptySeatsPositional(t *testing.T) {
 	}
 	if info["master_pet"] != int64(0) {
 		t.Fatalf("pet %#v", info["master_pet"])
+	}
+}
+
+func TestRoomStageAndPickTurn(t *testing.T) {
+	seats := []identity.PlayerID{1, 2, 3}
+	state := d.RoomState{}
+	if state.Status(len(seats)) != d.StagePrepare {
+		t.Fatal("selection opened before the master pressed 1351")
+	}
+	state.Stage = d.StageSelectHero
+	if state.Status(2) != d.StagePrepare {
+		t.Fatal("selection opened with two seats")
+	}
+	if state.Status(3) != d.StageSelectHero {
+		t.Fatal("selection did not open with three seats")
+	}
+	state.SetPick(1, d.TeamPick{Heroes: []int64{101}})
+	if err := turnReady(state, seats, 1); err == nil {
+		t.Fatal("mate one picked before the master's pet")
+	}
+	state.SetPick(1, d.TeamPick{Heroes: []int64{101}, PetID: 55})
+	if err := turnReady(state, seats, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := turnReady(state, seats, 2); err == nil {
+		t.Fatal("mate two picked before mate one")
+	}
+	state.SetPick(2, d.TeamPick{Heroes: []int64{201, 0}})
+	if err := turnReady(state, seats, 2); err == nil {
+		t.Fatal("mate two picked before mate one filled both slots")
+	}
+	state.SetPick(2, d.TeamPick{Heroes: []int64{201, 202}})
+	if err := turnReady(state, seats, 2); err != nil {
+		t.Fatal(err)
 	}
 }
 
