@@ -95,6 +95,9 @@ type Stats interface {
 	// ScaledHeroTx evaluates the same hero at an overridden level/star/colour
 	// for a mode that scales a copied opponent snapshot.
 	ScaledHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View, int64, int64, int64) (publicstats.Result, error)
+	// FreezeHeroTx reads one hero's canonical inputs once so a mode can evaluate
+	// many scaled candidates without repeating the owner read.
+	FreezeHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (*publicstats.FrozenHero, error)
 	PetTx(context.Context, ca.CoherentReadScope, character.PetRef, publicstats.View) (publicstats.Result, error)
 }
 

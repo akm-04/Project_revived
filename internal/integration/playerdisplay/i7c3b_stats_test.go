@@ -303,6 +303,10 @@ func (f forbiddenStats) ScaledHeroTx(context.Context, ca.CoherentReadScope, char
 	*f.called = true
 	return app.Result{}, errors.New("stats before privacy")
 }
+func (f forbiddenStats) FreezeHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, app.View) (*app.FrozenHero, error) {
+	*f.called = true
+	return nil, errors.New("stats before privacy")
+}
 func (f forbiddenStats) PetTx(context.Context, ca.CoherentReadScope, character.PetRef, app.View) (app.Result, error) {
 	*f.called = true
 	return app.Result{}, errors.New("stats before privacy")

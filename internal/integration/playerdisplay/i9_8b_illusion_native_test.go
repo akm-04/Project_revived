@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -46,6 +47,10 @@ func (illusionStatInputs) HeroTx(context.Context, ca.CoherentReadScope, characte
 
 func (illusionStatInputs) ScaledHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View, int64, int64, int64) (publicstats.Result, error) {
 	return publicstats.Result{Stats: statrules.Result{Force: 1000}}, nil
+}
+
+func (illusionStatInputs) FreezeHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (*publicstats.FrozenHero, error) {
+	return nil, errors.New("illusionStatInputs does not freeze")
 }
 
 type illusionGuildSource struct {

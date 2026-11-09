@@ -81,7 +81,11 @@ type Run struct {
 	Formation      []int64           `json:"formation"`
 	BattleOrdinal  int64             `json:"battle_ordinal"`
 	LastResult     json.RawMessage   `json:"last_result,omitempty"`
-	LifetimeChests int64             `json:"lifetime_chests"`
+	// ChestReplies keeps the granted reply body per claimed stage. The stock
+	// client retries a timed-out 339 with a new operation, and replaying the
+	// already-settled body is what lets its reward popup complete.
+	ChestReplies   map[string][]any `json:"chest_replies,omitempty"`
+	LifetimeChests int64            `json:"lifetime_chests"`
 	Version        int64             `json:"version"`
 }
 

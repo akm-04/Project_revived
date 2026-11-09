@@ -152,11 +152,7 @@ func (s Store) DormInputsActive(ctx context.Context) (string, bool, error) {
 }
 
 func (Store) DormInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(raw), revision, "DORM_INPUTS_I7C2C")
+	return storedCapability(ctx, q, revision, "DORM_INPUTS_I7C2C")
 }
 
 // ScalarDailyFloorMinimumTx observes today's owner policy independently of a

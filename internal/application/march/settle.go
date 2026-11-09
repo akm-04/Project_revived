@@ -128,10 +128,13 @@ func (s Mode) freezeReward(v view, r d.Run, sc gen.TimedScope, stage int64) []an
 }
 func (s Mode) Chest(c context.Context, a identity.ActorContext, stage int64, op operation.Context) (map[string]any, error) {
 	return s.run(c, a, "chest", stage, nil, op, func(c context.Context, sc gen.TimedScope, v view, r *d.Run) (map[string]any, error) {
+		key := strconv.FormatInt(stage, 10)
+		if granted, ok := r.ChestReplies[key]; ok && stage <= r.Passed {
+			return map[string]any{"map_info": r.Projection()["map_info"], "hero_status": map[string]any{}, "rewards": granted}, nil
+		}
 		if !r.Won || stage != r.NextStage() {
 			return nil, d.ErrRefused
 		}
-		key := strconv.FormatInt(stage, 10)
 		rows, ok := r.Rewards[key]
 		if !ok {
 			return nil, d.ErrUnavailable
@@ -147,6 +150,10 @@ func (s Mode) Chest(c context.Context, a identity.ActorContext, stage int64, op 
 		if err = r.AdvanceChest(stage); err != nil {
 			return nil, err
 		}
+		if r.ChestReplies == nil {
+			r.ChestReplies = map[string][]any{}
+		}
+		r.ChestReplies[key] = awards
 		// onUpdateMarch_ merges the actual item/hero rewards before the popup.
 		out := map[string]any{"map_info": r.Projection()["map_info"], "hero_status": map[string]any{}, "rewards": awards}
 		return out, nil

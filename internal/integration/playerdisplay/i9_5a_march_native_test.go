@@ -150,8 +150,14 @@ func TestI9_5AMarchNativeRunCarryChestAndReset(t *testing.T) {
 	if err != nil || string(originalJSON) != string(replayJSON) {
 		t.Fatal("chest retry", err, string(originalJSON), string(replayJSON))
 	}
-	if _, err = s.Chest(ctx, a, 1, op()); !errors.Is(err, d.ErrRefused) {
-		t.Fatal("duplicate chest", err)
+	// A verdict-free retry (the client resends after a timeout with a new
+	// operation) replays the granted body instead of hiding the reward.
+	replayed, err := s.Chest(ctx, a, 1, op())
+	if err != nil || marchJSON(replayed["rewards"]) != marchJSON(awards["rewards"]) {
+		t.Fatal("chest retry replay", err)
+	}
+	if marchRecord(t, p, a).Passed != 1 || marchRecord(t, p, a).LifetimeChests != 1 {
+		t.Fatal("chest retry advanced twice")
 	}
 	if _, err = s.Extra(ctx, a, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("early Mystic chest", err)
@@ -253,8 +259,11 @@ func TestI9_5AMarchNativeAllStagesExtraAndConcurrentValue(t *testing.T) {
 				t.Fatal("March producer did not advance daily mission")
 			}
 			good, bad := marchPair(t, func() (map[string]any, error) { return s.Chest(ctx, a, stage, op()) })
-			if good != 1 || bad != 1 {
-				t.Fatal("chest double spend", good, bad)
+			if good != 2 || bad != 0 {
+				t.Fatal("chest concurrent retry", good, bad)
+			}
+			if r := marchRecord(t, p, a); r.Passed != stage || r.LifetimeChests != stage {
+				t.Fatal("chest double spend", r)
 			}
 		} else {
 			if _, err = s.Chest(ctx, a, stage, op()); err != nil {
@@ -302,8 +311,8 @@ func TestI9_5AMarchNativeAllStagesExtraAndConcurrentValue(t *testing.T) {
 	if _, err := s.Start(ctx, a, app.Fight{Formation: team}, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("battle after final stage", err)
 	}
-	if _, err := s.Chest(ctx, a, 15, op()); !errors.Is(err, d.ErrRefused) {
-		t.Fatal("duplicate final chest", err)
+	if replay, err := s.Chest(ctx, a, 15, op()); err != nil || replay["rewards"] == nil {
+		t.Fatal("duplicate final chest replay", err)
 	}
 	// Extra exact retry on another genuine run, without fixture-authoring eligibility.
 	if _, err := s.Reset(ctx, a, op()); err != nil {

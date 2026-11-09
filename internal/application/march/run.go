@@ -17,7 +17,17 @@ import (
 	"time"
 )
 
+type rosterCacheKey struct{}
+
+type rosterCache struct{ rows map[string]any }
+
+// roster reads the stock roster once per operation; admission, the force list
+// and the status projection all ask for the same owned rows.
 func (s Mode) roster(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time) (map[string]any, error) {
+	cache, _ := c.Value(rosterCacheKey{}).(*rosterCache)
+	if cache != nil && cache.rows != nil {
+		return cache.rows, nil
+	}
 	detail := map[string]any{}
 	if err := s.Roster.OverlayMID1(c, q, a, false, at, detail); err != nil {
 		return nil, err
@@ -29,6 +39,9 @@ func (s Mode) roster(c context.Context, q tx.Queryer, a identity.ActorContext, a
 	rows, ok := body["heros"].(map[string]any)
 	if !ok {
 		return nil, d.ErrUnavailable
+	}
+	if cache != nil {
+		cache.rows = rows
 	}
 	return rows, nil
 }
@@ -139,12 +152,14 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		}
 		forces = append(forces, force)
 	}
+	// The candidate projection already carries the summed canonical force of
+	// its displayed heroes. Only a projection without one falls back to the
+	// per-hero read, so a populated server does not recompute every opponent.
 	for i := range candidates {
 		e := &candidates[i]
-		if e.Robot != 0 {
+		if e.Robot != 0 || e.Force > 0 {
 			continue
 		}
-		e.Force = 0
 		for _, row := range e.Heroes {
 			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: identity.PlayerID(e.Player), PartnerID: number(row["source_partner_id"])}, v.revision)
 			if err != nil {
@@ -162,6 +177,7 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		power += f
 	}
 	rng := cd.NewStream(sc.Operation.Operation().Derive("march.match/v1", 0))
+	frozen := frozenTeam{}
 	enemies := make([]d.Enemy, 0, d.Stages)
 	for stage, factor := range v.catalog.Factors("expedition_rival_param") {
 		target := float64(power) * factor
@@ -193,7 +209,7 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		for _, hero := range enemy.Heroes {
 			hero["mp"] = v.catalog.Factors("expedition_init_mana")[stage]
 		}
-		if err = s.scaleEnemy(c, sc, a, v, &enemy, target); err != nil {
+		if err = s.scaleEnemy(c, sc, a, v, &enemy, target, frozen); err != nil {
 			return fmt.Errorf("scale stage %d: %w", stage+1, err)
 		}
 		enemies = append(enemies, enemy)

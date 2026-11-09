@@ -34,11 +34,7 @@ func (Store) AppearanceRevisionTx(ctx context.Context, q tx.Queryer, revision st
 	if q == nil || len(revision) != 64 {
 		return false, errors.New("content store: invalid appearance revision")
 	}
-	var raw string
-	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
-		return false, err
-	}
-	return manifestHasCapability([]byte(raw), revision, characterasset.AppearanceContentCapability)
+	return storedCapability(ctx, q, revision, characterasset.AppearanceContentCapability)
 }
 
 func (s Store) AppearanceSkin(ctx context.Context, revision string, modelID int64) (characterasset.AppearanceSkinDefinition, bool, error) {
