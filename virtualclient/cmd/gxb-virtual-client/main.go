@@ -424,6 +424,10 @@ func (run run) step(virtual *client.Client, step string) error {
 		switch argument {
 		case "top_floor_task_rank":
 			return provision.TopFloorTaskRankFixture(context.Background(), run.databaseURL, run.account)
+		case "top_floor_no_defense":
+			return provision.TopFloorNoDefenseFixture(context.Background(), run.databaseURL, run.account)
+		case "top_floor_task_opponent":
+			return provision.TopFloorTaskOpponentFixture(context.Background(), run.databaseURL, run.account)
 		case "one_on_one_cooling":
 			return provision.OneOnOneCoolingFixture(context.Background(), run.databaseURL, run.account)
 		case "strong_team":
