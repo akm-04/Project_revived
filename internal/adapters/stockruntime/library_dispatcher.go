@@ -116,8 +116,12 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		c.Family = app.Gift
 		c.Value, e = requiredInt64(params, "gift_id")
 		n, err := requiredInt64(params, "gift_num")
-		if err != nil || n != 1 {
+		if err != nil || n < 1 || n > library.MaxWireInt {
 			return badHero("invalid_library_gift_num")
+		}
+		if n != 1 {
+			// One stays the zero value so pre-bulk receipts keep their fingerprint.
+			c.Quantity = n
 		}
 	case 839:
 		c.Family = app.BuyGift

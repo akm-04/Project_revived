@@ -214,7 +214,13 @@ func (Store) BackfillMissingHeroTx(ctx context.Context, t tx.Tx, ref character.H
 	if e != nil {
 		return false, e
 	}
-	return tag.RowsAffected() == 1, nil
+	if tag.RowsAffected() != 1 {
+		return false, nil
+	}
+	// A backfilled facet gets the same acquisition entry as a fresh one.
+	// PRIVATE_POLICY: every owned creation path records the Vending source.
+	_, e = t.Exec(ctx, `INSERT INTO player_library_hero_logs(player_id,partner_id,log_id,occurred_at)VALUES($1,$2,$3,$4)ON CONFLICT(player_id,partner_id,log_id)DO NOTHING`, int64(ref.PlayerID), ref.PartnerID, library.LogAcquired, now.UTC())
+	return true, e
 }
 
 // SaveHeroTx requires the preplanned Library root and record locks. The root

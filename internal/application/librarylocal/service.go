@@ -58,6 +58,7 @@ type Command struct {
 	Family    string
 	PartnerID int64
 	Value     int64
+	Quantity  int64 `json:",omitempty"`
 	SelectID  int64 `json:",omitempty"`
 	IsReward  bool  `json:",omitempty"`
 	HasSelect bool  `json:",omitempty"`
@@ -70,7 +71,7 @@ func (c Command) Validate() error {
 	}
 	switch c.Family {
 	case Gift:
-		if c.PartnerID <= 0 || c.Value <= 0 {
+		if c.PartnerID <= 0 || c.Value <= 0 || c.Quantity < 0 || c.Quantity > lib.MaxWireInt {
 			return lib.ErrInvalidGift
 		}
 	case Feed:
@@ -670,7 +671,13 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				if !ok {
 					return lib.ErrInvalidGift
 				}
-				facts, changed, e = facts.ApplyGift(rule, gift, d.DecisionAt)
+				quantity := d.Command.Quantity
+				if quantity == 0 {
+					// Direct Go callers predate the stock gift_num; the wire path
+					// always sets it. One gift is the old meaning.
+					quantity = 1
+				}
+				facts, changed, e = facts.ApplyGift(rule, gift, quantity, d.DecisionAt)
 				if e != nil {
 					return e
 				}
@@ -684,7 +691,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 					if ctx, e = s.prepareFacts(ctx, sc.Tx, a.PlayerID, d); e != nil {
 						return e
 					}
-					_, e = s.Costs.DebitMaterialCostTx(ctx, sc.Tx, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: gift.ItemID, Amount: 1}}}, costOp)
+					_, e = s.Costs.DebitMaterialCostTx(ctx, sc.Tx, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: gift.ItemID, Amount: quantity}}}, costOp)
 					if e == nil && facts.Favor > oldFavor {
 						if e = s.ensureMissionSetTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, facts.Favor, d.DecisionAt); e == nil {
 							e = s.advanceGiftMissionTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, d.DecisionAt)
