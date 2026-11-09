@@ -4,19 +4,68 @@
  "contracts": [
   {
    "count": 1,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
+  },
+  {
+   "count": 2,
    "file": "docs/i9/I9_MISSIONS_V1.json"
   },
   {
-   "count": 3,
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 4,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_OCCULT_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
  "dispatcher_files": [
+  "internal/adapters/stockruntime/function_click.go",
   "internal/adapters/stockruntime/guild_war_dispatcher.go",
   "internal/adapters/stockruntime/http_dispatchers.go",
   "internal/adapters/stockruntime/operation_log.go"
@@ -35,6 +84,14 @@
  },
  "login": [],
  "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/function_click.go",
+    "line": 23
+   },
+   "mid": 30,
+   "name": "FUNCTION_CLICK"
+  },
   {
    "handler": {
     "file": "internal/adapters/stockruntime/operation_log.go",

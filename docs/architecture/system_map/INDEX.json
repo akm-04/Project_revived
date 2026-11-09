@@ -382,6 +382,7 @@
    "2979": "characterhero",
    "298": "topfloor",
    "299": "topfloor",
+   "30": "realtimeauth",
    "300": "topfloor",
    "301": "ranking",
    "304": "characterhero",
@@ -1413,7 +1414,7 @@
   {
    "callees": 2,
    "callers": 1,
-   "mids": 3,
+   "mids": 4,
    "name": "realtimeauth",
    "path": "internal/application/realtimeauth",
    "purpose": "orchestrates I3 gameplay-context authority for stock realtime discovery and admission",

@@ -57,16 +57,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 30,
-   "name": "FUNCTION_CLICK",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 32,
    "name": "LOAD_SHOP",
    "files": [
@@ -886,12 +876,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 575,
+  "count": 574,
   "window_sender_mid_count": 140,
-  "non_window_sender_mid_count": 435,
+  "non_window_sender_mid_count": 434,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 46,
+   "no_registration": 45,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -952,19 +942,6 @@
    {
     "mid": 27,
     "name": "USE_ENERGY_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 30,
-    "name": "FUNCTION_CLICK",
     "registration_status": "no_registration",
     "senders": [
      "app/model/SelfPlayer.lua"

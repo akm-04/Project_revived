@@ -436,6 +436,8 @@ func (run run) step(virtual *client.Client, step string) error {
 			return provision.GuildCampaignFixture(context.Background(), run.databaseURL, run.account)
 		case "guild_campaign_last_wave":
 			return provision.GuildCampaignLastWaveFixture(context.Background(), run.databaseURL, run.account)
+		case "guild_join_seed":
+			return provision.GuildJoinSeedFixture(context.Background(), run.databaseURL, run.account)
 		case "mentor_terminate_ready":
 			return provision.MentorTerminateReadyFixture(context.Background(), run.databaseURL, run.account)
 		}
