@@ -233,11 +233,11 @@ func gluePurchaseCounterTransaction(service i5.Service, owner dormstore.Store, p
 func TestI910CUpgradeQualification(t *testing.T) {
 	evidencePath := os.Getenv("GXB_I910C_OLD_EVIDENCE")
 	upgradeDSN := os.Getenv("GXB_I910C_UPGRADE_DSN")
-	if evidencePath == "" && upgradeDSN == "" {
-		t.Skip("dedicated one-shot schema126 historical upgrade fixture not configured")
+	if evidencePath == "" {
+		t.Skip("dedicated schema126 historical player capture not supplied")
 	}
-	if evidencePath == "" || upgradeDSN == "" {
-		t.Fatal("GXB_I910C_OLD_EVIDENCE and GXB_I910C_UPGRADE_DSN must both be configured")
+	if upgradeDSN == "" {
+		t.Fatal("GXB_I910C_UPGRADE_DSN required with historical player capture")
 	}
 	p, err := pg.Open(ctx, upgradeDSN, pg.PoolSettings{MaxConns: 16, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
 	if err != nil {
