@@ -117,6 +117,7 @@
  "tests": {
   "integration": [
    "guildinvite",
+   "playerdisplay",
    "publicshowcase"
   ],
   "scenarios_naming": [],

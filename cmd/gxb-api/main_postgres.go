@@ -588,6 +588,7 @@ func main() {
 	}
 	mustRegister(301, ranking)
 	mustRegister(121, stockruntime.OperationLogDispatcher{Authority: authority})
+	mustRegister(30, stockruntime.FunctionClickDispatcher{Authority: authority})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
 	mustRegister(2754, lobbyD)
 	for _, mid := range stockruntime.SummonMIDs {
