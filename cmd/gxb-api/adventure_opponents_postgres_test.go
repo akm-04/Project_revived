@@ -200,7 +200,7 @@ func TestGauntlet6AdventureOpponentsProductionNative(t *testing.T) {
 		partnerByTable[tableID] = hero.PartnerID
 	}
 	if _, err = p.Raw().Exec(context.Background(), `INSERT INTO arena_competitions(competition_id,content_revision,policy_id,settled_through,state_version,created_at,updated_at)
-		VALUES($1,$2,$3,0,1,$4,$4) ON CONFLICT(competition_id) DO NOTHING`, arena.CompetitionID, revision, arena.PolicyID, now); err != nil {
+		VALUES($1,$2,$3,$4,1,$5,$5) ON CONFLICT(competition_id) DO NOTHING`, arena.CompetitionID, revision, arena.PolicyID, max(0, catalog.LatestClosed(now)), now); err != nil {
 		t.Fatal(err)
 	}
 	insertArenaPlayer(t, p, arena.Player{PlayerID: attacker.PlayerID, Server: server, Season: season, StarAt: now, Defense: arena.Lineup{Heroes: []int64{}}, Missions: []arena.MissionSlot{}, Awards: []arena.Award{}, StateVersion: 1, CreatedAt: now, UpdatedAt: now}, revision)
