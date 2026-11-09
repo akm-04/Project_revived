@@ -62,7 +62,7 @@ func (mode Mode) Start(ctx context.Context, actor identity.ActorContext, girl in
 	})
 }
 func (mode Mode) createFloor(ctx context.Context, actor identity.ActorContext, current scope, state *memoir.State) error {
-	candidates, err := mode.Opponents.MarchCandidatesTx(ctx, current.timed.Tx, actor, current.timed.Operation.DecisionAt(), 1000)
+	candidates, err := mode.Opponents.MarchCandidatesTx(ctx, current.timed.Tx, actor, current.timed.Operation.DecisionAt(), 1000, true)
 	if err != nil {
 		return err
 	}

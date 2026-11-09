@@ -44,7 +44,7 @@ type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 type Opponents interface {
-	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int) ([]march.Enemy, error)
+	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int, bool) ([]march.Enemy, error)
 }
 type Combat interface {
 	StartTx(context.Context, tx.Tx, characterasset.CoherentReadScope, combat.StartRequest) (combat.Started, error)

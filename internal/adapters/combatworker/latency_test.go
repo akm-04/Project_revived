@@ -110,8 +110,9 @@ func TestResolverLatencyGate(t *testing.T) {
 		for round := range rounds {
 			for index, c := range cases {
 				raw, hash := request(index)
+				// Every repetition replays the round seeds; mirror-timeout-1-1 only times out on those.
 				began := time.Now()
-				output, err := l.Resolve(context.Background(), raw, hash, sha256.Sum256([]byte(fmt.Sprint(c.name, repetition, round))))
+				output, err := l.Resolve(context.Background(), raw, hash, sha256.Sum256([]byte(fmt.Sprint(c.name, round))))
 				elapsed := time.Since(began)
 				if err != nil {
 					t.Fatal(c.name, err)

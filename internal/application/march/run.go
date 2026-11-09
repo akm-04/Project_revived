@@ -122,7 +122,7 @@ func (s Mode) admitFormation(c context.Context, sc gen.TimedScope, a identity.Ac
 	return nil
 }
 func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, r *d.Run, reset bool) error {
-	candidates, err := s.Opponents.MarchCandidatesTx(c, sc.Tx, a, sc.Operation.DecisionAt(), int(v.catalog.Policy.CandidateLimit))
+	candidates, err := s.Opponents.MarchCandidatesTx(c, sc.Tx, a, sc.Operation.DecisionAt(), int(v.catalog.Policy.CandidateLimit), false)
 	if err != nil {
 		return err
 	}
@@ -164,6 +164,7 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 			if err != nil {
 				return err
 			}
+			row["force"] = force
 			e.Force += force
 		}
 	}

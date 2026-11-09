@@ -16,7 +16,9 @@ import (
 
 // MarchCandidatesTx exposes copied defense projections; it neither enters nor
 // locks the ladder and never changes another player's team or run health.
-func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time, limit int) ([]march.Enemy, error) {
+// Without withForce, player rows carry no force: the caller freezes the heroes
+// itself with the viewer-qualified stats it matches on.
+func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time, limit int, withForce bool) ([]march.Enemy, error) {
 	if limit < 15 || limit > 1000 {
 		return nil, d.ErrInvalid
 	}
@@ -73,7 +75,7 @@ func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.A
 		if r.Occupant.Player == a.PlayerID || r.Occupant.IsRobot() {
 			continue
 		}
-		view, err := s.display(c, q, catalog, a.LogicalServerID, r.Occupant, at)
+		view, err := s.displayTeam(c, q, catalog, a.LogicalServerID, r.Occupant, at, withForce)
 		if err != nil {
 			return nil, err
 		}

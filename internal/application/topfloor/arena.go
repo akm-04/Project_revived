@@ -321,6 +321,12 @@ func (s Service) offers(c context.Context, q tx.Queryer, catalog d.Catalog, p d.
 // display builds an occupant's public face: robots from the catalog, players
 // from their canonical owners (directory, guild, roster rows of the defense).
 func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, server identity.LogicalServerID, o d.Occupant, at time.Time) (d.Display, error) {
+	return s.displayTeam(c, q, catalog, server, o, at, true)
+}
+
+// displayTeam leaves player hero rows without force when withForce is false,
+// for callers that freeze the same heroes themselves.
+func (s Service) displayTeam(c context.Context, q tx.Queryer, catalog d.Catalog, server identity.LogicalServerID, o d.Occupant, at time.Time, withForce bool) (d.Display, error) {
 	rank, _, err := s.Store.RankOfTx(c, q, server, o)
 	if err != nil {
 		return d.Display{}, err
@@ -361,6 +367,9 @@ func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, ser
 	view.Heroes, view.Pet, err = s.team(c, q, o.Player, p.Defense, p.DefensePet, at)
 	if err != nil {
 		return view, err
+	}
+	if !withForce {
+		return view, nil
 	}
 	if err = s.fillHeroForce(c, q, o.Player, view.Heroes, at); err != nil {
 		return d.Display{}, err

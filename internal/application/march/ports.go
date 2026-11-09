@@ -53,7 +53,7 @@ type Roster interface {
 
 // Opponents is a nonmutating projection from the canonical Top Floor owner.
 type Opponents interface {
-	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int) ([]d.Enemy, error)
+	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int, bool) ([]d.Enemy, error)
 }
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
