@@ -55,6 +55,28 @@ CHILD_SET = re.compile(r'"([A-Z0-9_]+)=|Setenv\("([A-Z0-9_]+)"')
 TEST_FUNCTION = re.compile(r'^func (Test\w+)\(t \*testing\.T\)', re.M)
 
 
+LATENCY_REPETITIONS = 3
+BASELINE_WORK = b'\0' * (64 << 20)
+
+
+def host_conditions():
+    """CPU temperatures, clocks, load and a fixed single-thread hash benchmark (best of 5) at one instant."""
+    temperatures = {}
+    for sensor in Path('/sys/class/hwmon').glob('hwmon*/temp*_input'):
+        name = (sensor.parent / 'name').read_text().strip()
+        label = sensor.with_name(sensor.name.replace('_input', '_label'))
+        key = f"{name}:{label.read_text().strip() if label.exists() else sensor.name}"
+        temperatures[key] = int(sensor.read_text()) / 1000
+    frequencies = [int(path.read_text()) / 1000 for path in Path('/sys/devices/system/cpu').glob('cpu[0-9]*/cpufreq/scaling_cur_freq')]
+    timings = []
+    for _ in range(5):
+        began = time.perf_counter()
+        hashlib.sha256(BASELINE_WORK).digest()
+        timings.append(time.perf_counter() - began)
+    return dict(at=datetime.datetime.now(datetime.timezone.utc).isoformat(), temperatures_celsius=temperatures,
+                mean_frequency_mhz=round(sum(frequencies) / len(frequencies)) if frequencies else None,
+                load_average=os.getloadavg(), baseline_sha256_64mib_seconds=round(min(timings), 4))
+
 class GateFailure(Exception):
     pass
 
@@ -455,7 +477,13 @@ class Gate:
         require(not unformatted, f'gofmt -l lists {unformatted}')
 
     def latency(self):
-        self.go_test('reference-host:latency', '', ['./internal/adapters/combatworker'], {'GXB_I8_LATENCY_GATE': '1'}, run='^TestResolverLatencyGate$')
+        """Absolute pooled p95 decides; host conditions are recorded beside it to explain a failure, never to rescale it."""
+        before = host_conditions()
+        try:
+            self.go_test('reference-host:latency', '', ['./internal/adapters/combatworker'],
+                         {'GXB_I8_LATENCY_GATE': '1', 'GXB_I8_LATENCY_REPETITIONS': str(LATENCY_REPETITIONS)}, run='^TestResolverLatencyGate$')
+        finally:
+            self.steps.append(dict(name='reference-host:latency-conditions', before=before, after=host_conditions()))
 
     def recipes(self):
         return [(name.removeprefix('recipe_').replace('_', '-'), getattr(self, name)) for name in dir(self) if name.startswith('recipe_')
@@ -479,7 +507,7 @@ class Gate:
                                  'GXB_I7A4D_MODE', 'GXB_I7A4D_EXPECTED', 'GXB_I7A7A_UPGRADE_MODE', 'GXB_I7A7B_DEPLOYMENT_MODE',
                                  'GXB_I7C4A_UPGRADE_OLD_REVISION', 'GXB_I7B2B_RESTORED', 'GXB_I7B3A_RESTORED', 'GXB_BOOKMARK_RESTORED',
                                  'GXB_I7B4A_RESTORED', 'GXB_I7B4B_RESTORED', 'GXB_I7B2A_RESTORED', 'GXB_I7B5B_RESTORED', 'GXB_I7B4B_FINAL', 'GXB_I8_4_EXPECT_LEGACY', 'GXB_I7A9_PREPARE_PROCESS',
-                                 'GXB_I8_LATENCY_GATE'}
+                                 'GXB_I8_LATENCY_GATE', 'GXB_I8_LATENCY_REPETITIONS'}
         self.census_of_test_variables()
         self.red += [f'census: test variable {variable} is neither provisioned, recipe-owned nor set by a parent test'
                      for variable in self.census.get('unclassified', [])]
