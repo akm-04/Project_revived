@@ -111,6 +111,7 @@ func seedMentorStudents(ctx context.Context, pool *postgres.Pool, owner identity
 			{`INSERT INTO player_profiles(player_id,display_name,avatar_id,avatar_frame_id,player_type,state_version,created_at,updated_at)VALUES($1,'',110001001,0,0,1,clock_timestamp()-interval '1 day',clock_timestamp()-interval '1 day')`, []any{int64(player)}},
 			{`INSERT INTO player_progression(player_id,level,exp,state_version,updated_at)VALUES($1,$2,0,1,clock_timestamp()-interval '1 day')`, []any{int64(player), mentorFixtureStudentLevel}},
 			{`INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES($1,1,clock_timestamp()-interval '1 day')`, []any{int64(player)}},
+			{`INSERT INTO player_hero_roots(player_id,next_partner_id,sort_type,state_version,created_at,updated_at)VALUES($1,1,0,1,clock_timestamp()-interval '1 day',clock_timestamp()-interval '1 day')`, []any{int64(player)}},
 			{`INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'crystal',1000,1,clock_timestamp()-interval '1 day')`, []any{int64(player)}},
 			{`INSERT INTO player_directory_profiles(player_id,name,lev,avatar_id,avatar_frame_id,vip,conquer_lev,state_version,created_at,updated_at)VALUES($1,$2,$3,110001001,0,0,0,1,clock_timestamp()-interval '1 day',clock_timestamp()-interval '1 day')`, []any{int64(player), fmt.Sprintf("Mentor%d", player), mentorFixtureStudentLevel}},
 		} {

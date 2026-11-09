@@ -1,6 +1,6 @@
 {
   "name": "i9_7a_top_floor_task_battle",
-  "note": "Stock admission to Top Floor task mode: real MID 280 fights, cooldown resets 288 and ticket buys 281 earn ten weekly challenges; only the normal rank is a declared fixture. The mode fight sends stock 295, 285, 286 and 298/299 requests with the shapes of ArenaWindow and ArenaSelectTeamWindow, without opening the team window. Camp and Ban days skip the fight because the provisioned roster may be banned there.",
+  "note": "Stock admission to Top Floor task mode: real MID 280 fights, cooldown resets 288 and ticket buys 281 earn ten weekly challenges; the normal rank is a declared fixture, and fixture:top_floor_task_opponent seeds one robot mode target because D512 starts the special ladder empty. The mode fight sends stock 295, 285, 286 and 298/299 requests with the shapes of ArenaWindow and ArenaSelectTeamWindow, without opening the team window. Camp and Ban days skip the fight because the provisioned roster may be banned there.",
   "level": 60,
   "heroes": [
     10001001,
@@ -25,11 +25,12 @@
     "tap:arena_node",
     "wait:30",
     "lua:local m=xyd.WindowManager.get() if m:getWindow('edit_player_name') then m:closeWindow('edit_player_name') end",
-    "lua:local w=xyd.WindowManager.get():getWindow('arena') assert(not w.isShowArenaMode,'vc-task-admission-bypassed')",
+    "lua:local w=xyd.WindowManager.get():getWindow('arena') assert(w and w.isShowArenaMode,'vc-task-viewer-missing') local a=w.arena_ assert(a.mRank==0,'vc-task-viewer-ranked')",
     "lua:local a=xyd.ModelManager.get():loadModel(xyd.ModelType.ARENA) local hs={} for _,h in pairs(xyd.selfPlayer:getHeros()) do table.insert(hs,h) if #hs>=5 then break end end a:saveArenaDefenderData({defenseHeroes=hs}) __vcNormalDefense=#hs",
     "wait:3",
     "lua:assert(__vcNormalDefense>0,'vc-task-normal-defense')",
     "fixture:top_floor_task_rank",
+    "fixture:top_floor_task_opponent",
     "lua:__tfDone=0 __tfTickets=5 __tfLast=0 function __tfCycle() xyd.Backend.get():request(xyd.mid.LOAD_ARENA,{},function(loadCode,loadBody) if loadCode~=xyd.error.OK then print('vc-tf-load-refused',loadBody and loadBody.error_code) return end local ids={} for _,h in pairs(xyd.selfPlayer:getHeros()) do if #ids<5 then table.insert(ids,h:getHeroID()) end end local e=nil for _,c in ipairs(loadBody.enemies) do if c.table_id~=__tfLast then e=c end end if not e then return end __tfLast=e.table_id xyd.Backend.get():request(xyd.mid.START_FIGHT,{formation=table.concat(ids,'|'),enemy_id=e.table_id,is_avenge=0,campaign_type=xyd.CampaignType.ARENA},function(code,body) if code~=xyd.error.OK then print('vc-tf-start-refused',body and body.error_code) return end if #body.battle_report==0 then return end __tfDone=__tfDone+1 __tfTickets=__tfTickets-1 local function reload() xyd.Backend.get():request(xyd.mid.LOAD_ARENA_PLAYER_LIST,{}) end xyd.Backend.get():request(xyd.mid.ARENA_RESET_TIMER,{},function() if __tfTickets>0 then reload() return end xyd.Backend.get():request(xyd.mid.ARENA_BUY_TICKET,{},function() __tfTickets=5 reload() end) end) end) end) end",
     "lua:if __tfDone<10 then __tfCycle() end",
     "wait:8",

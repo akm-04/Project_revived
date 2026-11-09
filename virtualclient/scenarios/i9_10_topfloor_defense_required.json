@@ -1,6 +1,6 @@
 {
  "name": "i9_10_topfloor_defense_required",
- "note": "D487 through the stock Top Floor window: a fresh player who owns none of the D511 preset girls (so no preset defense is written) opens the arena, preflights an offered opponent (294), enters the stock formation window, selects the team and confirms START (280) without ever saving a defense. The server refuses before any ticket debit, so no battle window opens, the formation window stays, and a stock LOAD_ARENA read afterwards still reports 5 tickets.",
+ "note": "D487 through the stock Top Floor window: the stock opening story always grants preset girl 10001001, so fixture:top_floor_no_defense clears the D511 preset defense written by the first ladder entry. The player then enters the formation window from the arena, selects the team and confirms START (280) without a usable defense. The server refuses before any ticket debit, so no battle window opens, the formation window stays, and a stock LOAD_ARENA read afterwards still reports 5 tickets.",
  "level": 60,
  "heroes": [10001005, 10001006, 10001007, 10001008, 10001009],
  "settle_seconds": 10,
@@ -9,6 +9,7 @@
   "window:sub_arena",
   "tap:arena_node",
   "wait:15",
+  "fixture:top_floor_no_defense",
   "tap:enemy_pos1/challenge_button",
   "wait:8",
   "tap:ok_btn",

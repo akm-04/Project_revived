@@ -131,6 +131,21 @@ xyd.ModelManager = {
 -- NormalHero.selfPlayer nil; each owned hero sees its own owner's album.
 local Hero = require("app.model.Hero")
 local Pet = require("app.model.Pet")
+-- Battle skills can clone an owned hero (Manchong's summonHeroMirror calls
+-- Hero:populate with the source hero's params). The server branch has no global
+-- selfPlayer, so bind the clone to its owner's album the same way model() does.
+local function bindOwnerAlbum(hero)
+	local player = tonumber(hero.playerID_ or 0)
+	if player ~= 0 and hero.selfPlayer == nil and input.players[player] then
+		hero.selfPlayer = { playerID = player, albumAttr = input.players[player].album }
+	end
+end
+local originalPopulate = Hero.populate
+function Hero.populate(hero, params)
+	originalPopulate(hero, params)
+	bindOwnerAlbum(hero)
+	return hero
+end
 local function model(actor)
 	if actor.kind == "PET" then
 		local pet = Pet.new()
