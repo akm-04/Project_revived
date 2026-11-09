@@ -192,6 +192,26 @@ def command_give(arguments):
     return 0
 
 
+def command_unlock_elite(arguments):
+    # Test supply (user R19): every elite stage cleared at 3 stars, so awakening drops in late elite chapters are reachable.
+    sql = (
+        "BEGIN; SET LOCAL lock_timeout='5s';"
+        " WITH elite AS (SELECT DISTINCT (jsonb_array_elements_text(chapter->'super'))::bigint AS campaign_id"
+        " FROM content_campaign_catalogs, jsonb_array_elements(payload->'chapters') AS chapter"
+        " WHERE revision_id=(SELECT revision_id FROM gxb_content_activation WHERE slot='content')),"
+        " written AS (INSERT INTO campaign_nodes(player_id,campaign_id,star,win_day,wins,reset_day,resets,partner_drop)"
+        " SELECT player_id,campaign_id,3,0,0,0,0,false FROM campaign_players CROSS JOIN elite"
+        " ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=3 WHERE campaign_nodes.star<3"
+        " RETURNING player_id)"
+        " UPDATE campaign_players SET state_version=state_version+1,updated_at=now()"
+        " WHERE player_id IN (SELECT player_id FROM written);"
+        " COMMIT;\n"
+    )
+    import_legacy.run_psql(sql)
+    print("unlock-elite done")
+    return 0
+
+
 def command_fight_report(arguments):
     player_id = resolve_player(arguments.login)
     sql = (
@@ -384,6 +404,9 @@ def main(arguments):
     give.add_argument("--currency", action="append", default=[], metavar="KEY:AMOUNT")
     give.add_argument("--item", action="append", default=[], metavar="ID:COUNT")
     give.set_defaults(handler=command_give)
+
+    unlock_elite = subcommands.add_parser("unlock-elite", help="clear every elite stage at 3 stars for all players")
+    unlock_elite.set_defaults(handler=command_unlock_elite)
 
     report = subcommands.add_parser("fight-report", help="last 20 journal rows")
     report.add_argument("login")

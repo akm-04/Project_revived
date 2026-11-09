@@ -19,9 +19,14 @@ test -s "$harness/psk/accounts.txt" || { echo "seed: missing credentials" >&2; e
 "$python" -I -B "$harness/bots.py" enter
 
 # Test supplies for every account: 2 Sorcery Scrolls, 5 Dodgeball tickets (misc dodge_ticket),
-# and for intimacy (R13) 5 Chocolate Gifts, 5 Bracelets, 2 Engagement Rings (library_gift).
-for login in $("$python" -I -B "$harness/helpers.py" players | cut -f1); do
-  "$python" -I -B "$harness/helpers.py" give "$login" --currency occult_ticket:2 --item 50001979:5 \
-    --item 50001113:5 --item 50005016:5 --item 50001112:2 >/dev/null
+# and for intimacy (R13, R17) 100 of every Affinity gift (library_gift), Engagement Ring included.
+gifts=""
+for item in 50001112 50001113 50005011 50005012 50005013 50005014 50005015 50005016 50005017 50005018; do
+  gifts="$gifts --item $item:100"
 done
+for login in $("$python" -I -B "$harness/helpers.py" players | cut -f1); do
+  "$python" -I -B "$harness/helpers.py" give "$login" --currency occult_ticket:2 --item 50001979:5 $gifts >/dev/null
+done
+# R19: every elite stage cleared, for awakening drops.
+"$python" -I -B "$harness/helpers.py" unlock-elite
 echo "SEED_PASS"
