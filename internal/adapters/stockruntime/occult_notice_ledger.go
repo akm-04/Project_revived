@@ -14,11 +14,13 @@ import (
 // shortcut: in memory, so a realtime restart skips the changes of one wakeup;
 // 2362 stays authoritative for the client.
 type roomObservation struct {
-	events    int64
-	pushes    int64
-	pushSeen  bool
-	positions map[identity.PlayerID]int64
-	online    map[identity.PlayerID]bool
+	signature     string
+	signatureSeen bool
+	events        int64
+	pushes        int64
+	pushSeen      bool
+	positions     map[identity.PlayerID]int64
+	online        map[identity.PlayerID]bool
 }
 
 type positionMove struct {
@@ -38,6 +40,25 @@ func (l *RoomNoticeLedger) observe(room int64) (*roomObservation, bool) {
 		l.observed[room] = seen
 	}
 	return seen, known
+}
+
+// roomShapeChanged reports whether the room's shape changed since the last
+// wakeup. The first sight records without pushing: the command reply that
+// created the room already carried its ROOM_CHANGE.
+func (l *RoomNoticeLedger) roomShapeChanged(room int64, signature string) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	seen, _ := l.observe(room)
+	if !seen.signatureSeen {
+		seen.signatureSeen = true
+		seen.signature = signature
+		return false
+	}
+	if seen.signature == signature {
+		return false
+	}
+	seen.signature = signature
+	return true
 }
 
 func (l *RoomNoticeLedger) newEvents(room int64, events []d.EventRecord) []d.EventRecord {

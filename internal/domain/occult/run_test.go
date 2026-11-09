@@ -258,8 +258,12 @@ func TestRoomMapReachabilityEventsAndChapterClear(t *testing.T) {
 		t.Fatal("clearing a campaign opens its unlocks, not the chapter")
 	}
 	eventful, _ := catalog.Campaign(20014)
-	if len(run.TriggerEvent(catalog, eventful)) != 0 {
-		t.Fatal("event 6 is the unread bonus row and does nothing")
+	outcomes := run.TriggerEvent(catalog, eventful)
+	if len(outcomes) != 1 || outcomes[0].Type != EventExtraPoint || outcomes[0].ExtraPoints != 2000 || run.ExtraPoints != 2000 {
+		t.Fatalf("event 6 bonus %+v extra=%d", outcomes, run.ExtraPoints)
+	}
+	if len(run.TriggerEvent(catalog, eventful)) != 0 || run.ExtraPoints != 2000 {
+		t.Fatal("the bonus event fires once per campaign")
 	}
 	autoPass := Campaign{ID: 20012, EventID: int64(EventAutoPass)}
 	if outcomes := run.TriggerEvent(catalog, autoPass); len(outcomes) != 1 || !run.Cleared(20012) {
@@ -277,6 +281,58 @@ func TestRoomMapReachabilityEventsAndChapterClear(t *testing.T) {
 	}
 	if !run.ChapterCleared(catalog) {
 		t.Fatal("final campaign cleared clears the chapter")
+	}
+}
+
+func TestChapterProgressAndStockScore(t *testing.T) {
+	catalog := generatedCatalog(t)
+	run := NewRun(4, SingleCampaignType)
+	if err := run.BindRoom(catalog); err != nil {
+		t.Fatal(err)
+	}
+	if got := run.ProgressFraction(catalog); got != 0 {
+		t.Fatalf("fresh progress %v", got)
+	}
+	run.HeroStatus = map[string]map[string]HeroStatus{key(11): {
+		"1": {HP: 100, MP: 800, LimitHP: 100}, "2": {HP: 50, MP: 900, LimitHP: 100}, "3": {HP: 1, MP: 1000, LimitHP: 100},
+	}}
+	run.BeginFight(1000)
+	for index := range run.Stages["40010"] {
+		run.Stages["40010"][index].HP = 0
+	}
+	progress := run.ProgressFraction(catalog)
+	if progress <= 0 || progress >= 1 {
+		t.Fatalf("one cleared stage progress %v", progress)
+	}
+	// one cleared sub-stage of seven -> 14%; 3 survivors, 87 unused slots,
+	// 140 s left: (3*25 + 87*35 + 14*100 + 140*11)/10.
+	if got, want := run.ChapterScore(catalog, 11, 1010, 0), int64(606); got != want {
+		t.Fatalf("score %d want %d", got, want)
+	}
+	if got, want := run.ChapterScore(catalog, 11, 1010, 1000), int64(1606); got != want {
+		t.Fatalf("score with bonus %d want %d", got, want)
+	}
+	if got := run.ScoreSeconds(1150); got != 0 {
+		t.Fatalf("expired fight seconds %d", got)
+	}
+}
+
+func TestSoloCarriesEnergyAboveThePreviousValue(t *testing.T) {
+	run := NewRun(2, SingleCampaignType)
+	_ = run.BindStages(20002, []int64{500})
+	_ = run.Enter(20002, 0, 11)
+	limits := map[int64]int64{1: 200}
+	if _, err := run.ApplySolo(11, 20002, 0, SoloReport{Star: 3, Heroes: map[int64]HeroStatus{1: {HP: 150, MP: 700}}}, limits, 0, false); err != nil {
+		t.Fatal(err)
+	}
+	_ = run.BindStages(20003, []int64{500})
+	_ = run.Enter(20003, 0, 11)
+	if _, err := run.ApplySolo(11, 20003, 0, SoloReport{Star: 3, Heroes: map[int64]HeroStatus{1: {HP: 150, MP: 950}}}, limits, 0, false); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := run.Status(11, 1)
+	if got.MP != 950 || got.HP != 150 {
+		t.Fatalf("energy must carry forward and HP must not rise: %+v", got)
 	}
 }
 

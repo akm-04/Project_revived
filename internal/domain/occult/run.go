@@ -57,18 +57,25 @@ type RunState struct {
 	StayPositions      map[string]int64                 `json:"stay_positions,omitempty"`
 	EventsDone         []int64                          `json:"events_done,omitempty"`
 	Points             int64                            `json:"points"`
-	ClearSettled       bool                             `json:"clear_settled,omitempty"`
-	Frozen             map[string]json.RawMessage       `json:"frozen,omitempty"`
-	ReportID           string                           `json:"report_id,omitempty"`
-	Events             []EventRecord                    `json:"events,omitempty"`
-	Team               *TeamFight                       `json:"team,omitempty"`
-	TeamRounds         int64                            `json:"team_rounds,omitempty"`
-	Notices            []NoticeRecord                   `json:"notices,omitempty"`
-	Forces             map[string]int64                 `json:"forces,omitempty"`
+	// ExtraPoints is the accumulated event-6 bonus; Points is the chapter score
+	// including it, recomputed at each settle.
+	ExtraPoints  int64                      `json:"extra_points,omitempty"`
+	ClearSettled bool                       `json:"clear_settled,omitempty"`
+	Frozen       map[string]json.RawMessage `json:"frozen,omitempty"`
+	ReportID     string                     `json:"report_id,omitempty"`
+	Events       []EventRecord              `json:"events,omitempty"`
+	Team         *TeamFight                 `json:"team,omitempty"`
+	TeamRounds   int64                      `json:"team_rounds,omitempty"`
+	Notices      []NoticeRecord             `json:"notices,omitempty"`
+	Forces       map[string]int64           `json:"forces,omitempty"`
 }
 
 func NewRun(chapterID, campaignType int64) RunState {
-	return RunState{ChapterID: chapterID, CampaignType: campaignType, DispatchLimit: DispatchLimit}
+	dispatchLimit := int64(DispatchLimit)
+	if campaignType == SingleCampaignType {
+		dispatchLimit = DispatchLimitSingle
+	}
+	return RunState{ChapterID: chapterID, CampaignType: campaignType, DispatchLimit: dispatchLimit}
 }
 
 func (s RunState) Encode() (json.RawMessage, error) { return json.Marshal(s) }
