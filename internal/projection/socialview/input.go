@@ -93,6 +93,7 @@ type Result struct {
 	Friends, Blocks, Players []Player
 	Requests                 []Requested
 	Notices                  []Notified
+	ShowGuildInviteNotices   bool
 	RecallDoing              []RecallDoing
 	RecallDone               []RecallDone
 	RecallGot                []int64

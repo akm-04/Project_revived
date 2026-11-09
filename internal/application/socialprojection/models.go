@@ -80,6 +80,7 @@ type Result struct {
 	Friends, Blocks, Players []Player
 	Requests                 []Requested
 	Notices                  []Notified
+	ShowGuildInviteNotices   bool
 	Recall                   socialrecall.RecallBase
 	RecallNames              map[identity.PlayerID]string
 	Scan                     ScanStats

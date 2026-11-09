@@ -106,6 +106,12 @@ func MapBase(r Result) Base {
 		v.Requests = append(v.Requests, Request{Common: common(p.Player), Message: p.Message, At: p.At.Unix()})
 	}
 	for _, p := range r.Notices {
+		if p.Type == 10 && !r.ShowGuildInviteNotices {
+			// PRIVATE_POLICY: bug #76 - the stock guild_invite_item.csb binds
+			// agree_text/refuse_text as Sprites, so a type-10 row crashes Social >
+			// Notice; keep it stored but unlisted until the OTA client patch.
+			continue
+		}
 		row := Notice{ID: int64(p.ID), Type: p.Type, At: p.At.Unix(), Player: common(p.Player)}
 		switch p.Type {
 		case 6:

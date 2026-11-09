@@ -22,6 +22,20 @@ func envPositiveInt(name string, fallback int) int {
 	return value
 }
 
+// envBool reads an optional boolean setting. Absence is false; a present but
+// invalid value is fatal so a typo cannot silently keep a policy gate.
+func envBool(name string) bool {
+	raw := os.Getenv(name)
+	if raw == "" {
+		return false
+	}
+	value, err := strconv.ParseBool(raw)
+	if err != nil {
+		log.Fatalf("%s must be a boolean, got %q", name, raw)
+	}
+	return value
+}
+
 func envPositiveDuration(name string, fallback time.Duration) time.Duration {
 	raw := os.Getenv(name)
 	if raw == "" {

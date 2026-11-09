@@ -41,6 +41,9 @@ type Service struct {
 	Observer       playerpresentation.TxObserver
 	Recall         socialrecall.RecallBaseReader
 	Content        ContentRevisionReader
+	// ShowGuildInviteNotices keeps the type-10 rows hidden until the OTA client
+	// patch that fixes guild_invite_item.csb (bug #76).
+	ShowGuildInviteNotices bool
 }
 
 func DefaultReadProfile() tx.Profile {
@@ -164,6 +167,7 @@ func (s Service) ReadBasePreparedTx(c context.Context, t tx.Tx, a identity.Actor
 }
 func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k ListKind, hasRoot bool, op operation.Context) (Result, error) {
 	out := emptyResult()
+	out.ShowGuildInviteNotices = s.ShowGuildInviteNotices
 	friends, blocks := []identity.PlayerID{}, []identity.PlayerID{}
 	requests := []socialrelation.FriendRequest{}
 	notices := []socialinbox.Notice{}
