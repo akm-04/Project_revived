@@ -400,6 +400,21 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 			// store persists it (librarystore/store.go:180, inserted at :206).
 			acquiredAt = f.Facts.CreatedAt
 		}
+		if _, present := partnerLogs[strconv.FormatInt(lib.LogAcquired, 10)]; !present {
+			// Imported facets (test_harness/import_legacy.py:1055 inserts the
+			// facet and no log rows) and pre-writer backfills have no explicit
+			// acquisition entry. PRIVATE_POLICY: the facet creation time is the
+			// acquisition time for every creation source.
+			partnerLogs[strconv.FormatInt(lib.LogAcquired, 10)] = map[string]any{"time": acquiredAt.Unix()}
+		}
+		for _, logID := range lib.FavorLogIDsCrossed(0, f.Facts.Favor) {
+			key := strconv.FormatInt(logID, 10)
+			if _, present := partnerLogs[key]; !present {
+				// Same reconstruction for intimacy milestones an import carried
+				// over without their crossing time. PRIVATE_POLICY.
+				partnerLogs[key] = map[string]any{"time": acquiredAt.Unix()}
+			}
+		}
 		for _, milestone := range lib.HoldTimeLogsReached(acquiredAt, at) {
 			partnerLogs[strconv.FormatInt(milestone.LogID, 10)] = map[string]any{"time": milestone.OccurredAt.Unix()}
 		}

@@ -4,17 +4,23 @@ import "time"
 
 // ApplyGift calculates the state effect only. The application service must
 // compose the qualified I5 debit and this effect in the same transaction.
-func (f HeroFacts) ApplyGift(template TemplateRule, gift GiftRule, now time.Time) (HeroFacts, bool, error) {
+//
+// quantity is the stock gift_num: GiftbagUseWindow.lua:126-128 sends the slider
+// count of one gift item in one 840 request, so the favor gain scales by it.
+func (f HeroFacts) ApplyGift(template TemplateRule, gift GiftRule, quantity int64, now time.Time) (HeroFacts, bool, error) {
 	if err := f.Validate(); err != nil {
 		return HeroFacts{}, false, err
 	}
 	if !template.DialogEnabled || template.TableID <= 0 || template.RelationshipSourceID <= 0 {
 		return HeroFacts{}, false, ErrUnqualified
 	}
-	if gift.ItemID <= 0 {
+	if gift.ItemID <= 0 || quantity < 1 || quantity > MaxWireInt {
 		return HeroFacts{}, false, ErrInvalidGift
 	}
 	if gift.Ring {
+		if quantity != 1 {
+			return HeroFacts{}, false, ErrInvalidGift
+		}
 		if gift.ItemID != 50001112 {
 			return HeroFacts{}, false, ErrUnqualified
 		}
@@ -38,9 +44,13 @@ func (f HeroFacts) ApplyGift(template TemplateRule, gift GiftRule, now time.Time
 		if gain < 0 {
 			gain = 0
 		}
-		f.Favor += gain
-		if f.Favor > FavorLimit {
-			f.Favor = FavorLimit
+		remaining := FavorLimit - f.Favor
+		if gain > 0 {
+			if quantity > remaining/gain {
+				f.Favor = FavorLimit
+			} else {
+				f.Favor += gain * quantity
+			}
 		}
 	}
 	f.StateVersion++
