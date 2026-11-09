@@ -94,14 +94,10 @@ func (s Store) libraryCatalogTx(ctx context.Context, q tx.Queryer, revision stri
 }
 
 func (s Store) LibraryInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var manifest string
 	if q == nil || !library.ValidRevision(revision) {
 		return false, library.ErrUnqualified
 	}
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&manifest); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(manifest), revision, "LIBRARY_INPUTS_I7C2B")
+	return storedCapability(ctx, q, revision, "LIBRARY_INPUTS_I7C2B")
 }
 
 type libraryDomainPayload struct {

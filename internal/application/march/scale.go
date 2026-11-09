@@ -25,17 +25,44 @@ const (
 // currently chosen for it. Rows stay copies; the stored defense is never read
 // for writing and the owner's heroes are never changed.
 type scaledHero struct {
-	row   map[string]any
-	ref   character.HeroRef
-	level int64
-	star  int64
-	color int64
+	row    map[string]any
+	ref    character.HeroRef
+	frozen *publicstats.FrozenHero
+	level  int64
+	star   int64
+	color  int64
+}
+
+// frozenTeam caches one owner read per opponent hero for the whole candidate
+// generation; every stage and every binary-search probe reuses it.
+type frozenTeam map[character.HeroRef]*publicstats.FrozenHero
+
+// frozenOwner reads one owner's canonical inputs once per opponent hero and
+// reuses them for the candidate force and every scaling probe.
+func (s Mode) frozenOwner(c context.Context, sc gen.TimedScope, a identity.ActorContext, ref character.HeroRef, revision string, frozen frozenTeam) (*publicstats.FrozenHero, error) {
+	if owner, ok := frozen[ref]; ok {
+		return owner, nil
+	}
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, revision, sc.Operation.DecisionAt())
+	if err != nil {
+		return nil, err
+	}
+	kind := publicstats.Self
+	if ref.PlayerID != a.PlayerID {
+		kind = publicstats.Foreign
+	}
+	owner, err := s.Stats.FreezeHeroTx(c, scope, ref, publicstats.View{Kind: kind, Viewer: a.PlayerID})
+	if err != nil {
+		return nil, err
+	}
+	frozen[ref] = owner
+	return owner, nil
 }
 
 // scaleEnemy brings a copied opponent snapshot within the stage's force
 // tolerance by stepping level first, then colour, then star down to the source
 // table floors. It never scales up and never leaves the stored force behind.
-func (s Mode) scaleEnemy(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, enemy *d.Enemy, target float64) error {
+func (s Mode) scaleEnemy(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, enemy *d.Enemy, target float64, frozen frozenTeam) error {
 	if enemy.Robot != 0 || enemy.Player <= 0 || target <= 0 {
 		return nil
 	}
@@ -44,7 +71,7 @@ func (s Mode) scaleEnemy(c context.Context, sc gen.TimedScope, a identity.ActorC
 	if float64(enemy.Force) <= limit {
 		return nil
 	}
-	heroes, err := s.scaledHeroes(enemy)
+	heroes, err := s.scaledHeroes(c, sc, a, v, enemy, frozen)
 	if err != nil {
 		return err
 	}
@@ -53,25 +80,29 @@ func (s Mode) scaleEnemy(c context.Context, sc gen.TimedScope, a identity.ActorC
 	}
 	for _, field := range []int{scaleLevel, scaleColor, scaleStar} {
 		floor := scaleFloor(policy, field)
-		if err = s.fitScale(c, sc, a, v, heroes, field, floor, limit); err != nil {
+		if err = s.fitScale(heroes, field, floor, limit); err != nil {
 			return err
 		}
 	}
 	total := int64(0)
 	for i := range heroes {
 		h := &heroes[i]
-		force, err := s.scaledForce(c, sc, a, v.revision, h.ref, h.level, h.star, h.color)
+		result, err := h.frozen.Evaluate(h.level, h.star, h.color)
 		if err != nil {
 			return err
 		}
-		h.row["lev"], h.row["star"], h.row["color"], h.row["force"] = h.level, h.star, h.color, force
-		total += force
+		force := math.Round(result.Stats.Force)
+		if math.IsNaN(force) || math.IsInf(force, 0) || force < 0 || force > 100000000000 {
+			return d.ErrUnavailable
+		}
+		h.row["lev"], h.row["star"], h.row["color"], h.row["force"] = h.level, h.star, h.color, int64(force)
+		total += int64(force)
 	}
 	enemy.Force = total
 	return nil
 }
 
-func (s Mode) scaledHeroes(enemy *d.Enemy) ([]scaledHero, error) {
+func (s Mode) scaledHeroes(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, enemy *d.Enemy, frozen frozenTeam) ([]scaledHero, error) {
 	keys := make([]int64, 0, len(enemy.Heroes))
 	for key := range enemy.Heroes {
 		id, err := strconv.ParseInt(key, 10, 64)
@@ -88,12 +119,18 @@ func (s Mode) scaledHeroes(enemy *d.Enemy) ([]scaledHero, error) {
 		if partner <= 0 {
 			return nil, d.ErrUnavailable
 		}
+		ref := character.HeroRef{PlayerID: identity.PlayerID(enemy.Player), PartnerID: partner}
+		owner, err := s.frozenOwner(c, sc, a, ref, v.revision, frozen)
+		if err != nil {
+			return nil, err
+		}
 		heroes = append(heroes, scaledHero{
-			row:   row,
-			ref:   character.HeroRef{PlayerID: identity.PlayerID(enemy.Player), PartnerID: partner},
-			level: number(row["lev"]),
-			star:  number(row["star"]),
-			color: number(row["color"]),
+			row:    row,
+			ref:    ref,
+			frozen: owner,
+			level:  number(row["lev"]),
+			star:   number(row["star"]),
+			color:  number(row["color"]),
 		})
 	}
 	return heroes, nil
@@ -101,7 +138,7 @@ func (s Mode) scaledHeroes(enemy *d.Enemy) ([]scaledHero, error) {
 
 // fitScale binary-searches the largest common value at or below every hero's
 // current value that keeps the copied team's canonical force within limit.
-func (s Mode) fitScale(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, heroes []scaledHero, field int, floor int64, limit float64) error {
+func (s Mode) fitScale(heroes []scaledHero, field int, floor int64, limit float64) error {
 	high := scaleValue(heroes, field)
 	if high <= floor {
 		applyScale(heroes, field, high)
@@ -110,7 +147,7 @@ func (s Mode) fitScale(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	low, best := floor, floor
 	for low <= high {
 		middle := (low + high) / 2
-		force, err := s.scaledTeamForce(c, sc, a, v, heroes, field, middle)
+		force, err := scaledTeamForce(heroes, field, middle)
 		if err != nil {
 			return err
 		}
@@ -138,7 +175,7 @@ func applyScale(heroes []scaledHero, field int, value int64) {
 	}
 }
 
-func (s Mode) scaledTeamForce(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, heroes []scaledHero, field int, value int64) (int64, error) {
+func scaledTeamForce(heroes []scaledHero, field int, value int64) (int64, error) {
 	total := int64(0)
 	for i := range heroes {
 		h := &heroes[i]
@@ -151,33 +188,17 @@ func (s Mode) scaledTeamForce(c context.Context, sc gen.TimedScope, a identity.A
 		case scaleStar:
 			star = value
 		}
-		force, err := s.scaledForce(c, sc, a, v.revision, h.ref, level, star, color)
+		result, err := h.frozen.Evaluate(level, star, color)
 		if err != nil {
 			return 0, err
 		}
-		total += force
+		force := math.Round(result.Stats.Force)
+		if math.IsNaN(force) || math.IsInf(force, 0) || force < 0 || force > 100000000000 {
+			return 0, d.ErrUnavailable
+		}
+		total += int64(force)
 	}
 	return total, nil
-}
-
-func (s Mode) scaledForce(c context.Context, sc gen.TimedScope, a identity.ActorContext, revision string, ref character.HeroRef, level, star, color int64) (int64, error) {
-	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, revision, sc.Operation.DecisionAt())
-	if err != nil {
-		return 0, err
-	}
-	kind := publicstats.Self
-	if ref.PlayerID != a.PlayerID {
-		kind = publicstats.Foreign
-	}
-	result, err := s.Stats.ScaledHeroTx(c, scope, ref, publicstats.View{Kind: kind, Viewer: a.PlayerID}, level, star, color)
-	if err != nil {
-		return 0, err
-	}
-	value := math.Round(result.Stats.Force)
-	if math.IsNaN(value) || math.IsInf(value, 0) || value < 0 || value > 100000000000 {
-		return 0, d.ErrUnavailable
-	}
-	return int64(value), nil
 }
 
 func scaleValue(heroes []scaledHero, field int) int64 {

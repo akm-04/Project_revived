@@ -35,11 +35,7 @@ func (Store) PracticeRevisionTx(ctx context.Context, q tx.Queryer, revision stri
 	if q == nil || len(revision) != 64 {
 		return false, errors.New("content store: invalid Practice revision")
 	}
-	var raw string
-	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
-		return false, err
-	}
-	return manifestHasCapability([]byte(raw), revision, practiceCapability)
+	return storedCapability(ctx, q, revision, practiceCapability)
 }
 
 func (Store) PracticeMethodTx(ctx context.Context, q tx.Queryer, revision string, methodID int64) (apppractice.Method, error) {

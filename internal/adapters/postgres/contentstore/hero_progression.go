@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sync"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/contentqueries"
 	"gxb.local/backend/v2/internal/content/registry"
@@ -11,7 +12,15 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// Installed revisions are immutable, so a manifest decoded once stays valid
+// for that revision. Every Hero facet read verifies the same pinned revision.
+var manifestCapabilities sync.Map
+
 func manifestHasCapability(raw []byte, revision, capability string) (bool, error) {
+	key := revision + "\x00" + capability
+	if cached, ok := manifestCapabilities.Load(key); ok {
+		return cached.(bool), nil
+	}
 	m, err := registry.DecodeManifestStrict(raw)
 	if err != nil {
 		return false, err
@@ -19,12 +28,29 @@ func manifestHasCapability(raw []byte, revision, capability string) (bool, error
 	if m.RevisionID != revision {
 		return false, errors.New("content store: Hero progression manifest revision mismatch")
 	}
+	good := false
 	for _, c := range m.EnabledCapabilities {
 		if c == capability {
-			return true, nil
+			good = true
+			break
 		}
 	}
-	return false, nil
+	manifestCapabilities.Store(key, good)
+	return good, nil
+}
+
+// storedCapability verifies a capability on the pinned immutable revision and
+// reuses the decoded manifest across every Hero facet read of the same revision.
+func storedCapability(ctx context.Context, q tx.Queryer, revision, capability string) (bool, error) {
+	key := revision + "\x00" + capability
+	if cached, ok := manifestCapabilities.Load(key); ok {
+		return cached.(bool), nil
+	}
+	var raw string
+	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
+		return false, err
+	}
+	return manifestHasCapability([]byte(raw), revision, capability)
 }
 
 // HeroProgressionActive reports the current immutable revision only when it

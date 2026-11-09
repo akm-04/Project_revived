@@ -98,11 +98,7 @@ func (s Store) EvolutionInputsActive(ctx context.Context) (string, bool, error) 
 }
 
 func (Store) EvolutionInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(raw), revision, "EVOLUTION_INPUTS_I7C2I")
+	return storedCapability(ctx, q, revision, "EVOLUTION_INPUTS_I7C2I")
 }
 
 func (s Store) EvolutionInputsActiveTx(ctx context.Context, q tx.Queryer) (string, bool, error) {

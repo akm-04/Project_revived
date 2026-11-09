@@ -45,11 +45,7 @@ func (Store) HeroFumoRevisionTx(ctx context.Context, q tx.Queryer, revision stri
 	if q == nil || len(revision) != 64 {
 		return false, errors.New("content store: invalid Hero Fumo revision")
 	}
-	var raw string
-	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
-		return false, err
-	}
-	return manifestHasCapability([]byte(raw), revision, heroFumoCapability)
+	return storedCapability(ctx, q, revision, heroFumoCapability)
 }
 
 func (s Store) HeroFumoTarget(ctx context.Context, revision string, itemID character.EquipmentTemplateID) (character.HeroFumoTarget, error) {

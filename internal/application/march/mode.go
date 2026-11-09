@@ -129,6 +129,7 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 			}
 		}
 		c = context.WithValue(c, lockedHeroesKey{}, locked)
+		c = context.WithValue(c, rosterCacheKey{}, &rosterCache{})
 		r, err := s.Store.LockTx(c, sc.Tx, a.PlayerID, at)
 		if err != nil {
 			return err
