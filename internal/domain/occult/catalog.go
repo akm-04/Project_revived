@@ -27,6 +27,14 @@ const (
 	EventDispatch    = 3
 	SweepPercent     = 60
 
+	// Single-player misc profile: creats_dispatch_hero_limit_single and the
+	// creats_*_param_single score coefficients.
+	DispatchLimitSingle     = 90
+	SurvivalParameterSingle = "2.5"
+	DispatchParameterSingle = "3.5"
+	ScheduleParameterSingle = "10"
+	TimeParameterSingle     = "1.1"
+
 	MultiCampaignType  = 1
 	SingleCampaignType = 2
 
@@ -64,12 +72,15 @@ type Campaign struct {
 	FightIDs     []int64 `json:"fight_ids"`
 	// StageTotalHP is the maximum aggregate monster HP of each fight. Absolute
 	// HP, compiled from the campaign's battle data.
-	StageTotalHP []int64 `json:"stage_total_hp"`
-	EventID      int64   `json:"event_id"`
-	Dialogue     string  `json:"dialogue"`
-	X            string  `json:"x"`
-	Y            string  `json:"y"`
-	ModelID      int64   `json:"model_id"`
+	StageTotalHP   []int64 `json:"stage_total_hp"`
+	EventID        int64   `json:"event_id"`
+	EventCondition int64   `json:"event_condition"`
+	// ExtraIntegral is the campaign's bonus score, granted by event 6 once.
+	ExtraIntegral int64  `json:"extra_integral"`
+	Dialogue      string `json:"dialogue"`
+	X             string `json:"x"`
+	Y             string `json:"y"`
+	ModelID       int64  `json:"model_id"`
 }
 
 // Route is one stage-1 ordinary awakening mission fed by a chapter; the
@@ -81,30 +92,38 @@ type Route struct {
 }
 
 type Catalog struct {
-	Schema            int        `json:"schema_version"`
-	Contract          string     `json:"contract_id"`
-	PolicyID          string     `json:"policy_id"`
-	PolicyVersion     int        `json:"policy_version"`
-	OpenAcademyLevel  int64      `json:"open_academy_level"`
-	EnergyPerTicket   int64      `json:"energy_per_ticket"`
-	TicketCap         int64      `json:"ticket_cap"`
-	RoomCapacity      int64      `json:"room_capacity"`
-	LevelBand         int64      `json:"level_band"`
-	RoomSeconds       int64      `json:"room_seconds"`
-	SelectionSeconds  int64      `json:"selection_seconds"`
-	FightSeconds      int64      `json:"fight_seconds"`
-	ReentrySeconds    int64      `json:"reentry_seconds"`
-	DispatchHeroLimit int64      `json:"dispatch_hero_limit"`
-	EventPercent      int64      `json:"event_percent"`
-	EventDispatch     int64      `json:"event_dispatch"`
-	SurvivalParameter string     `json:"survival_parameter"`
-	DispatchParameter string     `json:"dispatch_parameter"`
-	ScheduleParameter string     `json:"schedule_parameter"`
-	TimeParameter     string     `json:"time_parameter"`
-	SweepPercent      int64      `json:"sweep_percent"`
-	Chapters          []Chapter  `json:"chapters"`
-	Campaigns         []Campaign `json:"campaigns"`
-	AwakeningRoutes   []Route    `json:"awakening_routes"`
+	Schema            int    `json:"schema_version"`
+	Contract          string `json:"contract_id"`
+	PolicyID          string `json:"policy_id"`
+	PolicyVersion     int    `json:"policy_version"`
+	OpenAcademyLevel  int64  `json:"open_academy_level"`
+	EnergyPerTicket   int64  `json:"energy_per_ticket"`
+	TicketCap         int64  `json:"ticket_cap"`
+	RoomCapacity      int64  `json:"room_capacity"`
+	LevelBand         int64  `json:"level_band"`
+	RoomSeconds       int64  `json:"room_seconds"`
+	SelectionSeconds  int64  `json:"selection_seconds"`
+	FightSeconds      int64  `json:"fight_seconds"`
+	ReentrySeconds    int64  `json:"reentry_seconds"`
+	DispatchHeroLimit int64  `json:"dispatch_hero_limit"`
+	EventPercent      int64  `json:"event_percent"`
+	EventDispatch     int64  `json:"event_dispatch"`
+	SurvivalParameter string `json:"survival_parameter"`
+	DispatchParameter string `json:"dispatch_parameter"`
+	ScheduleParameter string `json:"schedule_parameter"`
+	TimeParameter     string `json:"time_parameter"`
+	SweepPercent      int64  `json:"sweep_percent"`
+	// DispatchHeroLimitSingle is the single-player dispatch cap (misc
+	// creats_dispatch_hero_limit_single); the _single score coefficients are the
+	// single-player misc creats_*_param_single values, kept as decimal strings.
+	DispatchHeroLimitSingle int64      `json:"dispatch_hero_limit_single"`
+	SurvivalParameterSingle string     `json:"survival_parameter_single"`
+	DispatchParameterSingle string     `json:"dispatch_parameter_single"`
+	ScheduleParameterSingle string     `json:"schedule_parameter_single"`
+	TimeParameterSingle     string     `json:"time_parameter_single"`
+	Chapters                []Chapter  `json:"chapters"`
+	Campaigns               []Campaign `json:"campaigns"`
+	AwakeningRoutes         []Route    `json:"awakening_routes"`
 }
 
 func (c Catalog) Validate() error {
@@ -114,7 +133,11 @@ func (c Catalog) Validate() error {
 	sourceProfile := c.OpenAcademyLevel == OpenAcademyLevel && c.EnergyPerTicket == EnergyPerTicket && c.TicketCap == TicketCap && c.RoomCapacity == RoomCapacity && c.LevelBand == LevelBand
 	timerProfile := c.RoomSeconds == RoomSeconds && c.SelectionSeconds == SelectionSeconds && c.FightSeconds == FightSeconds && c.ReentrySeconds == ReentrySeconds
 	eventProfile := c.DispatchHeroLimit == DispatchLimit && c.EventPercent == EventPercent && c.EventDispatch == EventDispatch && c.SweepPercent == SweepPercent
-	if !sourceProfile || !timerProfile || !eventProfile {
+	scoreProfile := c.DispatchHeroLimitSingle == DispatchLimitSingle && c.SurvivalParameterSingle == SurvivalParameterSingle &&
+		c.DispatchParameterSingle == DispatchParameterSingle && c.ScheduleParameterSingle == ScheduleParameterSingle &&
+		c.TimeParameterSingle == TimeParameterSingle && c.SurvivalParameter != "" && c.DispatchParameter != "" &&
+		c.ScheduleParameter != "" && c.TimeParameter != ""
+	if !sourceProfile || !timerProfile || !eventProfile || !scoreProfile {
 		return ErrUnavailable
 	}
 	if len(c.Chapters) != 6 || len(c.Campaigns) != 118 || len(c.AwakeningRoutes) != 22 {
@@ -130,6 +153,9 @@ func (c Catalog) Validate() error {
 			return ErrUnavailable
 		}
 		if len(campaign.StageTotalHP) != len(campaign.FightIDs) {
+			return ErrUnavailable
+		}
+		if campaign.EventID == int64(EventExtraPoint) && campaign.ExtraIntegral <= 0 {
 			return ErrUnavailable
 		}
 		for index, total := range campaign.StageTotalHP {

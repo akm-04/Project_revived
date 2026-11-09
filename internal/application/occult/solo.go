@@ -489,14 +489,16 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		}
 		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeSingleFight, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
 		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeFightStatus, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
+		baseScore := view.state.ChapterScore(view.catalog, int64(a.PlayerID), view.at.Unix(), 0)
+		view.state.Points = baseScore + view.state.ExtraPoints
 		body := map[string]any{"award_info": map[string]any{"awards": []map[string]any{}}}
 		if !result.Won {
-			return body, s.fillState(c, sc, a, view, body, result.Score)
+			return body, s.fillState(c, sc, a, view, body, baseScore)
 		}
 		if err = s.settleIfCleared(c, sc, a, view, body); err != nil {
 			return nil, err
 		}
-		return body, s.fillState(c, sc, a, view, body, result.Score)
+		return body, s.fillState(c, sc, a, view, body, baseScore)
 	})
 	return SettleResponse{Body: body, Duplicate: duplicate}, err
 }

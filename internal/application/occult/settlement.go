@@ -215,14 +215,14 @@ func (s Mode) fillState(c context.Context, sc gen.TimedScope, a identity.ActorCo
 	for key, value := range state {
 		body[key] = value
 	}
-	closed := chapterFraction(view.state, view.catalog)
 	body["hero_status"] = selfDispatch(view.state, int64(a.PlayerID))
 	awardInfo, ok := body["award_info"].(map[string]any)
 	if !ok {
 		awardInfo = map[string]any{"awards": []map[string]any{}}
 		body["award_info"] = awardInfo
 	}
-	awardInfo["award_detail"] = map[string]any{"extra_point": int64(0), "point": point, "is_close": closed, "close_time": view.at.Unix(), "start_time": view.state.StartedAt, "progress": closed}
+	awardInfo["award_detail"] = map[string]any{"extra_point": view.state.ExtraPoints, "point": point, "is_close": chapterClosed(view.state, view.catalog),
+		"close_time": view.at.Unix(), "start_time": view.state.StartedAt, "progress": view.state.ProgressFraction(view.catalog)}
 	piggyback(c, body)
 	return nil
 }

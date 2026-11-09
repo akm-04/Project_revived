@@ -144,6 +144,9 @@ func (h OccultRoomNoticeHandler) deliverRemovals(c context.Context, view app.Roo
 }
 
 func (h OccultRoomNoticeHandler) deliverRoomChanges(c context.Context, view app.RoomNotice, _ []identity.PlayerID) error {
+	if !h.Delivered.roomShapeChanged(view.RoomID, view.Signature) {
+		return nil
+	}
 	for _, member := range view.Seated {
 		frame, err := occultRoomFrame(occultFunctionRoomChange, member.Body)
 		if err = h.send(c, member.Player, frame, err); err != nil {

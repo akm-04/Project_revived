@@ -2,6 +2,8 @@ package occult
 
 import (
 	"context"
+	"fmt"
+	"slices"
 	"strconv"
 
 	"gxb.local/backend/v2/internal/application/sharedroom"
@@ -23,7 +25,10 @@ type PlayerBody struct {
 // ROOM_CHANGE, the departures that are delivered once, the run's applied events
 // and the members' map positions.
 type RoomNotice struct {
-	RoomID    int64
+	RoomID int64
+	// Signature changes only with the room's shape (members, start, type); a
+	// fight-only wakeup keeps it, and the projection does not re-send ROOM_CHANGE.
+	Signature string
 	Seated    []PlayerBody
 	Removed   []PlayerBody
 	Events    []d.EventRecord
@@ -72,7 +77,7 @@ func (r NoticeReader) ReadRoomNotice(c context.Context, reference string) (RoomN
 	if err != nil {
 		return RoomNotice{}, false, err
 	}
-	out := RoomNotice{RoomID: room.ID, Events: state.Events, Positions: map[identity.PlayerID]int64{}}
+	out := RoomNotice{RoomID: room.ID, Signature: roomSignature(room, state), Events: state.Events, Positions: map[identity.PlayerID]int64{}}
 	view := &roomView{room: room, state: state, catalog: catalog, at: room.UpdatedAt}
 	if room.Status == domainroom.StatusOpen {
 		out.Seated, err = r.seatedBodies(c, view)
@@ -92,6 +97,14 @@ func (r NoticeReader) ReadRoomNotice(c context.Context, reference string) (RoomN
 		return RoomNotice{}, false, err
 	}
 	return out, true, nil
+}
+
+// roomSignature is what a ROOM_CHANGE push may announce; stage HP, notices and
+// hero status deliberately stay out of it.
+func roomSignature(room domainroom.Room, state d.RunState) string {
+	members := slices.Clone(room.Members())
+	slices.Sort(members)
+	return fmt.Sprintf("%v|%d|%d|%d|%d|%s", members, state.StartedAt, state.ChapterID, state.CampaignType, room.Capacity, room.Status)
 }
 
 func (r NoticeReader) seatedBodies(c context.Context, view *roomView) ([]PlayerBody, error) {

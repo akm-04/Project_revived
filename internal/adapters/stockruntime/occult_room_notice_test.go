@@ -67,6 +67,19 @@ func TestOccultLedgerPushesOnlyChangesAfterTheFirstSight(t *testing.T) {
 	}
 }
 
+func TestOccultRoomChangeOnlyOnShapeChange(t *testing.T) {
+	ledger := NewRoomNoticeLedger()
+	if ledger.roomShapeChanged(7, "seated|100|4|2|1|open") {
+		t.Fatal("the first sight is carried by the command reply")
+	}
+	if ledger.roomShapeChanged(7, "seated|100|4|2|1|open") {
+		t.Fatal("a fight-only wakeup must not resend ROOM_CHANGE")
+	}
+	if !ledger.roomShapeChanged(7, "seated|200|4|2|1|open") {
+		t.Fatal("starting the room must resend ROOM_CHANGE")
+	}
+}
+
 func TestOccultRemovalIsOneShotAndAReseatedPlayerCanBeRemovedAgain(t *testing.T) {
 	ledger := NewRoomNoticeLedger()
 	players := []identity.PlayerID{11}

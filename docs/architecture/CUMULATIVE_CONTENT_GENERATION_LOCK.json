@@ -543,14 +543,23 @@
         },
         "relation": "Compiler-generation succession is not a contiguous accepted artifact or backend upgrade history. Existing payload identity comparison uses actual_parent; full historical upgrade remains separate proof."
       }
+    },
+    {
+      "ordinal": 71,
+      "stage": "I9-10F Occult Score",
+      "compiler_version": "i9-10f-occult-score",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+      "scope": "occult_catalog.json gains the single-player score profile and creats_campaign extra_integral/event_condition; every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
     }
   ],
   "current": {
-    "stage": "I9-10E Social Content",
-    "compiler_version": "i9-10e-social-content",
+    "stage": "I9-10F Occult Score",
+    "compiler_version": "i9-10f-occult-score",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "a7d69b70e4044f0be8f5ec32f464e1b27b64d18a2a1939a72e6ebccf58f066e3",
-    "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical.",
+    "revision_id": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+    "scope": "occult_catalog.json gains the single-player score profile and creats_campaign extra_integral/event_condition; every other artifact byte-identical.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }

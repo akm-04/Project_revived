@@ -5,6 +5,7 @@ package playerdisplay_test
 import (
 	"encoding/json"
 	"errors"
+	"math"
 	"strconv"
 	"testing"
 	"time"
@@ -259,7 +260,7 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	if err != nil {
 		t.Fatal("settle", err)
 	}
-	if settled.Duplicate || settled.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)["point"] != int64(3) {
+	if settled.Duplicate || settled.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)["point"] != int64(509) {
 		t.Fatalf("settle %+v", settled)
 	}
 	duplicate, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 10015, SubID: 1, Star: 3, Formation: formation}, op())
@@ -284,7 +285,7 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if afterSettle["progress"] != int64(0) || afterSettle["room_info"].(map[string]any)["is_close"] != int64(0) {
+	if progress, _ := afterSettle["progress"].(float64); progress <= 0 || progress >= 1 || afterSettle["room_info"].(map[string]any)["is_close"] != int64(0) {
 		t.Fatalf("an uncleared chapter reported completion %#v", afterSettle)
 	}
 	self := afterSettle["self_dispatch"].(map[string]any)[keyOf(partner)].(map[string]any)
@@ -327,6 +328,75 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	after, err := s.Info(ctx, a, op())
 	if err != nil || after["base_info"].(map[string]any)["room_id"] != int64(0) {
 		t.Fatalf("after exit %#v %v", after, err)
+	}
+}
+
+// TestI9_10OccultStockScoreNative drives a full chapter-4 single-player run in
+// the production order (2371 prepare, 2379 start, 2372 settle) and asserts the
+// stock score, bonus, progress, award rows and the stored best.
+func TestI9_10OccultStockScoreNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := occultOwner(t, p, server, 1)
+	s, _ := occultTestMode(t, p)
+	if _, err := s.CreateSolo(ctx, a, 4, op()); err != nil {
+		t.Fatal(err)
+	}
+	steps := []struct {
+		campaign int64
+		point    int64
+		extra    int64
+	}{
+		{40010, 619, 0}, {40011, 759, 0}, {40014, 899, 0},
+		{40015, 1049, 1000}, {40012, 1189, 1000}, {40013, 1329, 1000}, {40016, 1479, 1000},
+	}
+	for index, step := range steps {
+		prepared, err := s.Prepare(ctx, a, step.campaign, 1, op())
+		if err != nil {
+			t.Fatalf("prepare %d: %v", step.campaign, err)
+		}
+		if prepared["is_auto_pass"] != false {
+			t.Fatalf("campaign %d auto passed", step.campaign)
+		}
+		if _, err = s.StartFight(ctx, a, step.campaign, 1, op()); err != nil {
+			t.Fatalf("start %d: %v", step.campaign, err)
+		}
+		mp := int64(550 + index*50)
+		settled, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: step.campaign, SubID: 1, Star: 3,
+			Formation: []int64{partner}, Heroes: map[int64]d.HeroStatus{partner: {HP: 5000, MP: mp}}}, op())
+		if err != nil {
+			t.Fatalf("settle %d: %v", step.campaign, err)
+		}
+		info := settled.Body["award_info"].(map[string]any)
+		detail := info["award_detail"].(map[string]any)
+		if detail["point"] != step.point || detail["extra_point"] != step.extra {
+			t.Fatalf("campaign %d detail %#v want point=%d extra=%d", step.campaign, detail, step.point, step.extra)
+		}
+		if progress, _ := detail["progress"].(float64); math.Abs(progress-float64(index+1)/float64(len(steps))) > 1e-9 {
+			t.Fatalf("campaign %d progress %v", step.campaign, detail["progress"])
+		}
+		awards := info["awards"].([]map[string]any)
+		if index < len(steps)-1 && len(awards) != 0 {
+			t.Fatalf("ordinary stage %d paid %#v", step.campaign, awards)
+		}
+		if index == len(steps)-1 && len(awards) != 4 {
+			t.Fatalf("clear result awards %#v", awards)
+		}
+		dispatch := settled.Body["self_dispatch"].(map[string]any)[keyOf(partner)].(map[string]any)
+		if dispatch["mp"] != mp {
+			t.Fatalf("campaign %d carried mp %v want %d", step.campaign, dispatch["mp"], mp)
+		}
+		if index == 0 {
+			duplicate, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: step.campaign, SubID: 1, Star: 3,
+				Formation: []int64{partner}, Heroes: map[int64]d.HeroStatus{partner: {HP: 5000, MP: mp}}}, op())
+			if err != nil || !duplicate.Duplicate {
+				t.Fatalf("repeated 2372 on %d: %+v %v", step.campaign, duplicate, err)
+			}
+		}
+	}
+	var best int64
+	if err := p.QueryRow(ctx, `SELECT (scores->>'4')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 2479 {
+		t.Fatalf("stored best %d %v want 2479", best, err)
 	}
 }
 
@@ -405,7 +475,7 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 		}
 	}
 	var best, finished int64
-	if err = p.QueryRow(ctx, `SELECT (scores->>'2')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 33 {
+	if err = p.QueryRow(ctx, `SELECT (scores->>'2')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 1480 {
 		t.Fatalf("best score %d %v", best, err)
 	}
 	if err = p.QueryRow(ctx, `SELECT count(*) FROM occult_runs WHERE room_id=$1 AND finished_at IS NOT NULL`, roomID).Scan(&finished); err != nil || finished != 1 {
@@ -438,14 +508,14 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 		t.Fatalf("sweep progress is the chapter fraction, not energy: %#v", swept)
 	}
 	detail := clearedReply.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)
-	if detail["progress"] != int64(1) || detail["is_close"] != int64(1) || clearedReply.Body["progress"] != int64(1) {
+	if detail["progress"] != float64(1) || detail["is_close"] != int64(1) || clearedReply.Body["progress"] != float64(1) {
 		t.Fatalf("award_detail completion %#v", clearedReply.Body)
 	}
 	cleared, err := s.Info(ctx, a, op())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cleared["base_info"].(map[string]any)["room_id"] != int64(0) || cleared["progress"] != int64(0) {
+	if cleared["base_info"].(map[string]any)["room_id"] != int64(0) || cleared["progress"] != float64(0) {
 		t.Fatalf("a cleared chapter left a held room %#v", cleared)
 	}
 	if _, held := cleared["room_info"]; held {
