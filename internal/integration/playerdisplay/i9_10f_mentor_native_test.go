@@ -505,3 +505,51 @@ func TestI9_10FMentorExactOperationRetry(t *testing.T) {
 		}
 	})
 }
+
+// A player with no class gets no complete unawarded mission from 1856, so the
+// Social > My Class red dot stays off. A student in a class still gets it.
+func TestI9_10FNoRelationHasNoClassRedDot(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	solo := mentorActor(t, p, 85)
+
+	alone := expectMentorOK(t, mentorCall(t, service, solo, 1856, map[string]any{}), 1856)
+	if applications, _ := alone["apply_list"].([]any); len(applications) != 0 {
+		t.Fatalf("1856 apply_list without relation %#v", applications)
+	}
+	requireNoClaimableClassMission(t, alone)
+
+	teacher := mentorActor(t, p, 90)
+	expectMentorOK(t, mentorCall(t, service, solo, 1857, map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
+	expectMentorOK(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(solo.PlayerID)}), 1859)
+
+	inClass := expectMentorOK(t, mentorCall(t, service, solo, 1856, map[string]any{}), 1856)
+	studentMissions, _ := inClass["mission_list"].([]any)
+	requireCompleteUnawardedMission(t, studentMissions[len(studentMissions)-1], 100024)
+}
+
+func requireNoClaimableClassMission(t *testing.T, info map[string]any) {
+	t.Helper()
+	lists, _ := info["mission_list"].([]any)
+	for _, raw := range lists {
+		missions, _ := raw.([]any)
+		for _, mission := range missions {
+			row := mission.(map[string]any)
+			if row["is_complete"] == int64(1) && row["is_awarded"] == int64(0) {
+				t.Fatalf("complete unawarded class mission without relation: %#v", row)
+			}
+		}
+	}
+}
+
+func requireCompleteUnawardedMission(t *testing.T, raw any, missionID int64) {
+	t.Helper()
+	missions, _ := raw.([]any)
+	for _, mission := range missions {
+		row := mission.(map[string]any)
+		if row["table_id"] == missionID && row["is_complete"] == int64(1) && row["is_awarded"] == int64(0) {
+			return
+		}
+	}
+	t.Fatalf("mission %d complete unawarded missing from student list", missionID)
+}

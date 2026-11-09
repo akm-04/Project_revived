@@ -21,7 +21,7 @@ func wirePlayer(p sp.Player) sv.Player {
 // wireInput is the finite application-to-view bridge at the allowed edge. It
 // copies only committed response values; it performs no read or selection.
 func wireInput(r sp.Result) sv.Result {
-	v := sv.Result{ObservedAt: r.ObservedAt, SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, Recalling: map[int64]bool{}}
+	v := sv.Result{ObservedAt: r.ObservedAt, SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, ShowGuildInviteNotices: r.ShowGuildInviteNotices, Recalling: map[int64]bool{}}
 	for _, row := range r.Recall.Doing {
 		v.RecallDoing = append(v.RecallDoing, sv.RecallDoing{PlayerID: int64(row.PlayerID), PlayerName: r.RecallNames[row.PlayerID], RecallingTime: row.RecallingTime})
 	}

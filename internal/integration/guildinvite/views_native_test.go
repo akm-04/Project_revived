@@ -148,6 +148,15 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	if e != nil || calls != 1 {
 		t.Fatal("single shared observation", e, calls)
 	}
+	stored := 0
+	for _, n := range result.Notices {
+		if n.Notice.NoticeType == 10 {
+			stored++
+		}
+	}
+	if stored != 1 {
+		t.Fatalf("Invite stored in projection: %d", stored)
+	}
 	wire := socialpresentation.MapBase(result)
 	raw, e := json.Marshal(wire)
 	if e != nil {
@@ -157,21 +166,41 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	json.Unmarshal(raw, &doc)
 	var noticeRows []map[string]json.RawMessage
 	json.Unmarshal(doc["notice_list"], &noticeRows)
-	found := false
 	for _, n := range noticeRows {
 		var typ int
 		json.Unmarshal(n["notice_type"], &typ)
 		if typ == 10 {
-			found = true
-			if n["guild_id"] == nil || n["guild_name"] == nil {
-				t.Fatal("missing Invite stock fields", string(raw))
-			}
-		} else if n["guild_id"] != nil || n["guild_name"] != nil {
+			t.Fatal("MID176 type10 listed while hidden", string(raw))
+		}
+		if n["guild_id"] != nil || n["guild_name"] != nil {
 			t.Fatal("changed old notice DTO", string(raw))
 		}
 	}
-	if !found {
-		t.Fatal("eligible Invite missing", string(raw))
+	listSeen := false
+	listViews := views
+	listViews.Invites = observedInvites{InviteNoticeReader: target, observed: &listSeen}
+	listed, e := listViews.LoadList(c, actor, socialprojection.Notice, mustOp(t, policy.Set{}))
+	if e != nil {
+		t.Fatal("MID189 notice list", e)
+	}
+	listWire, e := socialpresentation.MapList(listed, socialprojection.Notice)
+	if e != nil {
+		t.Fatal(e)
+	}
+	listRaw, e := json.Marshal(listWire)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var listRows []map[string]json.RawMessage
+	if e = json.Unmarshal(listRaw, &listRows); e != nil {
+		t.Fatal(e)
+	}
+	for _, n := range listRows {
+		var typ int
+		json.Unmarshal(n["notice_type"], &typ)
+		if typ == 10 {
+			t.Fatal("MID189 type10 listed while hidden", string(listRaw))
+		}
 	}
 	reloader := socialreload.Service{Invites: target, Gifts: gift, Runner: runner, Relations: relations, Inbox: inbox, Observer: socialpresentation.TransactionReader{}}
 	if _, ok, e := reloader.Reload(c, emitter.refs[0], mustOp(t, policy.Set{})); e != nil || !ok {

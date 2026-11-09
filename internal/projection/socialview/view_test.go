@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	sv "gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
+	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/application/socialpresence"
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
 	"gxb.local/backend/v2/internal/application/socialrecall"
@@ -97,6 +98,47 @@ func TestC22CommonAndExtensionsExactNumericBooleanTypes(t *testing.T) {
 		t.Fatal(base.Friends)
 	}
 }
+func TestC23TypeTenGuildInviteNoticeWireShape(t *testing.T) {
+	at := time.Unix(1700000000, 0).UTC()
+	inviter := sp.Player{Presentation: playerpresentation.Projected{Minimal: playerpresentation.Minimal{PlayerID: 200001, Name: "inviter", Level: 9}}}
+	r := sp.Result{ObservedAt: at, Notices: []sp.Notified{{GuildID: 4242, GuildName: "Guild", Player: inviter, Notice: socialinbox.Notice{NoticeID: 77, NoticeType: 10, NoticeTime: at}}}}
+	hidden, err := sv.MapList(r, sp.Notice)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hiddenRaw, err := json.Marshal(hidden)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(hiddenRaw) != "[]" {
+		t.Fatalf("type10 listed while hidden: %s", hiddenRaw)
+	}
+	r.ShowGuildInviteNotices = true
+	value, err := sv.MapList(r, sp.Notice)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var rows []map[string]any
+	if err := json.Unmarshal(raw, &rows); err != nil || len(rows) != 1 {
+		t.Fatalf("notice rows %s %v", raw, err)
+	}
+	row := rows[0]
+	if row["notice_id"] != float64(77) || row["notice_type"] != float64(10) || row["notice_time"] != float64(1700000000) || row["guild_id"] != float64(4242) || row["guild_name"] != "Guild" {
+		t.Fatalf("type10 row %#v", row)
+	}
+	player := row["player_info"].(map[string]any)
+	if player["player_id"] != float64(200001) || player["player_name"] != "inviter" {
+		t.Fatalf("type10 player_info %#v", player)
+	}
+	if len(row) != 6 || len(player) != 10 {
+		t.Fatalf("type10 field count row=%d player_info=%d %s", len(row), len(player), raw)
+	}
+}
+
 func TestC13DecodeStrictRawTerm(t *testing.T) {
 	for _, raw := range []string{`null`, `[]`, `{}`, `{"msg":true}`, `{"player_name":5}`, `{"msg":"x","extra":1}`, `{"msg":"x","player_name":"x"}`, `{"msg":"x","msg":"y"}`, `{"msg":"x"} {}`} {
 		if _, e := sv.DecodeSearch([]byte(raw)); e == nil {
