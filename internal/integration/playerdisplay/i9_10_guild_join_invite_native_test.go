@@ -101,7 +101,7 @@ func guildJoinSocialReads(t *testing.T, p *pg.Pool, invites socialinbox.InviteNo
 	return sp.Service{Runner: tx.Runner{DB: p}, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}, NoticePages: socialinboxstore.Store{},
 		Directory: i4store.TransactionDiscoveryReader{}, Presentation: socialpresentation.TransactionReader{}, Observer: socialpresentation.TransactionReader{},
 		Gifts:   socialgift.Service{Store: socialgiftstore.Store{}, Content: contentstore.Store{Queryer: p}},
-		Invites: invites, PresentationAt: socialpresentation.TransactionReader{}}
+		Invites: invites, PresentationAt: socialpresentation.TransactionReader{}, ShowGuildInviteNotices: true}
 }
 
 func TestI9_10GuildlessListApplyAndInviteNotice(t *testing.T) {

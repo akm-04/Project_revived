@@ -60,33 +60,33 @@ func (l Loan) Fights(player, unit int64) bool {
 }
 
 type Run struct {
-	Revision       string            `json:"revision"`
-	Occurrence     string            `json:"occurrence"`
-	ResetDay       int64             `json:"reset_day"`
-	ResetUsed      bool              `json:"reset_used"`
-	DrinkDay       int64             `json:"drink_day"`
-	Drinks         int64             `json:"drinks"`
-	Passed         int64             `json:"passed"`
-	Won            bool              `json:"won"`
-	Extra          bool              `json:"extra"`
-	HasFight       bool              `json:"has_fight"`
-	Advanced       bool              `json:"advanced"`
-	Heroes         map[string]Status `json:"heroes"`
-	Loan           *Loan             `json:"loan,omitempty"`
-	Enemies        []Enemy           `json:"enemies"`
-	Rewards        map[string][]any  `json:"rewards"`
-	RecommendDay   int64             `json:"recommend_day"`
-	Recommend      []int64           `json:"recommend"`
-	Pending        string            `json:"pending"`
-	Formation      []int64           `json:"formation"`
-	BattleOrdinal  int64             `json:"battle_ordinal"`
-	LastResult     json.RawMessage   `json:"last_result,omitempty"`
+	Revision      string            `json:"revision"`
+	Occurrence    string            `json:"occurrence"`
+	ResetDay      int64             `json:"reset_day"`
+	ResetUsed     bool              `json:"reset_used"`
+	DrinkDay      int64             `json:"drink_day"`
+	Drinks        int64             `json:"drinks"`
+	Passed        int64             `json:"passed"`
+	Won           bool              `json:"won"`
+	Extra         bool              `json:"extra"`
+	HasFight      bool              `json:"has_fight"`
+	Advanced      bool              `json:"advanced"`
+	Heroes        map[string]Status `json:"heroes"`
+	Loan          *Loan             `json:"loan,omitempty"`
+	Enemies       []Enemy           `json:"enemies"`
+	Rewards       map[string][]any  `json:"rewards"`
+	RecommendDay  int64             `json:"recommend_day"`
+	Recommend     []int64           `json:"recommend"`
+	Pending       string            `json:"pending"`
+	Formation     []int64           `json:"formation"`
+	BattleOrdinal int64             `json:"battle_ordinal"`
+	LastResult    json.RawMessage   `json:"last_result,omitempty"`
 	// ChestReplies keeps the granted reply body per claimed stage. The stock
 	// client retries a timed-out 339 with a new operation, and replaying the
 	// already-settled body is what lets its reward popup complete.
 	ChestReplies   map[string][]any `json:"chest_replies,omitempty"`
 	LifetimeChests int64            `json:"lifetime_chests"`
-	Version        int64             `json:"version"`
+	Version        int64            `json:"version"`
 }
 
 // Refresh only refreshes daily entitlements; it never discards an unfinished
