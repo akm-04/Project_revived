@@ -33,11 +33,9 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const recallStartDSNEnv = "GXB_SOCIAL_RECALL_START_DSN"
-
 func openRecallStartPool(t *testing.T) *postgres.Pool {
 	t.Helper()
-	dsn := os.Getenv(recallStartDSNEnv)
+	dsn := os.Getenv("GXB_SOCIAL_RECALL_START_DSN")
 	if dsn == "" {
 		t.Skip("explicit own migrated PostgreSQL database required; skip is not native proof")
 	}

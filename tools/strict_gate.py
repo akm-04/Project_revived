@@ -38,7 +38,9 @@ BINARY_COMMANDS = {'API': ('gxb-api', 'postgres,river'), 'REALTIME': ('gxb-realt
                    'MAINT': ('gxb-profile-media-maint', 'postgres'), 'ACTIVATION': ('gxb-content-broadcast-deploy', 'postgres,river')}
 # Variables the gate itself provides to every run, and test outputs that are only written when a freeze tool asks for them.
 MACHINE_VARIABLES = {'GXB_LUAJIT', 'GXB_I7B5B_ASSET_ROOT', 'GXB_I7A8_FULL_ROSTER_PROBE'}
-OPTIONAL_OUTPUT_VARIABLES = {'GXB_I8_3B_SNAPSHOT_OUT'}
+SUITE_FIXTURE_VARIABLES = {'GXB_BOOK_COMPILER_PAYLOAD', 'GXB_I9_10A_SCRATCH_JSON', 'GXB_SOCIAL_CATALOG_PATH'}
+OPERATOR_VARIABLES = {'GXB_I910C_OLD_EVIDENCE', 'GXB_I9_10B_PRODUCTION_WAKE_PROBE', 'GXB_MENTOR_CATALOG_PATH', 'GXB_SOCIAL17_EVIDENCE'}
+OPTIONAL_OUTPUT_VARIABLES = {'GXB_I8_3B_SNAPSHOT_OUT', 'GXB_I910C_UPGRADE_EVIDENCE', 'GXB_SOCIAL17_UPGRADE_EVIDENCE'}
 TOOLS = ['go', 'gofmt', 'goose', 'luajit', 'initdb', 'pg_ctl', 'createdb', 'psql', 'pg_dump', 'pg_restore', 'zig-cc', 'zig-c++']
 ACCEPTED35_COMMIT = '52b31f6cb83b89eda2085635b205591ca4a72e7f'
 ACCEPTED35_REVISION = '66dddbab1c548555e244c670bc994e9a17c604ba5462e38eb6610c956943b3af'
@@ -46,6 +48,7 @@ PREVIOUS_PRODUCT_COMMIT = '79d1a26a413dd27e14f9d7557cfaf184785d17cb'
 # The last I9-4A commit: content generation 47 (5ca02bec...), schema 00086. Its mission instances pin the generation the 4B upgrade must keep.
 MISSION_CONTENT47_COMMIT = '93ae7889916a0db78e5c1ecad5da7b670a1cac6f'
 MISSION_CONTENT47_TESTS = '^(TestActivityNativePinned47ConsumersAndCanonicalSpend|TestActivityNativeMissingRequiredPayloadIsRefused)$'
+FORUM_LEGACY_MIGRATIONS_COMMIT = 'd1f521e1c2d44251f31a6644ec287207c04474a8'
 POPULATED59_SHA256 = '1423a2014caca26acbfe6fe96c11c8417bd819afbc8827cbdb9705554b364560'
 PREVIOUS_PRODUCT_POPULATE = ('^(TestI7C5ACombatOwnedStartResolveTerminalNative|TestI7C5ACombatCloseUnresolvedNative|'
                              'TestI7C5BTopFloorLadderFightSettlementNative|TestI7C5COneOnOneEntryMatchSettlementNative|'
@@ -265,6 +268,10 @@ class Gate:
             return 'binary'
         if variable in MACHINE_VARIABLES:
             return 'machine'
+        if variable in SUITE_FIXTURE_VARIABLES:
+            return 'suite_fixture'
+        if variable in OPERATOR_VARIABLES:
+            return 'operator'
         if variable in OPTIONAL_OUTPUT_VARIABLES:
             return 'optional_output'
         if variable in self.orchestration_variables:
@@ -291,7 +298,11 @@ class Gate:
         tag_arguments = ['-tags', tags]
         self.step(f'build:{name}', [self.tool('go'), 'build', '-buildvcs=false', *tag_arguments, './...'])
         self.step(f'vet:{name}', [self.tool('go'), 'vet', *tag_arguments, './...'])
-        extra = {}
+        extra = {
+            'GXB_BOOK_COMPILER_PAYLOAD': str(self.source / 'internal/content/builtin/generated/book_input_catalog.json'),
+            'GXB_I9_10A_SCRATCH_JSON': str(self.source / 'internal/content/builtin/generated/workshop_input_catalog.json'),
+            'GXB_SOCIAL_CATALOG_PATH': str(self.source / 'internal/content/builtin/generated/social_input_catalog.json'),
+        }
         if name != 'unit':
             for variable in self.census['dsn']:
                 database = f'{name}_' + variable.lower().removeprefix('gxb_').removesuffix('_dsn')
@@ -471,6 +482,15 @@ class Gate:
         self.deploy(recipe, dsn)
         self.recipe_test(recipe, 'upgraded', './internal/integration/missions', MISSION_CONTENT47_TESTS, self.every_dsn(dsn))
 
+    def recipe_forum_legacy_upgrade(self, recipe):
+        previous = self.export(FORUM_LEGACY_MIGRATIONS_COMMIT, 'forum-legacy-schema111')
+        legacy_migrations = previous / 'migrations'
+        require(legacy_migrations.is_dir(), f'legacy forum migrations missing from {FORUM_LEGACY_MIGRATIONS_COMMIT}')
+        dsn = self.database(recipe.replace('-', '_'))
+        self.recipe_test(recipe, 'upgrade', './internal/integration/playerdisplay',
+                         '^(TestI9_10BForumLegacy111To118Upgrade|TestI9_10BForumLegacyMismatchAborts)$',
+                         {**self.every_dsn(dsn), 'GXB_I9_10B_LEGACY_MIGRATIONS': str(legacy_migrations)})
+
     def format(self):
         self.step('format', [self.tool('gofmt'), '-l', '.'])
         unformatted = (self.work / 'logs/format.log').read_text().split()
@@ -506,7 +526,7 @@ class Gate:
                                  'GXB_I7A7A_RECOVERY_OUTPUT', 'GXB_I7A7B_RECOVERY_MODE', 'GXB_I7A7B_RECOVERY_OUTPUT', 'GXB6B_MIGRATION_FIXTURE',
                                  'GXB_I7A4D_MODE', 'GXB_I7A4D_EXPECTED', 'GXB_I7A7A_UPGRADE_MODE', 'GXB_I7A7B_DEPLOYMENT_MODE',
                                  'GXB_I7C4A_UPGRADE_OLD_REVISION', 'GXB_I7B2B_RESTORED', 'GXB_I7B3A_RESTORED', 'GXB_BOOKMARK_RESTORED',
-                                 'GXB_I7B4A_RESTORED', 'GXB_I7B4B_RESTORED', 'GXB_I7B2A_RESTORED', 'GXB_I7B5B_RESTORED', 'GXB_I7B4B_FINAL', 'GXB_I8_4_EXPECT_LEGACY', 'GXB_I7A9_PREPARE_PROCESS',
+                                 'GXB_I9_10B_LEGACY_MIGRATIONS', 'GXB_I7B4A_RESTORED', 'GXB_I7B4B_RESTORED', 'GXB_I7B2A_RESTORED', 'GXB_I7B5B_RESTORED', 'GXB_I7B4B_FINAL', 'GXB_I8_4_EXPECT_LEGACY', 'GXB_I7A9_PREPARE_PROCESS',
                                  'GXB_I8_LATENCY_GATE', 'GXB_I8_LATENCY_REPETITIONS'}
         self.census_of_test_variables()
         self.red += [f'census: test variable {variable} is neither provisioned, recipe-owned nor set by a parent test'
@@ -545,9 +565,9 @@ class Gate:
             self.red += [f'{test}: {finding}' for finding in findings]
         for test, entry in self.allowlist.items():
             owner_ran = any(label.startswith(entry.get('owner', '-')) and self.ran(test, outcome) for label, outcome in seen.get(test, {}).items())
-            if full and entry['kind'] != 'child_helper' and not owner_ran and entry.get('owner') not in self.blocked:
+            if full and entry['kind'] not in ('child_helper', 'operator') and not owner_ran and entry.get('owner') not in self.blocked:
                 self.red.append(f'{test}: allowlisted for {entry["owner"]} but no {entry["owner"]} run ran it')
-            if full and test not in seen:
+            if full and test not in seen and entry['kind'] != 'operator':
                 self.red.append(f'{test}: allowlist entry names a test no run saw')
         for test in self.known_debt:
             if full and test not in seen:

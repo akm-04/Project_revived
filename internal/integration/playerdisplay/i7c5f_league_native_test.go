@@ -220,6 +220,7 @@ func TestI9_10LeagueSeasonOneHonorRoomIsEmptyNative(t *testing.T) {
 	clock := &leagueClock{at: decisionTime}
 	service := leagueService(t, p, clock)
 	actor, _ := leaguePlayer(t, p, rankingServer(t, p), 100)
+	exec(t, p, `UPDATE player_function_eligibility SET eligible_at=$2 WHERE player_id=$1`, int64(actor.PlayerID), decisionTime.Add(-time.Minute))
 	leagueDo(t, service, actor, app.Command{Kind: "INFO"})
 	root, exists, err := (leaguestore.Store{}).RootTx(ctx, p, false)
 	if err != nil || !exists || root.Season != 1 {

@@ -32,11 +32,9 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const inviteDSNEnv = "GXB_SOCIAL_INVITE_DSN"
-
 func openInvitePool(t *testing.T) *postgres.Pool {
 	t.Helper()
-	dsn := os.Getenv(inviteDSNEnv)
+	dsn := os.Getenv("GXB_SOCIAL_INVITE_DSN")
 	if dsn == "" {
 		t.Skip("explicit own migrated PostgreSQL database required; skip is not native proof")
 	}

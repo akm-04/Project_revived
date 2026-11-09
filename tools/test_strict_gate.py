@@ -10,6 +10,7 @@ DEBT = 'internal/a.TestDebt'
 HELPER = 'internal/a.TestHelper'
 PARENT = 'internal/a.TestParent'
 SEEDED = 'internal/a.TestSeeded'
+OPERATOR = 'internal/a.TestOperator'
 
 
 def gate(runs, package_failures=None, known_debt=(DEBT,), blocked=None):
@@ -21,7 +22,8 @@ def gate(runs, package_failures=None, known_debt=(DEBT,), blocked=None):
     instance.known_debt = {test: {} for test in known_debt}
     instance.blocked = blocked or {}
     instance.allowlist = {HELPER: dict(test=HELPER, kind='child_helper', owners=[PARENT]),
-                          SEEDED: dict(test=SEEDED, kind='recipe', owner='recipe:seed')}
+                          SEEDED: dict(test=SEEDED, kind='recipe', owner='recipe:seed'),
+                          OPERATOR: dict(test=OPERATOR, kind='operator', reason='manual proof')}
     return instance
 
 
@@ -34,6 +36,12 @@ green = {'suite:x': {DEBT: 'fail', HELPER: 'skip', PARENT: 'pass', SEEDED: 'skip
 tests, red = classified(green)
 assert not red, red
 assert tests[DEBT]['status'] == 'KNOWN_DEBT_FAILING' and tests[HELPER]['status'] == 'ALLOWLISTED_SKIP', tests
+
+_, red = classified({**green, 'suite:x': {**green['suite:x'], OPERATOR: 'skip'}})
+assert not red, red
+
+_, red = classified({**green, 'suite:x': {**green['suite:x'], OPERATOR: 'pass'}})
+assert any('STALE_ALLOWLIST' in line for line in red), red
 
 _, red = classified({**green, 'suite:x': {**green['suite:x'], 'internal/a.TestNew': 'fail'}})
 assert any('NEW_FAILURE' in line for line in red), red

@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
+	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -110,8 +111,12 @@ func TestI910CMigration127PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
 	if !strings.Contains(predecessor, app.Open) || !strings.Contains(predecessor, app.Finish) || strings.Contains(predecessor, app.BuyGlue) {
 		t.Fatalf("unexpected predecessor family constraint: %s", predecessor)
 	}
+	bundle, err := registry.LoadBuiltinBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
 	revision, err := (contentstore.Store{}).ActiveRevision(ctx, p)
-	if err != nil || revision != i910cCandidateRevision {
+	if err != nil || revision != bundle.RevisionID() {
 		t.Fatalf("active content revision=%q err=%v", revision, err)
 	}
 	actor := bornActor(t, p)

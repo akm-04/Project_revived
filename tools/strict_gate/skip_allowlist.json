@@ -1,6 +1,6 @@
 {
  "contract": "I85_STRICT_GATE_V1 R3",
- "rule": "A test may skip only when listed. child_helper: its owner (parent test) must pass or be known debt in the same run. recipe/provision/reference_host: a run labelled with the owner prefix must pass it. excluded_from_suites: passed to go test -skip in the suites.",
+ "rule": "A test may skip only when listed. child_helper: its owner (parent test) must pass or be known debt in the same run. recipe/provision/reference_host: a run labelled with the owner prefix must pass it. operator: never run in suites or the gate. excluded_from_suites: passed to go test -skip in the suites.",
  "entries": [
   {
    "test": "internal/adapters/blobstore.TestNativeHelper",
@@ -315,6 +315,44 @@
    "kind": "recipe",
    "owner": "recipe:socialrelation-recovery",
    "reason": "standalone restart/restore harness supplies record path"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI9_10BForumLegacy111To118Upgrade",
+   "kind": "recipe",
+   "owner": "recipe:forum-legacy-upgrade",
+   "reason": "schema-111 migration source is exported from pinned commit d1f521e for the dedicated upgrade proof",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI9_10BForumLegacyMismatchAborts",
+   "kind": "recipe",
+   "owner": "recipe:forum-legacy-upgrade",
+   "reason": "schema-111 migration source is exported from pinned commit d1f521e for the dedicated mismatch proof",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI9_10BProductionWakeManualProbe",
+   "kind": "operator",
+   "reason": "manual production-only probe depends on a 1% adventure trigger and a clean candidate API binary",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/content/builtin.TestCompiledMentorCatalogMatchesGoldenFixture",
+   "kind": "operator",
+   "reason": "requires the external Python compiler output, which is not present in the gate source export",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI910CUpgradeQualification",
+   "kind": "operator",
+   "reason": "requires a retained schema-126 upgrade database and its historical player capture",
+   "excluded_from_suites": true
+  },
+  {
+   "test": "internal/integration/social17upgrade.TestSocial17HistoricalUpgradeAndReceiptReplay",
+   "kind": "operator",
+   "reason": "requires a retained schema-116 upgrade database and its historical player capture",
+   "excluded_from_suites": true
   }
  ]
 }
