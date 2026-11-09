@@ -16,7 +16,7 @@ func deriveMissions(catalog Catalog, actor identity.PlayerID, level int64, relat
 		stored[row.MissionID] = row
 	}
 	mentorFacts := domain.MissionFacts{}
-	studentFacts := domain.MissionFacts{OwnLevel: level}
+	studentFacts := domain.MissionFacts{}
 	for _, row := range progress {
 		mission, ok := missionByID(missions, row.MissionID)
 		if !ok {
@@ -41,6 +41,11 @@ func deriveMissions(catalog Catalog, actor identity.PlayerID, level int64, relat
 		if relation.Student == actor {
 			studentFacts.JoinedClass = true
 		}
+	}
+	// Own-level student missions belong to a class: without an active student
+	// relation they would show a claimable red dot for a player with no class.
+	if studentFacts.JoinedClass {
+		studentFacts.OwnLevel = level
 	}
 	mentorStates, err := domain.ResolveMissions(missions, domain.MissionTypeMentor, mentorFacts)
 	if err != nil {

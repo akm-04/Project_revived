@@ -173,6 +173,42 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	if !found {
 		t.Fatal("eligible Invite missing", string(raw))
 	}
+	listSeen := false
+	listViews := views
+	listViews.Invites = observedInvites{InviteNoticeReader: target, observed: &listSeen}
+	listed, e := listViews.LoadList(c, actor, socialprojection.Notice, mustOp(t, policy.Set{}))
+	if e != nil {
+		t.Fatal("MID189 notice list", e)
+	}
+	listWire, e := socialpresentation.MapList(listed, socialprojection.Notice)
+	if e != nil {
+		t.Fatal(e)
+	}
+	listRaw, e := json.Marshal(listWire)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var listRows []map[string]json.RawMessage
+	if e = json.Unmarshal(listRaw, &listRows); e != nil {
+		t.Fatal(e)
+	}
+	listFound := false
+	for _, n := range listRows {
+		var typ int
+		json.Unmarshal(n["notice_type"], &typ)
+		if typ != 10 {
+			continue
+		}
+		listFound = true
+		for _, key := range []string{"notice_id", "notice_time", "guild_id", "guild_name", "player_info"} {
+			if n[key] == nil {
+				t.Fatalf("MID189 type10 missing %s: %s", key, string(listRaw))
+			}
+		}
+	}
+	if !listFound {
+		t.Fatal("MID189 type10 row missing", string(listRaw))
+	}
 	reloader := socialreload.Service{Invites: target, Gifts: gift, Runner: runner, Relations: relations, Inbox: inbox, Observer: socialpresentation.TransactionReader{}}
 	if _, ok, e := reloader.Reload(c, emitter.refs[0], mustOp(t, policy.Set{})); e != nil || !ok {
 		t.Fatal("canonical u1 reload", ok, e)

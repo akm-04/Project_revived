@@ -1,2 +1,10 @@
-{"name":"social","level":20,
- "steps":["window:social_system","wait:10"],"settle_seconds":15,"expect_ok":[176]}
+{"name":"social","level":85,
+ "steps":[
+  "window:social_system",
+  "wait:10",
+  "lua:local w=xyd.WindowManager.get():getWindow('social_system') if not w or tolua.isnull(w) then error('vc-social-window') end if w:nodeByName('red_point_teacher'):isVisible() then error('vc-social-class-red-dot') end local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SOCIAL_SYSTEM) s.noticelist={{notice_id=900001,notice_type=10,notice_time=os.time(),guild_id=1,guild_name='VC Guild',player_info={player_id=125001,player_name='VC Inviter',avatar_id=110001001,avatar_frame_id=0,lev=10,is_online=0,last_time=0}}} w:swapWindowState(3)",
+  "wait:5"
+ ],
+ "settle_seconds":15,
+ "expect_ok":[176],
+ "note":"Drives the real 189 notice_list row shape (type 10 guild invite with guild_id/guild_name/player_info) into the stock Notice tab so createGuildInviteItemContent renders guild_invite_item.csb, and asserts the level-85 login-embedded 1856 leaves no My Class red dot without a relation. The old scenario only opened the Social window and never opened the Notice tab or seeded a type-10 row, so it never ran the broken renderer and passed client=0."}
