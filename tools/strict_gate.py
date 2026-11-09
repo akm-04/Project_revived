@@ -535,12 +535,13 @@ class Gate:
         self.cluster('init')
         self.cluster('start')
         try:
+            # Latency runs before the hours of suites heat the reference host.
+            self.guarded('reference-host:latency', self.latency)
             self.guarded('format', self.format)
             for name, tags in BUILD_ONLY_TAG_SETS.items():
                 self.guarded(f'build:{name}', self.step, f'build:{name}', [self.tool('go'), 'build', '-buildvcs=false', '-tags', tags, './...'])
             for name, tags in TAG_SETS.items():
                 self.guarded(f'suite:{name}', self.suite, name, tags)
-            self.guarded('reference-host:latency', self.latency)
             for name, recipe in self.recipes():
                 self.guarded(f'recipe:{name}', recipe, name)
         finally:
