@@ -91,7 +91,7 @@ func i910cLockAdmission(t *testing.T, p *pg.Pool, owner dormstore.Store, player 
 // the new DORM_BUY_GLUE lane back through the production admission store.
 // One-shot per database: drop and recreate to repeat.
 func TestI910CMigration127PreservesAdmissionsAndAdmitsBuyGlue(t *testing.T) {
-	dsn := os.Getenv("GXB_I910C_MIG127_DSN")
+	dsn := os.Getenv("GXB_I910C_MIG127_PREDECESSOR_DATABASE")
 	if dsn == "" {
 		t.Skip("dedicated populated schema126 migration127 fixture not configured")
 	}

@@ -121,6 +121,11 @@ func clearRecallWorld(t *testing.T, pool *postgres.Pool, caller, target identity
 		`DELETE FROM realtime_presence_leases WHERE player_id IN ($1,$2)`,
 		`DELETE FROM player_login_observations WHERE player_id IN ($1,$2)`,
 		`DELETE FROM commerce_privilege_roots WHERE player_id IN ($1,$2)`,
+		`DELETE FROM player_social_presence WHERE player_id IN ($1,$2)`,
+		`DELETE FROM social_friendships WHERE player_low_id IN ($1,$2) OR player_high_id IN ($1,$2)`,
+		`DELETE FROM player_social_roots WHERE player_id IN ($1,$2)`,
+		`DELETE FROM player_hero_roots WHERE player_id IN ($1,$2)`,
+		`DELETE FROM player_progression WHERE player_id IN ($1,$2)`,
 		`DELETE FROM player_directory_profiles WHERE player_id IN ($1,$2)`,
 		`DELETE FROM gameplay_context_credentials WHERE context_id IN (SELECT context_id FROM gameplay_contexts WHERE player_id IN ($1,$2))`,
 		`DELETE FROM gameplay_contexts WHERE player_id IN ($1,$2)`,
@@ -142,6 +147,7 @@ func seedRecallWorld(t *testing.T, pool *postgres.Pool, caller, target identity.
 	t.Helper()
 	ctx := context.Background()
 	clearRecallWorld(t, pool, caller, target)
+	t.Cleanup(func() { clearRecallWorld(t, pool, caller, target) })
 	now := dbClock(t, pool)
 	content := contentstore.Store{Queryer: pool}
 	revision, err := content.ActiveRevision(ctx, pool)

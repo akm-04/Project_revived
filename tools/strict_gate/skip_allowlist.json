@@ -349,6 +349,12 @@
    "excluded_from_suites": true
   },
   {
+   "test": "internal/integration/playerdisplay.TestI910CMigration127PreservesAdmissionsAndAdmitsBuyGlue",
+   "kind": "operator",
+   "reason": "requires a dedicated populated database held at goose 126; one-shot per database",
+   "excluded_from_suites": true
+  },
+  {
    "test": "internal/integration/social17upgrade.TestSocial17HistoricalUpgradeAndReceiptReplay",
    "kind": "operator",
    "reason": "requires a retained schema-116 upgrade database and its historical player capture",

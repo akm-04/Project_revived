@@ -116,8 +116,10 @@ func expectMentorRefusal(t *testing.T, response httpedge.Response, mid uint16, c
 func TestI9_10FMentorLifeCycleThroughDispatcher(t *testing.T) {
 	p := pool(t)
 	service := mentorService(p)
-	teacher := mentorActor(t, p, 60)
-	student := mentorActor(t, p, 20)
+	// 1858 scans at most 100 neighbours by player id; a server of its own keeps package neighbours out of that window.
+	server := rankingServer(t, p)
+	teacher := mentorActorOn(t, p, server, 60)
+	student := mentorActorOn(t, p, server, 20)
 
 	info := expectMentorOK(t, mentorCall(t, service, teacher, 1856, map[string]any{}), 1856)
 	if _, ok := info["base_info"].(map[string]any); !ok {

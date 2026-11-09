@@ -23,6 +23,7 @@ import (
 // revision. The caller stays pinned to the legacy revision.
 func TestA55ReadMaterializesExtensionPin(t *testing.T) {
 	p := pool(t)
+	seedHistoricalBookInputs(t, p)
 	a := actor(t, p)
 	s := bookService(p, p)
 	var legacy, source2 string
@@ -112,6 +113,7 @@ func TestA55ReadMaterializesExtensionPin(t *testing.T) {
 
 func TestA55Source2HistoricalCallerPins(t *testing.T) {
 	p := pool(t)
+	seedHistoricalBookInputs(t, p)
 	var legacy string
 	if e := p.Raw().QueryRow(ctx, `SELECT revision_id FROM content_book_input_catalogs WHERE (payload->>'schema_version')::int=1 ORDER BY revision_id LIMIT 1`).Scan(&legacy); e != nil {
 		t.Fatalf("legacy schema1 revision missing; run phase 1 first: %v", e)

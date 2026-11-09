@@ -22,7 +22,7 @@ import (
 func TestI7C2DBookCoreSourceRoundtripRollbackPreserve(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
-	legacyRevision := seedHistoricalBookInputs(t, p)
+	legacyRevision := activateHistoricalBookInputs(t, p)
 	a := actor(t, p)
 	content := contentstore.Store{Queryer: p}
 	active, on, e := content.BookInputsActive(ctx)
@@ -129,7 +129,7 @@ func TestI7C2DBookCostScalarProfileRequired(t *testing.T) {
 	}
 }
 
-// seedHistoricalBookInputs adds the retained schema-1 revision a fresh gate database does not contain.
+// seedHistoricalBookInputs stores the retained schema-1 revision a fresh gate database does not contain, without activating it.
 func seedHistoricalBookInputs(t *testing.T, p *pg.Pool) string {
 	t.Helper()
 	manifestRaw, err := os.ReadFile("../../content/builtin/testdata/manifest_i9_9c_404.json")
@@ -183,6 +183,21 @@ func seedHistoricalBookInputs(t *testing.T, p *pg.Pool) string {
 	if !manifestMatches || !payloadMatches {
 		t.Fatal("historical Book fixture conflicts with stored content")
 	}
+	if err = databaseTransaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	return manifest.RevisionID
+}
+
+// activateHistoricalBookInputs makes the retained schema-1 revision active and restores the previous activation on cleanup.
+func activateHistoricalBookInputs(t *testing.T, p *pg.Pool) string {
+	t.Helper()
+	legacyRevision := seedHistoricalBookInputs(t, p)
+	databaseTransaction, err := p.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer databaseTransaction.Rollback(ctx)
 	store := contentstore.Store{}
 	activation, found, err := store.ReadActivation(ctx, databaseTransaction)
 	if err != nil || !found {
@@ -207,12 +222,12 @@ func seedHistoricalBookInputs(t *testing.T, p *pg.Pool) string {
 			t.Fatal(restoreError)
 		}
 	})
-	activated, err := store.ActivateCAS(ctx, databaseTransaction, manifest.RevisionID, time.Now().UTC(), "i7c2d-native-test", activation)
+	activated, err := store.ActivateCAS(ctx, databaseTransaction, legacyRevision, time.Now().UTC(), "i7c2d-native-test", activation)
 	if err != nil || !activated {
 		t.Fatalf("activate historical Book fixture: activated %v err %v", activated, err)
 	}
 	if err = databaseTransaction.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
-	return manifest.RevisionID
+	return legacyRevision
 }
