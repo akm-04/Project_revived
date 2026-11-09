@@ -69,11 +69,12 @@ func TestRefundAndRecycleSettlement(t *testing.T) {
 	}
 	recycle := RecycleState{}
 	at := time.Unix(120, 0).UTC()
-	if err = SettleRecycle(&recycle, 11000, 15, at); err != nil || recycle.Energy != 0 || !recycle.EnergyAt.Equal(at) {
-		t.Fatalf("recycle anchor = %+v %v", recycle, err)
+	if err = SettleRecycle(&recycle, 11000, 15, at); err != nil || recycle.Energy != 11000 || !recycle.EnergyAt.Equal(at) {
+		t.Fatalf("recycle initial energy = %+v %v", recycle, err)
 	}
+	recycle.Energy = 1000
 	regenerated := at.Add(120 * time.Second)
-	if err = SettleRecycle(&recycle, 11000, 15, regenerated); err != nil || recycle.Energy != 8 || !recycle.EnergyAt.Equal(regenerated) {
+	if err = SettleRecycle(&recycle, 11000, 15, regenerated); err != nil || recycle.Energy != 1008 || !recycle.EnergyAt.Equal(regenerated) {
 		t.Fatalf("recycle regen = %+v %v", recycle, err)
 	}
 	if err = SettleRecycle(&recycle, 5, 15, regenerated.Add(time.Minute)); err != nil || recycle.Energy != 5 || !recycle.EnergyAt.Equal(regenerated.Add(time.Minute)) {

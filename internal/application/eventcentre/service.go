@@ -496,7 +496,13 @@ func adminRead(catalog Catalog, state State, inputs appbook.Inputs, at time.Time
 }
 
 func buildingLevel(inputs appbook.Inputs, buildingType int64) int64 {
-	return inputs.Applied.Buildings[buildingType].Level
+	building, exists := inputs.Applied.Buildings[buildingType]
+	if !exists {
+		// GET_BUILDING_LIST already reports an unbuilt building at level one,
+		// so the stock window offers its level-one actions; commands must agree.
+		return 1
+	}
+	return building.Level
 }
 
 func buildingInfo(inputs appbook.Inputs, buildingType int64) map[string]any {
