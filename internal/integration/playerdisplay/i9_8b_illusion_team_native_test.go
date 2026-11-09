@@ -110,6 +110,9 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatal("join", err)
 		}
 	}
+	if _, err = s.Prepare(ctx, a, op()); err != nil {
+		t.Fatal("master 1351", err)
+	}
 	// IllusionSelectHeroWindow.lua sends one pick at a time as table ids, the
 	// master's pet separately, and 0 for a slot still empty.
 	for _, step := range []struct {
@@ -140,14 +143,10 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 	if _, err = s.SetPartner(ctx, c, il.PartnerRequest{Heroes: []int64{10001005, 10001006}}, op()); err != nil {
 		t.Fatal("mate 2 repick", err)
 	}
-	if _, err = s.Prepare(ctx, a, op()); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = s.Prepare(ctx, b, op()); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = s.Ready(ctx, c, op()); err != nil {
-		t.Fatal(err)
+	for _, member := range []identity.ActorContext{a, b, c} {
+		if _, err = s.Ready(ctx, member, op()); err != nil {
+			t.Fatal("1357", err)
+		}
 	}
 	fight, err := s.StartTeam(ctx, a, op())
 	if err != nil {
@@ -250,7 +249,7 @@ func TestI9_8BIllusionRoomPolicyNative(t *testing.T) {
 	if _, err = s.EnterRoom(ctx, c, roomID, op()); err == nil {
 		t.Fatal("kicked player rejoined")
 	}
-	if _, err = s.Prepare(ctx, b, op()); err != nil {
+	if _, err = s.Ready(ctx, b, op()); err != nil {
 		t.Fatal(err)
 	}
 	reader := stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: p}

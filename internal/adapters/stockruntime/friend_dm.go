@@ -17,10 +17,18 @@ type FriendDMSender interface {
 type FriendDMEmitter interface {
 	EmitFriendDM(context.Context, dm.Occurrence)
 }
+
+// RoomChatSender routes a room-scoped selectType to its room owner; a stock
+// team-chat line is authorized by shared room membership, not friendship.
+type RoomChatSender interface {
+	SendRoomChat(context.Context, identity.ActorContext, identity.PlayerID, friendmessage.Message, operation.Context) error
+}
+
 type FriendDMDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
 	Service   FriendDMSender
 	Emitter   FriendDMEmitter
+	RoomChat  RoomChatSender
 }
 
 func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
@@ -65,6 +73,18 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 	}
 	msg, e := friendmessage.Decode(text)
 	if e != nil {
+		return bad()
+	}
+	if msg.SelectType == friendmessage.SelectIllusion {
+		if d.RoomChat == nil {
+			return unavailable()
+		}
+		if e = d.RoomChat.SendRoomChat(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation); e != nil {
+			return unavailable()
+		}
+		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
+	}
+	if msg.SelectType != friendmessage.SelectSocialSystem {
 		return bad()
 	}
 	if d.Service == nil {

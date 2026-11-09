@@ -12,13 +12,26 @@ import (
 
 var ErrMalformed = errors.New("malformed ordinary private message")
 
+// SelectIllusion is xyd.FriendMsgSelectType.ILLUSION: the stock client's
+// team-room chat routed through CHAT_TO_FRIEND. MaxSelectType is RAGNAROK.
+const (
+	SelectSocialSystem int64 = 0
+	SelectIllusion     int64 = 1
+	MaxSelectType      int64 = 6
+)
+
 type Message struct {
 	Kind       int64
 	Text       string
 	EmoticonID int64
+	// SelectType zero is omitted from Canonical, preserving ordinary DM bytes.
+	SelectType int64
 }
 
 func (m Message) Canonical() (string, error) {
+	if m.SelectType < SelectSocialSystem || m.SelectType > MaxSelectType {
+		return "", ErrMalformed
+	}
 	var value any
 	switch m.Kind {
 	case 0:
@@ -26,17 +39,19 @@ func (m Message) Canonical() (string, error) {
 			return "", ErrMalformed
 		}
 		value = struct {
-			Kind int64  `json:"msgType"`
-			Text string `json:"message"`
-		}{0, m.Text}
+			Kind       int64  `json:"msgType"`
+			Text       string `json:"message"`
+			SelectType int64  `json:"selectType,omitempty"`
+		}{0, m.Text, m.SelectType}
 	case 1:
 		if m.EmoticonID < 1 || m.EmoticonID > 9007199254740991 || m.Text != "" {
 			return "", ErrMalformed
 		}
 		value = struct {
-			Kind int64 `json:"msgType"`
-			ID   int64 `json:"message"`
-		}{1, m.EmoticonID}
+			Kind       int64 `json:"msgType"`
+			ID         int64 `json:"message"`
+			SelectType int64 `json:"selectType,omitempty"`
+		}{1, m.EmoticonID, m.SelectType}
 	default:
 		return "", ErrMalformed
 	}
@@ -59,17 +74,19 @@ func Decode(text string) (Message, error) {
 			return Message{}, ErrMalformed
 		}
 	}
+	out := Message{}
 	if v, exists := m["selectType"]; exists {
 		n, ok := v.(int64)
-		if !ok || n != 0 {
+		if !ok || n < SelectSocialSystem || n > MaxSelectType {
 			return Message{}, ErrMalformed
 		}
+		out.SelectType = n
 	}
 	kind, ok := m["msgType"].(int64)
 	if !ok {
 		return Message{}, ErrMalformed
 	}
-	out := Message{Kind: kind}
+	out.Kind = kind
 	switch kind {
 	case 0:
 		out.Text, ok = m["message"].(string)
