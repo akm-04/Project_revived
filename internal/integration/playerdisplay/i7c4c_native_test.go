@@ -89,6 +89,7 @@ func TestI7C4CLegacyUnknownZeroAndRollback(t *testing.T) {
 	p := pool(t)
 	a, rev := achievementFixture(t, p, false)
 	s := metricCommands(p, p)
+	exec(t, p, `DELETE FROM player_library_hero_logs WHERE player_id=$1`, int64(a.PlayerID))
 	exec(t, p, `DELETE FROM player_library_heroes WHERE player_id=$1`, int64(a.PlayerID))
 	if _, e := s.Execute(ctx, a, app.Command{Kind: app.ShowCommand, Show: []int64{1010}}, op()); e == nil {
 		t.Fatal("missingfacet becamezero")
