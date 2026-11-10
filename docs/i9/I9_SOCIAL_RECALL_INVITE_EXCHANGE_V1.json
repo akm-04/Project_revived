@@ -1,0 +1,63 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_SOCIAL_RECALL_INVITE_EXCHANGE_V1",
+ "node": "ROOT/I9/I9-10/I9-10E",
+ "status": "MID191_COMPONENT_REVIEWED_NATIVE_STOCK_TARGETED_PASS_STAGE_INTEGRATION_IN_PROGRESS_RECALL_INVITE_HELD",
+ "decisions": [
+  "D492",
+  "D493",
+  "D476",
+  "D495"
+ ],
+ "policy_record": "research/I9_10E/PRIVATE_POLICY_PROPOSAL.md",
+ "mids": [
+  191,
+  193,
+  194,
+  384,
+  385,
+  386
+ ],
+ "existing_read_integration": [
+  176
+ ],
+ "owners": {
+  "socialrecall": "Recall task/baseline/completion/claim state and target active claimant reservation",
+  "socialinvite": "Durable code, once-only invitation binding and mission claims",
+  "socialexchange": "Source-qualified product resolution and command orchestration; no duplicate I5 balance ownership",
+  "i5": "Friendship cost and all durable scalar/item rewards",
+  "commerceprivilege": "Canonical total charge observation",
+  "characterhero": "Current owned hero count/maximum level typed observations",
+  "socialrelation": "Existing friendship eligibility",
+  "socialpresence": "Existing presence observations, not proof of canonical login by itself"
+ },
+ "invariants": [
+  "No foreign-owner SQL; typed ports and canonical observations",
+  "Commit cost/reward/progress/receipt atomically; exact replay before fresh catalog validation as applicable",
+  "Durable owner projection on176/384 reload; client-shaped objects and complete stock success bodies",
+  "409 business refusal,400 malformed,503 unavailable under existing routing rules; no fake200 success",
+  "Source gift IDs distinct from item IDs; show_item not reward authority",
+  "D476 validated product override/off hook, no operator endpoint beforeI11",
+  "Mentor state stays separate; no invented push routes"
+ ],
+ "unreleased_boundaries": [
+  "Canonical durable login observation/hook and retry/recovery integration without altering login acceptance",
+  "Governed lock ordering and migration/schema ownership",
+  "Qualified all3gift/dropbox laws and reusable sampling seam preserving Course behavior",
+  "Typed cross-player snapshots/charge/roster fields and response captured under command scope",
+  "Receipt/admission families, source revision compatibility and targeted proof matrix"
+ ],
+ "proof_required": [
+  "Recall start/limit/target contention, qualifying login/expiry boundary, failed retry, completed once, reload and reward replay",
+  "Invite same-account/self/cross-server/level eligibility, duplicate/concurrent binding, code validation, type3 maximum-owned-hero metric and once-only mission claims",
+  "Atomic exchange debit/grant, source all3products, deterministic retry, product-off override and source mismatch refusal",
+  "Production route composition including176 reload and386, exact nativePG tests and stockclient scenario under existing gates"
+ ],
+ "acceptance": "MID191 component bf0fd68 independently reviewed20, targeted native and stock proof scope per adjudication. Working-stage integration under lead review; not frozen, deployed, sealed or full Social leaf accepted. Recall/invite/login remains held.",
+ "implementation_boundaries": [
+  "research/I9_10E/DOMAIN_IMPLEMENTATION_BOUNDARY.md",
+  "research/I9_10E/CONTENT_COMPILER_BOUNDARY.md",
+  "research/I9_10E/REWARD_PROGRESS_IMPLEMENTATION_BOUNDARY.md"
+ ],
+ "transaction_correction": "191 must use existing I5 MaterialExchange Prepare/Apply closed lock union; never debit scalar then acquire a fresh grant union."
+}

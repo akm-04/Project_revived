@@ -1,0 +1,26 @@
+{
+  "contract_id": "GUILD_NAME_LENGTH_POLICY_V1",
+  "status": "PRIVATE_POLICY",
+  "bug": "work/i9/BUGS.md #29",
+  "reason": "The original server's guild name rule is UNKNOWN. The stock client is the only reference: it refuses names longer than xyd.tables.misc.guildNameMaxCharNum (10) as counted by xyd.getTextLen, so a server that counted characters differently silently refused names the client allowed.",
+  "client_reference": [
+    "src_64/app/common/utils.lua:105-136 xyd.getTextLen",
+    "src_64/app/windows/TeamSettingNameWindow.lua:40-49",
+    "src_64/app/windows/TeamCreateWindow.lua:194"
+  ],
+  "rule": {
+    "applies_to": ["guild create", "guild rename"],
+    "unit": "a character whose UTF-8 lead byte is 226-240 counts 1; every other character counts 0.5",
+    "max_units": 10,
+    "min_characters": "unchanged (Policy.NameMinChars)",
+    "other_checks": "unchanged (valid UTF-8 and the existing name checks)"
+  },
+  "examples": {
+    "20 ASCII letters": "accepted",
+    "21 ASCII letters": "refused",
+    "10 CJK characters": "accepted",
+    "11 CJK characters": "refused",
+    "20 two-byte letters such as é": "accepted"
+  },
+  "implementation": "internal/application/guildcore/policy.go Policy.ValidName; tests in internal/application/guildcore/service_test.go"
+}

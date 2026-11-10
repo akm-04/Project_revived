@@ -1,0 +1,48 @@
+{
+ "contract_id": "TOPFLOOR_PLAYTEST_REPAIR_POLICY_V1",
+ "version": 1,
+ "status": "USER_APPROVED_PRIVATE_POLICY_IMPLEMENTATION_PENDING_NOT_SEALED",
+ "authorization": "User explicitly accepted lead recommendation on2026-11-04 and requested research plus bug-fix queue. No additional policy approval needed within this scope.",
+ "decisions": [
+  "D487",
+  "D488",
+  "D489"
+ ],
+ "sealed_base": 797,
+ "extends": [
+  "C5B_TOP_FLOOR_MODE_V1",
+  "I9_TOP_FLOOR_TASK_MODE_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3",
+  "I7C3B_PUBLIC_STAT_COMPOSITION"
+ ],
+ "owner": "Existing TopFloor owner; Character/Pet/PublicStats/Combat/Content keep their existing facts and ports.",
+ "classification": "IMPLEMENTATION_DECISION / PRIVATE_SERVER_POLICY; not recovered original-server algorithm.",
+ "rules": [
+  "D487: a new attacking admission requires a currently valid owned saved defense, in addition to its valid attacking formation. Preserve first-load ladder entry. Validate before spending a ticket; equivalent retry of an accepted attempt still replays its recorded outcome. Existing undefended ranked-state remediation needs separate non-destructive lead design; do not fabricate a team or reset ranks.",
+  "D488: the60-second stock timer limits formation selection. Opening formation does not grant an exclusive reservation of the opponent. Do not add a minute-long database lock or an application lease merely for opening the window.",
+  "For ordinary offered challenges persist a bounded snapshot of the offered identities and the challenger/opponent ranks actually returned by the owning offer response, scoped to player, logical server and normal/special ladder generation. At most the existing three offers; use TopFloor persistence, not another gameplay owner or generic cache. The current stored Offered identities lack these ranks.",
+  "Preflight294/285 compares the selected opponent with the latest issued stored offer snapshot and current eligible ladder state. Reject a stale challenger or selected-opponent rank with stock message35026 before opening formation; final START rechecks atomically before any new ticket debit or attempt creation. Do not invalidate an offer because an unrelated rank changed elsewhere.",
+  "Preserve identity categories, wire IDs, robot identities, special-mode rotation boundaries and valid revenge294{} caller. Revenge follows its own accepted eligibility path and is checked at START; do not invent a mandatory target parameter in294 or silently replace revenge with ordinary offers.",
+  "Exact retry/unknown-commit recovery of an already accepted START precedes new-admission snapshot checks. Do not revoke its report or roll back a settled fight because ranks moved. Preserve authoritative current-rank terminal settlement, receipts, ticket/cooldown/reset/settlement windows, facts and lock order.",
+  "The stock client sends no offer-generation token, so the server can validate its latest issued snapshot but cannot identify every stale screen on a second device sharing the same account. Do not claim that stronger guarantee or modify the client to obtain it in this repair.",
+  "Reuse35026 for a proved stale-rank condition. Reuse35036 only for a genuine busy/unresolved-attempt condition supported by the existing admission/recovery contract; concurrent formation windows or overlapping targets alone are not busy. Do not add target-wide exclusive battle admission by inference.",
+  "D489: reuse current NewRankWindow.clickCell ->291/295 -> arena_team_info. Return complete current saved-defense Hero/Pet rows and player identity/wins/rank under existing privacy and owner contracts. Repair the projection through qualified existing ports; the callback computes power from Hero/Pet fields, so a top-level force patch alone is insufficient. No new popup, parallel stats formula, fabricated power, foreign SQL or display rows used as combat authority.",
+  "Use the applicable D370/F4 non-success HTTP business-refusal mapping and stock message-table error_code. Inspect both success/error callbacks; HTTP200 error_code must not run success behavior. Do not inject error_msg blindly because Backend.lua opens an alert with restart/exit behavior."
+ ],
+ "lead_prerequisites_before_worker_writes": [
+  "Adjudicate task01 report and exact field ledger, including old/V1 limitations; accepted policy is sufficient authorization, research does not need another user approval.",
+  "Lead owns exact persistence/migration/versioning, atomic comparison transaction/locks, recovery and refusal mapping. Record changes before releasing worker; do not let a worker invent those boundaries.",
+  "Create isolated repair worktree from selected stage commit after checking concurrent10B deltas; commit approved lead boundaries as required by FLEET_GUIDE. Assign scratch/DB prefix. Do not deploy canonical or harness automatically."
+ ],
+ "required_proof": [
+  "294 occurs before opening formation;280/286 is final START; valid revenge294{} preserved.",
+  "Changed selected/challenger rank rejected at preflight and START with35026 and zero ticket/attempt/fact/value side effects; unchanged/irrelevant-rank changes allowed; normal/special scopes isolated.",
+  "Accepted duplicate START replays after rank moves, unknown-commit recovery and current-rank exactly-once settlement preserved; missing/old snapshots fail safely with refresh rather than inventing observed rank.",
+  "Saved defense validation includes ownership/current usability and exact retry semantics; cover empty, invalid and consumed references.",
+  "Real291/295 production-constructor projections run through stock Hero/Pet consumers and arena_team_info with valid player/robot identities, wins/rank/team and expected power; no nil indexing or false zero. Exercise another player, pet and special mode where reachable.",
+  "Focused PostgreSQL race tests for concurrent snapshot refresh/rank changes/START; separate fresh reviewer; lead examines changed dangerous boundaries and runs required tests. Product acceptance/deployment/seal remain later gates."
+ ],
+ "evidence": "work/i9/stages/I9-10/fleet_playtest6/TOPFLOOR_CLIENT_FOLLOWUP.md",
+ "resume_next": "Finish existing read-only task01; lead fills ACCEPTED.md and ledger, implements dangerous boundaries, then releases held repair task. No more user approval required unless new contract conflict or scope expansion appears."
+}
