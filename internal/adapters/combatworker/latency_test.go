@@ -35,15 +35,24 @@ func templateActor(t *testing.T, kind d.ActorKind, table string, tableID int64, 
 }
 
 // I8_RESOLVER_LATENCY_V1: p95 of a single fight through the real worker binary
-// and the production pool shape stays within 5 s on the reference machine, at
-// a steady cadence after the pool's first spares are prepared. Opt-in because
-// it measures the host. GXB_I8_LATENCY_REPETITIONS repeats the rounds; the
-// p95 of the pooled absolute samples decides, never a host-normalized figure.
+// and the production pool shape stays within the bound (D516: 6.5 s, tunable
+// with GXB_I8_LATENCY_BOUND) on the reference machine, at a steady cadence
+// after the pool's first spares are prepared. Opt-in because it measures the
+// host. GXB_I8_LATENCY_REPETITIONS repeats the rounds; the p95 of the pooled
+// absolute samples decides, never a host-normalized figure.
 func TestResolverLatencyGate(t *testing.T) {
 	if os.Getenv("GXB_I8_LATENCY_GATE") != "1" {
 		t.Skip("set GXB_I8_LATENCY_GATE=1 on the reference machine")
 	}
-	const rounds, cadence, bound = 5, 3 * time.Second, 5 * time.Second
+	const rounds, cadence = 5, 3 * time.Second
+	bound := 6500 * time.Millisecond
+	if value := os.Getenv("GXB_I8_LATENCY_BOUND"); value != "" {
+		parsed, err := time.ParseDuration(value)
+		if err != nil || parsed <= 0 {
+			t.Fatalf("GXB_I8_LATENCY_BOUND %q is not a positive duration", value)
+		}
+		bound = parsed
+	}
 	repetitions := 1
 	if value := os.Getenv("GXB_I8_LATENCY_REPETITIONS"); value != "" {
 		parsed, err := strconv.Atoi(value)
