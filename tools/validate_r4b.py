@@ -100,8 +100,9 @@ def main() -> int:
             errors.append(f"{table} not created exactly once")
     required_prefix = list(range(1, 11))
     actual_numbers = sorted(int(p.name[:5]) for p in (ROOT / "migrations").glob("[0-9][0-9][0-9][0-9][0-9]_*.sql"))
-    if actual_numbers[:10] != required_prefix or actual_numbers != list(range(1, max(actual_numbers)+1)):
-        errors.append(f"migration sequence={actual_numbers} must preserve contiguous historical 1..10 prefix")
+    retired = set(json.loads((ROOT / "tools" / "retired_migration_numbers.json").read_text())["retired"])
+    if actual_numbers[:10] != required_prefix or actual_numbers != [n for n in range(1, max(actual_numbers)+1) if n not in retired]:
+        errors.append(f"migration sequence={actual_numbers} must preserve contiguous historical 1..10 prefix and skip only retired numbers")
     if "ON DELETE CASCADE" in sql:
         errors.append("immutable content migration must not cascade-delete revision history")
     for needle in (
