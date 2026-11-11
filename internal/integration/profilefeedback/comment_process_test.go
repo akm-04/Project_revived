@@ -7,6 +7,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/nativebirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/profilefeedbackstore"
 	app "gxb.local/backend/v2/internal/application/profilefeedback"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -197,6 +199,45 @@ func TestCommentCorruptProofAndMissingAuthor(t *testing.T) {
 		t.Fatal("tombstone", f, e)
 	}
 }
+
+// loginProcess sends the MID1 sid/login_token pair the stock client logs in with before any gameplay MID. MID1 marks
+// the game day delivered, so the first gameplay reply of the day carries no daily reset signal.
+func loginProcess(t *testing.T, addr string, p *pg.Pool, a identity.ActorContext, output *bytes.Buffer) {
+	t.Helper()
+	digestSecret := []byte("i7b2b-fixture-digest-key-00001")
+	sidRaw := "process-sid-" + a.SessionID.UUID().String()
+	loginRaw := "process-login-" + a.SessionID.UUID().String()
+	sqlExec(t, p, `UPDATE account_sessions SET auth_profile='SID_LOGIN_TOKEN_PAIR' WHERE session_id=$1::uuid`, a.SessionID.UUID().String())
+	for _, c := range []struct{ kind, label, raw string }{{"SID", "sid", sidRaw}, {"LOGIN_TOKEN", "login_token", loginRaw}} {
+		digest, e := identity.DigestCredential(digestSecret, c.label, c.raw)
+		if e != nil {
+			t.Fatal(e)
+		}
+		sqlExec(t, p, `INSERT INTO account_session_credentials(credential_id,session_id,kind,digest,issued_at)VALUES($1,$2,$3,$4,clock_timestamp())`, uuid().String(), a.SessionID.UUID().String(), c.kind, digest[:])
+	}
+	raw := fmt.Sprintf(`{"mid":1,"token":"","region":1,"sid":%q,"login_token":%q}`, sidRaw, loginRaw)
+	var resp *http.Response
+	var e error
+	for deadline := time.Now().Add(12 * time.Second); time.Now().Before(deadline); {
+		resp, e = http.Post("http://"+addr+"/engine", "application/x-www-form-urlencoded", bytes.NewBufferString(url.Values{"payload": {raw}}.Encode()))
+		if e == nil {
+			break
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer resp.Body.Close()
+	var body map[string]any
+	if e = json.NewDecoder(resp.Body).Decode(&body); e != nil {
+		t.Fatal(e)
+	}
+	if resp.StatusCode != 200 {
+		t.Fatal("MID1 login", resp.StatusCode, body, output.String())
+	}
+}
+
 func TestCommentActualAPIProcess(t *testing.T) {
 	binary := os.Getenv("GXB_I7B4B_API_BINARY")
 	if binary == "" {
@@ -205,6 +246,15 @@ func TestCommentActualAPIProcess(t *testing.T) {
 	p := pool(t)
 	installed(t, p)
 	a, b := actor(t, p), actor(t, p)
+	// Replace actor()'s two own-value rows with the production birth chain MID1 login reconciles against.
+	for _, player := range []identity.ActorContext{a, b} {
+		sqlExec(t, p, `DELETE FROM player_profiles WHERE player_id=$1`, int64(player.PlayerID))
+		sqlExec(t, p, `DELETE FROM player_progression WHERE player_id=$1`, int64(player.PlayerID))
+		sqlExec(t, p, `INSERT INTO player_directory_profiles(player_id,name,created_at,updated_at)VALUES($1,$2,clock_timestamp(),clock_timestamp())`, int64(player.PlayerID), fmt.Sprint(player.PlayerID))
+		if e := nativebirth.Persist(ctx, p, player.AccountID.UUID(), player.LogicalServerID, player.PlayerID); e != nil {
+			t.Fatal(e)
+		}
+	}
 	_, bearer := token(t, p, a)
 	_, ownerBearer := token(t, p, b)
 	l, e := net.Listen("tcp", "127.0.0.1:0")
@@ -222,6 +272,8 @@ func TestCommentActualAPIProcess(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer func() { _ = cmd.Process.Signal(os.Interrupt); _ = cmd.Wait() }()
+	loginProcess(t, addr, p, a, &output)
+	loginProcess(t, addr, p, b, &output)
 	send := func(raw string) (int, map[string]any, error) {
 		resp, e := http.Post("http://"+addr+"/engine", "application/x-www-form-urlencoded", bytes.NewBufferString(url.Values{"payload": {raw}}.Encode()))
 		if e != nil {
