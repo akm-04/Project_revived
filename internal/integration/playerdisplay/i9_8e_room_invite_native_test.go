@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
 	"gxb.local/backend/v2/internal/application/socialgift"
@@ -29,18 +31,56 @@ import (
 	"gxb.local/backend/v2/internal/projection/socialview"
 )
 
-type roomInviteNotices struct{ changed []identity.PlayerID }
-
-func (n *roomInviteNotices) NoticeListChanged(_ context.Context, p identity.PlayerID) {
-	n.changed = append(n.changed, p)
-}
-
-var roomInvitePushes = &roomInviteNotices{}
-
 func roomInviteMaterializer(t *testing.T, p *pg.Pool) roominvite.Service {
 	t.Helper()
 	return roominvite.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}},
-		Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{}, Notices: roomInvitePushes}
+		Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{}, Notices: pg.RoomInviteNoticeListEmitter{Pool: p}}
+}
+
+// listenRoomInviteWakeup listens on the production realtime channel and returns
+// a waiter for the room-invite notice-list wakeup addressed to recipient.
+func listenRoomInviteWakeup(t *testing.T, p *pg.Pool, recipient identity.PlayerID) func() {
+	t.Helper()
+	listener, err := p.Raw().Acquire(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(listener.Release)
+	if _, err = listener.Exec(ctx, `LISTEN `+pg.RealtimeWakeupChannel); err != nil {
+		t.Fatal(err)
+	}
+	listenContext, stopListening := context.WithCancel(ctx)
+	t.Cleanup(stopListening)
+	payloads := make(chan string, 8)
+	go func() {
+		for {
+			notification, e := listener.Conn().WaitForNotification(listenContext)
+			if e != nil {
+				return
+			}
+			select {
+			case payloads <- notification.Payload:
+			case <-listenContext.Done():
+				return
+			}
+		}
+	}()
+	expectedReference := strconv.FormatInt(int64(recipient), 10)
+	return func() {
+		t.Helper()
+		deadline := time.After(3 * time.Second)
+		for {
+			select {
+			case payload := <-payloads:
+				wakeup, e := realtimewakeup.Decode([]byte(payload))
+				if e == nil && wakeup.Route == roominvite.NoticeListRoute && wakeup.Ref == expectedReference {
+					return
+				}
+			case <-deadline:
+				t.Fatalf("room invite did not wake the notice list for %d", recipient)
+			}
+		}
+	}
 }
 
 // socialNoticePage is the production LOAD_FRIEND_INFO list_type NOTICE path.
@@ -132,13 +172,11 @@ func TestI9_8ERoomInviteIllusionNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	roomID := illusionRoomID(t, created)
-	beforePush := len(roomInvitePushes.changed)
+	awaitNoticeListWakeup := listenRoomInviteWakeup(t, p, target.PlayerID)
 	if _, err = mode.Invite(ctx, owner, target.PlayerID, op()); err != nil {
 		t.Fatal("invite", err)
 	}
-	if len(roomInvitePushes.changed) != beforePush+1 || roomInvitePushes.changed[beforePush] != target.PlayerID {
-		t.Fatalf("room invite did not push the notice list: %+v", roomInvitePushes.changed)
-	}
+	awaitNoticeListWakeup()
 	page := socialNoticePage(t, p, target)
 	row, found := noticeOfType(page, socialinbox.RoomInviteIllusionNoticeType)
 	if !found {
