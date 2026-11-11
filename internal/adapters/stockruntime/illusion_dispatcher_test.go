@@ -74,7 +74,7 @@ func TestIllusionRefusalIsConflictErrorCode(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := IllusionDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionStub{err: d.ErrRefused}}
 	got := dispatcher.Dispatch(context.Background(), illusionRequest(1344, map[string]any{}, now))
-	if got.HTTPStatus != 409 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
+	if got.HTTPStatus != 409 || got.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }
@@ -112,7 +112,7 @@ func TestIllusionOutOfTurnPickIsConflict(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := IllusionRoomDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionRoomStub{err: d.ErrRefused}}
 	got := dispatcher.Dispatch(context.Background(), illusionRequest(1356, map[string]any{"partner_str": "10001005|10001006", "pet_id": int64(0)}, now))
-	if got.HTTPStatus != 409 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
+	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }

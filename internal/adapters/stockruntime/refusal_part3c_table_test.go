@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	gmquestion "gxb.local/backend/v2/internal/domain/gmquestion"
 	herorecommend "gxb.local/backend/v2/internal/domain/herorecommend"
+	illusion "gxb.local/backend/v2/internal/domain/illusion"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -87,5 +88,17 @@ func TestPart3CHeroRecommendFailureRows(t *testing.T) {
 		{"refused", failHeroRecommend(herorecommend.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"conflict", failHeroRecommend(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"unavailable", failHeroRecommend(herorecommend.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3CIllusionFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"invalid", failIllusion(illusion.ErrInvalid), http.StatusBadRequest, 0, "illusion_invalid_parameter"},
+		{"conflict", failIllusion(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"refused", failIllusion(illusion.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"loan refused", failIllusion(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"balance diamonds", failIllusion(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
+		{"balance other", failIllusion(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", failIllusion(illusion.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

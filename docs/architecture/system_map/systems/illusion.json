@@ -96,7 +96,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
-    "line": 41
+    "line": 38
    },
    "mid": 1344,
    "name": "ILLUSION_LOAD_INFO"
@@ -104,7 +104,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
-    "line": 41
+    "line": 38
    },
    "mid": 1345,
    "name": "ILLUSION_BUY_TIMES"
@@ -112,7 +112,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
-    "line": 41
+    "line": 38
    },
    "mid": 1346,
    "name": "ILLUSION_START_FIGHT"
@@ -120,7 +120,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
-    "line": 41
+    "line": 38
    },
    "mid": 1347,
    "name": "ILLUSION_FIGHT_RESULT"
@@ -224,7 +224,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
-    "line": 41
+    "line": 38
    },
    "mid": 1364,
    "name": "ILLUSION_RANK_HEROS"

@@ -2,10 +2,8 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
 	app "gxb.local/backend/v2/internal/application/illusion"
@@ -15,7 +13,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -152,13 +149,13 @@ func illusionTerminal(response app.Response) httpedge.Response {
 	return okI5(response.Body)
 }
 
+var illusionFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "illusion_invalid_parameter"},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failIllusion(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("illusion_invalid_parameter")
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, cd.ErrLoanRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "illusion_unavailable"}}
+	return failureFromRows(illusionFailureRows, err)
 }
