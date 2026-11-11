@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
+	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/campaign"
@@ -15,6 +16,7 @@ import (
 	herorecommend "gxb.local/backend/v2/internal/domain/herorecommend"
 	illusion "gxb.local/backend/v2/internal/domain/illusion"
 	march "gxb.local/backend/v2/internal/domain/march"
+	domainmentor "gxb.local/backend/v2/internal/domain/mentor"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -116,8 +118,7 @@ func TestPart3CIllusionRoomFailureRows(t *testing.T) {	assertPart2FailureCases(t
 	})
 }
 
-func TestPart3CLibraryUnservedRefusal(t *testing.T) {
-	assertPart2FailureCases(t, []part2FailureCase{
+func TestPart3CLibraryUnservedRefusal(t *testing.T) {	assertPart2FailureCases(t, []part2FailureCase{
 		{"unserved", unservedLibraryRefusal(), http.StatusConflict, unprovenRefusalCode, ""},
 	})
 }
@@ -130,5 +131,20 @@ func TestPart3CMarchFailureRows(t *testing.T) {
 		{"refused", marchFailure(march.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"start conflict", marchFailure(combat.ErrStartConflict), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", marchFailure(march.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3CMentorFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"stock refusal", mentorFailure(&appmentor.Refusal{Code: 34011}), http.StatusConflict, 34011, ""},
+		{"zero refusal", mentorFailure(&appmentor.Refusal{}), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"conflict", mentorFailure(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"relationship changed", mentorFailure(domainmentor.ErrRelationshipConflict), http.StatusConflict, staleConflictCode, ""},
+		{"relationship", mentorFailure(domainmentor.ErrRelationship), http.StatusConflict, unprovenRefusalCode, ""},
+		{"application", mentorFailure(domainmentor.ErrApplication), http.StatusConflict, unprovenRefusalCode, ""},
+		{"mission", mentorFailure(domainmentor.ErrMission), http.StatusConflict, unprovenRefusalCode, ""},
+		{"invalid", mentorFailure(appmentor.ErrInvalid), http.StatusBadRequest, 0, "invalid_mentor_request"},
+		{"unavailable", mentorFailure(appmentor.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"missing service", mentorUnavailable(), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

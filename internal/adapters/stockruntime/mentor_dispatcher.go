@@ -3,14 +3,12 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	mentor "gxb.local/backend/v2/internal/application/mentor"
 	authentication "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domainmentor "gxb.local/backend/v2/internal/domain/mentor"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -161,26 +159,23 @@ func numericParameter(parameters map[string]any, key string) bool {
 }
 
 func mentorUnavailable() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "mentor_unavailable"}}
+	return failureReply(unavailable(nil))
 }
 
 // Every business refusal is HTTP 409 with the best stock message code, because
 // the client treats any 200 as success and indexes nested reply fields.
+var mentorFailureRows = []failureRow{
+	{match: domainmentor.ErrRelationshipConflict, class: failureRefusal, code: staleConflictCode},
+	{match: domainmentor.ErrRelationship, class: failureRefusal, code: unprovenRefusalCode},
+	{match: domainmentor.ErrApplication, class: failureRefusal, code: unprovenRefusalCode},
+	{match: domainmentor.ErrMission, class: failureRefusal, code: unprovenRefusalCode},
+	{match: mentor.ErrInvalid, class: failureMalformed, detail: "invalid_mentor_request"},
+}
+
 func mentorFailure(err error) httpedge.Response {
 	var refusal *mentor.Refusal
 	if errors.As(err, &refusal) && refusal.Code > 0 {
-		return conflictRefusal(refusal.Code)
+		return failureReply(&classifiedFailure{class: failureRefusal, code: refusal.Code, cause: err})
 	}
-	var conflict *receipt.ConflictError
-	if errors.As(err, &conflict) || errors.Is(err, domainmentor.ErrRelationshipConflict) || errors.Is(err, domainmentor.ErrRelationship) || errors.Is(err, domainmentor.ErrApplication) || errors.Is(err, domainmentor.ErrMission) {
-		return conflictRefusal(1)
-	}
-	switch {
-	case errors.Is(err, mentor.ErrInvalid):
-		return badHero("invalid_mentor_request")
-	case errors.Is(err, mentor.ErrUnavailable):
-		return mentorUnavailable()
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "mentor_unavailable"}}
-	}
+	return failureFromRows(mentorFailureRows, err)
 }
