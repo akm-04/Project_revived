@@ -38,6 +38,7 @@ type Store interface {
 	LockResultTx(context.Context, tx.Tx, int64, int64, int64, identity.PlayerID, time.Time) (d.Result, error)
 	SaveResultTx(context.Context, tx.Tx, int64, int64, int64, d.Result, time.Time) error
 	ReadRankTx(context.Context, tx.Queryer, int64, int64, int64) ([]d.Result, error)
+	RankOfTx(context.Context, tx.Queryer, int64, int64, identity.PlayerID) (int64, error)
 	ListOccurrencesTx(context.Context, tx.Queryer, int64) ([]d.Occurrence, error)
 	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
 	FindAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64, int64) (d.Attempt, bool, error)

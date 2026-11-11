@@ -24,8 +24,10 @@ func BoardList(s d.BoardSnapshot, viewer identity.PlayerID) (map[string]any, err
 			mine = map[string]any{"rank": rank, "score": v.Metric.Value}
 		}
 	}
+	// A viewer outside the published window keeps the published rows and gets
+	// the client's unranked self bar (an empty table hides the rank number).
 	if !found {
-		return nil, d.ErrSnapshot
+		mine = map[string]any{}
 	}
 	return map[string]any{"rank_list": []map[string]any{{"rank_type": board.SubType, "rank_info": map[string]any{"my_rank": mine, "rank_info": rows}}}}, nil
 }

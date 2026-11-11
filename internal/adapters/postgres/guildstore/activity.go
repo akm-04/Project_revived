@@ -66,6 +66,25 @@ func (Store) ForfeitActivityLifetimeTx(ctx context.Context, t tx.Tx, player iden
 	return err
 }
 
+// ActivityRankOf returns one guild's positional rank on the same 3-day board
+// ListActivityBoard publishes, without materialising the whole server board.
+func (s Store) ActivityRankOf(ctx context.Context, server identity.LogicalServerID, day int64, id guild.ID) (int64, error) {
+	var rank int64
+	err := s.Queryer.QueryRow(ctx, `WITH board AS (
+		SELECT g.guild_id,COALESCE(SUM(LEAST($4,d.amount)),0)::bigint AS three_day
+		FROM guilds g
+		LEFT JOIN guild_memberships m ON m.guild_id=g.guild_id
+		LEFT JOIN player_guild_activity_days d ON d.player_id=m.player_id AND d.game_day BETWEEN $2-2 AND $2
+		WHERE g.logical_server_id=$1 AND g.retired_at IS NULL
+		GROUP BY g.guild_id
+	), target AS (SELECT three_day FROM board WHERE guild_id=$3)
+	SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM target) THEN 0 ELSE
+		1+(SELECT COUNT(*) FROM board b CROSS JOIN target t
+		WHERE b.three_day>t.three_day OR (b.three_day=t.three_day AND b.guild_id<$3))
+	END`, int32(server), day, int64(id), guild.ActivityDailyCap).Scan(&rank)
+	return rank, err
+}
+
 // ReadUnfoldedActivity sums what the guild's current members and awards have
 // credited but no fold has moved yet.
 func (s Store) ReadUnfoldedActivity(ctx context.Context, id guild.ID) (int64, error) {

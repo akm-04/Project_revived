@@ -23,6 +23,7 @@ type Store interface {
 	ReadSevenDayActivity(context.Context, []identity.PlayerID, int64) (map[identity.PlayerID]int64, error)
 	ReadGuildThreeDayActivity(context.Context, guild.ID, int64) (int64, error)
 	ListActivityBoard(context.Context, identity.LogicalServerID, int64, int64) ([]guild.ActivityBoardRow, error)
+	ActivityRankOf(context.Context, identity.LogicalServerID, int64, guild.ID) (int64, error)
 	ReadMembership(context.Context, identity.PlayerID) (guild.Membership, bool, error)
 	ListMemberships(context.Context, guild.ID) ([]guild.Membership, error)
 	ListGuilds(context.Context, identity.LogicalServerID, int) ([]guild.Guild, error)
@@ -433,6 +434,12 @@ func (s Service) ActivityRankList(ctx context.Context, actor identity.ActorConte
 		out = append(out, GuildRank{Rank: int64(index + 1), Guild: row, Leader: leaderName})
 		if ownMember && own.GuildID == guild.ID(row.GuildID) {
 			mine = int64(index + 1)
+		}
+	}
+	if mine == 0 && ownMember && own.GuildID != 0 {
+		mine, err = s.Store.ActivityRankOf(ctx, actor.LogicalServerID, day, own.GuildID)
+		if err != nil {
+			return nil, 0, err
 		}
 	}
 	return out, mine, nil

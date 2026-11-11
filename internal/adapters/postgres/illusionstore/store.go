@@ -105,6 +105,25 @@ func (Store) ReadRankTx(ctx context.Context, q tx.Queryer, serverID, openDay, li
 	return results, nil
 }
 
+// RankOfTx returns the player's positional rank on the same ordering
+// ReadRankTx publishes, counting better rows instead of reading them all.
+func (Store) RankOfTx(ctx context.Context, q tx.Queryer, serverID, openDay int64, playerID identity.PlayerID) (int64, error) {
+	var rank int64
+	err := q.QueryRow(ctx, `WITH target AS (
+		SELECT killed,hurt,cost_time FROM illusion_occurrence_results
+		WHERE logical_server_id=$1 AND open_day=$2 AND player_id=$3
+	)
+	SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM target) THEN 0 ELSE
+		1+(SELECT COUNT(*) FROM illusion_occurrence_results r CROSS JOIN target t
+		WHERE r.logical_server_id=$1 AND r.open_day=$2
+		AND (r.killed>t.killed
+		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)>(CASE WHEN t.killed THEN 0 ELSE t.hurt END))
+		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)=(CASE WHEN t.killed THEN 0 ELSE t.hurt END) AND r.cost_time<t.cost_time)
+		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)=(CASE WHEN t.killed THEN 0 ELSE t.hurt END) AND r.cost_time=t.cost_time AND r.player_id<$3)))
+	END`, serverID, openDay, int64(playerID)).Scan(&rank)
+	return rank, err
+}
+
 // ListOccurrencesTx lists one bounded batch of logical-server occurrences for
 // the settlement reconciler.
 func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, limit int64) ([]d.Occurrence, error) {

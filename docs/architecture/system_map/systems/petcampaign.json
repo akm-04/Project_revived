@@ -201,6 +201,8 @@
    "i9_5c_pet_awakening.json",
    "i9_5c_petcampaign.json"
   ],
-  "unit": []
+  "unit": [
+   "rank_test.go"
+  ]
  }
 }
