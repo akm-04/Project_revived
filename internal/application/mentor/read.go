@@ -99,7 +99,11 @@ func (service Service) readClassFacts(ctx context.Context, q tx.Tx, actor identi
 	if err != nil {
 		return WireFacts{}, err
 	}
-	return WireFacts{Now: at, Actor: actor, Level: level, CountMentor: state.CountMentor, CountStudent: state.CountStudent, BrokeAt: state.BrokeAt, Relations: relations, Applications: applications, Cards: cards, MentorMissions: mentorMissions, StudentMissions: studentMissions}, nil
+	countMentor, countStudent := state.CountMentor, state.CountStudent
+	if !sameDay(state.ApplyDay, at) {
+		countMentor, countStudent = 0, 0
+	}
+	return WireFacts{Now: at, Actor: actor, Level: level, CountMentor: countMentor, CountStudent: countStudent, BrokeAt: state.BrokeAt, Relations: relations, Applications: applications, Cards: cards, MentorMissions: mentorMissions, StudentMissions: studentMissions}, nil
 }
 
 func (service Service) readCardsQueryer(ctx context.Context, q tx.Tx, ids []identity.PlayerID, at time.Time) (map[identity.PlayerID]playerpresentation.Projected, error) {
@@ -141,7 +145,7 @@ func BuildClassInfo(facts WireFacts) map[string]any {
 		relations[slot-1] = cardWire(projection, facts.Now)
 		intimacies[slot-1] = relation.Intimacy
 		accept[slot-1] = relation.AcceptedAt.Unix()
-		if relation.LastIntimacyDay == dayKey(facts.Now) {
+		if relation.LastIntimacyDay == gameDate(facts.Now) {
 			dailyAdd[slot-1] = 1
 		}
 	}

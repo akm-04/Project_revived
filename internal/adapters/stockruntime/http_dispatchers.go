@@ -11,6 +11,7 @@ import (
 
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/application/clientlog"
+	"gxb.local/backend/v2/internal/application/dailyreset"
 	domainclientlog "gxb.local/backend/v2/internal/domain/clientlog"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
@@ -135,9 +136,10 @@ func requiredInt64(m map[string]any, key string) (int64, error) {
 // 1. It deliberately ignores any injected gameplay token/region claim for
 // account authority; MID18/MID1 authenticate the explicit SID+login_token pair.
 type BootstrapDispatcher struct {
-	Bootstrap appboot.RuntimePort
-	Tracker   *lobby.BootTracker
-	LogURLs   ClientLogURLIssuer
+	Bootstrap  appboot.RuntimePort
+	Tracker    *lobby.BootTracker
+	LogURLs    ClientLogURLIssuer
+	DailyReset dailyreset.Service
 }
 
 // ClientLogURLIssuer mints the per-session MID1 log_url (I85_CLIENT_LOG_INGEST_V1 R2).
@@ -186,6 +188,9 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		}
 		sessionID := out.ContextPlan.Selected.SessionID.UUID().String()
 		observability.NoteActor(ctx, observability.RequestActor{AccountUID: string(out.UID), PlayerID: int64(out.Player.PlayerID), SessionID: sessionID})
+		// Login already sends fresh counters, so its day is marked delivered. A marker failure only means the next
+		// successful reply repeats the signal.
+		_ = d.DailyReset.MarkLogin(ctx, identity.PlayerID(out.Player.PlayerID), req.Envelope.ReceivedAt)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
 			"token": out.Token, "region": int64(out.Region), "log_url": d.logURL(ctx, out, sessionID),
 			"uid": out.UID, "detail": out.Detail, "is_new": out.IsNew,

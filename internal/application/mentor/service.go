@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -228,12 +229,18 @@ func lockPlayerRoots(ctx context.Context, locker playerroot.TxLocker, t tx.Tx, s
 	return nil
 }
 
-// dayKey is the daily counter boundary. PRIVATE_POLICY D508: UTC day, because
-// the stock client sends no timezone and misc.lua has no reset rule.
-func dayKey(at time.Time) string { return at.UTC().Format(dayLayout) }
+// gameDate is the GMT+8 calendar date of at's game day (I9_MODE_FRAMEWORK_V1 F7, 05:00 GMT+8).
+func gameDate(at time.Time) string {
+	return modes.DayBegins(modes.Day(at)).Add(8 * time.Hour).Format(dayLayout)
+}
 
 func sameDay(stored time.Time, at time.Time) bool {
-	return stored.UTC().Format(dayLayout) == dayKey(at)
+	return gameDate(stored) == gameDate(at)
+}
+
+// gameDayStart is the UTC midnight of at's game-day date, the form the DATE columns store.
+func gameDayStart(at time.Time) time.Time {
+	return modes.DayBegins(modes.Day(at)).Add(8 * time.Hour).Truncate(24 * time.Hour)
 }
 
 func advance(version int64) int64 { return version + 1 }

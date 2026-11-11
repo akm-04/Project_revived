@@ -1,0 +1,38 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "dailyreset",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/dailyresetstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": [
+   "player_daily_reset_marks"
+  ]
+ },
+ "tests": {
+  "integration": [],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

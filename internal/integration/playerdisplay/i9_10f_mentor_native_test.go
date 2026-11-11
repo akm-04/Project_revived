@@ -5,6 +5,7 @@ package playerdisplay_test
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -554,4 +555,44 @@ func requireCompleteUnawardedMission(t *testing.T, raw any, missionID int64) {
 		}
 	}
 	t.Fatalf("mission %d complete unawarded missing from student list", missionID)
+}
+
+// TestI9_10FMentorDailyApplyReadNormalisesAtTheGameDayBoundary is BUGS #97: the client gates its
+// send button on this read, so a count left from yesterday locks the feature until a write resets it.
+func TestI9_10FMentorDailyApplyReadNormalisesAtTheGameDayBoundary(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	student := mentorActor(t, p, 20)
+	targets := []identity.ActorContext{mentorActor(t, p, 60), mentorActor(t, p, 60), mentorActor(t, p, 60), mentorActor(t, p, 60)}
+	boundary := nextGameDayBoundary(time.Now().UTC())
+	service.Timed.Binder.Time = fixedTime{at: boundary.Add(-time.Second)}
+	for index := 0; index < 3; index++ {
+		expectMentorOK(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(targets[index].PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
+	}
+	before := expectMentorOK(t, mentorCall(t, service, student, 1856, map[string]any{}), 1856)
+	if got := dailyApplyTimes(t, before); !reflect.DeepEqual(got, []any{int64(3), int64(0)}) {
+		t.Fatalf("04:59:59 GMT+8 daily_apply_times %v", got)
+	}
+
+	service.Timed.Binder.Time = fixedTime{at: boundary}
+	after := expectMentorOK(t, mentorCall(t, service, student, 1856, map[string]any{}), 1856)
+	if got := dailyApplyTimes(t, after); !reflect.DeepEqual(got, []any{int64(0), int64(0)}) {
+		t.Fatalf("05:00:00 GMT+8 daily_apply_times stayed stale: %v", got)
+	}
+	expectMentorOK(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(targets[3].PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
+}
+
+func nextGameDayBoundary(now time.Time) time.Time {
+	boundary := time.Date(now.Year(), now.Month(), now.Day(), 21, 0, 0, 0, time.UTC)
+	if !boundary.After(now) {
+		boundary = boundary.Add(24 * time.Hour)
+	}
+	return boundary
+}
+
+func dailyApplyTimes(t *testing.T, info map[string]any) []any {
+	t.Helper()
+	base, _ := info["base_info"].(map[string]any)
+	times, _ := base["daily_apply_times"].([]any)
+	return times
 }

@@ -62,6 +62,15 @@ func WithRequestNote(ctx context.Context) (context.Context, *RequestNote) {
 	return context.WithValue(ctx, requestNoteKey{}, note), note
 }
 
+// ActingActor is the actor noted on ctx so far, zero when the request attached no note or was not authenticated.
+func ActingActor(ctx context.Context) RequestActor {
+	note, _ := ctx.Value(requestNoteKey{}).(*RequestNote)
+	if note == nil {
+		return RequestActor{}
+	}
+	return note.Actor()
+}
+
 // NoteActor records the authenticated actor on the request's note, if any.
 func NoteActor(ctx context.Context, actor RequestActor) {
 	note, _ := ctx.Value(requestNoteKey{}).(*RequestNote)

@@ -9276,7 +9276,7 @@
   },
   {
    "file": "internal/adapters/stockruntime/http_dispatchers.go",
-   "line": 226,
+   "line": 231,
    "code": 20018,
    "kind": "stock_code"
   },

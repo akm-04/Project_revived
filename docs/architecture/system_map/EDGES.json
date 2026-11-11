@@ -558,6 +558,7 @@
     "Pipe"
    ]
   },
+  "dailyreset": {},
   "directorysync": {
    "playerdisplay": [
     "ReconcileDirectoryTx"
@@ -3200,6 +3201,7 @@
     "*DebitMaterialCostTx"
    ]
   },
+  "dailyreset": {},
   "directorysync": {
    "i5": [
     "*ReadCanonicalDirectoryTx"
@@ -5862,6 +5864,7 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "dailyconsume": [],
+  "dailyreset": [],
   "directorysync": [],
   "dodgeball": [
    "cmd/gxb-api/dodgeball_postgres.go"

@@ -5,14 +5,19 @@ import (
 	"net/http"
 	"slices"
 
+	"gxb.local/backend/v2/internal/application/dailyreset"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/changes"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 // Decorated adds the stock common hook keys economy_ and new_funcs_ (I9_MODE_FRAMEWORK_V1 F17, D93) from the state its
 // owners committed during the request. Keys the dispatcher wrote itself win; refusals and failures stay untouched.
+// When DailyReset is set, the first successful reply of a new game day also carries economy_.daily_updates.
 type Decorated struct {
-	Next httpedge.Dispatcher
+	Next       httpedge.Dispatcher
+	DailyReset dailyreset.Service
 }
 
 func (d Decorated) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -24,6 +29,7 @@ func (d Decorated) Dispatch(ctx context.Context, req httpedge.DispatchRequest) h
 	}
 	mergeEconomy(response.Body, set.Balances())
 	mergeNewFunctions(response.Body, set.Functions())
+	d.mergeDailyReset(ctx, req, response.Body)
 	for key, value := range set.MissionFields() {
 		if key == "redmarks_" {
 			if existing, ok := response.Body[key].(map[string]any); ok {
@@ -43,6 +49,55 @@ func (d Decorated) Dispatch(ctx context.Context, req httpedge.DispatchRequest) h
 		}
 	}
 	return response
+}
+
+// mergeDailyReset advances the player's marker and adds the reset signal when this is the first successful reply of
+// the game day. A marker or counter failure keeps the reply; the next successful reply retries the signal.
+func (d Decorated) mergeDailyReset(ctx context.Context, req httpedge.DispatchRequest, body map[string]any) {
+	if d.DailyReset.Markers == nil {
+		return
+	}
+	economy, mergeable := economyForReset(body)
+	if !mergeable {
+		return
+	}
+	actor := observability.ActingActor(ctx)
+	if actor.PlayerID <= 0 {
+		return
+	}
+	counters, advanced, err := d.DailyReset.Advance(ctx, identity.PlayerID(actor.PlayerID), req.Envelope.ReceivedAt)
+	if err != nil || !advanced {
+		return
+	}
+	if _, written := economy["daily_updates"]; !written {
+		economy["daily_updates"] = int64(1)
+	}
+	if _, written := economy["updates"]; !written {
+		economy["updates"] = map[string]any{
+			"buy_mana_times":   counters.BuyManaTimes,
+			"buy_energy_times": counters.BuyEnergyTimes,
+			"buy_skill_times":  counters.BuySkillTimes,
+		}
+	}
+	body["economy_"] = economy
+}
+
+func economyForReset(body map[string]any) (map[string]any, bool) {
+	economy := map[string]any{}
+	switch written := body["economy_"].(type) {
+	case nil:
+	case map[string]any:
+		for key, value := range written {
+			economy[key] = value
+		}
+	case map[string]int64:
+		for key, value := range written {
+			economy[key] = value
+		}
+	default:
+		return nil, false
+	}
+	return economy, true
 }
 
 func stockRefusal(body map[string]any) bool {
