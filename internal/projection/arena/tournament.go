@@ -192,23 +192,35 @@ func TournamentRecords(rooms []d.TournamentRoom, player identity.PlayerID, stage
 	return rows
 }
 
+// rowsOrEmpty keeps a map the client indexes an object, never a JSON null.
+func rowsOrEmpty(rows map[string]map[string]any) map[string]map[string]any {
+	if rows == nil {
+		return map[string]map[string]any{}
+	}
+	return rows
+}
+
 func TournamentRoom(view d.TournamentRoomView) map[string]any {
 	room := view.Room
-	pets := [2]any{}
-	for side := range pets {
+	body := map[string]any{"room_key": room.SelectionKey(), "stage": room.Selection.Turn, "stage_start_time": room.Selection.Deadline.Add(-d.SelectionTurnLifetime).Unix(), "server_time": view.At.Unix(), "is_open": flag(room.Status != d.RoomPreparing), "A_player_id": int64(room.Selection.Players[0]), "B_player_id": int64(room.Selection.Players[1]), "A_player_info": tournamentFace(room.Faces[0]), "B_player_info": tournamentFace(room.Faces[1]), "A_partners_info": rowsOrEmpty(view.Heroes[0]), "B_partners_info": rowsOrEmpty(view.Heroes[1]), "A_prepared": flag(room.Ready[0]), "B_prepared": flag(room.Ready[1]), "params": map[string]any{"team_id": room.Selection.Team, "stage": room.Stage, "record_id": room.Identifier.String(), "record_info": TournamentRecord(room)}}
+	// The stock window treats a present A_pet_info/B_pet_info as a pet and an
+	// absent key as "no pet"; JSON null decodes to truthy userdata and crashes.
+	for side, key := range [2]string{"A_pet_info", "B_pet_info"} {
 		identifier := room.Selection.Teams[side][room.Selection.Team-1].Pet
-		if identifier != 0 {
-			pets[side] = view.Pets[side][strconv.FormatInt(identifier, 10)]
+		if identifier == 0 {
+			continue
+		}
+		if pet, ok := view.Pets[side][strconv.FormatInt(identifier, 10)]; ok {
+			body[key] = pet
 		}
 	}
-	body := map[string]any{"room_key": room.SelectionKey(), "stage": room.Selection.Turn, "stage_start_time": room.Selection.Deadline.Add(-d.SelectionTurnLifetime).Unix(), "server_time": view.At.Unix(), "is_open": flag(room.Status != d.RoomPreparing), "A_player_id": int64(room.Selection.Players[0]), "B_player_id": int64(room.Selection.Players[1]), "A_player_info": tournamentFace(room.Faces[0]), "B_player_info": tournamentFace(room.Faces[1]), "A_partners_info": view.Heroes[0], "B_partners_info": view.Heroes[1], "A_pet_info": pets[0], "B_pet_info": pets[1], "A_prepared": flag(room.Ready[0]), "B_prepared": flag(room.Ready[1]), "params": map[string]any{"team_id": room.Selection.Team, "stage": room.Stage, "record_id": room.Identifier.String(), "record_info": TournamentRecord(room)}}
 	return body
 }
 
 func TournamentReport(view d.TournamentRoomView) map[string]any {
 	body := TournamentRoom(view)
 	body["record_info"] = TournamentRecord(view.Room)
-	body["A_pet_info"], body["B_pet_info"] = view.Pets[0], view.Pets[1]
+	body["A_pet_info"], body["B_pet_info"] = rowsOrEmpty(view.Pets[0]), rowsOrEmpty(view.Pets[1])
 	body["report"] = []map[string]any{}
 	if len(view.Report) > 0 {
 		body["report"] = []map[string]any{{"content": string(view.Report)}}
