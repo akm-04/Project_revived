@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"net/http"
 )
 
 var GodsTrialMIDs = []uint16{3092, 3093, 3097, 3099, 3100, 3101}
@@ -37,7 +38,7 @@ func (m GodsTrialDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	}
 	bad := badHero("gods_trial_invalid_parameter")
 	if m.Service == nil {
-		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(unavailable(errors.New("gods trial unavailable")))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	var out map[string]any
@@ -101,20 +102,31 @@ func (m GodsTrialDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 			out, e = m.Service.Result(c, a, app.Result{Campaign: id, Star: star, Pet: pet, Formation: ids}, op)
 		}
 	default:
-		return httpedge.Response{HTTPStatus: 501, Body: map[string]any{"error_code": int64(1)}}
+		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
 	}
 	if e != nil {
-		var conflict *receipt.ConflictError
-		if errors.Is(e, d.ErrInvalid) || errors.As(e, &conflict) {
-			return bad
-		}
-		if errors.Is(e, cd.ErrLoanRefused) {
-			return conflictRefusal(1)
-		}
-		if errors.Is(e, d.ErrRefused) || errors.Is(e, economy.ErrInsufficientBalance) || errors.Is(e, pet.ErrPetNotFound) {
-			return conflictRefusal(1)
-		}
-		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "gods_trial_failed"}}
+		return godsTrialFailure(e)
 	}
 	return okI5(out)
+}
+
+// no rows exist in the mapper table; D5 supplies the classes.
+var godsTrialFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "gods_trial_invalid_parameter"},
+	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: pet.ErrPetNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: d.ErrUnavailable, class: failureUnavailable},
+}
+
+func godsTrialFailure(e error) httpedge.Response {
+	var conflict *receipt.ConflictError
+	if errors.As(e, &conflict) {
+		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: e})
+	}
+	if classified := classifyFailure(godsTrialFailureRows, e); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(e))
 }
