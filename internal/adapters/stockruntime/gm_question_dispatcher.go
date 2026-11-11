@@ -2,15 +2,12 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	questions "gxb.local/backend/v2/internal/application/gmquestion"
 	authentication "gxb.local/backend/v2/internal/application/realtimeauth"
 	domain "gxb.local/backend/v2/internal/domain/gmquestion"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -52,11 +49,7 @@ func (dispatcher GMQuestionDispatcher) Dispatch(ctx context.Context, request htt
 		if err == nil {
 			return okI5(map[string]any{})
 		}
-		var conflict *receipt.ConflictError
-		if errors.Is(err, domain.ErrQuestion) || errors.As(err, &conflict) {
-			return conflictRefusal(1)
-		}
-		return questionUnavailable(err)
+		return failureFromRows(gmQuestionFailureRows, err)
 	}
 	entries, err := dispatcher.Service.List(ctx, actor, request.Envelope.Operation)
 	if err != nil {
@@ -68,6 +61,10 @@ func (dispatcher GMQuestionDispatcher) Dispatch(ctx context.Context, request htt
 	}
 	return okI5(map[string]any{"list": rows})
 }
+var gmQuestionFailureRows = []failureRow{
+	{match: domain.ErrQuestion, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func questionUnavailable(cause error) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: cause, Body: map[string]any{"error": "gm_question_unavailable"}}
+	return failureReply(unavailable(cause))
 }

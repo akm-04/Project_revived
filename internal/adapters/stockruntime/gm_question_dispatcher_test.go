@@ -64,13 +64,13 @@ func TestGMQuestionDispatcherUsesOrdinarySourceShapes(t *testing.T) {
 	if refused.HTTPStatus != 409 {
 		t.Fatal("200 refusal would append local message", refused)
 	}
-	assertGMQuestionBody(t, refused.Body, `{"error_code":1}`)
+	assertGMQuestionBody(t, refused.Body, `{"error_code":35028,"error_msg":""}`)
 	probe.err = questions.ErrProof
 	unavailable := dispatcher.Dispatch(context.Background(), heroReq(t, 4, map[string]any{}))
 	if unavailable.HTTPStatus != 503 {
 		t.Fatal(unavailable)
 	}
-	assertGMQuestionBody(t, unavailable.Body, `{"error":"gm_question_unavailable"}`)
+	assertGMQuestionBody(t, unavailable.Body, `{"error_code":35033,"error_msg":""}`)
 	if probe.asks != 2 || probe.lists != 3 {
 		t.Fatal("malformed request reached service", probe)
 	}

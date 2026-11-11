@@ -11,9 +11,11 @@ import (
 	"gxb.local/backend/v2/internal/domain/combat"
 	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/economy"
+	gmquestion "gxb.local/backend/v2/internal/domain/gmquestion"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 func TestPart3CAdventureFailureRows(t *testing.T) {
@@ -65,4 +67,16 @@ func TestPart3CCourseFailureRows(t *testing.T) {
 		{"balance other", failCourse(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", failCourse(appcourse.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
+}
+
+func TestPart3CGMQuestionFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"question refused", failQuestionRows(gmquestion.ErrQuestion), http.StatusConflict, unprovenRefusalCode, ""},
+		{"conflict", failQuestionRows(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"unavailable", questionUnavailable(nil), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func failQuestionRows(err error) httpedge.Response {
+	return failureFromRows(gmQuestionFailureRows, err)
 }

@@ -215,7 +215,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/gm_question_dispatcher.go",
-    "line": 26
+    "line": 23
    },
    "mid": 4,
    "name": "LOAD_GM_QUESTIONS"
@@ -223,7 +223,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/gm_question_dispatcher.go",
-    "line": 26
+    "line": 23
    },
    "mid": 5,
    "name": "ASK_GM_QUESTION"
