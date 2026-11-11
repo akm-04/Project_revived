@@ -139,7 +139,7 @@ func TestBug73PickOrderNative(t *testing.T) {
 	request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: op(), MID: 1356, ReceivedAt: clock.at, Params: params,
 		Claims: wire.CredentialClaims{Token: "bearer", Region: int64(server)}}}
 	refused := dispatcher.Dispatch(ctx, request)
-	if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(1) {
+	if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(35028) {
 		t.Fatalf("out-of-turn HTTP %d %#v", refused.HTTPStatus, refused.Body)
 	}
 

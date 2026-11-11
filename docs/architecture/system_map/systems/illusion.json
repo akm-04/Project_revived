@@ -128,7 +128,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1349,
    "name": "ILLUSION_CREATE_ROOM"
@@ -136,7 +136,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1350,
    "name": "ILLUSION_GET_ROOM_INFO"
@@ -144,7 +144,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1351,
    "name": "ILLUSION_PREPARE_ROOM"
@@ -152,7 +152,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1352,
    "name": "ILLUSION_ENTER_ROOM"
@@ -160,7 +160,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1353,
    "name": "ILLUSION_REMOVE_PLAYER"
@@ -168,7 +168,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1354,
    "name": "ILLUSION_EXIT_ROOM"
@@ -176,7 +176,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1356,
    "name": "ILLUSION_SET_PARTNER"
@@ -184,7 +184,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1357,
    "name": "ILLUSION_PREPARE_FIGHT"
@@ -192,7 +192,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1358,
    "name": "ILLUSION_START_TEAM_FIGHT"
@@ -200,7 +200,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1360,
    "name": "ILLUSION_INVITE_FRIEND"
@@ -208,7 +208,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1362,
    "name": "ILLUSION_GET_REPORT"
@@ -216,7 +216,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
-    "line": 52
+    "line": 50
    },
    "mid": 1363,
    "name": "ILLUSION_CANCEL_PREPARE"

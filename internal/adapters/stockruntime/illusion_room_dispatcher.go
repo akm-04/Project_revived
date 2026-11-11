@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -14,7 +13,6 @@ import (
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -219,16 +217,23 @@ func illusionReportID(params map[string]any) (string, bool) {
 	return strconv.FormatInt(value, 10), true
 }
 
+var illusionRoomFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "illusion_invalid_parameter"},
+	{match: sharedroom.ErrInvalid, class: failureMalformed, detail: "illusion_invalid_parameter"},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrNotInRoom, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrConflict, class: failureRefusal, code: staleConflictCode},
+	{match: sharedroom.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sharedroom.ErrExpired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sharedroom.ErrFull, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sharedroom.ErrKicked, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sharedroom.ErrNotOwner, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sharedroom.ErrNotSeated, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sharedroom.ErrNotFound, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failIllusionRoom(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.Is(err, sharedroom.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("illusion_invalid_parameter")
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, sr.ErrNotInRoom) || errors.Is(err, sr.ErrAlreadyInRoom) || errors.Is(err, sr.ErrNotFound) || errors.Is(err, sr.ErrConflict) ||
-		errors.Is(err, sharedroom.ErrClosed) || errors.Is(err, sharedroom.ErrExpired) || errors.Is(err, sharedroom.ErrFull) ||
-		errors.Is(err, sharedroom.ErrKicked) || errors.Is(err, sharedroom.ErrNotOwner) || errors.Is(err, sharedroom.ErrNotSeated) ||
-		errors.Is(err, sharedroom.ErrNotFound) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "illusion_unavailable"}}
+	return failureFromRows(illusionRoomFailureRows, err)
 }
