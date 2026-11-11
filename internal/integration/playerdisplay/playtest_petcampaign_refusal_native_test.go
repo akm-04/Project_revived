@@ -51,7 +51,7 @@ func TestPlaytestPetCampaignDrainedResultRefusesAndClearsFight(t *testing.T) {
 
 	dispatcher := stockruntime.PetCampaignDispatcher{Authority: playtestAuthority{a}, Service: mode}
 	response := dispatcher.Dispatch(ctx, playtestRequest(a, 820, map[string]any{"is_win": true, "floor": int64(1), "floor_type": int64(1)}))
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("drained result reached the OK callback: %+v", response)
 	}
 	if petCampaignRecord(t, p, a).Fight != nil {

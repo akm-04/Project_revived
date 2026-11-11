@@ -41,7 +41,7 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 	}
 	bad := badHero("pet_campaign_invalid_parameter")
 	if m.Service == nil {
-		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(unavailable(errors.New("pet campaign unavailable")))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	var out map[string]any
@@ -135,14 +135,27 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
 	}
 	if e != nil {
-		var conflict *receipt.ConflictError
-		status := http.StatusServiceUnavailable
-		if errors.Is(e, d.ErrInvalid) || errors.As(e, &conflict) {
-			status = 400
-		} else if errors.Is(e, d.ErrRefused) || errors.Is(e, economy.ErrInsufficientBalance) {
-			return conflictRefusal(1)
-		}
-		return httpedge.Response{HTTPStatus: status, Cause: e, Body: map[string]any{"error_code": int64(1), "error": "pet_campaign_failed"}}
+		return petCampaignFailure(e)
 	}
 	return okI5(out)
+}
+
+// No rows exist in the mapper table; D5 supplies the classes. A receipt
+// conflict is a stale-state 40002; a transient/unavailable error is a 503.
+var petCampaignFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "pet_campaign_invalid_parameter"},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: d.ErrUnavailable, class: failureUnavailable},
+}
+
+func petCampaignFailure(e error) httpedge.Response {
+	var conflict *receipt.ConflictError
+	if errors.As(e, &conflict) {
+		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: e})
+	}
+	if classified := classifyFailure(petCampaignFailureRows, e); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(e))
 }
