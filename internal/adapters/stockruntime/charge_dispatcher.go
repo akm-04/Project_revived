@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/commerceprivilege"
@@ -11,7 +9,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/privilege"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"gxb.local/backend/v2/internal/protocol/mids"
 )
@@ -36,7 +33,7 @@ func (o ChargeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if o.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "charge_unavailable"}}
+		return failCharge(d.ErrUnavailable)
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("charge_invalid_parameter")
@@ -54,7 +51,7 @@ func (o ChargeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 			return bad
 		}
 		if level < 1 || level > 15 {
-			return conflictRefusal(1)
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 		body, err = o.Service.ClaimVIPAward(ctx, a, level, op)
 	case mids.MIDRechargeTap:
@@ -86,10 +83,11 @@ func validTapIntent(intent string) bool {
 }
 
 // failCharge refuses business conflicts on 409 so stock callbacks see ERROR.
+var chargeFailureRows = []failureRow{
+	{match: d.ErrChargeRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrConflict, class: failureRefusal, code: staleConflictCode},
+}
+
 func failCharge(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrChargeRefused) || errors.Is(err, d.ErrConflict) || errors.As(err, &conflict) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "charge_unavailable"}}
+	return failureFromRows(chargeFailureRows, err)
 }

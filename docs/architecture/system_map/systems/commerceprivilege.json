@@ -86,7 +86,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/charge_dispatcher.go",
-    "line": 33
+    "line": 30
    },
    "mid": 354,
    "name": "QUERY_CHARGE_DATA"
@@ -94,7 +94,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/charge_dispatcher.go",
-    "line": 33
+    "line": 30
    },
    "mid": 657,
    "name": "GET_VIP_AWARD"
@@ -102,7 +102,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/charge_dispatcher.go",
-    "line": 33
+    "line": 30
    },
    "mid": 32000,
    "name": ""

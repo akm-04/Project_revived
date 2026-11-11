@@ -70,14 +70,14 @@ func TestChargeDispatcherRefusesMalformedAndBusinessErrors(t *testing.T) {
 			params = map[string]any{"charge_id": int64(80001007), "intent_id": "vc-2"}
 		}
 		got := dispatcher.Dispatch(context.Background(), heroReq(t, mid, params))
-		if got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+		if got.HTTPStatus != 409 || got.Body["error_code"] != unprovenRefusalCode {
 			t.Fatalf("mid %d refusal=%d %v", mid, got.HTTPStatus, got.Body)
 		}
 	}
 	if probe.queries != 1 || probe.claims != 2 || probe.taps != 2 {
 		t.Fatalf("calls query=%d claim=%d tap=%d", probe.queries, probe.claims, probe.taps)
 	}
-	if got := failCharge(d.ErrConflict); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := failCharge(d.ErrConflict); got.HTTPStatus != 409 || got.Body["error_code"] != staleConflictCode {
 		t.Fatalf("conflict mapped to %d %v", got.HTTPStatus, got.Body)
 	}
 	if got := failCharge(d.ErrUnavailable); got.HTTPStatus != 503 {
