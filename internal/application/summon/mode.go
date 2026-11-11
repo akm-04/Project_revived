@@ -100,7 +100,8 @@ func retry() tx.RetryPolicy {
 
 func (s Mode) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil &&
-		s.Heroes != nil && s.HeroWire != nil && s.Grants != nil && s.Costs != nil && s.Facts != nil && s.Privileges != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Heroes != nil && s.HeroWire != nil && s.Grants != nil && s.Costs != nil && s.Facts != nil && s.Privileges != nil && s.Receipts != nil && s.ReceiptRead != nil &&
+		s.Broadcast != nil
 }
 
 func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, error) {
@@ -288,7 +289,7 @@ func (s Mode) deliver(c context.Context, sc gen.TimedScope, a identity.ActorCont
 	if err = s.settle(c, sc, a, "classic", append(lines, extra...)); err != nil {
 		return nil, err
 	}
-	if announce && s.Broadcast != nil {
+	if announce {
 		for _, tableID := range newHeroes {
 			message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.SXHero, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{HeroTableID: tableID}}
 			if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {

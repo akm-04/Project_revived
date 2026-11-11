@@ -123,19 +123,16 @@ func TestGuildCampaignNoticeDatabaseErrorRollsBackChapter(t *testing.T) {
 	ctx := context.Background()
 	p := campaignPool(t)
 	member := campaignPlayer(t, p)
-	if _, err := p.Raw().Exec(ctx, `ALTER TABLE mail_records RENAME TO mail_records_repair_r2`); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		if _, err := p.Raw().Exec(context.Background(), `ALTER TABLE mail_records_repair_r2 RENAME TO mail_records`); err != nil {
-			t.Errorf("restore mail_records: %v", err)
-		}
-	})
 	tr, err := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer tr.Rollback(ctx)
+	// A column-less temp table shadows mail_records for this session only, so the
+	// write fails without touching the table other packages share.
+	if _, err = tr.Exec(ctx, `CREATE TEMP TABLE mail_records () ON COMMIT DROP`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err = tr.Exec(ctx, `UPDATE players SET bootstrap_profile_version='repair-r2-must-roll-back' WHERE player_id=$1`, int64(member)); err != nil {
 		t.Fatal(err)
 	}
@@ -162,19 +159,16 @@ func TestGuildCampaignRewardMailDatabaseErrorRollsBackChapter(t *testing.T) {
 	ctx := context.Background()
 	p := campaignPool(t)
 	member := campaignPlayer(t, p)
-	if _, err := p.Raw().Exec(ctx, `ALTER TABLE mail_attachments RENAME TO mail_attachments_repair_r2`); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		if _, err := p.Raw().Exec(context.Background(), `ALTER TABLE mail_attachments_repair_r2 RENAME TO mail_attachments`); err != nil {
-			t.Errorf("restore mail_attachments: %v", err)
-		}
-	})
 	tr, err := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer tr.Rollback(ctx)
+	// A column-less temp table shadows mail_attachments for this session only, so the
+	// write fails without touching the table other packages share.
+	if _, err = tr.Exec(ctx, `CREATE TEMP TABLE mail_attachments () ON COMMIT DROP`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err = tr.Exec(ctx, `UPDATE players SET bootstrap_profile_version='repair-r2-must-roll-back' WHERE player_id=$1`, int64(member)); err != nil {
 		t.Fatal(err)
 	}

@@ -7,12 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/guildcampaigncontent"
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
 	"gxb.local/backend/v2/internal/adapters/guildviewread"
 	guildwire "gxb.local/backend/v2/internal/adapters/guildwire"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -20,6 +22,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	appguildcampaign "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/guildtea"
 	"gxb.local/backend/v2/internal/application/guildview"
@@ -236,7 +239,11 @@ func guildCoreService(t *testing.T, p *pg.Pool) guildcore.Service {
 	cross := appi5.CrossOwner{Store: i5store.Store{}}
 	return guildcore.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Store: guildstore.Store{Queryer: p},
 		Fencer: i5store.Store{}, PlayerRoots: i4store.PlayerRootLocker{}, Level: cross, Scalar: cross, LevelAndScalar: cross,
-		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Policy: binding}
+		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Policy: binding,
+		Campaign: appguildcampaign.Service{
+			Store: guildcampaignstore.Store{}, Guilds: guildstore.Store{Queryer: p}, Catalog: guildcampaigncontent.Catalog{},
+			Payout: appguildcampaign.Payout{}, Mail: appi5.SettlementMail{Store: i5store.Store{}}, Fence: i5store.Store{}, Players: i4store.PlayerRootLocker{},
+		}}
 }
 
 // TestI9_9AProductionLeaveAndKickFoldVitality drives guildcore.Leave and Kick
@@ -254,10 +261,16 @@ func TestI9_9AProductionLeaveAndKickFoldVitality(t *testing.T) {
 	day := modes.Day(now)
 	appendActivity(t, pool, leaver, day, 600)
 	appendActivity(t, pool, kicked, day, 400)
+	exec(t, pool, `INSERT INTO guild_campaign_chapters(guild_id,chapter_id,run,start_time)VALUES($1,1,1,clock_timestamp())ON CONFLICT DO NOTHING`, int64(gid))
+	exec(t, pool, `INSERT INTO guild_campaign_registrations(guild_id,chapter_id,player_id)VALUES($1,1,$2)ON CONFLICT DO NOTHING`, int64(gid), int64(leaver.PlayerID))
+	exec(t, pool, `INSERT INTO guild_campaign_registrations(guild_id,chapter_id,player_id)VALUES($1,1,$2)ON CONFLICT DO NOTHING`, int64(gid), int64(kicked.PlayerID))
 	core := guildCoreService(t, pool)
 
 	if _, err = core.Leave(ctx, leaver, op()); err != nil {
 		t.Fatalf("leave: %v", err)
+	}
+	if n := scalar(t, pool, `SELECT count(*) FROM guild_campaign_registrations WHERE guild_id=$1 AND player_id=$2`, int64(gid), int64(leaver.PlayerID)); n != 0 {
+		t.Fatal("campaign registration survived leave")
 	}
 	if got := guildVitality(t, pool, gid); got != 20600 {
 		t.Fatalf("leave folded vitality=%d", got)
@@ -269,6 +282,9 @@ func TestI9_9AProductionLeaveAndKickFoldVitality(t *testing.T) {
 
 	if _, err = core.Kick(ctx, leader, kicked.PlayerID, op()); err != nil {
 		t.Fatalf("kick: %v", err)
+	}
+	if n := scalar(t, pool, `SELECT count(*) FROM guild_campaign_registrations WHERE guild_id=$1 AND player_id=$2`, int64(gid), int64(kicked.PlayerID)); n != 0 {
+		t.Fatal("campaign registration survived kick")
 	}
 	if got := guildVitality(t, pool, gid); got != 21000 {
 		t.Fatalf("kick folded vitality=%d", got)

@@ -369,12 +369,10 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 				return nil, e
 			}
 			room = rooms[room.ID]
-			if s.Broadcast != nil {
-				if rule, ok := catalog.Types[room.MainType]; ok && rule.MaxExpansion > 0 && room.ExpansionLevel >= rule.MaxExpansion {
-					message := broadcast.Message{MID: broadcast.ActivityMID, MsgType: broadcast.DormExpand, Server: a.LogicalServerID, Player: a.PlayerID}
-					if e = s.Broadcast.EmitTx(ctx, t, message); e != nil {
-						return nil, e
-					}
+			if rule, ok := catalog.Types[room.MainType]; ok && rule.MaxExpansion > 0 && room.ExpansionLevel >= rule.MaxExpansion {
+				message := broadcast.Message{MID: broadcast.ActivityMID, MsgType: broadcast.DormExpand, Server: a.LogicalServerID, Player: a.PlayerID}
+				if e = s.Broadcast.EmitTx(ctx, t, message); e != nil {
+					return nil, e
 				}
 			}
 		}

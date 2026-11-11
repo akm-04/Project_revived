@@ -115,19 +115,16 @@ func TestBroadcastEmitterDatabaseErrorRollsBackGameplay(t *testing.T) {
 	ctx := context.Background()
 	p := repairR2Pool(t)
 	player := repairR2Player(t, p, 1)
-	if _, err := p.Raw().Exec(ctx, `ALTER TABLE broadcast_outbox RENAME TO broadcast_outbox_repair_r2`); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		if _, err := p.Raw().Exec(context.Background(), `ALTER TABLE broadcast_outbox_repair_r2 RENAME TO broadcast_outbox`); err != nil {
-			t.Errorf("restore broadcast_outbox: %v", err)
-		}
-	})
 	tr, err := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer tr.Rollback(ctx)
+	// A column-less temp table shadows broadcast_outbox for this session only, so the
+	// write fails without touching the table other packages share.
+	if _, err = tr.Exec(ctx, `CREATE TEMP TABLE broadcast_outbox () ON COMMIT DROP`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err = tr.Exec(ctx, `UPDATE players SET bootstrap_profile_version='repair-r2-must-roll-back' WHERE player_id=$1`, int64(player)); err != nil {
 		t.Fatal(err)
 	}

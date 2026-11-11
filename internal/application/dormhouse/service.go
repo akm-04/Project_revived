@@ -240,7 +240,7 @@ type Service struct {
 }
 
 func (s Service) complete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.EXP != nil && s.Exchange != nil && s.Receipts != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.EXP != nil && s.Exchange != nil && s.Receipts != nil && s.Broadcast != nil
 }
 
 // Social commands do not touch Character progression, materials or exchange, so

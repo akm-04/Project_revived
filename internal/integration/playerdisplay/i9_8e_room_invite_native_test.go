@@ -29,10 +29,18 @@ import (
 	"gxb.local/backend/v2/internal/projection/socialview"
 )
 
+type roomInviteNotices struct{ changed []identity.PlayerID }
+
+func (n *roomInviteNotices) NoticeListChanged(_ context.Context, p identity.PlayerID) {
+	n.changed = append(n.changed, p)
+}
+
+var roomInvitePushes = &roomInviteNotices{}
+
 func roomInviteMaterializer(t *testing.T, p *pg.Pool) roominvite.Service {
 	t.Helper()
 	return roominvite.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}},
-		Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{}}
+		Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{}, Notices: roomInvitePushes}
 }
 
 // socialNoticePage is the production LOAD_FRIEND_INFO list_type NOTICE path.
@@ -124,8 +132,12 @@ func TestI9_8ERoomInviteIllusionNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	roomID := illusionRoomID(t, created)
+	beforePush := len(roomInvitePushes.changed)
 	if _, err = mode.Invite(ctx, owner, target.PlayerID, op()); err != nil {
 		t.Fatal("invite", err)
+	}
+	if len(roomInvitePushes.changed) != beforePush+1 || roomInvitePushes.changed[beforePush] != target.PlayerID {
+		t.Fatalf("room invite did not push the notice list: %+v", roomInvitePushes.changed)
 	}
 	page := socialNoticePage(t, p, target)
 	row, found := noticeOfType(page, socialinbox.RoomInviteIllusionNoticeType)

@@ -39,7 +39,7 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(403, "region_mismatch")
 	}
-	if r.Envelope.MID != 513 || d.Service == nil || d.Slots == nil || cap(d.Slots) != 16 {
+	if r.Envelope.MID != 513 || d.Service == nil || d.Slots == nil || cap(d.Slots) != 16 || d.Emitter == nil {
 		return fail(409, "general_message_unavailable")
 	}
 	params, e := socialFields(r.Envelope.Params, "message", "to_player_id", "channel")
@@ -95,7 +95,7 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	if e != nil {
 		return fail(409, "general_message_unavailable")
 	}
-	if d.Emitter != nil && !i.Status.Terminal() {
+	if !i.Status.Terminal() {
 		d.Emitter.EmitGeneralDM(bounded, i)
 	}
 	result, e := d.Service.Wait(bounded, i)

@@ -293,7 +293,7 @@ func Profile() tx.Profile {
 	return tx.Profile{Name: "I7C2B_LIBRARY_INPUTS", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 8 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 15 * time.Second}
 }
 func (s Service) complete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Library != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Receipts != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Library != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Receipts != nil && s.Broadcast != nil
 }
 
 // RecordHeroLogTx writes one display-only Girls Log row (D1): a row that
@@ -795,11 +795,9 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				if e = s.RecordHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: lib.LogMarried, OccurredAt: d.DecisionAt}); e != nil {
 					return e
 				}
-				if s.Broadcast != nil {
-					message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.Married, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{HeroTableID: h.TableID}}
-					if e = s.Broadcast.EmitTx(ctx, sc.Tx, message); e != nil {
-						return e
-					}
+				message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.Married, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{HeroTableID: h.TableID}}
+				if e = s.Broadcast.EmitTx(ctx, sc.Tx, message); e != nil {
+					return e
 				}
 			}
 			if d.Command.Family == TalkAward && out.HasDialog && out.Dialog.IsAwarded {

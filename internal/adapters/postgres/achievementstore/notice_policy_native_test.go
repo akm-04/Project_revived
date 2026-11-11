@@ -130,19 +130,16 @@ func TestAchievementNoticeDatabaseErrorRollsBackEarnedFact(t *testing.T) {
 	ctx := context.Background()
 	p := noticePool(t)
 	player := noticePlayer(t, p)
-	if _, err := p.Raw().Exec(ctx, `ALTER TABLE achievement_notices RENAME TO achievement_notices_repair_r2`); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		if _, err := p.Raw().Exec(context.Background(), `ALTER TABLE achievement_notices_repair_r2 RENAME TO achievement_notices`); err != nil {
-			t.Errorf("restore achievement_notices: %v", err)
-		}
-	})
 	tr, err := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer tr.Rollback(ctx)
+	// A column-less temp table shadows achievement_notices for this session only, so the
+	// write fails without touching the table other packages share.
+	if _, err = tr.Exec(ctx, `CREATE TEMP TABLE achievement_notices () ON COMMIT DROP`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err = tr.Exec(ctx, `UPDATE achievement_roots SET progress=500 WHERE player_id=$1`, int64(player)); err != nil {
 		t.Fatal(err)
 	}

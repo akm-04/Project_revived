@@ -16,7 +16,9 @@ import (
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/workplacestore"
+	"gxb.local/backend/v2/internal/application/guildrental"
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/workplace"
 	cd "gxb.local/backend/v2/internal/domain/combat"
@@ -35,7 +37,7 @@ func (f *workplaceTime) Now(_ context.Context) (time.Time, error) { return f.at,
 func workplaceMode(t *testing.T, p *pg.Pool, clock *workplaceTime) app.Mode {
 	m := marchMode(t, p)
 	owner := m.Grants.(i5.Service)
-	return app.Mode{Timed: m.Timed, Fresh: p, Store: workplacestore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Directory: m.Directory, Campaigns: campaignstore.Store{}, Heroes: m.Heroes, HeroLocks: characterstore.WorkplaceHeroPort{Store: characterstore.Store{Queryer: p}}, HeroWire: m.HeroWire, Opponents: topFloorService(t, p), Combat: combatService(t, p), Stats: m.Stats, Values: owner, Privileges: owner.Privileges, Facts: m.Facts, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead}
+	return app.Mode{Timed: m.Timed, Fresh: p, Store: workplacestore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Directory: m.Directory, Campaigns: campaignstore.Store{}, Heroes: m.Heroes, HeroLocks: characterstore.WorkplaceHeroPort{Store: characterstore.Store{Queryer: p}}, HeroWire: m.HeroWire, Opponents: topFloorService(t, p), Combat: combatService(t, p), Stats: m.Stats, Values: owner, Privileges: owner.Privileges, Facts: m.Facts, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead, Broadcast: pg.BroadcastEmitter{}, Rental: guildrental.Reader{Store: guildstore.Store{Queryer: p}}}
 }
 func workplaceRecord(t *testing.T, p *pg.Pool, a identity.ActorContext) d.State {
 	t.Helper()
@@ -101,6 +103,12 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	if _, err = s.Dispatch(ctx, a, bad, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("foreign/missing hero", err)
 	}
+	// A live rental offer withdraws the girl from workplace dispatch (Rental is wired).
+	exec(t, p, `INSERT INTO guild_rental_offers(lender_id,kind,unit_id,guild_id,force,rent_award,rent_time)VALUES($1,'HERO',$2,1,1,0,clock_timestamp())`, int64(a.PlayerID), h.PartnerID)
+	if _, err = s.Dispatch(ctx, a, request, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatal("a rented hero was dispatched", err)
+	}
+	exec(t, p, `DELETE FROM guild_rental_offers WHERE lender_id=$1 AND unit_id=$2`, int64(a.PlayerID), h.PartnerID)
 	// Drain via the real I5 owner; an unaffordable dispatch must roll back all job effects.
 	tr, err := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if err != nil {
