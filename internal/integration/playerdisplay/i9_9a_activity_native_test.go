@@ -391,10 +391,10 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if got := call("receiver", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 200 {
 		t.Fatalf("wish=%+v", got)
 	}
-	if got := call("receiver", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("receiver", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("second wish refusal=%+v", got)
 	}
-	if got := call("donor", 1810, map[string]any{"player_id": int64(a.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("donor", 1810, map[string]any{"player_id": int64(a.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("self donation refusal=%+v", got)
 	}
 	if got := call("donor", 1810, map[string]any{"player_id": int64(b.PlayerID)}); got.HTTPStatus != 200 {
@@ -413,7 +413,7 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if medal != 10 {
 		t.Fatalf("friend medal %d", medal)
 	}
-	if got := call("donor", 1810, map[string]any{"player_id": int64(b.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("donor", 1810, map[string]any{"player_id": int64(b.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("second donation refusal=%+v", got)
 	}
 
@@ -422,7 +422,7 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if got := call("third", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 200 {
 		t.Fatalf("third wish=%+v", got)
 	}
-	if got := call("donor", 1810, map[string]any{"player_id": int64(c.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("donor", 1810, map[string]any{"player_id": int64(c.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("insufficient stock refusal=%+v", got)
 	}
 	if again := scalar(t, pool, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='friend_medal'`, int64(a.PlayerID)); again != 10 {

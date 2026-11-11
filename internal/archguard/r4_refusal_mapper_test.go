@@ -15,22 +15,13 @@ import (
 // replies outside the shared stockruntime mapper. It may only shrink: delete
 // an entry when its dispatcher migrates (R4 parts 2 and 3 empty it).
 var r4RefusalMapperRatchet = map[string]bool{
-	"activity_dispatcher.go":       true,
-	"dodgeball_dispatcher.go":      true,
-	"eventcentre_dispatcher.go":    true,
-	"godstrial_dispatcher.go":      true,
-	"guild_campaign_dispatcher.go": true,
-	"guild_dispatcher.go":          true,
-	"guild_rental_dispatcher.go":   true,
-	"guild_tea_dispatcher.go":      true,
-	"i5_dispatcher.go":             true,
-	"library_forum_dispatcher.go":  true,
-	"memoir_dispatcher.go":         true,
-	"pet_dispatcher.go":            true,
-	"petcampaign_dispatcher.go":    true,
-	"practice_auto_dispatcher.go":  true,
-	"publication_dispatcher.go":    true,
-	"social_dispatcher.go":         true,
+	"activity_dispatcher.go":      true,
+	"dodgeball_dispatcher.go":     true,
+	"eventcentre_dispatcher.go":   true,
+	"library_forum_dispatcher.go": true,
+	"memoir_dispatcher.go":        true,
+	"practice_auto_dispatcher.go": true,
+	"publication_dispatcher.go":   true,
 }
 
 var r4MigratedDispatchers = []string{
