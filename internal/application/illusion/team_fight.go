@@ -272,7 +272,7 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, actor ident
 	if err != nil {
 		return cb.Started{}, err
 	}
-	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, BattleID: campaign.FightID, WavesB: waves}
+	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, RentalMode: d.RentalCampaignType, BattleID: campaign.FightID, WavesB: waves}
 	for index, member := range team.Members {
 		origin := cd.OwnedSelf
 		if index > 0 {

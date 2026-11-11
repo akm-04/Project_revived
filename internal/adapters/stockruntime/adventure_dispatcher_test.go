@@ -209,3 +209,27 @@ func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 		t.Fatalf("2422 duplicate %+v", response)
 	}
 }
+
+func TestAdventureRentFieldsAreRefused(t *testing.T) {
+	stub := &adventureStub{}
+	dispatcher := AdventureDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+	for _, test := range []struct {
+		name   string
+		mid    uint16
+		params map[string]any
+	}{
+		{"battle", 2419, map[string]any{"formation": "1", "rent_player_id": int64(7), "rent_formation": "31"}},
+		{"illusion-single", 2421, map[string]any{"formation": "1", "rent_player_id": int64(7), "rent_formation": "31"}},
+		{"defense", 2431, map[string]any{"formation": "1", "monster_pos": int64(1), "table_id": d.EventDefense, "rent_player_id": int64(7), "rent_formation": "31"}},
+	} {
+		response := dispatcher.Dispatch(context.Background(), adventureRequest(test.mid, test.params))
+		if response.HTTPStatus != 409 || response.Body["error_code"] != int64(adventureRentRefused) {
+			t.Fatalf("%s rent fields: %d %#v", test.name, response.HTTPStatus, response.Body)
+		}
+	}
+	// A zero-valued rent field is not a rental and still routes.
+	response := dispatcher.Dispatch(context.Background(), adventureRequest(2421, map[string]any{"formation": "1", "rent_player_id": int64(0), "rent_formation": "0"}))
+	if response.HTTPStatus != 200 {
+		t.Fatalf("zero rent fields: %d %#v", response.HTTPStatus, response.Body)
+	}
+}

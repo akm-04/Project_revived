@@ -249,7 +249,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 			r.Pending = r.Generation()
 			r.Formation = append([]int64{}, q.Formation...)
 		}
-		battle := appcombat.BattleRequest{CampaignType: 5, BattleID: 112000 + r.NextStage(), Formation: q.Formation, PetsA: []appcombat.Participant{}}
+		battle := appcombat.BattleRequest{CampaignType: 5, RentalMode: 5, BattleID: 112000 + r.NextStage(), Formation: q.Formation, PetsA: []appcombat.Participant{}}
 		for _, id := range q.Formation {
 			if id > 0 {
 				battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})

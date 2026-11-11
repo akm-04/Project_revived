@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/adventure"
@@ -23,6 +24,10 @@ var AdventureMIDs = []uint16{2410, 2411, 2412, 2413, 2416, 2417, 2418, 2419, 242
 const (
 	adventureFightExist = 30005
 	adventureExpired    = 35029
+	// Adventure does not enable a borrow mode (I9_GUILD_RENTAL_V1 C4), so a
+	// stock rent field is refused. 35028 "Not Available" is the stock message
+	// row; the client has no rent-specific row.
+	adventureRentRefused = 35028
 )
 
 type AdventurePort interface {
@@ -66,6 +71,9 @@ func (o AdventureDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		return failAdventure(d.ErrUnavailable)
 	}
 	params, op := req.Envelope.Params, req.Envelope.Operation
+	if adventureRented(params) {
+		return conflictRefusal(adventureRentRefused)
+	}
 	switch req.Envelope.MID {
 	case 2416:
 		if !onlyStockGameplayParams(params) {
@@ -224,8 +232,22 @@ func (o AdventureDispatcher) singleEvent(ctx context.Context, a identity.ActorCo
 	return adventureResponse(body, app.Response{}, err)
 }
 
-// adventureFight reads 2419/2421: formation plus an optional pet; the client's
-// rent_ fields are accepted and ignored.
+func adventureRented(params map[string]any) bool {
+	for _, key := range []string{"rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id"} {
+		raw, present := params[key]
+		if !present || raw == nil {
+			continue
+		}
+		text := fmt.Sprint(raw)
+		if text != "" && text != "0" {
+			return true
+		}
+	}
+	return false
+}
+
+// adventureFight reads 2419/2421: formation plus an optional pet; a nonzero
+// rent field is refused in Dispatch before this parser runs.
 func adventureFight(params map[string]any) (app.FightRequest, bool) {
 	formation, formationOK := topFloorFormation(params["formation"])
 	pet, petOK := topFloorInteger(params, "pet_id", false)

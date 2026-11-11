@@ -172,7 +172,7 @@ func provenance(loan combat.Loan) d.Provenance {
 // admit checks one loan and returns its price, 0 when the day's use already paid.
 // The offer row is locked here; the caller debits only after every offer is locked.
 func (s Service) admit(c context.Context, t tx.Tx, scope ca.CoherentReadScope, loan combat.Loan, membership guild.Membership, limit VIPLimit, borrowerLevel, day int64) (int64, error) {
-	rule, listed := s.Policy.Modes[loan.CampaignType]
+	rule, listed := s.Policy.Modes[loan.RentalMode]
 	if !listed || !rule.Enabled {
 		return 0, refused("mode does not allow borrowing")
 	}
@@ -209,7 +209,7 @@ func (s Service) admit(c context.Context, t tx.Tx, scope ca.CoherentReadScope, l
 		return 0, refused("one unit from a lender per day")
 	}
 	price := s.Policy.Money.Price(offer.Force)
-	inserted, err := s.Store.InsertRentalUseTx(c, t, guild.RentalUse{Borrower: loan.Borrower, Lender: loan.Lender, GameDay: day, Kind: kind, Unit: loan.Identity, CampaignType: loan.CampaignType, CostMana: price, UsedAt: scope.ObservedAt})
+	inserted, err := s.Store.InsertRentalUseTx(c, t, guild.RentalUse{Borrower: loan.Borrower, Lender: loan.Lender, GameDay: day, Kind: kind, Unit: loan.Identity, CampaignType: loan.RentalMode, CostMana: price, UsedAt: scope.ObservedAt})
 	if err != nil {
 		return 0, err
 	}

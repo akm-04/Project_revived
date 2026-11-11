@@ -143,7 +143,7 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if err != nil {
 		return cb.Started{}, err
 	}
-	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, BattleID: campaign.FightID, Formation: formation}
+	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, RentalMode: d.RentalCampaignType, BattleID: campaign.FightID, Formation: formation}
 	for _, id := range formation {
 		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}

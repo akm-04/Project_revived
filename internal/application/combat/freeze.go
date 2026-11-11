@@ -38,11 +38,14 @@ type Participant struct {
 
 type BattleRequest struct {
 	CampaignType int64
-	BattleID     int64
-	TeamA        []Participant
-	PetsA        []Participant
-	WavesB       [][]Participant
-	PetsB        []Participant
+	// RentalMode is the mode the mode's rent window offered under; zero keeps a
+	// loan refused because no policy row matches it.
+	RentalMode int64
+	BattleID   int64
+	TeamA      []Participant
+	PetsA      []Participant
+	WavesB     [][]Participant
+	PetsB      []Participant
 	// Context names the registered resolver transform of the mode (I8-2C).
 	Context *d.BattleContext
 	// Formation is the stock slot-ordered formation a client-summary START
@@ -230,7 +233,7 @@ func (f *freezer) lend(ctx context.Context, locator d.Locator, request BattleReq
 	}{{request.TeamA, d.HeroActor}, {request.PetsA, d.PetActor}} {
 		for _, p := range side.participants {
 			if p.Origin == d.Borrowed && p.Kind == side.kind && p.Player != f.starter && p.Player.Valid() && p.Identity > 0 {
-				loans = append(loans, Loan{Borrower: f.starter, Lender: p.Player, Kind: p.Kind, Identity: p.Identity, Locator: locator, CampaignType: request.CampaignType, Held: p.LoanHeld})
+				loans = append(loans, Loan{Borrower: f.starter, Lender: p.Player, Kind: p.Kind, Identity: p.Identity, Locator: locator, RentalMode: request.RentalMode, Held: p.LoanHeld})
 			}
 		}
 	}

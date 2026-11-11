@@ -27,6 +27,13 @@ const (
 	EventSummon   int64 = 10005
 	EventIllusion int64 = 10006
 
+	// Rental modes the stock adventure windows ask under; 0 means the client
+	// sends no rent fields on that site. AdventureIllusionWindow.lua:51 sends
+	// CampaignType.ADVENTURE_ILLUSION_SINGLE = 60, AdventureDefenseMonsterDetail
+	// Window.lua:73 sends CampaignType.ADVENTURE_DEFENSE = 62.
+	IllusionSingleRentalMode int64 = 60
+	DefenseRentalMode        int64 = 62
+
 	SweepFactKind    = objective.CampaignSweepKind
 	BattleFactKind   = objective.PVPFightKind
 	SummonFactKind   = "SUMMON"

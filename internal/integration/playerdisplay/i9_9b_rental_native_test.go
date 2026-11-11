@@ -157,9 +157,16 @@ func newRentalFixture(t *testing.T) rentalFixture {
 
 func (f rentalFixture) borrow(t *testing.T, scope string, campaignType int64, hero, pet int64) (appcombat.Started, error) {
 	t.Helper()
+	return f.borrowMode(t, scope, campaignType, campaignType, hero, pet)
+}
+
+// borrowMode separates the battle content type from the rent-list mode the
+// client sent, the split I9_GUILD_RENTAL_V1 C3/C4 requires.
+func (f rentalFixture) borrowMode(t *testing.T, scope string, campaignType, rentalMode int64, hero, pet int64) (appcombat.Started, error) {
+	t.Helper()
 	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
 	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: campaignType,
+		Battle: appcombat.BattleRequest{CampaignType: campaignType, RentalMode: rentalMode,
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	if hero > 0 {
 		request.Battle.TeamA = []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: hero}}
@@ -174,7 +181,7 @@ func (f rentalFixture) borrowBoth(t *testing.T, scope string, campaignType int64
 	t.Helper()
 	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
 	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: campaignType,
+		Battle: appcombat.BattleRequest{CampaignType: campaignType, RentalMode: campaignType,
 			TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: heroLender, Identity: hero}},
 			PetsA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.PetActor, Player: petLender, Identity: pet}},
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
@@ -257,7 +264,7 @@ func TestI9_9BBorrowedTableCollisionRefunds(t *testing.T) {
 	owned := must(genuineHeroService(f.pool).SummonNormal(ctx, f.borrower, genuineHeroTable, int64(definition.Template.FragmentItemID), definition.FragmentCount, op))(t, "borrower summon")
 	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/collision"}
 	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-collision", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: 1,
+		Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 			TeamA: []appcombat.Participant{
 				{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.borrower.PlayerID, Identity: owned.PartnerID},
 				{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: f.hero},
@@ -457,7 +464,7 @@ func rentalDeparture(t *testing.T) (rentalFixture, guildcore.Service, int64, int
 	}
 	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.lender.LogicalServerID), DomainLocator: fmt.Sprint(f.lender.PlayerID) + "/departure"}
 	request := appcombat.StartRequest{Actor: f.lender, Locator: locator, GenerationRef: "gen-departure", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: 1,
+		Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 			TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.borrower.PlayerID, Identity: borrowed.PartnerID}},
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	if _, err := fixtureStart(t, f.combat, revision, request, f.pool); err != nil {
@@ -521,7 +528,7 @@ func TestI9_9BDepartureClosesRentals(t *testing.T) {
 		}
 		locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/dissolve"}
 		request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-dissolve", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-			Battle: appcombat.BattleRequest{CampaignType: 1,
+			Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 				TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: f.hero}},
 				WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 		if _, err := fixtureStart(t, f.combat, f.revision, request, f.pool); err != nil {

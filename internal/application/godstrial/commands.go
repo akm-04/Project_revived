@@ -76,7 +76,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if e != nil {
 			return nil, e
 		}
-		battle := cb.BattleRequest{CampaignType: 79, BattleID: stage.Battle, Formation: append([]int64{}, q.Formation...), WavesB: waves}
+		battle := cb.BattleRequest{CampaignType: 79, RentalMode: 79, BattleID: stage.Battle, Formation: append([]int64{}, q.Formation...), WavesB: waves}
 		for _, h := range q.Formation {
 			battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: h})
 		}

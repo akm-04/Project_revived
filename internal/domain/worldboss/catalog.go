@@ -21,6 +21,10 @@ const (
 	AttemptsPerBuy = 5
 	SweepsPerDay   = 1
 
+	// RentalCampaignType is the mode the stock rent window asks under:
+	// WorldBossBattlePreWindow.lua:324 sends CampaignType.ELEMENT = 8.
+	RentalCampaignType int64 = 8
+
 	ClosedStartSecond   = 79080
 	SecondsPerDay       = 86400
 	CourageUpdateSecond = 79200
