@@ -87,20 +87,29 @@ func (d GuildTeaDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 }
 
 func teaBad() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "guild_tea_invalid_parameter"}}
+	return failureReply(malformed("guild_tea_invalid_parameter"))
+}
+
+var teaFailureRows = []failureRow{
+	{match: guildtea.ErrNotInGuild, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildtea.ErrAlreadyWished, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildtea.ErrNoWish, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildtea.ErrWishFull, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildtea.ErrAlreadyDonated, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildtea.ErrSelfDonation, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildtea.ErrNotOwner, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildtea.ErrUnknownScroll, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 // teaFailure refuses with 409: Backend.lua hands any 200 body to the success
 // callback, which indexes self_wish_info/gift_list/wish_list (F4/D370).
 func teaFailure(err error) httpedge.Response {
-	switch {
-	case errors.Is(err, guildtea.ErrInvalid):
+	if errors.Is(err, guildtea.ErrInvalid) {
 		return teaBad()
-	case errors.Is(err, guildtea.ErrNotInGuild), errors.Is(err, guildtea.ErrAlreadyWished), errors.Is(err, guildtea.ErrNoWish),
-		errors.Is(err, guildtea.ErrWishFull), errors.Is(err, guildtea.ErrAlreadyDonated), errors.Is(err, guildtea.ErrSelfDonation),
-		errors.Is(err, guildtea.ErrNotOwner), errors.Is(err, guildtea.ErrUnknownScroll), errors.Is(err, economy.ErrInsufficientBalance):
-		return conflictRefusal(1)
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "guild_tea_unavailable"}}
 	}
+	if classified := classifyFailure(teaFailureRows, err); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(err))
 }
