@@ -15,6 +15,30 @@ var (
 	ErrInvalidTemporalPolicy = errors.New("invalid temporal resource policy")
 )
 
+// InsufficientBalanceError names the resource whose debit failed while still
+// matching ErrInsufficientBalance through errors.Is.
+type InsufficientBalanceError struct {
+	ResourceKey string
+}
+
+func (e *InsufficientBalanceError) Error() string {
+	if e.ResourceKey == "" {
+		return ErrInsufficientBalance.Error()
+	}
+	return "insufficient " + e.ResourceKey + " balance"
+}
+
+func (e *InsufficientBalanceError) Unwrap() error { return ErrInsufficientBalance }
+
+// InsufficientBalance builds the typed balance error for a named scalar or
+// temporal resource; an unnamed resource keeps the plain sentinel.
+func InsufficientBalance(resourceKey string) error {
+	if resourceKey == "" {
+		return ErrInsufficientBalance
+	}
+	return &InsufficientBalanceError{ResourceKey: resourceKey}
+}
+
 type ResourceClass uint8
 
 const (
@@ -64,7 +88,7 @@ func (b ScalarBalance) Debit(amount int64, now time.Time) (ScalarBalance, error)
 		return ScalarBalance{}, errors.New("debit must be positive")
 	}
 	if b.Amount < amount {
-		return ScalarBalance{}, ErrInsufficientBalance
+		return ScalarBalance{}, InsufficientBalance(b.ResourceKey)
 	}
 	b.Amount -= amount
 	b.StateVersion++
@@ -246,7 +270,7 @@ func (s TemporalState) Debit(amount int64, now time.Time, p TemporalPolicy) (Tem
 		return TemporalState{}, err
 	}
 	if m.StoredAmount < amount {
-		return TemporalState{}, ErrInsufficientBalance
+		return TemporalState{}, InsufficientBalance(s.ResourceKey)
 	}
 	m.StoredAmount -= amount
 	if m.StoredAmount < p.NaturalCap && m.RegenAnchorAt == nil {

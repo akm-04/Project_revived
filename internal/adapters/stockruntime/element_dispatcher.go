@@ -92,7 +92,7 @@ func (d ElementDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 var elementFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 	{match: ins.ErrInvalid, class: failureMalformed, detail: "elementequipment_command_rejected"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failElement(e error) httpedge.Response {

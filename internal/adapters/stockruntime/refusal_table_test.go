@@ -124,7 +124,7 @@ func TestRefusalCodesHaveClientMessageRows(t *testing.T) {
 	rows = append(rows, heroFailureRows...)
 	rows = append(rows, heroSkillLevelFailureRows...)
 	for _, row := range rows {
-		if row.class != failureRefusal || row.code == unprovenRefusalCode {
+		if row.class != failureRefusal || row.code == unprovenRefusalCode || row.balance {
 			continue
 		}
 		if !clientMessageIDs[row.code] {

@@ -165,7 +165,7 @@ func (s SpiritDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 var spiritFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "spirit_command_rejected"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failSpirit(e error) httpedge.Response {

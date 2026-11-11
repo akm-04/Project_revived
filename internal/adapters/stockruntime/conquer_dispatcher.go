@@ -140,7 +140,7 @@ func conquerDamage(raw any) (int64, bool) {
 var conquerFailureRows = []failureRow{
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "conquer_request_refused"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failConquer(err error) httpedge.Response {

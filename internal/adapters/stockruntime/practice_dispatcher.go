@@ -223,7 +223,7 @@ var practiceFailureRows = []failureRow{
 	{match: apppractice.ErrPracticePrivilege, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apppractice.ErrPracticeBless, class: failureRefusal, code: unprovenRefusalCode},
 	{match: appi5.ErrLevelRequirement, class: failureRefusal, code: unprovenRefusalCode},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: apppractice.ErrAllPracticeAttrsAtCap, class: failureRefusal, code: unprovenRefusalCode},
 }
 

@@ -86,7 +86,7 @@ func (d EvolutionDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 var evolutionFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 	{match: ins.ErrInvalid, class: failureMalformed, detail: "heroevolution_command_rejected"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failEvolution(e error) httpedge.Response {

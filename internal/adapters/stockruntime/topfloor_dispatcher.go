@@ -244,7 +244,7 @@ var topFloorFailureRows = []failureRow{
 	{match: d.ErrDefenseRequired, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "top_floor_request_refused"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failTopFloor(err error) httpedge.Response {

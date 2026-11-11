@@ -86,7 +86,7 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 var bookFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 	{match: book.ErrInvalid, class: failureMalformed, detail: "book_command_rejected"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failBook(e error) httpedge.Response {

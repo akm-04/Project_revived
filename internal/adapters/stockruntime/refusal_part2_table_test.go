@@ -65,6 +65,15 @@ func assertPart2FailureCases(t *testing.T, cases []part2FailureCase) {
 	}
 }
 
+func TestInsufficientBalanceMapsResourceCodes(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"diamonds", failArena(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
+		{"coins", failArena(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
+		{"stamina", failArena(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
+		{"other resource", failArena(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
+	})
+}
+
 func TestPart2ArenaFailureRows(t *testing.T) {
 	fallback := errors.New("arena dependency")
 	assertPart2FailureCases(t, []part2FailureCase{

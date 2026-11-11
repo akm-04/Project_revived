@@ -198,7 +198,7 @@ var arenaFailureRows = []failureRow{
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "arena_request_refused"},
 	{match: d.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failArena(err error) httpedge.Response {
@@ -221,7 +221,7 @@ var arenaFightFailureRows = []failureRow{
 	{match: app.ErrNoTeam, class: failureRefusal, code: arenaNoTeamError},
 	{match: d.ErrRefused, class: failureRefusal, code: arenaMatchRefusedError},
 	{match: d.ErrClosed, class: failureRefusal, code: arenaClosedError},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "arena_request_refused"},
 }
 

@@ -185,7 +185,7 @@ var oneOnOneFailureRows = []failureRow{
 	{match: d.ErrOfferStale, class: failureRefusal, code: oneOnOneRankChangedError},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "one_on_one_request_refused"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failOneOnOne(err error) httpedge.Response {

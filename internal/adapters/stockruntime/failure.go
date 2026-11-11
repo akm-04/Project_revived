@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-// D5 PRIVATE_POLICY tunables. The balance codes apply only where a typed
-// resource key identifies the missing resource; the shared
-// economy.ErrInsufficientBalance carries none, so those rows use the generic.
+// D5 PRIVATE_POLICY tunables. The balance codes are selected from the typed
+// economy balance error's resource key.
 const (
 	unprovenRefusalCode     int64 = 35028
 	staleConflictCode       int64 = 40002
@@ -18,6 +18,16 @@ const (
 	insufficientDiamondCode int64 = 20005
 	insufficientCoinCode    int64 = 20006
 	insufficientStaminaCode int64 = 20007
+)
+
+// Stock resource keys: crystal is the diamond wallet (eventcentre admin
+// exchange from_type 2 -> 20005), mana is the coin wallet (from_type 1 ->
+// 20006, message.lua 20005/20006), and energy is stamina (client enums.lua
+// ENERGY = "energy", utils.lua asset "energy"; message.lua 20007).
+const (
+	diamondResourceKey = "crystal"
+	coinResourceKey    = "mana"
+	staminaResourceKey = "energy"
 )
 
 type failureClass uint8
@@ -77,10 +87,11 @@ func UnprovenRefusal() *classifiedFailure {
 }
 
 type failureRow struct {
-	match  error
-	class  failureClass
-	code   int64
-	detail string
+	match   error
+	class   failureClass
+	code    int64
+	detail  string
+	balance bool
 }
 
 func classifyFailure(rows []failureRow, err error) *classifiedFailure {
@@ -88,9 +99,29 @@ func classifyFailure(rows []failureRow, err error) *classifiedFailure {
 		if !errors.Is(err, row.match) {
 			continue
 		}
-		return &classifiedFailure{class: row.class, code: row.code, detail: row.detail, cause: err}
+		code := row.code
+		if row.balance {
+			code = insufficientBalanceCode(err)
+		}
+		return &classifiedFailure{class: row.class, code: code, detail: row.detail, cause: err}
 	}
 	return nil
+}
+
+func insufficientBalanceCode(err error) int64 {
+	var balance *economy.InsufficientBalanceError
+	if !errors.As(err, &balance) {
+		return unprovenRefusalCode
+	}
+	switch balance.ResourceKey {
+	case diamondResourceKey:
+		return insufficientDiamondCode
+	case coinResourceKey:
+		return insufficientCoinCode
+	case staminaResourceKey:
+		return insufficientStaminaCode
+	}
+	return unprovenRefusalCode
 }
 
 func failureReply(failure *classifiedFailure) httpedge.Response {

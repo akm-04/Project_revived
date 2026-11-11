@@ -236,7 +236,7 @@ var libraryModeFailureRows = []failureRow{
 	{match: library.ErrActAwarded, class: failureRefusal, code: unprovenRefusalCode},
 	{match: library.ErrCGClaimed, class: failureRefusal, code: unprovenRefusalCode},
 	{match: library.ErrBgOwned, class: failureRefusal, code: unprovenRefusalCode},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failLibraryMode(e error) httpedge.Response {

@@ -262,7 +262,7 @@ func (d MaterialCostDebiter) acquireMaterialCostLocksTx(ctx context.Context, t t
 				}
 			}
 			if !floorEnabled {
-				return economy.ErrInsufficientBalance
+				return economy.InsufficientBalance(r.ResourceKey)
 			}
 		case grantLockStack:
 			if _, exists, err := d.Store.LockStackTx(ctx, t, pid, r.ItemID, pf.Now); err != nil {
@@ -303,7 +303,7 @@ func (d MaterialCostDebiter) prepareMaterialDebitStateTx(ctx context.Context, t 
 			}
 		}
 		if !exists {
-			return MaterialDebitResult{}, economy.ErrInsufficientBalance
+			return MaterialDebitResult{}, economy.InsufficientBalance(x.Cost.ResourceKey)
 		}
 		next, err := b.Debit(x.Cost.Amount, pf.Now)
 		if err != nil {
