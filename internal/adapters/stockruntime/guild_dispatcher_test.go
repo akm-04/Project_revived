@@ -160,11 +160,18 @@ func TestGuildMutationResultMapsOnlySourceRecoveredGuildCodes(t *testing.T) {
 		})
 	}
 
-	for _, err := range []error{guildcore.ErrApplicantLimit, guildcore.ErrLevelTooLow, guildcore.ErrInviteLimit, errors.New("unknown")} {
+	for _, err := range []error{guildcore.ErrApplicantLimit, guildcore.ErrLevelTooLow, guildcore.ErrInviteLimit} {
 		r := guildMutationResult(err)
-		if _, exists := r.Body["error_code"]; exists {
-			t.Fatalf("invented numeric code for %v: %+v", err, r)
+		if r.HTTPStatus != 409 || r.Body["error_code"] != int64(35028) {
+			t.Fatalf("unproven refusal %v: %+v", err, r)
 		}
+	}
+	unknown := guildMutationResult(errors.New("unknown"))
+	if unknown.HTTPStatus != 503 || unknown.Body["error_code"] != int64(35033) {
+		t.Fatalf("unknown failure: %+v", unknown)
+	}
+	if _, leaks := unknown.Body["error"]; leaks {
+		t.Fatalf("unknown failure leaked backend detail: %+v", unknown)
 	}
 }
 
@@ -180,7 +187,7 @@ func TestGuildDispatcherRejectsForgedRegionBeforeViewOrCore(t *testing.T) {
 
 func TestFailGuildKeepsUnknownErrorsOpaque(t *testing.T) {
 	r := failGuild(errors.New("sensitive backend detail"))
-	if r.HTTPStatus != 503 || r.Body["error"] != "guild_operation_failed" {
+	if r.HTTPStatus != 503 || r.Body["error_code"] != int64(35033) || r.Body["error"] != nil {
 		t.Fatalf("%+v", r)
 	}
 }

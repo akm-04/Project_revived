@@ -77,7 +77,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 3092,
    "name": "HUNQI_START_FIGHT"
@@ -85,7 +85,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 3093,
    "name": "HUNQI_FIGHT_RESULT"
@@ -93,7 +93,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 3097,
    "name": "HUNQI_GET_CAMPAIGN_INFO"
@@ -101,7 +101,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 3099,
    "name": "HUNQI_AUTO_FIGHT"
@@ -109,7 +109,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 3100,
    "name": "HUNQI_GET_AUTO_AWRAD"
@@ -117,7 +117,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 3101,
    "name": "HUNQI_START_GAME_GET_INFO"

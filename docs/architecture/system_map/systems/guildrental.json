@@ -94,7 +94,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 593,
    "name": "LOAD_SENT_HEROS"
@@ -102,7 +102,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 594,
    "name": "RENT_HERO"
@@ -110,7 +110,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 595,
    "name": "CANCEL_RENT_HERO"
@@ -118,7 +118,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 618,
    "name": "LOAD_RENT_PET"
@@ -126,7 +126,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 619,
    "name": "RENT_PET"
@@ -134,7 +134,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 620,
    "name": "CANCEL_RENT_PET"
@@ -142,7 +142,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 621,
    "name": "LOAD_CAN_RENT_PET_LIST"
@@ -150,7 +150,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 623,
    "name": "LOAD_USED_PARTNER"
@@ -158,7 +158,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
-    "line": 35
+    "line": 34
    },
    "mid": 2768,
    "name": "GET_RENT_HEROS"
