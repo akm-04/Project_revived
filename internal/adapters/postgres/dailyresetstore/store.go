@@ -31,12 +31,14 @@ func (store Store) Advance(ctx context.Context, player identity.PlayerID, day in
 	return stored == day, nil
 }
 
+// Set never moves the marker backwards: a login whose ReceivedAt is earlier than a concurrent reply that already
+// advanced the day must not let the next reply repeat the signal.
 func (store Store) Set(ctx context.Context, player identity.PlayerID, day int64) error {
 	if store.Queryer == nil || !player.Valid() {
 		return errors.New("daily reset marker: invalid input")
 	}
 	var stored int64
-	return store.Queryer.QueryRow(ctx, `INSERT INTO player_daily_reset_marks(player_id,last_day,updated_at)VALUES($1,$2,clock_timestamp()) ON CONFLICT(player_id) DO UPDATE SET last_day=EXCLUDED.last_day,updated_at=EXCLUDED.updated_at RETURNING last_day`, int64(player), day).Scan(&stored)
+	return store.Queryer.QueryRow(ctx, `INSERT INTO player_daily_reset_marks(player_id,last_day,updated_at)VALUES($1,$2,clock_timestamp()) ON CONFLICT(player_id) DO UPDATE SET last_day=GREATEST(player_daily_reset_marks.last_day,EXCLUDED.last_day),updated_at=EXCLUDED.updated_at RETURNING last_day`, int64(player), day).Scan(&stored)
 }
 
 var _ dailyreset.MarkerStore = Store{}

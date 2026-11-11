@@ -115,6 +115,31 @@ func TestDailyResetSignalIsDeliveredExactlyOnceUnderConcurrency(t *testing.T) {
 	}
 }
 
+// MID 1 with an earlier ReceivedAt than a concurrent reply must not move the marker back and repeat the signal.
+func TestLoginMarkerNeverMovesBackwards(t *testing.T) {
+	service, pool := dailyResetService(t)
+	player := markerPlayer(t, pool, identity.PlayerID(99000005))
+	if !carriedReset(resetReply(t, service, player, gameDayAfter, map[string]any{}, 200)) {
+		t.Fatal("first reply of the day did not carry the reset signal")
+	}
+	if err := service.MarkLogin(context.Background(), player, gameDayBefore); err != nil {
+		t.Fatal(err)
+	}
+	if carriedReset(resetReply(t, service, player, gameDayAfter, map[string]any{}, 200)) {
+		t.Fatal("an earlier login moved the marker back and repeated the signal")
+	}
+	later := gameDayAfter.Add(24 * time.Hour)
+	if err := service.MarkLogin(context.Background(), player, later); err != nil {
+		t.Fatal(err)
+	}
+	if carriedReset(resetReply(t, service, player, later, map[string]any{}, 200)) {
+		t.Fatal("a later login did not mark the day login already served")
+	}
+	if !carriedReset(resetReply(t, service, player, later.Add(24*time.Hour), map[string]any{}, 200)) {
+		t.Fatal("the next game day after login did not carry the signal")
+	}
+}
+
 func TestLoginMarksTheDaySoTheFirstReplyDoesNotRepeatTheSignal(t *testing.T) {
 	pool := broadcastPool(t)
 	service := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: dailyreset.ZeroCounters{}}

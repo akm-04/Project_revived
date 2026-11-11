@@ -582,6 +582,41 @@ func TestI9_10FMentorDailyApplyReadNormalisesAtTheGameDayBoundary(t *testing.T) 
 	expectMentorOK(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(targets[3].PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
 }
 
+// An evening application is already on the next GMT+8 game day; the stored marker must be that day, so the read the
+// next morning does not reset it and grant an extra day of applications.
+func TestI9_10FMentorEveningApplicationKeepsTheNextGameDay(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	student := mentorActor(t, p, 20)
+	target := mentorActor(t, p, 60)
+	service.Timed.Binder.Time = fixedTime{at: time.Date(2026, 11, 10, 22, 0, 0, 0, time.UTC)}
+	expectMentorOK(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(target.PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
+	service.Timed.Binder.Time = fixedTime{at: time.Date(2026, 11, 11, 10, 0, 0, 0, time.UTC)}
+	info := expectMentorOK(t, mentorCall(t, service, student, 1856, map[string]any{}), 1856)
+	if got := dailyApplyTimes(t, info); !reflect.DeepEqual(got, []any{int64(1), int64(0)}) {
+		t.Fatalf("evening application was reset inside its own game day: %v", got)
+	}
+}
+
+// A legacy row written before 21:00 UTC stores UTC date D; the first read after the new 05:00 GMT+8 boundary
+// (21:00 UTC on D) must project zero, the same day-keyed reset the apply command performs.
+func TestI9_10FMentorSwitchResetsALegacyDayAtTheNewBoundary(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	student := mentorActor(t, p, 20)
+	exec(t, p, `INSERT INTO mentor_states(player_id,logical_server_id,apply_day,apply_count_mentor,apply_count_student,state_version)VALUES($1,$2,'2026-11-10',3,0,1)`, int64(student.PlayerID), int32(student.LogicalServerID))
+	service.Timed.Binder.Time = fixedTime{at: time.Date(2026, 11, 10, 20, 59, 59, 0, time.UTC)}
+	before := expectMentorOK(t, mentorCall(t, service, student, 1856, map[string]any{}), 1856)
+	if got := dailyApplyTimes(t, before); !reflect.DeepEqual(got, []any{int64(3), int64(0)}) {
+		t.Fatalf("04:59:59 GMT+8 daily_apply_times %v", got)
+	}
+	service.Timed.Binder.Time = fixedTime{at: time.Date(2026, 11, 10, 21, 0, 0, 0, time.UTC)}
+	after := expectMentorOK(t, mentorCall(t, service, student, 1856, map[string]any{}), 1856)
+	if got := dailyApplyTimes(t, after); !reflect.DeepEqual(got, []any{int64(0), int64(0)}) {
+		t.Fatalf("05:00:00 GMT+8 daily_apply_times stayed stale: %v", got)
+	}
+}
+
 func nextGameDayBoundary(now time.Time) time.Time {
 	boundary := time.Date(now.Year(), now.Month(), now.Day(), 21, 0, 0, 0, time.UTC)
 	if !boundary.After(now) {
