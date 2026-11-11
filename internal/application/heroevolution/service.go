@@ -20,8 +20,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
-
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -380,11 +380,18 @@ func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command
 	}
 	return Result{}, ErrUnavailable
 }
+
+// finishResult recovers the domain cause from the persisted rejection text so
+// the first attempt and its replay classify identically. A definite abort
+// records e.Error(), which contains the domain sentinel's text.
 func finishResult(out Result) (Result, error) {
-	if out.Rejected != "" {
-		return out, fmt.Errorf("%w: %s", ErrRejected, out.Rejected)
+	if out.Rejected == "" {
+		return out, nil
 	}
-	return out, nil
+	if strings.Contains(out.Rejected, heroevolution.ErrInvalid.Error()) {
+		return out, fmt.Errorf("%w: %w", ErrRejected, heroevolution.ErrInvalid)
+	}
+	return out, fmt.Errorf("%w: %s", ErrRejected, out.Rejected)
 }
 
 type resolver struct {
