@@ -2,16 +2,22 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	authentication "gxb.local/backend/v2/internal/application/realtimeauth"
 	recall "gxb.local/backend/v2/internal/application/socialrecall"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
+
+var socialRecallAwardFailureRows = []failureRow{
+	{match: recall.ErrAwardRefused, class: failureRefusal, code: unprovenRefusalCode},
+}
+
+var socialRecallStartFailureRows = []failureRow{
+	{match: recall.ErrStartRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: recall.ErrStartFacts, class: failureRefusal, code: unprovenRefusalCode},
+}
 
 type SocialRecallStartPort interface {
 	Start(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (map[string]any, error)
@@ -44,17 +50,13 @@ func (dispatcher SocialRecallAwardDispatcher) Dispatch(ctx context.Context, requ
 		return badHero("invalid_social_recall_award_parameter")
 	}
 	if dispatcher.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "social_recall_unavailable"}}
+		return failureReply(unavailable(nil))
 	}
 	body, err := dispatcher.Service.Claim(ctx, actor, award, request.Envelope.Operation)
 	if err == nil {
 		return okI5(body)
 	}
-	var conflict *receipt.ConflictError
-	if errors.Is(err, recall.ErrAwardRefused) || errors.As(err, &conflict) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "social_recall_unavailable"}}
+	return failureFromRows(socialRecallAwardFailureRows, err)
 }
 
 func (dispatcher SocialRecallStartDispatcher) Dispatch(ctx context.Context, request httpedge.DispatchRequest) httpedge.Response {
@@ -68,18 +70,14 @@ func (dispatcher SocialRecallStartDispatcher) Dispatch(ctx context.Context, requ
 		return badHero("invalid_social_recall_parameter")
 	}
 	if target <= 0 {
-		return conflictRefusal(1)
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if dispatcher.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "social_recall_unavailable"}}
+		return failureReply(unavailable(nil))
 	}
 	body, err := dispatcher.Service.Start(ctx, actor, identity.PlayerID(target), request.Envelope.Operation)
 	if err == nil {
 		return okI5(body)
 	}
-	var conflict *receipt.ConflictError
-	if errors.Is(err, recall.ErrStartRefused) || errors.Is(err, recall.ErrStartFacts) || errors.As(err, &conflict) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "social_recall_unavailable"}}
+	return failureFromRows(socialRecallStartFailureRows, err)
 }

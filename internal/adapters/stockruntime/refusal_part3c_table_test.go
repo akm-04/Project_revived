@@ -1,12 +1,14 @@
 package stockruntime
 
 import (
+	"errors"
 	"net/http"
 	"testing"
 
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	exchange "gxb.local/backend/v2/internal/application/socialexchange"
 	invite "gxb.local/backend/v2/internal/application/socialinvite"
+	recall "gxb.local/backend/v2/internal/application/socialrecall"
 	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -196,4 +198,15 @@ func TestPart3CSocialInviteFailureRows(t *testing.T) {
 
 func failSocialInvite(err error) httpedge.Response {
 	return failureFromRows(socialInviteFailureRows, err)
+}
+
+func TestPart3CSocialRecallFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"award refused", failureFromRows(socialRecallAwardFailureRows, recall.ErrAwardRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"award conflict", failureFromRows(socialRecallAwardFailureRows, &receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"start refused", failureFromRows(socialRecallStartFailureRows, recall.ErrStartRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"start facts", failureFromRows(socialRecallStartFailureRows, recall.ErrStartFacts), http.StatusConflict, unprovenRefusalCode, ""},
+		{"start conflict", failureFromRows(socialRecallStartFailureRows, &receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"unavailable", failureFromRows(socialRecallStartFailureRows, errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
 }
