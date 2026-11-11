@@ -19,7 +19,7 @@ func TestI9_10DCourseProcessStockMIDs(t *testing.T) {
 		t.Fatalf("2141 status %d body %+v", code, body)
 	}
 	code, body = api.post(2141, map[string]any{"item_id": int64(50001418)})
-	if code != 409 || body["error_code"] != float64(1) {
+	if code != 409 || body["error_code"] != float64(35028) {
 		t.Fatalf("2141 spent day status %d body %+v", code, body)
 	}
 	code, body = api.post(2500, map[string]any{"table_id": int64(10001001)})

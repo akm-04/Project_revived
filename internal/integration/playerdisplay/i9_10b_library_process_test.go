@@ -326,7 +326,7 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 	}
 	for _, mid := range []uint16{845, 846, 847} {
 		code, body = api.post(mid, map[string]any{"partner_id": int64(1), "mission_id": int64(1001)})
-		if code != 409 || body["error_code"] != float64(1) {
+		if code != 409 || body["error_code"] != float64(35028) {
 			t.Fatalf("%d status %d body %+v", mid, code, body)
 		}
 	}
@@ -336,15 +336,15 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 	}
 	// Representative D426 business refusals on existing live routes.
 	code, body = api.post(837, map[string]any{"partner_id": int64(1), "dialog_id": int64(9)})
-	if code != 409 || body["error_code"] != float64(1) {
+	if code != 409 || body["error_code"] != float64(35028) {
 		t.Fatalf("837 closed dialog status %d body %+v", code, body)
 	}
 	code, body = api.post(851, map[string]any{"talk_id": int64(1001)})
-	if code != 409 || body["error_code"] != float64(1) {
+	if code != 409 || body["error_code"] != float64(35028) {
 		t.Fatalf("851 replay status %d body %+v", code, body)
 	}
 	code, body = api.post(839, map[string]any{"gift_id": int64(50001112), "gift_num": int64(1)})
-	if code != 409 || body["error_code"] != float64(1) {
+	if code != 409 || body["error_code"] != float64(35028) {
 		t.Fatalf("839 insufficient crystal status %d body %+v", code, body)
 	}
 	// Malformed requests stay 400.
