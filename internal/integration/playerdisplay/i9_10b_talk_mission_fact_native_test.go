@@ -265,7 +265,7 @@ func TestI9_10B843TalkAwardChoiceAndEnd(t *testing.T) {
 		t.Fatalf("bad select_info status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(9), "select_info": "1|1"}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("closed dialog status %d body %+v", response.HTTPStatus, response.Body)
 	}
 }
@@ -359,7 +359,7 @@ func TestI9_10B851SchoolStoryClaimOnce(t *testing.T) {
 		t.Fatalf("851 replay status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 851, map[string]any{"talk_id": int64(1001)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("851 second claim status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	if e := p.QueryRow(ctx, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=50001002`, int64(a.PlayerID)).Scan(&quantity); e != nil || quantity != 5 {

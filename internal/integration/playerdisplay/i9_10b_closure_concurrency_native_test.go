@@ -129,14 +129,14 @@ func TestI9_10B840BusinessRefusalsSpendNothing(t *testing.T) {
 	}
 
 	invalid := libraryDispatchService(t, a, service, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50009999), "gift_num": int64(1)}, op())
-	if invalid.HTTPStatus != 409 || invalid.Body["error_code"] != int64(1) {
+	if invalid.HTTPStatus != 409 || invalid.Body["error_code"] != int64(35028) {
 		t.Fatalf("invalid gift status %d body %+v", invalid.HTTPStatus, invalid.Body)
 	}
 	spendNothing("invalid gift")
 
 	seedStack(t, p, a, rev, 50001112, 1)
 	marriageGate := libraryDispatchService(t, a, service, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50001112), "gift_num": int64(1)}, op())
-	if marriageGate.HTTPStatus != 409 || marriageGate.Body["error_code"] != int64(1) {
+	if marriageGate.HTTPStatus != 409 || marriageGate.Body["error_code"] != int64(35028) {
 		t.Fatalf("marriage gate status %d body %+v", marriageGate.HTTPStatus, marriageGate.Body)
 	}
 	if got := p5StackQuantity(t, p, a.PlayerID, 50001112); got != 1 {
@@ -145,7 +145,7 @@ func TestI9_10B840BusinessRefusalsSpendNothing(t *testing.T) {
 	spendNothing("marriage gate")
 
 	missingGift := libraryDispatchService(t, a, service, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, op())
-	if missingGift.HTTPStatus != 409 || missingGift.Body["error_code"] != int64(1) {
+	if missingGift.HTTPStatus != 409 || missingGift.Body["error_code"] != int64(35028) {
 		t.Fatalf("missing gift stack status %d body %+v", missingGift.HTTPStatus, missingGift.Body)
 	}
 	if got := stackQuantityOrZero(t, p, a.PlayerID, 50005011); got != 0 {

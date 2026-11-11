@@ -288,7 +288,7 @@ func TestI9_10BD491RejectsForgedSourceSelection(t *testing.T) {
 			before := d491StoredFavor(t, p, actor, 1)
 			response := libraryDispatchService(t, actor, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": tc.dialogID, "select_info": tc.selectInfo}, op())
 			t.Logf("forged select_info=%q status=%d body=%+v before=%d", tc.selectInfo, response.HTTPStatus, response.Body, before)
-			if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+			if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 				t.Fatalf("forged select_info %q status %d body %+v", tc.selectInfo, response.HTTPStatus, response.Body)
 			}
 			if after := d491StoredFavor(t, p, actor, 1); after != before {
@@ -313,7 +313,7 @@ func TestI9_10BD491MissingSourceGraphRefusesMutation(t *testing.T) {
 	before := d491StoredFavor(t, p, actor, 1)
 	response := libraryDispatchService(t, actor, service, 843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|202001"}, op())
 	t.Logf("missing source status=%d body=%+v before=%d", response.HTTPStatus, response.Body, before)
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("missing source status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	if after := d491StoredFavor(t, p, actor, 1); after != before {

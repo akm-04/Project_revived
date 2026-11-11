@@ -114,7 +114,7 @@ func TestI9_10B838DialogArrayAnd837ReadFlag(t *testing.T) {
 	}
 
 	response = libraryCall(t, p, a, 837, map[string]any{"partner_id": int64(1), "dialog_id": int64(2)})
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("closed dialog status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryCall(t, p, a, 837, map[string]any{"partner_id": int64(1)})
@@ -153,7 +153,7 @@ func TestI9_10B838EmptyArrayAndMissingKey(t *testing.T) {
 	}
 
 	response = libraryCall(t, p, a, 838, map[string]any{"partner_id": int64(2)})
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("unowned partner status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	if _, present := response.Body["partner_dialogs"]; present {
@@ -190,12 +190,12 @@ func TestI9_10B842ActSlotsAnd844OnceOnly(t *testing.T) {
 		t.Fatalf("act award replay status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("second act award status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	setLibraryFavor(t, p, a, 1, 100)
 	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(2)})
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("act 2 at the 100 band edge status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(5)})

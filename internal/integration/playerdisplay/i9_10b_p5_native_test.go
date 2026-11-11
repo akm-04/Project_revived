@@ -127,7 +127,7 @@ func TestI9_10B839BuyGiftDebitCreditAndOwnedCount(t *testing.T) {
 	}
 
 	response = libraryDispatchService(t, a, service, 839, map[string]any{"gift_id": int64(50009999), "gift_num": int64(1)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("unknown gift status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 839, map[string]any{"gift_id": giftID, "gift_num": int64(2)}, op())
@@ -140,7 +140,7 @@ func TestI9_10B839BuyGiftDebitCreditAndOwnedCount(t *testing.T) {
 	}
 	before := p5CrystalBalance(t, p, a.PlayerID)
 	response = libraryDispatchService(t, a, service, 839, map[string]any{"gift_id": int64(50001112), "gift_num": int64(1)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(20005) {
 		t.Fatalf("ring without crystal status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	if got := p5CrystalBalance(t, p, a.PlayerID); got != before {
@@ -185,11 +185,11 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 	}
 
 	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(3), "board_model_id": int64(11001001)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("unawakened card status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(2), "board_model_id": int64(40001001)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("unowned skin status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	saveSkinEntitlement(t, p, a, 1, 40001001)
@@ -198,7 +198,7 @@ func TestI9_10B835BoardSetResetAndMID1(t *testing.T) {
 		t.Fatalf("owned skin status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(99), "card_status": int64(1), "board_model_id": int64(10001001)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("unowned hero status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 835, map[string]any{"partner_id": int64(1), "card_status": int64(4), "board_model_id": int64(10001001)}, op())
@@ -363,11 +363,11 @@ func TestI9_10B855CGClaimOnce(t *testing.T) {
 		t.Fatalf("cg stack after replay %d", got)
 	}
 	response = libraryDispatchService(t, a, service, 855, map[string]any{"index": int64(1)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("855 second claim status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 855, map[string]any{"index": int64(99)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("855 unknown index status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	body, e := service.Read(ctx, a, op(), 836, 0)
@@ -387,7 +387,7 @@ func TestI9_10B856857Backgrounds(t *testing.T) {
 	service := libraryP5Service(p)
 
 	response := libraryDispatchService(t, a, service, 856, map[string]any{"bg_id": int64(3)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("856 without item status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	seedStack(t, p, a, rev, lib.BackgroundUnlockItemID, 2)
@@ -405,11 +405,11 @@ func TestI9_10B856857Backgrounds(t *testing.T) {
 		t.Fatalf("856 replay status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 856, map[string]any{"bg_id": int64(3)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("856 second unlock status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 856, map[string]any{"bg_id": int64(1)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("856 free bg status %d body %+v", response.HTTPStatus, response.Body)
 	}
 
@@ -430,7 +430,7 @@ func TestI9_10B856857Backgrounds(t *testing.T) {
 		t.Fatalf("bg main after reset %+v %v", root, e)
 	}
 	response = libraryDispatchService(t, a, service, 857, map[string]any{"_type": int64(2), "bg_id": int64(4)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("857 unowned paid bg status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 857, map[string]any{"_type": int64(1), "bg_id": int64(2)}, op())

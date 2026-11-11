@@ -67,7 +67,7 @@ func TestI9_10BulkGiftCountExact(t *testing.T) {
 	}
 
 	short := libraryDispatch(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": likeGift, "gift_num": int64(3)}, op())
-	if short.HTTPStatus != 409 || short.Body["error_code"] != int64(1) {
+	if short.HTTPStatus != 409 || short.Body["error_code"] != int64(35028) {
 		t.Fatalf("short bulk gift status %d body %+v", short.HTTPStatus, short.Body)
 	}
 	if got := libraryHeroFavor(t, p, a.PlayerID, 1); got != 39 {

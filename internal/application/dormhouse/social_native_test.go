@@ -700,7 +700,7 @@ func TestDormDeleteCommentHostOnlyThroughDispatcher(t *testing.T) {
 
 	nonHost := stockruntime.DormDispatcher{Authority: socialDispatchAuthority{actor: h.author}, Service: h.service}
 	refusal := nonHost.Dispatch(context.Background(), socialDispatchRequest(t, h.author, 2526, map[string]any{"house_id": int64(1), "comment_id": commentID}))
-	if refusal.HTTPStatus != 409 || refusal.Body["error_code"] != int64(1) {
+	if refusal.HTTPStatus != 409 || refusal.Body["error_code"] != int64(35028) {
 		t.Fatalf("non-host delete status=%d body=%v", refusal.HTTPStatus, refusal.Body)
 	}
 	page, err := h.socialRead(t, h.viewer, 2524, int64(h.owner.PlayerID), 1, 0, 20)
