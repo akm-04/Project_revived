@@ -427,7 +427,7 @@ func TestI9_10BForumReceiptReplayAcrossRetirement(t *testing.T) {
 	}
 
 	response = forumDispatch(t, p, viewer, 833, map[string]any{"player_id": int64(author.PlayerID), "table_id": tableID}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("inactive like status %d body %+v", response.HTTPStatus, response.Body)
 	}
 

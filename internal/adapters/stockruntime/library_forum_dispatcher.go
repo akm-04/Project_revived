@@ -162,17 +162,20 @@ func forumRows(rows []app.Row, forumType int64) []any {
 }
 
 func badForum(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
+}
+
+var forumFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrRequest, class: failureMalformed, detail: "invalid_library_forum_request"},
+	{match: app.ErrUnavailable, class: failureUnavailable},
 }
 
 // failForum refuses business conflicts on 409 so the stock callbacks see ERROR
-// instead of an OK body they would index.
+// instead of an OK body they would index (I9_LIBRARY_V1 C2).
 func failForum(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) {
-		return conflictRefusal(1)
+	if classified := classifyFailure(forumFailureRows, e); classified != nil {
+		return failureReply(classified)
 	}
-	if errors.Is(e, app.ErrRequest) {
-		return badForum("invalid_library_forum_request")
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "library_forum_unavailable"}}
+	return failureReply(unavailable(e))
 }

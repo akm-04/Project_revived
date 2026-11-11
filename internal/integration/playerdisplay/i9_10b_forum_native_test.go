@@ -201,7 +201,7 @@ func TestI9_10BForum832SharedCommentAndLikeToggle(t *testing.T) {
 	}
 
 	response = forumCall(t, p, second, 833, map[string]any{"player_id": int64(second.PlayerID), "table_id": tableID})
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("833 missing comment status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = forumCall(t, p, first, 832, map[string]any{"start_pos": int64(1), "end_pos": int64(51), "table_id": tableID})
