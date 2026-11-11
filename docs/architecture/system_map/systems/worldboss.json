@@ -95,7 +95,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
-    "line": 40
+    "line": 37
    },
    "mid": 624,
    "name": "WORLD_BOSS"
@@ -103,7 +103,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
-    "line": 40
+    "line": 37
    },
    "mid": 625,
    "name": "WORLD_BOSS_BUY_TIMES"
@@ -111,7 +111,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
-    "line": 40
+    "line": 37
    },
    "mid": 626,
    "name": "WORLD_BOSS_START_FIGHT"
@@ -119,7 +119,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
-    "line": 40
+    "line": 37
    },
    "mid": 627,
    "name": "WORLD_BOSS_FIGHT_RESULT"
@@ -127,7 +127,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/world_boss_dispatcher.go",
-    "line": 40
+    "line": 37
    },
    "mid": 628,
    "name": "WORLD_BOSS_SWEEP"

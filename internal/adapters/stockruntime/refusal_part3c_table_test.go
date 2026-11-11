@@ -27,6 +27,7 @@ import (
 	socialinvite "gxb.local/backend/v2/internal/domain/socialinvite"
 	summon "gxb.local/backend/v2/internal/domain/summon"
 	workplace "gxb.local/backend/v2/internal/domain/workplace"
+	worldboss "gxb.local/backend/v2/internal/domain/worldboss"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -232,5 +233,18 @@ func TestPart3CWorkplaceFailureRows(t *testing.T) {
 		{"balance diamonds", workplaceFailure(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance other", workplaceFailure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", workplaceFailure(workplace.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3CWorldBossFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"invalid", failWorldBoss(worldboss.ErrInvalid), http.StatusBadRequest, 0, "world_boss_invalid_parameter"},
+		{"conflict", failWorldBoss(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"loan refused", failWorldBoss(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"refused", failWorldBoss(worldboss.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"balance diamonds", failWorldBoss(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
+		{"balance coins", failWorldBoss(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
+		{"balance other", failWorldBoss(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", failWorldBoss(worldboss.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
