@@ -10,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 type DormPort interface {
@@ -202,11 +201,13 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	out, e := d.Service.Command(ctx, a, c, req.Envelope.Operation)
 	if e != nil {
 		if mid == 1845 {
-			status := http.StatusServiceUnavailable
 			if errors.Is(e, app.ErrRejected) || errors.Is(e, dorm.ErrGlueDailyLimit) {
-				return conflictRefusal(1)
+				return failureReply(refusal(unprovenRefusalCode))
 			}
-			return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "dorm_glue_purchase_refused"}}
+			if errors.Is(e, app.ErrUnavailable) {
+				return failureReply(unavailable(e))
+			}
+			return failureReply(refusalWithBody(unprovenRefusalCode, map[string]any{"error": "dorm_glue_purchase_refused"}))
 		}
 		if mid >= 2518 && mid <= 2526 {
 			return failSocialDorm(e)
@@ -219,30 +220,41 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: out.Body}
 }
-func failDorm(e error) httpedge.Response {
-	if errors.Is(e, dorm.ErrHidden) {
-		return conflictRefusal(1)
-	}
-	status := http.StatusServiceUnavailable
-	body := map[string]any{"error": "dorm_unavailable"}
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, dorm.ErrInvalidFacts) || errors.Is(e, dorm.ErrUnqualified) {
-		status = http.StatusBadRequest
-	}
-	if errors.Is(e, dorm.ErrInvalidLayout) {
-		status = http.StatusBadRequest
-	}
-	return httpedge.Response{HTTPStatus: status, Body: body}
+
+var dormFailureRows = []failureRow{
+	{match: dorm.ErrHidden, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: dorm.ErrInvalidFacts, class: failureMalformed, detail: "dorm_unavailable"},
+	{match: dorm.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: dorm.ErrInvalidLayout, class: failureMalformed, detail: "dorm_unavailable"},
 }
 
-// Every Dorm social domain refusal is a 409 conflictRefusal: the stock
-// callbacks either mutate locally or index a nested table on any 200.
-func failSocialDorm(e error) httpedge.Response {
-	for _, target := range []error{app.ErrRejected, app.ErrStale, app.ErrRetired, app.ErrActor, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrStaleTime, dorm.ErrHidden} {
-		if errors.Is(e, target) {
-			return conflictRefusal(1)
-		}
+func failDorm(e error) httpedge.Response {
+	if classified := classifyFailure(dormFailureRows, e); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "dorm_social_unavailable"}}
+	return failureReply(unavailable(e))
+}
+
+// Every Dorm social domain refusal is a non-200 refusal: the stock callbacks
+// either mutate locally or index a nested table on any 200.
+var dormSocialFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},
+	{match: app.ErrRetired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrActor, class: failureRefusal, code: unprovenRefusalCode},
+	{match: dorm.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: dorm.ErrInvalidFacts, class: failureMalformed, detail: "dorm_unavailable"},
+	{match: dorm.ErrInvalidLayout, class: failureMalformed, detail: "dorm_unavailable"},
+	{match: dorm.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
+	{match: dorm.ErrHidden, class: failureRefusal, code: unprovenRefusalCode},
+}
+
+func failSocialDorm(e error) httpedge.Response {
+	if classified := classifyFailure(dormSocialFailureRows, e); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(e))
 }
 
 func requiredDormString(m map[string]any, key string) (string, error) {

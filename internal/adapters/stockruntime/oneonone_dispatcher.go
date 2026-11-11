@@ -181,12 +181,16 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 // please refresh and challenge again"), shown by the shared Backend error toast.
 const oneOnOneRankChangedError = 35026
 
+var oneOnOneFailureRows = []failureRow{
+	{match: d.ErrOfferStale, class: failureRefusal, code: oneOnOneRankChangedError},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "one_on_one_request_refused"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failOneOnOne(err error) httpedge.Response {
-	if errors.Is(err, d.ErrOfferStale) {
-		return conflictRefusal(oneOnOneRankChangedError)
+	if classified := classifyFailure(oneOnOneFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "one_on_one_request_refused"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "one_on_one_unavailable_or_unresolved"}}
+	return failureReply(unavailable(err))
 }

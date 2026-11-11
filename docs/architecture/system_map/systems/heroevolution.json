@@ -100,7 +100,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/evolution_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 2608,
    "name": "BREACH_STONE_ADD"
@@ -108,7 +108,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/evolution_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 2609,
    "name": "BREACH_STONE_EVOLVE"

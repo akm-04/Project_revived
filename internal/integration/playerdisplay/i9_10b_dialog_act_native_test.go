@@ -373,7 +373,7 @@ func TestI9_10BFavorProducersFailClosedWithoutFacts(t *testing.T) {
 	exec(t, p, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,50005011,1,1,clock_timestamp()-interval '1 hour',clock_timestamp()-interval '1 hour') ON CONFLICT(player_id,item_id) DO UPDATE SET quantity=1,updated_at=clock_timestamp()-interval '1 hour'`, int64(a.PlayerID))
 
 	response := libraryDispatchService(t, a, service, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, op())
-	if response.HTTPStatus != 503 || response.Body["error"] != "library_unavailable" {
+	if response.HTTPStatus != 503 || response.Body["error_code"] != int64(35033) {
 		t.Fatalf("840 without Facts status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	facts, e := (librarystore.Store{}).ReadHeroTx(ctx, p, character.HeroRef{PlayerID: a.PlayerID, PartnerID: 1})

@@ -69,7 +69,7 @@ func TestI7C2IExactWireFieldsAndFailureEnvelope(t *testing.T) {
 	}
 	s.err = economy.ErrInsufficientBalance
 	r = d.Dispatch(context.Background(), heroReq(t, 2608, p))
-	if r.HTTPStatus != 400 || r.Body["evo_info"] != nil {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode || r.Body["evo_info"] != nil {
 		t.Fatal("failed debit produced success callback", r)
 	}
 	s.err = errors.New("database unavailable")

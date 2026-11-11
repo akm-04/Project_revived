@@ -76,7 +76,7 @@ func TestI9_10TopFloorOfferRefreshAndBotStartNative(t *testing.T) {
 	oldOffer := dispatcher.Dispatch(ctx, playtestRequest(actor, 280, map[string]any{
 		"formation": strconv.FormatInt(hero.PartnerID, 10), "enemy_id": target.Occupant.TableID(), "campaign_type": d.CampaignType,
 	}))
-	if oldOffer.HTTPStatus != 400 || oldOffer.Body["error"] != "top_floor_request_refused" {
+	if oldOffer.HTTPStatus != 409 || oldOffer.Body["error_code"] != int64(35028) {
 		t.Fatalf("reissued offer did not invalidate the old target: %+v", oldOffer)
 	}
 	if scalar(t, database, `SELECT tickets_left FROM top_floor_players WHERE player_id=$1`, int64(actor.PlayerID)) != 5 ||

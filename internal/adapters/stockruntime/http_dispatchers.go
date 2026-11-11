@@ -232,8 +232,8 @@ func bootstrapFailure(err error) httpedge.Response {
 	case errors.Is(err, logicalserver.ErrObservationRequired):
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "server_observation_required"}}
 	case errors.Is(err, logicalserver.ErrExistingLoginClosed):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "server_login_closed"}}
+		return failureReply(unavailable(err))
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "bootstrap_failed"}}
+		return failureReply(unavailable(err))
 	}
 }

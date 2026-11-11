@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/topfloor"
@@ -38,12 +37,14 @@ type TopFloorTaskDispatcher struct {
 // "Event hasn't started!"), the closest recovered "not open" text.
 const topFloorTaskNotOpen int64 = 40001
 
+var topFloorTaskFailureRows = []failureRow{
+	{match: domain.ErrInvalid, class: failureMalformed, detail: "invalid_top_floor_task_parameter"},
+	{match: domain.ErrRefused, class: failureRefusal, code: topFloorTaskNotOpen},
+}
+
 func failTopFloorTask(err error) httpedge.Response {
-	if errors.Is(err, domain.ErrInvalid) {
-		return badHero("invalid_top_floor_task_parameter")
-	}
-	if errors.Is(err, domain.ErrRefused) {
-		return conflictRefusal(topFloorTaskNotOpen)
+	if classified := classifyFailure(topFloorTaskFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
 	return failTopFloor(err)
 }

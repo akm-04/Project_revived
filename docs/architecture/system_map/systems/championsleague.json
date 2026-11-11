@@ -93,7 +93,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2800,
    "name": "CHAMPIONS_LEAGUE_GET_INFO"
@@ -101,7 +101,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2801,
    "name": "CHAMPIONS_LEAGUE_GET_ENEMY"
@@ -109,7 +109,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2802,
    "name": "CHAMPIONS_LEAGUE_FIGHT"
@@ -117,7 +117,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2803,
    "name": "CHAMPIONS_GET_FIGHT_RECORD"
@@ -125,7 +125,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2804,
    "name": "CHAMPIONS_GET_DAILY_AWARD"
@@ -133,7 +133,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2805,
    "name": "CHAMPIONS_SET_DEFENSE_INFO"
@@ -141,7 +141,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2806,
    "name": "CHAMPIONS_SELECT_AWARD_GROUP"
@@ -149,7 +149,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/league_dispatcher.go",
-    "line": 48
+    "line": 47
    },
    "mid": 2807,
    "name": "CHAMPIONS_GET_SEASON_TOP"

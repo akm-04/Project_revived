@@ -703,19 +703,19 @@ var heroFailureRows = []failureRow{
 	{match: apphero.ErrHeroFumoUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apphero.ErrHeroPromotionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apphero.ErrHeroPromotionPrerequisites, class: failureRefusal, code: unprovenRefusalCode},
-	{match: apphero.ErrHeroPromotionCorruptState, class: failureUnavailable, detail: "hero_operation_failed"},
-	{match: apphero.ErrHeroContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
-	{match: apphero.ErrAppearanceContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
-	{match: apphero.ErrHeroProgressionContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
-	{match: apphero.ErrHeroEquipmentContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
-	{match: apphero.ErrHeroFumoContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
-	{match: apphero.ErrHeroPromotionContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
-	{match: apphero.ErrHeroCapacityUnavailable, class: failureUnavailable, detail: "hero_content_inactive"},
+	{match: apphero.ErrHeroPromotionCorruptState, class: failureDefect},
+	{match: apphero.ErrHeroContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrAppearanceContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroProgressionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEquipmentContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroFumoContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroCapacityUnavailable, class: failureDefect},
 }
 
 var heroSkillLevelFailureRows = []failureRow{
 	{match: apphero.ErrHeroSkillLevelRequest, class: failureMalformed, detail: "invalid_hero_skill_level"},
-	{match: apphero.ErrHeroSkillLevelInactive, class: failureUnavailable, detail: "hero_skill_content_inactive"},
+	{match: apphero.ErrHeroSkillLevelInactive, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apphero.ErrHeroSkillLevelStaleTime, class: failureRefusal, code: unprovenRefusalCode},
 }
 
@@ -734,5 +734,5 @@ func failHero(err error) httpedge.Response {
 	if classified := classifyFailure(heroFailureRows, err); classified != nil {
 		return failureReply(classified)
 	}
-	return failureReply(unavailable("hero_operation_failed", err))
+	return failureReply(unavailable(err))
 }

@@ -67,7 +67,7 @@ func TestCA43BMID57UsesReceiptManaAndDoesNotPostReadEconomy(t *testing.T) {
 func TestCA43BPromotionFailuresClassifyContentAndSemanticRejections(t *testing.T) {
 	svc := &ca42HeroService{promoteErr: apphero.ErrHeroPromotionContentInactive}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
-	if r := d.Dispatch(context.Background(), heroReq(t, 51, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 503 || r.Body["error"] != "hero_content_inactive" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 51, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("content=%+v", r)
 	}
 	svc.promoteErr = apphero.ErrHeroPromotionPrerequisites

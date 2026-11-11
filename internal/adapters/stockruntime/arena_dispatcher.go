@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/arena"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -195,11 +194,18 @@ func arenaTableIDs(raw any) ([]int64, error) {
 	return out, nil
 }
 
+var arenaFailureRows = []failureRow{
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "arena_request_refused"},
+	{match: d.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failArena(err error) httpedge.Response {
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, d.ErrClosed) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "arena_request_refused"}}
+	if classified := classifyFailure(arenaFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "arena_unavailable"}}
+	return failureReply(unavailable(err))
 }
 
 // Stock message.lua rows for FIGHT refusals: 35006 is the only row mentioning
@@ -211,18 +217,17 @@ const (
 	arenaClosedError       = 31004
 )
 
+var arenaFightFailureRows = []failureRow{
+	{match: app.ErrNoTeam, class: failureRefusal, code: arenaNoTeamError},
+	{match: d.ErrRefused, class: failureRefusal, code: arenaMatchRefusedError},
+	{match: d.ErrClosed, class: failureRefusal, code: arenaClosedError},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "arena_request_refused"},
+}
+
 func failArenaFight(err error) httpedge.Response {
-	switch {
-	case errors.Is(err, app.ErrNoTeam):
-		return conflictRefusal(arenaNoTeamError)
-	case errors.Is(err, d.ErrRefused):
-		return conflictRefusal(arenaMatchRefusedError)
-	case errors.Is(err, d.ErrClosed):
-		return conflictRefusal(arenaClosedError)
-	case errors.Is(err, economy.ErrInsufficientBalance):
-		return conflictRefusal(1)
-	case errors.Is(err, d.ErrInvalid):
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "arena_request_refused"}}
+	if classified := classifyFailure(arenaFightFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "arena_unavailable"}}
+	return failureReply(unavailable(err))
 }

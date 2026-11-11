@@ -3,10 +3,8 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -139,9 +137,15 @@ func conquerDamage(raw any) (int64, bool) {
 	return int64(value), true
 }
 
+var conquerFailureRows = []failureRow{
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "conquer_request_refused"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failConquer(err error) httpedge.Response {
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "conquer_request_refused"}}
+	if classified := classifyFailure(conquerFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "conquer_unavailable"}}
+	return failureReply(unavailable(err))
 }

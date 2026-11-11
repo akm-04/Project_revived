@@ -149,7 +149,7 @@ func TestDormSocialDispatcherMapsEveryDomainRefusalToConflict(t *testing.T) {
 	}
 	for _, mid := range []uint16{2518, 2520, 2521, 2523, 2525, 2526} {
 		response := dispatcher.Dispatch(context.Background(), socialEnv(t, mid, valid[mid]))
-		if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+		if response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode {
 			t.Fatalf("mid %d refusal=%d %v", mid, response.HTTPStatus, response.Body)
 		}
 	}
@@ -158,7 +158,7 @@ func TestDormSocialDispatcherMapsEveryDomainRefusalToConflict(t *testing.T) {
 	if response.HTTPStatus != 503 {
 		t.Fatalf("infrastructure failure mapped to %d", response.HTTPStatus)
 	}
-	if got := failSocialDorm(app.ErrStale); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := failSocialDorm(app.ErrStale); got.HTTPStatus != 409 || got.Body["error_code"] != staleConflictCode {
 		t.Fatal(got)
 	}
 }

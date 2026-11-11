@@ -72,7 +72,7 @@ func TestI9_10TopFloorRefusalWire(t *testing.T) {
 		code   int64
 	}{
 		{fmt.Errorf("moved: %w", d.ErrOfferStale), 409, topFloorRankChangedError},
-		{fmt.Errorf("no defense: %w", d.ErrDefenseRequired), 409, topFloorGenericRefusal},
+		{fmt.Errorf("no defense: %w", d.ErrDefenseRequired), 409, unprovenRefusalCode},
 	} {
 		response := failTopFloor(check.err)
 		if response.HTTPStatus != check.status || response.Body["error_code"] != check.code {
@@ -166,7 +166,7 @@ func TestI7C5BTopFloorWireShapes(t *testing.T) {
 	if f.calls != before {
 		t.Fatal("invalid request reached the owner")
 	}
-	if r := dispatcher.Dispatch(context.Background(), heroReq(t, 292, map[string]any{"table_id": n("1")})); r.HTTPStatus != 400 {
+	if r := dispatcher.Dispatch(context.Background(), heroReq(t, 292, map[string]any{"table_id": n("1")})); r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatal("seal hero must stay closed", r)
 	}
 }

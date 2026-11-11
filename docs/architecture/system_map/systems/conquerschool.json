@@ -91,7 +91,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
-    "line": 39
+    "line": 37
    },
    "mid": 1568,
    "name": "GET_CONQUER_SCHOOL_INFO"
@@ -99,7 +99,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
-    "line": 39
+    "line": 37
    },
    "mid": 1569,
    "name": "START_CONQUER_SCHOOL_FIGHT"
@@ -107,7 +107,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
-    "line": 39
+    "line": 37
    },
    "mid": 1570,
    "name": "CONQUER_SCHOOL_FIGHT_RESULT"
@@ -115,7 +115,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
-    "line": 39
+    "line": 37
    },
    "mid": 1571,
    "name": "GET_CONQUER_SCHOOL_REPORT_LIST"
@@ -123,7 +123,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
-    "line": 39
+    "line": 37
    },
    "mid": 1572,
    "name": "GET_CONQUER_SCHOOL_REPORT"
@@ -131,7 +131,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
-    "line": 39
+    "line": 37
    },
    "mid": 1573,
    "name": "RESET_CONQUER_SCHOOL"
@@ -139,7 +139,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
-    "line": 39
+    "line": 37
    },
    "mid": 2790,
    "name": "BUY_CONQUER_TIMES"

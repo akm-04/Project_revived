@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/championsleague"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/championsleague"
@@ -145,9 +144,15 @@ func (o LeagueDispatcher) Dispatch(c context.Context, req httpedge.DispatchReque
 		return okI5(map[string]any{})
 	}
 }
+
+var leagueFailureRows = []failureRow{
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "league_request_refused"},
+}
+
 func failLeague(e error) httpedge.Response {
-	if errors.Is(e, d.ErrRefused) || errors.Is(e, d.ErrInvalid) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "league_request_refused"}}
+	if classified := classifyFailure(leagueFailureRows, e); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "league_unavailable"}}
+	return failureReply(unavailable(e))
 }

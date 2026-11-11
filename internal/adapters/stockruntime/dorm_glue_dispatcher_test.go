@@ -45,13 +45,14 @@ func TestDormGlueDispatcherUsesStockEmptyRequestAndRejectsUnsafeSuccess(t *testi
 	for _, cell := range []struct {
 		err    error
 		status int
-	}{{app.ErrRejected, 409}, {app.ErrUnavailable, 503}} {
+		code   int64
+	}{{app.ErrRejected, 409, unprovenRefusalCode}, {app.ErrUnavailable, 503, serverBusyCode}} {
 		fake.err = cell.err
 		response = dispatcher.Dispatch(context.Background(), request)
 		if response.HTTPStatus != cell.status || response.Body["buy_glue_times"] != nil || response.Body["economy_"] != nil {
 			t.Fatal(response, cell)
 		}
-		if response.Body["error_code"] != int64(1) {
+		if response.Body["error_code"] != cell.code {
 			t.Fatalf("stock refusal body %v", response.Body)
 		}
 		if cell.status == 409 && len(response.Body) != 1 {

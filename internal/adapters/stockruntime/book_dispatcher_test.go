@@ -63,7 +63,7 @@ func TestBookFailureRowTable(t *testing.T) {
 		})
 	}
 	fallback := failBook(anonymousFailure{})
-	if fallback.HTTPStatus != http.StatusServiceUnavailable || fallback.Body["error"] != "book_unavailable_or_unresolved" {
+	if fallback.HTTPStatus != http.StatusServiceUnavailable || fallback.Body["error_code"] != serverBusyCode || fallback.Body["error_msg"] != "" {
 		t.Fatalf("fallback=%+v", fallback)
 	}
 }

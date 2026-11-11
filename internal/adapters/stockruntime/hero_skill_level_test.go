@@ -52,13 +52,13 @@ func TestHeroSkillLevelMIDsWireSuccessAndPrivateRefusal(t *testing.T) {
 
 	stub.singleResult.Success = false
 	singleRefusal := dispatcher.Dispatch(context.Background(), heroReq(t, 53, map[string]any{"partner_id": int64(7), "skill_index": int64(2)}))
-	if singleRefusal.HTTPStatus != http.StatusConflict || singleRefusal.Body["error_code"] != int64(1) || singleRefusal.Body["skill_point"] != int64(8) {
+	if singleRefusal.HTTPStatus != http.StatusConflict || singleRefusal.Body["error_code"] != unprovenRefusalCode || singleRefusal.Body["skill_point"] != int64(8) {
 		t.Fatal("MID 53 refusal", singleRefusal)
 	}
 
 	stub.bulkResult.Success = false
 	bulkRefusal := dispatcher.Dispatch(context.Background(), heroReq(t, 39, map[string]any{"partner_id": int64(9), "skill_colors": "2|1", "skill_counts": "1|2"}))
-	if bulkRefusal.HTTPStatus != http.StatusConflict || bulkRefusal.Body["error_code"] != int64(1) || bulkRefusal.Body["is_success"] != int64(0) || bulkRefusal.Body["skills"] != "3|2|1|1|1|1" {
+	if bulkRefusal.HTTPStatus != http.StatusConflict || bulkRefusal.Body["error_code"] != unprovenRefusalCode || bulkRefusal.Body["is_success"] != int64(0) || bulkRefusal.Body["skills"] != "3|2|1|1|1|1" {
 		t.Fatal("MID 39 refusal", bulkRefusal)
 	}
 

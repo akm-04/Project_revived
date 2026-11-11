@@ -151,7 +151,7 @@ func TestI9_10TopFloorOperatorBansNative(t *testing.T) {
 	assertRefusal(284, defenseRequest(alternateHero.PartnerID))
 	assertRefusal(286, formationRequest(alternateHero.PartnerID, enemy))
 	defenseRefusal := dispatcher.Dispatch(ctx, playtestRequest(actor, 286, formationRequest(attackHero.PartnerID, enemy)))
-	if defenseRefusal.HTTPStatus != http.StatusConflict || defenseRefusal.Body["error_code"] != int64(1) {
+	if defenseRefusal.HTTPStatus != http.StatusConflict || defenseRefusal.Body["error_code"] != int64(35028) {
 		t.Fatalf("banned saved defense refusal: %+v", defenseRefusal)
 	}
 	if scalar(t, database, `SELECT (payload->'player'->>'TicketsLeft')::bigint FROM top_floor_task_players WHERE player_id=$1 AND period_number=$2`, int64(actor.PlayerID), rotation.Number) != 5 {

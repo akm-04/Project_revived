@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -237,23 +235,21 @@ func (t TopFloorDispatcher) start(ctx context.Context, a identity.ActorContext, 
 	return okI5(projection.Fight(v.Formation, v.Report, v.Win, v.AwardCrystal, v.Enemy))
 }
 
-// Stock message ids used by Top Floor refusals: 35026 is the rank-changed toast
-// (message.lua); no stock row describes a missing saved defense, so that refusal
-// keeps the generic business-refusal code and shows no toast.
-const (
-	topFloorRankChangedError = 35026
-	topFloorGenericRefusal   = 1
-)
+// Stock message id 35026 is the rank-changed toast; no stock row describes a
+// missing saved defense, so that refusal uses the D5 generic code.
+const topFloorRankChangedError = 35026
+
+var topFloorFailureRows = []failureRow{
+	{match: d.ErrOfferStale, class: failureRefusal, code: topFloorRankChangedError},
+	{match: d.ErrDefenseRequired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "top_floor_request_refused"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
 
 func failTopFloor(err error) httpedge.Response {
-	if errors.Is(err, d.ErrOfferStale) {
-		return conflictRefusal(topFloorRankChangedError)
+	if classified := classifyFailure(topFloorFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	if errors.Is(err, d.ErrDefenseRequired) {
-		return conflictRefusal(topFloorGenericRefusal)
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "top_floor_request_refused"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "top_floor_unavailable_or_unresolved"}}
+	return failureReply(unavailable(err))
 }

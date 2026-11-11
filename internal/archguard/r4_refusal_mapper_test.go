@@ -15,12 +15,8 @@ import (
 // replies outside the shared stockruntime mapper. It may only shrink: delete
 // an entry when its dispatcher migrates (R4 parts 2 and 3 empty it).
 var r4RefusalMapperRatchet = map[string]bool{
-	"achievement_dispatcher.go":    true,
 	"activity_dispatcher.go":       true,
-	"arena_dispatcher.go":          true,
-	"conquer_dispatcher.go":        true,
 	"dodgeball_dispatcher.go":      true,
-	"dorm_dispatcher.go":           true,
 	"eventcentre_dispatcher.go":    true,
 	"godstrial_dispatcher.go":      true,
 	"guild_campaign_dispatcher.go": true,
@@ -28,25 +24,34 @@ var r4RefusalMapperRatchet = map[string]bool{
 	"guild_rental_dispatcher.go":   true,
 	"guild_tea_dispatcher.go":      true,
 	"i5_dispatcher.go":             true,
-	"league_dispatcher.go":         true,
-	"library_dispatcher.go":        true,
 	"library_forum_dispatcher.go":  true,
 	"memoir_dispatcher.go":         true,
-	"oneonone_dispatcher.go":       true,
 	"pet_dispatcher.go":            true,
 	"petcampaign_dispatcher.go":    true,
 	"practice_auto_dispatcher.go":  true,
-	"practice_dispatcher.go":       true,
 	"publication_dispatcher.go":    true,
-	"saved_preset_dispatcher.go":   true,
 	"social_dispatcher.go":         true,
-	"topfloor_dispatcher.go":       true,
 }
 
 var r4MigratedDispatchers = []string{
+	"achievement_dispatcher.go",
+	"arena_dispatcher.go",
 	"book_dispatcher.go",
+	"conquer_dispatcher.go",
+	"dorm_dispatcher.go",
+	"element_dispatcher.go",
+	"evolution_dispatcher.go",
 	"hero_dispatcher.go",
 	"inactive_dispatcher.go",
+	"inscription_dispatcher.go",
+	"league_dispatcher.go",
+	"library_dispatcher.go",
+	"oneonone_dispatcher.go",
+	"practice_dispatcher.go",
+	"saved_preset_dispatcher.go",
+	"spirit_dispatcher.go",
+	"topfloor_dispatcher.go",
+	"topfloor_task_dispatcher.go",
 }
 
 func TestR4RefusalRepliesGoThroughTheMapper(t *testing.T) {

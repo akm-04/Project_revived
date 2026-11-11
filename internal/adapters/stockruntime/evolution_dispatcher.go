@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/heroevolution"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -11,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 type EvolutionPort interface {
@@ -84,9 +82,16 @@ func (d EvolutionDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 	}
 	return okI5(body)
 }
+
+var evolutionFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: ins.ErrInvalid, class: failureMalformed, detail: "heroevolution_command_rejected"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failEvolution(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, ins.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return badHero("heroevolution_command_rejected")
+	if classified := classifyFailure(evolutionFailureRows, e); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "heroevolution_unavailable_or_unresolved"}}
+	return failureReply(unavailable(e))
 }

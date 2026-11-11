@@ -28,14 +28,14 @@ func TestHeroFailureRowTable(t *testing.T) {
 		{"fumo unavailable", apphero.ErrHeroFumoUnavailable, http.StatusConflict, unprovenRefusalCode, ""},
 		{"promotion unavailable", apphero.ErrHeroPromotionUnavailable, http.StatusConflict, unprovenRefusalCode, ""},
 		{"promotion prerequisites", apphero.ErrHeroPromotionPrerequisites, http.StatusConflict, unprovenRefusalCode, ""},
-		{"promotion corrupt state", apphero.ErrHeroPromotionCorruptState, http.StatusServiceUnavailable, 0, "hero_operation_failed"},
-		{"hero content inactive", apphero.ErrHeroContentInactive, http.StatusServiceUnavailable, 0, "hero_content_inactive"},
-		{"appearance content inactive", apphero.ErrAppearanceContentInactive, http.StatusServiceUnavailable, 0, "hero_content_inactive"},
-		{"progression content inactive", apphero.ErrHeroProgressionContentInactive, http.StatusServiceUnavailable, 0, "hero_content_inactive"},
-		{"equipment content inactive", apphero.ErrHeroEquipmentContentInactive, http.StatusServiceUnavailable, 0, "hero_content_inactive"},
-		{"fumo content inactive", apphero.ErrHeroFumoContentInactive, http.StatusServiceUnavailable, 0, "hero_content_inactive"},
-		{"promotion content inactive", apphero.ErrHeroPromotionContentInactive, http.StatusServiceUnavailable, 0, "hero_content_inactive"},
-		{"capacity unavailable", apphero.ErrHeroCapacityUnavailable, http.StatusServiceUnavailable, 0, "hero_content_inactive"},
+		{"promotion corrupt state", apphero.ErrHeroPromotionCorruptState, http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"hero content inactive", apphero.ErrHeroContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
+		{"appearance content inactive", apphero.ErrAppearanceContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
+		{"progression content inactive", apphero.ErrHeroProgressionContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
+		{"equipment content inactive", apphero.ErrHeroEquipmentContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
+		{"fumo content inactive", apphero.ErrHeroFumoContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
+		{"promotion content inactive", apphero.ErrHeroPromotionContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
+		{"capacity unavailable", apphero.ErrHeroCapacityUnavailable, http.StatusInternalServerError, unprovenRefusalCode, ""},
 	}
 	for _, row := range cases {
 		t.Run(row.name, func(t *testing.T) {
@@ -55,7 +55,7 @@ func TestHeroFailureRowTable(t *testing.T) {
 		})
 	}
 	fallback := failHero(anonymousFailure{})
-	if fallback.HTTPStatus != http.StatusServiceUnavailable || fallback.Body["error"] != "hero_operation_failed" {
+	if fallback.HTTPStatus != http.StatusServiceUnavailable || fallback.Body["error_code"] != serverBusyCode || fallback.Body["error_msg"] != "" {
 		t.Fatalf("fallback=%+v", fallback)
 	}
 }
@@ -69,7 +69,7 @@ func TestHeroSkillLevelFailureRowTable(t *testing.T) {
 		wantError  string
 	}{
 		{"invalid request", apphero.ErrHeroSkillLevelRequest, http.StatusBadRequest, 0, "invalid_hero_skill_level"},
-		{"content inactive", apphero.ErrHeroSkillLevelInactive, http.StatusServiceUnavailable, 0, "hero_skill_content_inactive"},
+		{"content inactive", apphero.ErrHeroSkillLevelInactive, http.StatusConflict, unprovenRefusalCode, ""},
 		{"stale time", apphero.ErrHeroSkillLevelStaleTime, http.StatusConflict, unprovenRefusalCode, ""},
 	}
 	for _, row := range cases {
@@ -131,7 +131,7 @@ func TestRefusalCodesHaveClientMessageRows(t *testing.T) {
 			t.Errorf("refusal code %d has no client message row", row.code)
 		}
 	}
-	for _, code := range []int64{20018, 35035} {
+	for _, code := range []int64{20018, 35035, serverBusyCode, staleConflictCode} {
 		if !clientMessageIDs[code] {
 			t.Errorf("refusal code %d has no client message row", code)
 		}

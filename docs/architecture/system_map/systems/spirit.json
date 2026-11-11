@@ -104,7 +104,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3089,
    "name": "HUNQI_ENHANCE"
@@ -112,7 +112,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3090,
    "name": "HUNQI_LOCK"
@@ -120,7 +120,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3091,
    "name": "HUNQI_UNLOCK"
@@ -128,7 +128,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3094,
    "name": "HUNQI_EQUIP"
@@ -136,7 +136,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3095,
    "name": "HUNQI_ONE_KEY_UNEQUIP"
@@ -144,7 +144,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3112,
    "name": "HUNQI_GET_COLLOCATION_INFOS"
@@ -152,7 +152,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3113,
    "name": "HUNQI_SAVE_COLLOCATION"
@@ -160,7 +160,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3114,
    "name": "DEL_COLLOCATION"
@@ -168,7 +168,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/spirit_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 3115,
    "name": "APPLY_COLLOCATION"

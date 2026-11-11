@@ -93,20 +93,27 @@ func strictStringParam(params map[string]any, key string) (string, bool) {
 }
 
 func badSavedPreset(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
+}
+
+var savedPresetFailureRows = []failureRow{
+	{match: appsavedpreset.ErrInvalidCommand, class: failureMalformed, detail: "saved_preset_rejected"},
+	{match: characterasset.ErrReferenceNotFound, class: failureMalformed, detail: "saved_preset_rejected"},
+	{match: appsavedpreset.ErrAmbiguousLegacyDelete, class: failureRefusal, code: staleConflictCode},
+	{match: appsavedpreset.ErrStaleLegacyDelete, class: failureRefusal, code: staleConflictCode},
 }
 
 func failSavedPreset(err error) httpedge.Response {
-	var unknown *tx.UnknownCommitError
 	var conflict *receipt.ConflictError
-	switch {
-	case errors.Is(err, appsavedpreset.ErrInvalidCommand), errors.Is(err, characterasset.ErrReferenceNotFound):
-		return badSavedPreset("saved_preset_rejected")
-	case errors.Is(err, appsavedpreset.ErrAmbiguousLegacyDelete), errors.Is(err, appsavedpreset.ErrStaleLegacyDelete), errors.As(err, &conflict):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "saved_preset_conflict"}}
-	case errors.As(err, &unknown):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "saved_preset_commit_unknown"}}
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "saved_preset_failed"}}
+	var unknown *tx.UnknownCommitError
+	if errors.As(err, &unknown) {
+		return failureReply(unknownCommit("saved_preset_commit_unknown", err))
 	}
+	if errors.As(err, &conflict) {
+		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
+	}
+	if classified := classifyFailure(savedPresetFailureRows, err); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(err))
 }

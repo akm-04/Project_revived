@@ -51,7 +51,7 @@ func TestFriendFightDispatcherPreservesStockParametersAndRefusals(t *testing.T) 
 		t.Fatal("source shape", response)
 	}
 	fixture.refused = true
-	if response := dispatcher.Dispatch(context.Background(), request); response.HTTPStatus != 400 {
+	if response := dispatcher.Dispatch(context.Background(), request); response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode {
 		t.Fatal("unsafe callback ran", response)
 	}
 	fixture.refused = false

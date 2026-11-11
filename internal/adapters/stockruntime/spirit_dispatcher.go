@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/spirit"
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -162,9 +161,16 @@ func (s SpiritDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	}
 	return okI5(body)
 }
+
+var spiritFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "spirit_command_rejected"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failSpirit(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, d.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return badHero("spirit_command_rejected")
+	if classified := classifyFailure(spiritFailureRows, e); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "spirit_unavailable_or_unresolved"}}
+	return failureReply(unavailable(e))
 }

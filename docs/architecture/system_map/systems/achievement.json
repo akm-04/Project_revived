@@ -68,7 +68,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/achievement_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 1302,
    "name": "LOAD_ACHIEVEMENT_INFO"
@@ -76,7 +76,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/achievement_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 1303,
    "name": "GET_ACHIEVEMENT_AWARD"

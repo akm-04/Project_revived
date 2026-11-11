@@ -179,7 +179,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 666,
    "name": "GIVE_UP_REGION_MISSION"
@@ -187,7 +187,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 768,
    "name": "GET_REARENA_INFO"
@@ -195,7 +195,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 769,
    "name": "GET_REARENA_PARTNERS"
@@ -203,7 +203,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 770,
    "name": "REARENA_MODIFY_DEFENCE"
@@ -211,7 +211,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 771,
    "name": "REARENA_MATCH_ENEMY"
@@ -219,7 +219,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 772,
    "name": "REARENA_START_FIGHT"
@@ -227,7 +227,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 773,
    "name": "REARENA_FIGHT"
@@ -235,7 +235,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 774,
    "name": "REARENA_END_FIGHT"
@@ -243,7 +243,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 775,
    "name": "REARENA_LOAD_RANKS"
@@ -251,7 +251,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 776,
    "name": "REARENA_FIGHT_RECORDS"
@@ -259,7 +259,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 777,
    "name": "REARENA_FIGHT_REPORT"
@@ -267,7 +267,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 778,
    "name": "REARENA_PREPARE_FIGHT"
@@ -275,7 +275,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 779,
    "name": "REARENA_STOP_FIGHT"
@@ -283,7 +283,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 848,
    "name": "GET_EXCHANGE_AWARD"
@@ -291,7 +291,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/arena_dispatcher.go",
-    "line": 43
+    "line": 42
    },
    "mid": 849,
    "name": "GET_MISSION_AWARD"

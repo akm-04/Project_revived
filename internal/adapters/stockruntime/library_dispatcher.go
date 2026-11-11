@@ -10,7 +10,6 @@ import (
 	library "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 	"strconv"
 	"strings"
 )
@@ -214,19 +213,35 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: body}
 }
-func failLibrary(e error) httpedge.Response {
-	status := http.StatusServiceUnavailable
-	if errors.Is(e, app.ErrRejected) {
-		status = http.StatusBadRequest
-	}
-	return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error": "library_unavailable"}}
+
+var libraryFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 }
 
-// failLibraryMode refuses business conflicts on 409 so the stock Library
-// callbacks see ERROR instead of an OK body they would index.
+func failLibrary(e error) httpedge.Response {
+	if classified := classifyFailure(libraryFailureRows, e); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(e))
+}
+
+// failLibraryMode refuses business conflicts so the stock Library callbacks see
+// ERROR instead of an OK body they would index.
+var libraryModeFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrRetired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: library.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: library.ErrDialogClosed, class: failureRefusal, code: unprovenRefusalCode},
+	{match: library.ErrActLocked, class: failureRefusal, code: unprovenRefusalCode},
+	{match: library.ErrActAwarded, class: failureRefusal, code: unprovenRefusalCode},
+	{match: library.ErrCGClaimed, class: failureRefusal, code: unprovenRefusalCode},
+	{match: library.ErrBgOwned, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failLibraryMode(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, app.ErrRetired) || errors.Is(e, library.ErrUnqualified) || errors.Is(e, library.ErrDialogClosed) || errors.Is(e, library.ErrActLocked) || errors.Is(e, library.ErrActAwarded) || errors.Is(e, library.ErrCGClaimed) || errors.Is(e, library.ErrBgOwned) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return conflictRefusal(1)
+	if classified := classifyFailure(libraryModeFailureRows, e); classified != nil {
+		return failureReply(classified)
 	}
 	return failLibrary(e)
 }

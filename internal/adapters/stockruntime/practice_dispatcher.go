@@ -168,10 +168,10 @@ func (d PracticeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if _, _, ok := practiceWireMID(req.Envelope.MID); !ok {
 			return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_practice_mid"}}
 		}
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_practice_request"}}
+		return failureReply(malformed("invalid_practice_request"))
 	}
 	if d.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "practice_unavailable"}}
+		return failureReply(unavailable(nil))
 	}
 
 	target := apppractice.Target{Hero: wire.Hero, ActorID: wire.ActorID}
@@ -212,22 +212,37 @@ func (d PracticeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 	}
 }
 
+var practiceFailureRows = []failureRow{
+	{match: apppractice.ErrInvalidPracticeMethod, class: failureMalformed, detail: "practice_rejected"},
+	{match: apppractice.ErrEmptyRollSupport, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrUnknownResource, class: failureDefect},
+	{match: apppractice.ErrActorStaleVersion, class: failureRefusal, code: staleConflictCode},
+	{match: apppractice.ErrStaleVersion, class: failureRefusal, code: staleConflictCode},
+	{match: apppractice.ErrCandidateMissing, class: failureRefusal, code: staleConflictCode},
+	{match: apppractice.ErrPracticeAdmission, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppractice.ErrPracticePrivilege, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppractice.ErrPracticeBless, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrLevelRequirement, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppractice.ErrAllPracticeAttrsAtCap, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func practiceFailure(err error) httpedge.Response {
 	if err == nil {
 		err = errors.New("character practice failed")
 	}
 	var conflict *receipt.ConflictError
 	var unknown *tx.UnknownCommitError
-	switch {
-	case errors.As(err, &unknown):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "practice_commit_unknown"}}
-	case errors.As(err, &conflict), errors.Is(err, apppractice.ErrActorStaleVersion), errors.Is(err, apppractice.ErrStaleVersion), errors.Is(err, apppractice.ErrCandidateMissing):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "practice_state_conflict"}}
-	case errors.Is(err, apppractice.ErrPracticeAdmission), errors.Is(err, apppractice.ErrPracticePrivilege), errors.Is(err, apppractice.ErrPracticeBless), errors.Is(err, appi5.ErrLevelRequirement), errors.Is(err, economy.ErrInsufficientBalance), errors.Is(err, economy.ErrUnknownResource), errors.Is(err, apppractice.ErrAllPracticeAttrsAtCap), errors.Is(err, apppractice.ErrInvalidPracticeMethod), errors.Is(err, apppractice.ErrEmptyRollSupport):
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "practice_rejected"}}
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "practice_unavailable"}}
+	if errors.As(err, &unknown) {
+		return failureReply(unknownCommit("practice_commit_unknown", err))
 	}
+	if errors.As(err, &conflict) {
+		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
+	}
+	if classified := classifyFailure(practiceFailureRows, err); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(err))
 }
 
 func (d PracticeDispatcher) practiceActor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {

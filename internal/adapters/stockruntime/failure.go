@@ -8,9 +8,17 @@ import (
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-// unprovenRefusalCode is the single PRIVATE_POLICY tunable for refusals whose
-// stock code has no client evidence yet. 1 reproduces today's silent reply.
-const unprovenRefusalCode int64 = 1
+// D5 PRIVATE_POLICY tunables. The balance codes apply only where a typed
+// resource key identifies the missing resource; the shared
+// economy.ErrInsufficientBalance carries none, so those rows use the generic.
+const (
+	unprovenRefusalCode     int64 = 35028
+	staleConflictCode       int64 = 40002
+	serverBusyCode          int64 = 35033
+	insufficientDiamondCode int64 = 20005
+	insufficientCoinCode    int64 = 20006
+	insufficientStaminaCode int64 = 20007
+)
 
 type failureClass uint8
 
@@ -18,6 +26,7 @@ const (
 	failureMalformed failureClass = iota + 1
 	failureRefusal
 	failureUnavailable
+	failureDefect
 	failureUnknownCommit
 )
 
@@ -53,8 +62,8 @@ func refusalWithBody(code int64, body map[string]any) *classifiedFailure {
 	return &classifiedFailure{class: failureRefusal, code: code, extra: body}
 }
 
-func unavailable(detail string, cause error) *classifiedFailure {
-	return &classifiedFailure{class: failureUnavailable, detail: detail, cause: cause}
+func unavailable(cause error) *classifiedFailure {
+	return &classifiedFailure{class: failureUnavailable, cause: cause}
 }
 
 func unknownCommit(detail string, cause error) *classifiedFailure {
@@ -96,7 +105,9 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 		body["error_code"] = failure.code
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Cause: failure.cause, Body: body}
 	case failureUnavailable:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error": failure.detail}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": ""}}
+	case failureDefect:
+		return httpedge.Response{HTTPStatus: http.StatusInternalServerError, Cause: failure.cause, Body: map[string]any{"error_code": unprovenRefusalCode}}
 	case failureUnknownCommit:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error": failure.detail}}
 	}

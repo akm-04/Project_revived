@@ -93,5 +93,5 @@ func failBook(e error) httpedge.Response {
 	if classified := classifyFailure(bookFailureRows, e); classified != nil {
 		return failureReply(classified)
 	}
-	return failureReply(unavailable("book_unavailable_or_unresolved", e))
+	return failureReply(unavailable(e))
 }

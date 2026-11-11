@@ -127,7 +127,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 72,
    "name": "ALBUM_PARTNER_UNLOCK"
@@ -135,7 +135,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 835,
    "name": "SET_BOARD_HERO"
@@ -143,7 +143,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 836,
    "name": "GET_LIBRARY_INFOS"
@@ -151,7 +151,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 837,
    "name": "READ_DIALOG"
@@ -159,7 +159,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 838,
    "name": "GET_HERO_DIALOG"
@@ -167,7 +167,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 839,
    "name": "BUY_GIFT"
@@ -175,7 +175,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 840,
    "name": "ADD_FAVOR"
@@ -183,7 +183,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 841,
    "name": "GET_PARTNER_MISSION"
@@ -191,7 +191,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 842,
    "name": "GET_HERO_ACT"
@@ -199,7 +199,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 843,
    "name": "GET_HERO_TALK_AWARD"
@@ -207,7 +207,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 844,
    "name": "GET_HERO_ACT_AWARD"
@@ -215,7 +215,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 845,
    "name": "GET_HERO_MISSION_AWARD"
@@ -223,7 +223,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 846,
    "name": "ACCEPT_HERO_MISSION"
@@ -231,7 +231,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 847,
    "name": "ABANDON_MISSION"
@@ -239,7 +239,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 851,
    "name": "GET_SCHOOL_STORY_REWARD"
@@ -247,7 +247,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 852,
    "name": "HERO_FEED"
@@ -255,7 +255,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 853,
    "name": "GET_FEED_INFO"
@@ -263,7 +263,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 854,
    "name": "SAVE_HERO_FEED"
@@ -271,7 +271,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 855,
    "name": "GET_CG_AWARD"
@@ -279,7 +279,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 856,
    "name": "UNLOCK_BG"
@@ -287,7 +287,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 857,
    "name": "SET_BG"
@@ -295,7 +295,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 2784,
    "name": "ALBUM_SPECIAL_COLLECT_INFO"
@@ -303,7 +303,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/library_dispatcher.go",
-    "line": 27
+    "line": 26
    },
    "mid": 2785,
    "name": "ALBUM_SPECIAL_COLLECT_REWARD"

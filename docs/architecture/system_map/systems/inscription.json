@@ -128,7 +128,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1400,
    "name": "INSCRIPTION_MAKE"
@@ -136,7 +136,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1401,
    "name": "INSCRIPTION_REBUILD"
@@ -144,7 +144,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1402,
    "name": "INSCRIPTION_INSERT"
@@ -152,7 +152,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1403,
    "name": "INSCRIPTION_REMOVE"
@@ -160,7 +160,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1404,
    "name": "INSCRIPTION_RESOLVE"
@@ -168,7 +168,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1405,
    "name": "INSCRIPTION_SAVE_REBUILD"
@@ -176,7 +176,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1406,
    "name": "INSCRIPTION_ABANDON_REBUILD"
@@ -184,7 +184,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/inscription_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 1407,
    "name": "EXCHANGE_MATERIALS"

@@ -104,7 +104,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/element_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 2849,
    "name": "ELEMENT_EQUIP"
@@ -112,7 +112,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/element_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 2850,
    "name": "ELEMENT_LEV_UP"
@@ -120,7 +120,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/element_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 2851,
    "name": "ELEMENT_UNLOAD"
@@ -128,7 +128,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/element_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 2852,
    "name": "ELEMENT_DESTORY_ON_PARTNER"
@@ -136,7 +136,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/element_dispatcher.go",
-    "line": 26
+    "line": 24
    },
    "mid": 2853,
    "name": "ELEMENT_DESTORY_IN_BACKPACK"
