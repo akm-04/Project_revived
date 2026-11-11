@@ -73,7 +73,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
-    "line": 31
+    "line": 30
    },
    "mid": 528,
    "name": "TREASURE_LOAD_SP_INFO"
@@ -81,7 +81,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
-    "line": 31
+    "line": 30
    },
    "mid": 530,
    "name": "TREASURE_LOAD_INFO"
@@ -89,7 +89,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
-    "line": 31
+    "line": 30
    },
    "mid": 531,
    "name": "TREASURE_SET_PARTNER"
@@ -97,7 +97,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
-    "line": 31
+    "line": 30
    },
    "mid": 532,
    "name": "TREASURE_FINISH_ONE_TEAM"
@@ -105,7 +105,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
-    "line": 31
+    "line": 30
    },
    "mid": 533,
    "name": "TREASURE_LOG"
