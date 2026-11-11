@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/course"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	course "gxb.local/backend/v2/internal/domain/course"
@@ -10,7 +9,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 type CoursePort interface {
@@ -103,9 +101,17 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	}
 	return okI5(r.Body)
 }
+var courseFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},
+	{match: app.ErrRetired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrActor, class: failureRefusal, code: unprovenRefusalCode},
+	{match: course.ErrInvalid, class: failureMalformed, detail: "invalid_course_request"},
+	{match: course.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: course.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failCourse(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, app.ErrStale) || errors.Is(e, app.ErrRetired) || errors.Is(e, app.ErrActor) || errors.Is(e, course.ErrInvalid) || errors.Is(e, course.ErrUnqualified) || errors.Is(e, course.ErrStaleTime) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "course_unavailable_or_unresolved"}}
+	return failureFromRows(courseFailureRows, e)
 }

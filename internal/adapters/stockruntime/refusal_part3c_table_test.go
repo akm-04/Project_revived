@@ -5,9 +5,11 @@ import (
 	"testing"
 
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
+	appcourse "gxb.local/backend/v2/internal/application/course"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/combat"
+	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/economy"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
@@ -46,5 +48,21 @@ func TestPart3CChargeFailureRows(t *testing.T) {
 		{"conflict", failCharge(privilege.ErrConflict), http.StatusConflict, staleConflictCode, ""},
 		{"receipt conflict", failCharge(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"unavailable", failCharge(privilege.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3CCourseFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"rejected", failCourse(appcourse.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
+		{"stale", failCourse(appcourse.ErrStale), http.StatusConflict, staleConflictCode, ""},
+		{"retired", failCourse(appcourse.ErrRetired), http.StatusConflict, unprovenRefusalCode, ""},
+		{"actor", failCourse(appcourse.ErrActor), http.StatusConflict, unprovenRefusalCode, ""},
+		{"invalid", failCourse(course.ErrInvalid), http.StatusBadRequest, 0, "invalid_course_request"},
+		{"unqualified", failCourse(course.ErrUnqualified), http.StatusConflict, unprovenRefusalCode, ""},
+		{"stale time", failCourse(course.ErrStaleTime), http.StatusConflict, staleConflictCode, ""},
+		{"conflict", failCourse(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"balance diamonds", failCourse(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
+		{"balance other", failCourse(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", failCourse(appcourse.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

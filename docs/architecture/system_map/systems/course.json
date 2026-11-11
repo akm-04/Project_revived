@@ -115,7 +115,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2128,
    "name": "APPLY_COURSE"
@@ -123,7 +123,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2129,
    "name": "GET_COURSE_INFO"
@@ -131,7 +131,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2130,
    "name": "GET_STUDYROOM_INFO"
@@ -139,7 +139,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2131,
    "name": "STUDY"
@@ -147,7 +147,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2132,
    "name": "SPEED_STUDY"
@@ -155,7 +155,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2133,
    "name": "ADD_SKILL"
@@ -163,7 +163,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2134,
    "name": "FORGET_COURSE"
@@ -171,7 +171,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2135,
    "name": "ENTER_ROOM"
@@ -179,7 +179,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2136,
    "name": "LEAVE_ROOM"
@@ -187,7 +187,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2137,
    "name": "GET_STUDY_INFOS"
@@ -195,7 +195,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2138,
    "name": "CANCEL_STUDY"
@@ -203,7 +203,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2139,
    "name": "GET_GIFT_BOX_INFO"
@@ -211,7 +211,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2140,
    "name": "INCR_COURESE_EXP"
@@ -219,7 +219,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2141,
    "name": "OPEN_GIFT_BOX"
@@ -227,7 +227,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2142,
    "name": "CONTINUE_STUDY"
@@ -235,7 +235,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/course_dispatcher.go",
-    "line": 25
+    "line": 23
    },
    "mid": 2500,
    "name": "GET_COURSES_RECOMMEND"
