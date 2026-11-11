@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
+	exchange "gxb.local/backend/v2/internal/application/socialexchange"
 	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -18,6 +19,7 @@ import (
 	march "gxb.local/backend/v2/internal/domain/march"
 	domainmentor "gxb.local/backend/v2/internal/domain/mentor"
 	occult "gxb.local/backend/v2/internal/domain/occult"
+	socialexchange "gxb.local/backend/v2/internal/domain/socialexchange"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -160,4 +162,20 @@ func TestPart3COccultFailureRows(t *testing.T) {
 		{"room full", failOccult(room.ErrFull), http.StatusConflict, occultRoomRefusedCode, ""},
 		{"unavailable", failOccult(occult.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
+}
+
+func TestPart3CSocialExchangeFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"product off", failSocialExchange(exchange.ErrProductOff), http.StatusConflict, unprovenRefusalCode, ""},
+		{"count", failSocialExchange(socialexchange.ErrCount), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unknown product", failSocialExchange(socialexchange.ErrUnknownProduct), http.StatusConflict, unprovenRefusalCode, ""},
+		{"conflict", failSocialExchange(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"balance diamonds", failSocialExchange(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
+		{"stack capacity", failSocialExchange(economy.ErrStackCapacity), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", failSocialExchange(exchange.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func failSocialExchange(err error) httpedge.Response {
+	return failureFromRows(socialExchangeFailureRows, err)
 }

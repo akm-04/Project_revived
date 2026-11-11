@@ -71,7 +71,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_exchange_dispatcher.go",
-    "line": 26
+    "line": 23
    },
    "mid": 191,
    "name": "EXCHANGE_ITEMS"

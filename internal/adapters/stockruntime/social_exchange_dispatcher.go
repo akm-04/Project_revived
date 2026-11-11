@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	authentication "gxb.local/backend/v2/internal/application/realtimeauth"
 	exchange "gxb.local/backend/v2/internal/application/socialexchange"
@@ -11,7 +9,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/socialexchange"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -35,18 +32,22 @@ func (dispatcher SocialExchangeDispatcher) Dispatch(ctx context.Context, request
 		return badHero("invalid_social_exchange_parameter")
 	}
 	if productID <= 0 || count <= 0 {
-		return conflictRefusal(1)
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if dispatcher.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "social_exchange_unavailable"}}
+		return failureReply(unavailable(nil))
 	}
 	body, err := dispatcher.Service.Exchange(ctx, actor, exchange.Request{ProductID: productID, Count: count}, request.Envelope.Operation)
 	if err == nil {
 		return okI5(body)
 	}
-	var conflict *receipt.ConflictError
-	if errors.Is(err, exchange.ErrProductOff) || errors.Is(err, domain.ErrCount) || errors.Is(err, domain.ErrUnknownProduct) || errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, economy.ErrStackCapacity) || errors.As(err, &conflict) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "social_exchange_unavailable"}}
+	return failureFromRows(socialExchangeFailureRows, err)
+}
+
+var socialExchangeFailureRows = []failureRow{
+	{match: exchange.ErrProductOff, class: failureRefusal, code: unprovenRefusalCode},
+	{match: domain.ErrCount, class: failureRefusal, code: unprovenRefusalCode},
+	{match: domain.ErrUnknownProduct, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: economy.ErrStackCapacity, class: failureRefusal, code: unprovenRefusalCode},
 }
