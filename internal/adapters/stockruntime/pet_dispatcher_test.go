@@ -451,21 +451,22 @@ func TestCA75PetStyleErrorTransportMapping(t *testing.T) {
 	tests := []struct {
 		err  error
 		want int
+		code int64
 	}{
-		{apppet.ErrPetAppearanceContentInactive, 503},
-		{apppet.ErrPetNotFound, 404},
-		{apppet.ErrPetAppearanceUnavailable, 400},
-		{apppet.ErrPetStyleSwitchConflict, 409},
-		{economy.ErrInsufficientBalance, 409},
-		{errors.New("infrastructure"), 503},
+		{apppet.ErrPetAppearanceContentInactive, 409, 35028},
+		{apppet.ErrPetNotFound, 409, 35028},
+		{apppet.ErrPetAppearanceUnavailable, 409, 35028},
+		{apppet.ErrPetStyleSwitchConflict, 409, 35028},
+		{economy.ErrInsufficientBalance, 409, 35028},
+		{errors.New("infrastructure"), 503, 35033},
 	}
 	for _, tc := range tests {
 		d := PetDispatcher{Authority: httpAuthority{actor}, Service: &petServiceFake{err: tc.err}}
 		r := env(1894, nil, now)
 		r.Envelope.Params = map[string]any{"pet_id": int64(77), "style_id": int64(50001376)}
 		got := d.Dispatch(context.Background(), r)
-		if got.HTTPStatus != tc.want {
-			t.Fatalf("err=%v status=%d want=%d body=%#v", tc.err, got.HTTPStatus, tc.want, got.Body)
+		if got.HTTPStatus != tc.want || got.Body["error_code"] != tc.code {
+			t.Fatalf("err=%v status=%d want=%d code=%#v want=%d body=%#v", tc.err, got.HTTPStatus, tc.want, got.Body["error_code"], tc.code, got.Body)
 		}
 	}
 }
