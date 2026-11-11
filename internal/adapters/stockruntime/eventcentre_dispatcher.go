@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/eventcentre"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -11,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -32,14 +32,14 @@ func (d EventCentreDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 		return *fail
 	}
 	if d.Service == nil {
-		return eventCentreUnavailable(app.ErrUnavailable)
+		return failureReply(unavailable(app.ErrUnavailable))
 	}
 	params := req.Envelope.Params
 	mid := req.Envelope.MID
 	switch mid {
 	case 1072, 1074, 1081, 1090:
 		if !onlyStockGameplayParams(params) {
-			return conflictRefusal(1)
+			return eventCentreRefusal()
 		}
 		body, err := d.Service.Read(ctx, a, mid, req.Envelope.Operation)
 		if err != nil {
@@ -48,7 +48,7 @@ func (d EventCentreDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 		return okI5(body)
 	case 1083:
 		if !onlyStockGameplayParams(params) {
-			return conflictRefusal(1)
+			return eventCentreRefusal()
 		}
 		body, err := d.Service.BoardInfo(ctx, a, req.Envelope.Operation)
 		if err != nil {
@@ -58,7 +58,7 @@ func (d EventCentreDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 	case 1087:
 		boardID, err := requiredInt64(params, "battle_id")
 		if err != nil || !onlyStockGameplayParams(params, "battle_id") {
-			return conflictRefusal(1)
+			return eventCentreRefusal()
 		}
 		body, err := d.Service.BoardReport(ctx, a, boardID, req.Envelope.Operation)
 		if err != nil {
@@ -68,7 +68,7 @@ func (d EventCentreDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 	}
 	command, allowed, err := eventCentreCommand(mid, params)
 	if err != nil || !onlyStockGameplayParams(params, allowed...) || command.Validate() != nil {
-		return conflictRefusal(1)
+		return eventCentreRefusal()
 	}
 	result, err := d.Service.Command(ctx, a, command, req.Envelope.Operation)
 	if err != nil {
@@ -167,21 +167,38 @@ func failEventCentreCommand(err error, command app.Command) httpedge.Response {
 	if errors.Is(err, economy.ErrInsufficientBalance) && command.Family == app.AdminExchange {
 		switch command.FromType {
 		case 2:
-			return conflictRefusal(20005)
+			return failureReply(refusal(20005))
 		case 1:
-			return conflictRefusal(20006)
+			return failureReply(refusal(20006))
 		}
 	}
 	return failEventCentre(err)
 }
 
-func failEventCentre(err error) httpedge.Response {
-	if errors.Is(err, app.ErrRejected) || errors.Is(err, app.ErrInvalid) || errors.Is(err, app.ErrUnqualified) || errors.Is(err, app.ErrStale) || errors.Is(err, app.ErrStaleTime) || errors.Is(err, bookskill.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return conflictRefusal(1)
-	}
-	return eventCentreUnavailable(err)
+// I9_10A C23 keeps Event Centre refusals on 409 so the stock callbacks never
+// receive a 200 body; D5 supplies the codes.
+var eventCentreFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrInvalid, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},
+	{match: app.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
+	{match: bookskill.ErrInvalid, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: app.ErrUnavailable, class: failureUnavailable},
 }
 
-func eventCentreUnavailable(err error) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error_code": int64(1)}}
+func eventCentreRefusal() httpedge.Response {
+	return failureReply(refusal(unprovenRefusalCode))
+}
+
+func failEventCentre(err error) httpedge.Response {
+	var conflict *receipt.ConflictError
+	if errors.As(err, &conflict) {
+		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
+	}
+	if classified := classifyFailure(eventCentreFailureRows, err); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(err))
 }

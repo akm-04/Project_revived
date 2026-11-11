@@ -185,7 +185,7 @@ func TestI910AWorkshopRecycleMakeAdminPetNative(t *testing.T) {
 		t.Fatalf("1073 replay: %d %+v", replayed.HTTPStatus, replayed.Body)
 	}
 	refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1073, map[string]any{"item_id": int64(10010001), "item_num": int64(1)}))
-	if refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 1 {
+	if refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 35028 {
 		t.Fatalf("1073 foreign item: %d %+v", refused.HTTPStatus, refused.Body)
 	}
 

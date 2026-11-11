@@ -50,10 +50,10 @@ func TestI910AFreshPlayerWorkshopNative(t *testing.T) {
 	if stack, exists, err := stacks.ReadStackTx(ctx, database, actor.PlayerID, 30001006); err != nil || !exists || stack.Quantity != 9 {
 		t.Fatalf("1073 retry balance: %+v %v %v", stack, exists, err)
 	}
-	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1073, map[string]any{"item_id": int64(10010001), "item_num": int64(1)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 1 {
+	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1073, map[string]any{"item_id": int64(10010001), "item_num": int64(1)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 35028 {
 		t.Fatalf("1073 foreign item: %d %+v", refused.HTTPStatus, refused.Body)
 	}
-	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1073, map[string]any{"item_id": int64(30001006), "item_num": int64(11)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 1 {
+	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1073, map[string]any{"item_id": int64(30001006), "item_num": int64(11)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 35028 {
 		t.Fatalf("1073 overspent items: %d %+v", refused.HTTPStatus, refused.Body)
 	}
 
@@ -62,7 +62,7 @@ func TestI910AFreshPlayerWorkshopNative(t *testing.T) {
 	if deskInfo.HTTPStatus != 200 || !ok || number(t, deskBuilding["lev"]) != 1 {
 		t.Fatalf("1074 fresh: %d %+v", deskInfo.HTTPStatus, deskInfo.Body)
 	}
-	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1075, map[string]any{"item_id": int64(20001001)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 1 {
+	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1075, map[string]any{"item_id": int64(20001001)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 35028 {
 		t.Fatalf("1075 non-craftable: %d %+v", refused.HTTPStatus, refused.Body)
 	}
 	makeRequest := playtestRequest(actor, 1075, map[string]any{"item_id": int64(20001091)})
@@ -74,7 +74,7 @@ func TestI910AFreshPlayerWorkshopNative(t *testing.T) {
 	if replayedMake.HTTPStatus != 200 || !reflect.DeepEqual(normalizedBody(t, replayedMake.Body), normalizedBody(t, made.Body)) {
 		t.Fatalf("1075 exact retry: %d %+v", replayedMake.HTTPStatus, replayedMake.Body)
 	}
-	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1075, map[string]any{"item_id": int64(20001091)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 1 {
+	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1075, map[string]any{"item_id": int64(20001091)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 35028 {
 		t.Fatalf("1075 while making: %d %+v", refused.HTTPStatus, refused.Body)
 	}
 
@@ -121,10 +121,10 @@ func TestI910AFreshPlayerWorkshopNative(t *testing.T) {
 			t.Fatalf("1081 retry double counted %s: %+v", key, afterExchange.Body)
 		}
 	}
-	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1082, map[string]any{"from_type": int64(13), "to_type": int64(11)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 1 {
+	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1082, map[string]any{"from_type": int64(13), "to_type": int64(11)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 35028 {
 		t.Fatalf("1082 locked source: %d %+v", refused.HTTPStatus, refused.Body)
 	}
-	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1082, map[string]any{"from_type": int64(2), "to_type": int64(2)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 1 {
+	if refused := dispatcher.Dispatch(ctx, playtestRequest(actor, 1082, map[string]any{"from_type": int64(2), "to_type": int64(2)})); refused.HTTPStatus != 409 || number(t, refused.Body["error_code"]) != 35028 {
 		t.Fatalf("1082 same source and destination: %d %+v", refused.HTTPStatus, refused.Body)
 	}
 	exec(t, database, `UPDATE player_currency_balances SET amount=0 WHERE player_id=$1 AND resource_key='crystal'`, int64(actor.PlayerID))
