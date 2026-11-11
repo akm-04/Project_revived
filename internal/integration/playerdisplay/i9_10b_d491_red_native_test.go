@@ -367,7 +367,7 @@ func TestI9_10BD491NewChoiceReceiptAndReadsSurviveMissingGraph(t *testing.T) {
 
 			fresh := libraryDispatchService(t, actor, service, 843, params, op())
 			t.Logf("missing-graph fresh operation select_info=%q status=%d body=%+v", tc.selectInfo, fresh.HTTPStatus, fresh.Body)
-			if fresh.HTTPStatus != 409 || fresh.Body["error_code"] != int64(1) {
+			if fresh.HTTPStatus != 409 || fresh.Body["error_code"] != int64(35028) {
 				t.Fatalf("missing-graph fresh operation select_info %q status %d body %+v", tc.selectInfo, fresh.HTTPStatus, fresh.Body)
 			}
 

@@ -140,7 +140,7 @@ func TestI9_10B839BuyGiftDebitCreditAndOwnedCount(t *testing.T) {
 	}
 	before := p5CrystalBalance(t, p, a.PlayerID)
 	response = libraryDispatchService(t, a, service, 839, map[string]any{"gift_id": int64(50001112), "gift_num": int64(1)}, op())
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(20005) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("ring without crystal status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	if got := p5CrystalBalance(t, p, a.PlayerID); got != before {
@@ -311,7 +311,7 @@ func TestI9_10B835BoardReceiptSurvivesMissingCardMetadata(t *testing.T) {
 	}
 
 	failed := libraryDispatchService(t, a, service, 835, command, op())
-	if failed.HTTPStatus != 409 || failed.Body["error_code"] != int64(1) {
+	if failed.HTTPStatus != 409 || failed.Body["error_code"] != int64(35028) {
 		t.Fatalf("missing metadata mutation status %d body %+v", failed.HTTPStatus, failed.Body)
 	}
 	root, e := (librarystore.Store{}).ReadRootTx(ctx, p, a.PlayerID)
