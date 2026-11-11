@@ -186,7 +186,7 @@ func TestGuildRentalWireShapes(t *testing.T) {
 
 	probe.placeErr = guildrental.ErrAlreadyOffered
 	got = d.Dispatch(context.Background(), heroReq(t, 594, map[string]any{"partner_id": int64(31)}))
-	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatal("594 refusal must be 409", got)
 	}
 	got = d.Dispatch(context.Background(), heroReq(t, 594, map[string]any{"partner_id": int64(31), "extra": int64(1)}))

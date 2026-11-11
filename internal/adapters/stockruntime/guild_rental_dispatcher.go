@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"gxb.local/backend/v2/internal/application/characterasset"
@@ -275,18 +274,23 @@ func rentalAppearance(appearance *characterasset.EffectiveHeroAppearance) *herop
 }
 
 func rentalBad() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "guild_rental_invalid_parameter"}}
+	return failureReply(malformed("guild_rental_invalid_parameter"))
+}
+
+var rentalFailureRows = []failureRow{
+	{match: guildrental.ErrNotInGuild, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrUnitUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrAlreadyOffered, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrCapReached, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrNoOffer, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrRecallTooEarly, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 // rentalFailure refuses with 409 so the client's OK callback never indexes a
 // nil list (Backend.lua:562-566).
 func rentalFailure(err error) httpedge.Response {
-	switch {
-	case errors.Is(err, guildrental.ErrNotInGuild), errors.Is(err, guildrental.ErrUnitUnavailable),
-		errors.Is(err, guildrental.ErrAlreadyOffered), errors.Is(err, guildrental.ErrCapReached),
-		errors.Is(err, guildrental.ErrNoOffer), errors.Is(err, guildrental.ErrRecallTooEarly):
-		return conflictRefusal(1)
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "guild_rental_unavailable"}}
+	if classified := classifyFailure(rentalFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
+	return failureReply(unavailable(err))
 }
