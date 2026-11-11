@@ -420,8 +420,9 @@ func TestD09PostCommitOutputOnlyAndBootCorrelation(t *testing.T) {
 	if f.number(`SELECT count(*) FROM social_friend_requests WHERE status='PENDING'`) != 1 {
 		t.Fatal("hint before canonical commit")
 	}
-	status, _ = httpRequest(t, server, bearer, 1, 177, map[string]any{"player_id": 200001})
-	if status != 200 || emitter.calls != 1 {
-		t.Fatal("failed duplicate emitted")
+	status, duplicate := httpRequest(t, server, bearer, 1, 177, map[string]any{"player_id": 200001})
+	duplicateBody, _ := duplicate.(map[string]any)
+	if status != 409 || fmt.Sprint(duplicateBody["error_code"]) != "20009" || emitter.calls != 1 {
+		t.Fatal("duplicate request must refuse without output", status, duplicate)
 	}
 }
