@@ -388,7 +388,7 @@ func TestI9_10B845To847Refuse(t *testing.T) {
 	service := libraryService(p, p)
 	for _, mid := range []uint16{845, 846, 847} {
 		response := libraryDispatchService(t, a, service, mid, map[string]any{"partner_id": int64(1), "mission_id": int64(1001)}, op())
-		if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+		if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 			t.Fatalf("MID %d status %d body %+v", mid, response.HTTPStatus, response.Body)
 		}
 	}

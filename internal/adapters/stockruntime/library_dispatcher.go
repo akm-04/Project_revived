@@ -107,7 +107,7 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		c.Value, e = requiredInt64(params, "act_id")
 	case 845, 846, 847:
 		// No stock caller and no recovered reply shape (C14/B7).
-		return conflictRefusal(1)
+		return unservedLibraryRefusal()
 	case 851:
 		c.Family = app.SchoolStory
 		c.Value, e = requiredInt64(params, "talk_id")
@@ -212,6 +212,10 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		body["awards"] = app.StockAwardRows(out.Awards)
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: body}
+}
+
+func unservedLibraryRefusal() httpedge.Response {
+	return failureReply(refusal(unprovenRefusalCode))
 }
 
 var libraryFailureRows = []failureRow{

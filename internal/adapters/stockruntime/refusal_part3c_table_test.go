@@ -103,8 +103,7 @@ func TestPart3CIllusionFailureRows(t *testing.T) {
 	})
 }
 
-func TestPart3CIllusionRoomFailureRows(t *testing.T) {
-	assertPart2FailureCases(t, []part2FailureCase{
+func TestPart3CIllusionRoomFailureRows(t *testing.T) {	assertPart2FailureCases(t, []part2FailureCase{
 		{"invalid", failIllusionRoom(illusion.ErrInvalid), http.StatusBadRequest, 0, "illusion_invalid_parameter"},
 		{"room invalid", failIllusionRoom(room.ErrInvalid), http.StatusBadRequest, 0, "illusion_invalid_parameter"},
 		{"conflict", failIllusionRoom(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
@@ -113,5 +112,11 @@ func TestPart3CIllusionRoomFailureRows(t *testing.T) {
 		{"room changed", failIllusionRoom(sr.ErrConflict), http.StatusConflict, staleConflictCode, ""},
 		{"room full", failIllusionRoom(room.ErrFull), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", failIllusionRoom(illusion.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3CLibraryUnservedRefusal(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"unserved", unservedLibraryRefusal(), http.StatusConflict, unprovenRefusalCode, ""},
 	})
 }
