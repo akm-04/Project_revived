@@ -129,16 +129,17 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 	case failureMalformed:
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Cause: failure.cause, Body: map[string]any{"error": failure.detail}}
 	case failureRefusal:
-		body := make(map[string]any, len(failure.extra)+1)
+		body := make(map[string]any, len(failure.extra)+2)
 		for key, value := range failure.extra {
 			body[key] = value
 		}
 		body["error_code"] = failure.code
+		body["error_msg"] = ""
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Cause: failure.cause, Body: body}
 	case failureUnavailable:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": ""}}
 	case failureDefect:
-		return httpedge.Response{HTTPStatus: http.StatusInternalServerError, Cause: failure.cause, Body: map[string]any{"error_code": unprovenRefusalCode}}
+		return httpedge.Response{HTTPStatus: http.StatusInternalServerError, Cause: failure.cause, Body: map[string]any{"error_code": unprovenRefusalCode, "error_msg": ""}}
 	case failureUnknownCommit:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error": failure.detail}}
 	}

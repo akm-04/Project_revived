@@ -53,6 +53,9 @@ func assertPart2FailureCases(t *testing.T, cases []part2FailureCase) {
 				if tc.got.Body["error_code"] != tc.code {
 					t.Fatalf("error_code=%#v want=%d", tc.got.Body["error_code"], tc.code)
 				}
+				if tc.got.Body["error_msg"] != "" {
+					t.Fatalf("error_msg=%#v want empty", tc.got.Body["error_msg"])
+				}
 				return
 			}
 			if _, hasCode := tc.got.Body["error_code"]; hasCode {
