@@ -11,40 +11,6 @@ import (
 	"testing"
 )
 
-// r4RefusalMapperRatchet names the dispatchers that still build refusal
-// replies outside the shared stockruntime mapper. It may only shrink: delete
-// an entry when its dispatcher migrates (R4 parts 2 and 3 empty it).
-var r4RefusalMapperRatchet = map[string]bool{
-	"activity_dispatcher.go":      true,
-	"dodgeball_dispatcher.go":     true,
-	"eventcentre_dispatcher.go":   true,
-	"library_forum_dispatcher.go": true,
-	"memoir_dispatcher.go":        true,
-	"practice_auto_dispatcher.go": true,
-	"publication_dispatcher.go":   true,
-}
-
-var r4MigratedDispatchers = []string{
-	"achievement_dispatcher.go",
-	"arena_dispatcher.go",
-	"book_dispatcher.go",
-	"conquer_dispatcher.go",
-	"dorm_dispatcher.go",
-	"element_dispatcher.go",
-	"evolution_dispatcher.go",
-	"hero_dispatcher.go",
-	"inactive_dispatcher.go",
-	"inscription_dispatcher.go",
-	"league_dispatcher.go",
-	"library_dispatcher.go",
-	"oneonone_dispatcher.go",
-	"practice_dispatcher.go",
-	"saved_preset_dispatcher.go",
-	"spirit_dispatcher.go",
-	"topfloor_dispatcher.go",
-	"topfloor_task_dispatcher.go",
-}
-
 func TestR4RefusalRepliesGoThroughTheMapper(t *testing.T) {
 	root := repoRoot(t)
 	base := filepath.Join(root, "internal", "adapters", "stockruntime")
@@ -52,38 +18,13 @@ func TestR4RefusalRepliesGoThroughTheMapper(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	offenders := map[string]bool{}
-	stale := map[string]bool{}
 	for _, entry := range entries {
 		name := entry.Name()
 		if entry.IsDir() || !strings.HasSuffix(name, "_dispatcher.go") || strings.HasSuffix(name, "_test.go") {
 			continue
 		}
-		path := filepath.Join(base, name)
-		if fileBuildsRefusalOutsideMapper(t, path) {
-			if !r4RefusalMapperRatchet[name] {
-				offenders[name] = true
-			}
-			continue
-		}
-		if r4RefusalMapperRatchet[name] {
-			stale[name] = true
-		}
-	}
-	for name := range offenders {
-		t.Errorf("%s builds a 400/409 refusal (or a coded 503) outside the stockruntime mapper; migrate it in parts 2-3 or add it to the ratchet", name)
-	}
-	for name := range stale {
-		t.Errorf("%s no longer builds a refusal outside the mapper; remove it from the ratchet", name)
-	}
-	for _, name := range r4MigratedDispatchers {
-		if r4RefusalMapperRatchet[name] {
-			t.Errorf("%s is migrated and must not be on the refusal-mapper ratchet", name)
-		}
-	}
-	for name := range r4RefusalMapperRatchet {
-		if _, err := os.Stat(filepath.Join(base, name)); err != nil {
-			t.Errorf("ratchet entry %s no longer exists; the ratchet may only shrink to real files", name)
+		if fileBuildsRefusalOutsideMapper(t, filepath.Join(base, name)) {
+			t.Errorf("%s builds a 400/409 refusal (or a coded 503) outside the stockruntime mapper; route it through failureReply", name)
 		}
 	}
 }
