@@ -450,20 +450,28 @@ func flag(value bool) int64 {
 }
 
 func campaignBad() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "guild_campaign_invalid_parameter"}}
+	return failureReply(malformed("guild_campaign_invalid_parameter"))
 }
 
 func campaignUnavailable() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "guild_campaign_unavailable"}}
+	return failureReply(unavailable(errors.New("guild campaign unavailable")))
+}
+
+var campaignFailureRows = []failureRow{
+	{match: guildcampaign.ErrLate, class: failureRefusal, code: 30021},
+	{match: guildcampaign.ErrHolder, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 // campaignFailure refuses with 409: a 200 without the reply's fields crashes
-// the stock callbacks (Backend.lua:562-566).
+// the stock callbacks (Backend.lua:562-566). Unavailable stays a 503 fault.
 func campaignFailure(err error) httpedge.Response {
-	if errors.Is(err, guildcampaign.ErrUnavailable) {
-		return campaignUnavailable()
+	if classified := classifyFailure(campaignFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	return conflictRefusal(1)
+	if errors.Is(err, guildcampaign.ErrUnavailable) {
+		return failureReply(unavailable(err))
+	}
+	return failureReply(refusal(unprovenRefusalCode))
 }
 
 // campaignSettleFailure keeps 610's two client-visible codes: a late result is
@@ -471,7 +479,7 @@ func campaignFailure(err error) httpedge.Response {
 // arrives as a 200 body with error_code 30005 from Settle.
 func campaignSettleFailure(err error) httpedge.Response {
 	if errors.Is(err, guildcampaign.ErrLate) {
-		return conflictRefusal(30021)
+		return failureReply(refusal(30021))
 	}
 	return campaignFailure(err)
 }
