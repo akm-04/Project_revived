@@ -214,6 +214,7 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		response := failDorm(e)
 		if key, ok := out.Body["wrong_key"].(string); ok {
+			response = failureReply(malformed("dorm_unavailable"))
 			response.Body["wrong_key"] = key
 		}
 		return response
