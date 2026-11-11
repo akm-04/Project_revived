@@ -69,7 +69,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return *fail
 	}
 	if d.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "i5_unavailable"}}
+		return failureReply(unavailable(errors.New("i5 unavailable")))
 	}
 	switch req.Envelope.MID {
 	case 163, 164, 165, 166, 167, 168, 171, 2561, 2737, 2738:
@@ -199,7 +199,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		index, err := requiredInt64(req.Envelope.Params, "index")
 		if err != nil {
-			return conflictRefusal(1)
+			return badI5("invalid_activity_index")
 		}
 		period := "DAY"
 		if req.Envelope.MID == 170 {
@@ -418,45 +418,29 @@ func applySettlementProjection(body map[string]any, p appi5.SettlementProjection
 	}
 }
 
-// conflictRefusal answers a refusal on a mode whose success callbacks index nested
-// reply tables. Backend.lua hands a 200 body to the callback as OK, which crashes
-// them; on any other status the callback gets ERROR and the toast still shows.
-func conflictRefusal(code int64) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error_code": code}}
-}
-
-// conflictRefusalCause keeps the server-side branch visible in the request
-// journal while the stock client shows the coded toast.
-func conflictRefusalCause(code int64, cause error) httpedge.Response {
-	response := conflictRefusal(code)
-	response.Cause = cause
-	return response
-}
-
 func okI5(body map[string]any) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 }
 func badI5(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
 }
+
+var i5FailureRows = []failureRow{
+	{match: objective.ErrSignRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: objective.ErrAwakeningRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrMissionRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrMailNotClaimable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrMailStackFull, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrRedeemInvalid, class: failureMalformed, detail: "invalid_redeem"},
+	{match: appi5.ErrMailNotFound, class: failureMalformed, detail: "not_found"},
+	{match: appi5.ErrObjectiveNotFound, class: failureMalformed, detail: "not_found"},
+}
+
 func failI5(err error) httpedge.Response {
-	if errors.Is(err, objective.ErrSignRefused) || errors.Is(err, objective.ErrAwakeningRefused) {
-		return conflictRefusal(1)
+	if classified := classifyFailure(i5FailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	switch {
-	case errors.Is(err, appi5.ErrMissionRefused):
-		return conflictRefusal(1)
-	case errors.Is(err, appi5.ErrRedeemInvalid):
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_redeem"}}
-	case errors.Is(err, appi5.ErrMailStackFull):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "stack_capacity"}}
-	case errors.Is(err, appi5.ErrMailNotClaimable):
-		return conflictRefusal(1)
-	case errors.Is(err, appi5.ErrMailNotFound), errors.Is(err, appi5.ErrObjectiveNotFound):
-		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "not_found"}}
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "i5_operation_failed"}}
-	}
+	return failureReply(unavailable(err))
 }
 
 // storyGuideID floors fractional guide sub-steps (enums.lua GUIDE_SKILL_THREE =

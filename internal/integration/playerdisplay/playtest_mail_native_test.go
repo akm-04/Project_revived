@@ -231,7 +231,7 @@ func TestPlaytestClaimedMailHiddenFromListAndCounts(t *testing.T) {
 	if batch.HTTPStatus != 200 {
 		t.Fatalf("batch claim: %+v", batch)
 	}
-	if response := claim(addresses[1]); response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response := claim(addresses[1]); response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("single after batch should be a conflict: %+v", response)
 	}
 	page := dispatcher.Dispatch(ctx, playtestRequest(a, 368, map[string]any{"load_num": int64(2)}))
