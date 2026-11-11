@@ -503,6 +503,7 @@
    "equipment_service_test.go",
    "equipment_state_test.go",
    "fumo_service_test.go",
+   "journal_policy_native_test.go",
    "live_service_test.go",
    "practice_contribution_test.go",
    "progression_test.go",

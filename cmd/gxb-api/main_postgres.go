@@ -200,7 +200,7 @@ func main() {
 		}()
 	}
 	runner := tx.Runner{DB: pool, Admission: tx.NewSemaphore(64), Hooks: observability.TxHooks{Metrics: txMetrics}}
-	broadcastEmitter := postgres.BroadcastEmitter{}
+	broadcastEmitter := postgres.BroadcastEmitter{Metrics: txMetrics}
 	// Deployment must apply migrations first. Gate all HTTP traffic on content readiness.
 	contentCtx, contentCancel := context.WithTimeout(ctx, 3*registry.DefaultWriteProfile().OperationTimeout)
 	active, contentErr := (registry.Service{Runner: runner, Repo: contentstore.Store{}, Fresh: pool, Providers: registry.DefaultProviderSet()}).ValidateActiveReadiness(contentCtx)
@@ -269,12 +269,12 @@ func main() {
 	heroSvc := apphero.Service{CharacterFunctions: i5svc, AwakeningPositions: &apphero.AwakeningPositionResolver{Raw: characterstore.RawAwakeningStore{}, Content: contentDB, Queryer: pool}, Awakening: struct {
 		characterstore.Store
 		characterstore.RawAwakeningStore
-	}{Store: heroDB}, FreshFacets: characterbirth.FreshHeroFacets(), Journals: librarystore.Store{}, Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, CollectionAdmission: apphero.CatalogCollectionAdmission{Content: contentDB}, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB}
+	}{Store: heroDB}, FreshFacets: characterbirth.FreshHeroFacets(), Journals: librarystore.Store{}, Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, CollectionAdmission: apphero.CatalogCollectionAdmission{Content: contentDB}, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB, Metrics: txMetrics}
 	petAcquisitionDebit := appi5.PetAcquisitionDebiter{Store: i5db, Content: contentDB}
 	petExpDebit := appi5.PetExpDebiter{Store: i5db, Content: contentDB}
 	petTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
-	librarySvc := applibrary.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Library: librarystore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Receipts: receipts}
-	librarySvc.Achievements = appachievement.Service{Store: achievementstore.Store{}, Content: contentDB, Population: librarySvc}
+	librarySvc := applibrary.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Library: librarystore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Receipts: receipts, Metrics: txMetrics}
+	librarySvc.Achievements = appachievement.Service{Store: achievementstore.Store{Metrics: txMetrics}, Content: contentDB, Population: librarySvc}
 	librarySvc.Stacks = i5db
 	librarySvc.Skins = heroDB
 	librarySvc.Broadcast = broadcastEmitter
@@ -304,7 +304,7 @@ func main() {
 	librarySvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}
 	eventCentreSvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}
 	librarySvc.Roster = characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
-	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc, skins: displayService})
+	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc, skins: displayService}, txMetrics)
 	mentorTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
 	socialRelationDB := socialrelationstore.Store{}
 	mentorSvc := appmentor.Service{
@@ -461,6 +461,7 @@ func main() {
 	}
 	if fightReady {
 		campaignMode, _ := canonicalGuildCampaign(pool, runner, contentDB, guildDB, i5db, i5svc, guildcampaigncontent.Catalog{Installed: campaignCatalog.Catalog}, campaignPolicy.Policy, fight)
+		campaignMode.Metrics = txMetrics
 		guildSvc.Campaign = campaignMode
 		campaignD := stockruntime.GuildCampaignDispatcher{Authority: authority, Service: campaignMode}
 		for _, mid := range stockruntime.GuildCampaignMIDs {
