@@ -1,0 +1,17 @@
+{
+  "name": "r1_profile_comment",
+  "level": 100,
+  "heroes": [],
+  "profile_comment_fixture": true,
+  "note": "R1 case B (BUGS #94). A peer-written comment is declared on the driven player's profile; the stock person_display card is loaded through PersonDisplay:getPlayerInfo for sub_type SPACE and the window is opened on the space tab. PersonDisplayWindow.lua:1811 reads comment.from_player_info and immediately indexes avatar_id; the 1829 Space reply nests the author under player_info.",
+  "steps": [
+    "wait:3",
+    "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.PERSON_DISPLAY) local pid=xyd.selfPlayer.playerID if not pid then error('vc-r1b-no-player') end _G.vcR1Card=nil _G.vcR1Reply=nil m:getPlayerInfo({to_player_id=pid,sub_type=xyd.PlayerCardButtonStyle.SPACE}, function(code,reply) _G.vcR1Card=code _G.vcR1Reply=reply end, true)",
+    "wait:3",
+    "lua:if vcR1Card~=xyd.error.OK then error('vc-r1b-card-code-'..tostring(vcR1Card)) end if type(vcR1Reply)~='table' then error('vc-r1b-reply') end if type(vcR1Reply.best_comments)~='table' or type(vcR1Reply.comment_list)~='table' then error('vc-r1b-lists') end if #vcR1Reply.best_comments+#vcR1Reply.comment_list<1 then error('vc-r1b-no-comment') end xyd.WindowManager.get():openWindow('person_display',{leftBtnStyle=xyd.PlayerCardButtonStyle.SPACE})"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    1829
+  ]
+}

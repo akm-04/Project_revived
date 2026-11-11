@@ -54,6 +54,8 @@ type PrivateMessage struct {
 }
 type Base struct {
 	ServerTime   int64            `json:"server_time"`
+	Count        int              `json:"count"`
+	List         []Friend         `json:"list"`
 	Blacklist    []Common         `json:"blacklist"`
 	Friends      []Friend         `json:"friend_list"`
 	Notices      []Notice         `json:"notice_list"`
@@ -79,7 +81,7 @@ func common(p Player) Common {
 	return v
 }
 func MapBase(r Result) Base {
-	v := Base{ServerTime: r.ObservedAt.Unix(), SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []PrivateMessage{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
+	v := Base{ServerTime: r.ObservedAt.Unix(), SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, List: []Friend{}, Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []PrivateMessage{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
 	for _, p := range r.Blocks {
 		v.Blacklist = append(v.Blacklist, common(p))
 	}
@@ -90,6 +92,7 @@ func MapBase(r Result) Base {
 		}
 		v.Friends = append(v.Friends, Friend{Common: common(p), IsSent: p.IsSent, RecallingFriend: recalling})
 	}
+	v.List = v.Friends
 	for _, row := range r.RecallDoing {
 		v.Doing = append(v.Doing, row)
 	}

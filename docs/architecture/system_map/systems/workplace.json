@@ -150,7 +150,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [
-   "i9_5b_workplace.json"
+   "i9_5b_workplace.json",
+   "r1_workplace_award.json"
   ],
   "unit": []
  }

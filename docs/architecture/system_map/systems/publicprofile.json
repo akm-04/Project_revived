@@ -219,7 +219,8 @@
    "publicshowcase"
   ],
   "scenarios_naming": [
-   "playtest4_fixes.json"
+   "playtest4_fixes.json",
+   "r1_profile_comment.json"
   ],
   "unit": [
    "media_test.go",

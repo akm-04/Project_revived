@@ -350,7 +350,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	var body any = map[string]any{}
 	// Projection helpers preserve typed booleans and the source-specific batch object.
 	switch mid {
-	case 180, 182, 185:
+	case 177, 180, 182, 185:
 		body, e = mapSocialMutation(result, mid)
 		if e != nil {
 			return socialFailure(e)
