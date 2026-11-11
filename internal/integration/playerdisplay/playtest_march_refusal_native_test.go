@@ -56,7 +56,7 @@ func playtestReport(q appMarch.Result) map[string]any {
 
 func playtestConflict(t *testing.T, response httpedge.Response, path string) {
 	t.Helper()
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("%s reached the success callback: %+v", path, response)
 	}
 }

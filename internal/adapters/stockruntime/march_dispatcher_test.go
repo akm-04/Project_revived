@@ -44,10 +44,10 @@ func TestMarchReportStockVariantsAndNumericBoundary(t *testing.T) {
 			}
 		})
 	}
-	if marchFailure(d.ErrRefused).HTTPStatus != http.StatusConflict || marchFailure(d.ErrInvalid).HTTPStatus != http.StatusBadRequest || marchFailure(&receipt.ConflictError{}).HTTPStatus != http.StatusBadRequest {
+	if marchFailure(d.ErrRefused).HTTPStatus != http.StatusConflict || marchFailure(d.ErrInvalid).HTTPStatus != http.StatusBadRequest || marchFailure(&receipt.ConflictError{}).HTTPStatus != http.StatusConflict {
 		t.Fatal("F4 status shape")
 	}
-	if ref := marchFailure(d.ErrRefused); ref.HTTPStatus != http.StatusConflict || ref.Body["error_code"] != int64(1) {
+	if ref := marchFailure(d.ErrRefused); ref.HTTPStatus != http.StatusConflict || ref.Body["error_code"] != unprovenRefusalCode {
 		t.Fatal("a refusal reached the OK callback")
 	}
 }

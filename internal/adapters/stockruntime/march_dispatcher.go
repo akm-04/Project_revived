@@ -3,19 +3,17 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"math"
+	"strconv"
+
 	app "gxb.local/backend/v2/internal/application/march"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"math"
-	"net/http"
-	"strconv"
 )
 
 var MarchMIDs = []uint16{336, 337, 338, 339, 340, 341, 342}
@@ -186,18 +184,15 @@ func marchNumber(raw any) (float64, bool) {
 	value, err := strconv.ParseFloat(fmt.Sprint(raw), 64)
 	return value, err == nil && !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0
 }
+var marchFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "march_invalid_parameter"},
+	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: cd.ErrStartConflict, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func marchFailure(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("march_invalid_parameter")
-	}
-	if errors.Is(err, cd.ErrLoanRefused) {
-		return conflictRefusal(1)
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, cd.ErrStartConflict) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "march_operation_failed"}}
+	return failureFromRows(marchFailureRows, err)
 }
 
 func marchStatusKeys(row map[string]any) bool {

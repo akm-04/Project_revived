@@ -87,7 +87,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/march_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 336,
    "name": "LOAD_MARCH"
@@ -95,7 +95,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/march_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 337,
    "name": "RESTART_MARCH"
@@ -103,7 +103,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/march_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 338,
    "name": "MARCH_FIGHT_RESULT"
@@ -111,7 +111,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/march_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 339,
    "name": "MARCH_OPEN_BOX"
@@ -119,7 +119,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/march_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 340,
    "name": "MARCH_START_FIGHT"
@@ -127,7 +127,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/march_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 341,
    "name": "MARCH_OPEN_EXTRA_CHEST"
@@ -135,7 +135,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/march_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 342,
    "name": "MARCH_ADVANCE_SWEEP"

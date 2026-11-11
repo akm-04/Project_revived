@@ -14,6 +14,7 @@ import (
 	gmquestion "gxb.local/backend/v2/internal/domain/gmquestion"
 	herorecommend "gxb.local/backend/v2/internal/domain/herorecommend"
 	illusion "gxb.local/backend/v2/internal/domain/illusion"
+	march "gxb.local/backend/v2/internal/domain/march"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -118,5 +119,16 @@ func TestPart3CIllusionRoomFailureRows(t *testing.T) {	assertPart2FailureCases(t
 func TestPart3CLibraryUnservedRefusal(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"unserved", unservedLibraryRefusal(), http.StatusConflict, unprovenRefusalCode, ""},
+	})
+}
+
+func TestPart3CMarchFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"invalid", marchFailure(march.ErrInvalid), http.StatusBadRequest, 0, "march_invalid_parameter"},
+		{"conflict", marchFailure(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"loan refused", marchFailure(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"refused", marchFailure(march.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"start conflict", marchFailure(combat.ErrStartConflict), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", marchFailure(march.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
