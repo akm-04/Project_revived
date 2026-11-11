@@ -3,6 +3,8 @@ package stockruntime
 import (
 	"context"
 	"errors"
+	"net/http"
+
 	"gxb.local/backend/v2/internal/application/memoir"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/combat"
@@ -49,7 +51,7 @@ func (dispatcher MemoirDispatcher) Dispatch(ctx context.Context, request httpedg
 		return memoirFailure(domain.ErrUnavailable)
 	}
 	parameters, operationContext := request.Envelope.Params, request.Envelope.Operation
-	invalid := badHero("memoir_invalid_parameter")
+	invalid := failureReply(malformed("memoir_invalid_parameter"))
 	var response map[string]any
 	var err error
 	switch request.Envelope.MID {
@@ -126,33 +128,35 @@ func (dispatcher MemoirDispatcher) Dispatch(ctx context.Context, request httpedg
 		}
 		response, err = dispatcher.Service.MonsterResult(ctx, actor, result, operationContext)
 	default:
-		return httpedge.Response{HTTPStatus: 501, Body: map[string]any{"error_code": int64(1)}}
+		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
 	}
 	if err != nil {
 		return memoirFailure(err)
 	}
 	return okI5(response)
 }
+
+// The stock fightPlayer callback indexes battle_info on OK, so a failed player
+// fight must not be an HTTP 200 body. 35027/35028 are stock message rows.
+var memoirFailureRows = []failureRow{
+	{match: domain.ErrInvalid, class: failureMalformed, detail: "memoir_invalid_parameter"},
+	{match: domain.ErrReportExpired, class: failureRefusal, code: domain.ReportExpiredCode},
+	{match: domain.ErrFightUnavailable, class: failureRefusal, code: domain.FightUnavailableCode},
+	{match: domain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: combat.ErrStartConflict, class: failureRefusal, code: unprovenRefusalCode},
+	{match: domain.ErrUnavailable, class: failureUnavailable},
+}
+
 func memoirFailure(err error) httpedge.Response {
 	var conflict *receipt.ConflictError
-	if errors.Is(err, domain.ErrInvalid) || errors.As(err, &conflict) {
-		response := badHero("memoir_invalid_parameter")
-		response.Cause = err
-		return response
+	if errors.As(err, &conflict) {
+		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
 	}
-	// The stock fightPlayer callback indexes battle_info on OK, so a failed
-	// player fight must not be an HTTP 200 body. 35027/35028 are stock message
-	// rows ("This battle report expired" / "Not Available").
-	if errors.Is(err, domain.ErrReportExpired) {
-		return conflictRefusalCause(domain.ReportExpiredCode, err)
+	if classified := classifyFailure(memoirFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	if errors.Is(err, domain.ErrFightUnavailable) {
-		return conflictRefusalCause(domain.FightUnavailableCode, err)
-	}
-	if errors.Is(err, domain.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, combat.ErrStartConflict) {
-		return conflictRefusalCause(1, err)
-	}
-	return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "memoir_failed"}, Cause: err}
+	return failureReply(unavailable(err))
 }
 func memoirOpened(raw any) ([]int, bool) {
 	if fields, valid := raw.(map[string]any); valid && len(fields) == 0 {
