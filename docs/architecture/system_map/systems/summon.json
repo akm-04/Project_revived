@@ -137,7 +137,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 34
+    "line": 31
    },
    "mid": 50,
    "name": "SUMMON_HERO"
@@ -145,7 +145,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 34
+    "line": 31
    },
    "mid": 56,
    "name": "LOAD_SUMMON_INFO"
@@ -153,7 +153,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 34
+    "line": 31
    },
    "mid": 70,
    "name": "MAGIC_SUMMON_BUY"
@@ -161,7 +161,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 34
+    "line": 31
    },
    "mid": 71,
    "name": "MAGIC_SUMMON_SWITCH_HERO"
@@ -169,7 +169,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 34
+    "line": 31
    },
    "mid": 306,
    "name": "SUPER_HERO_STONE_EXCHANGE"

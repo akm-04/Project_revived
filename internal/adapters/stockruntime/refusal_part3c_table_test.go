@@ -9,6 +9,7 @@ import (
 	exchange "gxb.local/backend/v2/internal/application/socialexchange"
 	invite "gxb.local/backend/v2/internal/application/socialinvite"
 	recall "gxb.local/backend/v2/internal/application/socialrecall"
+	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -24,6 +25,7 @@ import (
 	occult "gxb.local/backend/v2/internal/domain/occult"
 	socialexchange "gxb.local/backend/v2/internal/domain/socialexchange"
 	socialinvite "gxb.local/backend/v2/internal/domain/socialinvite"
+	summon "gxb.local/backend/v2/internal/domain/summon"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -208,5 +210,15 @@ func TestPart3CSocialRecallFailureRows(t *testing.T) {
 		{"start facts", failureFromRows(socialRecallStartFailureRows, recall.ErrStartFacts), http.StatusConflict, unprovenRefusalCode, ""},
 		{"start conflict", failureFromRows(socialRecallStartFailureRows, &receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"unavailable", failureFromRows(socialRecallStartFailureRows, errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3CSummonFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"invalid", failSummon(summon.ErrInvalid), http.StatusBadRequest, 0, "summon_invalid_parameter"},
+		{"conflict", failSummon(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"refused", failSummon(summon.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"capacity", failSummon(apphero.ErrHeroCapacityExceeded), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", failSummon(summon.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
