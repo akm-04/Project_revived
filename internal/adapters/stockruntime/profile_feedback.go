@@ -55,7 +55,20 @@ func feedbackInteger(v any, min, max int64) (int64, error) {
 }
 func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "profile_feedback_request_failed"}}
+		switch status {
+		case http.StatusBadRequest:
+			return failureReply(malformed("profile_feedback_request_failed"))
+		case http.StatusConflict:
+			return failureReply(refusal(unprovenRefusalCode))
+		case http.StatusServiceUnavailable:
+			return failureReply(unavailable(nil))
+		case http.StatusUnauthorized:
+			return unauthorizedFailure("profile_feedback_request_failed")
+		case http.StatusForbidden:
+			return forbiddenFailure("profile_feedback_request_failed")
+		default:
+			return notImplementedFailure("profile_feedback_request_failed")
+		}
 	}
 	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized)

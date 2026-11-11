@@ -146,7 +146,7 @@ func TestI9_10B2141GiftBoxDailyFlagAndPurchased(t *testing.T) {
 	}
 
 	response = courseDispatch(t, a, service, 2141, map[string]any{"item_id": int64(50001417)}, op())
-	if response.HTTPStatus != 400 {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
 		t.Fatalf("unknown box status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = courseDispatch(t, a, service, 2141, map[string]any{}, op())

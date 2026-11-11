@@ -24,7 +24,20 @@ type PlayerDisplayDispatcher struct {
 
 func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int, cause error) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "player_display_request_failed"}, Cause: cause}
+		switch status {
+		case http.StatusBadRequest:
+			return failureReply(&classifiedFailure{class: failureMalformed, detail: "player_display_request_failed", cause: cause})
+		case http.StatusConflict:
+			return failureReply(&classifiedFailure{class: failureRefusal, code: unprovenRefusalCode, cause: cause})
+		case http.StatusServiceUnavailable:
+			return failureReply(unavailable(cause))
+		case http.StatusUnauthorized:
+			return unauthorizedFailure("player_display_request_failed")
+		case http.StatusForbidden:
+			return forbiddenFailure("player_display_request_failed")
+		default:
+			return notImplementedFailure("player_display_request_failed")
+		}
 	}
 	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized, nil)
@@ -127,7 +140,10 @@ func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 		if errors.Is(e, app.ErrRequest) {
 			return fail(http.StatusBadRequest, e)
 		}
-		if errors.Is(e, app.ErrUnavailable) || errors.Is(e, app.ErrConflict) {
+		if errors.Is(e, app.ErrUnavailable) {
+			return fail(http.StatusServiceUnavailable, e)
+		}
+		if errors.Is(e, app.ErrConflict) {
 			return fail(http.StatusConflict, e)
 		}
 		return fail(http.StatusServiceUnavailable, e)

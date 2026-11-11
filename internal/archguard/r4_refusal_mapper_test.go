@@ -11,6 +11,9 @@ import (
 	"testing"
 )
 
+// TestR4RefusalRepliesGoThroughTheMapper guards every stockruntime production
+// file, not only the dispatchers: failure.go is the only place allowed to build
+// a 400/409 refusal, an error_code body, or a coded 503.
 func TestR4RefusalRepliesGoThroughTheMapper(t *testing.T) {
 	root := repoRoot(t)
 	base := filepath.Join(root, "internal", "adapters", "stockruntime")
@@ -20,7 +23,7 @@ func TestR4RefusalRepliesGoThroughTheMapper(t *testing.T) {
 	}
 	for _, entry := range entries {
 		name := entry.Name()
-		if entry.IsDir() || !strings.HasSuffix(name, "_dispatcher.go") || strings.HasSuffix(name, "_test.go") {
+		if entry.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") || name == "failure.go" {
 			continue
 		}
 		if fileBuildsRefusalOutsideMapper(t, filepath.Join(base, name)) {

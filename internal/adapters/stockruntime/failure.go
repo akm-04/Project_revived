@@ -159,3 +159,17 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error": "unclassified_failure"}}
 }
+
+// The three protocol-edge statuses below sit outside the mapper's refusal
+// classes (auth, region and unsupported-MID); their bodies stay unchanged.
+func unauthorizedFailure(detail string) httpedge.Response {
+	return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error_code": int64(1), "error": detail}}
+}
+
+func forbiddenFailure(detail string) httpedge.Response {
+	return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error_code": int64(1), "error": detail}}
+}
+
+func notImplementedFailure(detail string) httpedge.Response {
+	return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1), "error": detail}}
+}

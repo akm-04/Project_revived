@@ -24,7 +24,7 @@ func (d OperationLogDispatcher) Dispatch(ctx context.Context, req httpedge.Dispa
 		return authFailure(err)
 	}
 	if _, err := requiredInt64(req.Envelope.Params, "operation_id"); err != nil {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Cause: err, Body: map[string]any{"error": "invalid_operation_id"}}
+		return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_operation_id", cause: err})
 	}
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 }

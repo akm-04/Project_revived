@@ -101,6 +101,7 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	}
 	return okI5(r.Body)
 }
+
 var courseFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},

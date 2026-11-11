@@ -32,7 +32,7 @@ type DiscoveryDispatcher struct {
 func (d DiscoveryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	room, err := requiredInt64(req.Envelope.Params, "room_id")
 	if err != nil || room <= 0 {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_room"}}
+		return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_room", cause: err})
 	}
 	adm, err := d.Realtime.Discover(ctx, apprealtime.Claims{
 		Bearer: req.Envelope.Claims.Token,
@@ -173,7 +173,7 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 	case 1:
 		region, err := requiredInt64(req.Envelope.Params, "region")
 		if err != nil || region <= 0 || region > math.MaxInt32 {
-			return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_region"}}
+			return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_region", cause: err})
 		}
 		out, err := d.Bootstrap.MID1(ctx, appboot.RuntimeMID1Request{Credentials: creds, Region: identity.LogicalServerID(region), Operation: req.Envelope.Operation})
 		if err != nil {
@@ -230,7 +230,7 @@ func bootstrapFailure(err error) httpedge.Response {
 		// rejection as transport failure rather than inventing a stock code.
 		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "account_auth_failed"}}
 	case errors.Is(err, logicalserver.ErrObservationRequired):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "server_observation_required"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	case errors.Is(err, logicalserver.ErrExistingLoginClosed):
 		return failureReply(unavailable(err))
 	default:

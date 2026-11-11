@@ -25,7 +25,7 @@ func (d FunctionClickDispatcher) Dispatch(ctx context.Context, req httpedge.Disp
 		_, _ = d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
 	}
 	if _, err := requiredInt64(req.Envelope.Params, "click_id"); err != nil {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Cause: err, Body: map[string]any{"error": "invalid_click_id"}}
+		return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_click_id", cause: err})
 	}
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 }

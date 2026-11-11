@@ -22,7 +22,18 @@ type ProfileMediaDispatcher struct {
 
 func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int, msg string) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": 1, "error": msg}}
+		switch status {
+		case 400:
+			return failureReply(malformed(msg))
+		case 409:
+			return failureReply(refusal(unprovenRefusalCode))
+		case 503:
+			return failureReply(unavailable(nil))
+		case 401:
+			return unauthorizedFailure(msg)
+		default:
+			return forbiddenFailure(msg)
+		}
 	}
 	if r.Envelope.MID != 1844 || d.Authority == nil || d.Service.Blobs == nil || r.Upload == nil || r.Upload.TempPath == "" {
 		return fail(400, "invalid_media_upload")

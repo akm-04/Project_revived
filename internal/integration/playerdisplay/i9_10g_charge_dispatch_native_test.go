@@ -108,7 +108,7 @@ func TestI910GChargeDispatcherProductionPath(t *testing.T) {
 	}
 	for _, level := range []int64{0, 16} {
 		refused := dispatcher.Dispatch(ctx, playtestRequest(a, 657, map[string]any{"id": level}))
-		if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(1) {
+		if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(35028) {
 			t.Fatalf("657 level %d: %d %+v", level, refused.HTTPStatus, refused.Body)
 		}
 	}
@@ -122,7 +122,7 @@ func TestI910GChargeDispatcherConflictIsNotUnavailable(t *testing.T) {
 	exec(t, p, `INSERT INTO commerce_privilege_roots(player_id,logical_server_id,qualifying_charge,vip_level,monthly_state,content_revision,policy_version,origin_class,issuer,reason,state_version,created_at,updated_at)VALUES($1,$2,100,1,'QUALIFIED_ABSENT',$3,'I10_CHARGE_TAP_V1','PLAYER_TAP_PRESERVATION','native','i910g foreign root',1,clock_timestamp()-interval '1 day',clock_timestamp()-interval '1 day')`, int64(foreign.PlayerID), int64(a.LogicalServerID)+1000, revision)
 	dispatcher := stockruntime.ChargeDispatcher{Authority: playtestAuthority{foreign}, Service: chargeService(p)}
 	refused := dispatcher.Dispatch(ctx, playtestRequest(foreign, 32000, map[string]any{"charge_id": int64(80001007), "intent_id": "i910g-foreign-root"}))
-	if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(1) {
+	if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(40002) {
 		t.Fatalf("foreign root: %d %+v", refused.HTTPStatus, refused.Body)
 	}
 }

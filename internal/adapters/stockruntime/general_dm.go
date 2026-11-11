@@ -27,7 +27,18 @@ type GeneralDMDispatcher struct {
 
 func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(code int, name string) httpedge.Response {
-		return httpedge.Response{HTTPStatus: code, Body: map[string]any{"error": name}}
+		switch code {
+		case 400:
+			return failureReply(malformed(name))
+		case 409:
+			return failureReply(refusal(unprovenRefusalCode))
+		case 503:
+			return failureReply(unavailable(nil))
+		case 401:
+			return unauthorizedFailure(name)
+		default:
+			return forbiddenFailure(name)
+		}
 	}
 	if d.Authority == nil || r.Envelope.Claims.Token == "" {
 		return fail(401, "gameplay_auth_required")

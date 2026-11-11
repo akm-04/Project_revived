@@ -61,7 +61,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/friend_dm.go",
-    "line": 34
+    "line": 36
    },
    "mid": 515,
    "name": "CHAT_TO_FRIEND"

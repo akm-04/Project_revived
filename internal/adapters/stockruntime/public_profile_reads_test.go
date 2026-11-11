@@ -68,7 +68,7 @@ func Test6BProfileReadWireActorAndExactIDs(t *testing.T) {
 		if got.HTTPStatus != tc.status {
 			t.Fatalf("%d %+v", tc.mid, got)
 		}
-		if tc.status != 200 && got.Body["error_code"] != int64(1) {
+		if tc.status != 200 && got.Body["error"] != "public_profile_request_failed" {
 			t.Fatal(got)
 		}
 	}

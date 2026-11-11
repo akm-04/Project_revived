@@ -93,6 +93,7 @@ func (m WorkplaceDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	}
 	return okI5(body)
 }
+
 var workplaceFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "workplace_invalid_parameter"},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},

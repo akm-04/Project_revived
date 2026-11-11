@@ -3,6 +3,8 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	dm "gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/friendmessage"
@@ -33,20 +35,20 @@ type FriendDMDispatcher struct {
 
 func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	bad := func() httpedge.Response {
-		return httpedge.Response{HTTPStatus: 400, Body: map[string]any{"error": "invalid_private_message"}}
+		return failureReply(malformed("invalid_private_message"))
 	}
 	unavailable := func() httpedge.Response {
-		return httpedge.Response{HTTPStatus: 409, Body: map[string]any{"error": "private_message_unavailable"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if d.Authority == nil || r.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: 401, Body: map[string]any{"error": "gameplay_auth_required"}}
+		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
 	if e != nil {
 		return authFailure(e)
 	}
 	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: 403, Body: map[string]any{"error": "region_mismatch"}}
+		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
 	}
 	if r.Envelope.MID != 515 {
 		return bad()

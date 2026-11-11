@@ -63,7 +63,20 @@ type RankingDispatcher struct {
 
 func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "ranking_request_failed"}}
+		switch status {
+		case http.StatusBadRequest:
+			return failureReply(malformed("ranking_request_failed"))
+		case http.StatusConflict:
+			return failureReply(refusal(unprovenRefusalCode))
+		case http.StatusServiceUnavailable:
+			return failureReply(unavailable(nil))
+		case http.StatusUnauthorized:
+			return unauthorizedFailure("ranking_request_failed")
+		case http.StatusForbidden:
+			return forbiddenFailure("ranking_request_failed")
+		default:
+			return notImplementedFailure("ranking_request_failed")
+		}
 	}
 	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized)

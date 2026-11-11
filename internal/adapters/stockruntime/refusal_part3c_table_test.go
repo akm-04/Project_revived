@@ -1,17 +1,18 @@
 package stockruntime
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"testing"
 
+	apphero "gxb.local/backend/v2/internal/application/characterhero"
+	appcourse "gxb.local/backend/v2/internal/application/course"
+	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	exchange "gxb.local/backend/v2/internal/application/socialexchange"
 	invite "gxb.local/backend/v2/internal/application/socialinvite"
 	recall "gxb.local/backend/v2/internal/application/socialrecall"
-	apphero "gxb.local/backend/v2/internal/application/characterhero"
-	appmentor "gxb.local/backend/v2/internal/application/mentor"
-	appcourse "gxb.local/backend/v2/internal/application/course"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/combat"
@@ -23,13 +24,13 @@ import (
 	march "gxb.local/backend/v2/internal/domain/march"
 	domainmentor "gxb.local/backend/v2/internal/domain/mentor"
 	occult "gxb.local/backend/v2/internal/domain/occult"
+	privilege "gxb.local/backend/v2/internal/domain/privilege"
+	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	socialexchange "gxb.local/backend/v2/internal/domain/socialexchange"
 	socialinvite "gxb.local/backend/v2/internal/domain/socialinvite"
 	summon "gxb.local/backend/v2/internal/domain/summon"
 	workplace "gxb.local/backend/v2/internal/domain/workplace"
 	worldboss "gxb.local/backend/v2/internal/domain/worldboss"
-	privilege "gxb.local/backend/v2/internal/domain/privilege"
-	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
@@ -117,7 +118,8 @@ func TestPart3CIllusionFailureRows(t *testing.T) {
 	})
 }
 
-func TestPart3CIllusionRoomFailureRows(t *testing.T) {	assertPart2FailureCases(t, []part2FailureCase{
+func TestPart3CIllusionRoomFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
 		{"invalid", failIllusionRoom(illusion.ErrInvalid), http.StatusBadRequest, 0, "illusion_invalid_parameter"},
 		{"room invalid", failIllusionRoom(room.ErrInvalid), http.StatusBadRequest, 0, "illusion_invalid_parameter"},
 		{"conflict", failIllusionRoom(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
@@ -129,7 +131,8 @@ func TestPart3CIllusionRoomFailureRows(t *testing.T) {	assertPart2FailureCases(t
 	})
 }
 
-func TestPart3CLibraryUnservedRefusal(t *testing.T) {	assertPart2FailureCases(t, []part2FailureCase{
+func TestPart3CLibraryUnservedRefusal(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
 		{"unserved", unservedLibraryRefusal(), http.StatusConflict, unprovenRefusalCode, ""},
 	})
 }
@@ -186,6 +189,14 @@ func TestPart3CSocialExchangeFailureRows(t *testing.T) {
 
 func failSocialExchange(err error) httpedge.Response {
 	return failureFromRows(socialExchangeFailureRows, err)
+}
+
+func TestPart3CFriendDMRefusalTransport(t *testing.T) {
+	dispatcher := FriendDMDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}}
+	got := dispatcher.Dispatch(context.Background(), heroReq(t, 515, map[string]any{}))
+	if got.HTTPStatus != http.StatusBadRequest || got.Body["error"] != "invalid_private_message" {
+		t.Fatalf("MID515 refusal %d %#v", got.HTTPStatus, got.Body)
+	}
 }
 
 func TestPart3CSocialInviteFailureRows(t *testing.T) {

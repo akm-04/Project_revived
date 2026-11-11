@@ -61,6 +61,7 @@ func (dispatcher GMQuestionDispatcher) Dispatch(ctx context.Context, request htt
 	}
 	return okI5(map[string]any{"list": rows})
 }
+
 var gmQuestionFailureRows = []failureRow{
 	{match: domain.ErrQuestion, class: failureRefusal, code: unprovenRefusalCode},
 }

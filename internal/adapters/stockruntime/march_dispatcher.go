@@ -184,6 +184,7 @@ func marchNumber(raw any) (float64, bool) {
 	value, err := strconv.ParseFloat(fmt.Sprint(raw), 64)
 	return value, err == nil && !math.IsNaN(value) && !math.IsInf(value, 0) && value >= 0
 }
+
 var marchFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "march_invalid_parameter"},
 	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
