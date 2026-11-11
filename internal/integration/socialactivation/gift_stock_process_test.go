@@ -14,8 +14,8 @@ import (
 
 func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 	f, _, a, b := giftFixture(t)
-	_, sender := f.live(a.PlayerID)
-	_, recipient := f.live(b.PlayerID)
+	senderActor, sender := f.live(a.PlayerID)
+	recipientActor, recipient := f.live(b.PlayerID)
 	apiBin, rtBin := os.Getenv("GXB_I7A4D_API_BINARY"), os.Getenv("GXB_I7A4D_REALTIME_BINARY")
 	if apiBin == "" || rtBin == "" {
 		t.Fatal("exact candidate server binaries required")
@@ -23,6 +23,8 @@ func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 	api, world := freeAddr(t), freeAddr(t)
 	apiProc := startProcess(t, apiBin, api, world)
 	rtProc := startProcess(t, rtBin, api, world)
+	loginProcess(t, api, f, senderActor)
+	loginProcess(t, api, f, recipientActor)
 	senderWorld := worldLogin(t, world, sender, 1)
 	recipientWorld := worldLogin(t, world, recipient, 2)
 	deadline := time.Now().Add(3 * time.Second)
