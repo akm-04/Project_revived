@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -110,7 +111,19 @@ func bindPolicies(op operation.Context) (operation.Context, error) {
 	op.Policies = p
 	return op, nil
 }
+
+// RequestDay is the canonical 05:00 GMT+8 game day (I9_MODE_FRAMEWORK_V1 F7).
 func RequestDay(at time.Time) (int64, time.Time, error) {
+	if at.IsZero() {
+		return 0, time.Time{}, ErrInvalidCommand
+	}
+	day := modes.Day(at)
+	return day, modes.DayBegins(day), nil
+}
+
+// LegacyRequestDay is the pre-R3 GMT+8-midnight day. It exists to resolve a
+// stored epoch written under the old calendar that still covers at.
+func LegacyRequestDay(at time.Time) (int64, time.Time, error) {
 	if at.IsZero() {
 		return 0, time.Time{}, ErrInvalidCommand
 	}
@@ -120,6 +133,14 @@ func RequestDay(at time.Time) (int64, time.Time, error) {
 	}
 	day := (s + 28800) / 86400
 	return day, time.Unix(day*86400-28800, 0).UTC(), nil
+}
+
+// LegacyDayAnchor is the stored old-calendar anchor for a legacy day number.
+func LegacyDayAnchor(day int64) (time.Time, error) {
+	if day < -1 || day > (math.MaxInt64-28800)/86400 {
+		return time.Time{}, ErrInvalidCommand
+	}
+	return time.Unix(day*86400-28800, 0).UTC(), nil
 }
 func increment(x int64) (int64, error) {
 	if x < 0 || x == math.MaxInt64 {

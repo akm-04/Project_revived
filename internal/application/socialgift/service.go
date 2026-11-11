@@ -141,22 +141,67 @@ func preflightRoot(r socialrelation.Root, at time.Time) error {
 	}
 	return nil
 }
-func (s Service) epoch(c context.Context, t tx.Tx, pid identity.PlayerID, day string, op operation.Context, at time.Time) (Epoch, bool, error) {
-	e, ok, last, have, err := s.Store.LockEpoch(c, t, pid, day)
-	if err != nil {
-		return e, ok, err
+
+// pairDay keeps a send under one day token: an old-calendar epoch of either
+// participant that still covers at makes the legacy token today's row.
+func (s Service) pairDay(c context.Context, q tx.Queryer, sender, recipient identity.PlayerID, at time.Time, day string) (string, error) {
+	legacy, e := LegacyDay(at)
+	if e != nil || legacy == day {
+		return day, e
 	}
-	if have && (last.Day > day || at.Before(last.UpdatedAt) || last.Version == math.MaxInt64) {
-		return e, ok, ErrClock
+	for _, pid := range []identity.PlayerID{sender, recipient} {
+		if _, ok, e := s.Store.ReadEpoch(c, q, pid, legacy); e != nil {
+			return day, e
+		} else if ok {
+			return legacy, nil
+		}
+	}
+	return day, nil
+}
+
+// dayFor is the read-only bound of epoch(): a legacy row that covers observedAt counts as today.
+func (s Service) dayFor(c context.Context, q tx.Queryer, pid identity.PlayerID, at time.Time) (string, error) {
+	day, e := Day(at)
+	if e != nil {
+		return "", e
+	}
+	return s.pairDay(c, q, pid, pid, at, day)
+}
+
+// epoch resolves the stored epoch for the current game day. During the R3
+// switch an old GMT+8-midnight row that still covers at is today's row.
+func (s Service) epoch(c context.Context, t tx.Tx, pid identity.PlayerID, day string, op operation.Context, at time.Time) (Epoch, bool, string, error) {
+	used := day
+	e, ok, last, have, err := s.Store.LockEpoch(c, t, pid, used)
+	if err != nil {
+		return e, false, used, err
+	}
+	if !ok {
+		legacy, legacyErr := LegacyDay(at)
+		if legacyErr != nil {
+			return e, false, used, legacyErr
+		}
+		if legacy != used {
+			l, lOK, lLast, _, lErr := s.Store.LockEpoch(c, t, pid, legacy)
+			if lErr != nil {
+				return l, false, used, lErr
+			}
+			if lOK {
+				e, ok, last, have, used = l, true, lLast, true, legacy
+			}
+		}
+	}
+	if have && (last.Day > used || at.Before(last.UpdatedAt) || last.Version == math.MaxInt64) {
+		return e, ok, used, ErrClock
 	}
 	if ok {
 		if e.Version == math.MaxInt64 || at.Before(e.UpdatedAt) {
-			return e, ok, ErrClock
+			return e, ok, used, ErrClock
 		}
-		return e, true, nil
+		return e, true, used, nil
 	}
-	e, err = NewEpoch(pid, day, op, at)
-	return e, false, err
+	e, err = NewEpoch(pid, used, op, at)
+	return e, false, used, err
 }
 func (s Service) sendProof(c context.Context, q tx.Queryer, actor identity.ActorContext, recipient identity.PlayerID, fp string, op operation.Context) (Result, bool, error) {
 	v, ok, e := s.Store.ReadSend(c, q, op.ID)
@@ -354,6 +399,10 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		if e != nil {
 			return e
 		}
+		day, e = s.pairDay(c, sc.Tx, actor.PlayerID, recipient, at, day)
+		if e != nil {
+			return e
+		}
 		epochOrder := []identity.PlayerID{actor.PlayerID, recipient}
 		sort.Slice(epochOrder, func(i, j int) bool {
 			a, _ := EpochKey(epochOrder[i])
@@ -363,9 +412,12 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		epochs := map[identity.PlayerID]Epoch{}
 		existingEpochs := map[identity.PlayerID]bool{}
 		for _, pid := range epochOrder {
-			v, exists, e := s.epoch(c, sc.Tx, pid, day, bound, at)
+			v, exists, used, e := s.epoch(c, sc.Tx, pid, day, bound, at)
 			if e != nil {
 				return e
+			}
+			if used != day {
+				return ErrClock
 			}
 			epochs[pid] = v
 			existingEpochs[pid] = exists
@@ -605,10 +657,12 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 			if e := preflightRoot(root, at); e != nil {
 				return e
 			}
-			epoch, exists, e = s.epoch(c, sc.Tx, actor.PlayerID, day, bound, at)
+			var used string
+			epoch, exists, used, e = s.epoch(c, sc.Tx, actor.PlayerID, day, bound, at)
 			if e != nil {
 				return e
 			}
+			day = used
 			_, claimed, e := s.Store.Counts(c, sc.Tx, actor.PlayerID, day)
 			if e != nil {
 				return e
@@ -755,7 +809,7 @@ func resolved(answer Result, outcome tx.Result, e error) (Result, error) {
 // SnapshotTx is a pure observation: it neither creates an epoch nor refreshes a
 // counter. I7A7B must call it before the FriendDM destructive drain at rank380.
 func (s Service) SnapshotTx(c context.Context, q tx.Queryer, pid identity.PlayerID, observedAt time.Time) (sent, claimed int64, err error) {
-	day, e := Day(observedAt)
+	day, e := s.dayFor(c, q, pid, observedAt)
 	if e != nil {
 		return 0, 0, e
 	}
@@ -774,7 +828,7 @@ func (s Service) GiftSnapshotTx(c context.Context, q tx.Queryer, pid identity.Pl
 	if q == nil || s.Store == nil || !pid.Valid() {
 		return Snapshot{}, ErrInvalid
 	}
-	day, e := Day(observedAt)
+	day, e := s.dayFor(c, q, pid, observedAt)
 	if e != nil {
 		return Snapshot{}, e
 	}

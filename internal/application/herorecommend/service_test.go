@@ -464,13 +464,32 @@ func TestWeeklySnapshotIsCachedAndRebuiltAtTheBoundary(t *testing.T) {
 	}
 }
 
-func TestWeekStartUsesMondayFourUTC(t *testing.T) {
-	before := time.Date(2026, 11, 2, 3, 59, 0, 0, time.UTC)
-	if got := WeekStart(before); !got.Equal(time.Date(2026, 10, 26, 4, 0, 0, 0, time.UTC)) {
+func TestWeekStartUsesMondayFiveGMT8(t *testing.T) {
+	before := time.Date(2026, 11, 1, 20, 59, 59, 0, time.UTC) // Monday 04:59:59 GMT+8
+	if got := WeekStart(before); !got.Equal(time.Date(2026, 10, 25, 21, 0, 0, 0, time.UTC)) {
 		t.Fatalf("before boundary %s", got)
 	}
-	after := time.Date(2026, 11, 2, 4, 0, 0, 0, time.UTC)
+	after := time.Date(2026, 11, 1, 21, 0, 0, 0, time.UTC) // Monday 05:00 GMT+8
 	if got := WeekStart(after); !got.Equal(after) {
 		t.Fatalf("at boundary %s", got)
+	}
+}
+
+// An old Monday 04:00 UTC snapshot that still covers the instant is this
+// week's snapshot until the old week rolls.
+func TestLegacyWeekSnapshotIsServedAcrossTheSwitch(t *testing.T) {
+	service, store, clock := testService(t)
+	at := time.Date(2026, 11, 2, 1, 0, 0, 0, time.UTC) // Monday 09:00 GMT+8
+	clock.now = at
+	legacy := LegacyWeekStart(at)
+	if legacy.Equal(WeekStart(at)) {
+		t.Fatal("fixture does not cross the calendars")
+	}
+	store.snapshots = map[int64]d.Snapshot{1: {Schema: d.Schema, Server: 1, Generation: legacy.Unix(), Revision: testRevision, ObservedAt: at.Add(-time.Hour), Digest: "legacy"}}
+	if _, err := service.Overview(context.Background(), testActor(), testOperation(at)); err != nil {
+		t.Fatal(err)
+	}
+	if store.inserts != 0 {
+		t.Fatalf("legacy snapshot was rebuilt: inserts=%d", store.inserts)
 	}
 }

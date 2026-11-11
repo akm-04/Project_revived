@@ -8,23 +8,20 @@ import (
 
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-var alchemyLocation = time.FixedZone("GXB_GMT_PLUS_8", 8*60*60)
-
-// AlchemyEpochStartV1 is the explicit CA6 compatibility boundary. Source only
-// establishes a daily/next-day reset; midnight GMT+8 is versioned policy, not
-// claimed original-server fact.
+// AlchemyEpochStartV1 is the canonical 05:00 GMT+8 game day (I9_MODE_FRAMEWORK_V1
+// F7). A stored old GMT+8-midnight epoch that still covers at compares after this
+// start, so the first read after the switch keeps it until the next 05:00.
 func AlchemyEpochStartV1(at time.Time) (time.Time, error) {
 	if at.IsZero() {
 		return time.Time{}, errors.New("character practice: zero epoch time")
 	}
-	local := at.In(alchemyLocation)
-	start := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, alchemyLocation)
-	return start.UTC(), nil
+	return modes.DayBegins(modes.Day(at)), nil
 }
 
 type Service struct {

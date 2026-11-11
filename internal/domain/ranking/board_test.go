@@ -112,6 +112,52 @@ func TestDormComfortBoardPublishesTopHundredWithoutTitles(t *testing.T) {
 	}
 }
 
+func TestBoardWeekSwitchKeepsAnUnsettledLegacyPeriod(t *testing.T) {
+	before := time.Date(2026, 11, 1, 20, 59, 59, 0, time.UTC) // Monday 04:59:59 GMT+8
+	if got, e := BoardWeek(before); e != nil || !got.Equal(time.Date(2026, 10, 25, 21, 0, 0, 0, time.UTC)) {
+		t.Fatal(got, e)
+	}
+	after := time.Date(2026, 11, 1, 21, 0, 0, 0, time.UTC) // Monday 05:00 GMT+8
+	if got, e := BoardWeek(after); e != nil || !got.Equal(after) {
+		t.Fatal(got, e)
+	}
+	at := time.Date(2026, 11, 2, 1, 0, 0, 0, time.UTC) // Monday 09:00 GMT+8, before the old week rolls at 08:00 UTC
+	legacy, e := LegacyBoardWeek(at)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if kept, e := BindWeek(at, true); e != nil || !kept.Equal(legacy) {
+		t.Fatalf("unsettled legacy period %v %v", kept, e)
+	}
+	if fresh, e := BindWeek(at, false); e != nil || !fresh.Equal(time.Date(2026, 11, 1, 21, 0, 0, 0, time.UTC)) {
+		t.Fatalf("new game week %v %v", fresh, e)
+	}
+}
+
+// Settlement validates a period against the snapshot it settles. A period
+// written under the old UTC week still validates across the switch, so the
+// settled period is neither skipped nor settled twice.
+func TestLegacyBoardPeriodSettlesTheSwitchSnapshotOnce(t *testing.T) {
+	r, at, rev, op := girlsFixture()
+	_, snapshot, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{girlsInput(1, 1, at, rev)})
+	if e != nil {
+		t.Fatal(e)
+	}
+	legacy, e := LegacyBoardWeek(at)
+	if e != nil {
+		t.Fatal(e)
+	}
+	period := BoardPeriod{Server: int64(snapshot.Server), Policy: snapshot.Policy, Week: legacy, Generation: snapshot.Generation}
+	if e = period.Validate(snapshot); e != nil {
+		t.Fatalf("legacy period rejected: %v", e)
+	}
+	settled := at.Add(time.Hour)
+	period.SettledAt = &settled
+	if e = period.Validate(snapshot); e != nil {
+		t.Fatalf("settled legacy period rejected: %v", e)
+	}
+}
+
 func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *testing.T) {
 	r, at, rev, op := girlsFixture()
 	in := []BoardInput{}
@@ -140,14 +186,14 @@ func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *test
 		}
 	}
 	week, e := BoardWeek(at)
-	if e != nil || week.Format(time.RFC3339) != "2026-10-12T00:00:00Z" {
+	if e != nil || week.Format(time.RFC3339) != "2026-10-11T21:00:00Z" {
 		t.Fatal(week, e)
 	}
 	next, e := BoardWeek(at.Add(12 * time.Hour))
-	if e != nil || next.Format(time.RFC3339) != "2026-10-19T00:00:00Z" {
+	if e != nil || next.Format(time.RFC3339) != "2026-10-18T21:00:00Z" {
 		t.Fatal(next, e)
 	}
-	// A time zone on an input instant cannot change the policy's UTC week.
+	// A time zone on an input instant cannot change the policy's game week.
 	zone, e := BoardWeek(at.In(time.FixedZone("offset", 8*3600)))
 	if e != nil || !zone.Equal(week) {
 		t.Fatal(zone, e)

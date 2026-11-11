@@ -1806,7 +1806,8 @@
    "socialprojection": [
     "*GiftNoticeValidityTx",
     "*GiftSnapshotTx",
-    "Day"
+    "Day",
+    "LegacyDay"
    ],
    "socialreload": [
     "*ValidateReloadTx"
@@ -5425,7 +5426,8 @@
    "socialgift": [
     "*GiftNoticeValidityTx",
     "*GiftSnapshotTx",
-    "Day"
+    "Day",
+    "LegacyDay"
    ],
    "socialinbox": [
     "*NoticePageTx",

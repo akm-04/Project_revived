@@ -148,10 +148,40 @@ func Test7A_PostIssueRelationChangeAndMidnight(t *testing.T) {
 	if e != nil || got.Amount != 5 {
 		t.Fatal(got, e)
 	}
-	if f.text(`SELECT sender_day FROM social_gift_transfers`) != "2026-10-08" || f.text(`SELECT claim_day FROM social_gift_transfers`) != "2026-10-09" {
-		t.Fatal("day boundary")
+	if f.text(`SELECT sender_day FROM social_gift_transfers`) != "2026-10-08" || f.text(`SELECT claim_day FROM social_gift_transfers`) != "2026-10-08" {
+		t.Fatal("game-day boundary")
 	}
-	t.Log("REAL_PG injected exact database-time port before/at GMT+8 midnight; old gifts survive relation/privacy changes")
+	t.Log("REAL_PG injected exact database-time port; 00:00 GMT+8 stays on the 05:00 game day; old gifts survive relation/privacy changes")
+}
+
+// A gift epoch written under the old GMT+8-midnight calendar at 00:00-05:00
+// still covers the instant, so it is today's row and gets no second reset.
+func Test7A_SwitchKeepsALegacyGiftRowThatCoversTheInstant(t *testing.T) {
+	f, s, a, b := giftFixture(t)
+	f.player(300001)
+	f.friend(100001, 300001)
+	at := time.Date(2026, 10, 8, 16, 30, 0, 0, time.UTC) // 00:30 GMT+8 on 10/9, game day 10/8
+	s.Timed.Binder.Time = fixedDMClock{at}
+	f.sql(`UPDATE player_social_roots SET created_at=$1,updated_at=$1`, at.Add(-time.Hour))
+	f.sql(`UPDATE social_friendships SET activated_at=$1,updated_at=$1`, at.Add(-time.Hour))
+	epoch, e := sg.NewEpoch(100001, "2026-10-09", f.op(), at.Add(-time.Minute))
+	if e != nil {
+		t.Fatal(e)
+	}
+	f.sql(`INSERT INTO social_gift_epochs(player_id,policy_id,day_token,generation_id,state_version,created_at,updated_at)VALUES($1,'SOCIAL_GIFT_DAY_V1','2026-10-09',$2::uuid,1,$3,$3)`, 100001, epoch.Generation.UUID().String(), at.Add(-time.Minute))
+	if _, e = s.Send(ctx, a, b.PlayerID, f.op()); e != nil {
+		t.Fatal(e)
+	}
+	if f.text(`SELECT sender_day FROM social_gift_transfers`) != "2026-10-09" {
+		t.Fatal("legacy covering row was not today's row")
+	}
+	s.Timed.Binder.Time = fixedDMClock{time.Date(2026, 10, 8, 21, 0, 0, 0, time.UTC)} // 05:00 GMT+8 on 10/9
+	if _, e = s.Send(ctx, a, 300001, f.op()); e != nil {
+		t.Fatal(e)
+	}
+	if f.number(`SELECT count(*) FROM social_gift_transfers WHERE sender_day='2026-10-09'`) != 2 {
+		t.Fatal("05:00 boundary reset the legacy row")
+	}
 }
 
 func Test7A_EligibilityActorAndNaturalFences(t *testing.T) {
