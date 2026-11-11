@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/adventure"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -287,22 +285,27 @@ func adventureResponse(body map[string]any, response app.Response, err error) ht
 	return okI5(body)
 }
 
+// Adventure keeps refusals on 409 so the stock callbacks never receive an OK
+// body; 35029 and the room codes come from the R4 mapper table.
+var adventureFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "adventure_invalid_parameter"},
+	{match: d.ErrExpired, class: failureRefusal, code: adventureExpired},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: sr.ErrNotInRoom, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrFull, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrKicked, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrExpired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrNotOwner, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrNotSeated, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrUnknownResource, class: failureDefect},
+}
+
 func failAdventure(err error) httpedge.Response {
-	if errors.Is(err, d.ErrInvalid) {
-		return badAdventure()
-	}
-	if errors.Is(err, d.ErrExpired) {
-		return conflictRefusal(adventureExpired)
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) ||
-		errors.Is(err, sr.ErrNotInRoom) || errors.Is(err, sr.ErrAlreadyInRoom) || errors.Is(err, sr.ErrNotFound) ||
-		errors.Is(err, room.ErrFull) || errors.Is(err, room.ErrKicked) ||
-		errors.Is(err, room.ErrExpired) || errors.Is(err, room.ErrClosed) || errors.Is(err, room.ErrNotOwner) || errors.Is(err, room.ErrNotSeated) {
-		return conflictRefusal(1)
-	}
-	// Server failures (including d.ErrUnavailable and economy.ErrUnknownResource)
-	// are F4 503 answers, never a stock refusal body.
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "adventure_unavailable"}}
+	return failureFromRows(adventureFailureRows, err)
 }
 
 func badAdventure() httpedge.Response {

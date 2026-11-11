@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -192,15 +193,18 @@ func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 	}
 	stub.err = sr.ErrAlreadyInRoom
 	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("already in room %+v", response)
 	}
-	for _, serverError := range []error{economy.ErrUnknownResource, d.ErrUnavailable} {
-		stub.err = serverError
-		response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
-		if response.HTTPStatus != 503 {
-			t.Fatalf("server failure %v -> %+v", serverError, response)
-		}
+	stub.err = economy.ErrUnknownResource
+	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
+	if response.HTTPStatus != http.StatusInternalServerError || response.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("unknown resource %+v", response)
+	}
+	stub.err = d.ErrUnavailable
+	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
+	if response.HTTPStatus != 503 || response.Body["error_code"] != serverBusyCode {
+		t.Fatalf("unavailable %+v", response)
 	}
 	stub.err = nil
 	stub.duplicate = true

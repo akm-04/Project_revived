@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"gxb.local/backend/v2/internal/domain/economy"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -122,6 +123,19 @@ func insufficientBalanceCode(err error) int64 {
 		return insufficientStaminaCode
 	}
 	return unprovenRefusalCode
+}
+
+// failureFromRows maps a dispatcher's domain errors to the client reply. A
+// receipt conflict is D5's stale-state refusal; the fallback is a server fault.
+func failureFromRows(rows []failureRow, err error) httpedge.Response {
+	var conflict *receipt.ConflictError
+	if errors.As(err, &conflict) {
+		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
+	}
+	if classified := classifyFailure(rows, err); classified != nil {
+		return failureReply(classified)
+	}
+	return failureReply(unavailable(err))
 }
 
 func failureReply(failure *classifiedFailure) httpedge.Response {
