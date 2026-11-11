@@ -71,7 +71,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
-    "line": 33
+    "line": 35
    },
    "mid": 2960,
    "name": "SANDBAG_INFO"
@@ -79,7 +79,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
-    "line": 33
+    "line": 35
    },
    "mid": 2961,
    "name": "SANDBAG_ENTER"
@@ -87,7 +87,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
-    "line": 33
+    "line": 35
    },
    "mid": 2962,
    "name": "SANDBAG_START"
@@ -95,7 +95,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
-    "line": 33
+    "line": 35
    },
    "mid": 2963,
    "name": "SANDBAG_RESULT"
@@ -103,7 +103,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
-    "line": 33
+    "line": 35
    },
    "mid": 2964,
    "name": "SANDBAG_FRIEND_INFO"

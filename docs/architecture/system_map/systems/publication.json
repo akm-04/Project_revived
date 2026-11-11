@@ -151,7 +151,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/publication_dispatcher.go",
-    "line": 20
+    "line": 22
    },
    "mid": 7,
    "name": "LOAD_ANNOUNCE"
@@ -159,7 +159,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/publication_dispatcher.go",
-    "line": 20
+    "line": 22
    },
    "mid": 1537,
    "name": "GET_BOARD_INFO"
@@ -167,7 +167,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/publication_dispatcher.go",
-    "line": 20
+    "line": 22
    },
    "mid": 8193,
    "name": "GET_PIC_NOTICE_INFO"
@@ -175,7 +175,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/publication_dispatcher.go",
-    "line": 20
+    "line": 22
    },
    "mid": 8194,
    "name": "READ_PIC_NOTICE"
