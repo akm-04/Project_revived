@@ -83,8 +83,10 @@ func dispatchTogether(t *testing.T, dispatcher stockruntime.EventCentreDispatche
 }
 
 // requireOneAccepted asserts that two simultaneous requests have exactly one
-// effect and returns the winning request and body.
-func requireOneAccepted(t *testing.T, label string, loserCode int64, firstRequest, secondRequest httpedge.DispatchRequest, first, second httpedge.Response) (httpedge.DispatchRequest, httpedge.Response) {
+// effect and returns the winning request and body. The loser may fail on the
+// receipt conflict path or the domain rejection path, so callers name both
+// mapped codes where the race reaches either.
+func requireOneAccepted(t *testing.T, label string, loserCodes []int64, firstRequest, secondRequest httpedge.DispatchRequest, first, second httpedge.Response) (httpedge.DispatchRequest, httpedge.Response) {
 	t.Helper()
 	if (first.HTTPStatus == 200) == (second.HTTPStatus == 200) {
 		t.Fatalf("%s concurrent pair: %d %+v / %d %+v", label, first.HTTPStatus, first.Body, second.HTTPStatus, second.Body)
@@ -94,8 +96,19 @@ func requireOneAccepted(t *testing.T, label string, loserCode int64, firstReques
 	if second.HTTPStatus == 200 {
 		winnerRequest, winner, loser = secondRequest, second, first
 	}
-	if loser.HTTPStatus != 409 || number(t, loser.Body["error_code"]) != loserCode {
+	if loser.HTTPStatus != 409 {
 		t.Fatalf("%s losing request: %d %+v", label, loser.HTTPStatus, loser.Body)
+	}
+	code := number(t, loser.Body["error_code"])
+	accepted := false
+	for _, want := range loserCodes {
+		if code == want {
+			accepted = true
+			break
+		}
+	}
+	if !accepted {
+		t.Fatalf("%s losing request: %d %+v want one of %v", label, loser.HTTPStatus, loser.Body, loserCodes)
 	}
 	return winnerRequest, winner
 }
@@ -174,7 +187,7 @@ func TestI910ARecycleConcurrencyAndRetryNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1073, map[string]any{"item_id": int64(30001006), "item_num": int64(1)})
 	secondRequest := playtestRequest(actor, 1073, map[string]any{"item_id": int64(30001006), "item_num": int64(1)})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1073", int64(35028), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1073", []int64{35028}, firstRequest, secondRequest, first, second)
 	if stack := workshopStack(t, database, actor.PlayerID, 30001006); stack != 0 {
 		t.Fatalf("1073 stack after concurrency = %d", stack)
 	}
@@ -198,7 +211,7 @@ func TestI910AMakeConcurrencyAndRetryNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1075, map[string]any{"item_id": int64(20001091)})
 	secondRequest := playtestRequest(actor, 1075, map[string]any{"item_id": int64(20001091)})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1075", int64(35028), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1075", []int64{35028}, firstRequest, secondRequest, first, second)
 	root := workshopRoot(t, database, actor.PlayerID)
 	if root.Facts.Desk.Job == nil || root.Facts.Desk.Job.Occurrence != winnerRequest.Envelope.Operation.ID.String() {
 		t.Fatalf("1075 job = %+v", root.Facts.Desk.Job)
@@ -229,7 +242,7 @@ func TestI910ACancelConcurrencyAndRetryNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1076, map[string]any{"building_type": int64(2)})
 	secondRequest := playtestRequest(actor, 1076, map[string]any{"building_type": int64(2)})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1076", int64(35028), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1076", []int64{35028}, firstRequest, secondRequest, first, second)
 	if root := workshopRoot(t, database, actor.PlayerID); root.Facts.Desk.Job != nil {
 		t.Fatal("1076 left the job")
 	}
@@ -251,7 +264,7 @@ func TestI910AAdminConcurrencyAndRetryNative(t *testing.T) {
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
 	// The loser spends from an emptied crystal balance, so it answers the stock
 	// "Not enough diamonds" code (message.lua 20005) rather than a bare 1.
-	winnerRequest, winner := requireOneAccepted(t, "1082", int64(20005), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1082", []int64{20005}, firstRequest, secondRequest, first, second)
 	root := workshopRoot(t, database, actor.PlayerID)
 	if root.Facts.Admin[ec.AdminKey(2, 11)] != 1 {
 		t.Fatalf("1082 admin counter = %+v", root.Facts.Admin)
@@ -276,7 +289,7 @@ func TestI910AConfirmConcurrencyAndRetryNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1088, map[string]any{"building_type": int64(2)})
 	secondRequest := playtestRequest(actor, 1088, map[string]any{"building_type": int64(2)})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1088", int64(35028), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1088", []int64{35028, 40002}, firstRequest, secondRequest, first, second)
 	if items := workshopStack(t, database, actor.PlayerID, 20001091); items != 1 {
 		t.Fatalf("1088 granted %d items", items)
 	}
@@ -295,7 +308,7 @@ func TestI910AAccelerateConcurrencyAndRetryNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1089, map[string]any{"speed_num": int64(348), "building_type": int64(2)})
 	secondRequest := playtestRequest(actor, 1089, map[string]any{"speed_num": int64(348), "building_type": int64(2)})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1089", int64(35028), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1089", []int64{35028}, firstRequest, secondRequest, first, second)
 	if spent := speedBefore - workshopStack(t, database, actor.PlayerID, 50005024); spent != 348 {
 		t.Fatalf("1089 spent %d speed items", spent)
 	}
@@ -315,7 +328,7 @@ func TestI910APetMakeConcurrencyAndRetryNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1091, map[string]any{"item_id": int64(80001027), "pet_id": petID})
 	secondRequest := playtestRequest(actor, 1091, map[string]any{"item_id": int64(80001027), "pet_id": petID})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1091", int64(35028), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1091", []int64{35028}, firstRequest, secondRequest, first, second)
 	root := workshopRoot(t, database, actor.PlayerID)
 	if root.Facts.Pet.Job == nil || root.Facts.Pet.Job.Occurrence != winnerRequest.Envelope.Operation.ID.String() || root.Facts.Pet.PetID != petID {
 		t.Fatalf("1091 pet = %+v", root.Facts.Pet)
@@ -340,7 +353,7 @@ func TestI910ABoardReceiveConcurrencyNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1084, map[string]any{"mission_id": int64(10001), "leader": int64(1), "partners": map[string]any{}, "wish_crystal": int64(0)})
 	secondRequest := playtestRequest(actor, 1084, map[string]any{"mission_id": int64(10001), "leader": int64(1), "partners": map[string]any{}, "wish_crystal": int64(0)})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1084", int64(35028), firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1084", []int64{35028}, firstRequest, secondRequest, first, second)
 	if partners, ok := winner.Body["partners"].([]int64); !ok || len(partners) != 0 {
 		t.Fatalf("1084 empty partners reply = %#v", winner.Body["partners"])
 	}
