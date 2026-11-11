@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"strings"
 
 	authentication "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -11,9 +9,10 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/socialinvite"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
+
+const sameAccountInviteCode int64 = 20033
 
 type SocialInviteReadPort interface {
 	Read(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
@@ -91,21 +90,18 @@ func (dispatcher SocialInviteDispatcher) Dispatch(ctx context.Context, request h
 }
 
 func inviteUnavailable() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "social_invite_unavailable"}}
+	return failureReply(unavailable(nil))
 }
 
 // Every business refusal is HTTP 409 with the stock error_code body; the client
 // treats any 200 as success and indexes nested fields.
+var socialInviteFailureRows = []failureRow{
+	{match: domain.ErrSameAccount, class: failureRefusal, code: sameAccountInviteCode},
+	{match: invite.ErrBindRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: invite.ErrClaimRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: invite.ErrFacts, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func socialInviteFailure(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, invite.ErrUnavailable) {
-		return inviteUnavailable()
-	}
-	if errors.Is(err, domain.ErrSameAccount) {
-		return conflictRefusal(20033)
-	}
-	if errors.Is(err, invite.ErrBindRefused) || errors.Is(err, invite.ErrClaimRefused) || errors.Is(err, invite.ErrFacts) || errors.As(err, &conflict) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "social_invite_unavailable"}}
+	return failureFromRows(socialInviteFailureRows, err)
 }

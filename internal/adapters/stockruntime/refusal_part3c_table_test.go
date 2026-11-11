@@ -6,6 +6,7 @@ import (
 
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	exchange "gxb.local/backend/v2/internal/application/socialexchange"
+	invite "gxb.local/backend/v2/internal/application/socialinvite"
 	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -20,6 +21,7 @@ import (
 	domainmentor "gxb.local/backend/v2/internal/domain/mentor"
 	occult "gxb.local/backend/v2/internal/domain/occult"
 	socialexchange "gxb.local/backend/v2/internal/domain/socialexchange"
+	socialinvite "gxb.local/backend/v2/internal/domain/socialinvite"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -178,4 +180,20 @@ func TestPart3CSocialExchangeFailureRows(t *testing.T) {
 
 func failSocialExchange(err error) httpedge.Response {
 	return failureFromRows(socialExchangeFailureRows, err)
+}
+
+func TestPart3CSocialInviteFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"same account", failSocialInvite(socialinvite.ErrSameAccount), http.StatusConflict, sameAccountInviteCode, ""},
+		{"bind refused", failSocialInvite(invite.ErrBindRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"claim refused", failSocialInvite(invite.ErrClaimRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"facts", failSocialInvite(invite.ErrFacts), http.StatusConflict, unprovenRefusalCode, ""},
+		{"conflict", failSocialInvite(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"unavailable", failSocialInvite(invite.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"missing service", inviteUnavailable(), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func failSocialInvite(err error) httpedge.Response {
+	return failureFromRows(socialInviteFailureRows, err)
 }

@@ -81,20 +81,25 @@ func TestSocialInviteDispatcherStockShapesAndRefusals(t *testing.T) {
 		t.Fatal(read.calls, bind.calls, claim.calls, bind.code, claim.mission)
 	}
 
-	for _, refusal := range []error{invite.ErrBindRefused, invite.ErrClaimRefused, invite.ErrFacts, &receipt.ConflictError{}} {
+	for _, refusal := range []error{invite.ErrBindRefused, invite.ErrClaimRefused, invite.ErrFacts} {
 		bind.err = refusal
 		result := dispatcher.Dispatch(context.Background(), heroReq(t, 386, map[string]any{"invite_code": "1F"}))
-		if result.HTTPStatus != 409 || result.Body["error_code"] != int64(1) {
+		if result.HTTPStatus != 409 || result.Body["error_code"] != unprovenRefusalCode {
 			t.Fatal(refusal, result)
 		}
 		claim.err = refusal
 		result = dispatcher.Dispatch(context.Background(), heroReq(t, 385, map[string]any{"mission_id": int64(100016)}))
-		if result.HTTPStatus != 409 || result.Body["error_code"] != int64(1) {
+		if result.HTTPStatus != 409 || result.Body["error_code"] != unprovenRefusalCode {
 			t.Fatal(refusal, result)
 		}
 	}
-	bind.err = domain.ErrSameAccount
+	bind.err = &receipt.ConflictError{}
 	result := dispatcher.Dispatch(context.Background(), heroReq(t, 386, map[string]any{"invite_code": "1F"}))
+	if result.HTTPStatus != 409 || result.Body["error_code"] != staleConflictCode {
+		t.Fatal("receipt conflict", result)
+	}
+	bind.err = domain.ErrSameAccount
+	result = dispatcher.Dispatch(context.Background(), heroReq(t, 386, map[string]any{"invite_code": "1F"}))
 	if result.HTTPStatus != 409 || result.Body["error_code"] != int64(20033) {
 		t.Fatal("same-account refusal lost stock code", result)
 	}

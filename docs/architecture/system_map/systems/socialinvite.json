@@ -87,7 +87,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_invite_dispatcher.go",
-    "line": 39
+    "line": 38
    },
    "mid": 384,
    "name": "LOAD_INVITE_INFOS"
@@ -95,7 +95,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_invite_dispatcher.go",
-    "line": 39
+    "line": 38
    },
    "mid": 385,
    "name": "GET_INVITE_AWARD"
@@ -103,7 +103,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_invite_dispatcher.go",
-    "line": 39
+    "line": 38
    },
    "mid": 386,
    "name": "SEND_INVITE_CODE"
