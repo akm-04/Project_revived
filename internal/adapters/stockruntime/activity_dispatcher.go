@@ -33,17 +33,17 @@ func (d ActivityDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 	case 229:
 		rows, err := d.Service.List(ctx, actor)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "activity_projection_unavailable"}}
+			return failureReply(unavailable(err))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: activityproj.List(rows)}
 	case 234:
 		id, err := requiredInt64(req.Envelope.Params, "activity_id")
 		if err != nil || id <= 0 {
-			return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_activity_id"}}
+			return failureReply(malformed("invalid_activity_id"))
 		}
 		row, ok, err := d.Service.Lookup(ctx, actor, id)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "activity_projection_unavailable"}}
+			return failureReply(unavailable(err))
 		}
 		if !ok {
 			return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "activity_unavailable"}}
