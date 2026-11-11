@@ -105,8 +105,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		body := map[string]any{"skill_point": result.SkillPoint, "skill_time": result.SkillTime}
 		if !result.Success {
-			body["error_code"] = int64(1)
-			return httpedge.Response{HTTPStatus: http.StatusConflict, Body: body}
+			return failureReply(refusalWithBody(unprovenRefusalCode, body))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 39:
@@ -132,8 +131,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		body := map[string]any{"skills": result.SkillString(), "is_success": result.SuccessValue(), "skill_point": result.SkillPoint, "skill_time": result.SkillTime}
 		if !result.Success {
-			body["error_code"] = int64(1)
-			return httpedge.Response{HTTPStatus: http.StatusConflict, Body: body}
+			return failureReply(refusalWithBody(unprovenRefusalCode, body))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 2144:
@@ -191,7 +189,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		got, err := d.Appearance.SkinOn(ctx, actor, partnerID, itemID, req.Envelope.Operation)
 		if err != nil {
 			if errors.Is(err, apphero.ErrHeroSkinExperienceAlreadyOwned) {
-				return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error_code": int64(35035)}}
+				return failureReply(refusal(35035))
 			}
 			return failHero(err)
 		}
@@ -543,7 +541,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	case 89:
 		sortType, err := requiredInt64(req.Envelope.Params, "sort_type")
 		if err != nil || sortType < 0 || sortType > character.MaxSortType {
-			return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_hero_sort_type"}}
+			return badHero("invalid_hero_sort_type")
 		}
 		if err := d.Service.SaveSortType(ctx, actor, sortType, req.Envelope.Operation); err != nil {
 			return failHero(err)
@@ -691,29 +689,50 @@ func requiredPipeIntegers(params map[string]any, key string) ([]int64, error) {
 	return values, nil
 }
 
+var heroFailureRows = []failureRow{
+	{match: apphero.ErrHeroAppearanceUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroExpMax, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEvolutionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPrerequisites, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroCapacityExceeded, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroDuplicateOrigin, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroAcquisitionInvalid, class: failureMalformed, detail: "hero_operation_rejected"},
+	{match: apphero.ErrHeroVowsLevel, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEquipmentUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroFumoUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionPrerequisites, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionCorruptState, class: failureUnavailable, detail: "hero_operation_failed"},
+	{match: apphero.ErrHeroContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
+	{match: apphero.ErrAppearanceContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
+	{match: apphero.ErrHeroProgressionContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
+	{match: apphero.ErrHeroEquipmentContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
+	{match: apphero.ErrHeroFumoContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
+	{match: apphero.ErrHeroPromotionContentInactive, class: failureUnavailable, detail: "hero_content_inactive"},
+	{match: apphero.ErrHeroCapacityUnavailable, class: failureUnavailable, detail: "hero_content_inactive"},
+}
+
+var heroSkillLevelFailureRows = []failureRow{
+	{match: apphero.ErrHeroSkillLevelRequest, class: failureMalformed, detail: "invalid_hero_skill_level"},
+	{match: apphero.ErrHeroSkillLevelInactive, class: failureUnavailable, detail: "hero_skill_content_inactive"},
+	{match: apphero.ErrHeroSkillLevelStaleTime, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failHeroSkillLevel(err error) httpedge.Response {
-	if errors.Is(err, apphero.ErrHeroSkillLevelRequest) {
-		return badHero("invalid_hero_skill_level")
-	}
-	if errors.Is(err, apphero.ErrHeroSkillLevelInactive) {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_skill_content_inactive"}}
-	}
-	if errors.Is(err, apphero.ErrHeroSkillLevelStaleTime) {
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Cause: err, Body: map[string]any{"error_code": int64(1)}}
+	if classified := classifyFailure(heroSkillLevelFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
 	return failHero(err)
 }
 
 func badHero(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
 }
 
 func failHero(err error) httpedge.Response {
-	if errors.Is(err, apphero.ErrHeroContentInactive) || errors.Is(err, apphero.ErrAppearanceContentInactive) || errors.Is(err, apphero.ErrHeroProgressionContentInactive) || errors.Is(err, apphero.ErrHeroEquipmentContentInactive) || errors.Is(err, apphero.ErrHeroFumoContentInactive) || errors.Is(err, apphero.ErrHeroPromotionContentInactive) || errors.Is(err, apphero.ErrHeroCapacityUnavailable) {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_content_inactive"}}
+	if classified := classifyFailure(heroFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	if errors.Is(err, apphero.ErrHeroAppearanceUnavailable) || errors.Is(err, apphero.ErrHeroExpMax) || errors.Is(err, apphero.ErrHeroEvolutionUnavailable) || errors.Is(err, apphero.ErrHeroPrerequisites) || errors.Is(err, apphero.ErrHeroNotFound) || errors.Is(err, apphero.ErrHeroCapacityExceeded) || errors.Is(err, apphero.ErrHeroDuplicateOrigin) || errors.Is(err, apphero.ErrHeroAcquisitionInvalid) || errors.Is(err, apphero.ErrHeroVowsLevel) || errors.Is(err, apphero.ErrHeroEquipmentUnavailable) || errors.Is(err, apphero.ErrHeroFumoUnavailable) || errors.Is(err, apphero.ErrHeroPromotionUnavailable) || errors.Is(err, apphero.ErrHeroPromotionPrerequisites) || errors.Is(err, apphero.ErrHeroPromotionCorruptState) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "hero_operation_rejected"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_operation_failed"}}
+	return failureReply(unavailable("hero_operation_failed", err))
 }

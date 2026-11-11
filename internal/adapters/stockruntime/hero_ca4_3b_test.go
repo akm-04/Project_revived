@@ -71,7 +71,7 @@ func TestCA43BPromotionFailuresClassifyContentAndSemanticRejections(t *testing.T
 		t.Fatalf("content=%+v", r)
 	}
 	svc.promoteErr = apphero.ErrHeroPromotionPrerequisites
-	if r := d.Dispatch(context.Background(), heroReq(t, 51, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 51, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("semantic=%+v", r)
 	}
 }

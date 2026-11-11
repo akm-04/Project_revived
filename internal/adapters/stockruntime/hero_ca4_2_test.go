@@ -128,7 +128,7 @@ func TestCA42MID54StrictShapeAndSemanticRejection(t *testing.T) {
 		}
 	}
 	svc.equipErr = apphero.ErrHeroEquipmentUnavailable
-	if r := d.Dispatch(context.Background(), heroReq(t, 54, map[string]any{"partner_id": int64(1), "equip_index": int64(1)})); r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 54, map[string]any{"partner_id": int64(1), "equip_index": int64(1)})); r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("semantic rejection=%+v", r)
 	}
 }

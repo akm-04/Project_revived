@@ -222,8 +222,9 @@ func stringParam(m map[string]any, key string) string {
 func bootstrapFailure(err error) httpedge.Response {
 	switch {
 	case errors.Is(err, logicalserver.ErrServerFull):
-		// Recovered stock semantic: new-character capacity failure only.
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(20018), "error_msg": ""}}
+		// Recovered stock semantic: new-character capacity failure only. The
+		// client reads 20018 on its failed-login branch, so this is not a 200.
+		return failureReply(refusalWithBody(int64(20018), map[string]any{"error_msg": ""}))
 	case errors.Is(err, appboot.ErrAccountAuth):
 		// Exact private auth semantic code is not source-recovered. Keep auth
 		// rejection as transport failure rather than inventing a stock code.

@@ -511,6 +511,16 @@ func answered(report client.Report, mid int, errorCode int) bool {
 	return false
 }
 
+// refused reports a completed non-200 refusal carrying the stock error_code.
+func refused(report client.Report, mid int, errorCode int) bool {
+	for _, exchange := range report.Requests {
+		if int(exchange.MID) == mid && exchange.Status != 200 && int(exchange.ErrorCode) == errorCode {
+			return true
+		}
+	}
+	return false
+}
+
 func inactiveFailures(ctx context.Context, databaseURL, accountUID string, report client.Report, mids []int) ([]string, error) {
 	failures := []string{}
 	if len(mids) == 0 {
@@ -524,8 +534,8 @@ func inactiveFailures(ctx context.Context, databaseURL, accountUID string, repor
 	}
 	defer connection.Close(ctx)
 	for _, mid := range mids {
-		if !answered(report, mid, 1) {
-			failures = append(failures, fmt.Sprintf("MID%d not sent or not answered 200 with error_code 1", mid))
+		if !refused(report, mid, 1) {
+			failures = append(failures, fmt.Sprintf("MID%d not sent or not answered non-200 with error_code 1", mid))
 		}
 		var journalled int
 		if err := connection.QueryRow(ctx, `SELECT count(*) FROM request_journal WHERE account_uid=$1 AND mid=$2 AND outcome='INACTIVE_MODE'`, accountUID, mid).Scan(&journalled); err != nil {

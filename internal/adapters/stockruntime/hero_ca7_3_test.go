@@ -60,7 +60,7 @@ func TestCA73MID60Recovered35035UsesErrorHTTPStatus(t *testing.T) {
 	appearance := &ca73AppearanceService{skinErr: apphero.ErrHeroSkinExperienceAlreadyOwned}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, Appearance: appearance}
 	r := d.Dispatch(context.Background(), heroReq(t, 60, map[string]any{"partner_id": int64(7), "item_id": int64(50009163)}))
-	if r.HTTPStatus != 400 || r.Body["error_code"] != int64(35035) {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != int64(35035) {
 		t.Fatalf("MID60 35035 response=%+v", r)
 	}
 }
@@ -90,7 +90,7 @@ func TestCA73AppearanceUnavailableMapsToHeroRejection(t *testing.T) {
 	appearance := &ca73AppearanceService{skinErr: apphero.ErrHeroAppearanceUnavailable}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, Appearance: appearance}
 	r := d.Dispatch(context.Background(), heroReq(t, 60, map[string]any{"partner_id": int64(7), "item_id": int64(123)}))
-	if r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("response=%+v", r)
 	}
 	appearance.skinErr = errors.New("db")

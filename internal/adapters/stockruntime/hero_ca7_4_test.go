@@ -102,7 +102,7 @@ func TestCA74MIDsRejectInventedGameplayFieldsAndMapSemanticFailure(t *testing.T)
 	live := &ca74LIVEHTTPService{unlockErr: apphero.ErrHeroAppearanceUnavailable}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, LIVE: live, Economy: &ca74HeroEconomy{amount: 1}}
 	r := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
-	if r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("semantic rejection=%+v", r)
 	}
 	extra := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074"), "item_id": json.Number("50005171")}))

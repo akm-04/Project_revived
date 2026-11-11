@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"errors"
+	"net/http"
 	"path/filepath"
 	"testing"
 	"time"
@@ -199,13 +200,13 @@ func TestBootstrapDispatcherMID1EmptyLogURLIsHonestDisabledDefault(t *testing.T)
 	}
 }
 
-func TestBootstrapDispatcherPreserves20018OnlyForCapacity(t *testing.T) {
+func TestBootstrapDispatcherReturns20018OnlyForCapacity(t *testing.T) {
 	now := time.Unix(501, 0).UTC()
 	r := env(1, nil, now)
 	r.Envelope.Operation = operation.Context{StartedAt: now}
 	r.Envelope.Params = map[string]any{"sid": "s", "login_token": "l", "region": int64(1)}
 	got := (BootstrapDispatcher{Bootstrap: fakeBootstrap{err: logicalserver.ErrServerFull}}).Dispatch(context.Background(), r)
-	if got.HTTPStatus != 200 || got.Body["error_code"] != int64(20018) {
+	if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != int64(20018) || got.Body["error_msg"] != "" {
 		t.Fatalf("%+v", got)
 	}
 }

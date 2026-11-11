@@ -9270,14 +9270,8 @@
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-   "line": 383,
+   "line": 381,
    "code": 30001,
-   "kind": "stock_code"
-  },
-  {
-   "file": "internal/adapters/stockruntime/http_dispatchers.go",
-   "line": 226,
-   "code": 20018,
    "kind": "stock_code"
   },
   {

@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/bookskill"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	book "gxb.local/backend/v2/internal/domain/bookskill"
@@ -10,7 +9,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 type BookPort interface {
@@ -84,9 +82,16 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	}
 	return okI5(r.Body)
 }
+
+var bookFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: book.ErrInvalid, class: failureMalformed, detail: "book_command_rejected"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failBook(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, book.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return badHero("book_command_rejected")
+	if classified := classifyFailure(bookFailureRows, e); classified != nil {
+		return failureReply(classified)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "book_unavailable_or_unresolved"}}
+	return failureReply(unavailable("book_unavailable_or_unresolved", e))
 }

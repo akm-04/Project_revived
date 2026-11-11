@@ -50,7 +50,7 @@ func TestCA43AMID58RejectsMalformedAndSemanticFailureWithoutProjection(t *testin
 	}
 	svc.fumoErr = apphero.ErrHeroFumoUnavailable
 	r := d.Dispatch(context.Background(), heroReq(t, 58, map[string]any{"partner_id": int64(1), "equip_index": int64(5), "materials": []any{int64(1)}}))
-	if r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" || economy.calls != 0 {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode || economy.calls != 0 {
 		t.Fatalf("semantic=%+v economyCalls=%d", r, economy.calls)
 	}
 }
