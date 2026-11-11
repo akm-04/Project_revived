@@ -36,7 +36,13 @@ func missions(p d.Player) []map[string]any {
 func Info(v d.InfoView) map[string]any {
 	p := v.Player
 	days := int64(v.At.Sub(v.Season.OpensAt).Hours()/24) + 1
-	body := map[string]any{"daily_fight": p.DailyFights, "defence_formation": p.Defense.Heroes, "pet_id": p.Defense.Pet, "index": int64(1), "win_times": p.WinTimes,
+	// RegionArenaWindow.lua:19 keeps the reply value and :607 iterates it, and
+	// stock cjson decodes null to truthy userdata, so send an empty array.
+	defence := p.Defense.Heroes
+	if defence == nil {
+		defence = []int64{}
+	}
+	body := map[string]any{"daily_fight": p.DailyFights, "defence_formation": defence, "pet_id": p.Defense.Pet, "index": int64(1), "win_times": p.WinTimes,
 		"total_fight": p.TotalFight, "keep_win_times": p.KeepWin, "point": p.Point, "star": p.Star, "total": v.Total, "my_rank": v.Rank, "count": v.Season.Number,
 		"day_count": max(days, 0), "missions": missions(p), "mission_time": p.MissionTime.Unix(), "awards": awards(p), "king_coin": v.KingCoin, "is_close": flag(v.Closed)}
 	for i, times := range p.ExchangeTimes {
