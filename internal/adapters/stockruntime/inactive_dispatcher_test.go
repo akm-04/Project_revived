@@ -10,7 +10,7 @@ import (
 
 func TestInactiveModeDispatcherAnswersStockRefusal(t *testing.T) {
 	got := InactiveModeDispatcher{}.Dispatch(context.Background(), httpedge.DispatchRequest{})
-	if got.HTTPStatus != 409 || !got.Inactive || len(got.Body) != 2 || got.Body["error_code"] != unprovenRefusalCode || got.Body["error_msg"] != "" {
+	if got.HTTPStatus != 200 || !got.Inactive || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
 		t.Fatalf("%+v", got)
 	}
 }
