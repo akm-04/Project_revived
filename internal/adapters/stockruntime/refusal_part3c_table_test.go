@@ -17,6 +17,7 @@ import (
 	illusion "gxb.local/backend/v2/internal/domain/illusion"
 	march "gxb.local/backend/v2/internal/domain/march"
 	domainmentor "gxb.local/backend/v2/internal/domain/mentor"
+	occult "gxb.local/backend/v2/internal/domain/occult"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -146,5 +147,17 @@ func TestPart3CMentorFailureRows(t *testing.T) {
 		{"invalid", mentorFailure(appmentor.ErrInvalid), http.StatusBadRequest, 0, "invalid_mentor_request"},
 		{"unavailable", mentorFailure(appmentor.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"missing service", mentorUnavailable(), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3COccultFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"invalid", failOccult(occult.ErrInvalid), http.StatusBadRequest, 0, "occult_invalid_parameter"},
+		{"conflict", failOccult(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"refused", failOccult(occult.ErrRefused), http.StatusConflict, occultRoomRefusedCode, ""},
+		{"no scrolls", failOccult(economy.ErrInsufficientBalance), http.StatusConflict, occultNoScrollsCode, ""},
+		{"not in room", failOccult(sr.ErrNotInRoom), http.StatusConflict, occultRoomRefusedCode, ""},
+		{"room full", failOccult(room.ErrFull), http.StatusConflict, occultRoomRefusedCode, ""},
+		{"unavailable", failOccult(occult.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

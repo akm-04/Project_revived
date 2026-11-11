@@ -2,9 +2,7 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net/http"
 	"strconv"
 
 	app "gxb.local/backend/v2/internal/application/occult"
@@ -15,7 +13,6 @@ import (
 	d "gxb.local/backend/v2/internal/domain/occult"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -306,19 +303,23 @@ func occultMonsterStatus(raw any) (map[int64]int64, bool) {
 	return monsters, true
 }
 
+var occultFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "occult_invalid_parameter"},
+	{match: d.ErrRefused, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: occultNoScrollsCode},
+	{match: sr.ErrNotInRoom, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: sr.ErrNotFound, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrFull, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrKicked, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrExpired, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrClosed, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrNotOwner, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrNotSeated, class: failureRefusal, code: occultRoomRefusedCode},
+}
+
 func failOccult(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		response := badHero("occult_invalid_parameter")
-		response.Cause = err
-		return response
-	}
-	for _, refusal := range occultRefusals {
-		if errors.Is(err, refusal) {
-			return occultRefusal(err)
-		}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "occult_unavailable"}}
+	return failureFromRows(occultFailureRows, err)
 }
 
 // Stock room-system messages the client renders from error_code; code 1 has no
@@ -327,18 +328,3 @@ const (
 	occultRoomRefusedCode = 35002
 	occultNoScrollsCode   = 35003
 )
-
-// occultRefusal keeps the internal reason in Cause so the journal names the
-// branch while the client shows a stock toast.
-func occultRefusal(err error) httpedge.Response {
-	code := int64(occultRoomRefusedCode)
-	if errors.Is(err, economy.ErrInsufficientBalance) {
-		code = occultNoScrollsCode
-	}
-	response := conflictRefusal(code)
-	response.Cause = err
-	return response
-}
-
-var occultRefusals = []error{d.ErrRefused, economy.ErrInsufficientBalance, sr.ErrNotInRoom, sr.ErrAlreadyInRoom, sr.ErrNotFound,
-	room.ErrFull, room.ErrKicked, room.ErrExpired, room.ErrClosed, room.ErrNotOwner, room.ErrNotSeated}
