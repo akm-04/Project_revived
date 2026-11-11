@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/campaign"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -11,7 +9,6 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -222,18 +219,14 @@ func campaignResult(p map[string]any) (app.Result, bool) {
 	return app.Result{AwakeMission: awake, PetAwakeMission: petAwake, CampaignID: id, Type: kind, Star: star, Formation: formation, Pet: pet}, true
 }
 
+var campaignModeFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "campaign_invalid_parameter"},
+	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failCampaign(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("campaign_invalid_parameter")
-	}
-	if errors.Is(err, cd.ErrLoanRefused) {
-		return conflictRefusal(1)
-	}
-	if errors.Is(err, d.ErrRefused) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "campaign_unavailable"}}
+	return failureFromRows(campaignModeFailureRows, err)
 }
 
 // campaignSweep reads SweepWindow's forwarded stock params; UI-only compose keys do not affect awards.

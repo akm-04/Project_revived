@@ -25,7 +25,7 @@ func TestCampaignSweepStockParams(t *testing.T) {
 
 func TestCampaignPurchaseConflictIsClientError(t *testing.T) {
 	response := failCampaign(&receipt.ConflictError{})
-	if response.HTTPStatus != http.StatusBadRequest {
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != staleConflictCode {
 		t.Fatal(response)
 	}
 }

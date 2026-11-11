@@ -168,7 +168,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 28,
    "name": "DAILY_CONSUNME_LOAD"
@@ -176,7 +176,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 29,
    "name": "DAILY_CONSUNME"
@@ -184,7 +184,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 112,
    "name": "LOAD_WORLD_MAP"
@@ -192,7 +192,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 113,
    "name": "FIGHT"
@@ -200,7 +200,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 114,
    "name": "FIGHT_RESULT"
@@ -208,7 +208,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 115,
    "name": "LOAD_TRIAL_INFOS"
@@ -216,7 +216,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 116,
    "name": "RESET_CAMPAIGN"
@@ -224,7 +224,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 117,
    "name": "SWEEP_CAMPAIGN"
@@ -232,7 +232,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 118,
    "name": "GET_BONUS_AWARD"
@@ -240,7 +240,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 122,
    "name": "GET_MAXLEVEL"
@@ -248,7 +248,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 123,
    "name": "CHALLENGEINFO"
@@ -256,7 +256,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 2064,
    "name": "GET_STORY_DROP_PARTNER"
@@ -264,7 +264,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
-    "line": 44
+    "line": 41
    },
    "mid": 2576,
    "name": "GET_CHAPTER_GACHA_AWARD"

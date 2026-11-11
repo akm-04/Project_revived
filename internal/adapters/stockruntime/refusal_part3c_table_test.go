@@ -6,8 +6,11 @@ import (
 
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	d "gxb.local/backend/v2/internal/domain/adventure"
+	"gxb.local/backend/v2/internal/domain/campaign"
+	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 )
 
 func TestPart3CAdventureFailureRows(t *testing.T) {
@@ -23,5 +26,15 @@ func TestPart3CAdventureFailureRows(t *testing.T) {
 		{"balance other", failAdventure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unknown resource", failAdventure(economy.ErrUnknownResource), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"unavailable", failAdventure(d.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
+}
+
+func TestPart3CCampaignFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"invalid", failCampaign(campaign.ErrInvalid), http.StatusBadRequest, 0, "campaign_invalid_parameter"},
+		{"conflict", failCampaign(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"loan refused", failCampaign(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"refused", failCampaign(campaign.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", failCampaign(campaign.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
