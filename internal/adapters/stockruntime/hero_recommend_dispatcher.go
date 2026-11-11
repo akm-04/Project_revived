@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net/http"
 
@@ -37,7 +36,7 @@ func (h HeroRecommendDispatcher) Dispatch(ctx context.Context, req httpedge.Disp
 	switch mid {
 	case 2496:
 		// PRIVATE_POLICY: no client caller or success shape is recovered for GET_HERO_SCORE.
-		return conflictRefusal(1)
+		return failureReply(refusal(unprovenRefusalCode))
 	case 2497:
 		if !onlyStockGameplayParams(params) {
 			return badHero("invalid_hero_recommend_params")
@@ -71,10 +70,14 @@ func (h HeroRecommendDispatcher) Dispatch(ctx context.Context, req httpedge.Disp
 
 // failHeroRecommend refuses a business conflict on 409 so the stock callbacks
 // see ERROR instead of an OK body they would index.
+var heroRecommendFailureRows = []failureRow{
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failHeroRecommend(e error) httpedge.Response {
-	if errors.Is(e, d.ErrRefused) {
-		return conflictRefusal(1)
+	response := failureFromRows(heroRecommendFailureRows, e)
+	if response.HTTPStatus == http.StatusServiceUnavailable {
+		log.Printf("hero recommend unavailable: %v", e)
 	}
-	log.Printf("hero recommend unavailable: %v", e)
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_recommend_unavailable"}}
+	return response
 }

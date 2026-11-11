@@ -89,7 +89,7 @@ func TestI9_10HeroRecommendProcessStockMIDs(t *testing.T) {
 	}
 
 	status, body = process.post(2496, map[string]any{})
-	if status != 409 || i9Number(t, body["error_code"]) != 1 {
+	if status != 409 || i9Number(t, body["error_code"]) != 35028 {
 		t.Fatalf("2496 unsupported contract refusal status %d body %+v", status, body)
 	}
 	status, body = process.post(2497, map[string]any{"unexpected": true})

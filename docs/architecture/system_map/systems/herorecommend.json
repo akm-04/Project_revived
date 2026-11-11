@@ -57,7 +57,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
-    "line": 28
+    "line": 27
    },
    "mid": 2496,
    "name": "GET_HERO_SCORE"
@@ -65,7 +65,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
-    "line": 28
+    "line": 27
    },
    "mid": 2497,
    "name": "GET_RECOMMEND_INFO"
@@ -73,7 +73,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
-    "line": 28
+    "line": 27
    },
    "mid": 2498,
    "name": "GET_HERO_RECOMMEND_DETAIL"
@@ -81,7 +81,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_recommend_dispatcher.go",
-    "line": 28
+    "line": 27
    },
    "mid": 2499,
    "name": "GET_FORCE_RANK_LIST"

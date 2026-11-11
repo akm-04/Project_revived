@@ -12,6 +12,7 @@ import (
 	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/economy"
 	gmquestion "gxb.local/backend/v2/internal/domain/gmquestion"
+	herorecommend "gxb.local/backend/v2/internal/domain/herorecommend"
 	privilege "gxb.local/backend/v2/internal/domain/privilege"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -79,4 +80,12 @@ func TestPart3CGMQuestionFailureRows(t *testing.T) {
 
 func failQuestionRows(err error) httpedge.Response {
 	return failureFromRows(gmQuestionFailureRows, err)
+}
+
+func TestPart3CHeroRecommendFailureRows(t *testing.T) {
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"refused", failHeroRecommend(herorecommend.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"conflict", failHeroRecommend(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"unavailable", failHeroRecommend(herorecommend.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+	})
 }
