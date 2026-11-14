@@ -110,14 +110,14 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	defer cancel()
 	i, e := d.Service.Accept(bounded, int64(a.PlayerID), recipient, message, r.Envelope.Operation)
 	if e != nil {
-		return failureFromRows(nil, e)
+		return refusalOrTransient(e)
 	}
 	if d.Emitter != nil && !i.Status.Terminal() {
 		d.Emitter.EmitGeneralDM(bounded, i)
 	}
 	result, e := d.Service.Wait(bounded, i)
 	if e != nil {
-		return failureFromRows(nil, e)
+		return refusalOrTransient(e)
 	}
 	if bounded.Err() != nil || result.ID != i.ID || result.Digest != i.Digest || result.Status != dm.WrittenBeforeDeadline || result.CompletionUpper == nil || !result.CompletionUpper.Before(i.ExpiresAt) {
 		return failureReply(defect(nil))

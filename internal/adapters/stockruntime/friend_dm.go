@@ -84,7 +84,7 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 			return failureReply(defect(nil))
 		}
 		if e = d.RoomChat.SendRoomChat(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation); e != nil {
-			return failureFromRows(nil, e)
+			return refusalOrTransient(e)
 		}
 		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
 	}
@@ -96,7 +96,7 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 	}
 	o, e := d.Service.Accept(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation)
 	if e != nil {
-		return failureFromRows(nil, e)
+		return refusalOrTransient(e)
 	}
 	if d.Emitter != nil {
 		d.Emitter.EmitFriendDM(c, o)
