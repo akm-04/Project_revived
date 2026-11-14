@@ -231,10 +231,7 @@ var dormFailureRows = []failureRow{
 }
 
 func failDorm(e error) httpedge.Response {
-	if classified := classifyFailure(dormFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(dormFailureRows, e)
 }
 
 // Every Dorm social domain refusal is a non-200 refusal: the stock callbacks
@@ -252,10 +249,7 @@ var dormSocialFailureRows = []failureRow{
 }
 
 func failSocialDorm(e error) httpedge.Response {
-	if classified := classifyFailure(dormSocialFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(dormSocialFailureRows, e)
 }
 
 func requiredDormString(m map[string]any, key string) (string, error) {

@@ -114,8 +114,5 @@ var inscriptionFailureRows = []failureRow{
 }
 
 func failInscription(e error) httpedge.Response {
-	if classified := classifyFailure(inscriptionFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(inscriptionFailureRows, e)
 }

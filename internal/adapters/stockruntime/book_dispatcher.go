@@ -90,8 +90,5 @@ var bookFailureRows = []failureRow{
 }
 
 func failBook(e error) httpedge.Response {
-	if classified := classifyFailure(bookFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(bookFailureRows, e)
 }

@@ -202,10 +202,7 @@ var arenaFailureRows = []failureRow{
 }
 
 func failArena(err error) httpedge.Response {
-	if classified := classifyFailure(arenaFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(arenaFailureRows, err)
 }
 
 // Stock message.lua rows for FIGHT refusals: 35006 is the only row mentioning
@@ -226,8 +223,5 @@ var arenaFightFailureRows = []failureRow{
 }
 
 func failArenaFight(err error) httpedge.Response {
-	if classified := classifyFailure(arenaFightFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(arenaFightFailureRows, err)
 }

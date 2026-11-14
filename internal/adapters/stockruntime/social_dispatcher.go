@@ -128,7 +128,7 @@ func socialFailure(e error) httpedge.Response {
 	if errors.As(e, &stock) && stock.Code > 0 {
 		return failureReply(refusal(stock.Code))
 	}
-	return failureReply(unavailable(e))
+	return failureFromRows(nil, e)
 }
 func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	// One finite parent deadline covers authority, command and postcommit projection.
@@ -382,8 +382,5 @@ func giftFailure(err error) httpedge.Response {
 	if err == nil {
 		return failureReply(unavailable(errors.New("social gift dependency unavailable")))
 	}
-	if classified := classifyFailure(socialGiftFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(socialGiftFailureRows, err)
 }

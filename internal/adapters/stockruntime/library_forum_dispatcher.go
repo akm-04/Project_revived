@@ -174,8 +174,5 @@ var forumFailureRows = []failureRow{
 // failForum refuses business conflicts on 409 so the stock callbacks see ERROR
 // instead of an OK body they would index (I9_LIBRARY_V1 C2).
 func failForum(e error) httpedge.Response {
-	if classified := classifyFailure(forumFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(forumFailureRows, e)
 }

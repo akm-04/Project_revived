@@ -124,8 +124,5 @@ func godsTrialFailure(e error) httpedge.Response {
 	if errors.As(e, &conflict) {
 		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: e})
 	}
-	if classified := classifyFailure(godsTrialFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(godsTrialFailureRows, e)
 }

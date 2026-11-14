@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -79,7 +78,7 @@ func TestI7C2IExactWireFieldsAndFailureEnvelope(t *testing.T) {
 	if r.HTTPStatus != 400 || r.Body["error"] == nil {
 		t.Fatal("a recorded malformed rejection lost its class", r)
 	}
-	s.err = errors.New("database unavailable")
+	s.err = context.DeadlineExceeded
 	r = d.Dispatch(context.Background(), heroReq(t, 2608, p))
 	if r.HTTPStatus != 503 || r.Body["evo_info"] != nil {
 		t.Fatal("infrastructure failure disguised", r)

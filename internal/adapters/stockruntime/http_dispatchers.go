@@ -245,6 +245,6 @@ func bootstrapFailure(err error) httpedge.Response {
 	case errors.Is(err, logicalserver.ErrExistingLoginClosed):
 		return failureReply(unavailable(err))
 	default:
-		return failureReply(unavailable(err))
+		return failureFromRows(nil, err)
 	}
 }

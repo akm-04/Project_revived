@@ -122,7 +122,7 @@ func TestPart3AGuildTeaFailureRows(t *testing.T) {
 func TestPart3ASocialFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"stock code", socialFailure(&sr.StockError{Code: 20004}), http.StatusConflict, 20004, ""},
-		{"dependency", socialFailure(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"dependency", socialFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"gift quota", giftFailure(socialgift.ErrQuota), http.StatusConflict, unprovenRefusalCode, ""},
 		{"gift duplicate", giftFailure(socialgift.ErrDuplicate), http.StatusConflict, unprovenRefusalCode, ""},
 		{"gift ineligible", giftFailure(socialgift.ErrNotEligible), http.StatusConflict, unprovenRefusalCode, ""},
@@ -130,7 +130,7 @@ func TestPart3ASocialFailureRows(t *testing.T) {
 		{"gift conflict", giftFailure(socialgift.ErrConflict), http.StatusConflict, staleConflictCode, ""},
 		{"gift clock defect", giftFailure(socialgift.ErrClock), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"gift invalid", giftFailure(socialgift.ErrInvalid), http.StatusBadRequest, 0, "invalid_social_request"},
-		{"gift dependency", giftFailure(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"gift dependency", giftFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 	assertPart2FailureCases(t, []part2FailureCase{{"gift nil dependency", giftFailure(nil), http.StatusServiceUnavailable, serverBusyCode, ""}})
 }
@@ -196,7 +196,7 @@ func TestPart3AGodsTrialFailureRows(t *testing.T) {
 		{"pet not found", godsTrialFailure(characterpet.ErrPetNotFound), http.StatusConflict, unprovenRefusalCode, ""},
 		{"balance stamina", godsTrialFailure(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
 		{"unavailable", godsTrialFailure(god.ErrUnavailable), http.StatusConflict, unprovenRefusalCode, ""},
-		{"dependency", godsTrialFailure(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"dependency", godsTrialFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 

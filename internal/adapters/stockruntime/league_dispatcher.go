@@ -151,8 +151,5 @@ var leagueFailureRows = []failureRow{
 }
 
 func failLeague(e error) httpedge.Response {
-	if classified := classifyFailure(leagueFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(leagueFailureRows, e)
 }

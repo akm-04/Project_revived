@@ -189,8 +189,5 @@ var oneOnOneFailureRows = []failureRow{
 }
 
 func failOneOnOne(err error) httpedge.Response {
-	if classified := classifyFailure(oneOnOneFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(oneOnOneFailureRows, err)
 }

@@ -96,8 +96,5 @@ var elementFailureRows = []failureRow{
 }
 
 func failElement(e error) httpedge.Response {
-	if classified := classifyFailure(elementFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(elementFailureRows, e)
 }

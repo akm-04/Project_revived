@@ -100,7 +100,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1072,
    "name": "GET_RECYCLE_INFO"
@@ -108,7 +108,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1073,
    "name": "RECYCLE_ITEMS"
@@ -116,7 +116,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1074,
    "name": "GET_DESKP_INFO"
@@ -124,7 +124,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1075,
    "name": "MAKE_ITEM"
@@ -132,7 +132,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1076,
    "name": "CANCEL_MAKE_ITEM"
@@ -140,7 +140,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1081,
    "name": "GET_ADMIN_INFO"
@@ -148,7 +148,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1082,
    "name": "ADMIN_CONVERSION"
@@ -156,7 +156,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1083,
    "name": "GET_NOTICE_BOARD_INFO"
@@ -164,7 +164,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1084,
    "name": "RECEIVE_MISSION"
@@ -172,7 +172,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1085,
    "name": "GIVE_UP_MISSION"
@@ -180,7 +180,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1086,
    "name": "CONFIRM_NEW_AWARD_LOG"
@@ -188,7 +188,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1087,
    "name": "GET_NOTICE_BOARD_REPORT"
@@ -196,7 +196,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1088,
    "name": "CONFIRM_MAKE_ITEM"
@@ -204,7 +204,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1089,
    "name": "ACCELERATE_MAKE_ITEM"
@@ -212,7 +212,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1090,
    "name": "GET_PET_ROOM_INFO"
@@ -220,7 +220,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/eventcentre_dispatcher.go",
-    "line": 29
+    "line": 28
    },
    "mid": 1091,
    "name": "MAKE_PET_ITEM"

@@ -61,10 +61,7 @@ var achievementFailureRows = []failureRow{
 }
 
 func failAchievement(e error) httpedge.Response {
-	if classified := classifyFailure(achievementFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(achievementFailureRows, e)
 }
 
 type AchievementObserver interface {

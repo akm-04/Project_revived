@@ -273,7 +273,7 @@ func TestPetDispatcherMID782ProjectionFailureDoesNotResettleInDispatcher(t *test
 	actor := actorForHTTP(t)
 	now := time.Unix(100, 0).UTC()
 	svc := &petServiceFake{}
-	economy := &petEconomyFake{err: errors.New("read failed")}
+	economy := &petEconomyFake{err: context.DeadlineExceeded}
 	d := PetDispatcher{Authority: httpAuthority{actor}, Service: svc, Economy: economy}
 	req := env(782, nil, now)
 	req.Envelope.Params = map[string]any{"pet_id": int64(77)}

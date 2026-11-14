@@ -13,7 +13,7 @@ func TestPart3BForumFailureRows(t *testing.T) {
 		{"rejected", failForum(libraryapp.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
 		{"request", failForum(libraryapp.ErrRequest), http.StatusBadRequest, 0, "invalid_library_forum_request"},
 		{"unavailable", failForum(libraryapp.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"dependency", failForum(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"dependency", failForum(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"malformed params", badForum("invalid_library_forum_page"), http.StatusBadRequest, 0, "invalid_library_forum_page"},
 	})
 }

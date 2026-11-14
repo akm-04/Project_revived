@@ -248,8 +248,5 @@ var topFloorFailureRows = []failureRow{
 }
 
 func failTopFloor(err error) httpedge.Response {
-	if classified := classifyFailure(topFloorFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(topFloorFailureRows, err)
 }

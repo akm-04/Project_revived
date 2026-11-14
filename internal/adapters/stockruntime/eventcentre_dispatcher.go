@@ -10,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -193,12 +192,5 @@ func eventCentreRefusal() httpedge.Response {
 }
 
 func failEventCentre(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.As(err, &conflict) {
-		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
-	}
-	if classified := classifyFailure(eventCentreFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(eventCentreFailureRows, err)
 }

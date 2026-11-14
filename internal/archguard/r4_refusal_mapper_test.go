@@ -177,3 +177,43 @@ func productionGoFiles(t *testing.T, base string) []string {
 	}
 	return names
 }
+
+// TestR4CatchAllFailuresUseFailureFromRows guards the dispatcher fallback: a
+// function that ends in failureReply(unavailable(err)) answers 503 for any
+// error, so a permanent defect looks retryable. failureFromRows keeps 503 for
+// transient faults only. It sees only the final return of a function.
+func TestR4CatchAllFailuresUseFailureFromRows(t *testing.T) {
+	root := repoRoot(t)
+	base := filepath.Join(root, "internal", "adapters", "stockruntime")
+	allowed := map[string]bool{"questionUnavailable": true} // its callers pass only the gm question unavailable sentinel
+	for _, name := range productionGoFiles(t, base) {
+		if name == "failure.go" {
+			continue
+		}
+		file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(base, name), nil, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, declaration := range file.Decls {
+			function, ok := declaration.(*ast.FuncDecl)
+			if !ok || function.Body == nil || len(function.Body.List) == 0 || allowed[function.Name.Name] {
+				continue
+			}
+			last, ok := function.Body.List[len(function.Body.List)-1].(*ast.ReturnStmt)
+			if !ok || len(last.Results) != 1 {
+				continue
+			}
+			reply, ok := last.Results[0].(*ast.CallExpr)
+			if !ok || calledName(reply.Fun) != "failureReply" || len(reply.Args) != 1 {
+				continue
+			}
+			inner, ok := reply.Args[0].(*ast.CallExpr)
+			if !ok || calledName(inner.Fun) != "unavailable" || len(inner.Args) != 1 {
+				continue
+			}
+			if variable, ok := inner.Args[0].(*ast.Ident); ok && variable.Name != "nil" {
+				t.Errorf("%s: %s ends in failureReply(unavailable(%s)); use failureFromRows", name, function.Name.Name, variable.Name)
+			}
+		}
+	}
+}

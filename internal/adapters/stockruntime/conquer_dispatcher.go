@@ -144,8 +144,5 @@ var conquerFailureRows = []failureRow{
 }
 
 func failConquer(err error) httpedge.Response {
-	if classified := classifyFailure(conquerFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(conquerFailureRows, err)
 }

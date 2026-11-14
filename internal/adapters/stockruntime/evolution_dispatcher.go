@@ -90,8 +90,5 @@ var evolutionFailureRows = []failureRow{
 }
 
 func failEvolution(e error) httpedge.Response {
-	if classified := classifyFailure(evolutionFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(evolutionFailureRows, e)
 }

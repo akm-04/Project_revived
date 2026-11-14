@@ -96,7 +96,7 @@ func TestPart2ArenaFailureRows(t *testing.T) {
 		{"invalid", failArena(arena.ErrInvalid), http.StatusBadRequest, 0, "arena_request_refused"},
 		{"closed", failArena(arena.ErrClosed), http.StatusConflict, unprovenRefusalCode, ""},
 		{"insufficient", failArena(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
-		{"fallback", failArena(fallback), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", failArena(fallback), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"fight no team", failArenaFight(apparena.ErrNoTeam), http.StatusConflict, arenaNoTeamError, ""},
@@ -104,7 +104,7 @@ func TestPart2ArenaFailureRows(t *testing.T) {
 		{"fight closed", failArenaFight(arena.ErrClosed), http.StatusConflict, arenaClosedError, ""},
 		{"fight insufficient", failArenaFight(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
 		{"fight invalid", failArenaFight(arena.ErrInvalid), http.StatusBadRequest, 0, "arena_request_refused"},
-		{"fight fallback", failArenaFight(fallback), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fight fallback", failArenaFight(fallback), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -113,10 +113,10 @@ func TestPart2ConquerLeagueFailureRows(t *testing.T) {
 		{"conquer refused", failConquer(conquerschool.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"conquer invalid", failConquer(conquerschool.ErrInvalid), http.StatusBadRequest, 0, "conquer_request_refused"},
 		{"conquer insufficient", failConquer(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
-		{"conquer fallback", failConquer(errors.New("conquer dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"conquer fallback", failConquer(errors.New("conquer dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"league refused", failLeague(championsleague.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"league invalid", failLeague(championsleague.ErrInvalid), http.StatusBadRequest, 0, "league_request_refused"},
-		{"league fallback", failLeague(errors.New("league dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"league fallback", failLeague(errors.New("league dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -126,7 +126,7 @@ func TestPart2OneOnOneFailureRows(t *testing.T) {
 		{"refused", failOneOnOne(oneonone.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid", failOneOnOne(oneonone.ErrInvalid), http.StatusBadRequest, 0, "one_on_one_request_refused"},
 		{"insufficient", failOneOnOne(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
-		{"fallback", failOneOnOne(errors.New("one on one dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", failOneOnOne(errors.New("one on one dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -137,17 +137,17 @@ func TestPart2TopFloorFailureRows(t *testing.T) {
 		{"refused", failTopFloor(topfloor.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid", failTopFloor(topfloor.ErrInvalid), http.StatusBadRequest, 0, "top_floor_request_refused"},
 		{"insufficient", failTopFloor(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
-		{"fallback", failTopFloor(errors.New("top floor dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", failTopFloor(errors.New("top floor dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"task refused", failTopFloorTask(topfloor.ErrRefused), http.StatusConflict, topFloorTaskNotOpen, ""},
 		{"task invalid", failTopFloorTask(topfloor.ErrInvalid), http.StatusBadRequest, 0, "invalid_top_floor_task_parameter"},
-		{"task fallback", failTopFloorTask(topfloor.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"task fallback", failTopFloorTask(topfloor.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
 func TestPart2AchievementFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"nothing to claim", failAchievement(appachievement.ErrNothingToClaim), http.StatusConflict, unprovenRefusalCode, ""},
-		{"fallback", failAchievement(errors.New("achievement dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", failAchievement(errors.New("achievement dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -158,7 +158,7 @@ func TestPart2DormFailureRows(t *testing.T) {
 		{"invalid facts", failDorm(dormhouse.ErrInvalidFacts), http.StatusBadRequest, 0, "dorm_unavailable"},
 		{"unqualified", failDorm(dormhouse.ErrUnqualified), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid layout", failDorm(dormhouse.ErrInvalidLayout), http.StatusBadRequest, 0, "dorm_unavailable"},
-		{"fallback", failDorm(errors.New("dorm dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", failDorm(errors.New("dorm dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"social rejected", failSocialDorm(appdorm.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
 		{"social stale", failSocialDorm(appdorm.ErrStale), http.StatusConflict, staleConflictCode, ""},
 		{"social retired", failSocialDorm(appdorm.ErrRetired), http.StatusConflict, unprovenRefusalCode, ""},
@@ -168,14 +168,14 @@ func TestPart2DormFailureRows(t *testing.T) {
 		{"social invalid layout", failSocialDorm(dormhouse.ErrInvalidLayout), http.StatusBadRequest, 0, "dorm_unavailable"},
 		{"social stale time", failSocialDorm(dormhouse.ErrStaleTime), http.StatusConflict, staleConflictCode, ""},
 		{"social hidden", failSocialDorm(dormhouse.ErrHidden), http.StatusConflict, unprovenRefusalCode, ""},
-		{"social fallback", failSocialDorm(errors.New("dorm social dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"social fallback", failSocialDorm(errors.New("dorm social dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
 func TestPart2LibraryFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"rejected", failLibrary(applibrary.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
-		{"fallback", failLibrary(errors.New("library dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", failLibrary(errors.New("library dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"mode rejected", failLibraryMode(applibrary.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mode retired", failLibraryMode(applibrary.ErrRetired), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mode unqualified", failLibraryMode(librarylocal.ErrUnqualified), http.StatusConflict, unprovenRefusalCode, ""},
@@ -193,7 +193,7 @@ func TestPart2EquipmentFamilyFailureRows(t *testing.T) {
 		{"element rejected", failElement(appelement.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
 		{"element invalid", failElement(elementequipment.ErrInvalid), http.StatusBadRequest, 0, "elementequipment_command_rejected"},
 		{"element insufficient", failElement(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
-		{"element fallback", failElement(errors.New("element dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"element fallback", failElement(errors.New("element dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"evolution rejected", failEvolution(appevolution.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
 		{"evolution invalid", failEvolution(heroevolution.ErrInvalid), http.StatusBadRequest, 0, "heroevolution_command_rejected"},
 		{"evolution insufficient", failEvolution(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
@@ -202,7 +202,7 @@ func TestPart2EquipmentFamilyFailureRows(t *testing.T) {
 		{"spirit rejected", failSpirit(appspirit.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
 		{"spirit invalid", failSpirit(spirit.ErrInvalid), http.StatusBadRequest, 0, "spirit_command_rejected"},
 		{"spirit insufficient", failSpirit(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
-		{"spirit fallback", failSpirit(errors.New("spirit dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"spirit fallback", failSpirit(errors.New("spirit dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 

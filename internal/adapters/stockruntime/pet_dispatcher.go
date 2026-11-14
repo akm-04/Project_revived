@@ -108,7 +108,7 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		}
 		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
 		if err != nil {
-			return failureReply(unavailable(err))
+			return failureFromRows(nil, err)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"economy_": map[string]any{"crystal": crystal}}}
 	case 789:

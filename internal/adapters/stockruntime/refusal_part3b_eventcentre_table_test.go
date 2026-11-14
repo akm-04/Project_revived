@@ -24,7 +24,7 @@ func TestPart3BEventCentreFailureRows(t *testing.T) {
 		{"balance coins", failEventCentre(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
 		{"balance stamina", failEventCentre(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
 		{"unavailable", failEventCentre(app.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"dependency", failEventCentre(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"dependency", failEventCentre(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"malformed params", eventCentreRefusal(), http.StatusConflict, unprovenRefusalCode, ""},
 	})
 	assertPart2FailureCases(t, []part2FailureCase{

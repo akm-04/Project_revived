@@ -223,10 +223,7 @@ var libraryFailureRows = []failureRow{
 }
 
 func failLibrary(e error) httpedge.Response {
-	if classified := classifyFailure(libraryFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(libraryFailureRows, e)
 }
 
 // failLibraryMode refuses business conflicts so the stock Library callbacks see

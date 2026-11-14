@@ -169,8 +169,5 @@ var spiritFailureRows = []failureRow{
 }
 
 func failSpirit(e error) httpedge.Response {
-	if classified := classifyFailure(spiritFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(spiritFailureRows, e)
 }
