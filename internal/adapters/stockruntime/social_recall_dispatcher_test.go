@@ -77,7 +77,7 @@ func TestRecallAwardDispatcherStockShapeAndRefusals(t *testing.T) {
 	for _, failure := range []error{recall.ErrAwardProof, recall.ErrAwardUnavailable, errors.New("database unavailable")} {
 		probe.err = failure
 		result := dispatcher.Dispatch(context.Background(), heroReq(t, 194, map[string]any{"award_id": int64(100001)}))
-		if result.HTTPStatus != 503 || result.Body["awards"] != nil {
+		if result.HTTPStatus != 500 || result.Body["awards"] != nil {
 			t.Fatal(failure, result)
 		}
 	}
@@ -120,7 +120,7 @@ func TestRecallStartDispatcherStockShapeAndRefusals(t *testing.T) {
 	}
 	probe.err = errors.New("database unavailable")
 	result := dispatcher.Dispatch(context.Background(), heroReq(t, 193, map[string]any{"friend_id": int64(125002)}))
-	if result.HTTPStatus != 503 || result.Body["doing_recall"] != nil {
+	if result.HTTPStatus != 500 || result.Body["doing_recall"] != nil {
 		t.Fatal(result)
 	}
 }

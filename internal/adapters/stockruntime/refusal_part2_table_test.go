@@ -58,6 +58,18 @@ func assertPart2FailureCases(t *testing.T, cases []part2FailureCase) {
 				}
 				return
 			}
+			if tc.want == http.StatusBadRequest {
+				if tc.got.Body["error_code"] != unprovenRefusalCode {
+					t.Fatalf("malformed error_code=%#v want=%d", tc.got.Body["error_code"], unprovenRefusalCode)
+				}
+				if tc.got.Body["error_msg"] != "" {
+					t.Fatalf("malformed error_msg=%#v want empty", tc.got.Body["error_msg"])
+				}
+				if tc.errorBody != "" && tc.got.Body["error"] != tc.errorBody {
+					t.Fatalf("error=%#v want=%q", tc.got.Body["error"], tc.errorBody)
+				}
+				return
+			}
 			if _, hasCode := tc.got.Body["error_code"]; hasCode {
 				t.Fatalf("unexpected error_code in %#v", tc.got.Body)
 			}
@@ -196,7 +208,7 @@ func TestPart2EquipmentFamilyFailureRows(t *testing.T) {
 
 func TestPart2PracticeFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
-		{"commit unknown", practiceFailure(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusServiceUnavailable, 0, ""},
+		{"commit unknown", practiceFailure(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"receipt conflict", practiceFailure(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"actor stale", practiceFailure(apppractice.ErrActorStaleVersion), http.StatusConflict, staleConflictCode, ""},
 		{"stale version", practiceFailure(apppractice.ErrStaleVersion), http.StatusConflict, staleConflictCode, ""},
@@ -221,7 +233,7 @@ func TestPart2SavedPresetFailureRows(t *testing.T) {
 		{"ambiguous delete", failSavedPreset(appsavedpreset.ErrAmbiguousLegacyDelete), http.StatusConflict, staleConflictCode, ""},
 		{"stale delete", failSavedPreset(appsavedpreset.ErrStaleLegacyDelete), http.StatusConflict, staleConflictCode, ""},
 		{"receipt conflict", failSavedPreset(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
-		{"commit unknown", failSavedPreset(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusServiceUnavailable, 0, ""},
+		{"commit unknown", failSavedPreset(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"fallback", failSavedPreset(errors.New("saved preset dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

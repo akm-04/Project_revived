@@ -57,7 +57,7 @@ func TestGMQuestionDispatcherUsesOrdinarySourceShapes(t *testing.T) {
 		if result.HTTPStatus != 400 {
 			t.Fatal("malformed question", parameters, result)
 		}
-		assertGMQuestionBody(t, result.Body, `{"error":"invalid_gm_question_parameter"}`)
+		assertGMQuestionBody(t, result.Body, `{"error":"invalid_gm_question_parameter","error_code":35028,"error_msg":""}`)
 	}
 	probe.err = domain.ErrQuestion
 	refused := dispatcher.Dispatch(context.Background(), heroReq(t, 5, map[string]any{"msg": " "}))

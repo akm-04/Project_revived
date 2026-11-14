@@ -54,7 +54,7 @@ func TestSocialExchangeDispatcherStockParametersAndRefusals(t *testing.T) {
 		}
 	}
 	probe.err = exchange.ErrProof
-	if result := dispatcher.Dispatch(context.Background(), heroReq(t, 191, map[string]any{"id": int64(1), "num": int64(1)})); result.HTTPStatus != 503 || result.Body["awards"] != nil {
+	if result := dispatcher.Dispatch(context.Background(), heroReq(t, 191, map[string]any{"id": int64(1), "num": int64(1)})); result.HTTPStatus != 500 || result.Body["awards"] != nil {
 		t.Fatal(result)
 	}
 	if result := (SocialExchangeDispatcher{Authority: httpAuthority{actorForHTTP(t)}}).Dispatch(context.Background(), heroReq(t, 191, map[string]any{"id": int64(1), "num": int64(1)})); result.HTTPStatus != 503 {

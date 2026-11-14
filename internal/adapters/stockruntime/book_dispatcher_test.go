@@ -52,8 +52,8 @@ func TestBookFailureRowTable(t *testing.T) {
 				t.Fatalf("status=%d want=%d body=%#v", got.HTTPStatus, row.wantStatus, got.Body)
 			}
 			if row.wantCode == 0 {
-				if _, hasCode := got.Body["error_code"]; hasCode {
-					t.Fatalf("unexpected error_code: %#v", got.Body)
+				if got.Body["error_code"] != unprovenRefusalCode || got.Body["error_msg"] != "" {
+					t.Fatalf("malformed code body: %#v", got.Body)
 				}
 				return
 			}

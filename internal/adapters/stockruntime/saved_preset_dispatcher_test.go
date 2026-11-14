@@ -89,7 +89,7 @@ func TestSavedPresetDispatcherUsesD5RefusalCodes(t *testing.T) {
 		{characterasset.ErrReferenceNotFound, http.StatusBadRequest, 0},
 		{appsavedpreset.ErrAmbiguousLegacyDelete, http.StatusConflict, staleConflictCode},
 		{appsavedpreset.ErrStaleLegacyDelete, http.StatusConflict, staleConflictCode},
-		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusServiceUnavailable, 0},
+		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusServiceUnavailable, serverBusyCode},
 		{errors.New("infra"), http.StatusServiceUnavailable, serverBusyCode},
 	}
 	for _, tc := range cases {
@@ -100,8 +100,8 @@ func TestSavedPresetDispatcherUsesD5RefusalCodes(t *testing.T) {
 			t.Fatalf("err=%v got=%+v", tc.err, got)
 		}
 		if tc.code == 0 {
-			if _, invented := got.Body["error_code"]; invented {
-				t.Fatalf("unexpected error code for %v: %+v", tc.err, got.Body)
+			if got.Body["error_code"] != unprovenRefusalCode || got.Body["error_msg"] != "" {
+				t.Fatalf("malformed code body for %v: %+v", tc.err, got.Body)
 			}
 			continue
 		}

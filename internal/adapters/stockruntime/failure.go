@@ -1,12 +1,20 @@
 package stockruntime
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
+	apphero "gxb.local/backend/v2/internal/application/characterhero"
+	apppet "gxb.local/backend/v2/internal/application/characterpet"
+	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
+	appcombat "gxb.local/backend/v2/internal/application/combat"
+	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
+	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -16,6 +24,7 @@ const (
 	unprovenRefusalCode     int64 = 35028
 	staleConflictCode       int64 = 40002
 	serverBusyCode          int64 = 35033
+	sessionFailureCode      int64 = 20003
 	insufficientDiamondCode int64 = 20005
 	insufficientCoinCode    int64 = 20006
 	insufficientStaminaCode int64 = 20007
@@ -39,6 +48,7 @@ const (
 	failureUnavailable
 	failureDefect
 	failureUnknownCommit
+	failureSession
 )
 
 type classifiedFailure struct {
@@ -77,8 +87,19 @@ func unavailable(cause error) *classifiedFailure {
 	return &classifiedFailure{class: failureUnavailable, cause: cause}
 }
 
+func defect(cause error) *classifiedFailure {
+	return &classifiedFailure{class: failureDefect, cause: cause}
+}
+
 func unknownCommit(detail string, cause error) *classifiedFailure {
 	return &classifiedFailure{class: failureUnknownCommit, detail: detail, cause: cause}
+}
+
+// sessionFailure marks an expired, replaced or invalid session/token (U6). The
+// server has no content row for message.lua text, so error_msg stays empty and
+// the client toasts message.lua's 20003 row.
+func sessionFailure() *classifiedFailure {
+	return &classifiedFailure{class: failureSession}
 }
 
 // UnprovenRefusal is the named mapper entry for rows whose stock code has no
@@ -125,23 +146,81 @@ func insufficientBalanceCode(err error) int64 {
 	return unprovenRefusalCode
 }
 
+// sharedFailureRows apply to every failureFromRows call after the dispatcher's
+// own rows. Content inactive is a permanent refusal (the content revision does
+// not grant the capability); an unknown resource is a server defect because the
+// caller named a resource the content compiler never defined.
+var sharedFailureRows = []failureRow{
+	{match: economy.ErrUnknownResource, class: failureDefect},
+	{match: apphero.ErrHeroContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrAppearanceContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroProgressionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEquipmentContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrSuperEquipmentContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroFumoContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetAcquisitionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetProgressionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetEquipmentContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetPromotionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetAppearanceContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppractice.ErrContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+}
+
+// isTransient lists the faults where the same request may succeed later. A
+// permanent refusal never answers 503 (D5 amendment).
+func isTransient(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+	if errors.Is(err, tx.ErrAdmissionClosed) {
+		return true
+	}
+	if errors.Is(err, combat.ErrResolverRetryable) || errors.Is(err, appcombat.ErrWorkerSaturated) {
+		return true
+	}
+	if errors.Is(err, httpedge.ErrSaturated) {
+		return true
+	}
+	if tx.IsDefiniteAbortError(err) {
+		return true
+	}
+	state := tx.SQLState(err)
+	if strings.HasPrefix(state, "40") || strings.HasPrefix(state, "53") || strings.HasPrefix(state, "08") {
+		return true
+	}
+	// pgx v5 pgxpool returns the acquire context's deadline while waiting for a
+	// connection, so the context checks above cover the pool acquire timeout.
+	return state == "57P01"
+}
+
 // failureFromRows maps a dispatcher's domain errors to the client reply. A
-// receipt conflict is D5's stale-state refusal; the fallback is a server fault.
+// receipt conflict is D5's stale-state refusal; the shared rows cover inactivity
+// and content defects; the fallback is transient only for a retryable fault.
 func failureFromRows(rows []failureRow, err error) httpedge.Response {
+	if classified := classifyFailure(rows, err); classified != nil {
+		return failureReply(classified)
+	}
 	var conflict *receipt.ConflictError
 	if errors.As(err, &conflict) {
 		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
 	}
-	if classified := classifyFailure(rows, err); classified != nil {
+	if classified := classifyFailure(sharedFailureRows, err); classified != nil {
 		return failureReply(classified)
 	}
-	return failureReply(unavailable(err))
+	if isTransient(err) {
+		return failureReply(unavailable(err))
+	}
+	return failureReply(defect(err))
 }
 
 func failureReply(failure *classifiedFailure) httpedge.Response {
 	switch failure.class {
 	case failureMalformed:
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Cause: failure.cause, Body: map[string]any{"error": failure.detail}}
+		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Cause: failure.cause, Body: map[string]any{"error_code": unprovenRefusalCode, "error_msg": "", "error": failure.detail}}
 	case failureRefusal:
 		body := make(map[string]any, len(failure.extra)+2)
 		for key, value := range failure.extra {
@@ -155,9 +234,11 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 	case failureDefect:
 		return httpedge.Response{HTTPStatus: http.StatusInternalServerError, Cause: failure.cause, Body: map[string]any{"error_code": unprovenRefusalCode, "error_msg": ""}}
 	case failureUnknownCommit:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error": failure.detail}}
+		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": "", "error": failure.detail}}
+	case failureSession:
+		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Cause: failure.cause, Body: map[string]any{"error_code": sessionFailureCode, "error_msg": ""}}
 	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error": "unclassified_failure"}}
+	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": ""}}
 }
 
 // The three protocol-edge statuses below sit outside the mapper's refusal
