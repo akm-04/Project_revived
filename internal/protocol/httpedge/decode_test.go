@@ -183,11 +183,11 @@ func TestHandlerUnknownUnimplementedImplementedAndSaturation(t *testing.T) {
 		return w
 	}
 	w := call(`{"mid":65001}`)
-	if w.Code != 404 {
+	if w.Code != http.StatusConflict {
 		t.Fatalf("unknown=%d %s", w.Code, w.Body.String())
 	}
 	w = call(`{"mid":50}`)
-	if w.Code != 501 {
+	if w.Code != http.StatusConflict {
 		t.Fatalf("unimplemented=%d %s", w.Code, w.Body.String())
 	}
 	if err := h.Router.Register(50, DispatcherFunc(func(ctx context.Context, req DispatchRequest) Response {

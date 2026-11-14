@@ -79,7 +79,7 @@ func TestJournalUsesPublicCodeWhenServerErrorHasNoCause(t *testing.T) {
 func TestJournalKeepsRawEnvelopeOfUnknownAndUndecodableRequests(t *testing.T) {
 	journal := &capturedJournal{}
 	handler := journalHandler(t, journal, func(context.Context, DispatchRequest) Response { return Response{} })
-	if code := post(handler, `{"mid":65000,"token":"bearer"}`).Code; code != http.StatusNotFound {
+	if code := post(handler, `{"mid":65000,"token":"bearer"}`).Code; code != http.StatusConflict {
 		t.Fatalf("unknown code=%d", code)
 	}
 	post(handler, `not json`)

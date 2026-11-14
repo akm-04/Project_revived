@@ -1006,7 +1006,7 @@ func TestI9_9BProjectionCacheKeyAndWireNative(t *testing.T) {
 	// Negative control: the same failing content owner refuses the Hero list.
 	heroFailDispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower},
 		Service: rentalListOnlyPort{Reader: rentalReader(f, failingContent, authoritativeObservation)}}
-	if failed := rentalDispatch(t, heroFailDispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": int64(1)}, readOp); failed.HTTPStatus != http.StatusServiceUnavailable {
-		t.Fatalf("2768 failing Hero curve returned %d", failed.HTTPStatus)
+	if failed := rentalDispatch(t, heroFailDispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": int64(1)}, readOp); failed.HTTPStatus != http.StatusInternalServerError || failed.Body["error_code"] != int64(35028) {
+		t.Fatalf("2768 failing Hero curve returned %d %v", failed.HTTPStatus, failed.Body)
 	}
 }

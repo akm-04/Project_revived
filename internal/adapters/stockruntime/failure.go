@@ -30,6 +30,14 @@ const (
 	insufficientStaminaCode int64 = 20007
 )
 
+// sessionFailureMessage is message.lua row 20003
+// (tmp/virtualclient/src_64/data/tables/message.lua:44-48, "登錄失敗"/"Login
+// failed"). Backend.lua:428-447 opens the one-button alert that restarts the
+// game only for a non-empty error_msg; an empty one only toasts and leaves the
+// player stuck on the dead session. PRIVATE_POLICY tunable: the stock row text
+// is the default, an operator may change it.
+const sessionFailureMessage = "Unstable network,try to relog in!"
+
 // Stock resource keys: crystal is the diamond wallet (eventcentre admin
 // exchange from_type 2 -> 20005), mana is the coin wallet (from_type 1 ->
 // 20006, message.lua 20005/20006), and energy is stamina (client enums.lua
@@ -105,9 +113,9 @@ func unknownCommit(detail string, cause error) *classifiedFailure {
 	return &classifiedFailure{class: failureUnknownCommit, detail: detail, cause: cause}
 }
 
-// sessionFailure marks an expired, replaced or invalid session/token (U6). The
-// server has no content row for message.lua text, so error_msg stays empty and
-// the client toasts message.lua's 20003 row.
+// sessionFailure marks an expired, replaced or invalid session/token (U6). Its
+// non-empty error_msg is the message.lua 20003 text, so the client alerts and
+// restarts into login instead of leaving the player on a dead session.
 func sessionFailure() *classifiedFailure {
 	return &classifiedFailure{class: failureSession}
 }
@@ -250,7 +258,7 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 	case failureUnknownCommit:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": "", "error": failure.detail}}
 	case failureSession:
-		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Cause: failure.cause, Body: map[string]any{"error_code": sessionFailureCode, "error_msg": ""}}
+		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Cause: failure.cause, Body: map[string]any{"error_code": sessionFailureCode, "error_msg": sessionFailureMessage}}
 	}
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": ""}}
 }

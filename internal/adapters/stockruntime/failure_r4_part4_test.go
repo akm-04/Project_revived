@@ -25,11 +25,12 @@ func (e sqlStateString) SQLState() string { return string(e) }
 var failureClassSentinel = errors.New("class sentinel")
 
 type failureBodyCase struct {
-	name       string
-	got        httpedge.Response
-	wantStatus int
-	wantCode   int64
-	wantError  string
+	name        string
+	got         httpedge.Response
+	wantStatus  int
+	wantCode    int64
+	wantError   string
+	wantMessage string
 }
 
 func assertFailureBodyCases(t *testing.T, cases []failureBodyCase) {
@@ -42,8 +43,8 @@ func assertFailureBodyCases(t *testing.T, cases []failureBodyCase) {
 			if tc.got.Body["error_code"] != tc.wantCode {
 				t.Fatalf("error_code=%#v want=%d", tc.got.Body["error_code"], tc.wantCode)
 			}
-			if tc.got.Body["error_msg"] != "" {
-				t.Fatalf("error_msg=%#v want empty", tc.got.Body["error_msg"])
+			if tc.got.Body["error_msg"] != tc.wantMessage {
+				t.Fatalf("error_msg=%#v want %q", tc.got.Body["error_msg"], tc.wantMessage)
 			}
 			if tc.wantError != "" && tc.got.Body["error"] != tc.wantError {
 				t.Fatalf("error=%#v want=%q", tc.got.Body["error"], tc.wantError)
@@ -56,17 +57,17 @@ func TestR4Part4FailureClassTable(t *testing.T) {
 	malformedRows := []failureRow{{match: failureClassSentinel, class: failureMalformed, detail: "bad_shape"}}
 	refusalRows := []failureRow{{match: failureClassSentinel, class: failureRefusal, code: 35002}}
 	assertFailureBodyCases(t, []failureBodyCase{
-		{"malformed", failureFromRows(malformedRows, failureClassSentinel), http.StatusBadRequest, unprovenRefusalCode, "bad_shape"},
-		{"refusal", failureFromRows(refusalRows, failureClassSentinel), http.StatusConflict, 35002, ""},
-		{"stale", failureFromRows(nil, &receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
-		{"transient", failureFromRows(nil, sqlStateString("40001")), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"lock timeout", failureFromRows(nil, sqlStateString("55P03")), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"statement timeout", failureFromRows(nil, sqlStateString("57014")), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"idle transaction timeout", failureFromRows(nil, sqlStateString("25P03")), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"unique violation", failureFromRows(nil, sqlStateString("23505")), http.StatusInternalServerError, unprovenRefusalCode, ""},
-		{"defect", failureFromRows(nil, errors.New("plain failure")), http.StatusInternalServerError, unprovenRefusalCode, ""},
-		{"unknown commit", failureReply(unknownCommit("practice_commit_unknown", errors.New("commit unknown"))), http.StatusServiceUnavailable, serverBusyCode, "practice_commit_unknown"},
-		{"session", failureReply(sessionFailure()), http.StatusUnauthorized, sessionFailureCode, ""},
+		{name: "malformed", got: failureFromRows(malformedRows, failureClassSentinel), wantStatus: http.StatusBadRequest, wantCode: unprovenRefusalCode, wantError: "bad_shape"},
+		{name: "refusal", got: failureFromRows(refusalRows, failureClassSentinel), wantStatus: http.StatusConflict, wantCode: 35002},
+		{name: "stale", got: failureFromRows(nil, &receipt.ConflictError{}), wantStatus: http.StatusConflict, wantCode: staleConflictCode},
+		{name: "transient", got: failureFromRows(nil, sqlStateString("40001")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
+		{name: "lock timeout", got: failureFromRows(nil, sqlStateString("55P03")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
+		{name: "statement timeout", got: failureFromRows(nil, sqlStateString("57014")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
+		{name: "idle transaction timeout", got: failureFromRows(nil, sqlStateString("25P03")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
+		{name: "unique violation", got: failureFromRows(nil, sqlStateString("23505")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
+		{name: "defect", got: failureFromRows(nil, errors.New("plain failure")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
+		{name: "unknown commit", got: failureReply(unknownCommit("practice_commit_unknown", errors.New("commit unknown"))), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode, wantError: "practice_commit_unknown"},
+		{name: "session", got: failureReply(sessionFailure()), wantStatus: http.StatusUnauthorized, wantCode: sessionFailureCode, wantMessage: sessionFailureMessage},
 	})
 }
 

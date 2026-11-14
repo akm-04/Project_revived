@@ -263,11 +263,11 @@ func TestD05NativeHTTPWireAuthAndNoticeKey(t *testing.T) {
 		t.Fatal(v)
 	}
 	status, _ = httpRequest(t, s, token, 2, 176, nil)
-	if status != 403 {
+	if status != http.StatusConflict {
 		t.Fatal("region accepted")
 	}
 	status, _ = httpRequest(t, s, "bad", 1, 176, nil)
-	if status != 403 {
+	if status != http.StatusUnauthorized {
 		t.Fatal("token accepted")
 	}
 	for _, fields := range []map[string]any{{"list_type": "4"}, {"list_type": 4.5}, {"list_type": 4, "unknown": 1}} {
@@ -353,7 +353,7 @@ func TestD08AllStockRoutesAndPartialShapes(t *testing.T) {
 		t.Fatal("recommend array")
 	}
 	status, _ := httpRequest(t, server, a, 1, 183, nil)
-	if status != 501 {
+	if status != http.StatusConflict {
 		t.Fatal("gift activated", status)
 	}
 	t.Log("All14selectedHTTP branches, numeric/array/string-keyed-map/ACKshapes,modern/legacy and183inactive exercised onrealPG")

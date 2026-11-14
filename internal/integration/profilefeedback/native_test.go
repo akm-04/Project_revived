@@ -592,7 +592,7 @@ func TestPraiseHTTPRawAndCallbacks(t *testing.T) {
 		}
 	}
 	status, _ = send(fmt.Sprintf(`{"mid":1830,"token":%q,"region":2,"to_player_id":%d}`, bearer, b.PlayerID))
-	if status != 403 {
+	if status != http.StatusConflict {
 		t.Fatal("region mismatch", status)
 	}
 }

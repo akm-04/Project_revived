@@ -14,6 +14,7 @@ import (
 	domainclientlog "gxb.local/backend/v2/internal/domain/clientlog"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/observability"
 
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -60,32 +61,35 @@ type LobbyDispatcher struct {
 }
 
 func (d LobbyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if req.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	actor, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
 	if err != nil {
 		return authFailure(err)
 	}
 	if req.Envelope.Claims.Region != int64(actor.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	name := ""
 	if d.PlayerName != nil {
 		name, err = d.PlayerName(ctx, int64(actor.PlayerID))
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "projection_unavailable"}}
+			return failureFromRows(nil, err)
 		}
 	}
 	body, ok := lobby.Explicit(req.Envelope.MID, lobby.BootstrapView{Actor: actor, PlayerName: name, Now: req.Envelope.ReceivedAt})
 	if !ok {
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_wave_s_facade", "mid": int64(req.Envelope.MID)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	obj, ok := body.(map[string]any)
 	if !ok {
 		// Every I4 explicit facade is intentionally an object. Embedded MID1
 		// records may contain arrays, but those are not routed here.
-		return httpedge.Response{HTTPStatus: http.StatusInternalServerError, Body: map[string]any{"error": "invalid_wave_s_shape"}}
+		return failureReply(defect(nil))
 	}
 	if d.Tracker != nil {
 		kind := lobby.BootExplicitHTTP
@@ -97,12 +101,19 @@ func (d LobbyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: obj}
 }
 
+// authFailure classifies a rejected gameplay bearer by meaning: a region or room
+// claim that does not match the canonical actor is a permanent refusal, an
+// endpoint lookup fault is a server fault, and everything else is an expired,
+// replaced or invalid session. Credential and canonical actor details are never
+// reflected to stock callers.
 func authFailure(err error) httpedge.Response {
-	if err == nil {
-		err = errors.New("authentication failed")
+	if errors.Is(err, apprealtime.ErrRegionMismatch) || errors.Is(err, domainrt.ErrRoomNotAuthorized) {
+		return failureReply(refusal(unprovenRefusalCode))
 	}
-	// Do not reflect credential or canonical actor details to stock callers.
-	return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "realtime_auth_failed"}}
+	if errors.Is(err, apprealtime.ErrNoEndpoint) {
+		return failureReply(defect(err))
+	}
+	return failureReply(sessionFailure())
 }
 
 func requiredInt64(m map[string]any, key string) (int64, error) {
@@ -148,7 +159,7 @@ type ClientLogURLIssuer interface {
 
 func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	if d.Bootstrap == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "bootstrap_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	creds := appboot.AccountCredentials{SID: stringParam(req.Envelope.Params, "sid"), LoginToken: stringParam(req.Envelope.Params, "login_token")}
 	switch req.Envelope.MID {
@@ -196,7 +207,7 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 			"is_debug": int64(0), "is_old_top": int64(0),
 		}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_bootstrap_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
@@ -226,9 +237,9 @@ func bootstrapFailure(err error) httpedge.Response {
 		// client reads 20018 on its failed-login branch, so this is not a 200.
 		return failureReply(refusalWithBody(int64(20018), map[string]any{"error_msg": ""}))
 	case errors.Is(err, appboot.ErrAccountAuth):
-		// Exact private auth semantic code is not source-recovered. Keep auth
-		// rejection as transport failure rather than inventing a stock code.
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "account_auth_failed"}}
+		// message.lua 20003 is the login-failed row; its non-empty text opens the
+		// client's restart alert, which is the correct recovery for bad credentials.
+		return failureReply(sessionFailure())
 	case errors.Is(err, logicalserver.ErrObservationRequired):
 		return failureReply(refusal(unprovenRefusalCode))
 	case errors.Is(err, logicalserver.ErrExistingLoginClosed):

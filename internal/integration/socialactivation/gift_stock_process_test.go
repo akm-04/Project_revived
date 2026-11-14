@@ -6,6 +6,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
+	"net/http"
 	"os"
 	"os/exec"
 	"testing"
@@ -134,7 +135,7 @@ func Test7B_ExplicitDeploymentActivationPreservesStartupContract(t *testing.T) {
 		t.Fatal("API startup switched oldpointer")
 	}
 	status, _ := postProcess(t, api, token, 1, 183, map[string]any{"player_id": 200001})
-	if status != 501 {
+	if status != http.StatusConflict {
 		t.Fatal("partial gift group exposed", status)
 	}
 	status, body := postProcess(t, api, token, 1, 184, map[string]any{"notice_ids": []any{}})

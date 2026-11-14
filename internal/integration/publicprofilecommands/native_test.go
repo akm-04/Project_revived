@@ -575,12 +575,12 @@ func TestRealHTTPBearerAndNonSuccessCallbacks(t *testing.T) {
 	wrong := map[string]any{"mid": 1834, "token": bearer, "region": 2, "content": "forbidden"}
 	raw, _ := json.Marshal(wrong)
 	status, _ = send(string(raw))
-	if status != 403 {
+	if status != http.StatusConflict {
 		t.Fatal("region accepted", status)
 	}
 	sqlExec(t, p, `UPDATE account_sessions SET absolute_expires_at=clock_timestamp()-interval '1 second' WHERE session_id=$1`, a.SessionID.UUID().String())
 	status, _ = send(payload(1834, map[string]any{"content": "expired"}))
-	if status != 403 {
+	if status != http.StatusUnauthorized {
 		t.Fatal("expired bearer accepted", status)
 	}
 }

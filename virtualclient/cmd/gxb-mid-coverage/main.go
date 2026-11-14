@@ -23,10 +23,10 @@ import (
 
 // Edge classes, in the order the edge decides them before any dispatcher (and so before any authentication) runs.
 const (
-	classUncatalogued  = "uncatalogued"  // 404 unknown_mid
+	classUncatalogued  = "uncatalogued"  // 409 unknown_mid
 	classSocket        = "socket"        // 400 wrong_transport
 	classUndecodable   = "not_ordinary"  // 400 before routing: a multipart MID or one the ordinary form cannot carry
-	classUnimplemented = "unimplemented" // 501 unimplemented_mid
+	classUnimplemented = "unimplemented" // 409 unimplemented_mid
 	classImplemented   = "implemented"   // reached a dispatcher
 )
 
@@ -143,11 +143,11 @@ func probe(client *http.Client, engine string, mid int) (string, error) {
 	}
 	json.Unmarshal(body, &edge)
 	switch {
-	case response.StatusCode == http.StatusNotFound && edge.Error == "unknown_mid":
+	case response.StatusCode == http.StatusConflict && edge.Error == "unknown_mid":
 		return classUncatalogued, nil
 	case response.StatusCode == http.StatusBadRequest && edge.Error == "wrong_transport":
 		return classSocket, nil
-	case response.StatusCode == http.StatusNotImplemented && edge.Error == "unimplemented_mid":
+	case response.StatusCode == http.StatusConflict && edge.Error == "unimplemented_mid":
 		return classUnimplemented, nil
 	case response.StatusCode == http.StatusBadRequest && edge.Error == "bad_request":
 		return classUndecodable, nil

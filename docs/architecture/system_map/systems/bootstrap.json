@@ -280,7 +280,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/http_dispatchers.go",
-    "line": 149
+    "line": 160
    },
    "mid": 1,
    "name": "RETRIEVE_TOKEN"
@@ -288,7 +288,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/http_dispatchers.go",
-    "line": 149
+    "line": 160
    },
    "mid": 18,
    "name": "LOAD_USER_REGIONS"

@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -24,7 +25,7 @@ func (d PreloginDispatcher) Dispatch(_ context.Context, req httpedge.DispatchReq
 	switch req.Envelope.MID {
 	case mids.MIDCenterDiscovery:
 		if strings.TrimSpace(d.PublicEngineURL) == "" {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "public_engine_url_unconfigured"}}
+			return failureReply(defect(errors.New("public_engine_url_unconfigured")))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
 			"url": d.PublicEngineURL, "server_id": int64(1), "back_domain": "", "res_download_url": "",
@@ -40,7 +41,7 @@ func (d PreloginDispatcher) Dispatch(_ context.Context, req httpedge.DispatchReq
 		key, _ := req.Envelope.Params["unique_key"].(string)
 		return httpedge.Response{HTTPStatus: http.StatusOK, JSON: tutorialGroup(key)}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_prelogin_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 

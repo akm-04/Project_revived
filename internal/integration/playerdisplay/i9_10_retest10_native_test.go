@@ -167,7 +167,7 @@ func TestI9_10Retest10IllusionFailedCreateLeavesNoRoom(t *testing.T) {
 	mode.Stats = &failingFirstStats{inner: mode.Stats}
 
 	failed := illusionRoomDispatch(t, mode, owner, 1349, map[string]any{})
-	if failed.HTTPStatus != 503 {
+	if failed.HTTPStatus != 500 || failed.Body["error_code"] != int64(35028) {
 		t.Fatalf("forced create status %d body %#v cause %v", failed.HTTPStatus, failed.Body, failed.Cause)
 	}
 	if seats := roomSeats(t, p, owner.PlayerID); seats != 0 {

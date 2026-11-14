@@ -120,12 +120,12 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observability.RequestRecord) {
 	if r.Method != http.MethodPost {
 		record.Disposition = observability.RequestUndecodable
-		writeJSON(w, http.StatusMethodNotAllowed, map[string]any{"error": "method_not_allowed"})
+		edgeFailure(w, wire.ErrMalformed, "method_not_allowed")
 		return
 	}
 	if h.Admission == nil || !h.Admission.TryAcquire() {
 		w.Header().Set("Retry-After", "1")
-		writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "edge_saturated"})
+		edgeFailure(w, wire.ErrSaturated, "edge_saturated")
 		return
 	}
 	defer h.Admission.Release()
@@ -133,14 +133,14 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	op, err := h.Operations.New(h.Policies)
 	if err != nil {
 		record.Cause = err
-		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "operation_context"})
+		edgeFailure(w, wire.ErrInternal, "operation_context")
 		return
 	}
 	decoded, edgeErr := Decode(r, h.Limits)
 	if edgeErr != nil {
 		record.Disposition = observability.RequestUndecodable
 		record.Cause = edgeErr
-		writeJSON(w, edgeErr.HTTPStatus, map[string]any{"error": edgeErr.PublicCode})
+		edgeFailure(w, edgeErr.Class, edgeErr.PublicCode)
 		return
 	}
 	defer decoded.Cleanup()
@@ -151,19 +151,19 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	if !known {
 		record.Disposition = observability.RequestUnknownMID
 		h.recordObservation(decoded, op.StartedAt)
-		writeJSON(w, http.StatusNotFound, map[string]any{"error": "unknown_mid", "mid": decoded.MID})
+		edgeFailure(w, wire.ErrUnknownMID, "unknown_mid")
 		return
 	}
 	if desc.Transport != mids.HTTP {
 		record.Disposition = observability.RequestUndecodable
-		writeJSON(w, http.StatusBadRequest, map[string]any{"error": "wrong_transport", "mid": decoded.MID})
+		edgeFailure(w, wire.ErrMalformed, "wrong_transport")
 		return
 	}
 	dispatcher, implemented := h.Router.Lookup(decoded.MID)
 	if !implemented {
 		record.Disposition = observability.RequestUnknownMID
 		h.recordObservation(decoded, op.StartedAt)
-		writeJSON(w, http.StatusNotImplemented, map[string]any{"error": "unimplemented_mid", "mid": decoded.MID})
+		edgeFailure(w, wire.ErrUnimplemented, "unimplemented_mid")
 		return
 	}
 	record.Disposition = observability.RequestDispatched
@@ -204,6 +204,36 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 		payload = resp.JSON
 	}
 	writeJSONValue(w, status, payload)
+}
+
+// D5 PRIVATE_POLICY tunables; both are message.lua rows (35028 "Not Available",
+// 35033 "The server is busy, please try again later.").
+const (
+	edgeRefusalCode   int64 = 35028
+	edgeTransientCode int64 = 35033
+)
+
+// edgeFailure is the only place the edge writes a non-200 reply. Backend.lua
+// :428-447 toasts the message.lua row for an empty error_msg; no edge failure
+// restarts the game.
+func edgeFailure(w http.ResponseWriter, class wire.ErrorClass, publicCode string) {
+	status, code := edgeFailureStatus(class)
+	writeJSON(w, status, map[string]any{"error_code": code, "error_msg": "", "error": publicCode})
+}
+
+func edgeFailureStatus(class wire.ErrorClass) (int, int64) {
+	switch class {
+	case wire.ErrSaturated:
+		return http.StatusServiceUnavailable, edgeTransientCode
+	case wire.ErrUnknownMID, wire.ErrUnimplemented, wire.ErrForbidden:
+		return http.StatusConflict, edgeRefusalCode
+	case wire.ErrTooLarge:
+		return http.StatusRequestEntityTooLarge, edgeRefusalCode
+	case wire.ErrInternal:
+		return http.StatusInternalServerError, edgeRefusalCode
+	default:
+		return http.StatusBadRequest, edgeRefusalCode
+	}
 }
 
 func (h Handler) recordObservation(decoded *Decoded, now time.Time) {
