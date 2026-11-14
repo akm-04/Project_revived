@@ -207,6 +207,11 @@ func isTransient(err error) bool {
 	if tx.IsDefiniteAbortError(err) {
 		return true
 	}
+	// The commit may have landed; the client's retry replays through the receipt.
+	var commitUnknown *tx.UnknownCommitError
+	if errors.As(err, &commitUnknown) {
+		return true
+	}
 	state := tx.SQLState(err)
 	if strings.HasPrefix(state, "40") || strings.HasPrefix(state, "53") || strings.HasPrefix(state, "08") {
 		return true

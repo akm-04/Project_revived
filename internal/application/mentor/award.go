@@ -66,7 +66,7 @@ func (service Service) Claim(ctx context.Context, actor identity.ActorContext, m
 			return err
 		}
 		if !complete {
-			return refusal(1)
+			return refusal(35028) // message.lua has no row 1; 35028 is the stock generic refusal row
 		}
 		var mentorRelation *domain.Relationship
 		if missionID == catalog.Rules.FinishMissionID {
