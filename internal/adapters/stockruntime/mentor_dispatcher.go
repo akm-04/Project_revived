@@ -35,7 +35,7 @@ func (dispatcher MentorDispatcher) Dispatch(ctx context.Context, request httpedg
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return mentorUnavailable()
+		return failureReply(defect(nil))
 	}
 	parameters := request.Envelope.Params
 	op := request.Envelope.Operation
@@ -156,10 +156,6 @@ func (dispatcher MentorDispatcher) Dispatch(ctx context.Context, request httpedg
 func numericParameter(parameters map[string]any, key string) bool {
 	_, ok := topFloorInteger(parameters, key, false)
 	return ok
-}
-
-func mentorUnavailable() httpedge.Response {
-	return failureReply(unavailable(nil))
 }
 
 // Every business refusal is HTTP 409 with the best stock message code, because

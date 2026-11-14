@@ -102,6 +102,8 @@ func defect(cause error) *classifiedFailure {
 // refusalOrTransient keeps a bounded private refusal for any permanent fault,
 // because those endpoints must never answer 200 or a generic defect body, while
 // a retryable fault still gets the transient 503.
+// The DM owners reuse ErrUnavailable for a missing recipient root or fence,
+// and PASS647 answers DM "unavailable" 409, so the sentinel list is not consulted.
 func refusalOrTransient(err error) httpedge.Response {
 	if isTransient(err) {
 		return failureReply(unavailable(err))

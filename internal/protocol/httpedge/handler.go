@@ -341,7 +341,7 @@ func writeJSONValue(w http.ResponseWriter, status int, body any) {
 	payload, err := json.Marshal(body)
 	if err != nil {
 		status = http.StatusInternalServerError
-		payload = []byte(`{"error":"response_encoding"}`)
+		payload = []byte(`{"error_code":35028,"error_msg":"","error":"response_encoding"}`)
 	}
 	payload = append(payload, '\n')
 	w.Header().Set("Content-Type", "application/json")

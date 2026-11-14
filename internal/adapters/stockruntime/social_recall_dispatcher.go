@@ -52,7 +52,7 @@ func (dispatcher SocialRecallAwardDispatcher) Dispatch(ctx context.Context, requ
 		return badHero("invalid_social_recall_award_parameter")
 	}
 	if dispatcher.Service == nil {
-		return failureReply(unavailable(nil))
+		return failureReply(defect(nil))
 	}
 	body, err := dispatcher.Service.Claim(ctx, actor, award, request.Envelope.Operation)
 	if err == nil {
@@ -75,7 +75,7 @@ func (dispatcher SocialRecallStartDispatcher) Dispatch(ctx context.Context, requ
 		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if dispatcher.Service == nil {
-		return failureReply(unavailable(nil))
+		return failureReply(defect(nil))
 	}
 	body, err := dispatcher.Service.Start(ctx, actor, identity.PlayerID(target), request.Envelope.Operation)
 	if err == nil {

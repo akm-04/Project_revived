@@ -293,7 +293,7 @@ var adventureFailureRows = []failureRow{
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: sr.ErrNotInRoom, class: failureRefusal, code: unprovenRefusalCode},
-	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: adventureExpired}, // I9_ADVENTURE_POLICY_V1 rooms.second_room_for_slot
 	{match: sr.ErrNotFound, class: failureRefusal, code: unprovenRefusalCode},
 	{match: room.ErrFull, class: failureRefusal, code: unprovenRefusalCode},
 	{match: room.ErrKicked, class: failureRefusal, code: unprovenRefusalCode},

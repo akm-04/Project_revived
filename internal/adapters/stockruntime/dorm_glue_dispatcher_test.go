@@ -60,9 +60,14 @@ func TestDormGlueDispatcherUsesStockEmptyRequestAndRejectsUnsafeSuccess(t *testi
 			t.Fatalf("conflict refusal body must be error_code and empty error_msg: %v", response.Body)
 		}
 	}
-	fake.err = economy.ErrInsufficientBalance
-	response = dispatcher.Dispatch(context.Background(), request)
-	if response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode || response.Body["error"] != "dorm_glue_purchase_refused" {
-		t.Fatalf("business refusal lost the stock refusal body: %v", response)
+	for _, cell := range []struct {
+		err  error
+		code int64
+	}{{economy.ErrInsufficientBalance, unprovenRefusalCode}, {economy.InsufficientBalance("crystal"), insufficientDiamondCode}} {
+		fake.err = cell.err
+		response = dispatcher.Dispatch(context.Background(), request)
+		if response.HTTPStatus != 409 || response.Body["error_code"] != cell.code || response.Body["error"] != "dorm_glue_purchase_refused" {
+			t.Fatalf("balance refusal lost its D5 code or the stock refusal body: %v", response)
+		}
 	}
 }

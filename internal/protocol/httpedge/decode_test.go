@@ -270,7 +270,7 @@ func TestHandlerResponseEncodingFailureDoesNotRedispatch(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatal(err)
 	}
-	if body["error"] != "response_encoding" {
+	if body["error"] != "response_encoding" || body["error_code"] != float64(edgeRefusalCode) || body["error_msg"] != "" {
 		t.Fatalf("body=%v", body)
 	}
 }

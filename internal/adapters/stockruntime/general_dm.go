@@ -32,8 +32,6 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 			return failureReply(malformed(name))
 		case 409:
 			return failureReply(refusal(unprovenRefusalCode))
-		case 503:
-			return failureReply(defect(nil))
 		case 401:
 			return failureReply(sessionFailure())
 		default:

@@ -35,7 +35,7 @@ func (dispatcher SocialExchangeDispatcher) Dispatch(ctx context.Context, request
 		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if dispatcher.Service == nil {
-		return failureReply(unavailable(nil))
+		return failureReply(defect(nil))
 	}
 	body, err := dispatcher.Service.Exchange(ctx, actor, exchange.Request{ProductID: productID, Count: count}, request.Envelope.Operation)
 	if err == nil {

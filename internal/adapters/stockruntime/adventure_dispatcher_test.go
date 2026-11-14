@@ -193,7 +193,7 @@ func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 	}
 	stub.err = sr.ErrAlreadyInRoom
 	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
-	if response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(adventureExpired) {
 		t.Fatalf("already in room %+v", response)
 	}
 	stub.err = economy.ErrUnknownResource

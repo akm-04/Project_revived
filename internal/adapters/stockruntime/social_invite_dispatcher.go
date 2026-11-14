@@ -47,7 +47,7 @@ func (dispatcher SocialInviteDispatcher) Dispatch(ctx context.Context, request h
 			return badHero("invalid_social_invite_request")
 		}
 		if dispatcher.Read == nil {
-			return inviteUnavailable()
+			return failureReply(defect(nil))
 		}
 		body, err := dispatcher.Read.Read(ctx, actor, request.Envelope.Operation)
 		if err != nil {
@@ -60,7 +60,7 @@ func (dispatcher SocialInviteDispatcher) Dispatch(ctx context.Context, request h
 			return badHero("invalid_social_invite_request")
 		}
 		if dispatcher.Claim == nil {
-			return inviteUnavailable()
+			return failureReply(defect(nil))
 		}
 		body, err := dispatcher.Claim.Claim(ctx, actor, mission, request.Envelope.Operation)
 		if err != nil {
@@ -77,7 +77,7 @@ func (dispatcher SocialInviteDispatcher) Dispatch(ctx context.Context, request h
 			return badHero("invalid_social_invite_request")
 		}
 		if dispatcher.Bind == nil {
-			return inviteUnavailable()
+			return failureReply(defect(nil))
 		}
 		body, err := dispatcher.Bind.Bind(ctx, actor, code, request.Envelope.Operation)
 		if err != nil {
@@ -87,10 +87,6 @@ func (dispatcher SocialInviteDispatcher) Dispatch(ctx context.Context, request h
 	default:
 		return badHero("invalid_social_invite_request")
 	}
-}
-
-func inviteUnavailable() httpedge.Response {
-	return failureReply(unavailable(nil))
 }
 
 // Every business refusal is HTTP 409 with the stock error_code body; the client

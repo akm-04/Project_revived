@@ -42,7 +42,7 @@ func (dispatcher GMQuestionDispatcher) Dispatch(ctx context.Context, request htt
 		return badHero("invalid_gm_question_mid")
 	}
 	if dispatcher.Service == nil {
-		return questionUnavailable(nil)
+		return failureReply(defect(nil))
 	}
 	if request.Envelope.MID == 5 {
 		_, err := dispatcher.Service.Ask(ctx, actor, message, request.Envelope.Operation)
@@ -64,8 +64,4 @@ func (dispatcher GMQuestionDispatcher) Dispatch(ctx context.Context, request htt
 
 var gmQuestionFailureRows = []failureRow{
 	{match: domain.ErrQuestion, class: failureRefusal, code: unprovenRefusalCode},
-}
-
-func questionUnavailable(cause error) httpedge.Response {
-	return failureReply(unavailable(cause))
 }

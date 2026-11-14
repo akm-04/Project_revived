@@ -234,7 +234,7 @@ var dormGlueFailureRows = []failureRow{
 	{match: dorm.ErrInUse, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
 	{match: dorm.ErrCooldown, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
 	{match: dorm.ErrHidden, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true, extra: dormGlueRefusedBody},
 	{match: app.ErrRetired, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
 	{match: app.ErrActor, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
 }

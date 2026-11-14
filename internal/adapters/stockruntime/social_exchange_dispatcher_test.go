@@ -57,7 +57,7 @@ func TestSocialExchangeDispatcherStockParametersAndRefusals(t *testing.T) {
 	if result := dispatcher.Dispatch(context.Background(), heroReq(t, 191, map[string]any{"id": int64(1), "num": int64(1)})); result.HTTPStatus != 500 || result.Body["awards"] != nil {
 		t.Fatal(result)
 	}
-	if result := (SocialExchangeDispatcher{Authority: httpAuthority{actorForHTTP(t)}}).Dispatch(context.Background(), heroReq(t, 191, map[string]any{"id": int64(1), "num": int64(1)})); result.HTTPStatus != 503 {
-		t.Fatal("unavailable service", result)
+	if result := (SocialExchangeDispatcher{Authority: httpAuthority{actorForHTTP(t)}}).Dispatch(context.Background(), heroReq(t, 191, map[string]any{"id": int64(1), "num": int64(1)})); result.HTTPStatus != 500 || result.Body["error_code"] != unprovenRefusalCode {
+		t.Fatal("missing service is a composition defect", result)
 	}
 }

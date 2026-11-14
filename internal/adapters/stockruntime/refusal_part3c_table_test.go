@@ -92,7 +92,7 @@ func TestPart3CGMQuestionFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"question refused", failQuestionRows(gmquestion.ErrQuestion), http.StatusConflict, unprovenRefusalCode, ""},
 		{"conflict", failQuestionRows(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
-		{"unavailable", questionUnavailable(nil), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"missing service", (GMQuestionDispatcher{Authority: httpAuthority{actorForHTTP(t)}}).Dispatch(context.Background(), heroReq(t, 4, map[string]any{})), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -161,7 +161,7 @@ func TestPart3CMentorFailureRows(t *testing.T) {
 		{"mission", mentorFailure(domainmentor.ErrMission), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid", mentorFailure(appmentor.ErrInvalid), http.StatusBadRequest, 0, "invalid_mentor_request"},
 		{"unavailable", mentorFailure(appmentor.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"missing service", mentorUnavailable(), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"missing service", (MentorDispatcher{Authority: httpAuthority{actorForHTTP(t)}}).Dispatch(context.Background(), heroReq(t, 1856, map[string]any{})), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -209,7 +209,7 @@ func TestPart3CSocialInviteFailureRows(t *testing.T) {
 		{"facts", failSocialInvite(invite.ErrFacts), http.StatusConflict, unprovenRefusalCode, ""},
 		{"conflict", failSocialInvite(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"unavailable", failSocialInvite(invite.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"missing service", inviteUnavailable(), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"missing service", (SocialInviteDispatcher{Authority: httpAuthority{actorForHTTP(t)}}).Dispatch(context.Background(), heroReq(t, 384, map[string]any{})), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
