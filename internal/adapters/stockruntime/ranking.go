@@ -8,6 +8,7 @@ import (
 
 	"gxb.local/backend/v2/internal/adapters/guildwire"
 	guildview "gxb.local/backend/v2/internal/application/guildview"
+	appranking "gxb.local/backend/v2/internal/application/ranking"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/achievement"
@@ -22,7 +23,7 @@ import (
 )
 
 type BoardRankingReads interface {
-	ReadBoard(context.Context, rankingdomain.Board, identity.ActorContext, operation.Context) (rankingdomain.BoardSnapshot, error)
+	ReadBoard(context.Context, rankingdomain.Board, identity.ActorContext, operation.Context) (appranking.BoardRead, error)
 }
 type TrophyRanks interface {
 	TrophyBoard(context.Context, identity.ActorContext) (achievement.TrophyBoard, error)
@@ -188,14 +189,19 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if !known {
 		return failureReply(refusal(unprovenRefusalCode))
 	}
-	snapshot, e := d.Service.ReadBoard(c, board, a, r.Envelope.Operation)
+	read, e := d.Service.ReadBoard(c, board, a, r.Envelope.Operation)
 	if e != nil {
 		return failureFromRows(nil, e)
 	}
-	body, e := projection.BoardList(snapshot, a.PlayerID)
+	rows, e := projection.BoardRows(read.Rows, read.Displays, board.RowValue)
 	if e != nil {
 		return failureReply(defect(e))
 	}
+	mine := map[string]any{}
+	if read.MyRank > 0 {
+		mine = map[string]any{"rank": read.MyRank, "score": read.MyScore}
+	}
+	body := projection.BoardList(board.SubType, rows, mine)
 	body["error_code"] = int64(0)
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 }

@@ -5136,7 +5136,8 @@
    "store:i4store": [
     "*ListPlayerRootsTx",
     "*LockPlayerRootsTx",
-    "*ProfileTx"
+    "*ProfileTx",
+    "*ProfilesTx"
    ],
    "store:kernelstore": [
     "*FindTx",

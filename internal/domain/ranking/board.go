@@ -238,6 +238,9 @@ func (p BoardPresentation) valid(id identity.PlayerID) bool {
 	return p.Player == id && p.Level >= 1 && p.AvatarID >= 0 && p.FrameID >= 0 && p.ConquerLevel >= 0 && p.ConquerLoopID >= 0
 }
 
+// Valid checks the presentation fields without a caller-supplied subject id.
+func (p BoardPresentation) Valid() bool { return p.valid(p.Player) }
+
 type BoardInput struct {
 	Metric  BoardMetric
 	Display BoardPresentation

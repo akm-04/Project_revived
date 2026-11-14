@@ -87,4 +87,6 @@ type Service struct {
 	Ledger      RecipientLedger
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+	// ListSize overrides R7_PRIVATE_RANK_LIST_SIZE_V1; zero uses the policy fallback.
+	ListSize int64
 }
