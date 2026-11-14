@@ -132,6 +132,7 @@ type failureRow struct {
 	code    int64
 	detail  string
 	balance bool
+	extra   map[string]any
 }
 
 func classifyFailure(rows []failureRow, err error) *classifiedFailure {
@@ -143,7 +144,7 @@ func classifyFailure(rows []failureRow, err error) *classifiedFailure {
 		if row.balance {
 			code = insufficientBalanceCode(err)
 		}
-		return &classifiedFailure{class: row.class, code: code, detail: row.detail, cause: err}
+		return &classifiedFailure{class: row.class, code: code, detail: row.detail, extra: row.extra, cause: err}
 	}
 	return nil
 }

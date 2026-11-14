@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
+	i5 "gxb.local/backend/v2/internal/application/i5"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -201,13 +203,7 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	out, e := d.Service.Command(ctx, a, c, req.Envelope.Operation)
 	if e != nil {
 		if mid == 1845 {
-			if errors.Is(e, app.ErrRejected) || errors.Is(e, dorm.ErrGlueDailyLimit) {
-				return failureReply(refusal(unprovenRefusalCode))
-			}
-			if errors.Is(e, app.ErrUnavailable) {
-				return failureReply(unavailable(e))
-			}
-			return failureReply(refusalWithBody(unprovenRefusalCode, map[string]any{"error": "dorm_glue_purchase_refused"}))
+			return failureFromRows(dormGlueFailureRows, e)
 		}
 		if mid >= 2518 && mid <= 2526 {
 			return failSocialDorm(e)
@@ -220,6 +216,27 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return response
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: out.Body}
+}
+
+var dormGlueRefusedBody = map[string]any{"error": "dorm_glue_purchase_refused"}
+
+// MID 1845 business refusals keep the stock refusal body; stale, transient and
+// unclassified faults fall through to the shared classes.
+var dormGlueFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: dorm.ErrGlueDailyLimit, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},
+	{match: dorm.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
+	{match: i5.ErrGluePurchaseLimit, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: dorm.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: dorm.ErrInvalidFacts, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: dorm.ErrInvalidLayout, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: dorm.ErrInUse, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: dorm.ErrCooldown, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: dorm.ErrHidden, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: app.ErrRetired, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
+	{match: app.ErrActor, class: failureRefusal, code: unprovenRefusalCode, extra: dormGlueRefusedBody},
 }
 
 var dormFailureRows = []failureRow{

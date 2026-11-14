@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"testing"
@@ -46,7 +47,7 @@ func TestDormGlueDispatcherUsesStockEmptyRequestAndRejectsUnsafeSuccess(t *testi
 		err    error
 		status int
 		code   int64
-	}{{app.ErrRejected, 409, unprovenRefusalCode}, {app.ErrUnavailable, 503, serverBusyCode}} {
+	}{{app.ErrRejected, 409, unprovenRefusalCode}, {app.ErrUnavailable, 503, serverBusyCode}, {app.ErrStale, 409, staleConflictCode}, {context.DeadlineExceeded, 503, serverBusyCode}, {errors.New("unclassified"), 500, unprovenRefusalCode}} {
 		fake.err = cell.err
 		response = dispatcher.Dispatch(context.Background(), request)
 		if response.HTTPStatus != cell.status || response.Body["buy_glue_times"] != nil || response.Body["economy_"] != nil {
@@ -58,5 +59,10 @@ func TestDormGlueDispatcherUsesStockEmptyRequestAndRejectsUnsafeSuccess(t *testi
 		if cell.status == 409 && (len(response.Body) != 2 || response.Body["error_msg"] != "") {
 			t.Fatalf("conflict refusal body must be error_code and empty error_msg: %v", response.Body)
 		}
+	}
+	fake.err = economy.ErrInsufficientBalance
+	response = dispatcher.Dispatch(context.Background(), request)
+	if response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode || response.Body["error"] != "dorm_glue_purchase_refused" {
+		t.Fatalf("business refusal lost the stock refusal body: %v", response)
 	}
 }

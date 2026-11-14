@@ -74,7 +74,11 @@ func TestRecallAwardDispatcherStockShapeAndRefusals(t *testing.T) {
 			t.Fatal(refusal, result)
 		}
 	}
-	for _, failure := range []error{recall.ErrAwardProof, recall.ErrAwardUnavailable, errors.New("database unavailable")} {
+	probe.err = recall.ErrAwardUnavailable
+	if result := dispatcher.Dispatch(context.Background(), heroReq(t, 194, map[string]any{"award_id": int64(100001)})); result.HTTPStatus != 503 || result.Body["error_code"] != serverBusyCode {
+		t.Fatal("unavailable award owner", result)
+	}
+	for _, failure := range []error{recall.ErrAwardProof, errors.New("database unavailable")} {
 		probe.err = failure
 		result := dispatcher.Dispatch(context.Background(), heroReq(t, 194, map[string]any{"award_id": int64(100001)}))
 		if result.HTTPStatus != 500 || result.Body["awards"] != nil {

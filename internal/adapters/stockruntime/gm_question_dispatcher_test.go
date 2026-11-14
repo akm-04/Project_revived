@@ -65,13 +65,19 @@ func TestGMQuestionDispatcherUsesOrdinarySourceShapes(t *testing.T) {
 		t.Fatal("200 refusal would append local message", refused)
 	}
 	assertGMQuestionBody(t, refused.Body, `{"error_code":35028,"error_msg":""}`)
-	probe.err = questions.ErrProof
+	probe.err = questions.ErrUnavailable
 	unavailable := dispatcher.Dispatch(context.Background(), heroReq(t, 4, map[string]any{}))
 	if unavailable.HTTPStatus != 503 {
 		t.Fatal(unavailable)
 	}
 	assertGMQuestionBody(t, unavailable.Body, `{"error_code":35033,"error_msg":""}`)
-	if probe.asks != 2 || probe.lists != 3 {
+	probe.err = questions.ErrProof
+	corrupt := dispatcher.Dispatch(context.Background(), heroReq(t, 4, map[string]any{}))
+	if corrupt.HTTPStatus != 500 {
+		t.Fatal("a corrupt proof is a defect, not a retryable 503", corrupt)
+	}
+	assertGMQuestionBody(t, corrupt.Body, `{"error_code":35028,"error_msg":""}`)
+	if probe.asks != 2 || probe.lists != 4 {
 		t.Fatal("malformed request reached service", probe)
 	}
 }

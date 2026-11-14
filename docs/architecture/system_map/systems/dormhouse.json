@@ -100,7 +100,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 1845,
    "name": "BUY_GLUE"
@@ -108,7 +108,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2512,
    "name": "GET_HOUSE_LIST"
@@ -116,7 +116,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2513,
    "name": "OPEN_HOUSE"
@@ -124,7 +124,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2514,
    "name": "GET_HOUSE_DETAIL"
@@ -132,7 +132,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2515,
    "name": "SAVE_FURNITURES"
@@ -140,7 +140,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2516,
    "name": "HOUSE_EQUIP"
@@ -148,7 +148,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2517,
    "name": "ENTER_HERO"
@@ -156,7 +156,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2518,
    "name": "CHANGE_HOUSE_NAME"
@@ -164,7 +164,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2519,
    "name": "VISIT_RANDOM_HOUSE"
@@ -172,7 +172,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2520,
    "name": "HIDE_HOUSE"
@@ -180,7 +180,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2521,
    "name": "PRAISE_HOUSE"
@@ -188,7 +188,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2522,
    "name": "GET_DORM_PRAISE_LIST"
@@ -196,7 +196,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2523,
    "name": "COMMENT_HOUSE"
@@ -204,7 +204,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2524,
    "name": "GET_DORM_COMMENT_LIST"
@@ -212,7 +212,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2525,
    "name": "PRAISE_COMMENT"
@@ -220,7 +220,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2526,
    "name": "DELETE_COMMENT"
@@ -228,7 +228,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2693,
    "name": "EXCHANGE_DORM_KEY"
@@ -236,7 +236,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2694,
    "name": "START_EXPAND_HOUSE"
@@ -244,7 +244,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
-    "line": 25
+    "line": 27
    },
    "mid": 2695,
    "name": "FINISH_EXPAND_HOUSE"

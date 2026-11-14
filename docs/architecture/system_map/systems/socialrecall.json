@@ -98,7 +98,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_recall_dispatcher.go",
-    "line": 62
+    "line": 64
    },
    "mid": 193,
    "name": "recall_friend"
@@ -106,7 +106,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_recall_dispatcher.go",
-    "line": 39
+    "line": 41
    },
    "mid": 194,
    "name": "get_recall_award"

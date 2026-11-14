@@ -222,6 +222,8 @@ func TestPart3CSocialRecallFailureRows(t *testing.T) {
 		{"start refused", failureFromRows(socialRecallStartFailureRows, recall.ErrStartRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"start facts", failureFromRows(socialRecallStartFailureRows, recall.ErrStartFacts), http.StatusConflict, unprovenRefusalCode, ""},
 		{"start conflict", failureFromRows(socialRecallStartFailureRows, &receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
+		{"award unavailable", failureFromRows(socialRecallAwardFailureRows, recall.ErrAwardUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"start unavailable", failureFromRows(socialRecallStartFailureRows, recall.ErrRecallUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"unavailable", failureFromRows(socialRecallStartFailureRows, errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

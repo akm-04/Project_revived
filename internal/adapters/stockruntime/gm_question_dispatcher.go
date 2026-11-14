@@ -53,7 +53,7 @@ func (dispatcher GMQuestionDispatcher) Dispatch(ctx context.Context, request htt
 	}
 	entries, err := dispatcher.Service.List(ctx, actor, request.Envelope.Operation)
 	if err != nil {
-		return questionUnavailable(err)
+		return failureFromRows(gmQuestionFailureRows, err)
 	}
 	rows := make([]any, 0, len(entries))
 	for _, entry := range entries {

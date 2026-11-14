@@ -12,11 +12,13 @@ import (
 
 var socialRecallAwardFailureRows = []failureRow{
 	{match: recall.ErrAwardRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: recall.ErrAwardUnavailable, class: failureUnavailable},
 }
 
 var socialRecallStartFailureRows = []failureRow{
 	{match: recall.ErrStartRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: recall.ErrStartFacts, class: failureRefusal, code: unprovenRefusalCode},
+	{match: recall.ErrRecallUnavailable, class: failureUnavailable},
 }
 
 type SocialRecallStartPort interface {
