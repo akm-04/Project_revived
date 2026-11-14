@@ -49,8 +49,8 @@ func TestRankingWorkersRegisterAndDispatchToTheirJobs(t *testing.T) {
 	if e := Register(workers, jobs, roots); e == nil {
 		t.Fatal("duplicate worker registration accepted")
 	}
-	if len(PeriodicJobs(0)) != 2 {
-		t.Fatal("refresh and settlement periods are not scheduled")
+	if e := uniqueWhileQueued.ByState; len(e) == 0 {
+		t.Fatal("ranking jobs insert without a single-flight rule")
 	}
 	c := context.Background()
 	factory := operation.Factory{Clock: clock.Fixed{T: time.Now().UTC()}}

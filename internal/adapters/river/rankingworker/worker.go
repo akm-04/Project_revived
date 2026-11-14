@@ -8,9 +8,11 @@ package rankingworker
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/riverqueue/river"
+	"github.com/riverqueue/river/rivertype"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
@@ -26,6 +28,15 @@ const ScoresRefreshKind = "ranking_scores_refresh"
 const ScoresBackfillKind = "ranking_scores_backfill"
 const BoardSettleKind = "ranking_board_settle"
 const PhysicalQueue = "ranking_maintenance"
+
+const settlePeriod = time.Minute
+
+// uniqueWhileQueued skips an insert while a copy of the job waits or runs. Every
+// API process inserts on its own ticker, so the jobs run whichever River client
+// holds leadership (A-028), and a slow run never stacks a second copy.
+var uniqueWhileQueued = river.UniqueOpts{ByArgs: true, ByState: []rivertype.JobState{
+	rivertype.JobStateAvailable, rivertype.JobStatePending, rivertype.JobStateRunning,
+	rivertype.JobStateRetryable, rivertype.JobStateScheduled}}
 
 // Jobs is the ranking application surface the workers re-enter.
 type Jobs interface {
@@ -126,28 +137,18 @@ func Register(workers *river.Workers, jobs Jobs, roots Roots) error {
 	return river.AddWorkerSafely(workers, settle)
 }
 
-// PeriodicJobs schedules the refresh and boundary settlement jobs. The
-// backfill is inserted once at deploy, not scheduled.
-func PeriodicJobs(refreshPeriod time.Duration) []*river.PeriodicJob {
-	if refreshPeriod <= 0 {
-		refreshPeriod = appranking.DefaultRankRefreshPeriod
-	}
-	return []*river.PeriodicJob{
-		river.NewPeriodicJob(river.PeriodicInterval(refreshPeriod), func() (river.JobArgs, *river.InsertOpts) {
-			return refreshArgs{}, &river.InsertOpts{Queue: PhysicalQueue}
-		}, &river.PeriodicJobOpts{ID: ScoresRefreshKind, RunOnStart: true}),
-		river.NewPeriodicJob(river.PeriodicInterval(time.Minute), func() (river.JobArgs, *river.InsertOpts) {
-			return settleArgs{}, &river.InsertOpts{Queue: PhysicalQueue}
-		}, &river.PeriodicJobOpts{ID: BoardSettleKind, RunOnStart: true}),
-	}
+type Runtime struct {
+	river         *riveradapter.Runtime
+	refreshPeriod time.Duration
 }
-
-type Runtime struct{ river *riveradapter.Runtime }
 
 // New validates the pinned River schema and builds the ranking worker client.
 func New(p *postgres.Pool, jobs Jobs, refreshPeriod time.Duration) (*Runtime, error) {
 	if p == nil || jobs == nil {
 		return nil, errors.New("ranking worker requires a pool and jobs")
+	}
+	if refreshPeriod <= 0 {
+		refreshPeriod = appranking.DefaultRankRefreshPeriod
 	}
 	if e := riveradapter.ValidateDeployment(context.Background(), p.Raw()); e != nil {
 		return nil, e
@@ -164,12 +165,11 @@ func New(p *postgres.Pool, jobs Jobs, refreshPeriod time.Duration) (*Runtime, er
 		SoftStopTimeout: 15 * time.Second,
 		JobTimeout:      2 * time.Minute,
 		RegisterWorkers: func(workers *river.Workers) error { return Register(workers, jobs, roots) },
-		PeriodicJobs:    PeriodicJobs(refreshPeriod),
 	})
 	if e != nil {
 		return nil, e
 	}
-	return &Runtime{river: runtime}, nil
+	return &Runtime{river: runtime, refreshPeriod: refreshPeriod}, nil
 }
 
 // EnqueueBackfill inserts the one-shot deploy backfill. River uniqueness by
@@ -181,7 +181,14 @@ func (r *Runtime) EnqueueBackfill(c context.Context) error {
 	return r.river.Insert(c, backfillArgs{}, &river.InsertOpts{Queue: PhysicalQueue, UniqueOpts: river.UniqueOpts{ByArgs: true}})
 }
 
-// Run starts the worker client and waits for cancellation.
+func (r *Runtime) schedule(c context.Context, args river.JobArgs) {
+	if e := r.river.Insert(c, args, &river.InsertOpts{Queue: PhysicalQueue, UniqueOpts: uniqueWhileQueued}); e != nil && c.Err() == nil {
+		log.Printf("ranking %s insert failed: %v", args.Kind(), e)
+	}
+}
+
+// Run starts the worker client, inserts the refresh and settlement jobs at once
+// and then on their periods, and waits for cancellation.
 func (r *Runtime) Run(c context.Context) error {
 	if r == nil || r.river == nil {
 		return errors.New("nil ranking worker runtime")
@@ -189,7 +196,20 @@ func (r *Runtime) Run(c context.Context) error {
 	if e := r.river.Start(c); e != nil {
 		return e
 	}
-	<-c.Done()
+	refresh, settle := time.NewTicker(r.refreshPeriod), time.NewTicker(settlePeriod)
+	defer refresh.Stop()
+	defer settle.Stop()
+	r.schedule(c, refreshArgs{})
+	r.schedule(c, settleArgs{})
+	for c.Err() == nil {
+		select {
+		case <-refresh.C:
+			r.schedule(c, refreshArgs{})
+		case <-settle.C:
+			r.schedule(c, settleArgs{})
+		case <-c.Done():
+		}
+	}
 	drain, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	return r.river.Stop(drain)

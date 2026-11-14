@@ -26,8 +26,6 @@ type RuntimeConfig struct {
 	JobTimeout      time.Duration
 	// RegisterWorkers adds feature-owned workers beside the obligation worker.
 	RegisterWorkers func(*river.Workers) error
-	// PeriodicJobs schedules feature-owned recurring work.
-	PeriodicJobs []*river.PeriodicJob
 }
 
 func (c RuntimeConfig) riverQueues() (map[string]river.QueueConfig, error) {
@@ -75,7 +73,6 @@ func NewRuntime(pool *pgxpool.Pool, dispatcher appgeneration.ObligationDispatche
 		SoftStopTimeout: cfg.SoftStopTimeout,
 		PollOnly:        cfg.PollOnly,
 		JobTimeout:      cfg.JobTimeout,
-		PeriodicJobs:    cfg.PeriodicJobs,
 	})
 	if err != nil {
 		return nil, err

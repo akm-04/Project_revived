@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -262,4 +263,74 @@ func TestR7MID301StoredReadScales(t *testing.T) {
 		readSamples = append(readSamples, time.Since(started))
 	}
 	t.Logf("R7_SCALE players=1000 viewer_heroes=50 viewer_refresh_p95=%s mid301_read_p95=%s %s", r7P95(refreshSamples), r7P95(readSamples), r7Temperature())
+}
+
+type r7MovingTime struct {
+	mu sync.Mutex
+	at time.Time
+}
+
+func (m *r7MovingTime) Now(context.Context) (time.Time, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.at.UTC(), nil
+}
+
+func (m *r7MovingTime) set(at time.Time) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.at = at
+}
+
+// r7RacingPresence runs race once, just before the job's first batch, and then
+// reports every player as seen at the given instant.
+type r7RacingPresence struct {
+	once *sync.Once
+	race func()
+	seen time.Time
+}
+
+func (r r7RacingPresence) LastSeenAtTx(_ context.Context, _ tx.Queryer, players []identity.PlayerID) (map[identity.PlayerID]time.Time, error) {
+	r.once.Do(r.race)
+	out := map[identity.PlayerID]time.Time{}
+	for _, player := range players {
+		out[player] = r.seen
+	}
+	return out, nil
+}
+
+// A-030: a viewer stores a newer row after the job began. The batch must use its
+// own decision time and finish instead of failing the run.
+func TestR7RefreshSurvivesAViewerRowStoredAfterTheJobBegan(t *testing.T) {
+	p := pool(t)
+	_ = installed(t, p)
+	server := rankingServer(t, p)
+	viewer, _, _ := combatOwner(t, p, server)
+	players := r7ServerPlayers(t, p, server)
+	start := time.Now().UTC().Add(time.Minute).Truncate(time.Microsecond)
+
+	seed := r7JobService(p)
+	seed.Timed.Binder.Time = r7FixedTime{at: start.Add(-time.Minute)}
+	if e := seed.BackfillScoresServer(ctx, op(), server, players); e != nil {
+		t.Fatal(e)
+	}
+
+	clock := &r7MovingTime{at: start}
+	job := r7JobService(p)
+	job.Timed.Binder.Time = clock
+	job.Presence = r7RacingPresence{once: &sync.Once{}, seen: start.Add(45 * time.Second), race: func() {
+		reader := r7JobService(p)
+		reader.Timed.Binder.Time = r7FixedTime{at: start.Add(30 * time.Second)}
+		if e := reader.BackfillScoresServer(ctx, op(), server, []identity.PlayerID{viewer.PlayerID}); e != nil {
+			t.Error("viewer refresh", e)
+		}
+		clock.set(start.Add(time.Minute))
+	}}
+	if e := job.RefreshActiveScoresServer(ctx, op(), server, players); e != nil {
+		t.Fatal(e)
+	}
+	row, ok, e := (rankingstore.Store{}).ReadScoreRowTx(ctx, p, d.GirlsPolicy, viewer.PlayerID)
+	if e != nil || !ok || !row.UpdatedAt.Equal(start.Add(time.Minute)) {
+		t.Fatal("viewer row was not refreshed at the batch's own time", row, ok, e)
+	}
 }

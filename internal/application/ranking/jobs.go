@@ -2,6 +2,7 @@ package ranking
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -75,15 +76,17 @@ func bindScoreOperation(o operation.Context, b d.Board, rev string) (operation.C
 	return bind(o, "ranking", b.Policy)
 }
 
-func (s Service) runScoreTx(c context.Context, o operation.Context, b d.Board, server identity.LogicalServerID, players []identity.PlayerID, runs map[identity.PlayerID]d.ScoreRun, rev string, at time.Time) error {
+func (s Service) runScoreTx(c context.Context, o operation.Context, b d.Board, server identity.LogicalServerID, players []identity.PlayerID, runs map[identity.PlayerID]d.ScoreRun, rev string) error {
 	bound, e := bindScoreOperation(o, b, rev)
 	if e != nil {
 		return e
 	}
 	o = bound
 	_, res, e := s.Timed.Run(c, o, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(c context.Context, sc gen.TimedScope) error {
+		// A-030: each batch takes its own decision time, as the viewer read does;
+		// a row a viewer stored after the job began must not fail validation.
 		scope := ScoreScope{Scope: tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, Server: server}
-		return s.refreshScores(c, scope, b, players, runs, rev, at)
+		return s.refreshScores(c, scope, b, players, runs, rev, sc.Operation.DecisionAt())
 	})
 	if e != nil {
 		return e
@@ -141,19 +144,22 @@ func (s Service) RefreshActiveScores(c context.Context, o operation.Context, roo
 	if e != nil {
 		return e
 	}
+	var failed []error
 	for server := range byServer {
-		if e = s.RefreshActiveScoresServer(c, o, server, byServer[server]); e != nil {
-			return e
-		}
+		failed = append(failed, s.RefreshActiveScoresServer(c, o, server, byServer[server]))
 	}
-	return nil
+	return errors.Join(failed...)
 }
 
-func (s Service) refreshServer(c context.Context, o operation.Context, players []identity.PlayerID, server identity.LogicalServerID, rev string, at time.Time) error {
+// refreshServer goes on past a failed board or batch, so one player cannot stop
+// the rest of the server (A-030); every failure is returned at the end.
+func (s Service) refreshServer(c context.Context, o operation.Context, players []identity.PlayerID, server identity.LogicalServerID, rev string) error {
+	var failed []error
 	for _, board := range d.Boards {
 		updates, e := s.Store.ReadScoreRowUpdatesTx(c, s.Fresh, board.Policy, server)
 		if e != nil {
-			return e
+			failed = append(failed, fmt.Errorf("ranking refresh %s: %w", board.Name, e))
+			continue
 		}
 		for batch := 0; batch < maxRefreshBatches; batch++ {
 			first := batch * refreshBatchSize
@@ -165,18 +171,15 @@ func (s Service) refreshServer(c context.Context, o operation.Context, players [
 				last = len(players)
 			}
 			stale, e := s.activityStale(c, players[first:last], updates)
+			if e == nil && len(stale) > 0 {
+				e = s.runScoreTx(c, o, board, server, stale, nil, rev)
+			}
 			if e != nil {
-				return e
-			}
-			if len(stale) == 0 {
-				continue
-			}
-			if e = s.runScoreTx(c, o, board, server, stale, nil, rev, at); e != nil {
-				return fmt.Errorf("ranking refresh %s: %w", board.Name, e)
+				failed = append(failed, fmt.Errorf("ranking refresh %s: %w", board.Name, e))
 			}
 		}
 	}
-	return nil
+	return errors.Join(failed...)
 }
 
 // RefreshActiveScoresServer scopes the activity refresh to one logical server.
@@ -188,11 +191,7 @@ func (s Service) RefreshActiveScoresServer(c context.Context, o operation.Contex
 	if e != nil {
 		return e
 	}
-	at, e := s.now(c)
-	if e != nil {
-		return e
-	}
-	return s.refreshServer(c, o, players, server, rev, at)
+	return s.refreshServer(c, o, players, server, rev)
 }
 
 // BackfillScores seeds every player of every server for every board. A legacy
@@ -205,12 +204,11 @@ func (s Service) BackfillScores(c context.Context, o operation.Context, roots []
 	if e != nil {
 		return e
 	}
+	var failed []error
 	for server := range byServer {
-		if e = s.BackfillScoresServer(c, o, server, byServer[server]); e != nil {
-			return e
-		}
+		failed = append(failed, s.BackfillScoresServer(c, o, server, byServer[server]))
 	}
-	return nil
+	return errors.Join(failed...)
 }
 
 // BackfillScoresServer scopes the deploy backfill to one logical server.
@@ -218,12 +216,13 @@ func (s Service) BackfillScoresServer(c context.Context, o operation.Context, se
 	if !s.jobsReady() || o.ID.IsZero() || o.StartedAt.IsZero() || !server.Valid() {
 		return ErrUnavailable
 	}
+	var failed []error
 	for _, board := range d.Boards {
 		if e := s.BackfillBoardServer(c, o, board, server, players); e != nil {
-			return fmt.Errorf("ranking backfill %s: %w", board.Name, e)
+			failed = append(failed, fmt.Errorf("ranking backfill %s: %w", board.Name, e))
 		}
 	}
-	return nil
+	return errors.Join(failed...)
 }
 
 // BackfillBoardServer scopes the deploy backfill to one board of a server.
@@ -235,14 +234,11 @@ func (s Service) BackfillBoardServer(c context.Context, o operation.Context, boa
 	if e != nil {
 		return e
 	}
-	at, e := s.now(c)
-	if e != nil {
-		return e
-	}
 	runs, e := s.Store.ReadBoardRootRunsTx(c, s.Fresh, board, server)
 	if e != nil {
 		return e
 	}
+	var failed []error
 	for batch := 0; batch < maxBackfillBatches; batch++ {
 		first := batch * refreshBatchSize
 		if first >= len(players) {
@@ -252,14 +248,12 @@ func (s Service) BackfillBoardServer(c context.Context, o operation.Context, boa
 		if last > len(players) {
 			last = len(players)
 		}
-		if e = s.runScoreTx(c, o, board, server, players[first:last], runs, rev, at); e != nil {
-			return e
-		}
+		failed = append(failed, s.runScoreTx(c, o, board, server, players[first:last], runs, rev))
 		if last == len(players) {
 			break
 		}
 	}
-	return nil
+	return errors.Join(failed...)
 }
 
 // SettleBoardBoundaries settles the current week's board once, after
@@ -272,12 +266,11 @@ func (s Service) SettleBoardBoundaries(c context.Context, o operation.Context, r
 	if e != nil {
 		return e
 	}
+	var failed []error
 	for server := range byServer {
-		if e = s.SettleBoardBoundariesServer(c, o, server); e != nil {
-			return e
-		}
+		failed = append(failed, s.SettleBoardBoundariesServer(c, o, server))
 	}
-	return nil
+	return errors.Join(failed...)
 }
 
 // SettleBoardBoundariesServer scopes the weekly settlement to one logical server.
@@ -285,12 +278,13 @@ func (s Service) SettleBoardBoundariesServer(c context.Context, o operation.Cont
 	if !s.jobsReady() || s.Players == nil || s.Recipient == nil || s.Receipts == nil || s.ReceiptRead == nil || o.ID.IsZero() || o.StartedAt.IsZero() || !server.Valid() {
 		return ErrUnavailable
 	}
+	var failed []error
 	for _, board := range d.Boards {
 		if e := s.SettleBoardServer(c, o, board, server); e != nil {
-			return fmt.Errorf("ranking settle %s: %w", board.Name, e)
+			failed = append(failed, fmt.Errorf("ranking settle %s: %w", board.Name, e))
 		}
 	}
-	return nil
+	return errors.Join(failed...)
 }
 
 // SettleBoardServer settles one board's current week for a server.
@@ -313,10 +307,10 @@ func (s Service) SettleBoardServer(c context.Context, o operation.Context, b d.B
 	if _, e = s.SettlePendingBoard(c, b, server, o); e != nil {
 		return e
 	}
-	return s.settleCurrentWeek(c, o, b, server, week, now, rev)
+	return s.settleCurrentWeek(c, o, b, server, week, rev)
 }
 
-func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board d.Board, server identity.LogicalServerID, week, now time.Time, rev string) error {
+func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board d.Board, server identity.LogicalServerID, week time.Time, rev string) error {
 	p, ok, e := s.Store.ReadBoardPeriodTx(c, s.Fresh, board, server, week)
 	if e != nil {
 		return e
@@ -337,7 +331,7 @@ func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board
 		return e
 	}
 	_, _, e = s.Timed.Run(c, bound, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, nil, func(c context.Context, sc gen.TimedScope) error {
-		at := now
+		at := sc.Operation.DecisionAt()
 		root, e := s.Store.LockBoardRootTx(c, sc.Tx, board, server, at)
 		if e != nil {
 			return e
