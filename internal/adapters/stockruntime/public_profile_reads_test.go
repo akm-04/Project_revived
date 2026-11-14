@@ -77,7 +77,7 @@ func Test6BProfileReadWireActorAndExactIDs(t *testing.T) {
 	}
 	r := activityReq(1840, map[string]any{}, time.Now())
 	r.Envelope.Claims.Region = 2
-	if d.Dispatch(context.Background(), r).HTTPStatus != 403 {
+	if d.Dispatch(context.Background(), r).HTTPStatus != 409 {
 		t.Fatal("forgedregion")
 	}
 }

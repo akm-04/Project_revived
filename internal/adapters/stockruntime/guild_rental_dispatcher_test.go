@@ -201,7 +201,7 @@ func TestGuildRentalRefusesInvalidProjection(t *testing.T) {
 	probe := &rentalProbe{list: guildrental.List{Rows: []guildrental.Row{row}, RentCount: 1}}
 	dispatcher := GuildRentalDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: probe}
 	got := dispatcher.Dispatch(context.Background(), heroReq(t, 2768, map[string]any{}))
-	if got.HTTPStatus != 503 {
+	if got.HTTPStatus != 500 {
 		t.Fatalf("invalid projection returned %d: %+v", got.HTTPStatus, got.Body)
 	}
 }

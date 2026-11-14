@@ -25,12 +25,12 @@ import (
 
 func TestPart3AGuildFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
-		{"not found", failGuild(guildcore.ErrGuildNotFound), http.StatusNotFound, 0, "guild_not_found"},
-		{"application not found", failGuild(guildcore.ErrApplicationNotFound), http.StatusNotFound, 0, "guild_not_found"},
-		{"invite not found", failGuild(guildcore.ErrInviteNotFound), http.StatusNotFound, 0, "guild_not_found"},
-		{"forbidden", failGuild(guildcore.ErrGuildPermission), http.StatusForbidden, 0, "guild_forbidden"},
-		{"not member", failGuild(guildcore.ErrNotGuildMember), http.StatusForbidden, 0, "guild_forbidden"},
-		{"view forbidden", failGuild(guildview.ErrForbidden), http.StatusForbidden, 0, "guild_forbidden"},
+		{"not found", failGuild(guildcore.ErrGuildNotFound), http.StatusConflict, guildNotFoundCode, ""},
+		{"application not found", failGuild(guildcore.ErrApplicationNotFound), http.StatusConflict, unprovenRefusalCode, ""},
+		{"invite not found", failGuild(guildcore.ErrInviteNotFound), http.StatusConflict, unprovenRefusalCode, ""},
+		{"forbidden", failGuild(guildcore.ErrGuildPermission), http.StatusConflict, unprovenRefusalCode, ""},
+		{"not member", failGuild(guildcore.ErrNotGuildMember), http.StatusConflict, unprovenRefusalCode, ""},
+		{"view forbidden", failGuild(guildview.ErrForbidden), http.StatusConflict, unprovenRefusalCode, ""},
 		{"closed", failGuild(guildcore.ErrGuildClosed), http.StatusConflict, 30014, ""},
 		{"full", failGuild(guildcore.ErrGuildFull), http.StatusConflict, 30020, ""},
 		{"application full", failGuild(guildcore.ErrGuildApplicationFull), http.StatusConflict, 30016, ""},
@@ -56,7 +56,7 @@ func TestPart3AGuildFailureRows(t *testing.T) {
 		{"balance coins", failGuild(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
 		{"balance other", failGuild(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"untyped balance", failGuild(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
-		{"database", failGuild(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"database", failGuild(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 	cooldown := sourceGuildProtocolResponse(t, &guildcore.CantJoinError{Kind: guildcore.JoinCooldownOtherGuild, RemainingSeconds: 7}, 30010)
 	if cooldown.Body["time"] != int64(7) {
@@ -78,10 +78,10 @@ func sourceGuildProtocolResponse(t *testing.T, err error, wantCode int64) httped
 
 func TestPart3AGuildCampaignFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
-		{"refused", campaignFailure(errors.New("refused")), http.StatusConflict, unprovenRefusalCode, ""},
+		{"refused", campaignFailure(errors.New("refused")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"holder", campaignFailure(guildcampaign.ErrHolder), http.StatusConflict, unprovenRefusalCode, ""},
 		{"late", campaignSettleFailure(guildcampaign.ErrLate), http.StatusConflict, 30021, ""},
-		{"unavailable", campaignFailure(guildcampaign.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"unavailable", campaignFailure(guildcampaign.ErrUnavailable), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid parameter", campaignBad(), http.StatusBadRequest, 0, "guild_campaign_invalid_parameter"},
 	})
 }
@@ -96,7 +96,7 @@ func TestPart3AGuildRentalFailureRows(t *testing.T) {
 		cases = append(cases, part2FailureCase{name: "refusal " + string(rune('a'+i)), got: rentalFailure(row), want: http.StatusConflict, code: unprovenRefusalCode})
 	}
 	cases = append(cases,
-		part2FailureCase{"unavailable", rentalFailure(guildrental.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		part2FailureCase{"unavailable", rentalFailure(guildrental.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		part2FailureCase{"invalid parameter", rentalBad(), http.StatusBadRequest, 0, "guild_rental_invalid_parameter"},
 	)
 	assertPart2FailureCases(t, cases)
@@ -115,7 +115,7 @@ func TestPart3AGuildTeaFailureRows(t *testing.T) {
 		{"balance diamonds", teaFailure(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance other", teaFailure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid parameter", teaFailure(guildtea.ErrInvalid), http.StatusBadRequest, 0, "guild_tea_invalid_parameter"},
-		{"unavailable", teaFailure(guildtea.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"unavailable", teaFailure(guildtea.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -145,7 +145,7 @@ func TestPart3AI5FailureRows(t *testing.T) {
 		{"redeem invalid", failI5(appi5.ErrRedeemInvalid), http.StatusBadRequest, 0, "invalid_redeem"},
 		{"mail not found", failI5(appi5.ErrMailNotFound), http.StatusBadRequest, 0, "not_found"},
 		{"objective not found", failI5(appi5.ErrObjectiveNotFound), http.StatusBadRequest, 0, "not_found"},
-		{"dependency", failI5(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"dependency", failI5(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -172,7 +172,7 @@ func TestPart3APetFailureRows(t *testing.T) {
 		{"promotion prerequisites", petFail(characterpet.ErrPetPromotionPrerequisites), http.StatusConflict, unprovenRefusalCode, ""},
 		{"promotion corrupt", petFail(characterpet.ErrPetPromotionCorruptState), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"promotion q1 unsupported", petFail(characterpet.ErrPetPromotionQ1Unsupported), http.StatusConflict, unprovenRefusalCode, ""},
-		{"dependency", petFail(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"dependency", petFail(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -182,8 +182,8 @@ func TestPart3APetCampaignFailureRows(t *testing.T) {
 		{"conflict", petCampaignFailure(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"refused", petCampaignFailure(pc.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"balance coins", petCampaignFailure(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
-		{"unavailable", petCampaignFailure(pc.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"dependency", petCampaignFailure(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"unavailable", petCampaignFailure(pc.ErrUnavailable), http.StatusConflict, unprovenRefusalCode, ""},
+		{"dependency", petCampaignFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -195,7 +195,7 @@ func TestPart3AGodsTrialFailureRows(t *testing.T) {
 		{"refused", godsTrialFailure(god.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"pet not found", godsTrialFailure(characterpet.ErrPetNotFound), http.StatusConflict, unprovenRefusalCode, ""},
 		{"balance stamina", godsTrialFailure(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
-		{"unavailable", godsTrialFailure(god.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"unavailable", godsTrialFailure(god.ErrUnavailable), http.StatusConflict, unprovenRefusalCode, ""},
 		{"dependency", godsTrialFailure(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

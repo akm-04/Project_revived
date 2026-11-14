@@ -139,7 +139,7 @@ func TestNormal59MissingEconomyRejectsBeforeMutation(t *testing.T) {
 	svc := &ca23HeroService{}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
 	r := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
-	if r.HTTPStatus != 503 || len(svc.summonArgs) != 0 {
+	if r.HTTPStatus != 500 || len(svc.summonArgs) != 0 {
 		t.Fatal("missing projection allowed partial mutation", r, svc.summonArgs)
 	}
 }

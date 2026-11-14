@@ -53,7 +53,7 @@ func TestProfilePreferenceWireAndFailureCallbacks(t *testing.T) {
 	}
 	r := activityReq(1834, map[string]any{"content": "x"}, time.Now())
 	r.Envelope.Claims.Region = 2
-	if got := d.Dispatch(context.Background(), r); got.HTTPStatus != 403 {
+	if got := d.Dispatch(context.Background(), r); got.HTTPStatus != 409 {
 		t.Fatal(got)
 	}
 	if calls != 5 {

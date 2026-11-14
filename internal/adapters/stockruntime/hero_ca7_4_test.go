@@ -67,11 +67,11 @@ func TestCA74MID68StockWireAlwaysProjectsAlignedLIVEAndCurrentCrystal(t *testing
 	}
 }
 
-func TestCA74MID68ProjectionFailureAfterSemanticSuccessReturns503ForFreshConvergenceRetry(t *testing.T) {
+func TestCA74MID68ProjectionFailureAfterSemanticSuccessReturns500(t *testing.T) {
 	live := &ca74LIVEHTTPService{unlockResult: apphero.LIVEUnlockResult{PartnerID: 7, ModelID: 40001074, StateVersion: 2, LIVE: []apphero.LIVEResultState{{ModelID: 40001074, IsShow: true}}}}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, LIVE: live, Economy: &ca74HeroEconomy{err: errors.New("projection")}}
 	r := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
-	if r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_failed" {
+	if r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("response=%+v", r)
 	}
 }

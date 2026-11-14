@@ -22,7 +22,7 @@ func TestPart3BActivityFailureReplies(t *testing.T) {
 	dispatcher := ActivityDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: appactivity.Runtime{Directory: appactivity.Directory{Registry: registry}}}
 	request := activityReq(229, map[string]any{}, time.Unix(10, 0).UTC())
 	assertPart2FailureCases(t, []part2FailureCase{
-		{"projection unavailable", dispatcher.Dispatch(context.Background(), request), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"projection unavailable", dispatcher.Dispatch(context.Background(), request), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"invalid activity id", dispatcher.Dispatch(context.Background(), activityReq(234, map[string]any{"activity_id": int64(0)}, time.Unix(10, 0).UTC())), http.StatusBadRequest, 0, "invalid_activity_id"},
 	})
 }

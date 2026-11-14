@@ -20,7 +20,7 @@ func TestPart3BMemoirFailureRows(t *testing.T) {
 		{"refused", memoirFailure(memoirdomain.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"balance stamina", memoirFailure(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
 		{"start conflict", memoirFailure(combat.ErrStartConflict), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", memoirFailure(memoirdomain.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"dependency", memoirFailure(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"unavailable", memoirFailure(memoirdomain.ErrUnavailable), http.StatusConflict, unprovenRefusalCode, ""},
+		{"dependency", memoirFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

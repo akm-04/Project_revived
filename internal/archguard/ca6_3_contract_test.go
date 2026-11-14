@@ -85,7 +85,7 @@ func TestCA63DispatcherPreservesTelemetryAndExcludesFutureMIDs(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	for _, need := range []string{"case 124:", "case 125:", "case 126:", "case 128:", "case 129:", "case 130:", "case 131:", "case 133:", "lobby.BootLegitTimer", "ResolveGameplayBearer", "region_mismatch"} {
+	for _, need := range []string{"case 124:", "case 125:", "case 126:", "case 128:", "case 129:", "case 130:", "case 131:", "case 133:", "lobby.BootLegitTimer", "ResolveGameplayBearer", "req.Envelope.Claims.Region != int64(actor.LogicalServerID)"} {
 		if !strings.Contains(s, need) {
 			t.Errorf("CA6-3 dispatcher missing %q", need)
 		}

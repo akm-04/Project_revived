@@ -167,7 +167,7 @@ func TestGuildMutationResultMapsOnlySourceRecoveredGuildCodes(t *testing.T) {
 		}
 	}
 	unknown := guildMutationResult(errors.New("unknown"))
-	if unknown.HTTPStatus != 503 || unknown.Body["error_code"] != int64(35033) {
+	if unknown.HTTPStatus != 500 || unknown.Body["error_code"] != int64(35028) {
 		t.Fatalf("unknown failure: %+v", unknown)
 	}
 	if _, leaks := unknown.Body["error"]; leaks {
@@ -180,21 +180,21 @@ func TestGuildDispatcherRejectsForgedRegionBeforeViewOrCore(t *testing.T) {
 	rq := env(576, nil, time.Unix(1, 0).UTC())
 	rq.Envelope.Claims.Region = 2
 	r := d.Dispatch(context.Background(), rq)
-	if r.HTTPStatus != 403 {
+	if r.HTTPStatus != 409 {
 		t.Fatalf("%+v", r)
 	}
 }
 
 func TestFailGuildKeepsUnknownErrorsOpaque(t *testing.T) {
 	r := failGuild(errors.New("sensitive backend detail"))
-	if r.HTTPStatus != 503 || r.Body["error_code"] != int64(35033) || r.Body["error"] != nil {
+	if r.HTTPStatus != 500 || r.Body["error_code"] != int64(35028) || r.Body["error"] != nil {
 		t.Fatalf("%+v", r)
 	}
 }
 
 func TestFailGuildRefusesGuildlessViewRead(t *testing.T) {
 	r := failGuild(guildview.ErrForbidden)
-	if r.HTTPStatus != 403 || r.Body["error"] != "guild_forbidden" {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != int64(35028) {
 		t.Fatalf("%+v", r)
 	}
 }
@@ -210,5 +210,22 @@ func TestGuildDispatcher616AlwaysAnswersEmptySuccess(t *testing.T) {
 	guildless := GuildDispatcher{Authority: httpAuthority{actor}}
 	if got := guildless.Dispatch(context.Background(), env(616, nil, now)); got.HTTPStatus != 200 || len(got.Body) != 0 {
 		t.Fatalf("616 guildless=%+v", got)
+	}
+}
+
+type kickedGuildCore struct{ *fakeGuildCore }
+
+func (kickedGuildCore) Leave(context.Context, identity.ActorContext, operation.Context) (guildcore.AckResult, error) {
+	return guildcore.AckResult{}, guildcore.ErrNotGuildMember
+}
+
+// A player kicked between requests is no longer a member; the stock client must
+// get a 409 refusal instead of a 200 body its guild mutation callback indexes.
+func TestGuildDispatcherKickedMemberGuildActionIsRefusal(t *testing.T) {
+	now := time.Unix(200, 0).UTC()
+	d := GuildDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Core: kickedGuildCore{&fakeGuildCore{}}, View: fakeGuildView{}}
+	got := d.Dispatch(context.Background(), env(584, nil, now))
+	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) || got.Body["error_msg"] != "" {
+		t.Fatalf("kicked member action=%+v", got)
 	}
 }

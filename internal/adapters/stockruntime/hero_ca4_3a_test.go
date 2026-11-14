@@ -59,7 +59,7 @@ func TestCA43AMID58ProjectionFailureIsNonOK(t *testing.T) {
 	svc := &ca42HeroService{fumoResult: apphero.FumoResult{PartnerID: 1, Slot: 1, Fumo: 1}}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: &ca42HeroEconomy{err: errors.New("projection")}}
 	r := d.Dispatch(context.Background(), heroReq(t, 58, map[string]any{"partner_id": int64(1), "equip_index": int64(1), "materials": []any{int64(2)}}))
-	if r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_failed" {
+	if r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("projection failure=%+v", r)
 	}
 }

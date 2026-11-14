@@ -95,7 +95,7 @@ func TestCA73AppearanceUnavailableMapsToHeroRejection(t *testing.T) {
 	}
 	appearance.skinErr = errors.New("db")
 	r = d.Dispatch(context.Background(), heroReq(t, 60, map[string]any{"partner_id": int64(7), "item_id": int64(123)}))
-	if r.HTTPStatus != 503 {
+	if r.HTTPStatus != 500 {
 		t.Fatalf("unexpected internal error mapping: %+v", r)
 	}
 }

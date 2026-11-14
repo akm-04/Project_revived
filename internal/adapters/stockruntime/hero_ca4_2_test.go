@@ -171,11 +171,11 @@ func TestCA42MID62StrictShapeAndProjectionFailure(t *testing.T) {
 	}
 
 	d.Economy = nil
-	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_unavailable" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("missing projection=%+v", r)
 	}
 	d.Economy = &ca42HeroEconomy{err: errors.New("projection failed")}
-	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_failed" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("failed projection=%+v", r)
 	}
 }

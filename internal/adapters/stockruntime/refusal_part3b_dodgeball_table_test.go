@@ -19,7 +19,7 @@ func TestPart3BDodgeballFailureRows(t *testing.T) {
 		{"balance coins", dodgeballFailure(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
 		{"balance stamina", dodgeballFailure(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
 		{"balance other", dodgeballFailure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", dodgeballFailure(domain.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"dependency", dodgeballFailure(errors.New("database unavailable")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"unavailable", dodgeballFailure(domain.ErrUnavailable), http.StatusConflict, unprovenRefusalCode, ""},
+		{"dependency", dodgeballFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

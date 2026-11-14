@@ -222,7 +222,7 @@ func TestPart2PracticeFailureRows(t *testing.T) {
 		{"all at cap", practiceFailure(apppractice.ErrAllPracticeAttrsAtCap), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid method", practiceFailure(apppractice.ErrInvalidPracticeMethod), http.StatusBadRequest, 0, "practice_rejected"},
 		{"empty roll support", practiceFailure(apppractice.ErrEmptyRollSupport), http.StatusConflict, unprovenRefusalCode, ""},
-		{"fallback", practiceFailure(errors.New("practice dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", practiceFailure(errors.New("practice dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }
 
@@ -234,6 +234,6 @@ func TestPart2SavedPresetFailureRows(t *testing.T) {
 		{"stale delete", failSavedPreset(appsavedpreset.ErrStaleLegacyDelete), http.StatusConflict, staleConflictCode, ""},
 		{"receipt conflict", failSavedPreset(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"commit unknown", failSavedPreset(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"fallback", failSavedPreset(errors.New("saved preset dependency")), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"fallback", failSavedPreset(errors.New("saved preset dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

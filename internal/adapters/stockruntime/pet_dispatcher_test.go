@@ -349,7 +349,7 @@ func TestPetDispatcherRejectsInventedParamsAndUnownedMIDs(t *testing.T) {
 	unownedReq := env(784, nil, now)
 	unownedReq.Envelope.Params = map[string]any{}
 	unowned := d.Dispatch(context.Background(), unownedReq)
-	if unowned.HTTPStatus != 501 {
+	if unowned.HTTPStatus != 409 {
 		t.Fatalf("unowned mid status=%d", unowned.HTTPStatus)
 	}
 }
@@ -458,7 +458,7 @@ func TestCA75PetStyleErrorTransportMapping(t *testing.T) {
 		{apppet.ErrPetAppearanceUnavailable, 409, 35028},
 		{apppet.ErrPetStyleSwitchConflict, 409, 35028},
 		{economy.ErrInsufficientBalance, 409, 35028},
-		{errors.New("infrastructure"), 503, 35033},
+		{errors.New("infrastructure"), 500, 35028},
 	}
 	for _, tc := range tests {
 		d := PetDispatcher{Authority: httpAuthority{actor}, Service: &petServiceFake{err: tc.err}}

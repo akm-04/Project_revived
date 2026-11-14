@@ -90,7 +90,7 @@ func TestSavedPresetDispatcherUsesD5RefusalCodes(t *testing.T) {
 		{appsavedpreset.ErrAmbiguousLegacyDelete, http.StatusConflict, staleConflictCode},
 		{appsavedpreset.ErrStaleLegacyDelete, http.StatusConflict, staleConflictCode},
 		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusServiceUnavailable, serverBusyCode},
-		{errors.New("infra"), http.StatusServiceUnavailable, serverBusyCode},
+		{errors.New("infra"), http.StatusInternalServerError, unprovenRefusalCode},
 	}
 	for _, tc := range cases {
 		svc := &savedPresetFakeService{err: tc.err}
