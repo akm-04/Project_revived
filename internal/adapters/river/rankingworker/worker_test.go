@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/riverqueue/river"
+	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
@@ -26,23 +27,26 @@ func (j *recordingJobs) record(name string, o operation.Context) error {
 	j.lastOps[name] = o
 	return nil
 }
-func (j *recordingJobs) RefreshActiveScores(_ context.Context, o operation.Context) error {
+func (j *recordingJobs) RefreshActiveScores(_ context.Context, o operation.Context, _ []playerroot.Root) error {
 	return j.record("refresh", o)
 }
-func (j *recordingJobs) BackfillScores(_ context.Context, o operation.Context) error {
+func (j *recordingJobs) BackfillScores(_ context.Context, o operation.Context, _ []playerroot.Root) error {
 	return j.record("backfill", o)
 }
-func (j *recordingJobs) SettleBoardBoundaries(_ context.Context, o operation.Context) error {
+func (j *recordingJobs) SettleBoardBoundaries(_ context.Context, o operation.Context, _ []playerroot.Root) error {
 	return j.record("settle", o)
 }
 
 func TestRankingWorkersRegisterAndDispatchToTheirJobs(t *testing.T) {
 	jobs := &recordingJobs{calls: map[string]int{}, lastOps: map[string]operation.Context{}}
+	roots := func(context.Context) ([]playerroot.Root, error) {
+		return []playerroot.Root{{PlayerID: 1, LogicalServerID: 1}}, nil
+	}
 	workers := river.NewWorkers()
-	if e := Register(workers, jobs); e != nil {
+	if e := Register(workers, jobs, roots); e != nil {
 		t.Fatal(e)
 	}
-	if e := Register(workers, jobs); e == nil {
+	if e := Register(workers, jobs, roots); e == nil {
 		t.Fatal("duplicate worker registration accepted")
 	}
 	if len(PeriodicJobs(0)) != 2 {
@@ -50,9 +54,9 @@ func TestRankingWorkersRegisterAndDispatchToTheirJobs(t *testing.T) {
 	}
 	c := context.Background()
 	factory := operation.Factory{Clock: clock.Fixed{T: time.Now().UTC()}}
-	refresh := &scoreRefreshWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Run: jobs.RefreshActiveScores}}
-	backfill := &scoreBackfillWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Run: jobs.BackfillScores}}
-	settle := &boardSettleWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Run: jobs.SettleBoardBoundaries}}
+	refresh := &scoreRefreshWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Roots: roots, Run: jobs.RefreshActiveScores}}
+	backfill := &scoreBackfillWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Roots: roots, Run: jobs.BackfillScores}}
+	settle := &boardSettleWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Roots: roots, Run: jobs.SettleBoardBoundaries}}
 	if e := refresh.Work(c, &river.Job[refreshArgs]{}); e != nil {
 		t.Fatal(e)
 	}

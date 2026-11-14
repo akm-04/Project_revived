@@ -25,7 +25,7 @@ const maxRefreshBatches = 200
 const maxBackfillBatches = 100000
 
 func (s Service) jobsReady() bool {
-	return s.readReady() && s.Cohort != nil
+	return s.readReady()
 }
 
 func (s Service) now(c context.Context) (time.Time, error) {
@@ -45,19 +45,6 @@ func (s Service) activeRevision(c context.Context) (string, error) {
 		return "", ErrUnavailable
 	}
 	return rev, nil
-}
-
-func (s Service) playerRoots(c context.Context, o operation.Context) ([]playerroot.Root, error) {
-	var roots []playerroot.Root
-	_, _, e := s.Timed.Run(c, o, Profile(), tx.Options{Isolation: tx.ReadCommitted, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc gen.TimedScope) error {
-		var e error
-		roots, e = s.Cohort.ListPlayerRootsTx(c, sc.Tx)
-		return e
-	})
-	if e != nil {
-		return nil, e
-	}
-	return roots, nil
 }
 
 func groupPlayersByServer(roots []playerroot.Root) (map[identity.LogicalServerID][]identity.PlayerID, error) {
@@ -144,29 +131,18 @@ func (s Service) activityStale(c context.Context, players []identity.PlayerID, u
 }
 
 // RefreshActiveScores refreshes rows whose owner activity is newer than the
-// stored row, for every generic board, in bounded player batches.
-func (s Service) RefreshActiveScores(c context.Context, o operation.Context) error {
+// stored row, for every generic board, in bounded player batches. The caller
+// supplies the I4 enumeration so this package never scans all players.
+func (s Service) RefreshActiveScores(c context.Context, o operation.Context, roots []playerroot.Root) error {
 	if !s.jobsReady() || (s.Presence == nil && s.Login == nil) || o.ID.IsZero() || o.StartedAt.IsZero() {
 		return ErrUnavailable
-	}
-	rev, e := s.activeRevision(c)
-	if e != nil {
-		return e
-	}
-	at, e := s.now(c)
-	if e != nil {
-		return e
-	}
-	roots, e := s.playerRoots(c, o)
-	if e != nil {
-		return e
 	}
 	byServer, e := groupPlayersByServer(roots)
 	if e != nil {
 		return e
 	}
 	for server := range byServer {
-		if e = s.refreshServer(c, o, byServer[server], server, rev, at); e != nil {
+		if e = s.RefreshActiveScoresServer(c, o, server, byServer[server]); e != nil {
 			return e
 		}
 	}
@@ -204,7 +180,7 @@ func (s Service) refreshServer(c context.Context, o operation.Context, players [
 }
 
 // RefreshActiveScoresServer scopes the activity refresh to one logical server.
-func (s Service) RefreshActiveScoresServer(c context.Context, o operation.Context, server identity.LogicalServerID) error {
+func (s Service) RefreshActiveScoresServer(c context.Context, o operation.Context, server identity.LogicalServerID, players []identity.PlayerID) error {
 	if !s.jobsReady() || (s.Presence == nil && s.Login == nil) || o.ID.IsZero() || o.StartedAt.IsZero() || !server.Valid() {
 		return ErrUnavailable
 	}
@@ -216,75 +192,42 @@ func (s Service) RefreshActiveScoresServer(c context.Context, o operation.Contex
 	if e != nil {
 		return e
 	}
-	roots, e := s.playerRoots(c, o)
-	if e != nil {
-		return e
-	}
-	byServer, e := groupPlayersByServer(roots)
-	if e != nil {
-		return e
-	}
-	return s.refreshServer(c, o, byServer[server], server, rev, at)
+	return s.refreshServer(c, o, players, server, rev, at)
 }
 
 // BackfillScores seeds every player of every server for every board. A legacy
 // board-root Run keeps its observation time when the score and revision agree.
-func (s Service) BackfillScores(c context.Context, o operation.Context) error {
+func (s Service) BackfillScores(c context.Context, o operation.Context, roots []playerroot.Root) error {
 	if !s.jobsReady() || o.ID.IsZero() || o.StartedAt.IsZero() {
 		return ErrUnavailable
-	}
-	rev, e := s.activeRevision(c)
-	if e != nil {
-		return e
-	}
-	at, e := s.now(c)
-	if e != nil {
-		return e
-	}
-	roots, e := s.playerRoots(c, o)
-	if e != nil {
-		return e
 	}
 	byServer, e := groupPlayersByServer(roots)
 	if e != nil {
 		return e
 	}
 	for server := range byServer {
-		if e = s.backfillServer(c, o, byServer[server], server, rev, at); e != nil {
+		if e = s.BackfillScoresServer(c, o, server, byServer[server]); e != nil {
 			return e
-		}
-	}
-	return nil
-}
-
-func (s Service) backfillServer(c context.Context, o operation.Context, players []identity.PlayerID, server identity.LogicalServerID, rev string, at time.Time) error {
-	for _, board := range d.Boards {
-		runs, e := s.Store.ReadBoardRootRunsTx(c, s.Fresh, board, server)
-		if e != nil {
-			return e
-		}
-		for batch := 0; batch < maxBackfillBatches; batch++ {
-			first := batch * refreshBatchSize
-			if first >= len(players) {
-				break
-			}
-			last := first + refreshBatchSize
-			if last > len(players) {
-				last = len(players)
-			}
-			if e = s.runScoreTx(c, o, board, server, players[first:last], runs, rev, at); e != nil {
-				return fmt.Errorf("ranking backfill %s: %w", board.Name, e)
-			}
-			if last == len(players) {
-				break
-			}
 		}
 	}
 	return nil
 }
 
 // BackfillScoresServer scopes the deploy backfill to one logical server.
-func (s Service) BackfillScoresServer(c context.Context, o operation.Context, server identity.LogicalServerID) error {
+func (s Service) BackfillScoresServer(c context.Context, o operation.Context, server identity.LogicalServerID, players []identity.PlayerID) error {
+	if !s.jobsReady() || o.ID.IsZero() || o.StartedAt.IsZero() || !server.Valid() {
+		return ErrUnavailable
+	}
+	for _, board := range d.Boards {
+		if e := s.BackfillBoardServer(c, o, board, server, players); e != nil {
+			return fmt.Errorf("ranking backfill %s: %w", board.Name, e)
+		}
+	}
+	return nil
+}
+
+// BackfillBoardServer scopes the deploy backfill to one board of a server.
+func (s Service) BackfillBoardServer(c context.Context, o operation.Context, board d.Board, server identity.LogicalServerID, players []identity.PlayerID) error {
 	if !s.jobsReady() || o.ID.IsZero() || o.StartedAt.IsZero() || !server.Valid() {
 		return ErrUnavailable
 	}
@@ -296,58 +239,42 @@ func (s Service) BackfillScoresServer(c context.Context, o operation.Context, se
 	if e != nil {
 		return e
 	}
-	roots, e := s.playerRoots(c, o)
+	runs, e := s.Store.ReadBoardRootRunsTx(c, s.Fresh, board, server)
 	if e != nil {
 		return e
 	}
-	byServer, e := groupPlayersByServer(roots)
-	if e != nil {
-		return e
+	for batch := 0; batch < maxBackfillBatches; batch++ {
+		first := batch * refreshBatchSize
+		if first >= len(players) {
+			break
+		}
+		last := first + refreshBatchSize
+		if last > len(players) {
+			last = len(players)
+		}
+		if e = s.runScoreTx(c, o, board, server, players[first:last], runs, rev, at); e != nil {
+			return e
+		}
+		if last == len(players) {
+			break
+		}
 	}
-	return s.backfillServer(c, o, byServer[server], server, rev, at)
+	return nil
 }
 
 // SettleBoardBoundaries settles the current week's board once, after
 // processing any periods the old read-bound path left pending.
-func (s Service) SettleBoardBoundaries(c context.Context, o operation.Context) error {
+func (s Service) SettleBoardBoundaries(c context.Context, o operation.Context, roots []playerroot.Root) error {
 	if !s.jobsReady() || s.Players == nil || s.Recipient == nil || s.Receipts == nil || s.ReceiptRead == nil || o.ID.IsZero() || o.StartedAt.IsZero() {
 		return ErrUnavailable
-	}
-	now, e := s.now(c)
-	if e != nil {
-		return e
-	}
-	week, e := d.BoardWeek(now)
-	if e != nil {
-		return e
-	}
-	rev, e := s.activeRevision(c)
-	if e != nil {
-		return e
-	}
-	roots, e := s.playerRoots(c, o)
-	if e != nil {
-		return e
 	}
 	byServer, e := groupPlayersByServer(roots)
 	if e != nil {
 		return e
 	}
 	for server := range byServer {
-		if e = s.settleServer(c, o, server, week, now, rev); e != nil {
+		if e = s.SettleBoardBoundariesServer(c, o, server); e != nil {
 			return e
-		}
-	}
-	return nil
-}
-
-func (s Service) settleServer(c context.Context, o operation.Context, server identity.LogicalServerID, week, now time.Time, rev string) error {
-	for _, board := range d.Boards {
-		if _, e := s.SettlePendingBoard(c, board, server, o); e != nil {
-			return e
-		}
-		if e := s.settleCurrentWeek(c, o, board, server, week, now, rev); e != nil {
-			return fmt.Errorf("ranking settle %s: %w", board.Name, e)
 		}
 	}
 	return nil
@@ -355,6 +282,19 @@ func (s Service) settleServer(c context.Context, o operation.Context, server ide
 
 // SettleBoardBoundariesServer scopes the weekly settlement to one logical server.
 func (s Service) SettleBoardBoundariesServer(c context.Context, o operation.Context, server identity.LogicalServerID) error {
+	if !s.jobsReady() || s.Players == nil || s.Recipient == nil || s.Receipts == nil || s.ReceiptRead == nil || o.ID.IsZero() || o.StartedAt.IsZero() || !server.Valid() {
+		return ErrUnavailable
+	}
+	for _, board := range d.Boards {
+		if e := s.SettleBoardServer(c, o, board, server); e != nil {
+			return fmt.Errorf("ranking settle %s: %w", board.Name, e)
+		}
+	}
+	return nil
+}
+
+// SettleBoardServer settles one board's current week for a server.
+func (s Service) SettleBoardServer(c context.Context, o operation.Context, b d.Board, server identity.LogicalServerID) error {
 	if !s.jobsReady() || s.Players == nil || s.Recipient == nil || s.Receipts == nil || s.ReceiptRead == nil || o.ID.IsZero() || o.StartedAt.IsZero() || !server.Valid() {
 		return ErrUnavailable
 	}
@@ -370,7 +310,10 @@ func (s Service) SettleBoardBoundariesServer(c context.Context, o operation.Cont
 	if e != nil {
 		return e
 	}
-	return s.settleServer(c, o, server, week, now, rev)
+	if _, e = s.SettlePendingBoard(c, b, server, o); e != nil {
+		return e
+	}
+	return s.settleCurrentWeek(c, o, b, server, week, now, rev)
 }
 
 func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board d.Board, server identity.LogicalServerID, week, now time.Time, rev string) error {
@@ -393,7 +336,7 @@ func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board
 	if e != nil {
 		return e
 	}
-	_, _, e = s.Timed.Run(c, bound, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(c context.Context, sc gen.TimedScope) error {
+	_, _, e = s.Timed.Run(c, bound, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, nil, func(c context.Context, sc gen.TimedScope) error {
 		at := now
 		root, e := s.Store.LockBoardRootTx(c, sc.Tx, board, server, at)
 		if e != nil {

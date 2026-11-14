@@ -12,8 +12,10 @@ import (
 
 	"github.com/riverqueue/river"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	riveradapter "gxb.local/backend/v2/internal/adapters/river"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/playerroot"
 	appranking "gxb.local/backend/v2/internal/application/ranking"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -27,10 +29,14 @@ const PhysicalQueue = "ranking_maintenance"
 
 // Jobs is the ranking application surface the workers re-enter.
 type Jobs interface {
-	RefreshActiveScores(context.Context, operation.Context) error
-	BackfillScores(context.Context, operation.Context) error
-	SettleBoardBoundaries(context.Context, operation.Context) error
+	RefreshActiveScores(context.Context, operation.Context, []playerroot.Root) error
+	BackfillScores(context.Context, operation.Context, []playerroot.Root) error
+	SettleBoardBoundaries(context.Context, operation.Context, []playerroot.Root) error
 }
+
+// Roots is the I4-owned player enumeration. It lives at the adapter edge so the
+// ranking application package never scans all players.
+type Roots func(context.Context) ([]playerroot.Root, error)
 
 type refreshArgs struct{}
 
@@ -47,18 +53,23 @@ func (settleArgs) Kind() string { return BoardSettleKind }
 type jobRunner struct {
 	Jobs       Jobs
 	Operations operation.Factory
-	Run        func(context.Context, operation.Context) error
+	Roots      Roots
+	Run        func(context.Context, operation.Context, []playerroot.Root) error
 }
 
 func (r jobRunner) run(c context.Context) error {
-	if r.Jobs == nil || r.Run == nil {
+	if r.Jobs == nil || r.Run == nil || r.Roots == nil {
 		return errors.New("ranking worker dependencies unavailable")
 	}
 	op, e := r.Operations.New(policy.Set{})
 	if e != nil {
 		return e
 	}
-	return r.Run(c, op)
+	roots, e := r.Roots(c)
+	if e != nil {
+		return e
+	}
+	return r.Run(c, op, roots)
 }
 
 type scoreRefreshWorker struct {
@@ -98,14 +109,14 @@ func (w *boardSettleWorker) Work(c context.Context, job *river.Job[settleArgs]) 
 }
 
 // Register installs the three feature workers on the shared River bundle.
-func Register(workers *river.Workers, jobs Jobs) error {
-	if workers == nil || jobs == nil {
-		return errors.New("ranking worker registration requires workers and jobs")
+func Register(workers *river.Workers, jobs Jobs, roots Roots) error {
+	if workers == nil || jobs == nil || roots == nil {
+		return errors.New("ranking worker registration requires workers, jobs and roots")
 	}
 	factory := operation.Factory{Clock: clock.System{}}
-	refresh := &scoreRefreshWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Run: jobs.RefreshActiveScores}}
-	backfill := &scoreBackfillWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Run: jobs.BackfillScores}}
-	settle := &boardSettleWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Run: jobs.SettleBoardBoundaries}}
+	refresh := &scoreRefreshWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Roots: roots, Run: jobs.RefreshActiveScores}}
+	backfill := &scoreBackfillWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Roots: roots, Run: jobs.BackfillScores}}
+	settle := &boardSettleWorker{jobRunner: jobRunner{Jobs: jobs, Operations: factory, Roots: roots, Run: jobs.SettleBoardBoundaries}}
 	if e := river.AddWorkerSafely(workers, refresh); e != nil {
 		return e
 	}
@@ -145,11 +156,14 @@ func New(p *postgres.Pool, jobs Jobs, refreshPeriod time.Duration) (*Runtime, er
 	if e != nil {
 		return nil, e
 	}
+	roots := func(c context.Context) ([]playerroot.Root, error) {
+		return (i4store.PlayerRootLocker{}).ListPlayerRootsTx(c, p)
+	}
 	runtime, e := riveradapter.NewRuntime(p.Raw(), dispatch, riveradapter.RuntimeConfig{
 		Queues:          map[string]int{PhysicalQueue: 2},
 		SoftStopTimeout: 15 * time.Second,
 		JobTimeout:      2 * time.Minute,
-		RegisterWorkers: func(workers *river.Workers) error { return Register(workers, jobs) },
+		RegisterWorkers: func(workers *river.Workers) error { return Register(workers, jobs, roots) },
 		PeriodicJobs:    PeriodicJobs(refreshPeriod),
 	})
 	if e != nil {

@@ -12,7 +12,6 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/ranking"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -102,16 +101,6 @@ func (Store) ReadBoardSnapshotTx(c context.Context, q tx.Queryer, b d.Board, ser
 	}
 	s, ok, e := decodeSnapshot(q.QueryRow(c, `SELECT payload::text,digest FROM ranking_girls_snapshots WHERE logical_server_id=$1 AND policy_id=$2 AND generation=$3`, int64(server), b.Policy, gen))
 	if e == nil && ok && (s.Server != server || s.Generation != gen) {
-		return s, ok, d.ErrSnapshot
-	}
-	return s, ok, e
-}
-func (Store) FindBoardSnapshotByOperationTx(c context.Context, q tx.Queryer, op ids.UUID) (d.BoardSnapshot, bool, error) {
-	if q == nil || op.IsZero() {
-		return d.BoardSnapshot{}, false, d.ErrSnapshot
-	}
-	s, ok, e := decodeSnapshot(q.QueryRow(c, `SELECT payload::text,digest FROM ranking_girls_snapshots WHERE operation_id=$1`, op.String()))
-	if e == nil && ok && s.OperationID != op {
 		return s, ok, d.ErrSnapshot
 	}
 	return s, ok, e

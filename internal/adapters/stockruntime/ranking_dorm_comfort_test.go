@@ -33,14 +33,15 @@ func TestRankingMID301Subtype34ServesDormComfortShape(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	inputs := []d.BoardInput{}
+	entries := []d.BoardEntry{}
 	for player, value := range map[int64]int64{100001: 17, 100002: 5} {
-		inputs = append(inputs, d.BoardInput{
-			Metric:  d.BoardMetric{Player: identity.PlayerID(player), Owner: d.DormComfortBoard.SourceOwner, Policy: d.DormComfortBoard.SourcePolicy, Semantics: d.DormComfortBoard.SourceSemantics, Revision: revision, PopulationDigest: strings.Repeat("b", 64), FieldID: d.DormComfortBoard.FieldID, Value: value, SourceVersion: 1, PopulationVersion: 1, ObservedAt: at},
-			Display: d.BoardPresentation{Player: identity.PlayerID(player), Name: "Ranker", Level: 10, AvatarID: 110001001},
+		entries = append(entries, d.BoardEntry{
+			Metric:     d.BoardMetric{Player: identity.PlayerID(player), Owner: d.DormComfortBoard.SourceOwner, Policy: d.DormComfortBoard.SourcePolicy, Semantics: d.DormComfortBoard.SourceSemantics, Revision: revision, PopulationDigest: strings.Repeat("b", 64), FieldID: d.DormComfortBoard.FieldID, Value: value, SourceVersion: 1, PopulationVersion: 1, ObservedAt: at},
+			Display:    d.BoardPresentation{Player: identity.PlayerID(player), Name: "Ranker", Level: 10, AvatarID: 110001001},
+			ScoreSince: at,
 		})
 	}
-	_, snapshot, e := d.BuildBoardSnapshot(root, at, revision, opID, inputs)
+	_, snapshot, e := d.FreezeBoardSnapshot(root, at, revision, opID, entries)
 	if e != nil {
 		t.Fatal(e)
 	}

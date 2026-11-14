@@ -15,7 +15,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
 	d "gxb.local/backend/v2/internal/domain/ranking"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -25,7 +24,6 @@ type Store interface {
 	SaveBoardRootTx(context.Context, tx.Tx, d.BoardRoot, int64) error
 	InsertBoardSnapshotTx(context.Context, tx.Tx, d.BoardSnapshot) error
 	ReadBoardSnapshotTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID, int64) (d.BoardSnapshot, bool, error)
-	FindBoardSnapshotByOperationTx(context.Context, tx.Queryer, ids.UUID) (d.BoardSnapshot, bool, error)
 	BindBoardPeriodTx(context.Context, tx.Tx, d.BoardSnapshot) error
 	PendingBoardPeriodsTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID) ([]d.BoardPeriod, error)
 	ReadBoardPeriodTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID, time.Time) (d.BoardPeriod, bool, error)
@@ -41,12 +39,9 @@ type Store interface {
 	ReadScoreRowUpdatesTx(context.Context, tx.Queryer, string, identity.LogicalServerID) (map[identity.PlayerID]time.Time, error)
 	ReadBoardRootRunsTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID) (map[identity.PlayerID]d.ScoreRun, error)
 }
-type Cohort interface {
-	ListPlayerRootsTx(context.Context, tx.Queryer) ([]playerroot.Root, error)
-}
 type Directory interface {
-	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 	ProfilesTx(context.Context, tx.Queryer, []identity.PlayerID) (map[identity.PlayerID]playerdirectory.Profile, error)
+	ServerTx(context.Context, tx.Queryer, identity.PlayerID) (identity.LogicalServerID, bool, error)
 }
 
 // PresenceActivity and LoginActivity are owners' batched activity markers. The
@@ -86,7 +81,6 @@ type Service struct {
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
 	Store       Store
-	Cohort      Cohort
 	Directory   Directory
 	Metrics     publicprofile.ScopedMetricReader
 	Comfort     ComfortFacts

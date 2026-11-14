@@ -112,3 +112,40 @@ func TestR7MID301ServesStoredRowsAndViewerRankOutsideThePage(t *testing.T) {
 		t.Fatalf("page did not reflect the score change: %v", rows)
 	}
 }
+
+func TestR7MID301ViewerAtRank101AndEmptyBoard(t *testing.T) {
+	p := pool(t)
+	revision := installed(t, p)
+	server := rankingServer(t, p)
+	r7BulkPlayers(t, p, server, 100)
+	for i := int64(1); i <= 100; i++ {
+		comfortRooms(t, p, identity.PlayerID(int64(server)*100000+i), revision, map[int64]int64{1: 1000 - i})
+	}
+	viewer := rankingActor(t, p, server, true)
+	comfortRooms(t, p, viewer.PlayerID, revision, map[int64]int64{1: 1})
+	service := r7JobService(p)
+	if e := service.BackfillScoresServer(ctx, op(), server, r7ServerPlayers(t, p, server)); e != nil {
+		t.Fatal(e)
+	}
+	dispatcher := stockruntime.RankingDispatcher{Authority: bearerAuthority{string(viewer.AccountUID): viewer}, Service: service}
+	info := r7Dispatch(t, dispatcher, viewer)
+	mine := info["my_rank"].(map[string]any)
+	if mine["rank"] != int64(101) || mine["score"] != int64(1) {
+		t.Fatalf("viewer at rank 101: %v", mine)
+	}
+	if rows := info["rank_info"].([]map[string]any); len(rows) != 100 {
+		t.Fatalf("page past the published 100: %d", len(rows))
+	}
+
+	emptyServer := rankingServer(t, p)
+	emptyViewer := rankingActor(t, p, emptyServer, true)
+	emptyService := r7JobService(p)
+	emptyDispatcher := stockruntime.RankingDispatcher{Authority: bearerAuthority{string(emptyViewer.AccountUID): emptyViewer}, Service: emptyService}
+	empty := r7Dispatch(t, emptyDispatcher, emptyViewer)
+	if len(empty["my_rank"].(map[string]any)) != 0 {
+		t.Fatalf("empty board gave a rank: %v", empty["my_rank"])
+	}
+	if rows := empty["rank_info"].([]map[string]any); len(rows) != 0 {
+		t.Fatalf("empty board published rows: %v", rows)
+	}
+}

@@ -29,16 +29,34 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// refreshRanking keeps the weekly snapshot and settlement assertions on the
-// retained snapshot path; the scored read itself no longer publishes one.
-func refreshRanking(t *testing.T, s app.Service, b d.Board, a identity.ActorContext, o operation.Context) d.BoardSnapshot {
+// settleRanking writes the server's score rows through the production backfill
+// and settles one board through the boundary job, then returns the frozen
+// snapshot the settlement produced.
+func settleRanking(t *testing.T, p *pg.Pool, s app.Service, b d.Board, server identity.LogicalServerID, o operation.Context) d.BoardSnapshot {
 	t.Helper()
-	snapshot, e := s.RefreshBoard(ctx, b, a, o)
+	roots, e := (i4store.PlayerRootLocker{}).ListPlayerRootsTx(ctx, p)
 	if e != nil {
 		t.Fatal(e)
 	}
-	if _, e = s.SettlePendingBoard(ctx, b, a.LogicalServerID, o); e != nil {
+	players := []identity.PlayerID{}
+	for _, root := range roots {
+		if root.LogicalServerID == server {
+			players = append(players, root.PlayerID)
+		}
+	}
+	if e = s.BackfillBoardServer(ctx, o, b, server, players); e != nil {
 		t.Fatal(e)
+	}
+	if e = s.SettleBoardServer(ctx, o, b, server); e != nil {
+		t.Fatal(e)
+	}
+	var generation int64
+	if e = p.QueryRow(ctx, `SELECT snapshot_generation FROM ranking_girls_periods WHERE logical_server_id=$1 AND policy_id=$2 ORDER BY week_start DESC LIMIT 1`, int64(server), b.Policy).Scan(&generation); e != nil {
+		t.Fatal(e)
+	}
+	snapshot, ok, e := (rankingstore.Store{}).ReadBoardSnapshotTx(ctx, p, b, server, generation)
+	if e != nil || !ok {
+		t.Fatal(e, ok)
 	}
 	return snapshot
 }
@@ -110,7 +128,7 @@ func rankingActor(t *testing.T, p *pg.Pool, server identity.LogicalServerID, tra
 	return identity.ActorContext{AccountID: aid, AccountUID: identity.AccountUID(a.String()), SessionID: sid, ContextID: cid, LogicalServerID: server, PlayerID: identity.PlayerID(pid), ContextGeneration: 1, SessionLivenessVersion: 1, ContextLivenessVersion: 1}
 }
 func rankingService(p *pg.Pool, db tx.Beginner) app.Service {
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Fresh: p, Store: rankingstore.Store{}, Cohort: i4store.PlayerRootLocker{}, Directory: i4store.PlayerDirectoryReader{}, Metrics: privateMetricProvider(p), Content: contentstore.Store{Queryer: p}, Fence: i5store.Store{}, Players: i4store.PlayerRootLocker{}, Recipient: service(p, db), Ledger: i5store.Store{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Fresh: p, Store: rankingstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Metrics: privateMetricProvider(p), Content: contentstore.Store{Queryer: p}, Fence: i5store.Store{}, Players: i4store.PlayerRootLocker{}, Recipient: service(p, db), Ledger: i5store.Store{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 func rankingSummon(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string, table int64) {
 	t.Helper()
@@ -141,29 +159,29 @@ func TestI7C4CRankingGenuineCoherentCohortFirstWeeklyWinnersAndReplay(t *testing
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
 	o := op()
-	first := refreshRanking(t, s, d.GirlsBoard, a, o)
+	first := settleRanking(t, p, s, d.GirlsBoard, server, o)
 	if len(first.Entries) != 2 || first.Entries[0].Metric.Player != a.PlayerID || first.Entries[0].Metric.Value != 1 || first.Entries[1].Metric.Value != 0 {
 		t.Fatal(first)
 	}
 	if rankingCount(t, p, server, "ranking_girls_awards") != 1 || rankingCount(t, p, server, "ranking_girls_periods") != 1 {
 		t.Fatal("award/period count")
 	}
-	// A later genuine current population change changes the fresh board, while
-	// the first immutable weekly generation remains the title settlement basis.
+	// A later genuine current population change does not replace the week's
+	// already settled immutable generation.
 	rankingSummon(t, p, b, rev, 10001001)
 	rankingSummon(t, p, b, rev, 10001002)
-	later, e := s.RefreshBoard(ctx, d.GirlsBoard, b, op())
-	if e != nil || later.Generation != first.Generation+1 || later.Entries[0].Metric.Player != b.PlayerID || later.Entries[0].Metric.Value != 2 {
-		t.Fatal(later, e)
+	later := settleRanking(t, p, s, d.GirlsBoard, server, op())
+	if later.Generation != first.Generation || !reflect.DeepEqual(first, later) {
+		t.Fatal("settled weekly generation replaced", later, first)
 	}
 	if rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal("weekly winners refreshed")
 	}
-	replay, e := s.RefreshBoard(ctx, d.GirlsBoard, a, o)
-	if e != nil || !reflect.DeepEqual(first, replay) {
-		t.Fatal("historic snapshot receipt changed", e)
+	replay := settleRanking(t, p, s, d.GirlsBoard, server, o)
+	if !reflect.DeepEqual(first, replay) {
+		t.Fatal("historic snapshot receipt changed", replay, first)
 	}
-	if rankingCount(t, p, server, "ranking_girls_snapshots") != 2 {
+	if rankingCount(t, p, server, "ranking_girls_snapshots") != 1 {
 		t.Fatal("replay published new generation")
 	}
 	ds := service(p, p)
@@ -183,38 +201,36 @@ func TestI7C4CRankingGenuineCoherentCohortFirstWeeklyWinnersAndReplay(t *testing
 		t.Fatal("partial owner promoted whole title picker", e)
 	}
 }
-func TestI7C4CRankingMissingCanonicalParticipantBlocksWholeSnapshot(t *testing.T) {
-	p := pool(t)
-	installed(t, p)
-	server := rankingServer(t, p)
-	a := rankingActor(t, p, server, true)
-	b := rankingActor(t, p, server, true)
-	exec(t, p, `DELETE FROM player_hero_roots WHERE player_id=$1`, int64(b.PlayerID))
-	s := rankingService(p, p)
-	if _, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op()); e == nil {
-		t.Fatal("missing canonical owner omitted or supplied zero")
-	}
-	if rankingCount(t, p, server, "ranking_girls_snapshots") != 0 || rankingCount(t, p, server, "ranking_girls_roots") != 0 {
-		t.Fatal("failed snapshot/root leaked")
-	}
-}
-func TestI7C4CRankingConcurrentRefreshAndSettlementConverge(t *testing.T) {
+func TestI7C4CRankingConcurrentSettlementConverges(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
 	server := rankingServer(t, p)
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
+	roots, e := (i4store.PlayerRootLocker{}).ListPlayerRootsTx(ctx, p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	players := []identity.PlayerID{}
+	for _, root := range roots {
+		if root.LogicalServerID == server {
+			players = append(players, root.PlayerID)
+		}
+	}
+	if e = s.BackfillBoardServer(ctx, op(), d.GirlsBoard, server, players); e != nil {
+		t.Fatal(e)
+	}
 	var wg sync.WaitGroup
 	errs := make(chan error, 4)
 	for i := 0; i < 4; i++ {
 		wg.Add(1)
-		go func() { defer wg.Done(); _, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op()); errs <- e }()
+		go func() { defer wg.Done(); errs <- s.SettleBoardServer(ctx, op(), d.GirlsBoard, server) }()
 	}
 	wg.Wait()
 	close(errs)
-	// Stale already-bound decision instants may be refused after waiting for a
-	// newer observation; they must not resample time or publish partial state.
+	// The board-root lock serializes the boundary freeze; stale bound instants
+	// may be refused and must not publish a partial or duplicate generation.
 	successes := 0
 	for e := range errs {
 		if e == nil {
@@ -224,10 +240,7 @@ func TestI7C4CRankingConcurrentRefreshAndSettlementConverge(t *testing.T) {
 		}
 	}
 	if successes < 1 {
-		t.Fatal("concurrent refresh diverged", successes)
-	}
-	if _, e := s.SettlePendingBoard(ctx, d.GirlsBoard, server, op()); e != nil {
-		t.Fatal(e)
+		t.Fatal("concurrent settlement diverged", successes)
 	}
 	if rankingCount(t, p, server, "ranking_girls_periods") != 1 || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal("concurrent settlement diverged", successes)
@@ -280,13 +293,22 @@ func TestI7C4CRankingAtomicRecipientRollbackAndRetry(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
-	snapshot, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op())
+	roots, e := (i4store.PlayerRootLocker{}).ListPlayerRootsTx(ctx, p)
 	if e != nil {
+		t.Fatal(e)
+	}
+	players := []identity.PlayerID{}
+	for _, root := range roots {
+		if root.LogicalServerID == server {
+			players = append(players, root.PlayerID)
+		}
+	}
+	if e = s.BackfillBoardServer(ctx, op(), d.GirlsBoard, server, players); e != nil {
 		t.Fatal(e)
 	}
 	broken := s
 	broken.Recipient = rankingFailRecipient{Inner: s.Recipient}
-	if _, e = broken.SettlePendingBoard(ctx, d.GirlsBoard, server, op()); !errors.Is(e, errRankingRecipient) {
+	if e = broken.SettleBoardServer(ctx, op(), d.GirlsBoard, server); !errors.Is(e, errRankingRecipient) {
 		t.Fatal(e)
 	}
 	if rankingCount(t, p, server, "ranking_girls_awards") != 0 {
@@ -297,48 +319,20 @@ func TestI7C4CRankingAtomicRecipientRollbackAndRetry(t *testing.T) {
 		t.Fatal("recipient leaked", mirrors, e)
 	}
 	pending, e := (rankingstore.Store{}).PendingBoardPeriodsTx(ctx, p, d.GirlsBoard, server)
-	if e != nil || len(pending) != 1 || pending[0].Generation != snapshot.Generation {
+	if e != nil || len(pending) != 1 {
 		t.Fatal(pending, e)
 	}
-	result, e := s.SettlePendingBoard(ctx, d.GirlsBoard, server, op())
-	if e != nil || len(result) != 1 || result[0].SnapshotDigest != snapshot.Digest || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
-		t.Fatal(result, e)
-	}
-	again, e := s.SettlePendingBoard(ctx, d.GirlsBoard, server, op())
-	if e != nil || len(again) != 0 || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
-		t.Fatal(again, e)
-	}
-}
-func TestI7C4CRankingUnknownCommitPositiveAndAbsenceUnresolved(t *testing.T) {
-	p := pool(t)
-	rev := installed(t, p)
-	server := rankingServer(t, p)
-	a := rankingActor(t, p, server, true)
-	rankingSummon(t, p, a, rev, 10001001)
-	ambiguous := rankingService(p, metricCommitDB{p, true})
-	o := op()
-	first, e := ambiguous.RefreshBoard(ctx, d.GirlsBoard, a, o)
-	if e != nil {
+	if e = s.SettleBoardServer(ctx, op(), d.GirlsBoard, server); e != nil {
 		t.Fatal(e)
 	}
-	again, e := rankingService(p, p).RefreshBoard(ctx, d.GirlsBoard, a, o)
-	if e != nil || !reflect.DeepEqual(first, again) {
-		t.Fatal("unknown commit proof lost", e)
+	if rankingCount(t, p, server, "ranking_girls_awards") != 1 {
+		t.Fatal("retry did not settle the pending period")
 	}
-	settled, e := ambiguous.SettlePendingBoard(ctx, d.GirlsBoard, server, op())
-	if e != nil || len(settled) != 1 || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
-		t.Fatal(settled, e)
+	if pending, e = (rankingstore.Store{}).PendingBoardPeriodsTx(ctx, p, d.GirlsBoard, server); e != nil || len(pending) != 0 {
+		t.Fatal(pending, e)
 	}
-	// Commit result is deliberately made ambiguous while the real transaction is
-	// rolled back. Generic receipt absence must remain unresolved, not replay.
-	otherServer := rankingServer(t, p)
-	other := rankingActor(t, p, otherServer, true)
-	absent := rankingService(p, metricCommitDB{p, false})
-	if _, e = absent.RefreshBoard(ctx, d.GirlsBoard, other, op()); e == nil {
-		t.Fatal("absence treated as positive commit")
-	}
-	if rankingCount(t, p, otherServer, "ranking_girls_snapshots") != 0 || rankingCount(t, p, otherServer, "ranking_girls_roots") != 0 {
-		t.Fatal("rolled back unknown left snapshot")
+	if e = s.SettleBoardServer(ctx, op(), d.GirlsBoard, server); e != nil || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
+		t.Fatal("settlement rerun changed awards", e)
 	}
 }
 func TestI7C4CRankingFixedExpiryAndUnknownLegacyExpiry(t *testing.T) {
@@ -349,7 +343,7 @@ func TestI7C4CRankingFixedExpiryAndUnknownLegacyExpiry(t *testing.T) {
 		a := rankingActor(t, p, server, tracked)
 		rankingSummon(t, p, a, rev, 10001001)
 		s := rankingService(p, p)
-		snapshot := refreshRanking(t, s, d.GirlsBoard, a, op())
+		snapshot := settleRanking(t, p, s, d.GirlsBoard, server, op())
 		ds := service(p, p)
 		ds.CatalogExternal = s
 		if _, e := ds.Execute(ctx, a, display.Command{Kind: "title", ID: 100059}, op()); e != nil {
@@ -387,7 +381,7 @@ func TestI7C4CRankingRecipientMismatchIsNotQualifiedOrigin(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
-	refreshRanking(t, s, d.GirlsBoard, a, op())
+	settleRanking(t, p, s, d.GirlsBoard, server, op())
 	exec(t, p, `UPDATE player_cosmetic_entitlements SET end_time=end_time+1 WHERE player_id=$1 AND catalog_id=100059`, int64(a.PlayerID))
 	q := display.CatalogOriginRequest{PlayerID: a.PlayerID, Family: "title", CatalogID: 100059, Revision: rev, ObservedAt: time.Now().UTC()}
 	if _, e := s.ReadCatalogDisplayOriginsTx(ctx, p, q); !errors.Is(e, display.ErrConflict) {
@@ -402,7 +396,7 @@ func TestI7C4CRankingScopedFactsKeepUnrelatedOriginsUnknown(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	rank := rankingService(p, p)
-	refreshRanking(t, rank, d.GirlsBoard, a, op())
+	settleRanking(t, p, rank, d.GirlsBoard, server, op())
 	ds := display4a(p)
 	ds.CatalogExternal = rank
 	var facts display.EligibilityObservation

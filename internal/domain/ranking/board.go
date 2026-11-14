@@ -140,18 +140,20 @@ type BoardRoot struct {
 	Policy                       string
 	NextGeneration, StateVersion int64
 	CreatedAt, UpdatedAt         time.Time
-	Runs                         map[identity.PlayerID]ScoreRun
+	// Runs is legacy read-only state: old roots seed the one-time backfill.
+	// New roots leave it empty and nothing writes score runs here any more.
+	Runs map[identity.PlayerID]ScoreRun `json:"Runs,omitempty"`
 }
 
 func NewBoardRoot(b Board, server identity.LogicalServerID, at time.Time) (BoardRoot, error) {
-	r := BoardRoot{Server: server, Policy: b.Policy, NextGeneration: 1, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC(), Runs: map[identity.PlayerID]ScoreRun{}}
+	r := BoardRoot{Server: server, Policy: b.Policy, NextGeneration: 1, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC()}
 	return r, r.Validate()
 }
 func (r BoardRoot) Validate() error {
 	if _, ok := BoardOf(r.Policy); !ok {
 		return ErrSnapshot
 	}
-	if !r.Server.Valid() || r.NextGeneration < 1 || r.StateVersion < 1 || r.CreatedAt.Unix() <= 0 || r.UpdatedAt.Before(r.CreatedAt) || r.Runs == nil {
+	if !r.Server.Valid() || r.NextGeneration < 1 || r.StateVersion < 1 || r.CreatedAt.Unix() <= 0 || r.UpdatedAt.Before(r.CreatedAt) {
 		return ErrSnapshot
 	}
 	for id, v := range r.Runs {
@@ -209,7 +211,7 @@ func boardOfMetric(m BoardMetric) (Board, bool) {
 }
 
 // NextScoreRow keeps the current-value run while score and revision are
-// unchanged, the same rule BuildBoardSnapshot applies to Runs.
+// unchanged.
 func NextScoreRow(prev *ScoreRow, m BoardMetric, at time.Time) (ScoreRow, error) {
 	b, ok := boardOfMetric(m)
 	if !ok || at.Unix() <= 0 || !m.valid(b, at, m.Revision) {
@@ -241,10 +243,6 @@ func (p BoardPresentation) valid(id identity.PlayerID) bool {
 // Valid checks the presentation fields without a caller-supplied subject id.
 func (p BoardPresentation) Valid() bool { return p.valid(p.Player) }
 
-type BoardInput struct {
-	Metric  BoardMetric
-	Display BoardPresentation
-}
 type BoardEntry struct {
 	Metric     BoardMetric
 	Display    BoardPresentation
@@ -304,9 +302,6 @@ func (s BoardSnapshot) Validate() error {
 	return nil
 }
 
-// BuildBoardSnapshot must receive the complete canonical I4 cohort. The caller
-// checks cohort identity and obtains all metrics in one witnessed transaction.
-// This function never manufactures historical first-reach timestamps.
 func beginBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID) (BoardSnapshot, Board, error) {
 	var out BoardSnapshot
 	if r.Validate() != nil || !revision(rev) || op.IsZero() || at.Unix() <= 0 {
@@ -345,34 +340,6 @@ func finishBoardSnapshot(r BoardRoot, out BoardSnapshot, byID map[int64]BoardEnt
 		return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
 	}
 	return next, out, nil
-}
-
-func BuildBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID, in []BoardInput) (BoardRoot, BoardSnapshot, error) {
-	out, b, e := beginBoardSnapshot(r, at, rev, op)
-	if e != nil {
-		return BoardRoot{}, BoardSnapshot{}, e
-	}
-	next := r
-	next.Runs = map[identity.PlayerID]ScoreRun{}
-	byID := map[int64]BoardEntry{}
-	for _, v := range in {
-		m := v.Metric
-		if !m.valid(b, at, rev) || !v.Display.valid(m.Player) {
-			return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
-		}
-		if _, dup := byID[int64(m.Player)]; dup {
-			return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
-		}
-		run := ScoreRun{Score: m.Value, Since: at.UTC(), Revision: rev}
-		if old, ok := r.Runs[m.Player]; ok && old.Score == m.Value && old.Revision == rev {
-			run.Since = old.Since
-		}
-		next.Runs[m.Player] = run
-		v := BoardEntry{Metric: m, Display: v.Display, ScoreSince: run.Since}
-		byID[int64(m.Player)] = v
-		out.Entries = append(out.Entries, v)
-	}
-	return finishBoardSnapshot(next, out, byID, at)
 }
 
 // FreezeBoardSnapshot settles stored score rows. Each entry keeps the

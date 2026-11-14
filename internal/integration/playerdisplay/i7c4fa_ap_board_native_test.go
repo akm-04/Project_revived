@@ -28,10 +28,7 @@ func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
 	if _, e := ownerSummoner(p).SummonNormal(ctx, b, second.Template.TableID, second.Template.FragmentItemID, second.FragmentCount, op()); e != nil {
 		t.Fatal(e)
 	}
-	s := rankingService(p, p)
-	metrics := privateMetricProvider(p)
-	metrics.Force = rawBirthStats(p)
-	s.Metrics = metrics
+	s := r7JobService(p)
 
 	expected := int64(0)
 	if e := statRead(t, p, rev, func(sc ca.CoherentReadScope) error {
@@ -48,13 +45,7 @@ func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
 	}
 
 	o := op()
-	board, e := s.RefreshBoard(ctx, d.AchievementPointBoard, a, o)
-	if e != nil {
-		t.Fatal(e)
-	}
-	if _, e = s.SettlePendingBoard(ctx, d.AchievementPointBoard, a.LogicalServerID, o); e != nil {
-		t.Fatal(e)
-	}
+	board := settleRanking(t, p, s, d.AchievementPointBoard, a.LogicalServerID, o)
 	order := []identity.PlayerID{}
 	for _, v := range board.Entries {
 		order = append(order, v.Metric.Player)
@@ -63,18 +54,15 @@ func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
 		t.Fatal(board.Entries)
 	}
 	var winner, title int64
-	if e = p.QueryRow(ctx, `SELECT player_id,title_id FROM ranking_girls_awards WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), d.AchievementPointPolicy).Scan(&winner, &title); e != nil || winner != int64(b.PlayerID) || title != 100001 {
+	if e := p.QueryRow(ctx, `SELECT player_id,title_id FROM ranking_girls_awards WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), d.AchievementPointPolicy).Scan(&winner, &title); e != nil || winner != int64(b.PlayerID) || title != 100001 {
 		t.Fatal("AP title must go to rank 1 only", winner, title, e)
 	}
 	if rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal("AP settled more than one title")
 	}
-	replay, e := s.RefreshBoard(ctx, d.AchievementPointBoard, a, o)
-	if e != nil || !reflect.DeepEqual(board, replay) {
-		t.Fatal("AP snapshot receipt changed", e)
-	}
-	if _, e = s.RefreshBoard(ctx, d.GirlsBoard, a, o); e == nil {
-		t.Fatal("one operation crossed into the Girls board")
+	replay := settleRanking(t, p, s, d.AchievementPointBoard, a.LogicalServerID, o)
+	if !reflect.DeepEqual(board, replay) {
+		t.Fatal("AP settled snapshot changed", replay, board)
 	}
 
 	wire := boardWire(t, readOfSnapshot(board, a.PlayerID))

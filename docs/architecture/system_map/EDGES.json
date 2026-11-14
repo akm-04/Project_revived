@@ -5138,10 +5138,9 @@
    ],
    "store:i4store": [
     "*LastLoginAtTx",
-    "*ListPlayerRootsTx",
     "*LockPlayerRootsTx",
-    "*ProfileTx",
-    "*ProfilesTx"
+    "*ProfilesTx",
+    "*ServerTx"
    ],
    "store:kernelstore": [
     "*FindTx",

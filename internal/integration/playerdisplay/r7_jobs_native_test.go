@@ -15,6 +15,7 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/rankingstore"
 	appgen "gxb.local/backend/v2/internal/application/generation"
@@ -40,6 +41,21 @@ func r7JobService(p *pg.Pool) app.Service {
 	service.Presence = nil
 	service.Login = nil
 	return service
+}
+
+func r7ServerPlayers(t *testing.T, p *pg.Pool, server identity.LogicalServerID) []identity.PlayerID {
+	t.Helper()
+	roots, e := (i4store.PlayerRootLocker{}).ListPlayerRootsTx(ctx, p)
+	if e != nil {
+		t.Fatal(e)
+	}
+	players := []identity.PlayerID{}
+	for _, root := range roots {
+		if root.LogicalServerID == server {
+			players = append(players, root.PlayerID)
+		}
+	}
+	return players
 }
 
 func r7Summon(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string, table int64) {
@@ -73,7 +89,7 @@ func TestR7RefreshActiveScoresPicksVisiblyActivePlayers(t *testing.T) {
 	service.Presence = presencestore.Store{}
 	t0 := time.Now().UTC().Add(time.Minute).Truncate(time.Microsecond)
 	service.Timed.Binder.Time = r7FixedTime{at: t0}
-	if e := service.BackfillScoresServer(ctx, op(), server); e != nil {
+	if e := service.BackfillScoresServer(ctx, op(), server, r7ServerPlayers(t, p, server)); e != nil {
 		t.Fatal(e)
 	}
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
@@ -91,70 +107,13 @@ func TestR7RefreshActiveScoresPicksVisiblyActivePlayers(t *testing.T) {
 	}
 	t1 := t0.Add(2 * time.Minute)
 	service.Timed.Binder.Time = r7FixedTime{at: t1}
-	if e = service.RefreshActiveScoresServer(ctx, op(), server); e != nil {
+	if e = service.RefreshActiveScoresServer(ctx, op(), server, r7ServerPlayers(t, p, server)); e != nil {
 		t.Fatal(e)
 	}
 	row, ok, e := (rankingstore.Store{}).ReadScoreRowTx(ctx, p, d.GirlsPolicy, player.PlayerID)
 	if e != nil || !ok || !row.UpdatedAt.Equal(t1) || row.Revision != rev {
 		t.Fatal(row, ok, e)
 	}
-}
-
-func TestR7EqualityRetainedSnapshotAndBackfillAgree(t *testing.T) {
-	p := pool(t)
-	rev := installed(t, p)
-	server := rankingServer(t, p)
-	viewer, _ := r7Population(t, p, server)
-	service := r7JobService(p)
-	active, e := service.Content.ActiveRevision(ctx, p)
-	if e != nil || active == "" || active != rev {
-		t.Fatalf("active revision %q fixture %q err %v", active, rev, e)
-	}
-	t0 := time.Now().UTC().Add(time.Minute).Truncate(time.Microsecond)
-	t1 := t0.Add(time.Minute)
-	service.Timed.Binder.Time = r7FixedTime{at: t0}
-	for _, board := range d.Boards {
-		if _, e := service.RefreshBoard(ctx, board, viewer, op()); e != nil {
-			t.Fatalf("legacy refresh %s: %v", board.Name, e)
-		}
-	}
-	service.Timed.Binder.Time = r7FixedTime{at: t1}
-	if e := service.BackfillScoresServer(ctx, op(), server); e != nil {
-		t.Fatal(e)
-	}
-	type compared struct {
-		Player identity.PlayerID `json:"player"`
-		Score  int64             `json:"score"`
-		Since  time.Time         `json:"score_since"`
-	}
-	evidence := map[string][]compared{}
-	for _, board := range d.Boards {
-		snapshot, e := service.RefreshBoard(ctx, board, viewer, op())
-		if e != nil {
-			t.Fatalf("new snapshot %s: %v", board.Name, e)
-		}
-		rows, e := (rankingstore.Store{}).AllScoreRowsTx(ctx, p, board.Policy, server)
-		if e != nil {
-			t.Fatal(e)
-		}
-		if len(snapshot.Entries) != len(rows) {
-			t.Fatalf("%s: entries=%d rows=%d", board.Name, len(snapshot.Entries), len(rows))
-		}
-		out := make([]compared, 0, len(rows))
-		for i, entry := range snapshot.Entries {
-			row := rows[i]
-			if row.Player != entry.Metric.Player || row.Score != entry.Metric.Value || !row.ScoreSince.Equal(entry.ScoreSince) {
-				t.Fatalf("%s[%d]: snapshot %d/%d/%s row %d/%d/%s", board.Name, i, entry.Metric.Player, entry.Metric.Value, entry.ScoreSince, row.Player, row.Score, row.ScoreSince)
-			}
-			out = append(out, compared{Player: row.Player, Score: row.Score, Since: row.ScoreSince.UTC()})
-		}
-		evidence[board.Name] = out
-	}
-	raw, e := json.MarshalIndent(map[string]any{"revision": rev, "server": int64(server), "boards": evidence}, "", " ")
-	if e != nil {
-		t.Fatal(e)
-	}
-	t.Logf("R7_EQUALITY %s", raw)
 }
 
 func TestR7SettlementAtBoundaryWithoutReadersAndReplay(t *testing.T) {
@@ -166,7 +125,7 @@ func TestR7SettlementAtBoundaryWithoutReadersAndReplay(t *testing.T) {
 	service := r7JobService(p)
 	var e error
 	service.Timed.Binder.Time = r7FixedTime{at: settleAt}
-	if e = service.BackfillScoresServer(ctx, op(), server); e != nil {
+	if e = service.BackfillScoresServer(ctx, op(), server, r7ServerPlayers(t, p, server)); e != nil {
 		t.Fatal(e)
 	}
 	service.Timed.Binder.Time = r7FixedTime{at: settleAt.Add(time.Minute)}
@@ -271,7 +230,7 @@ func TestR7MID301StoredReadScales(t *testing.T) {
 	service := r7JobService(p)
 	base := time.Now().UTC().Add(time.Minute).Truncate(time.Microsecond)
 	service.Timed.Binder.Time = r7FixedTime{at: base}
-	if e := service.BackfillScoresServer(ctx, op(), server); e != nil {
+	if e := service.BackfillScoresServer(ctx, op(), server, r7ServerPlayers(t, p, server)); e != nil {
 		t.Fatal(e)
 	}
 	// The viewer owns fifty real heroes; the other 999 players keep empty

@@ -78,7 +78,11 @@ func run(c context.Context) error {
 	if e != nil {
 		return e
 	}
-	if e = service.BackfillScores(c, op); e != nil {
+	roots, e := (i4store.PlayerRootLocker{}).ListPlayerRootsTx(c, p)
+	if e != nil {
+		return e
+	}
+	if e = service.BackfillScores(c, op, roots); e != nil {
 		return e
 	}
 	log.Print("ranking score backfill complete")
@@ -111,5 +115,5 @@ func compose(p *pg.Pool) appranking.Service {
 	publicStats := publicstats.Service{Owned: owned, Pets: heroDB, Content: contentDB, Skills: apphero.RawSkillObservationReader{Store: heroDB, Content: contentDB}, Awakening: apphero.RawAwakeningObservationReader{Heroes: heroDB, Births: characterstore.RawAwakeningStore{}}, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Courses: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: contentDB, Heroes: heroDB, Kinds: contentDB, Players: i4store.PlayerRootLocker{}}}
 	displayService := playerdisplay.Service{Runner: runner, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: heroDB, Content: contentDB}, Characters: characterstore.DisplayReader{Store: heroDB, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}, SkinItems: contentDB}
 	metrics := apppublicprofile.CanonicalMetricProvider{Roster: characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: contentDB}, Force: publicStats, Display: displayService}
-	return appranking.Service{Timed: timed, Fresh: p, Store: rankingstore.Store{}, Cohort: i4store.PlayerRootLocker{}, Directory: i4store.PlayerDirectoryReader{}, Content: contentDB, Fence: i5db, Players: i4store.PlayerRootLocker{}, Recipient: displayService, Ledger: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}, Metrics: metrics, TopForce: metrics, Comfort: dormstore.Store{Queryer: p}, Presence: presencestore.Store{}, Login: i4store.PlayerLoginActivity{}}
+	return appranking.Service{Timed: timed, Fresh: p, Store: rankingstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Content: contentDB, Fence: i5db, Players: i4store.PlayerRootLocker{}, Recipient: displayService, Ledger: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}, Metrics: metrics, TopForce: metrics, Comfort: dormstore.Store{Queryer: p}, Presence: presencestore.Store{}, Login: i4store.PlayerLoginActivity{}}
 }

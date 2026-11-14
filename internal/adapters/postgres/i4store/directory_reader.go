@@ -81,6 +81,27 @@ func (PlayerDirectoryReader) ProfilesTx(c context.Context, q tx.Queryer, ids []i
 	return out, nil
 }
 
+// ServerTx resolves one player's canonical logical server. It is a single-row
+// lookup, never an enumeration.
+func (PlayerDirectoryReader) ServerTx(c context.Context, q tx.Queryer, pid identity.PlayerID) (identity.LogicalServerID, bool, error) {
+	if q == nil || !pid.Valid() {
+		return 0, false, errors.New("invalid player server read")
+	}
+	var server int64
+	err := q.QueryRow(c, `SELECT logical_server_id FROM players WHERE player_id=$1`, int64(pid)).Scan(&server)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	out := identity.LogicalServerID(server)
+	if !out.Valid() {
+		return 0, false, errors.New("invalid player server")
+	}
+	return out, true, nil
+}
+
 var _ playerdirectory.Reader = PlayerDirectoryReader{}
 
 func (PlayerDirectoryReader) ServerMaximumLevelTx(requestContext context.Context, query tx.Queryer, server identity.LogicalServerID) (int64, error) {
