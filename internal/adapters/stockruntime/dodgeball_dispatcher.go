@@ -94,7 +94,9 @@ var dodgeballFailureRows = []failureRow{
 	{match: domain.ErrInvalid, class: failureMalformed, detail: "dodgeball_invalid_parameter"},
 	{match: domain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
-	{match: domain.ErrUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	// The owner's ErrUnavailable means a catalog that fails validation or a corrupt saved state: a
+	// permanent defect, not a refusal and not a fault a retry clears (R4 amendment items 4 and 13).
+	{match: domain.ErrUnavailable, class: failureDefect},
 }
 
 func dodgeballFailure(err error) httpedge.Response {
