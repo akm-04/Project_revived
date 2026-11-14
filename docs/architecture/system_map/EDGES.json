@@ -5133,9 +5133,6 @@
    "store:dormstore": [
     "*ComfortFactTx"
    ],
-   "store:guildrentalread": [
-    "*ProfileTx"
-   ],
    "store:i4store": [
     "*ListPlayerRootsTx",
     "*LockPlayerRootsTx",

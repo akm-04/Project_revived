@@ -175,6 +175,57 @@ func (m BoardMetric) valid(b Board, at time.Time, rev string) bool {
 	return m.Player.Valid() && m.Owner == b.SourceOwner && m.Policy == b.SourcePolicy && m.Semantics == b.SourceSemantics && m.Revision == rev && m.FieldID == b.FieldID && m.Value >= 0 && m.Value <= 9007199254740991 && m.SourceVersion > 0 && m.PopulationVersion == m.SourceVersion && revision(m.PopulationDigest) && m.ObservedAt.Equal(at)
 }
 
+// ScoreRow is one durable board score. Server is the board scope; the writer
+// fills it on the first row because NextScoreRow only knows the metric.
+type ScoreRow struct {
+	Policy     string
+	Server     identity.LogicalServerID
+	Player     identity.PlayerID
+	Score      int64
+	ScoreSince time.Time
+	Revision   string
+	Metric     BoardMetric
+	UpdatedAt  time.Time
+}
+
+func (r ScoreRow) Validate() error {
+	b, ok := BoardOf(r.Policy)
+	if !ok || !r.Server.Valid() || !r.Player.Valid() || r.Score < 0 || r.Score > 9007199254740991 || !revision(r.Revision) || r.ScoreSince.Unix() <= 0 || r.ScoreSince.After(r.UpdatedAt) || r.UpdatedAt.Unix() <= 0 {
+		return ErrSnapshot
+	}
+	if r.Metric.Player != r.Player || r.Metric.Value != r.Score || !r.Metric.valid(b, r.Metric.ObservedAt, r.Revision) || r.Metric.ObservedAt.Unix() <= 0 || r.Metric.ObservedAt.After(r.UpdatedAt) {
+		return ErrSnapshot
+	}
+	return nil
+}
+
+func boardOfMetric(m BoardMetric) (Board, bool) {
+	for _, b := range Boards {
+		if b.SourceOwner == m.Owner && b.SourcePolicy == m.Policy && b.SourceSemantics == m.Semantics && b.FieldID == m.FieldID {
+			return b, true
+		}
+	}
+	return Board{}, false
+}
+
+// NextScoreRow keeps the current-value run while score and revision are
+// unchanged, the same rule BuildBoardSnapshot applies to Runs.
+func NextScoreRow(prev *ScoreRow, m BoardMetric, at time.Time) (ScoreRow, error) {
+	b, ok := boardOfMetric(m)
+	if !ok || at.Unix() <= 0 || !m.valid(b, at, m.Revision) {
+		return ScoreRow{}, ErrSnapshot
+	}
+	since := at.UTC()
+	if prev != nil && prev.Score == m.Value && prev.Revision == m.Revision {
+		since = prev.ScoreSince
+	}
+	row := ScoreRow{Policy: b.Policy, Player: m.Player, Score: m.Value, ScoreSince: since, Revision: m.Revision, Metric: m, UpdatedAt: at.UTC()}
+	if prev != nil {
+		row.Server = prev.Server
+	}
+	return row, nil
+}
+
 // Presentation is a snapshot of I4's derived directory; it never establishes a
 // score, cohort membership, title eligibility or authoritative Conquer state.
 type BoardPresentation struct {
@@ -253,19 +304,51 @@ func (s BoardSnapshot) Validate() error {
 // BuildBoardSnapshot must receive the complete canonical I4 cohort. The caller
 // checks cohort identity and obtains all metrics in one witnessed transaction.
 // This function never manufactures historical first-reach timestamps.
-func BuildBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID, in []BoardInput) (BoardRoot, BoardSnapshot, error) {
+func beginBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID) (BoardSnapshot, Board, error) {
 	var out BoardSnapshot
 	if r.Validate() != nil || !revision(rev) || op.IsZero() || at.Unix() <= 0 {
-		return BoardRoot{}, out, ErrSnapshot
+		return out, Board{}, ErrSnapshot
 	}
 	if at.Before(r.UpdatedAt) {
-		return BoardRoot{}, out, ErrStale
+		return out, Board{}, ErrStale
 	}
 	if r.StateVersion == math.MaxInt64 || r.NextGeneration == math.MaxInt64 {
-		return BoardRoot{}, out, ErrSnapshot
+		return out, Board{}, ErrSnapshot
 	}
 	b, _ := BoardOf(r.Policy)
-	out = BoardSnapshot{Server: r.Server, Policy: r.Policy, Revision: rev, Generation: r.NextGeneration, OperationID: op, ObservedAt: at.UTC(), Entries: []BoardEntry{}}
+	return BoardSnapshot{Server: r.Server, Policy: r.Policy, Revision: rev, Generation: r.NextGeneration, OperationID: op, ObservedAt: at.UTC(), Entries: []BoardEntry{}}, b, nil
+}
+
+func finishBoardSnapshot(r BoardRoot, out BoardSnapshot, byID map[int64]BoardEntry, at time.Time) (BoardRoot, BoardSnapshot, error) {
+	b, _ := BoardOf(r.Policy)
+	ordered, e := out.ordered()
+	if e != nil {
+		return BoardRoot{}, BoardSnapshot{}, e
+	}
+	out.Entries = []BoardEntry{}
+	for _, v := range ordered {
+		out.Entries = append(out.Entries, byID[v.SubjectID])
+	}
+	if b.Limit > 0 && int64(len(out.Entries)) > b.Limit {
+		out.Entries = out.Entries[:b.Limit]
+	}
+	out.CohortDigest = out.cohortDigest()
+	out.Digest = out.hash()
+	next := r
+	next.NextGeneration++
+	next.StateVersion++
+	next.UpdatedAt = at.UTC()
+	if next.Validate() != nil || out.Validate() != nil {
+		return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
+	}
+	return next, out, nil
+}
+
+func BuildBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID, in []BoardInput) (BoardRoot, BoardSnapshot, error) {
+	out, b, e := beginBoardSnapshot(r, at, rev, op)
+	if e != nil {
+		return BoardRoot{}, BoardSnapshot{}, e
+	}
 	next := r
 	next.Runs = map[identity.PlayerID]ScoreRun{}
 	byID := map[int64]BoardEntry{}
@@ -286,26 +369,30 @@ func BuildBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID, in [
 		byID[int64(m.Player)] = v
 		out.Entries = append(out.Entries, v)
 	}
-	ordered, e := out.ordered()
+	return finishBoardSnapshot(next, out, byID, at)
+}
+
+// FreezeBoardSnapshot settles stored score rows. Each entry keeps the
+// ScoreSince a row recorded; nothing derives or invents a new run time.
+func FreezeBoardSnapshot(root BoardRoot, at time.Time, rev string, op ids.UUID, entries []BoardEntry) (BoardRoot, BoardSnapshot, error) {
+	out, b, e := beginBoardSnapshot(root, at, rev, op)
 	if e != nil {
 		return BoardRoot{}, BoardSnapshot{}, e
 	}
-	out.Entries = []BoardEntry{}
-	for _, v := range ordered {
-		out.Entries = append(out.Entries, byID[v.SubjectID])
+	byID := map[int64]BoardEntry{}
+	for _, v := range entries {
+		m := v.Metric
+		if !m.valid(b, at, rev) || !v.Display.valid(m.Player) || v.ScoreSince.IsZero() || v.ScoreSince.After(at) {
+			return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
+		}
+		if _, dup := byID[int64(m.Player)]; dup {
+			return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
+		}
+		v.ScoreSince = v.ScoreSince.UTC()
+		byID[int64(m.Player)] = v
+		out.Entries = append(out.Entries, v)
 	}
-	if b.Limit > 0 && int64(len(out.Entries)) > b.Limit {
-		out.Entries = out.Entries[:b.Limit]
-	}
-	out.CohortDigest = out.cohortDigest()
-	out.Digest = out.hash()
-	next.NextGeneration++
-	next.StateVersion++
-	next.UpdatedAt = at.UTC()
-	if next.Validate() != nil || out.Validate() != nil {
-		return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
-	}
-	return next, out, nil
+	return finishBoardSnapshot(root, out, byID, at)
 }
 
 // BoardWeek is an explicit private UTC calendar. It does not reuse another

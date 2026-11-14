@@ -101,7 +101,6 @@
  "stores": [
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/dormstore",
-  "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
@@ -109,6 +108,7 @@
  ],
  "tables": {
   "owned": [
+   "ranking_board_scores",
    "ranking_girls_awards",
    "ranking_girls_birth_tracking",
    "ranking_girls_periods",

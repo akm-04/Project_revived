@@ -764,6 +764,7 @@
    "publication_items": "publication",
    "publication_picture_reads": "publication",
    "publication_sets": "publication",
+   "ranking_board_scores": "ranking",
    "ranking_girls_awards": "ranking",
    "ranking_girls_birth_tracking": "ranking",
    "ranking_girls_periods": "ranking",
@@ -1403,13 +1404,13 @@
    "tables": 0
   },
   {
-   "callees": 12,
+   "callees": 11,
    "callers": 1,
    "mids": 1,
    "name": "ranking",
    "path": "internal/application/ranking",
    "purpose": "owns canonical Ranking snapshots and their title settlements",
-   "tables": 5
+   "tables": 6
   },
   {
    "callees": 2,
