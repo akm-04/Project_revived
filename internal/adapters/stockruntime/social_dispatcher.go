@@ -16,7 +16,6 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 	"time"
 )
 
@@ -141,15 +140,18 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	bad := func() httpedge.Response {
 		return failureReply(malformed("invalid_social_request"))
 	}
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if req.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	a, e := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
 	if e != nil {
 		return authFailure(e)
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	mid := req.Envelope.MID
 	op := req.Envelope.Operation

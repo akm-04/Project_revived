@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	"gxb.local/backend/v2/internal/application/dodgeball"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
@@ -11,7 +9,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -38,7 +35,7 @@ func (dispatcher DodgeballDispatcher) Dispatch(ctx context.Context, request http
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return failureReply(unavailable(errors.New("dodgeball unavailable")))
+		return failureReply(defect(nil))
 	}
 	parameters, operationContext := request.Envelope.Params, request.Envelope.Operation
 	invalid := failureReply(malformed("dodgeball_invalid_parameter"))
@@ -82,7 +79,7 @@ func (dispatcher DodgeballDispatcher) Dispatch(ctx context.Context, request http
 		}
 		response, err = dispatcher.Service.Result(ctx, actor, records, operationContext)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if err != nil {
 		return dodgeballFailure(err)
@@ -97,18 +94,11 @@ var dodgeballFailureRows = []failureRow{
 	{match: domain.ErrInvalid, class: failureMalformed, detail: "dodgeball_invalid_parameter"},
 	{match: domain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
-	{match: domain.ErrUnavailable, class: failureUnavailable},
+	{match: domain.ErrUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func dodgeballFailure(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.As(err, &conflict) {
-		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
-	}
-	if classified := classifyFailure(dodgeballFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(dodgeballFailureRows, err)
 }
 
 func dodgeballRecords(raw any) ([]domain.HitRecord, bool) {

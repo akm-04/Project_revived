@@ -2,12 +2,10 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 type AwakeningBloodService interface {
@@ -26,7 +24,7 @@ func (d AwakeningBloodDispatcher) Dispatch(ctx context.Context, r httpedge.Dispa
 	}
 	p := r.Envelope.Params
 	if _, blood := p["twice_awake_mission"]; !blood {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "incubus_provider_deferred"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	id, a := topFloorInteger(p, "twice_awake_mission", true)
 	incubus, b := topFloorInteger(p, "incubus_id", true)
@@ -34,7 +32,7 @@ func (d AwakeningBloodDispatcher) Dispatch(ctx context.Context, r httpedge.Dispa
 		return badI5("invalid_blood_mission")
 	}
 	if d.Service == nil {
-		return failI5(errors.New("Blood combat unavailable"))
+		return failureReply(defect(nil))
 	}
 	var body map[string]any
 	var e error

@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"net/http"
 
 	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/guildrental"
@@ -160,7 +159,7 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 			"tutor_rent_heroes": []any{},
 		})
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i9_9b_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
@@ -289,8 +288,5 @@ var rentalFailureRows = []failureRow{
 // rentalFailure refuses with 409 so the client's OK callback never indexes a
 // nil list (Backend.lua:562-566).
 func rentalFailure(err error) httpedge.Response {
-	if classified := classifyFailure(rentalFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(rentalFailureRows, err)
 }

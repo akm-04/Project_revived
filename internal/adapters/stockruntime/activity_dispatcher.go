@@ -18,22 +18,25 @@ type ActivityDispatcher struct {
 }
 
 func (d ActivityDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if req.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	actor, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
 	if err != nil {
 		return authFailure(err)
 	}
 	if req.Envelope.Claims.Region != int64(actor.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 
 	switch req.Envelope.MID {
 	case 229:
 		rows, err := d.Service.List(ctx, actor)
 		if err != nil {
-			return failureReply(unavailable(err))
+			return failureFromRows(nil, err)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: activityproj.List(rows)}
 	case 234:
@@ -43,13 +46,13 @@ func (d ActivityDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		}
 		row, ok, err := d.Service.Lookup(ctx, actor, id)
 		if err != nil {
-			return failureReply(unavailable(err))
+			return failureFromRows(nil, err)
 		}
 		if !ok {
-			return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "activity_unavailable"}}
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: activityproj.Row(row)}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_activity_directory", "mid": int64(req.Envelope.MID)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }

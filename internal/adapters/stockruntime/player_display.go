@@ -28,22 +28,26 @@ func (d PlayerDisplayDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 		case http.StatusBadRequest:
 			return failureReply(&classifiedFailure{class: failureMalformed, detail: "player_display_request_failed", cause: cause})
 		case http.StatusConflict:
-			return failureReply(&classifiedFailure{class: failureRefusal, code: unprovenRefusalCode, cause: cause})
+			return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: cause})
 		case http.StatusServiceUnavailable:
-			return failureReply(unavailable(cause))
+			return failureFromRows(nil, cause)
 		case http.StatusUnauthorized:
-			return unauthorizedFailure("player_display_request_failed")
-		case http.StatusForbidden:
-			return forbiddenFailure("player_display_request_failed")
+			return failureReply(sessionFailure())
 		default:
-			return notImplementedFailure("player_display_request_failed")
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 	}
-	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
+	if d.Authority == nil || d.Service == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized, nil)
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
-	if e != nil || r.Envelope.Claims.Region != int64(a.LogicalServerID) {
+	if e != nil {
+		return authFailure(e)
+	}
+	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(http.StatusForbidden, e)
 	}
 	q := app.Command{}

@@ -282,13 +282,17 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_pet_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
 func (d PetDispatcher) petActor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -297,7 +301,7 @@ func (d PetDispatcher) petActor(ctx context.Context, req httpedge.DispatchReques
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -459,10 +463,7 @@ var petFailureRows = []failureRow{
 }
 
 func petFail(err error) httpedge.Response {
-	if classified := classifyFailure(petFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(petFailureRows, err)
 }
 
 var _ PetServicePort = apppet.Service{}

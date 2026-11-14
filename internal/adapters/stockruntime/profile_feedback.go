@@ -61,20 +61,27 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		case http.StatusConflict:
 			return failureReply(refusal(unprovenRefusalCode))
 		case http.StatusServiceUnavailable:
-			return failureReply(unavailable(nil))
+			return failureReply(defect(nil))
 		case http.StatusUnauthorized:
-			return unauthorizedFailure("profile_feedback_request_failed")
-		case http.StatusForbidden:
-			return forbiddenFailure("profile_feedback_request_failed")
+			return failureReply(sessionFailure())
 		default:
-			return notImplementedFailure("profile_feedback_request_failed")
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 	}
-	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if d.Service == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized)
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
-	if e != nil || r.Envelope.Claims.Region != int64(a.LogicalServerID) {
+	if e != nil {
+		return authFailure(e)
+	}
+	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(http.StatusForbidden)
 	}
 	params := r.Envelope.Params
@@ -93,10 +100,10 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		}
 		out, e := d.Service.Execute(c, a, q, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		if out.Current.Target != q.Target || out.Current.Actor != a.PlayerID || !out.Current.HasPraised || out.Current.Count < 1 {
-			return fail(http.StatusServiceUnavailable)
+			return failureReply(defect(nil))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: out.Wire()}
 	case 1842:
@@ -121,10 +128,10 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		}
 		out, e := d.Service.List(c, a, q, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		if out.Current.Target != a.PlayerID || out.Rows == nil || out.Current.Count < 0 {
-			return fail(http.StatusServiceUnavailable)
+			return failureReply(defect(nil))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: out.Wire()}
 	default:

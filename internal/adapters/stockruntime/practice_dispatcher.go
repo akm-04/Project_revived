@@ -11,7 +11,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -166,12 +165,12 @@ func (d PracticeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 	wire, err := decodePracticeWireRequest(req.Envelope.MID, req.Envelope.Params)
 	if err != nil {
 		if _, _, ok := practiceWireMID(req.Envelope.MID); !ok {
-			return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_practice_mid"}}
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 		return failureReply(malformed("invalid_practice_request"))
 	}
 	if d.Service == nil {
-		return failureReply(unavailable(nil))
+		return failureReply(defect(nil))
 	}
 
 	target := apppractice.Target{Hero: wire.Hero, ActorID: wire.ActorID}
@@ -208,7 +207,7 @@ func (d PracticeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"info": practiceInfoBody(out.Info), "add_attr": practiceDeltaBody(out.AddAttr)}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_practice_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
@@ -231,23 +230,20 @@ func practiceFailure(err error) httpedge.Response {
 	if err == nil {
 		err = errors.New("character practice failed")
 	}
-	var conflict *receipt.ConflictError
 	var unknown *tx.UnknownCommitError
 	if errors.As(err, &unknown) {
 		return failureReply(unknownCommit("practice_commit_unknown", err))
 	}
-	if errors.As(err, &conflict) {
-		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
-	}
-	if classified := classifyFailure(practiceFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(practiceFailureRows, err)
 }
 
 func (d PracticeDispatcher) practiceActor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	actor, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -256,7 +252,7 @@ func (d PracticeDispatcher) practiceActor(ctx context.Context, req httpedge.Disp
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(actor.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return actor, nil

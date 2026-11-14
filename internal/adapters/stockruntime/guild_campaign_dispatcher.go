@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
 	"gxb.local/backend/v2/internal/application/guildcampaign"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
+	guilddomain "gxb.local/backend/v2/internal/domain/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -202,7 +202,7 @@ func (d GuildCampaignDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 		}
 		return okI5(map[string]any{"logs": logs})
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i9_9c_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
@@ -454,24 +454,26 @@ func campaignBad() httpedge.Response {
 }
 
 func campaignUnavailable() httpedge.Response {
-	return failureReply(unavailable(errors.New("guild campaign unavailable")))
+	return failureReply(defect(nil))
 }
 
 var campaignFailureRows = []failureRow{
 	{match: guildcampaign.ErrLate, class: failureRefusal, code: 30021},
 	{match: guildcampaign.ErrHolder, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guilddomain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 // campaignFailure refuses with 409: a 200 without the reply's fields crashes
-// the stock callbacks (Backend.lua:562-566). Unavailable stays a 503 fault.
+// the stock callbacks (Backend.lua:562-566). A permanent content gap is a
+// refusal; a retryable fault is the mapper's transient 503.
 func campaignFailure(err error) httpedge.Response {
 	if classified := classifyFailure(campaignFailureRows, err); classified != nil {
 		return failureReply(classified)
 	}
 	if errors.Is(err, guildcampaign.ErrUnavailable) {
-		return failureReply(unavailable(err))
+		return failureReply(refusal(unprovenRefusalCode))
 	}
-	return failureReply(refusal(unprovenRefusalCode))
+	return failureFromRows(nil, err)
 }
 
 // campaignSettleFailure keeps 610's two client-visible codes: a late result is

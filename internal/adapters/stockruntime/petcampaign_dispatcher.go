@@ -9,9 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/petcampaign"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 var PetCampaignMIDs = []uint16{816, 817, 818, 819, 820, 821, 822, 823, 824, 825, 826, 827}
@@ -132,7 +130,7 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		}
 		out, e = m.Service.SaveElite(c, a, n, state, op)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if e != nil {
 		return petCampaignFailure(e)
@@ -146,16 +144,9 @@ var petCampaignFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "pet_campaign_invalid_parameter"},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
-	{match: d.ErrUnavailable, class: failureUnavailable},
+	{match: d.ErrUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func petCampaignFailure(e error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.As(e, &conflict) {
-		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: e})
-	}
-	if classified := classifyFailure(petCampaignFailureRows, e); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(e))
+	return failureFromRows(petCampaignFailureRows, e)
 }

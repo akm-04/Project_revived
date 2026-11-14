@@ -69,7 +69,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 816,
    "name": "PET_CAMPAIGN_LOAD_INFO"
@@ -77,7 +77,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 817,
    "name": "PET_CAMPAIGN_SWEEP"
@@ -85,7 +85,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 818,
    "name": "PET_CAMPAIGN_RECORD_SWEEP_TIME"
@@ -93,7 +93,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 819,
    "name": "PET_CAMPAIGN_FIGHT"
@@ -101,7 +101,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 820,
    "name": "PET_CAMPAIGN_BATTLE_RESULT"
@@ -109,7 +109,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 821,
    "name": "PET_CAMPAIGN_RESTART"
@@ -117,7 +117,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 822,
    "name": "PET_CAMPAIGN_RED_POINT"
@@ -125,7 +125,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 823,
    "name": "PET_CAMPAIGN_AWAKE_SWEEP"
@@ -133,7 +133,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 824,
    "name": "PET_CAMPAIGN_SWEEP_SUPER"
@@ -141,7 +141,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 825,
    "name": "PET_CAMPAIGN_BUY_SUPER"
@@ -149,7 +149,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 826,
    "name": "PET_CAMPAIGN_SAVE_SUPER"
@@ -157,7 +157,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
-    "line": 37
+    "line": 35
    },
    "mid": 827,
    "name": "PET_CAMPAIGN_PRACTICE"

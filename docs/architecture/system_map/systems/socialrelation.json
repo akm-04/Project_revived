@@ -129,7 +129,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 176,
    "name": "LOAD_FRIENDS"
@@ -137,7 +137,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 177,
    "name": "REQUEST_FRIEND"
@@ -145,7 +145,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 178,
    "name": "DENY_FRIEND_REQUEST"
@@ -153,7 +153,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 179,
    "name": "IGNORE_FRIEND_REQUEST"
@@ -161,7 +161,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 180,
    "name": "ACCEPT_FRIEND_REQUEST"
@@ -169,7 +169,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 181,
    "name": "DELETE_FRIEND"
@@ -177,7 +177,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 182,
    "name": "ACCEPT_ALL_FRIEND_REQUEST"
@@ -185,7 +185,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 183,
    "name": "SEND_SOCIAL_GIFT"
@@ -193,7 +193,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 184,
    "name": "READ_NOTICE"
@@ -201,7 +201,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 185,
    "name": "ADD_BLACK_LIST"
@@ -209,7 +209,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 186,
    "name": "REMOVE_BLACK_LIST"
@@ -217,7 +217,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 187,
    "name": "CLEAR_BLACK_LIST"
@@ -225,7 +225,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 188,
    "name": "SEARCH_PLAYER"
@@ -233,7 +233,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 189,
    "name": "LOAD_FRIEND_INFO"
@@ -241,7 +241,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/social_dispatcher.go",
-    "line": 134
+    "line": 133
    },
    "mid": 190,
    "name": "GET_RECOMMEND_FRIENDS"

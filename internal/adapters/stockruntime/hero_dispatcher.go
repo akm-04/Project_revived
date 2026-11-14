@@ -84,12 +84,12 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return *fail
 	}
 	if d.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	switch req.Envelope.MID {
 	case 53:
 		if d.SkillLevels == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skill_levels_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_index") {
 			return badHero("invalid_hero_skill_level")
@@ -110,7 +110,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 39:
 		if d.SkillLevels == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skill_levels_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_colors", "skill_counts") {
 			return badHero("invalid_hero_skill_levels")
@@ -136,7 +136,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 2144:
 		if d.Skills == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skills_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_index", "skill_item") {
 			return badHero("invalid_hero_skill_choice")
@@ -155,7 +155,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 
 	case 3116: // HERO_COLLOCATION is desired assignment, never a server toggle.
 		if d.Bookmark == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_bookmark_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "is_like") {
 			return badHero("invalid_hero_bookmark")
@@ -176,7 +176,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 
 	case 60: // SKIN_ON — CA7-3 acquire-or-select
 		if d.Appearance == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "item_id") {
 			return badHero("invalid_hero_skin_on")
@@ -208,7 +208,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 68: // UNLOCK_DYNAMIC_CARD — CA7-4 paid type-2 LIVE convergence
 		if d.LIVE == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_live_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "model_id") {
 			return badHero("invalid_hero_live_unlock")
@@ -223,11 +223,11 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
 		models, states, err := liveStockStrings(got.LIVE)
 		if err != nil {
@@ -240,7 +240,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}}
 	case 69: // SHOW_DYNAMIC_CARD — CA7-4 explicit desired show-state assignment
 		if d.LIVE == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_live_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "model_id", "is_show") {
 			return badHero("invalid_hero_live_show")
@@ -257,7 +257,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 61: // SKIN_CANCEL — CA7-3 ordinary selector -> base
 		if d.Appearance == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
 			return badHero("invalid_hero_skin_cancel")
@@ -272,7 +272,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 2979: // USE_ILLUSION_SKIN_ITEM — CA7-3 independent presentation selector
 		if d.Appearance == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "item_id") {
 			return badHero("invalid_hero_illusion")
@@ -291,7 +291,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if raw, ok := req.Envelope.Params["player_id"]; ok && raw != nil {
 			pid, err := requiredInt64(req.Envelope.Params, "player_id")
 			if err != nil || pid != int64(actor.PlayerID) {
-				return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "private_hero_roster"}}
+				return failureReply(refusal(unprovenRefusalCode))
 			}
 		}
 		if d.Roster != nil {
@@ -398,11 +398,11 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
 		equips := make([]any, character.HeroEquipmentSlotCount)
 		for i, v := range got.Equipment {
@@ -424,11 +424,11 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
 		levels := make([]any, character.HeroEquipmentSlotCount)
 		for i, v := range got.Levels {
@@ -478,7 +478,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return badHero("invalid_hero_summon")
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		h, err := d.Service.SummonNormal(ctx, actor, tableID, stoneID, stoneNum, req.Envelope.Operation)
 		if err != nil {
@@ -490,7 +490,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
 		body["economy_"] = map[string]any{"mana": mana}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
@@ -548,12 +548,16 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_hero_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 func (d HeroDispatcher) actor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -562,7 +566,7 @@ func (d HeroDispatcher) actor(ctx context.Context, req httpedge.DispatchRequest)
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -731,8 +735,5 @@ func badHero(code string) httpedge.Response {
 }
 
 func failHero(err error) httpedge.Response {
-	if classified := classifyFailure(heroFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(heroFailureRows, err)
 }

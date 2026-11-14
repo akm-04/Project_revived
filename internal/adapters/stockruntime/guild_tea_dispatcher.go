@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	guildwire "gxb.local/backend/v2/internal/adapters/guildwire"
 	"gxb.local/backend/v2/internal/application/guildtea"
@@ -78,7 +77,7 @@ func (d GuildTeaDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 		}
 		state, err = d.Service.Confirm(c, a, op)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i9_9_tea_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if err != nil {
 		return teaFailure(err)
@@ -111,5 +110,5 @@ func teaFailure(err error) httpedge.Response {
 	if classified := classifyFailure(teaFailureRows, err); classified != nil {
 		return failureReply(classified)
 	}
-	return failureReply(unavailable(err))
+	return failureFromRows(nil, err)
 }

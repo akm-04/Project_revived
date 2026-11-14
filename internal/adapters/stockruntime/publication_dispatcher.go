@@ -28,8 +28,11 @@ func (d PublicationDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 	}
 	var actor identity.ActorContext
 	if r.Envelope.MID != 7 {
-		if d.Authority == nil || r.Envelope.Claims.Token == "" {
-			return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+		if d.Authority == nil {
+			return failureReply(defect(nil))
+		}
+		if r.Envelope.Claims.Token == "" {
+			return failureReply(sessionFailure())
 		}
 		var e error
 		actor, e = d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
@@ -37,11 +40,11 @@ func (d PublicationDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 			return authFailure(e)
 		}
 		if r.Envelope.Claims.Region != int64(actor.LogicalServerID) {
-			return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 	}
 	publicationUnavailable := func(cause error) httpedge.Response {
-		return failureReply(unavailable(cause))
+		return failureFromRows(nil, cause)
 	}
 	if r.Envelope.MID == 8194 {
 		if e := d.Service.Mark(c, r.Envelope.Operation, actor); e != nil {
@@ -57,7 +60,7 @@ func (d PublicationDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 	case 8193:
 		family = pub.Picture
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_publication"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	v, e := d.Service.Read(c, r.Envelope.Operation, family, actor.LogicalServerID, actor.PlayerID)
 	if e != nil {

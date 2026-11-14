@@ -69,20 +69,27 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 		case http.StatusConflict:
 			return failureReply(refusal(unprovenRefusalCode))
 		case http.StatusServiceUnavailable:
-			return failureReply(unavailable(nil))
+			return failureReply(defect(nil))
 		case http.StatusUnauthorized:
-			return unauthorizedFailure("ranking_request_failed")
-		case http.StatusForbidden:
-			return forbiddenFailure("ranking_request_failed")
+			return failureReply(sessionFailure())
 		default:
-			return notImplementedFailure("ranking_request_failed")
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 	}
-	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
-		return fail(http.StatusUnauthorized)
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if d.Service == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
-	if e != nil || r.Envelope.Claims.Region != int64(a.LogicalServerID) {
+	if e != nil {
+		return authFailure(e)
+	}
+	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(http.StatusForbidden)
 	}
 	if r.Envelope.MID != 301 {
@@ -102,7 +109,7 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if subtype >= 24 && subtype <= 27 && d.Illusion != nil {
 		body, e := d.Illusion.RankList(c, a, subtype, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		body["error_code"] = int64(0)
 		return okI5(body)
@@ -111,7 +118,7 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if (subtype == 22 || subtype == 23) && d.PetCampaign != nil {
 		body, e := d.PetCampaign.RankList(c, a, subtype, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		return okI5(body)
 	}
@@ -121,11 +128,11 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 			TaskRankList(context.Context, identity.ActorContext) (topfloor.RankList, error)
 		})
 		if !ok {
-			return fail(http.StatusServiceUnavailable)
+			return failureReply(defect(nil))
 		}
 		list, err := service.TaskRankList(c, a)
 		if err != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, err)
 		}
 		body := topfloorprojection.RankList(list.Rows, list.MyRank, a.LogicalServerID)
 		body["rank_list"].([]map[string]any)[0]["rank_type"] = int64(2)
@@ -134,7 +141,7 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if subtype == 1 && d.TopFloor != nil {
 		list, e := d.TopFloor.RankList(c, a)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		body := topfloorprojection.RankList(list.Rows, list.MyRank, a.LogicalServerID)
 		body["error_code"] = int64(0)
@@ -143,7 +150,7 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if (subtype == 3 || subtype == 4) && d.OneOnOne != nil {
 		list, e := d.OneOnOne.RankList(c, a, subtype == 3)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		body := oneononeprojection.RankList(list, subtype)
 		body["error_code"] = int64(0)
@@ -152,7 +159,7 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if subtype == 6 && d.Arena != nil {
 		list, e := d.Arena.RankList(c, a)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		body := arenaprojection.RankList(list)
 		body["error_code"] = int64(0)
@@ -161,7 +168,7 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if subtype == 15 && d.Trophy != nil {
 		list, e := d.Trophy.TrophyBoard(c, a)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 		body := projection.TrophyList(list)
 		body["error_code"] = int64(0)
@@ -170,7 +177,7 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	if (subtype == 11 || subtype == 39) && d.Guilds != nil {
 		rows, mine, err := d.Guilds.ActivityRankList(c, a, 50)
 		if err != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, err)
 		}
 		body := guildwire.GuildRankList(subtype, rows, mine)
 		body["error_code"] = int64(0)
@@ -179,17 +186,15 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 
 	board, known := rankingdomain.BoardOfSubType(subtype)
 	if !known {
-		return fail(http.StatusNotImplemented)
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	snapshot, e := d.Service.ReadBoard(c, board, a, r.Envelope.Operation)
 	if e != nil {
-		failure := fail(http.StatusServiceUnavailable)
-		failure.Cause = e
-		return failure
+		return failureFromRows(nil, e)
 	}
 	body, e := projection.BoardList(snapshot, a.PlayerID)
 	if e != nil {
-		return fail(http.StatusServiceUnavailable)
+		return failureReply(defect(e))
 	}
 	body["error_code"] = int64(0)
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}

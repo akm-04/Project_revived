@@ -28,15 +28,18 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 		case 409:
 			return failureReply(refusal(unprovenRefusalCode))
 		case 503:
-			return failureReply(unavailable(nil))
+			return failureReply(defect(nil))
 		case 401:
-			return unauthorizedFailure(msg)
+			return failureReply(sessionFailure())
 		default:
-			return forbiddenFailure(msg)
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 	}
-	if r.Envelope.MID != 1844 || d.Authority == nil || d.Service.Blobs == nil || r.Upload == nil || r.Upload.TempPath == "" {
+	if r.Envelope.MID != 1844 || r.Upload == nil || r.Upload.TempPath == "" {
 		return fail(400, "invalid_media_upload")
+	}
+	if d.Authority == nil || d.Service.Blobs == nil {
+		return failureReply(defect(nil))
 	}
 	token := r.Envelope.Claims.Token
 	if token == "" {
@@ -56,7 +59,7 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 	}
 	f, e := os.Open(r.Upload.TempPath)
 	if e != nil {
-		return fail(503, "upload_unavailable")
+		return failureReply(defect(e))
 	}
 	prepareCtx, cancel := context.WithTimeout(c, 30*time.Second)
 	p, e := d.Service.Blobs.Prepare(prepareCtx, f, asset.Reservation{Operation: r.Envelope.Operation.ID, Actor: ac.PlayerID, Server: ac.LogicalServerID})
@@ -66,12 +69,12 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 		if errors.Is(e, asset.ErrInvalid) {
 			return fail(400, "invalid_png")
 		}
-		return fail(503, "media_unavailable")
+		return failureFromRows(nil, e)
 	}
 	desc, e := p.Descriptor()
 	if e != nil {
 		_ = p.Close(asset.DefiniteAbort)
-		return fail(503, "media_unavailable")
+		return failureReply(defect(e))
 	}
 	out, e, cleanup := d.Service.Publish(c, ac, desc, p, r.Envelope.Operation)
 	if cleanup != nil {
@@ -84,7 +87,7 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 		if errors.Is(e, app.ErrInvalidState) || errors.Is(e, app.ErrConflict) {
 			return fail(409, "media_conflict")
 		}
-		return fail(503, "media_unavailable")
+		return failureFromRows(nil, e)
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: out.Wire()}
 }

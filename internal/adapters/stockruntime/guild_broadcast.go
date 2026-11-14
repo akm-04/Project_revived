@@ -10,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 const GuildBroadcastStockGroup = "GUILD_BROADCAST_STOCK_I7A8A"
@@ -60,10 +59,10 @@ func (p PreparedGuildBroadcast) Enable(c context.Context, q tx.Queryer) (GuildBr
 }
 func (d GuildBroadcastDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	if !d.ready || d.command == nil || d.authority == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "guild_broadcast_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	if r.Envelope.MID != 588 {
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_guild_broadcast_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	actor, fail := (GuildDispatcher{Authority: d.authority}).guildActor(c, r)
 	if fail != nil {
@@ -90,7 +89,7 @@ func (d GuildBroadcastDispatcher) Dispatch(c context.Context, r httpedge.Dispatc
 		return okGuild(map[string]any{})
 	}
 	if errors.Is(e, guildbroadcast.ErrLeader) {
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "guild_leader_required"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	return failGuild(e)
 }

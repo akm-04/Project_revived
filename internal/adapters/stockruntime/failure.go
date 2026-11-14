@@ -192,9 +192,13 @@ func isTransient(err error) bool {
 	if strings.HasPrefix(state, "40") || strings.HasPrefix(state, "53") || strings.HasPrefix(state, "08") {
 		return true
 	}
+	switch state {
+	case "57P01", "55P03", "57014", "25P03":
+		return true
+	}
 	// pgx v5 pgxpool returns the acquire context's deadline while waiting for a
 	// connection, so the context checks above cover the pool acquire timeout.
-	return state == "57P01"
+	return false
 }
 
 // failureFromRows maps a dispatcher's domain errors to the client reply. A
@@ -241,16 +245,5 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": ""}}
 }
 
-// The three protocol-edge statuses below sit outside the mapper's refusal
-// classes (auth, region and unsupported-MID); their bodies stay unchanged.
-func unauthorizedFailure(detail string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error_code": int64(1), "error": detail}}
-}
-
-func forbiddenFailure(detail string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error_code": int64(1), "error": detail}}
-}
-
-func notImplementedFailure(detail string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1), "error": detail}}
-}
+// Unsupported and region-mismatch replies are permanent refusals through
+// refusal(unprovenRefusalCode); authentication failures are sessionFailure.

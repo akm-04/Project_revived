@@ -2,6 +2,8 @@ package stockruntime
 
 import (
 	"context"
+	"errors"
+
 	"gxb.local/backend/v2/internal/application/publicprofile"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -30,20 +32,24 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 		case http.StatusConflict:
 			return failureReply(refusal(unprovenRefusalCode))
 		case http.StatusServiceUnavailable:
-			return failureReply(unavailable(nil))
+			return failureReply(defect(nil))
 		case http.StatusUnauthorized:
-			return unauthorizedFailure("public_profile_request_failed")
-		case http.StatusForbidden:
-			return forbiddenFailure("public_profile_request_failed")
+			return failureReply(sessionFailure())
 		default:
-			return notImplementedFailure("public_profile_request_failed")
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 	}
-	if d.Authority == nil || r.Envelope.Claims.Token == "" {
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized)
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
-	if e != nil || r.Envelope.Claims.Region != int64(a.LogicalServerID) {
+	if e != nil {
+		return authFailure(e)
+	}
+	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(http.StatusForbidden)
 	}
 	p := r.Envelope.Params
@@ -66,7 +72,7 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 	}
 	if q.MID == 1832 {
 		if d.Showcase == nil {
-			return fail(http.StatusBadRequest)
+			return failureReply(defect(nil))
 		}
 		array, ok := p["ids"].([]any)
 		if !ok || len(array) != 6 {
@@ -85,12 +91,15 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 		}
 		out, e := d.Showcase.Execute(c, a, sel, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusBadRequest)
+			if errors.Is(e, publicprofile.ErrCommand) {
+				return fail(http.StatusBadRequest)
+			}
+			return failureFromRows(nil, e)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(0), "show_case": out.Records}}
 	}
 	if d.Service == nil {
-		return fail(http.StatusBadRequest)
+		return failureReply(defect(nil))
 	}
 	if q.MID != 1840 {
 		n, e := feedbackInteger(p["to_player_id"], 1, 9007199254740991)
@@ -117,7 +126,7 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 	}
 	out, e := d.Service.Read(c, a, q, r.Envelope.Operation)
 	if e != nil {
-		return fail(http.StatusBadRequest)
+		return failureFromRows(nil, e)
 	}
 	body := make(map[string]any, len(out)+1)
 	for k, v := range out {

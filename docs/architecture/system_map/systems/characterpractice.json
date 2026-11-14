@@ -103,7 +103,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 124,
    "name": "GET_PRACTICE_INFO"
@@ -111,7 +111,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 125,
    "name": "PRACTICE"
@@ -119,7 +119,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 126,
    "name": "PRACTICE_SAVE"
@@ -127,7 +127,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 127,
    "name": "PRACTICE_AUTO"
@@ -135,7 +135,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 128,
    "name": "WASH_BY_TICKET"
@@ -143,7 +143,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 129,
    "name": "PET_GET_PRACTICE_INFO"
@@ -151,7 +151,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 130,
    "name": "PET_PRACTICE"
@@ -159,7 +159,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 131,
    "name": "PET_PRACTICE_SAVE"
@@ -167,7 +167,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 132,
    "name": "PET_PRACTICE_AUTO"
@@ -175,7 +175,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/practice_dispatcher.go",
-    "line": 158
+    "line": 157
    },
    "mid": 133,
    "name": "PET_WASH_BY_TICKET"

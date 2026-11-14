@@ -54,7 +54,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/awakening_blood_dispatcher.go",
-    "line": 22
+    "line": 20
    },
    "mid": 866,
    "name": "UNLIMIT_START_FIGHT"
@@ -62,7 +62,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/awakening_blood_dispatcher.go",
-    "line": 22
+    "line": 20
    },
    "mid": 867,
    "name": "UNLIMIT_FIGHT_RESULT"

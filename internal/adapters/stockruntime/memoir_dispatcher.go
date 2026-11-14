@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	"gxb.local/backend/v2/internal/application/memoir"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
@@ -12,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"sort"
 	"strconv"
@@ -128,7 +125,7 @@ func (dispatcher MemoirDispatcher) Dispatch(ctx context.Context, request httpedg
 		}
 		response, err = dispatcher.Service.MonsterResult(ctx, actor, result, operationContext)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if err != nil {
 		return memoirFailure(err)
@@ -145,18 +142,11 @@ var memoirFailureRows = []failureRow{
 	{match: domain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: combat.ErrStartConflict, class: failureRefusal, code: unprovenRefusalCode},
-	{match: domain.ErrUnavailable, class: failureUnavailable},
+	{match: domain.ErrUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func memoirFailure(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.As(err, &conflict) {
-		return failureReply(&classifiedFailure{class: failureRefusal, code: staleConflictCode, cause: err})
-	}
-	if classified := classifyFailure(memoirFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(memoirFailureRows, err)
 }
 func memoirOpened(raw any) ([]int, bool) {
 	if fields, valid := raw.(map[string]any); valid && len(fields) == 0 {

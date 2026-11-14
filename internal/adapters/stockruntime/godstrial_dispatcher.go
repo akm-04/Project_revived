@@ -13,7 +13,6 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 var GodsTrialMIDs = []uint16{3092, 3093, 3097, 3099, 3100, 3101}
@@ -102,7 +101,7 @@ func (m GodsTrialDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 			out, e = m.Service.Result(c, a, app.Result{Campaign: id, Star: star, Pet: pet, Formation: ids}, op)
 		}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if e != nil {
 		return godsTrialFailure(e)
@@ -117,7 +116,7 @@ var godsTrialFailureRows = []failureRow{
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: pet.ErrPetNotFound, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
-	{match: d.ErrUnavailable, class: failureUnavailable},
+	{match: d.ErrUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func godsTrialFailure(e error) httpedge.Response {

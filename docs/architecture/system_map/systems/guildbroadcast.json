@@ -90,7 +90,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_broadcast.go",
-    "line": 61
+    "line": 60
    },
    "mid": 588,
    "name": "MESSAGE_TEAM"

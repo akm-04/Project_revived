@@ -126,13 +126,13 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 			return failGuild(err)
 		}
 		if !found {
-			return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "guild_not_found"}}
+			return failureReply(refusal(unprovenRefusalCode))
 		}
 		return okGuild(guildproj.Detail2565(info))
 	}
 
 	if d.Core == nil {
-		return failureReply(unavailable(errors.New("guild core unavailable")))
+		return failureReply(defect(nil))
 	}
 	op := req.Envelope.Operation
 	switch req.Envelope.MID {
@@ -251,13 +251,17 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		_, err = d.Core.AcceptInvite(ctx, actor, guild.ID(gid), op)
 		return guildMutationResult(err)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i6c_guild_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
 func (d GuildDispatcher) guildActor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -266,7 +270,7 @@ func (d GuildDispatcher) guildActor(ctx context.Context, req httpedge.DispatchRe
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -361,15 +365,18 @@ var guildFailureRows = []failureRow{
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
+// guildNotFoundCode is message.lua row 30015 ("Can't find the guild"), the
+// only guild-specific not-found text in the stock table. There is no stock row
+// for "not a member" or "no permission", so those refusals use 35028.
+const guildNotFoundCode int64 = 30015
+
 func failGuild(err error) httpedge.Response {
 	switch {
-	case errors.Is(err, guildcore.ErrGuildNotFound), errors.Is(err, guildcore.ErrApplicationNotFound), errors.Is(err, guildcore.ErrInviteNotFound):
-		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "guild_not_found"}}
-	case errors.Is(err, guildcore.ErrGuildPermission), errors.Is(err, guildcore.ErrNotGuildMember), errors.Is(err, guildview.ErrForbidden):
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "guild_forbidden"}}
+	case errors.Is(err, guildcore.ErrGuildNotFound):
+		return failureReply(refusal(guildNotFoundCode))
+	case errors.Is(err, guildcore.ErrApplicationNotFound), errors.Is(err, guildcore.ErrInviteNotFound),
+		errors.Is(err, guildcore.ErrGuildPermission), errors.Is(err, guildcore.ErrNotGuildMember), errors.Is(err, guildview.ErrForbidden):
+		return failureReply(refusal(unprovenRefusalCode))
 	}
-	if classified := classifyFailure(guildFailureRows, err); classified != nil {
-		return failureReply(classified)
-	}
-	return failureReply(unavailable(err))
+	return failureFromRows(guildFailureRows, err)
 }

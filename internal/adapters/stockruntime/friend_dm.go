@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 
 	dm "gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
@@ -37,21 +36,24 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 	bad := func() httpedge.Response {
 		return failureReply(malformed("invalid_private_message"))
 	}
-	unavailable := func() httpedge.Response {
+	unsupported := func() httpedge.Response {
 		return failureReply(refusal(unprovenRefusalCode))
 	}
-	if d.Authority == nil || r.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
 	if e != nil {
 		return authFailure(e)
 	}
 	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if r.Envelope.MID != 515 {
-		return bad()
+		return unsupported()
 	}
 	fields, e := socialFields(r.Envelope.Params, "player_id", "msg")
 	if e != nil || len(fields) != 2 {
@@ -79,10 +81,10 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 	}
 	if msg.SelectType == friendmessage.SelectIllusion {
 		if d.RoomChat == nil {
-			return unavailable()
+			return failureReply(defect(nil))
 		}
 		if e = d.RoomChat.SendRoomChat(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation); e != nil {
-			return unavailable()
+			return failureFromRows(nil, e)
 		}
 		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
 	}
@@ -90,11 +92,11 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 		return bad()
 	}
 	if d.Service == nil {
-		return unavailable()
+		return failureReply(defect(nil))
 	}
 	o, e := d.Service.Accept(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation)
 	if e != nil {
-		return unavailable()
+		return failureFromRows(nil, e)
 	}
 	if d.Emitter != nil {
 		d.Emitter.EmitFriendDM(c, o)

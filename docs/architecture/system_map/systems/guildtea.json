@@ -85,7 +85,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
-    "line": 32
+    "line": 31
    },
    "mid": 1808,
    "name": "GET_TEA_TALK_INFO"
@@ -93,7 +93,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
-    "line": 32
+    "line": 31
    },
    "mid": 1809,
    "name": "TEA_TALK_QUEST"
@@ -101,7 +101,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
-    "line": 32
+    "line": 31
    },
    "mid": 1810,
    "name": "TEA_TALK_PRESENT"
@@ -109,7 +109,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
-    "line": 32
+    "line": 31
    },
    "mid": 1811,
    "name": "TEA_TALK_CONFIRM_GIFT"

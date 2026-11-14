@@ -94,7 +94,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/public_profile_reads.go",
-    "line": 25
+    "line": 27
    },
    "mid": 1829,
    "name": "GET_PLAYER_CARD_INFO"
@@ -110,7 +110,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/public_profile_reads.go",
-    "line": 25
+    "line": 27
    },
    "mid": 1832,
    "name": "MODIFY_SHOW_CASE"
@@ -134,7 +134,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/public_profile_reads.go",
-    "line": 25
+    "line": 27
    },
    "mid": 1838,
    "name": "GET_SHOWCASE_DETAIL"
@@ -142,7 +142,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/public_profile_reads.go",
-    "line": 25
+    "line": 27
    },
    "mid": 1840,
    "name": "GET_ALL_SHOW_TYPE_INFOS"

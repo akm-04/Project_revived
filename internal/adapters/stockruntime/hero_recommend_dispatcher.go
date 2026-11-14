@@ -30,7 +30,7 @@ func (h HeroRecommendDispatcher) Dispatch(ctx context.Context, req httpedge.Disp
 		return *fail
 	}
 	if h.Service == nil {
-		return failHeroRecommend(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params, o, mid := req.Envelope.Params, req.Envelope.Operation, req.Envelope.MID
 	switch mid {
@@ -65,7 +65,7 @@ func (h HeroRecommendDispatcher) Dispatch(ctx context.Context, req httpedge.Disp
 		}
 		return httpedge.Response{HTTPStatus: 200, Body: body}
 	}
-	return badHero("unsupported_hero_recommend_mid")
+	return failureReply(refusal(unprovenRefusalCode))
 }
 
 // failHeroRecommend refuses a business conflict on 409 so the stock callbacks
