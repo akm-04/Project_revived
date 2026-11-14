@@ -2,6 +2,7 @@ package i4store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
@@ -34,6 +35,50 @@ func (PlayerDirectoryReader) ProfileTx(ctx context.Context, q tx.Queryer, pid id
 		return playerdirectory.Profile{}, false, err
 	}
 	return p, true, nil
+}
+
+// ProfilesTx is the batched directory read for a board page: one statement,
+// missing players simply absent from the map.
+func (PlayerDirectoryReader) ProfilesTx(c context.Context, q tx.Queryer, ids []identity.PlayerID) (map[identity.PlayerID]playerdirectory.Profile, error) {
+	out := map[identity.PlayerID]playerdirectory.Profile{}
+	if q == nil {
+		return out, errors.New("invalid player directory read")
+	}
+	if len(ids) == 0 {
+		return out, nil
+	}
+	rawIDs := make([]int64, 0, len(ids))
+	for _, pid := range ids {
+		if !pid.Valid() {
+			return out, errors.New("invalid player directory read")
+		}
+		rawIDs = append(rawIDs, int64(pid))
+	}
+	var raw string
+	err := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'name',name,'lev',lev,'avatar_id',avatar_id,'avatar_frame_id',avatar_frame_id,'conquer_lev',conquer_lev,'conquer_loop_id',conquer_loop_id)),'[]'::jsonb)::text FROM player_directory_profiles WHERE player_id=ANY($1)`, rawIDs).Scan(&raw)
+	if err != nil {
+		return out, err
+	}
+	var wire []struct {
+		PlayerID      int64  `json:"player_id"`
+		Name          string `json:"name"`
+		Level         int64  `json:"lev"`
+		AvatarID      int64  `json:"avatar_id"`
+		AvatarFrameID int64  `json:"avatar_frame_id"`
+		ConquerLevel  int64  `json:"conquer_lev"`
+		ConquerLoopID int64  `json:"conquer_loop_id"`
+	}
+	if err = json.Unmarshal([]byte(raw), &wire); err != nil {
+		return out, err
+	}
+	for _, w := range wire {
+		p := playerdirectory.Profile{PlayerID: identity.PlayerID(w.PlayerID), Name: w.Name, Level: w.Level, AvatarID: w.AvatarID, AvatarFrameID: w.AvatarFrameID, ConquerLevel: w.ConquerLevel, ConquerLoopID: w.ConquerLoopID}
+		if err = p.Validate(); err != nil {
+			return out, err
+		}
+		out[p.PlayerID] = p
+	}
+	return out, nil
 }
 
 var _ playerdirectory.Reader = PlayerDirectoryReader{}

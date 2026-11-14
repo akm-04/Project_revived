@@ -32,12 +32,19 @@ type Store interface {
 	SettleBoardPeriodTx(context.Context, tx.Tx, d.BoardSnapshot, d.BoardPeriod, time.Time) error
 	BoardAwardEvidenceTx(context.Context, tx.Queryer, d.Board, identity.PlayerID) ([]d.BoardAwardEvidence, error)
 	BoardTrackingTx(context.Context, tx.Queryer, d.Board, identity.PlayerID, identity.LogicalServerID, time.Time) (bool, error)
+	UpsertScoreRowTx(context.Context, tx.Tx, d.ScoreRow) error
+	DeleteScoreRowTx(context.Context, tx.Tx, string, identity.PlayerID) error
+	ReadScoreRowTx(context.Context, tx.Queryer, string, identity.PlayerID) (d.ScoreRow, bool, error)
+	TopScoreRowsTx(context.Context, tx.Queryer, string, identity.LogicalServerID, int64) ([]d.ScoreRow, error)
+	AllScoreRowsTx(context.Context, tx.Queryer, string, identity.LogicalServerID) ([]d.ScoreRow, error)
+	ScoreRankTx(context.Context, tx.Queryer, string, identity.LogicalServerID, d.ScoreRow) (int64, error)
 }
 type Cohort interface {
 	ListPlayerRootsTx(context.Context, tx.Queryer) ([]playerroot.Root, error)
 }
 type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
+	ProfilesTx(context.Context, tx.Queryer, []identity.PlayerID) (map[identity.PlayerID]playerdirectory.Profile, error)
 }
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
