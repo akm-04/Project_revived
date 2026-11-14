@@ -1,1 +1,4 @@
-{"serial": [], "shards": {"./internal/integration/playerdisplay": 6}, "known_flaky": []}
+{"serial": ["./internal/integration/socialactivation", "./internal/integration/profilemedia"],
+ "shards": {"./internal/integration/playerdisplay": 6},
+ "serial_tests": ["internal/integration/playerdisplay.TestI9_10MarchNativeLatencyBudget"],
+ "known_flaky": []}

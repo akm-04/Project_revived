@@ -1,6 +1,7 @@
 """Self-check of the strict gate's classification rules and parallel units. Run: python3 -B tools/test_strict_gate.py"""
 import collections
 import json
+import stat
 import sys
 import tempfile
 import threading
@@ -81,18 +82,29 @@ _, red = classified(green, {'suite:x': ['internal/b']})
 assert any('package internal/b failed' in line for line in red), red
 
 FAKE_GO = '''#!/usr/bin/env python3
-import json, os, sys
+import json, os, re, sys
 arguments = sys.argv[1:]
 with open(os.environ['GATE_FAKE_LOG'], 'a') as log:
     log.write(json.dumps(arguments) + '\\n')
+
+def option(name):
+    return arguments[arguments.index(name) + 1] if name in arguments else None
+
 if '-list' in arguments:
     print('TestAlpha')
     print('TestBeta')
     print('ok   example.com/mod/internal/fake   0.001s')
 elif '-json' in arguments:
-    print(json.dumps({'Action': 'run', 'Package': 'example.com/mod/internal/fake', 'Test': 'TestAlpha'}))
-    print(json.dumps({'Action': 'pass', 'Package': 'example.com/mod/internal/fake', 'Test': 'TestAlpha'}))
-    print(json.dumps({'Action': 'pass', 'Package': 'example.com/mod/internal/fake'}))
+    package = 'example.com/mod/internal/fake'
+    run, skip = option('-run'), option('-skip')
+    for name in ('TestAlpha', 'TestBeta'):
+        if run is not None and not re.search(run, name):
+            continue
+        if skip is not None and re.search(skip, name):
+            continue
+        print(json.dumps({'Action': 'run', 'Package': package, 'Test': name}))
+        print(json.dumps({'Action': 'pass', 'Package': package, 'Test': name}))
+    print(json.dumps({'Action': 'pass', 'Package': package}))
 '''
 
 
@@ -106,6 +118,7 @@ def fake_gate():
     work = directory / 'work'
     (work / 'logs').mkdir(parents=True)
     (work / 'runs').mkdir()
+    (work / 'media').mkdir()
     source = directory / 'source'
     source.mkdir()
     instance = Gate.__new__(Gate)
@@ -125,6 +138,9 @@ def fake_gate():
     instance.test_functions = {}
     instance.packages = None
     instance.previous = None
+    instance.jobs = 1
+    instance.parallel = gate_pool.EMPTY_PARALLEL
+    instance.dsn_by_package = {}
     instance.environment = {'PATH': '/usr/bin:/bin', 'GATE_FAKE_LOG': str(log)}
     instance.database = lambda name, cwd=None, migrate=('up',), deploy=True: f'postgres://self-check/{name}'
     return instance, log
@@ -139,6 +155,37 @@ units = gate_pool.build_units(['./internal/fake'], {'internal/fake': 6}, lambda 
 covered = [name for unit in units for name in (unit['tests'] or ())]
 assert sorted(covered) == sorted(names) and len(covered) == len(set(covered)), units
 assert len(units) <= 6 and all(unit['run'] for unit in units), units
+
+serial_units = gate_pool.build_units(['./internal/fake'], {'internal/fake': 6}, lambda package: names,
+                                     ['internal/fake.TestExample003'])
+sharded = [name for unit in serial_units if not unit['serial'] for name in unit['tests']]
+run_alone = [unit for unit in serial_units if unit['serial']]
+assert 'TestExample003' not in sharded, serial_units
+assert len(run_alone) == 1 and run_alone[0]['tests'] == ['TestExample003'], serial_units
+assert run_alone[0]['run'] == '^(TestExample003)$', run_alone
+assert sorted(sharded + run_alone[0]['tests']) == sorted(names), serial_units
+
+instance, _ = fake_gate()
+first = instance.unit_environment('postgres', {'package': './internal/fake', 'unit': 'alpha'}, {})
+second = instance.unit_environment('postgres', {'package': './internal/fake', 'unit': 'beta'}, {})
+roots = [Path(first['GXB_I7B5B_ASSET_ROOT']), Path(second['GXB_I7B5B_ASSET_ROOT'])]
+assert roots[0] != roots[1], roots
+assert all(root.is_dir() and stat.S_IMODE(root.stat().st_mode) == 0o700 for root in roots), roots
+
+instance, log = fake_gate()
+instance.packages = ['./internal/fake']
+instance.parallel = dict(gate_pool.EMPTY_PARALLEL, shards={'internal/fake': 2},
+                         serial_tests=['internal/fake.TestAlpha'])
+instance.suite_parallel('unit', '')
+commands = [json.loads(line) for line in log.read_text().splitlines()]
+tests_commands = [command for command in commands if '-json' in command]
+assert len(tests_commands) == 2, tests_commands
+shard_command, serial_command = tests_commands
+assert shard_command[shard_command.index('-run') + 1] == '^(TestBeta)$', shard_command
+assert shard_command[shard_command.index('-skip') + 1] == '^(TestAlpha)$', shard_command
+assert serial_command[serial_command.index('-run') + 1] == '^(TestAlpha)$' and '-skip' not in serial_command, serial_command
+assert instance.runs['suite:unit'] == {'internal/fake.TestAlpha': 'pass', 'internal/fake.TestBeta': 'pass'}, instance.runs
+assert not instance.red, instance.red
 
 instance, log = fake_gate()
 instance.merge_unit_outcomes('suite:postgres', 'unit_a', {'internal/a.TestOne': 'pass'}, {'internal/broken'})

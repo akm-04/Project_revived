@@ -12,7 +12,7 @@ import subprocess
 
 TEST_VARIABLE = re.compile(r'os\.(?:Getenv|LookupEnv)\("([A-Z0-9_]+)"\)')
 TEST_NAME = re.compile(r'^Test\w+$')
-EMPTY_PARALLEL = {'serial': [], 'shards': {}, 'known_flaky': []}
+EMPTY_PARALLEL = {'serial': [], 'shards': {}, 'serial_tests': [], 'known_flaky': []}
 MAXIMUM_DATABASE_BYTES = 63
 
 
@@ -107,29 +107,40 @@ def database_name(suite, unit, variable):
     return name
 
 
-def build_units(packages, shard_counts, list_tests):
+def build_units(packages, shard_counts, list_tests, serial_tests=()):
     """One unit per package; a package in shard_counts becomes one unit per non-empty shard.
 
     list_tests returns the package's test names, or None when the listing failed (the package then runs whole).
+    A `package.Test` entry in serial_tests is left out of the package's shards and becomes one `_serial` unit that the
+    caller runs after the pool; together the shards and the serial unit must cover the package's whole listed set.
     """
+    serial_by_package = collections.defaultdict(list)
+    for key in serial_tests:
+        serial_package, _, test_name = key.rpartition('.')
+        serial_by_package[serial_package].append(test_name)
     units = []
     for package in packages:
         name = unit_slug(package)
+        serial = sorted(serial_by_package.get(normalize_package(package), ()))
         count = shard_counts.get(normalize_package(package), 0)
         names = list_tests(package) if count else None
+        if serial:
+            units.append(dict(package=package, unit=f'{name}_serial', tests=serial,
+                              run='^(' + '|'.join(serial) + ')$', shard=None, serial=True))
         if not count or names is None:
-            units.append(dict(package=package, unit=name, tests=None, run=None, shard=None))
+            units.append(dict(package=package, unit=name, tests=None, run=None, shard=None, serial=False))
             continue
-        shards = assign_shards(names, count)
-        covered = [test_name for shard in shards for test_name in shard]
+        runnable = [test_name for test_name in names if test_name not in set(serial)]
+        shards = assign_shards(runnable, count)
+        covered = [test_name for shard in shards for test_name in shard] + serial
         if sorted(covered) != sorted(names):
-            raise PoolError(f'shards for {package} cover {len(covered)} names of {len(names)}')
+            raise PoolError(f'shards for {package} cover {len(covered)} names of {len(names)} (serial {serial})')
         for index, shard in enumerate(shards):
             # An empty shard would still start the package's TestMain with no test to run.
             if not shard:
                 continue
             units.append(dict(package=package, unit=f'{name}_s{index}', tests=shard,
-                              run='^(' + '|'.join(shard) + ')$', shard=index))
+                              run='^(' + '|'.join(shard) + ')$', shard=index, serial=False))
     return units
 
 

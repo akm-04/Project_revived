@@ -176,6 +176,10 @@ class Gate:
         require(isinstance(document.get('shards'), dict), 'parallel.json shards must be an object')
         require(all(isinstance(count, int) and count >= 1 for count in document['shards'].values()),
                 'parallel.json shard counts must be positive integers')
+        serial_tests = document.get('serial_tests', [])
+        require(isinstance(serial_tests, list), 'parallel.json serial_tests must be a list')
+        require(all(isinstance(key, str) and '.' in key for key in serial_tests),
+                'parallel.json serial_tests entries must be package.TestName')
         require(isinstance(document.get('known_flaky'), list), 'parallel.json known_flaky must be a list')
 
     def selected(self, unit):
@@ -348,18 +352,35 @@ class Gate:
         serial_packages = {gate_pool.normalize_package(package) for package in self.parallel['serial']}
         shard_counts = {gate_pool.normalize_package(package): count for package, count in self.parallel['shards'].items()
                         if gate_pool.normalize_package(package) not in serial_packages}
-        units = gate_pool.build_units(self.parallel_packages(tags), shard_counts, self.test_lister(name, tags))
+        units = gate_pool.build_units(self.parallel_packages(tags), shard_counts, self.test_lister(name, tags),
+                                      self.parallel.get('serial_tests', ()))
         counts = self.test_counts_by_package()
         for unit in units:
             unit['test_count'] = len(unit['tests'] or ()) or counts.get(gate_pool.normalize_package(unit['package']), 0)
         (self.work / 'runs' / f'suite_{name}').mkdir()
         skip = self.suite_skip_pattern()
-        pooled = [unit for unit in units if gate_pool.normalize_package(unit['package']) not in serial_packages]
-        sequential = [unit for unit in units if gate_pool.normalize_package(unit['package']) in serial_packages]
+        pooled = [unit for unit in units if not unit['serial'] and gate_pool.normalize_package(unit['package']) not in serial_packages]
+        sequential = [unit for unit in units if not unit['serial'] and gate_pool.normalize_package(unit['package']) in serial_packages]
+        serial_units = [unit for unit in units if unit['serial']]
         gate_pool.run_pool(self.ordered_units(name, pooled), self.jobs,
-                           lambda unit: self.run_unit(name, tags, unit, extra, skip))
+                           lambda unit: self.run_unit(name, tags, unit, extra, self.unit_skip(unit, skip)))
         for unit in sequential:
-            self.run_unit(name, tags, unit, extra, skip)
+            self.run_unit(name, tags, unit, extra, self.unit_skip(unit, skip))
+        for unit in serial_units:
+            self.run_unit(name, tags, unit, extra, self.unit_skip(unit, skip))
+
+    def serial_skip(self, package):
+        """The skip pattern for a package's serial_tests, or None when it has none."""
+        package_path = gate_pool.normalize_package(package)
+        names = sorted({key.rpartition('.')[2] for key in self.parallel.get('serial_tests', [])
+                        if key.rpartition('.')[0] == package_path})
+        return '^(' + '|'.join(names) + ')$' if names else None
+
+    def unit_skip(self, unit, suite_skip):
+        """Serial tests run alone, so their own unit must not skip them."""
+        if unit['serial']:
+            return suite_skip
+        return '|'.join(pattern for pattern in (suite_skip, self.serial_skip(unit['package'])) if pattern) or None
 
     def prepared_template(self, name, tags, extra):
         """The plain template's clone after the publication provision step, which prepared-variable units clone from."""
@@ -408,6 +429,9 @@ class Gate:
 
     def unit_environment(self, name, unit, extra):
         environment = {**self.environment, **extra}
+        asset_root = self.work / 'media' / unit['unit']
+        asset_root.mkdir(mode=0o700, exist_ok=True)
+        environment['GXB_I7B5B_ASSET_ROOT'] = str(asset_root)
         if name == 'unit':
             return environment
         variables = self.dsn_by_package.get(gate_pool.normalize_package(unit['package']), frozenset())
@@ -675,6 +699,9 @@ class Gate:
         self.dsn_by_package = gate_pool.dsn_variables_by_package(self.source)
         self.red += [f'census: test variable {variable} is neither provisioned, recipe-owned nor set by a parent test'
                      for variable in self.census.get('unclassified', [])]
+        test_locations = {location for locations in self.test_functions.values() for location in locations}
+        self.red += [f'parallel: serial test {key} names no test function'
+                     for key in self.parallel.get('serial_tests', []) if key not in test_locations]
         self.build_binaries()
         self.cluster('init')
         self.cluster('start')
@@ -758,6 +785,7 @@ class Gate:
         report = dict(contract='I85_STRICT_GATE_V1', verdict=verdict, commit=self.commit, toolchain=str(self.toolchain), started=started,
                       finished=datetime.datetime.now(datetime.timezone.utc).isoformat(), mode=self.mode, jobs=self.jobs,
                       lists=self.list_hashes, selection=self.select.pattern if self.select else None,
+                      packages=self.packages,
                       census=self.census, red=self.red, blocked_by_known_debt=self.blocked, steps=self.steps,
                       counts=dict(collections.Counter(row['status'] for row in tests.values())),
                       known_debt=dict(entries=len(self.known_debt), failing=sum(row['status'] == 'KNOWN_DEBT_FAILING' for row in tests.values())),
