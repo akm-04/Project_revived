@@ -97,7 +97,7 @@ func (d ProfileCommentDispatcher) Dispatch(c context.Context, r httpedge.Dispatc
 		}
 		out, e := d.Service.ListComments(c, a, q.Target, page, r.Envelope.Operation)
 		if e != nil {
-			return failureFromRows(nil, e)
+			return failureFromRows(profileFeedbackFailureRows, e)
 		}
 		if out.Target != q.Target || out.Actor != a.PlayerID || out.Rows == nil || out.Best == nil || out.Count < 0 {
 			return failureReply(defect(nil))
@@ -122,7 +122,7 @@ func (d ProfileCommentDispatcher) Dispatch(c context.Context, r httpedge.Dispatc
 	}
 	out, e := d.Service.ExecuteComment(c, a, q, r.Envelope.Operation)
 	if e != nil {
-		return failureFromRows(nil, e)
+		return failureFromRows(profileFeedbackFailureRows, e)
 	}
 	if out.Terminal.Kind != q.Kind || out.Terminal.Actor != a.PlayerID {
 		return failureReply(defect(nil))

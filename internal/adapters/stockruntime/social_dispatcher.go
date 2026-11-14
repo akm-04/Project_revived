@@ -123,12 +123,21 @@ func socialTargets(m map[string]any, key string, batch bool) ([]identity.PlayerI
 	}
 	return out, nil
 }
+
+// The owner's stale decision time, counter overflow and policy drift are
+// defects, like the gift clock row, so they fall through to 500.
+var socialRelationFailureRows = []failureRow{
+	{match: sr.ErrInvalidCommand, class: failureMalformed, detail: "invalid_social_request"},
+	{match: sr.ErrNotEligible, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrStateConflict, class: failureRefusal, code: staleConflictCode},
+}
+
 func socialFailure(e error) httpedge.Response {
 	var stock *sr.StockError
 	if errors.As(e, &stock) && stock.Code > 0 {
 		return failureReply(refusal(stock.Code))
 	}
-	return failureFromRows(nil, e)
+	return failureFromRows(socialRelationFailureRows, e)
 }
 func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	// One finite parent deadline covers authority, command and postcommit projection.

@@ -53,6 +53,14 @@ func feedbackInteger(v any, min, max int64) (int64, error) {
 	}
 	return n, nil
 }
+
+// ErrInvalid means a broken transaction token or root, a defect that falls through to 500.
+var profileFeedbackFailureRows = []failureRow{
+	{match: app.ErrRequest, class: failureMalformed, detail: "profile_feedback_request_failed"},
+	{match: app.ErrConflict, class: failureRefusal, code: staleConflictCode},
+	{match: app.ErrProvider, class: failureUnavailable},
+}
+
 func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int) httpedge.Response {
 		switch status {
@@ -100,7 +108,7 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		}
 		out, e := d.Service.Execute(c, a, q, r.Envelope.Operation)
 		if e != nil {
-			return failureFromRows(nil, e)
+			return failureFromRows(profileFeedbackFailureRows, e)
 		}
 		if out.Current.Target != q.Target || out.Current.Actor != a.PlayerID || !out.Current.HasPraised || out.Current.Count < 1 {
 			return failureReply(defect(nil))
@@ -128,7 +136,7 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		}
 		out, e := d.Service.List(c, a, q, r.Envelope.Operation)
 		if e != nil {
-			return failureFromRows(nil, e)
+			return failureFromRows(profileFeedbackFailureRows, e)
 		}
 		if out.Current.Target != a.PlayerID || out.Rows == nil || out.Current.Count < 0 {
 			return failureReply(defect(nil))

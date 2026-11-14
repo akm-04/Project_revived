@@ -436,8 +436,8 @@ var i5FailureRows = []failureRow{
 	{match: appi5.ErrMailNotClaimable, class: failureRefusal, code: unprovenRefusalCode},
 	{match: appi5.ErrMailStackFull, class: failureRefusal, code: unprovenRefusalCode},
 	{match: appi5.ErrRedeemInvalid, class: failureMalformed, detail: "invalid_redeem"},
-	{match: appi5.ErrMailNotFound, class: failureMalformed, detail: "not_found"},
-	{match: appi5.ErrObjectiveNotFound, class: failureMalformed, detail: "not_found"},
+	{match: appi5.ErrMailNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrObjectiveNotFound, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func failI5(err error) httpedge.Response {

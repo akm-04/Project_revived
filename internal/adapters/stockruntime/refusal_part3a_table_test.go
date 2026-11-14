@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/application/guildtea"
 	"gxb.local/backend/v2/internal/application/guildview"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/profilefeedback"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/combat"
@@ -125,6 +126,12 @@ func TestPart3ASocialFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"stock code", socialFailure(&sr.StockError{Code: 20004}), http.StatusConflict, 20004, ""},
 		{"dependency", socialFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"invalid command", socialFailure(sr.ErrInvalidCommand), http.StatusBadRequest, 0, "invalid_social_request"},
+		{"not eligible", socialFailure(sr.ErrNotEligible), http.StatusConflict, unprovenRefusalCode, ""},
+		{"state conflict", socialFailure(sr.ErrStateConflict), http.StatusConflict, staleConflictCode, ""},
+		{"stale decision time", socialFailure(sr.ErrStaleDecisionTime), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"counter overflow", socialFailure(sr.ErrCounterOverflow), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"policy drift", socialFailure(sr.ErrPolicyDrift), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"gift quota", giftFailure(socialgift.ErrQuota), http.StatusConflict, unprovenRefusalCode, ""},
 		{"gift duplicate", giftFailure(socialgift.ErrDuplicate), http.StatusConflict, unprovenRefusalCode, ""},
 		{"gift ineligible", giftFailure(socialgift.ErrNotEligible), http.StatusConflict, unprovenRefusalCode, ""},
@@ -137,6 +144,16 @@ func TestPart3ASocialFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{{"gift nil dependency", giftFailure(nil), http.StatusInternalServerError, unprovenRefusalCode, ""}})
 }
 
+func TestR4ProfileFeedbackFailureRows(t *testing.T) {
+	fail := func(err error) httpedge.Response { return failureFromRows(profileFeedbackFailureRows, err) }
+	assertPart2FailureCases(t, []part2FailureCase{
+		{"request", fail(profilefeedback.ErrRequest), http.StatusBadRequest, 0, "profile_feedback_request_failed"},
+		{"conflict", fail(profilefeedback.ErrConflict), http.StatusConflict, staleConflictCode, ""},
+		{"provider", fail(profilefeedback.ErrProvider), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"invalid root", fail(profilefeedback.ErrInvalid), http.StatusInternalServerError, unprovenRefusalCode, ""},
+	})
+}
+
 func TestPart3AI5FailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"sign refused", failI5(objective.ErrSignRefused), http.StatusConflict, unprovenRefusalCode, ""},
@@ -145,8 +162,8 @@ func TestPart3AI5FailureRows(t *testing.T) {
 		{"mail not claimable", failI5(appi5.ErrMailNotClaimable), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mail stack full", failI5(appi5.ErrMailStackFull), http.StatusConflict, unprovenRefusalCode, ""},
 		{"redeem invalid", failI5(appi5.ErrRedeemInvalid), http.StatusBadRequest, 0, "invalid_redeem"},
-		{"mail not found", failI5(appi5.ErrMailNotFound), http.StatusBadRequest, 0, "not_found"},
-		{"objective not found", failI5(appi5.ErrObjectiveNotFound), http.StatusBadRequest, 0, "not_found"},
+		{"mail not found", failI5(appi5.ErrMailNotFound), http.StatusConflict, unprovenRefusalCode, ""},
+		{"objective not found", failI5(appi5.ErrObjectiveNotFound), http.StatusConflict, unprovenRefusalCode, ""},
 		{"dependency", failI5(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

@@ -76,7 +76,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/profile_feedback.go",
-    "line": 56
+    "line": 64
    },
    "mid": 1830,
    "name": "PLAYER_CARD_ADD_PRAISE"
@@ -116,7 +116,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/profile_feedback.go",
-    "line": 56
+    "line": 64
    },
    "mid": 1842,
    "name": "GET_PRAISE_LIST"
