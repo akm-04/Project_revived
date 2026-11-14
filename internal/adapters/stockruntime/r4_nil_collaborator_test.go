@@ -11,11 +11,14 @@ import (
 	"testing"
 	"time"
 
+	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 // TestR4NilCollaboratorBranchesAreDefects enforces R4_FAILURE_STATUS_AMENDMENT
 // item 7: a nil service, port or view is a composition defect (500 + 35028).
+// It scans every function of *_dispatcher.go and every reply-building function
+// elsewhere; background delivery paths return errors to a loop, not replies.
 func TestR4NilCollaboratorBranchesAreDefects(t *testing.T) {
 	entries, err := os.ReadDir(".")
 	if err != nil {
@@ -24,21 +27,28 @@ func TestR4NilCollaboratorBranchesAreDefects(t *testing.T) {
 	files := token.NewFileSet()
 	for _, entry := range entries {
 		name := entry.Name()
-		if entry.IsDir() || !strings.HasSuffix(name, "_dispatcher.go") || strings.HasSuffix(name, "_test.go") {
+		if entry.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
 			continue
 		}
 		file, err := parser.ParseFile(files, name, nil, 0)
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
-		ast.Inspect(file, func(node ast.Node) bool {
-			branch, ok := node.(*ast.IfStmt)
-			if !ok || !comparesSelectorToNil(branch.Cond) || !returnsUnavailableEvidence(branch.Body) {
-				return true
+		dispatcherFile := strings.HasSuffix(name, "_dispatcher.go")
+		for _, declaration := range file.Decls {
+			function, ok := declaration.(*ast.FuncDecl)
+			if !ok || function.Body == nil || !dispatcherFile && !returnsReply(function) {
+				continue
 			}
-			t.Errorf("%s: nil collaborator branch returns an unavailable reply; R4_FAILURE_STATUS_AMENDMENT item 7 requires failureReply(defect(nil))", files.Position(branch.Pos()))
-			return true
-		})
+			ast.Inspect(function.Body, func(node ast.Node) bool {
+				branch, ok := node.(*ast.IfStmt)
+				if !ok || !comparesSelectorToNil(branch.Cond) || !returnsUnavailableEvidence(branch.Body) {
+					return true
+				}
+				t.Errorf("%s: nil collaborator branch returns an unavailable reply; R4_FAILURE_STATUS_AMENDMENT item 7 requires failureReply(defect(nil))", files.Position(branch.Pos()))
+				return true
+			})
+		}
 	}
 }
 
@@ -163,6 +173,15 @@ func TestR4NilCollaboratorsAnswerDefect(t *testing.T) {
 			cleanRequest.Envelope.Params["pet_id"] = int64(1)
 			return PetDispatcher{Authority: authority, Service: &petServiceFake{}}.Dispatch(context.Background(), cleanRequest)
 		}},
+		{"profile comment", func() httpedge.Response {
+			return ProfileCommentDispatcher{Authority: authority}.Dispatch(context.Background(), request)
+		}},
+		{"profile feedback", func() httpedge.Response {
+			return ProfileFeedbackDispatcher{Authority: authority}.Dispatch(context.Background(), request)
+		}},
+		{"ranking", func() httpedge.Response {
+			return RankingDispatcher{Authority: authority}.Dispatch(context.Background(), request)
+		}},
 		{"practice auto", func() httpedge.Response {
 			return PracticeDispatcher{}.dispatchPracticeAuto(context.Background(), httpedge.DispatchRequest{Envelope: part3bEnvelope(127, practiceAutoParams, now)}, actorForHTTP(t))
 		}},
@@ -205,6 +224,29 @@ func TestR4NilCollaboratorsAnswerDefect(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestR4BootstrapAccountAuthIsSessionFailure: ErrAccountAuth means an invalid,
+// expired or mismatched sid/login token pair, a session failure (R4P4 item 2).
+func TestR4BootstrapAccountAuthIsSessionFailure(t *testing.T) {
+	got := bootstrapFailure(appboot.ErrAccountAuth)
+	want := failureReply(sessionFailure())
+	if got.HTTPStatus != http.StatusUnauthorized || got.Body["error_code"] != want.Body["error_code"] || got.Body["error_msg"] == "" {
+		t.Fatalf("status=%d body=%#v want 401 %#v", got.HTTPStatus, got.Body, want.Body)
+	}
+}
+
+func returnsReply(function *ast.FuncDecl) bool {
+	if function.Type.Results == nil {
+		return false
+	}
+	for _, result := range function.Type.Results.List {
+		selector, ok := result.Type.(*ast.SelectorExpr)
+		if ok && selector.Sel.Name == "Response" {
+			return true
+		}
+	}
+	return false
 }
 
 func comparesSelectorToNil(condition ast.Expr) bool {
