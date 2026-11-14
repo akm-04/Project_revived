@@ -11,6 +11,7 @@ outside the allowlist, a repaid debt entry and a stale allowlist entry all make 
 
 Usage: strict_gate.py --toolchain <self-contained tool root> --cache <go/zig cache root> --work <new directory>
                       --populated59-dump <I7C3B F2_RECOVERY_EVIDENCE.dump> [--commit HEAD] [--port 55561] [--select REGEX]
+                      [--mode serial|parallel] [--jobs N] [--package PATH ...] [--previous STRICT_GATE.json]
 """
 import argparse
 import collections
@@ -25,8 +26,12 @@ import socket
 import subprocess
 import sys
 import tarfile
+import threading
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import gate_pool  # noqa: E402
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 LISTS = REPOSITORY / 'tools/strict_gate'
@@ -39,6 +44,8 @@ BINARY_COMMANDS = {'API': ('gxb-api', 'postgres,river'), 'REALTIME': ('gxb-realt
 # Variables the gate itself provides to every run, and test outputs that are only written when a freeze tool asks for them.
 MACHINE_VARIABLES = {'GXB_LUAJIT', 'GXB_I7B5B_ASSET_ROOT', 'GXB_I7A8_FULL_ROSTER_PROBE'}
 SUITE_FIXTURE_VARIABLES = {'GXB_BOOK_COMPILER_PAYLOAD', 'GXB_I9_10A_SCRATCH_JSON', 'GXB_SOCIAL_CATALOG_PATH'}
+# Parallel units clone these DSN variables from the publication-prepared template; all others from the plain template.
+PREPARED_VARIABLES = {'GXB_I7A9_DSN'}
 OPERATOR_VARIABLES = {'GXB_I8_LATENCY_BOUND', 'GXB_I910C_MIG127_PREDECESSOR_DATABASE', 'GXB_I910C_OLD_EVIDENCE', 'GXB_I9_10B_PRODUCTION_WAKE_PROBE', 'GXB_MENTOR_CATALOG_PATH', 'GXB_SOCIAL17_EVIDENCE'}
 OPTIONAL_OUTPUT_VARIABLES = {'GXB_I8_3B_SNAPSHOT_OUT', 'GXB_I910C_UPGRADE_EVIDENCE', 'GXB_SOCIAL17_UPGRADE_EVIDENCE'}
 TOOLS = ['go', 'gofmt', 'goose', 'luajit', 'initdb', 'pg_ctl', 'createdb', 'psql', 'pg_dump', 'pg_restore', 'zig-cc', 'zig-c++']
@@ -105,13 +112,20 @@ class Gate:
         self.work = Path(arguments.work).resolve()
         self.port = arguments.port
         self.select = re.compile(arguments.select) if arguments.select else None
+        self.packages = arguments.package or None
+        self.mode = arguments.mode
+        self.jobs = arguments.jobs
+        self.previous = Path(arguments.previous).resolve() if arguments.previous else None
+        self.max_connections = 900 if self.mode == 'parallel' else 300
         self.populated59 = Path(arguments.populated59_dump).resolve()
         self.red = []
         self.steps = []
         self.runs = {}
         self.package_failures = collections.defaultdict(list)
+        self.unit_lock = threading.Lock()
         self.blocked = {}
         self.orchestration_variables = set()
+        self.dsn_by_package = {}
         self.accepted35 = None
         self.work.mkdir(parents=True)
         for directory in ['logs', 'runs', 'binaries', 'recipes', 'exports', 'media']:
@@ -119,8 +133,7 @@ class Gate:
         self.commit = subprocess.check_output(['git', 'rev-parse', arguments.commit], cwd=REPOSITORY, text=True).strip()
         self.source = self.export(self.commit, 'candidate')
         self.module = re.search(r'^module (\S+)', (self.source / 'go.mod').read_text(), re.M).group(1)
-        self.known_debt = {entry['test']: entry for entry in json.loads((LISTS / 'known_debt.json').read_text())['entries']}
-        self.allowlist = {entry['test']: entry for entry in json.loads((LISTS / 'skip_allowlist.json').read_text())['entries']}
+        self.known_debt, self.allowlist, self.parallel, self.list_hashes = self.load_lists()
         cache = Path(arguments.cache).resolve()
         go_root = self.only(self.toolchain.glob('opt/go-*'))
         postgres_root = self.only(self.toolchain.glob('opt/postgresql-*'))
@@ -140,6 +153,31 @@ class Gate:
         require(len(found) == 1, f'expected exactly one of {found}')
         return found[0]
 
+    def load_lists(self):
+        """Lists come from the exported candidate; a candidate without parallel.json gets the empty one."""
+        documents, hashes = {}, {}
+        for name, required in (('known_debt.json', True), ('skip_allowlist.json', True), ('parallel.json', False)):
+            path = self.source / 'tools/strict_gate' / name
+            if path.exists():
+                text = path.read_text()
+            else:
+                require(not required, f'candidate lacks tools/strict_gate/{name}')
+                text = json.dumps(gate_pool.EMPTY_PARALLEL)
+            documents[name] = json.loads(text)
+            hashes[name.removesuffix('.json')] = hashlib.sha256(text.encode()).hexdigest()
+        parallel = documents['parallel.json']
+        self.validate_parallel(parallel)
+        return ({entry['test']: entry for entry in documents['known_debt.json']['entries']},
+                {entry['test']: entry for entry in documents['skip_allowlist.json']['entries']}, parallel, hashes)
+
+    @staticmethod
+    def validate_parallel(document):
+        require(isinstance(document.get('serial'), list), 'parallel.json serial must be a list')
+        require(isinstance(document.get('shards'), dict), 'parallel.json shards must be an object')
+        require(all(isinstance(count, int) and count >= 1 for count in document['shards'].values()),
+                'parallel.json shard counts must be positive integers')
+        require(isinstance(document.get('known_flaky'), list), 'parallel.json known_flaky must be a list')
+
     def selected(self, unit):
         return self.select is None or bool(self.select.search(unit))
 
@@ -155,10 +193,12 @@ class Gate:
 
     def step(self, name, arguments, extra=None, cwd=None):
         log = self.work / 'logs' / (name.replace(':', '_') + '.log')
+        began = time.perf_counter()
         with log.open('w') as output:
             code = subprocess.run([str(argument) for argument in arguments], cwd=cwd or self.source, env={**self.environment, **(extra or {})},
                                   stdout=output, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
-        self.steps.append(dict(name=name, exit=code, log=str(log.relative_to(self.work))))
+        self.steps.append(dict(name=name, exit=code, log=str(log.relative_to(self.work)),
+                               seconds=round(time.perf_counter() - began, 3)))
         print(f'{name} {code}', flush=True)
         require(code == 0, f'step {name} exited {code} (log {log.relative_to(self.work)})')
 
@@ -171,35 +211,17 @@ class Gate:
 
     def go_test(self, label, tags, packages, extra=None, run=None, skip=None, cwd=None, serial=True):
         stream = self.work / 'runs' / (label.replace(':', '_') + '.jsonl')
-        arguments = [self.tool('go'), 'test', '-json', '-count=1', '-timeout=150m', '-tags', tags]
-        arguments += ['-p=1'] * serial + ['-run', run] * bool(run) + ['-skip', skip] * bool(skip)
+        arguments = gate_pool.go_test_command(self.tool('go'), tags, packages, run=run, skip=skip, package_limit=serial)
+        began = time.perf_counter()
         with stream.open('w') as output:
-            code = subprocess.run(arguments + packages, cwd=cwd or self.source, env={**self.environment, **(extra or {})},
+            code = subprocess.run(arguments, cwd=cwd or self.source, env={**self.environment, **(extra or {})},
                                   stdout=output, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
-        outcomes, started, failed_packages = {}, set(), set()
-        for line in stream.read_text().splitlines():
-            try:
-                event = json.loads(line)
-            except ValueError:
-                continue
-            package = event.get('Package', '').removeprefix(self.module + '/')
-            test = event.get('Test', '')
-            action = event.get('Action')
-            if action == 'fail' and not test:
-                failed_packages.add(package)
-            if not test or '/' in test:
-                continue
-            key = f'{package}.{test}'
-            if action == 'run':
-                started.add(key)
-            if action in ('pass', 'fail', 'skip'):
-                outcomes[key] = action
-        for key in started - set(outcomes):
-            outcomes[key] = 'incomplete'
+        outcomes, failed_packages = gate_pool.parse_go_test_json(stream, self.module)
         failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
         self.package_failures[label] = sorted(failed_packages - failing_packages)
         self.runs[label] = outcomes
-        self.steps.append(dict(name=label, exit=code, stream=str(stream.relative_to(self.work)), tests=len(outcomes)))
+        self.steps.append(dict(name=label, exit=code, stream=str(stream.relative_to(self.work)), tests=len(outcomes),
+                               seconds=round(time.perf_counter() - began, 3)))
         print(f'{label} {code} {dict(collections.Counter(outcomes.values()))}', flush=True)
         return outcomes
 
@@ -234,7 +256,7 @@ class Gate:
         commands = {'init': [self.tool('initdb'), '-D', data, '--auth=trust', '--no-locale', '--encoding=UTF8'],
                     'stop': [self.tool('pg_ctl'), '-D', data, '-m', 'fast', '-t', '600', '-w', 'stop']}
         start = [self.tool('pg_ctl'), '-D', data, '-l', self.work / 'cluster/postgresql.log', '-t', '600', '-w',
-                 '-o', f'-h 127.0.0.1 -p {self.port} -c max_connections=300']
+                 '-o', f'-h 127.0.0.1 -p {self.port} -c max_connections={self.max_connections}']
         commands['start'] = [*start, 'start']
         commands['restart'] = [*start, '-m', 'fast', 'restart']
         self.step(f'cluster:{action}:{len(self.steps)}', commands[action])
@@ -294,15 +316,18 @@ class Gate:
             require(len(self.test_functions.get(name, [])) == 1, f'suite exclusion {name} must name exactly one test function')
         return '^(' + '|'.join(names) + ')$' if names else None
 
-    def suite(self, name, tags):
-        tag_arguments = ['-tags', tags]
-        self.step(f'build:{name}', [self.tool('go'), 'build', '-buildvcs=false', *tag_arguments, './...'])
-        self.step(f'vet:{name}', [self.tool('go'), 'vet', *tag_arguments, './...'])
-        extra = {
+    def suite_fixtures(self):
+        return {
             'GXB_BOOK_COMPILER_PAYLOAD': str(self.source / 'internal/content/builtin/generated/book_input_catalog.json'),
             'GXB_I9_10A_SCRATCH_JSON': str(self.source / 'internal/content/builtin/generated/workshop_input_catalog.json'),
             'GXB_SOCIAL_CATALOG_PATH': str(self.source / 'internal/content/builtin/generated/social_input_catalog.json'),
         }
+
+    def suite(self, name, tags):
+        tag_arguments = ['-tags', tags]
+        self.step(f'build:{name}', [self.tool('go'), 'build', '-buildvcs=false', *tag_arguments, './...'])
+        self.step(f'vet:{name}', [self.tool('go'), 'vet', *tag_arguments, './...'])
+        extra = self.suite_fixtures()
         if name != 'unit':
             for variable in self.census['dsn']:
                 database = f'{name}_' + variable.lower().removeprefix('gxb_').removesuffix('_dsn')
@@ -310,7 +335,123 @@ class Gate:
             packages = ['./internal/integration/publication'] + ['./internal/adapters/river'] * ('river' in tags.split())
             self.go_test(f'provision:{name}:publication', tags, packages, {**extra, 'GXB_I7A9_PREPARE_PROCESS': '1'},
                          run='^(TestPreparePublicationProcess|TestPreparePublicationRiver)$')
-        self.go_test(f'suite:{name}', tags, ['./...'], extra, skip=self.suite_skip_pattern(), serial=name != 'unit')
+        self.go_test(f'suite:{name}', tags, self.packages or ['./...'], extra, skip=self.suite_skip_pattern(), serial=name != 'unit')
+
+    def suite_parallel(self, name, tags):
+        tag_arguments = ['-tags', tags]
+        self.step(f'build:{name}', [self.tool('go'), 'build', '-buildvcs=false', *tag_arguments, './...'])
+        self.step(f'vet:{name}', [self.tool('go'), 'vet', *tag_arguments, './...'])
+        extra = self.suite_fixtures()
+        if name != 'unit':
+            self.database(f'tpl_{name}')
+            self.prepared_template(name, tags, extra)
+        serial_packages = {gate_pool.normalize_package(package) for package in self.parallel['serial']}
+        shard_counts = {gate_pool.normalize_package(package): count for package, count in self.parallel['shards'].items()
+                        if gate_pool.normalize_package(package) not in serial_packages}
+        units = gate_pool.build_units(self.parallel_packages(tags), shard_counts, self.test_lister(name, tags))
+        counts = self.test_counts_by_package()
+        for unit in units:
+            unit['test_count'] = len(unit['tests'] or ()) or counts.get(gate_pool.normalize_package(unit['package']), 0)
+        (self.work / 'runs' / f'suite_{name}').mkdir()
+        skip = self.suite_skip_pattern()
+        pooled = [unit for unit in units if gate_pool.normalize_package(unit['package']) not in serial_packages]
+        sequential = [unit for unit in units if gate_pool.normalize_package(unit['package']) in serial_packages]
+        gate_pool.run_pool(self.ordered_units(name, pooled), self.jobs,
+                           lambda unit: self.run_unit(name, tags, unit, extra, skip))
+        for unit in sequential:
+            self.run_unit(name, tags, unit, extra, skip)
+
+    def prepared_template(self, name, tags, extra):
+        """The plain template's clone after the publication provision step, which prepared-variable units clone from."""
+        prepared = f'tpl_{name}_pub'
+        gate_pool.clone_database(self.tool('createdb'), self.port, f'tpl_{name}', prepared, self.environment)
+        variables = {variable: self.dsn(prepared) for variable in self.census['dsn']}
+        packages = ['./internal/integration/publication'] + ['./internal/adapters/river'] * ('river' in tags.split())
+        self.go_test(f'provision:{name}:publication', tags, packages, {**extra, **variables, 'GXB_I7A9_PREPARE_PROCESS': '1'},
+                     run='^(TestPreparePublicationProcess|TestPreparePublicationRiver)$')
+
+    def parallel_packages(self, tags):
+        if self.packages:
+            return list(self.packages)
+        completed = subprocess.run([self.tool('go'), 'list', '-tags', tags, '-f', '{{.ImportPath}}', './...'],
+                                   cwd=self.source, env=self.environment, capture_output=True, text=True, stdin=subprocess.DEVNULL)
+        require(completed.returncode == 0, f'go list failed: {(completed.stdout + completed.stderr).strip()[-2000:]}')
+        prefix = self.module + '/'
+        return ['./' + line.removeprefix(prefix) for line in completed.stdout.split() if line.startswith(prefix)]
+
+    def test_lister(self, name, tags):
+        def list_tests(package):
+            try:
+                return gate_pool.test_names(self.tool('go'), self.environment, self.source, tags, package)
+            except gate_pool.PoolError as failure:
+                self.red.append(f'suite:{name}: {failure}')
+                return None
+        return list_tests
+
+    def test_counts_by_package(self):
+        counts = collections.Counter()
+        for locations in self.test_functions.values():
+            for location in locations:
+                counts[location.rsplit('.', 1)[0]] += 1
+        return counts
+
+    def ordered_units(self, name, units):
+        durations = self.previous_durations()
+        return sorted(units, key=lambda unit: (-durations.get(f'unit:{name}:{unit["unit"]}', 0), -unit['test_count']))
+
+    def previous_durations(self):
+        if self.previous is None:
+            return {}
+        require(self.previous.is_file(), f'previous report {self.previous} missing')
+        document = json.loads(self.previous.read_text())
+        return {row['name']: row.get('seconds', 0) for row in document.get('steps', [])}
+
+    def unit_environment(self, name, unit, extra):
+        environment = {**self.environment, **extra}
+        if name == 'unit':
+            return environment
+        variables = self.dsn_by_package.get(gate_pool.normalize_package(unit['package']), frozenset())
+        for variable in sorted(variables):
+            template = f'tpl_{name}_pub' if variable in PREPARED_VARIABLES else f'tpl_{name}'
+            database = gate_pool.database_name(name, unit['unit'], variable)
+            gate_pool.clone_database(self.tool('createdb'), self.port, template, database, self.environment)
+            environment[variable] = self.dsn(database)
+        return environment
+
+    def run_unit(self, name, tags, unit, extra, skip):
+        label = f'suite:{name}'
+        stream = self.work / 'runs' / f'suite_{name}' / f'{unit["unit"]}.jsonl'
+        began = time.perf_counter()
+        try:
+            environment = self.unit_environment(name, unit, extra)
+            arguments = gate_pool.go_test_command(self.tool('go'), tags, [unit['package']], run=unit['run'], skip=skip)
+            with stream.open('w') as output:
+                code = subprocess.run(arguments, cwd=self.source, env=environment, stdout=output,
+                                      stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
+            outcomes, failed_packages = gate_pool.parse_go_test_json(stream, self.module)
+        except (gate_pool.PoolError, OSError) as failure:
+            with self.unit_lock:
+                self.red.append(f'{label}: unit {unit["unit"]}: {failure}')
+            return
+        failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
+        self.merge_unit_outcomes(label, unit['unit'], outcomes, failed_packages - failing_packages)
+        row = dict(name=f'unit:{name}:{unit["unit"]}', exit=code, stream=str(stream.relative_to(self.work)),
+                   tests=len(outcomes), seconds=round(time.perf_counter() - began, 3))
+        with self.unit_lock:
+            self.steps.append(row)
+        print(f'{row["name"]} {code} {dict(collections.Counter(outcomes.values()))}', flush=True)
+
+    def merge_unit_outcomes(self, label, unit_name, outcomes, broken_packages):
+        with self.unit_lock:
+            merged = self.runs.setdefault(label, {})
+            for test, outcome in outcomes.items():
+                if test in merged:
+                    self.red.append(f'{test}: seen in two units of {label} ({unit_name})')
+                    continue
+                merged[test] = outcome
+            for package in sorted(broken_packages):
+                if package not in self.package_failures[label]:
+                    self.package_failures[label].append(package)
 
     def recipe_test(self, recipe, step, package, pattern, extra, cwd=None):
         outcomes = self.go_test(f'recipe:{recipe}:{step}', FULL_TAGS, [package], extra, run=pattern, cwd=cwd)
@@ -498,12 +639,14 @@ class Gate:
 
     def latency(self):
         """Absolute pooled p95 decides; host conditions are recorded beside it to explain a failure, never to rescale it."""
+        began = time.perf_counter()
         before = host_conditions()
         try:
             self.go_test('reference-host:latency', '', ['./internal/adapters/combatworker'],
                          {'GXB_I8_LATENCY_GATE': '1', 'GXB_I8_LATENCY_REPETITIONS': str(LATENCY_REPETITIONS)}, run='^TestResolverLatencyGate$')
         finally:
-            self.steps.append(dict(name='reference-host:latency-conditions', before=before, after=host_conditions()))
+            self.steps.append(dict(name='reference-host:latency-conditions', before=before, after=host_conditions(),
+                                   seconds=round(time.perf_counter() - began, 3)))
 
     def recipes(self):
         return [(name.removeprefix('recipe_').replace('_', '-'), getattr(self, name)) for name in dir(self) if name.startswith('recipe_')
@@ -516,7 +659,7 @@ class Gate:
             action(*arguments)
         except BlockedByKnownDebt as blocked:
             self.blocked[unit] = str(blocked)
-        except (GateFailure, subprocess.CalledProcessError) as failure:
+        except (GateFailure, subprocess.CalledProcessError, gate_pool.PoolError) as failure:
             self.red.append(f'{unit}: {failure}')
 
     def run(self):
@@ -529,6 +672,7 @@ class Gate:
                                  'GXB_I9_10B_LEGACY_MIGRATIONS', 'GXB_I7B4A_RESTORED', 'GXB_I7B4B_RESTORED', 'GXB_I7B2A_RESTORED', 'GXB_I7B5B_RESTORED', 'GXB_I7B4B_FINAL', 'GXB_I8_4_EXPECT_LEGACY', 'GXB_I7A9_PREPARE_PROCESS',
                                  'GXB_I8_LATENCY_GATE', 'GXB_I8_LATENCY_REPETITIONS'}
         self.census_of_test_variables()
+        self.dsn_by_package = gate_pool.dsn_variables_by_package(self.source)
         self.red += [f'census: test variable {variable} is neither provisioned, recipe-owned nor set by a parent test'
                      for variable in self.census.get('unclassified', [])]
         self.build_binaries()
@@ -541,7 +685,10 @@ class Gate:
             for name, tags in BUILD_ONLY_TAG_SETS.items():
                 self.guarded(f'build:{name}', self.step, f'build:{name}', [self.tool('go'), 'build', '-buildvcs=false', '-tags', tags, './...'])
             for name, tags in TAG_SETS.items():
-                self.guarded(f'suite:{name}', self.suite, name, tags)
+                if self.mode == 'parallel':
+                    self.guarded(f'suite:{name}', self.suite_parallel, name, tags)
+                else:
+                    self.guarded(f'suite:{name}', self.suite, name, tags)
             for name, recipe in self.recipes():
                 self.guarded(f'recipe:{name}', recipe, name)
         finally:
@@ -606,10 +753,11 @@ class Gate:
 
     def report(self, started):
         tests = self.classify()
-        partial = self.select is not None
+        partial = self.select is not None or self.packages is not None
         verdict = ('PARTIAL_' if partial else '') + ('RED' if self.red else 'GREEN')
         report = dict(contract='I85_STRICT_GATE_V1', verdict=verdict, commit=self.commit, toolchain=str(self.toolchain), started=started,
-                      finished=datetime.datetime.now(datetime.timezone.utc).isoformat(), selection=self.select.pattern if partial else None,
+                      finished=datetime.datetime.now(datetime.timezone.utc).isoformat(), mode=self.mode, jobs=self.jobs,
+                      lists=self.list_hashes, selection=self.select.pattern if self.select else None,
                       census=self.census, red=self.red, blocked_by_known_debt=self.blocked, steps=self.steps,
                       counts=dict(collections.Counter(row['status'] for row in tests.values())),
                       known_debt=dict(entries=len(self.known_debt), failing=sum(row['status'] == 'KNOWN_DEBT_FAILING' for row in tests.values())),
@@ -626,7 +774,13 @@ def main():
     parser.add_argument('--commit', default='HEAD')
     parser.add_argument('--port', default='55561')
     parser.add_argument('--select')
+    parser.add_argument('--mode', choices=('serial', 'parallel'), default='serial')
+    parser.add_argument('--jobs', type=int, default=4)
+    parser.add_argument('--package', action='append')
+    parser.add_argument('--previous')
     arguments = parser.parse_args()
+    if arguments.jobs < 1:
+        parser.error('--jobs must be positive')
     # SystemExit unwinds through run()'s finally, so a stopped gate still stops its cluster.
     signal.signal(signal.SIGTERM, lambda number, frame: sys.exit(128 + number))
     started = datetime.datetime.now(datetime.timezone.utc).isoformat()
