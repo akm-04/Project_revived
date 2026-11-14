@@ -169,8 +169,9 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+	poolConnections := envPositiveInt("GXB_API_DB_POOL_MAX_CONNS", 16)
 	pool, err := postgres.Open(ctx, string(cfg.PostgresDSN), postgres.PoolSettings{
-		MaxConns: int32(envPositiveInt("GXB_API_DB_POOL_MAX_CONNS", 16)), MinConns: 1, MaxConnLifetime: 30 * time.Minute,
+		MaxConns: int32(poolConnections), MinConns: 1, MaxConnLifetime: 30 * time.Minute,
 		MaxConnIdleTime: 5 * time.Minute, HealthCheckPeriod: 30 * time.Second,
 		ApplicationName: "gxb-v2-i6b-api",
 	})
@@ -180,6 +181,9 @@ func main() {
 	defer pool.Close()
 	if err := pool.Ping(ctx); err != nil {
 		log.Fatal(err)
+	}
+	if short, err := postgres.SerializableLockShortfall(ctx, pool); err != nil || len(short) > 0 {
+		log.Printf("WARNING: PostgreSQL SSI lock budget below C1 Tier 0, expect 40001 between unrelated players under load: %v %v", short, err)
 	}
 
 	var txMetrics observability.Metrics = observability.NopMetrics{}
@@ -199,7 +203,8 @@ func main() {
 			}
 		}()
 	}
-	runner := tx.Runner{DB: pool, Admission: tx.NewSemaphore(64), Hooks: observability.TxHooks{Metrics: txMetrics}}
+	// Admission equals the pool, so an admitted transaction never waits inside pgx where no deadline or order applies (C1-1).
+	runner := tx.Runner{DB: pool, Admission: tx.NewSemaphore(poolConnections), Hooks: observability.TxHooks{Metrics: txMetrics}}
 	broadcastEmitter := postgres.BroadcastEmitter{}
 	// Deployment must apply migrations first. Gate all HTTP traffic on content readiness.
 	contentCtx, contentCancel := context.WithTimeout(ctx, 3*registry.DefaultWriteProfile().OperationTimeout)
@@ -815,6 +820,7 @@ func main() {
 	h := httpedge.Handler{
 		Limits: limits.Default(), Admission: admission,
 		Operations: operation.Factory{Clock: clock.System{}}, Router: router, Journal: journal,
+		QueueBudget: time.Duration(envPositiveInt("GXB_HTTP_QUEUE_BUDGET_SECONDS", int(httpedge.DefaultQueueBudget/time.Second))) * time.Second,
 	}
 	mux.Handle("/", h)
 	if mediaHandler != nil {

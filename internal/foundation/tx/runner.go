@@ -84,7 +84,7 @@ const (
 
 func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, profile Profile, opts Options, retry RetryPolicy, resolver UnknownCommitResolver, body Body) (Result, nextAction, error) {
 	started := time.Now()
-	acquireCtx, acqCancel := context.WithTimeout(ctx, profile.AcquireTimeout)
+	acquireCtx, acqCancel := context.WithTimeout(ctx, admissionWait(ctx, profile))
 	release, err := r.Admission.Acquire(acquireCtx)
 	if err != nil {
 		acqCancel()
@@ -109,6 +109,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 	txCtx, txCancel := withMaxTimeout(ctx, profile.TransactionTimeout)
 	defer txCancel()
 	txCtx, staged := changes.Stage(txCtx)
+	txCtx = context.WithValue(txCtx, holdsConnectionKey{}, true)
 	if err = applyTimeouts(txCtx, dbtx, profile); err != nil {
 		_ = finalizer.rollback()
 		outcome := DefiniteAbort

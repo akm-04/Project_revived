@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
+	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	"gxb.local/backend/v2/internal/protocol/observe"
@@ -85,7 +86,14 @@ type Handler struct {
 	Observer   observe.Sink
 	// Journal, when set, receives one record per request (I85_REQUEST_JOURNAL_V1).
 	Journal observability.RequestJournal
+	// QueueBudget bounds how long a request may queue for a database connection (C1-1); zero means
+	// DefaultQueueBudget.
+	QueueBudget time.Duration
 }
+
+// DefaultQueueBudget is the stock client's 20 s HTTP timeout (Backend.lua:645-647) less a 2 s margin for the
+// reply: a request still queued after it is answered to nobody (C1_PRIVATE_CLIENT_BUDGET_V1, tunable).
+const DefaultQueueBudget = 18 * time.Second
 
 // rawCaptureBytes bounds the request prefix kept for unknown or undecodable
 // requests (I85_REQUEST_JOURNAL_V1 R3).
@@ -182,7 +190,11 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 		CatalogRevision: mids.CatalogRevision(),
 		RemoteLabel:     remoteLabel(r.RemoteAddr),
 	}
-	resp := dispatcher.Dispatch(r.Context(), DispatchRequest{Envelope: env, Upload: decoded.Upload})
+	budget := h.QueueBudget
+	if budget <= 0 {
+		budget = DefaultQueueBudget
+	}
+	resp := dispatcher.Dispatch(tx.WithAdmissionDeadline(r.Context(), op.StartedAt.Add(budget)), DispatchRequest{Envelope: env, Upload: decoded.Upload})
 	record.ErrorCode = stockErrorCode(resp.Body)
 	status := resp.HTTPStatus
 	if status == 0 {
