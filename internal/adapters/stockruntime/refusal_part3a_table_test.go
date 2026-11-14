@@ -134,7 +134,7 @@ func TestPart3ASocialFailureRows(t *testing.T) {
 		{"gift invalid", giftFailure(socialgift.ErrInvalid), http.StatusBadRequest, 0, "invalid_social_request"},
 		{"gift dependency", giftFailure(errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
-	assertPart2FailureCases(t, []part2FailureCase{{"gift nil dependency", giftFailure(nil), http.StatusServiceUnavailable, serverBusyCode, ""}})
+	assertPart2FailureCases(t, []part2FailureCase{{"gift nil dependency", giftFailure(nil), http.StatusInternalServerError, unprovenRefusalCode, ""}})
 }
 
 func TestPart3AI5FailureRows(t *testing.T) {

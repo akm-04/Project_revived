@@ -27,7 +27,7 @@ func (d EvolutionDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		return *fail
 	}
 	if d.Service == nil {
-		return failEvolution(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	c := app.Command{}

@@ -26,7 +26,7 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return *fail
 	}
 	if d.Service == nil {
-		return failBook(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	mid := req.Envelope.MID

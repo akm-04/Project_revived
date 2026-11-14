@@ -59,7 +59,7 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		return *fail
 	}
 	if o.Service == nil {
-		return failOneOnOne(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	switch req.Envelope.MID {

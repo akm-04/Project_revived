@@ -53,7 +53,7 @@ func (o IllusionRoomDispatcher) Dispatch(ctx context.Context, req httpedge.Dispa
 		return *fail
 	}
 	if o.Service == nil {
-		return failIllusion(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("illusion_invalid_parameter")

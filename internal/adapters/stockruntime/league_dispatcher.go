@@ -50,7 +50,7 @@ func (o LeagueDispatcher) Dispatch(c context.Context, req httpedge.DispatchReque
 		return *fail
 	}
 	if o.Service == nil {
-		return failLeague(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, mid := req.Envelope.Params, req.Envelope.MID
 	cmd := app.Command{}

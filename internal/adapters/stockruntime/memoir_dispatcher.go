@@ -45,7 +45,7 @@ func (dispatcher MemoirDispatcher) Dispatch(ctx context.Context, request httpedg
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return memoirFailure(domain.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	parameters, operationContext := request.Envelope.Params, request.Envelope.Operation
 	invalid := failureReply(malformed("memoir_invalid_parameter"))

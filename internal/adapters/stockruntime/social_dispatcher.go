@@ -158,7 +158,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	m := req.Envelope.Params
 	if mid == 176 || mid == 188 || mid == 189 || mid == 190 {
 		if d.Projection == nil {
-			return socialFailure(sp.ErrInvalidRead)
+			return failureReply(defect(nil))
 		}
 		var v sp.Result
 		var body any
@@ -280,7 +280,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 			return httpedge.Response{HTTPStatus: 200, Body: body}
 		}
 		if d.Dismissal == nil {
-			return socialFailure(socialinbox.ErrInvalidNotice)
+			return failureReply(defect(nil))
 		}
 		out, e := d.Dismissal.Dismiss(ctx, a, ids, op)
 		if e != nil {
@@ -292,7 +292,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{"ids": out}}
 	}
 	if d.Relations == nil {
-		return socialFailure(sr.ErrInvalidCommand)
+		return failureReply(defect(nil))
 	}
 	command := sr.Command{}
 	batch := false
@@ -380,7 +380,7 @@ var socialGiftFailureRows = []failureRow{
 
 func giftFailure(err error) httpedge.Response {
 	if err == nil {
-		return failureReply(unavailable(errors.New("social gift dependency unavailable")))
+		return failureReply(defect(nil))
 	}
 	return failureFromRows(socialGiftFailureRows, err)
 }

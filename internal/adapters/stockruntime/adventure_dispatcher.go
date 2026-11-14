@@ -61,7 +61,7 @@ func (o AdventureDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		return *fail
 	}
 	if o.Service == nil {
-		return failAdventure(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params, op := req.Envelope.Params, req.Envelope.Operation
 	switch req.Envelope.MID {

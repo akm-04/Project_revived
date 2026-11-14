@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
@@ -18,7 +17,7 @@ func (d PracticeDispatcher) dispatchPracticeAuto(ctx context.Context, req httped
 		return failureReply(malformed("invalid_practice_request"))
 	}
 	if d.Service == nil {
-		return failureReply(unavailable(errors.New("character practice unavailable")))
+		return failureReply(defect(nil))
 	}
 	locks := apppractice.PracticeLocks{wire.Locks[0] == 1, wire.Locks[1] == 1, wire.Locks[2] == 1}
 	save := apppractice.AutoSavePredicates{wire.SaveTypes[0] == 1, wire.SaveTypes[1] == 1, wire.SaveTypes[2] == 1, wire.SaveTypes[3] == 1}

@@ -33,7 +33,7 @@ func (o ChargeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if o.Service == nil {
-		return failCharge(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("charge_invalid_parameter")

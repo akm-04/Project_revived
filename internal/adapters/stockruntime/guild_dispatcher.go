@@ -65,7 +65,7 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		return okGuild(map[string]any{})
 	}
 	if d.View == nil {
-		return failureReply(unavailable(errors.New("guild view unavailable")))
+		return failureReply(defect(nil))
 	}
 
 	switch req.Envelope.MID {

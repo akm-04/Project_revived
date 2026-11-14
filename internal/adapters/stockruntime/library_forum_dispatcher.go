@@ -28,7 +28,7 @@ func (d LibraryForumDispatcher) Dispatch(ctx context.Context, req httpedge.Dispa
 		return *fail
 	}
 	if d.Service == nil {
-		return failForum(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params := req.Envelope.Params
 	switch req.Envelope.MID {

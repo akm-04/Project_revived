@@ -34,7 +34,7 @@ func (d GuildTeaDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 		return *fail
 	}
 	if d.Service == nil {
-		return teaFailure(guildtea.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	var state guildtea.State

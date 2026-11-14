@@ -4,7 +4,6 @@ import (
 	"context"
 	app "gxb.local/backend/v2/internal/application/achievement"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
-	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -29,7 +28,7 @@ func (o AchievementDispatcher) Dispatch(c context.Context, req httpedge.Dispatch
 		return *fail
 	}
 	if o.Service == nil {
-		return failAchievement(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	if !onlyStockGameplayParams(req.Envelope.Params) {
 		return badHero("invalid_achievement_parameter")

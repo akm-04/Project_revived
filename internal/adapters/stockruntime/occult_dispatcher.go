@@ -62,7 +62,7 @@ func (o OccultDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if o.Service == nil {
-		return failOccult(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	bad := badHero("occult_invalid_parameter")
 	params, op := req.Envelope.Params, req.Envelope.Operation

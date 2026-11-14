@@ -45,7 +45,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		return *fail
 	}
 	if o.Service == nil {
-		return failArena(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("invalid_arena_parameter")

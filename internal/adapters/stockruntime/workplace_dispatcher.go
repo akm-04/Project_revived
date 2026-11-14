@@ -33,7 +33,7 @@ func (m WorkplaceDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 		return *fail
 	}
 	if m.Service == nil {
-		return workplaceFailure(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	bad := badHero("workplace_invalid_parameter")

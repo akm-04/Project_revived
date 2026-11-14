@@ -36,7 +36,7 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		return *fail
 	}
 	if d.Service == nil {
-		return rentalFailure(guildrental.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	switch r.Envelope.MID {

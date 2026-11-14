@@ -55,7 +55,7 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		return *fail
 	}
 	if d.Service == nil {
-		return failureReply(unavailable(errors.New("pet unavailable")))
+		return failureReply(defect(nil))
 	}
 	switch req.Envelope.MID {
 	case 780:
@@ -104,7 +104,7 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 			return petFail(err)
 		}
 		if d.Economy == nil {
-			return failureReply(unavailable(errors.New("pet projection unavailable")))
+			return failureReply(defect(nil))
 		}
 		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
 		if err != nil {

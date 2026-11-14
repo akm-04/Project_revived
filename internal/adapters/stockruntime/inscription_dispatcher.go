@@ -27,7 +27,7 @@ func (d InscriptionDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 		return *fail
 	}
 	if d.Service == nil {
-		return failInscription(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	c := app.Command{}

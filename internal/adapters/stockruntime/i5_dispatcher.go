@@ -69,14 +69,14 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return *fail
 	}
 	if d.Service == nil {
-		return failureReply(unavailable(errors.New("i5 unavailable")))
+		return failureReply(defect(nil))
 	}
 	switch req.Envelope.MID {
 	case 163, 164, 165, 166, 167, 168, 171, 2561, 2737, 2738:
 		return d.dispatchAwakening(ctx, actor, req)
 	case 352, 353:
 		if d.SignIn == nil {
-			return failI5(errors.New("sign-in unavailable"))
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params) {
 			return badI5("invalid_sign_in")
@@ -195,7 +195,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return okI5(body)
 	case 169, 170:
 		if d.Missions == nil {
-			return failI5(errors.New("mission runtime unavailable"))
+			return failureReply(defect(nil))
 		}
 		index, err := requiredInt64(req.Envelope.Params, "index")
 		if err != nil {
@@ -212,7 +212,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return okI5(body)
 	case 160:
 		if d.Missions == nil {
-			return failI5(errors.New("mission runtime unavailable"))
+			return failureReply(defect(nil))
 		}
 		body, err := d.Missions.ReadMissions(ctx, actor, 0, req.Envelope.Operation)
 		if err != nil {
@@ -460,7 +460,7 @@ func storyGuideID(params map[string]any) (int64, error) {
 
 func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.ActorContext, req httpedge.DispatchRequest) httpedge.Response {
 	if d.Awakening == nil {
-		return failI5(errors.New("awakening unavailable"))
+		return failureReply(defect(nil))
 	}
 	mid, p := req.Envelope.MID, req.Envelope.Params
 	if mid == 2561 {

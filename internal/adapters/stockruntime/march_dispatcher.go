@@ -38,7 +38,7 @@ func (m MarchDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest)
 		return *fail
 	}
 	if m.Service == nil {
-		return marchFailure(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	bad := badHero("march_invalid_parameter")

@@ -37,7 +37,7 @@ func (m GodsTrialDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	}
 	bad := badHero("gods_trial_invalid_parameter")
 	if m.Service == nil {
-		return failureReply(unavailable(errors.New("gods trial unavailable")))
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	var out map[string]any
@@ -116,6 +116,7 @@ var godsTrialFailureRows = []failureRow{
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: pet.ErrPetNotFound, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	// The owner's ErrUnavailable names a permanent content gap, not a fault (item 5).
 	{match: d.ErrUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 }
 

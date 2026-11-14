@@ -44,7 +44,7 @@ func (o CampaignDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		return *fail
 	}
 	if o.Service == nil {
-		return failCampaign(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("campaign_invalid_parameter")

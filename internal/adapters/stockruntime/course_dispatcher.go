@@ -26,7 +26,7 @@ func (d CourseDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if d.Service == nil {
-		return failCourse(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	mid := req.Envelope.MID

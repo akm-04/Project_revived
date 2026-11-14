@@ -88,7 +88,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		return *fail
 	}
 	if t.Service == nil {
-		return failTopFloor(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	switch req.Envelope.MID {

@@ -29,7 +29,7 @@ func (d LibraryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		return *fail
 	}
 	if d.Service == nil {
-		return failLibrary(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	c := app.Command{}
 	params := req.Envelope.Params

@@ -40,7 +40,7 @@ func (o WorldBossDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		return *fail
 	}
 	if o.Service == nil {
-		return failWorldBoss(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("world_boss_invalid_parameter")

@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/petcampaign"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -39,7 +38,7 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 	}
 	bad := badHero("pet_campaign_invalid_parameter")
 	if m.Service == nil {
-		return failureReply(unavailable(errors.New("pet campaign unavailable")))
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	var out map[string]any
@@ -139,7 +138,8 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 }
 
 // No rows exist in the mapper table; D5 supplies the classes. A receipt
-// conflict is a stale-state 40002; a transient/unavailable error is a 503.
+// conflict is a stale-state 40002. The owner's ErrUnavailable names a permanent
+// content gap, so its row refuses with 409 + 35028 (R4 amendment item 5).
 var petCampaignFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "pet_campaign_invalid_parameter"},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},

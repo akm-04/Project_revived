@@ -31,7 +31,7 @@ func (s SpiritDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if s.Service == nil {
-		return failSpirit(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	c := app.Command{}

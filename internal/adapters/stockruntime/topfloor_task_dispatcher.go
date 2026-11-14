@@ -54,7 +54,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return failTopFloor(domain.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	parameters, op := request.Envelope.Params, request.Envelope.Operation
 	bad := badHero("invalid_top_floor_task_parameter")

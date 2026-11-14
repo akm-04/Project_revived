@@ -40,7 +40,7 @@ func (o ConquerDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		return *fail
 	}
 	if o.Service == nil {
-		return failConquer(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("invalid_conquer_parameter")

@@ -27,6 +27,6 @@ func TestPart3BPracticeAutoFailureReplies(t *testing.T) {
 	}
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"invalid request", dispatcher.dispatchPracticeAuto(context.Background(), httpedge.DispatchRequest{Envelope: part3bEnvelope(127, map[string]any{"partner_id": int64(0)}, now)}, actor), http.StatusBadRequest, 0, "invalid_practice_request"},
-		{"unavailable", dispatcher.dispatchPracticeAuto(context.Background(), httpedge.DispatchRequest{Envelope: part3bEnvelope(127, valid, now)}, actor), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"missing service", dispatcher.dispatchPracticeAuto(context.Background(), httpedge.DispatchRequest{Envelope: part3bEnvelope(127, valid, now)}, actor), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

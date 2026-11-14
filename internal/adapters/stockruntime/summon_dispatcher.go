@@ -34,7 +34,7 @@ func (o SummonDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if o.Service == nil {
-		return failSummon(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("summon_invalid_parameter")

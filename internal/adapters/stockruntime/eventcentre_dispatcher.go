@@ -31,7 +31,7 @@ func (d EventCentreDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 		return *fail
 	}
 	if d.Service == nil {
-		return failureReply(unavailable(app.ErrUnavailable))
+		return failureReply(defect(nil))
 	}
 	params := req.Envelope.Params
 	mid := req.Envelope.MID

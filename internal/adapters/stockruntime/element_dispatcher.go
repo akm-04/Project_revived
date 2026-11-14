@@ -27,7 +27,7 @@ func (d ElementDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		return *fail
 	}
 	if d.Service == nil {
-		return failElement(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	c := app.Command{}
