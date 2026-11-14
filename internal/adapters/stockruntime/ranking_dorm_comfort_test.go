@@ -6,19 +6,20 @@ import (
 	"testing"
 	"time"
 
+	appranking "gxb.local/backend/v2/internal/application/ranking"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/ranking"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
-type comfortBoardFixture struct{ snapshot d.BoardSnapshot }
+type comfortBoardFixture struct{ read appranking.BoardRead }
 
-func (f comfortBoardFixture) ReadBoard(_ context.Context, board d.Board, _ identity.ActorContext, _ operation.Context) (d.BoardSnapshot, error) {
+func (f comfortBoardFixture) ReadBoard(_ context.Context, board d.Board, _ identity.ActorContext, _ operation.Context) (appranking.BoardRead, error) {
 	if board.Policy != d.DormComfortPolicy {
-		return d.BoardSnapshot{}, d.ErrSnapshot
+		return appranking.BoardRead{}, d.ErrSnapshot
 	}
-	return f.snapshot, nil
+	return f.read, nil
 }
 
 func TestRankingMID301Subtype34ServesDormComfortShape(t *testing.T) {
@@ -43,7 +44,7 @@ func TestRankingMID301Subtype34ServesDormComfortShape(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: comfortBoardFixture{snapshot: snapshot}}
+	dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: comfortBoardFixture{read: boardReadFromSnapshot(snapshot, 100001)}}
 	request := env(301, nil, time.Now().UTC())
 	request.Envelope.Params["rank_types"] = []any{int64(34)}
 	response := dispatcher.Dispatch(context.Background(), request)

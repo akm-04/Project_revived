@@ -54,8 +54,17 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	}
 	bearer := displayToken(t, p, a)
 	original := op()
-	first, e := rankingService(p, p).ReadBoard(ctx, d.GirlsBoard, a, original)
+	initial := rankingService(p, p)
+	first, e := initial.RefreshBoard(ctx, d.GirlsBoard, a, original)
 	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = initial.SettlePendingBoard(ctx, d.GirlsBoard, server, original); e != nil {
+		t.Fatal(e)
+	}
+	// The scored read refreshes only its viewer; warm the other ranker's row so
+	// the shared page still has both players.
+	if _, e = initial.ReadBoard(ctx, d.GirlsBoard, b, op()); e != nil {
 		t.Fatal(e)
 	}
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
@@ -231,7 +240,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if after := fingerprint(restored); after != before {
 		t.Fatal("relocated durable state changed", before, after)
 	}
-	recovered, e := rankingService(restored, restored).ReadBoard(ctx, d.GirlsBoard, a, original)
+	recovered, e := rankingService(restored, restored).RefreshBoard(ctx, d.GirlsBoard, a, original)
 	if e != nil || !reflect.DeepEqual(first, recovered) {
 		t.Fatal("restored immutable snapshot/Kernel receipt", e)
 	}

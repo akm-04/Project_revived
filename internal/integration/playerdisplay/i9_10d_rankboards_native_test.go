@@ -11,7 +11,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/petcampaign"
 	rankingdomain "gxb.local/backend/v2/internal/domain/ranking"
-	projection "gxb.local/backend/v2/internal/projection/ranking"
 )
 
 func TestI9_10DStarAndAwakenBoardsAreServerScoped(t *testing.T) {
@@ -28,36 +27,39 @@ func TestI9_10DStarAndAwakenBoardsAreServerScoped(t *testing.T) {
 	exec(t, p, `UPDATE player_heroes SET star=4 WHERE player_id=$1 AND partner_id=1`, int64(b.PlayerID))
 	s := rankingService(p, p)
 
+	if _, e := s.ReadBoard(ctx, rankingdomain.StarCountBoard, b, op()); e != nil {
+		t.Fatal(e)
+	}
 	stars, e := s.ReadBoard(ctx, rankingdomain.StarCountBoard, a, op())
 	if e != nil {
 		t.Fatal(e)
 	}
-	if len(stars.Entries) != 2 || !reflect.DeepEqual([]identity.PlayerID{stars.Entries[0].Metric.Player, stars.Entries[1].Metric.Player}, []identity.PlayerID{a.PlayerID, b.PlayerID}) || stars.Entries[0].Metric.Value != 6 || stars.Entries[1].Metric.Value != 4 {
-		t.Fatal(stars.Entries)
+	if len(stars.Rows) != 2 || !reflect.DeepEqual([]identity.PlayerID{stars.Rows[0].Player, stars.Rows[1].Player}, []identity.PlayerID{a.PlayerID, b.PlayerID}) || stars.Rows[0].Score != 6 || stars.Rows[1].Score != 4 {
+		t.Fatal(stars.Rows)
 	}
-	starWire, e := projection.BoardList(stars, a.PlayerID)
-	if e != nil {
-		t.Fatal(e)
-	}
+	starWire := boardWire(t, stars)
 	starInfo := starWire["rank_list"].([]map[string]any)[0]["rank_info"].(map[string]any)
 	starMine := starInfo["my_rank"].(map[string]any)
 	if starMine["rank"] != int64(1) || starMine["score"] != int64(6) {
 		t.Fatal(starMine)
 	}
 
+	if _, e := s.ReadBoard(ctx, rankingdomain.AwakenCountBoard, b, op()); e != nil {
+		t.Fatal(e)
+	}
 	awakened, e := s.ReadBoard(ctx, rankingdomain.AwakenCountBoard, a, op())
 	if e != nil {
 		t.Fatal(e)
 	}
-	if len(awakened.Entries) != 2 || awakened.Entries[0].Metric.Player != a.PlayerID || awakened.Entries[0].Metric.Value != 1 || awakened.Entries[1].Metric.Player != b.PlayerID || awakened.Entries[1].Metric.Value != 0 {
-		t.Fatal(awakened.Entries)
+	if len(awakened.Rows) != 2 || awakened.Rows[0].Player != a.PlayerID || awakened.Rows[0].Score != 1 || awakened.Rows[1].Player != b.PlayerID || awakened.Rows[1].Score != 0 {
+		t.Fatal(awakened.Rows)
 	}
 
 	otherStars, e := s.ReadBoard(ctx, rankingdomain.StarCountBoard, c, op())
 	if e != nil {
 		t.Fatal(e)
 	}
-	if len(otherStars.Entries) != 1 || otherStars.Entries[0].Metric.Player != c.PlayerID || otherStars.Entries[0].Metric.Value != 0 || otherStars.Server != other {
+	if len(otherStars.Rows) != 1 || otherStars.Rows[0].Player != c.PlayerID || otherStars.Rows[0].Score != 0 || otherStars.Server != other {
 		t.Fatal(otherStars)
 	}
 }

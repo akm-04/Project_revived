@@ -207,8 +207,12 @@ func TestI7C4FCSkinsBoardRanksAndTitlesSevenDays(t *testing.T) {
 	skillHero(t, p, a, rev, 10001001, 1)
 	s := rankingService(p, p)
 	s.Metrics = countingMetrics(p, nil)
-	board, e := s.ReadBoard(ctx, ranking.SkinsBoard, a, op())
+	opContext := op()
+	board, e := s.RefreshBoard(ctx, ranking.SkinsBoard, a, opContext)
 	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = s.SettlePendingBoard(ctx, ranking.SkinsBoard, a.LogicalServerID, opContext); e != nil {
 		t.Fatal(e)
 	}
 	if len(board.Entries) != 2 || board.Entries[0].Metric.Player != b.PlayerID || board.Entries[0].Metric.Value != 2 || board.Entries[0].Metric.FieldID != 1003 || board.Entries[1].Metric.Value != 0 {

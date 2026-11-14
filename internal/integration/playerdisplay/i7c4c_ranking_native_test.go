@@ -25,8 +25,23 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	d "gxb.local/backend/v2/internal/domain/ranking"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+// refreshRanking keeps the weekly snapshot and settlement assertions on the
+// retained snapshot path; the scored read itself no longer publishes one.
+func refreshRanking(t *testing.T, s app.Service, b d.Board, a identity.ActorContext, o operation.Context) d.BoardSnapshot {
+	t.Helper()
+	snapshot, e := s.RefreshBoard(ctx, b, a, o)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = s.SettlePendingBoard(ctx, b, a.LogicalServerID, o); e != nil {
+		t.Fatal(e)
+	}
+	return snapshot
+}
 
 // Identity/resources below are explicit native fixtures. Counts are then read
 // through the real canonical I4 and Character ports; no fake score provider is
@@ -126,10 +141,7 @@ func TestI7C4CRankingGenuineCoherentCohortFirstWeeklyWinnersAndReplay(t *testing
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
 	o := op()
-	first, e := s.ReadBoard(ctx, d.GirlsBoard, a, o)
-	if e != nil {
-		t.Fatal(e)
-	}
+	first := refreshRanking(t, s, d.GirlsBoard, a, o)
 	if len(first.Entries) != 2 || first.Entries[0].Metric.Player != a.PlayerID || first.Entries[0].Metric.Value != 1 || first.Entries[1].Metric.Value != 0 {
 		t.Fatal(first)
 	}
@@ -140,14 +152,14 @@ func TestI7C4CRankingGenuineCoherentCohortFirstWeeklyWinnersAndReplay(t *testing
 	// the first immutable weekly generation remains the title settlement basis.
 	rankingSummon(t, p, b, rev, 10001001)
 	rankingSummon(t, p, b, rev, 10001002)
-	later, e := s.ReadBoard(ctx, d.GirlsBoard, b, op())
+	later, e := s.RefreshBoard(ctx, d.GirlsBoard, b, op())
 	if e != nil || later.Generation != first.Generation+1 || later.Entries[0].Metric.Player != b.PlayerID || later.Entries[0].Metric.Value != 2 {
 		t.Fatal(later, e)
 	}
 	if rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal("weekly winners refreshed")
 	}
-	replay, e := s.ReadBoard(ctx, d.GirlsBoard, a, o)
+	replay, e := s.RefreshBoard(ctx, d.GirlsBoard, a, o)
 	if e != nil || !reflect.DeepEqual(first, replay) {
 		t.Fatal("historic snapshot receipt changed", e)
 	}
@@ -197,7 +209,7 @@ func TestI7C4CRankingConcurrentRefreshAndSettlementConverge(t *testing.T) {
 	errs := make(chan error, 4)
 	for i := 0; i < 4; i++ {
 		wg.Add(1)
-		go func() { defer wg.Done(); _, e := s.ReadBoard(ctx, d.GirlsBoard, a, op()); errs <- e }()
+		go func() { defer wg.Done(); _, e := s.RefreshBoard(ctx, d.GirlsBoard, a, op()); errs <- e }()
 	}
 	wg.Wait()
 	close(errs)
@@ -211,7 +223,13 @@ func TestI7C4CRankingConcurrentRefreshAndSettlementConverge(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	if successes < 1 || rankingCount(t, p, server, "ranking_girls_periods") != 1 || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
+	if successes < 1 {
+		t.Fatal("concurrent refresh diverged", successes)
+	}
+	if _, e := s.SettlePendingBoard(ctx, d.GirlsBoard, server, op()); e != nil {
+		t.Fatal(e)
+	}
+	if rankingCount(t, p, server, "ranking_girls_periods") != 1 || rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal("concurrent settlement diverged", successes)
 	}
 	var mirrors int64
@@ -331,13 +349,10 @@ func TestI7C4CRankingFixedExpiryAndUnknownLegacyExpiry(t *testing.T) {
 		a := rankingActor(t, p, server, tracked)
 		rankingSummon(t, p, a, rev, 10001001)
 		s := rankingService(p, p)
-		snapshot, e := s.ReadBoard(ctx, d.GirlsBoard, a, op())
-		if e != nil {
-			t.Fatal(e)
-		}
+		snapshot := refreshRanking(t, s, d.GirlsBoard, a, op())
 		ds := service(p, p)
 		ds.CatalogExternal = s
-		if _, e = ds.Execute(ctx, a, display.Command{Kind: "title", ID: 100059}, op()); e != nil {
+		if _, e := ds.Execute(ctx, a, display.Command{Kind: "title", ID: 100059}, op()); e != nil {
 			t.Fatal(e)
 		}
 		end := snapshot.ObservedAt.Unix() + d.BoardTitleDuration
@@ -372,9 +387,7 @@ func TestI7C4CRankingRecipientMismatchIsNotQualifiedOrigin(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	s := rankingService(p, p)
-	if _, e := s.ReadBoard(ctx, d.GirlsBoard, a, op()); e != nil {
-		t.Fatal(e)
-	}
+	refreshRanking(t, s, d.GirlsBoard, a, op())
 	exec(t, p, `UPDATE player_cosmetic_entitlements SET end_time=end_time+1 WHERE player_id=$1 AND catalog_id=100059`, int64(a.PlayerID))
 	q := display.CatalogOriginRequest{PlayerID: a.PlayerID, Family: "title", CatalogID: 100059, Revision: rev, ObservedAt: time.Now().UTC()}
 	if _, e := s.ReadCatalogDisplayOriginsTx(ctx, p, q); !errors.Is(e, display.ErrConflict) {
@@ -389,9 +402,7 @@ func TestI7C4CRankingScopedFactsKeepUnrelatedOriginsUnknown(t *testing.T) {
 	a := rankingActor(t, p, server, true)
 	rankingSummon(t, p, a, rev, 10001001)
 	rank := rankingService(p, p)
-	if _, e := rank.ReadBoard(ctx, d.GirlsBoard, a, op()); e != nil {
-		t.Fatal(e)
-	}
+	refreshRanking(t, rank, d.GirlsBoard, a, op())
 	ds := display4a(p)
 	ds.CatalogExternal = rank
 	var facts display.EligibilityObservation

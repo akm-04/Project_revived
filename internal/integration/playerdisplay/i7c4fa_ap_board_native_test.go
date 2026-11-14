@@ -15,7 +15,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/ranking"
-	projection "gxb.local/backend/v2/internal/projection/ranking"
 )
 
 func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
@@ -49,8 +48,11 @@ func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
 	}
 
 	o := op()
-	board, e := s.ReadBoard(ctx, d.AchievementPointBoard, a, o)
+	board, e := s.RefreshBoard(ctx, d.AchievementPointBoard, a, o)
 	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = s.SettlePendingBoard(ctx, d.AchievementPointBoard, a.LogicalServerID, o); e != nil {
 		t.Fatal(e)
 	}
 	order := []identity.PlayerID{}
@@ -67,7 +69,7 @@ func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
 	if rankingCount(t, p, server, "ranking_girls_awards") != 1 {
 		t.Fatal("AP settled more than one title")
 	}
-	replay, e := s.ReadBoard(ctx, d.AchievementPointBoard, a, o)
+	replay, e := s.RefreshBoard(ctx, d.AchievementPointBoard, a, o)
 	if e != nil || !reflect.DeepEqual(board, replay) {
 		t.Fatal("AP snapshot receipt changed", e)
 	}
@@ -75,10 +77,7 @@ func TestI7C4FAAchievementPointBoardSumsForceAndTitlesOnlyFirst(t *testing.T) {
 		t.Fatal("one operation crossed into the Girls board")
 	}
 
-	wire, e := projection.BoardList(board, a.PlayerID)
-	if e != nil {
-		t.Fatal(e)
-	}
+	wire := boardWire(t, readOfSnapshot(board, a.PlayerID))
 	list := wire["rank_list"].([]map[string]any)[0]
 	mine := list["rank_info"].(map[string]any)["my_rank"].(map[string]any)
 	first := list["rank_info"].(map[string]any)["rank_info"].([]map[string]any)[0]
