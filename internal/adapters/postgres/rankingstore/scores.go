@@ -145,6 +145,59 @@ func (Store) AllScoreRowsTx(c context.Context, q tx.Queryer, policy string, serv
 	return readScoreRows(c, q, `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY t.score DESC,t.score_since,t.player_id),'[]'::jsonb)::text FROM (SELECT `+scoreRowAggregateColumns+` FROM ranking_board_scores WHERE policy=$1 AND logical_server_id=$2 ORDER BY score DESC,score_since,player_id)t`, policy, int64(server))
 }
 
+// ReadScoreRowUpdatesTx returns the board's stored update times so the refresh
+// job can tell which active players are stale.
+func (Store) ReadScoreRowUpdatesTx(c context.Context, q tx.Queryer, policy string, server identity.LogicalServerID) (map[identity.PlayerID]time.Time, error) {
+	out := map[identity.PlayerID]time.Time{}
+	if q == nil || policy == "" || !server.Valid() {
+		return out, d.ErrSnapshot
+	}
+	var raw string
+	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'updated_at',updated_at)),'[]'::jsonb)::text FROM ranking_board_scores WHERE policy=$1 AND logical_server_id=$2`, policy, int64(server)).Scan(&raw); e != nil {
+		return out, e
+	}
+	var rows []struct {
+		Player    int64     `json:"player"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+	if e := json.Unmarshal([]byte(raw), &rows); e != nil {
+		return out, e
+	}
+	for _, x := range rows {
+		id := identity.PlayerID(x.Player)
+		if !id.Valid() || x.UpdatedAt.Unix() <= 0 {
+			return nil, d.ErrSnapshot
+		}
+		out[id] = x.UpdatedAt
+	}
+	return out, nil
+}
+
+// ReadBoardRootRunsTx reads the legacy Runs map for backfill seeding. It never
+// creates or locks a root.
+func (Store) ReadBoardRootRunsTx(c context.Context, q tx.Queryer, b d.Board, server identity.LogicalServerID) (map[identity.PlayerID]d.ScoreRun, error) {
+	out := map[identity.PlayerID]d.ScoreRun{}
+	if q == nil || !server.Valid() {
+		return out, d.ErrSnapshot
+	}
+	var raw string
+	e := q.QueryRow(c, `SELECT payload::text FROM ranking_girls_roots WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), b.Policy).Scan(&raw)
+	if errors.Is(e, kernelstore.ErrNoRows) {
+		return out, nil
+	}
+	if e != nil {
+		return nil, e
+	}
+	var root d.BoardRoot
+	if e = json.Unmarshal([]byte(raw), &root); e != nil {
+		return nil, e
+	}
+	if root.Validate() != nil || root.Server != server || root.Policy != b.Policy {
+		return nil, d.ErrSnapshot
+	}
+	return root.Runs, nil
+}
+
 func (Store) ScoreRankTx(c context.Context, q tx.Queryer, policy string, server identity.LogicalServerID, row d.ScoreRow) (int64, error) {
 	if q == nil || policy == "" || !server.Valid() || !row.Player.Valid() || row.Score < 0 || row.Score > 9007199254740991 || row.ScoreSince.Unix() <= 0 {
 		return 0, d.ErrSnapshot

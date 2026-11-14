@@ -42,6 +42,10 @@ func (s Service) readReady() bool {
 // metric owners the snapshot path used. A player without an owned fact loses
 // the row; score_since follows the domain current-value run rule.
 func (s Service) RefreshScoresTx(c context.Context, scope ScoreScope, b d.Board, players []identity.PlayerID, rev string, at time.Time) error {
+	return s.refreshScores(c, scope, b, players, nil, rev, at)
+}
+
+func (s Service) refreshScores(c context.Context, scope ScoreScope, b d.Board, players []identity.PlayerID, runs map[identity.PlayerID]d.ScoreRun, rev string, at time.Time) error {
 	if scope.Tx == nil || !scope.Server.Valid() || scope.Operation.ID.IsZero() || scope.Attempt <= 0 || len(players) == 0 || at.Unix() <= 0 || s.Store == nil || s.Metrics == nil {
 		return ErrUnavailable
 	}
@@ -74,6 +78,8 @@ func (s Service) RefreshScoresTx(c context.Context, scope ScoreScope, b d.Board,
 				return ErrConflict
 			}
 			prior = &prev
+		} else if run, has := runs[player]; has && run.Score == m.Value && run.Revision == rev && run.Since.Unix() > 0 && !run.Since.After(at) {
+			prior = &d.ScoreRow{Score: run.Score, Revision: run.Revision, ScoreSince: run.Since}
 		}
 		row, e := d.NextScoreRow(prior, m, at)
 		if e != nil {

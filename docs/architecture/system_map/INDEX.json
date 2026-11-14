@@ -1404,7 +1404,7 @@
    "tables": 0
   },
   {
-   "callees": 11,
+   "callees": 13,
    "callers": 1,
    "mids": 1,
    "name": "ranking",
@@ -1585,7 +1585,7 @@
   },
   {
    "callees": 15,
-   "callers": 19,
+   "callers": 20,
    "mids": 5,
    "name": "workplace",
    "path": "internal/application/workplace",

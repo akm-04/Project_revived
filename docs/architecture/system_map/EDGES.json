@@ -2109,6 +2109,9 @@
    "publicprofile": [
     "*Now"
    ],
+   "ranking": [
+    "*Now"
+   ],
    "socialpresence": [
     "*Now"
    ],
@@ -5134,6 +5137,7 @@
     "*ComfortFactTx"
    ],
    "store:i4store": [
+    "*LastLoginAtTx",
     "*ListPlayerRootsTx",
     "*LockPlayerRootsTx",
     "*ProfileTx",
@@ -5142,6 +5146,12 @@
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"
+   ],
+   "store:presencestore": [
+    "*LastSeenAtTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "realtimeauth": {

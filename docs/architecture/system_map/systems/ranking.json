@@ -104,6 +104,7 @@
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/presencestore",
   "internal/adapters/postgres/rankingstore"
  ],
  "tables": {
@@ -129,6 +130,8 @@
    "player_dorm_heroes",
    "player_dorm_rooms",
    "player_dorm_roots",
+   "player_login_observations",
+   "player_social_presence",
    "players",
    "ranking_board_scores",
    "ranking_girls_awards",

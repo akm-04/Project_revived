@@ -38,6 +38,8 @@ type Store interface {
 	TopScoreRowsTx(context.Context, tx.Queryer, string, identity.LogicalServerID, int64) ([]d.ScoreRow, error)
 	AllScoreRowsTx(context.Context, tx.Queryer, string, identity.LogicalServerID) ([]d.ScoreRow, error)
 	ScoreRankTx(context.Context, tx.Queryer, string, identity.LogicalServerID, d.ScoreRow) (int64, error)
+	ReadScoreRowUpdatesTx(context.Context, tx.Queryer, string, identity.LogicalServerID) (map[identity.PlayerID]time.Time, error)
+	ReadBoardRootRunsTx(context.Context, tx.Queryer, d.Board, identity.LogicalServerID) (map[identity.PlayerID]d.ScoreRun, error)
 }
 type Cohort interface {
 	ListPlayerRootsTx(context.Context, tx.Queryer) ([]playerroot.Root, error)
@@ -45,6 +47,15 @@ type Cohort interface {
 type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 	ProfilesTx(context.Context, tx.Queryer, []identity.PlayerID) (map[identity.PlayerID]playerdirectory.Profile, error)
+}
+
+// PresenceActivity and LoginActivity are owners' batched activity markers. The
+// refresh job takes the later of the two reported instants.
+type PresenceActivity interface {
+	LastSeenAtTx(context.Context, tx.Queryer, []identity.PlayerID) (map[identity.PlayerID]time.Time, error)
+}
+type LoginActivity interface {
+	LastLoginAtTx(context.Context, tx.Queryer, []identity.PlayerID) (map[identity.PlayerID]time.Time, error)
 }
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
@@ -87,6 +98,8 @@ type Service struct {
 	Ledger      RecipientLedger
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+	Presence    PresenceActivity
+	Login       LoginActivity
 	// ListSize overrides R7_PRIVATE_RANK_LIST_SIZE_V1; zero uses the policy fallback.
 	ListSize int64
 }
