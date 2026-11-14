@@ -39,8 +39,10 @@ func (r Runner) Run(ctx context.Context, op operation.Context, profile Profile, 
 	opCtx, cancel := withMaxTimeout(ctx, profile.OperationTimeout)
 	defer cancel()
 	var reconciliationHistory []Reconciliation
+	var lastErr error
 	for attempt := 1; attempt <= retry.MaxAttempts; attempt++ {
 		res, action, err := r.attempt(opCtx, op, attempt, profile, opts, retry, resolver, body)
+		lastErr = err
 		if len(res.Reconciliations) > 0 {
 			reconciliationHistory = append(reconciliationHistory, res.Reconciliations...)
 		}
@@ -68,7 +70,8 @@ func (r Runner) Run(ctx context.Context, op operation.Context, profile Profile, 
 		res.Reconciliations = append([]Reconciliation(nil), reconciliationHistory...)
 		res.Evidence = reconciliationHistory[len(reconciliationHistory)-1].Evidence
 	}
-	return res, errors.New("transaction retry budget exhausted")
+	// Every attempt rolled back, so callers see a retryable definite abort, not a defect.
+	return res, MarkDefiniteAbort(fmt.Errorf("transaction retry budget exhausted: %w", lastErr))
 }
 
 type nextAction uint8
