@@ -209,7 +209,7 @@ func isTransient(err error) bool {
 	if tx.IsDefiniteAbortError(err) {
 		return true
 	}
-	// The commit may have landed; the client's retry replays through the receipt.
+	// failureReply turns an unknown commit into the U8 relog reply.
 	var commitUnknown *tx.UnknownCommitError
 	if errors.As(err, &commitUnknown) {
 		return true
@@ -257,6 +257,12 @@ func isUnavailableSentinel(err error) bool {
 }
 
 func failureReply(failure *classifiedFailure) httpedge.Response {
+	// U8: the commit may have landed and a second tap is a new operation, so the
+	// player relogs and the client reloads its state instead of retrying.
+	var commitUnknown *tx.UnknownCommitError
+	if failure.class == failureUnavailable && errors.As(failure.cause, &commitUnknown) {
+		failure = unknownCommit("commit_unknown", failure.cause)
+	}
 	switch failure.class {
 	case failureMalformed:
 		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Cause: failure.cause, Body: map[string]any{"error_code": unprovenRefusalCode, "error_msg": "", "error": failure.detail}}
@@ -273,7 +279,7 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 	case failureDefect:
 		return httpedge.Response{HTTPStatus: http.StatusInternalServerError, Cause: failure.cause, Body: map[string]any{"error_code": unprovenRefusalCode, "error_msg": ""}}
 	case failureUnknownCommit:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": "", "error": failure.detail}}
+		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Cause: failure.cause, Body: map[string]any{"error_code": sessionFailureCode, "error_msg": sessionFailureMessage, "error": failure.detail}}
 	case failureSession:
 		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Cause: failure.cause, Body: map[string]any{"error_code": sessionFailureCode, "error_msg": sessionFailureMessage}}
 	}

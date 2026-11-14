@@ -160,8 +160,11 @@ func retry() tx.RetryPolicy {
 // Claim is 614 (C6). A free or expired copy is claimed at stage 1; another
 // holder's live claim is read back without a write.
 func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (ClaimView, error) {
-	if !m.ready() || copyID <= 0 {
+	if !m.ready() {
 		return ClaimView{}, ErrUnavailable
+	}
+	if copyID <= 0 {
+		return ClaimView{}, d.ErrRefused
 	}
 	chapterID, known := m.Content.ChapterOfCopy(copyID)
 	if !known {
@@ -229,8 +232,11 @@ func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op
 
 // Start is 604 (C4-C7, C9).
 func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, op operation.Context) (Started, error) {
-	if !m.ready() || request.CopyID <= 0 || request.ChapterID <= 0 || request.CampaignType != 7 {
+	if !m.ready() {
 		return Started{}, ErrUnavailable
+	}
+	if request.CopyID <= 0 || request.ChapterID <= 0 || request.CampaignType != 7 {
+		return Started{}, d.ErrRefused
 	}
 	formation, err := parseFormation(request.Formation)
 	if err != nil {
@@ -353,8 +359,11 @@ func battleRequest(a identity.ActorContext, info CopyInfo, formation []int64, re
 // 606, copy 607, Combat 609, damage and server records, payout mail 610, grants
 // 700+, then the fact.
 func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result, op operation.Context) (Settled, error) {
-	if !m.ready() || request.CopyID <= 0 || request.ChapterID <= 0 {
+	if !m.ready() {
 		return Settled{}, ErrUnavailable
+	}
+	if request.CopyID <= 0 || request.ChapterID <= 0 {
+		return Settled{}, d.ErrRefused
 	}
 	formation, err := parseFormation(request.Formation)
 	if err != nil {

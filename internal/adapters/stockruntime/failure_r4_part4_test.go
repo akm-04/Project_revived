@@ -66,7 +66,7 @@ func TestR4Part4FailureClassTable(t *testing.T) {
 		{name: "idle transaction timeout", got: failureFromRows(nil, sqlStateString("25P03")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
 		{name: "unique violation", got: failureFromRows(nil, sqlStateString("23505")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
 		{name: "defect", got: failureFromRows(nil, errors.New("plain failure")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
-		{name: "unknown commit", got: failureReply(unknownCommit("practice_commit_unknown", errors.New("commit unknown"))), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode, wantError: "practice_commit_unknown"},
+		{name: "unknown commit", got: failureReply(unknownCommit("practice_commit_unknown", errors.New("commit unknown"))), wantStatus: http.StatusUnauthorized, wantCode: sessionFailureCode, wantError: "practice_commit_unknown", wantMessage: sessionFailureMessage},
 		{name: "session", got: failureReply(sessionFailure()), wantStatus: http.StatusUnauthorized, wantCode: sessionFailureCode, wantMessage: sessionFailureMessage},
 	})
 }

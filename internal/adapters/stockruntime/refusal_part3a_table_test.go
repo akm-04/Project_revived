@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	god "gxb.local/backend/v2/internal/domain/godstrial"
+	guilddomain "gxb.local/backend/v2/internal/domain/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/objective"
 	pc "gxb.local/backend/v2/internal/domain/petcampaign"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -80,8 +81,9 @@ func TestPart3AGuildCampaignFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"refused", campaignFailure(errors.New("refused")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"holder", campaignFailure(guildcampaign.ErrHolder), http.StatusConflict, unprovenRefusalCode, ""},
+		{"domain refusal", campaignFailure(guilddomain.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"late", campaignSettleFailure(guildcampaign.ErrLate), http.StatusConflict, 30021, ""},
-		{"unavailable", campaignFailure(guildcampaign.ErrUnavailable), http.StatusConflict, unprovenRefusalCode, ""},
+		{"unavailable", campaignFailure(guildcampaign.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"invalid parameter", campaignBad(), http.StatusBadRequest, 0, "guild_campaign_invalid_parameter"},
 	})
 }

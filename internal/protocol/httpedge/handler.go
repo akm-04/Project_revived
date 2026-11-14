@@ -340,8 +340,10 @@ func writeJSONValue(w http.ResponseWriter, status int, body any) {
 	// never cause the dispatcher/gameplay operation to be executed again.
 	payload, err := json.Marshal(body)
 	if err != nil {
-		status = http.StatusInternalServerError
-		payload = []byte(`{"error_code":35028,"error_msg":"","error":"response_encoding"}`)
+		// U8: the action may have committed, so the client relogs and reloads
+		// (message.lua 20003, the same text as stockruntime sessionFailureMessage).
+		status = http.StatusUnauthorized
+		payload = []byte(`{"error_code":20003,"error_msg":"Unstable network,try to relog in!","error":"response_encoding"}`)
 	}
 	payload = append(payload, '\n')
 	w.Header().Set("Content-Type", "application/json")

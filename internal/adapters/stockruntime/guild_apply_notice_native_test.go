@@ -141,6 +141,8 @@ func applyNoticeOps(t *testing.T, refs policy.Set) operation.Context {
 	return op
 }
 
+const applyNoticeServer identity.LogicalServerID = 4
+
 func seedApplyNoticePlayers(t *testing.T, c context.Context, p *postgres.Pool) []identity.ActorContext {
 	t.Helper()
 	fixture, err := p.Begin(c, tx.Options{Isolation: tx.Serializable})
@@ -149,7 +151,9 @@ func seedApplyNoticePlayers(t *testing.T, c context.Context, p *postgres.Pool) [
 	}
 	defer fixture.Rollback(c)
 	var first int64
-	if err = fixture.QueryRow(c, `UPDATE logical_servers SET next_player_id=next_player_id+6,state_version=state_version+1 WHERE logical_server_id=1 AND next_player_id+6<=max_player_id RETURNING next_player_id-6`).Scan(&first); err != nil {
+	// A-035: raw players have no I5 display basis, so their guild must stay off
+	// server 1, whose MID 576 list other packages read on the same database.
+	if err = fixture.QueryRow(c, `UPDATE logical_servers SET next_player_id=next_player_id+6,state_version=state_version+1 WHERE logical_server_id=$1 AND next_player_id+6<=max_player_id RETURNING next_player_id-6`, int64(applyNoticeServer)).Scan(&first); err != nil {
 		t.Fatal(err)
 	}
 	at := time.Now().UTC().Add(-time.Second)
@@ -164,12 +168,12 @@ func seedApplyNoticePlayers(t *testing.T, c context.Context, p *postgres.Pool) [
 			args []any
 		}{
 			{`INSERT INTO accounts(account_id,status,created_at,account_uid)VALUES($1::uuid,'ACTIVE',$2,$3)`, []any{accountID.String(), at, accountID.String()}},
-			{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2::uuid,1,$3,'guild-apply-notice-fixture')`, []any{int64(player), accountID.String(), at}},
+			{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2::uuid,$3,$4,'guild-apply-notice-fixture')`, []any{int64(player), accountID.String(), int64(applyNoticeServer), at}},
 			{`INSERT INTO player_progression(player_id,level,exp,state_version,updated_at)VALUES($1,80,0,1,$2)`, []any{int64(player), at}},
 			{`INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES($1,1,$2)`, []any{int64(player), at}},
 			{`INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'crystal',10000,1,$2)`, []any{int64(player), at}},
 			{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,last_activity_at)VALUES($1::uuid,$2::uuid,'guild-apply-notice-fixture',$3,$3)`, []any{sessionID.String(), accountID.String(), at}},
-			{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at)VALUES($1::uuid,$2::uuid,$3::uuid,1,$4,1,$5)`, []any{contextID.String(), sessionID.String(), accountID.String(), int64(player), at}},
+			{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at)VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,1,$6)`, []any{contextID.String(), sessionID.String(), accountID.String(), int64(applyNoticeServer), int64(player), at}},
 		} {
 			if _, err = fixture.Exec(c, statement.sql, statement.args...); err != nil {
 				t.Fatal(err)
@@ -178,7 +182,7 @@ func seedApplyNoticePlayers(t *testing.T, c context.Context, p *postgres.Pool) [
 		account, _ := identity.AccountIDFrom(accountID)
 		session, _ := identity.SessionIDFrom(sessionID)
 		context, _ := identity.ContextIDFrom(contextID)
-		actors[i] = identity.ActorContext{AccountID: account, AccountUID: identity.AccountUID(accountID.String()), SessionID: session, ContextID: context, LogicalServerID: 1, PlayerID: player, ContextGeneration: 1, SessionLivenessVersion: 1, ContextLivenessVersion: 1}
+		actors[i] = identity.ActorContext{AccountID: account, AccountUID: identity.AccountUID(accountID.String()), SessionID: session, ContextID: context, LogicalServerID: applyNoticeServer, PlayerID: player, ContextGeneration: 1, SessionLivenessVersion: 1, ContextLivenessVersion: 1}
 	}
 	if err = fixture.Commit(c); err != nil {
 		t.Fatal(err)

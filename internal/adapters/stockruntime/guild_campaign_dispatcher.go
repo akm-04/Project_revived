@@ -464,14 +464,15 @@ var campaignFailureRows = []failureRow{
 }
 
 // campaignFailure refuses with 409: a 200 without the reply's fields crashes
-// the stock callbacks (Backend.lua:562-566). A permanent content gap is a
-// refusal; a retryable fault is the mapper's transient 503.
+// the stock callbacks (Backend.lua:562-566). Player and parameter refusals are
+// guilddomain.ErrRefused; the owner's ErrUnavailable means unwired ports or a
+// missing member profile, a defect (A-043).
 func campaignFailure(err error) httpedge.Response {
 	if classified := classifyFailure(campaignFailureRows, err); classified != nil {
 		return failureReply(classified)
 	}
 	if errors.Is(err, guildcampaign.ErrUnavailable) {
-		return failureReply(refusal(unprovenRefusalCode))
+		return failureReply(defect(err))
 	}
 	return failureFromRows(nil, err)
 }

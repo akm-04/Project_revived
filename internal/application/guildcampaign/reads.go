@@ -181,8 +181,11 @@ func sortedChapters(tables map[int64]ChapterInfo) []ChapterInfo {
 
 // DamageRank is 607.
 func (m Mode) DamageRank(c context.Context, a identity.ActorContext, chapterID int64, op operation.Context) ([]RankRow, error) {
-	if !m.ready() || chapterID <= 0 {
+	if !m.ready() {
 		return nil, ErrUnavailable
+	}
+	if chapterID <= 0 {
+		return nil, d.ErrRefused
 	}
 	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
 	if err != nil {
@@ -219,8 +222,11 @@ func (m Mode) DamageRank(c context.Context, a identity.ActorContext, chapterID i
 
 // AllServerRank is 608, scoped to the logical server.
 func (m Mode) AllServerRank(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (ServerView, error) {
-	if !m.ready() || copyID <= 0 {
+	if !m.ready() {
 		return ServerView{}, ErrUnavailable
+	}
+	if copyID <= 0 {
+		return ServerView{}, d.ErrRefused
 	}
 	var out ServerView
 	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
@@ -349,8 +355,11 @@ func memberLogType(kind string, role int64) (int64, bool) {
 
 // MapDetail is 613.
 func (m Mode) MapDetail(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (DetailView, error) {
-	if !m.ready() || copyID <= 0 {
+	if !m.ready() {
 		return DetailView{}, ErrUnavailable
+	}
+	if copyID <= 0 {
+		return DetailView{}, d.ErrRefused
 	}
 	chapterID, known := m.Content.ChapterOfCopy(copyID)
 	if !known {

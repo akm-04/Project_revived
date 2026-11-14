@@ -226,7 +226,7 @@ func TestPart3CSocialRecallFailureRows(t *testing.T) {
 		{"start conflict", failureFromRows(socialRecallStartFailureRows, &receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"award unavailable", failureFromRows(socialRecallAwardFailureRows, recall.ErrAwardUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"start unavailable", failureFromRows(socialRecallStartFailureRows, recall.ErrRecallUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
-		{"start unknown commit", failureFromRows(socialRecallStartFailureRows, fmt.Errorf("start: %w", &tx.UnknownCommitError{Cause: errors.New("connection reset")})), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"start unknown commit", failureFromRows(socialRecallStartFailureRows, fmt.Errorf("start: %w", &tx.UnknownCommitError{Cause: errors.New("connection reset")})), http.StatusUnauthorized, sessionFailureCode, "commit_unknown"},
 		{"unavailable", failureFromRows(socialRecallStartFailureRows, errors.New("database unavailable")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

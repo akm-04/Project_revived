@@ -53,8 +53,12 @@ func assertPart2FailureCases(t *testing.T, cases []part2FailureCase) {
 				if tc.got.Body["error_code"] != tc.code {
 					t.Fatalf("error_code=%#v want=%d", tc.got.Body["error_code"], tc.code)
 				}
-				if tc.got.Body["error_msg"] != "" {
-					t.Fatalf("error_msg=%#v want empty", tc.got.Body["error_msg"])
+				wantMessage := ""
+				if tc.code == sessionFailureCode {
+					wantMessage = sessionFailureMessage
+				}
+				if tc.got.Body["error_msg"] != wantMessage {
+					t.Fatalf("error_msg=%#v want %q", tc.got.Body["error_msg"], wantMessage)
 				}
 				return
 			}
@@ -208,7 +212,7 @@ func TestPart2EquipmentFamilyFailureRows(t *testing.T) {
 
 func TestPart2PracticeFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
-		{"commit unknown", practiceFailure(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"commit unknown", practiceFailure(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusUnauthorized, sessionFailureCode, ""},
 		{"receipt conflict", practiceFailure(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"actor stale", practiceFailure(apppractice.ErrActorStaleVersion), http.StatusConflict, staleConflictCode, ""},
 		{"stale version", practiceFailure(apppractice.ErrStaleVersion), http.StatusConflict, staleConflictCode, ""},
@@ -233,7 +237,7 @@ func TestPart2SavedPresetFailureRows(t *testing.T) {
 		{"ambiguous delete", failSavedPreset(appsavedpreset.ErrAmbiguousLegacyDelete), http.StatusConflict, staleConflictCode, ""},
 		{"stale delete", failSavedPreset(appsavedpreset.ErrStaleLegacyDelete), http.StatusConflict, staleConflictCode, ""},
 		{"receipt conflict", failSavedPreset(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
-		{"commit unknown", failSavedPreset(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"commit unknown", failSavedPreset(&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}), http.StatusUnauthorized, sessionFailureCode, ""},
 		{"fallback", failSavedPreset(errors.New("saved preset dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})
 }

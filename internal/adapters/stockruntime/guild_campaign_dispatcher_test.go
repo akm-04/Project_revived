@@ -23,7 +23,7 @@ func TestI9_9CSettleRefusalsAre409AndLateIs30021(t *testing.T) {
 	if refused.HTTPStatus != http.StatusConflict || refused.Body["error_code"] != int64(35028) {
 		t.Fatalf("refused %+v", refused)
 	}
-	if unavailable := campaignSettleFailure(app.ErrUnavailable); unavailable.HTTPStatus != http.StatusConflict || unavailable.Body["error_code"] != int64(35028) {
+	if unavailable := campaignSettleFailure(app.ErrUnavailable); unavailable.HTTPStatus != http.StatusInternalServerError || unavailable.Body["error_code"] != int64(35028) {
 		t.Fatalf("unavailable %+v", unavailable)
 	}
 }

@@ -263,14 +263,14 @@ func TestHandlerResponseEncodingFailureDoesNotRedispatch(t *testing.T) {
 	if calls != 1 {
 		t.Fatalf("dispatcher calls=%d, want 1", calls)
 	}
-	if w.Code != http.StatusInternalServerError {
+	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("status=%d body=%q", w.Code, w.Body.String())
 	}
 	var body map[string]any
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatal(err)
 	}
-	if body["error"] != "response_encoding" || body["error_code"] != float64(edgeRefusalCode) || body["error_msg"] != "" {
+	if body["error"] != "response_encoding" || body["error_code"] != float64(20003) || body["error_msg"] != "Unstable network,try to relog in!" {
 		t.Fatalf("body=%v", body)
 	}
 }

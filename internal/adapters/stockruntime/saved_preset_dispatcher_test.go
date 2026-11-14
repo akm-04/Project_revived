@@ -89,7 +89,7 @@ func TestSavedPresetDispatcherUsesD5RefusalCodes(t *testing.T) {
 		{characterasset.ErrReferenceNotFound, http.StatusBadRequest, 0},
 		{appsavedpreset.ErrAmbiguousLegacyDelete, http.StatusConflict, staleConflictCode},
 		{appsavedpreset.ErrStaleLegacyDelete, http.StatusConflict, staleConflictCode},
-		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusServiceUnavailable, serverBusyCode},
+		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusUnauthorized, sessionFailureCode},
 		{errors.New("infra"), http.StatusInternalServerError, unprovenRefusalCode},
 	}
 	for _, tc := range cases {

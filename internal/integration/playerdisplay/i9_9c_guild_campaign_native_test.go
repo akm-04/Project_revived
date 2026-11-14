@@ -762,7 +762,7 @@ func TestI9_9CAwardQueue(t *testing.T) {
 			t.Fatalf("third apply %d: %v", attempt+2, err)
 		}
 	}
-	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, app.ErrUnavailable) {
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("fifth application in a day: %v", err)
 	}
 
