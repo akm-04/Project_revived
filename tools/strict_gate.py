@@ -166,7 +166,8 @@ class Gate:
             documents[name] = json.loads(text)
             hashes[name.removesuffix('.json')] = hashlib.sha256(text.encode()).hexdigest()
         parallel = documents['parallel.json']
-        self.validate_parallel(parallel)
+        if self.mode == 'parallel':
+            self.validate_parallel(parallel)
         return ({entry['test']: entry for entry in documents['known_debt.json']['entries']},
                 {entry['test']: entry for entry in documents['skip_allowlist.json']['entries']}, parallel, hashes)
 
@@ -456,7 +457,13 @@ class Gate:
         except (gate_pool.PoolError, OSError) as failure:
             with self.unit_lock:
                 self.red.append(f'{label}: unit {unit["unit"]}: {failure}')
+                self.steps.append(dict(name=f'unit:{name}:{unit["unit"]}', exit=None, error=str(failure),
+                                       seconds=round(time.perf_counter() - began, 3)))
             return
+        if code != 0 and not outcomes and not failed_packages:
+            # A unit killed without events (OOM, SIGKILL) would otherwise drop its tests silently.
+            with self.unit_lock:
+                self.red.append(f'{label}: unit {unit["unit"]} exited {code} without test events')
         failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
         self.merge_unit_outcomes(label, unit['unit'], outcomes, failed_packages - failing_packages)
         row = dict(name=f'unit:{name}:{unit["unit"]}', exit=code, stream=str(stream.relative_to(self.work)),
@@ -700,8 +707,9 @@ class Gate:
         self.red += [f'census: test variable {variable} is neither provisioned, recipe-owned nor set by a parent test'
                      for variable in self.census.get('unclassified', [])]
         test_locations = {location for locations in self.test_functions.values() for location in locations}
-        self.red += [f'parallel: serial test {key} names no test function'
-                     for key in self.parallel.get('serial_tests', []) if key not in test_locations]
+        if self.mode == 'parallel':
+            self.red += [f'parallel: serial test {key} names no test function'
+                         for key in self.parallel.get('serial_tests', []) if key not in test_locations]
         self.build_binaries()
         self.cluster('init')
         self.cluster('start')

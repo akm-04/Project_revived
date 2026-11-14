@@ -11,7 +11,8 @@ import re
 import subprocess
 
 TEST_VARIABLE = re.compile(r'os\.(?:Getenv|LookupEnv)\("([A-Z0-9_]+)"\)')
-TEST_NAME = re.compile(r'^Test\w+$')
+# go test -list prints Example and Fuzz functions as well; the serial suite runs them too.
+TEST_NAME = re.compile(r'^(Test|Example|Fuzz)\w*$')
 EMPTY_PARALLEL = {'serial': [], 'shards': {}, 'serial_tests': [], 'known_flaky': []}
 MAXIMUM_DATABASE_BYTES = 63
 
@@ -130,6 +131,8 @@ def build_units(packages, shard_counts, list_tests, serial_tests=()):
         if not count or names is None:
             units.append(dict(package=package, unit=name, tests=None, run=None, shard=None, serial=False))
             continue
+        if not names:
+            raise PoolError(f'{package} is sharded but go test -list found no test in it')
         runnable = [test_name for test_name in names if test_name not in set(serial)]
         shards = assign_shards(runnable, count)
         covered = [test_name for shard in shards for test_name in shard] + serial

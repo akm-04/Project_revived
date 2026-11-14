@@ -222,4 +222,16 @@ expected = [
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', '', './...'],
 ]
 assert commands == expected, commands
+try:
+    gate_pool.build_units(['./internal/fake'], {'internal/fake': 6}, lambda package: [])
+    raise AssertionError('a sharded package with no tests must be refused')
+except gate_pool.PoolError:
+    pass
+assert gate_pool.TEST_NAME.match('ExampleShard') and gate_pool.TEST_NAME.match('FuzzShard'), 'go test -list names'
+
+import gate_compare  # noqa: E402
+pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}
+dropped = {'pkg.TestA': dict(status='PASS', runs={'recipe:x': 'pass'})}
+assert gate_compare.differing_runs(pair, dropped) == ['pkg.TestA'], 'a test dropped from a suite must differ'
+assert gate_compare.differing_runs(pair, pair) == []
 print('strict gate self-check: PASS')

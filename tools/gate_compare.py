@@ -23,6 +23,12 @@ def differing_status(first, second):
     return sorted(test for test in set(first) & set(second) if first[test].get('status') != second[test].get('status'))
 
 
+def differing_runs(first, second):
+    """Tests whose per-label outcomes differ: a test dropped from one suite can still classify PASS overall."""
+    return sorted(test for test in set(first) & set(second)
+                  if first[test].get('status') == second[test].get('status') and first[test].get('runs') != second[test].get('runs'))
+
+
 def flaky_reasons():
     if not PARALLEL.exists():
         return {}
@@ -47,7 +53,10 @@ def main():
         line('ONLY_IN_B', test, flaky)
     for test in differing:
         line('STATUS_DIFFERS', test, flaky, f' {first[test].get("status")} {second[test].get("status")}')
-    compared = [*missing_first, *missing_second, *differing]
+    differing_labels = differing_runs(first, second)
+    for test in differing_labels:
+        line('RUNS_DIFFER', test, flaky, f' {first[test].get("runs")} {second[test].get("runs")}')
+    compared = [*missing_first, *missing_second, *differing, *differing_labels]
     failing = [test for test in compared if test not in flaky]
     print(f'GATE_COMPARE {"MISMATCH" if failing else "MATCH"} differences={len(compared)} failing={len(failing)}')
     return 1 if failing else 0
