@@ -28,6 +28,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 type playtestCampaignContent struct{}
@@ -122,6 +123,15 @@ func playtestGuildPool(t *testing.T) (*pg.Pool, []identity.ActorContext, guildco
 	return pool, actors, applyNoticeGuildService(t, pool), c
 }
 
+// playtestEnv is env on the fixture's logical server; the guild dispatchers
+// refuse a region claim that differs from the actor's server.
+func playtestEnv(mid uint16, now time.Time) httpedge.DispatchRequest {
+	request := env(mid, nil, now)
+	request.Envelope.Claims.Region = int64(applyNoticeServer)
+	request.Envelope.Params["region"] = int64(applyNoticeServer)
+	return request
+}
+
 func playtestJoin(t *testing.T, c context.Context, core guildcore.Service, leader identity.ActorContext, target identity.ActorContext, gid guild.ID, refs policy.Set) {
 	t.Helper()
 	if _, err := core.ApplyOrJoin(c, target, gid, applyNoticeOps(t, refs)); err != nil {
@@ -144,14 +154,14 @@ func TestPlaytestGuildKickThenReapplyAnswers409AndWritesNoApplication(t *testing
 	playtestJoin(t, c, core, leader, target, gid, refs)
 
 	now := time.Now().UTC()
-	kick := env(587, nil, now)
+	kick := playtestEnv(587, now)
 	kick.Envelope.Operation = applyNoticeOps(t, refs)
 	kick.Envelope.Params["member_id"] = int64(target.PlayerID)
 	response := GuildDispatcher{Authority: httpAuthority{leader}, Core: core, View: fakeGuildView{}}.Dispatch(c, kick)
 	if response.HTTPStatus != 200 {
 		t.Fatalf("kick: %+v", response)
 	}
-	reapply := env(580, nil, now)
+	reapply := playtestEnv(580, now)
 	reapply.Envelope.Operation = applyNoticeOps(t, refs)
 	reapply.Envelope.Params["guild_id"] = int64(gid)
 	response = GuildDispatcher{Authority: httpAuthority{target}, Core: core, View: fakeGuildView{}}.Dispatch(c, reapply)
@@ -195,7 +205,7 @@ func TestPlaytestGuildLogMergesMembershipEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	response := GuildCampaignDispatcher{Authority: httpAuthority{leader}, Service: playtestGuildLogMode(pool)}.Dispatch(c, env(609, nil, time.Now().UTC()))
+	response := GuildCampaignDispatcher{Authority: httpAuthority{leader}, Service: playtestGuildLogMode(pool)}.Dispatch(c, playtestEnv(609, time.Now().UTC()))
 	if response.HTTPStatus != 200 {
 		t.Fatalf("609: %+v", response)
 	}
