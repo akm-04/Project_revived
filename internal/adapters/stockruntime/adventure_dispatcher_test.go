@@ -203,7 +203,7 @@ func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 	}
 	stub.err = d.ErrUnavailable
 	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
-	if response.HTTPStatus != http.StatusInternalServerError || response.Body["error_code"] != unprovenRefusalCode {
+	if response.HTTPStatus != http.StatusServiceUnavailable || response.Body["error_code"] != serverBusyCode {
 		t.Fatalf("unavailable %+v", response)
 	}
 	stub.err = nil

@@ -155,7 +155,7 @@ func TestDormSocialDispatcherMapsEveryDomainRefusalToConflict(t *testing.T) {
 	}
 	fake.commandErr = app.ErrUnavailable
 	response := dispatcher.Dispatch(context.Background(), socialEnv(t, 2521, map[string]any{"host_id": int64(2), "house_id": int64(3)}))
-	if response.HTTPStatus != 500 || response.Body["error_code"] != unprovenRefusalCode {
+	if response.HTTPStatus != 503 || response.Body["error_code"] != serverBusyCode {
 		t.Fatalf("bare unavailable sentinel mapped to %d", response.HTTPStatus)
 	}
 	if got := failSocialDorm(app.ErrStale); got.HTTPStatus != 409 || got.Body["error_code"] != staleConflictCode {

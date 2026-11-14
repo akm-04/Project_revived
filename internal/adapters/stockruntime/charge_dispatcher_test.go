@@ -80,7 +80,7 @@ func TestChargeDispatcherRefusesMalformedAndBusinessErrors(t *testing.T) {
 	if got := failCharge(d.ErrConflict); got.HTTPStatus != 409 || got.Body["error_code"] != staleConflictCode {
 		t.Fatalf("conflict mapped to %d %v", got.HTTPStatus, got.Body)
 	}
-	if got := failCharge(d.ErrUnavailable); got.HTTPStatus != 500 || got.Body["error_code"] != unprovenRefusalCode {
+	if got := failCharge(d.ErrUnavailable); got.HTTPStatus != 503 || got.Body["error_code"] != serverBusyCode {
 		t.Fatalf("unavailable mapped to %d %v", got.HTTPStatus, got.Body)
 	}
 }

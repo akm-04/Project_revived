@@ -140,7 +140,7 @@ func TestPart2TopFloorFailureRows(t *testing.T) {
 		{"fallback", failTopFloor(errors.New("top floor dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"task refused", failTopFloorTask(topfloor.ErrRefused), http.StatusConflict, topFloorTaskNotOpen, ""},
 		{"task invalid", failTopFloorTask(topfloor.ErrInvalid), http.StatusBadRequest, 0, "invalid_top_floor_task_parameter"},
-		{"task fallback", failTopFloorTask(topfloor.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"task fallback", failTopFloorTask(topfloor.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 

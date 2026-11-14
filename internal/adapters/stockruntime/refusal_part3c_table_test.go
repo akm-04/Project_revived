@@ -47,7 +47,7 @@ func TestPart3CAdventureFailureRows(t *testing.T) {
 		{"balance stamina", failAdventure(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
 		{"balance other", failAdventure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unknown resource", failAdventure(economy.ErrUnknownResource), http.StatusInternalServerError, unprovenRefusalCode, ""},
-		{"unavailable", failAdventure(d.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failAdventure(d.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -57,7 +57,7 @@ func TestPart3CCampaignFailureRows(t *testing.T) {
 		{"conflict", failCampaign(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"loan refused", failCampaign(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"refused", failCampaign(campaign.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", failCampaign(campaign.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failCampaign(campaign.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -66,7 +66,7 @@ func TestPart3CChargeFailureRows(t *testing.T) {
 		{"charge refused", failCharge(privilege.ErrChargeRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"conflict", failCharge(privilege.ErrConflict), http.StatusConflict, staleConflictCode, ""},
 		{"receipt conflict", failCharge(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
-		{"unavailable", failCharge(privilege.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failCharge(privilege.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -82,7 +82,7 @@ func TestPart3CCourseFailureRows(t *testing.T) {
 		{"conflict", failCourse(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"balance diamonds", failCourse(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance other", failCourse(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", failCourse(appcourse.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failCourse(appcourse.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -102,7 +102,7 @@ func TestPart3CHeroRecommendFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"refused", failHeroRecommend(herorecommend.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"conflict", failHeroRecommend(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
-		{"unavailable", failHeroRecommend(herorecommend.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failHeroRecommend(herorecommend.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -114,7 +114,7 @@ func TestPart3CIllusionFailureRows(t *testing.T) {
 		{"loan refused", failIllusion(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"balance diamonds", failIllusion(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance other", failIllusion(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", failIllusion(illusion.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failIllusion(illusion.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -127,7 +127,7 @@ func TestPart3CIllusionRoomFailureRows(t *testing.T) {
 		{"not in room", failIllusionRoom(sr.ErrNotInRoom), http.StatusConflict, unprovenRefusalCode, ""},
 		{"room changed", failIllusionRoom(sr.ErrConflict), http.StatusConflict, staleConflictCode, ""},
 		{"room full", failIllusionRoom(room.ErrFull), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", failIllusionRoom(illusion.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failIllusionRoom(illusion.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -144,7 +144,7 @@ func TestPart3CMarchFailureRows(t *testing.T) {
 		{"loan refused", marchFailure(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"refused", marchFailure(march.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"start conflict", marchFailure(combat.ErrStartConflict), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", marchFailure(march.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", marchFailure(march.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -158,7 +158,7 @@ func TestPart3CMentorFailureRows(t *testing.T) {
 		{"application", mentorFailure(domainmentor.ErrApplication), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mission", mentorFailure(domainmentor.ErrMission), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid", mentorFailure(appmentor.ErrInvalid), http.StatusBadRequest, 0, "invalid_mentor_request"},
-		{"unavailable", mentorFailure(appmentor.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", mentorFailure(appmentor.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"missing service", mentorUnavailable(), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
@@ -171,7 +171,7 @@ func TestPart3COccultFailureRows(t *testing.T) {
 		{"no scrolls", failOccult(economy.ErrInsufficientBalance), http.StatusConflict, occultNoScrollsCode, ""},
 		{"not in room", failOccult(sr.ErrNotInRoom), http.StatusConflict, occultRoomRefusedCode, ""},
 		{"room full", failOccult(room.ErrFull), http.StatusConflict, occultRoomRefusedCode, ""},
-		{"unavailable", failOccult(occult.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failOccult(occult.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -183,7 +183,7 @@ func TestPart3CSocialExchangeFailureRows(t *testing.T) {
 		{"conflict", failSocialExchange(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"balance diamonds", failSocialExchange(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"stack capacity", failSocialExchange(economy.ErrStackCapacity), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", failSocialExchange(exchange.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failSocialExchange(exchange.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -206,7 +206,7 @@ func TestPart3CSocialInviteFailureRows(t *testing.T) {
 		{"claim refused", failSocialInvite(invite.ErrClaimRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"facts", failSocialInvite(invite.ErrFacts), http.StatusConflict, unprovenRefusalCode, ""},
 		{"conflict", failSocialInvite(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
-		{"unavailable", failSocialInvite(invite.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failSocialInvite(invite.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"missing service", inviteUnavailable(), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
@@ -232,7 +232,7 @@ func TestPart3CSummonFailureRows(t *testing.T) {
 		{"conflict", failSummon(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"refused", failSummon(summon.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"capacity", failSummon(apphero.ErrHeroCapacityExceeded), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", failSummon(summon.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failSummon(summon.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -243,7 +243,7 @@ func TestPart3CWorkplaceFailureRows(t *testing.T) {
 		{"refused", workplaceFailure(workplace.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"balance diamonds", workplaceFailure(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance other", workplaceFailure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", workplaceFailure(workplace.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", workplaceFailure(workplace.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
@@ -256,6 +256,6 @@ func TestPart3CWorldBossFailureRows(t *testing.T) {
 		{"balance diamonds", failWorldBoss(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance coins", failWorldBoss(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
 		{"balance other", failWorldBoss(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
-		{"unavailable", failWorldBoss(worldboss.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", failWorldBoss(worldboss.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

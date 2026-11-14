@@ -233,10 +233,19 @@ func failureFromRows(rows []failureRow, err error) httpedge.Response {
 	if classified := classifyFailure(sharedFailureRows, err); classified != nil {
 		return failureReply(classified)
 	}
-	if isTransient(err) {
+	if isTransient(err) || isUnavailableSentinel(err) {
 		return failureReply(unavailable(err))
 	}
 	return failureReply(defect(err))
+}
+
+func isUnavailableSentinel(err error) bool {
+	for _, sentinel := range unavailableSentinels {
+		if errors.Is(err, sentinel) {
+			return true
+		}
+	}
+	return false
 }
 
 func failureReply(failure *classifiedFailure) httpedge.Response {

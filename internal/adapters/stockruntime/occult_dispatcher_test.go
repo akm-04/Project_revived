@@ -275,14 +275,14 @@ func TestOccultRoomRefusalsCarryStockCodesAndCauses(t *testing.T) {
 	}
 }
 
-func TestOccultRefusalIsStockErrorCodeAndFailureIs500(t *testing.T) {
+func TestOccultRefusalIsStockErrorCodeAndUnavailableIs503(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	refused := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: d.ErrRefused}}
 	if got := refused.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35002) || got.Cause == nil {
 		t.Fatalf("%d %#v %v", got.HTTPStatus, got.Body, got.Cause)
 	}
 	failed := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: d.ErrUnavailable}}
-	if got := failed.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 500 || got.Body["error_code"] != unprovenRefusalCode {
+	if got := failed.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 503 || got.Body["error_code"] != serverBusyCode {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }

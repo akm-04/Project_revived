@@ -105,7 +105,7 @@ func TestSocialInviteDispatcherStockShapesAndRefusals(t *testing.T) {
 	}
 	bind.err = invite.ErrUnavailable
 	result = dispatcher.Dispatch(context.Background(), heroReq(t, 386, map[string]any{"invite_code": "1F"}))
-	if result.HTTPStatus != 500 {
+	if result.HTTPStatus != 503 {
 		t.Fatal(result)
 	}
 	read.err = errors.New("database unavailable")

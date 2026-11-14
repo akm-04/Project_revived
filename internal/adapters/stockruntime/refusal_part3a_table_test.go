@@ -96,7 +96,7 @@ func TestPart3AGuildRentalFailureRows(t *testing.T) {
 		cases = append(cases, part2FailureCase{name: "refusal " + string(rune('a'+i)), got: rentalFailure(row), want: http.StatusConflict, code: unprovenRefusalCode})
 	}
 	cases = append(cases,
-		part2FailureCase{"unavailable", rentalFailure(guildrental.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		part2FailureCase{"unavailable", rentalFailure(guildrental.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 		part2FailureCase{"invalid parameter", rentalBad(), http.StatusBadRequest, 0, "guild_rental_invalid_parameter"},
 	)
 	assertPart2FailureCases(t, cases)
@@ -115,7 +115,7 @@ func TestPart3AGuildTeaFailureRows(t *testing.T) {
 		{"balance diamonds", teaFailure(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance other", teaFailure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid parameter", teaFailure(guildtea.ErrInvalid), http.StatusBadRequest, 0, "guild_tea_invalid_parameter"},
-		{"unavailable", teaFailure(guildtea.ErrUnavailable), http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"unavailable", teaFailure(guildtea.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
 
