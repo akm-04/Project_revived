@@ -27,7 +27,16 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "account_session_credentials": {
       "allowed_query_owners": [
@@ -46,7 +55,16 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "account_session_server_observations": {
       "allowed_query_owners": [
@@ -63,7 +81,16 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "account_sessions": {
       "allowed_query_owners": [
@@ -82,7 +109,16 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "accounts": {
       "allowed_query_owners": [
@@ -101,7 +137,16 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_emoticon_catalogs": {
       "allowed_query_owners": [
@@ -119,7 +164,16 @@
       ],
       "migration": "migrations/00034_i7a6a_friend_dm.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_guild_broadcast_policies": {
       "allowed_query_owners": [
@@ -137,7 +191,16 @@
       ],
       "migration": "migrations/00037_guild_broadcast.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_guild_invite_policies": {
       "allowed_query_owners": [
@@ -155,7 +218,16 @@
       ],
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_player_display_catalogs": {
       "allowed_query_owners": [
@@ -173,7 +245,16 @@
       ],
       "migration": "migrations/00047_i7b6a_player_display.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_public_profile_policies": {
       "allowed_query_owners": [
@@ -191,7 +272,16 @@
       ],
       "migration": "migrations/00041_i7b2b_public_profile_content.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_public_showcase_policies": {
       "allowed_query_owners": [
@@ -209,7 +299,16 @@
       ],
       "migration": "migrations/00042_i7b3a_showcase_selection.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_social_gift_catalogs": {
       "allowed_query_owners": [
@@ -227,7 +326,16 @@
       ],
       "migration": "migrations/00036_social_gift.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "friend_dm_delivery": {
       "allowed_query_owners": [
@@ -241,7 +349,18 @@
       ],
       "migration": "migrations/00034_i7a6a_friend_dm.sql",
       "owner": "friend-dm",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_id"
+        ],
+        "via": "friend_dm_roots",
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "friend_dm_occurrences": {
       "allowed_query_owners": [
@@ -255,7 +374,20 @@
       ],
       "migration": "migrations/00034_i7a6a_friend_dm.sql",
       "owner": "friend-dm",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "sender_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [
+          "recipient_id"
+        ],
+        "retention": null
+      }
     },
     "friend_dm_projection_receipts": {
       "allowed_query_owners": [
@@ -269,7 +401,18 @@
       ],
       "migration": "migrations/00034_i7a6a_friend_dm.sql",
       "owner": "friend-dm",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "friend_dm_roots": {
       "allowed_query_owners": [
@@ -283,7 +426,18 @@
       ],
       "migration": "migrations/00034_i7a6a_friend_dm.sql",
       "owner": "friend-dm",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "gameplay_context_credentials": {
       "allowed_query_owners": [
@@ -302,7 +456,16 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gameplay_contexts": {
       "allowed_query_owners": [
@@ -321,7 +484,20 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "account_id",
+          "logical_server_id",
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_applications": {
       "allowed_query_owners": [
@@ -335,7 +511,20 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_audit_log": {
       "allowed_query_owners": [
@@ -349,7 +538,21 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "journal",
+        "backup": false,
+        "references": [
+          "actor_player_id",
+          "subject_player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_broadcast_recipients": {
       "allowed_query_owners": [
@@ -363,7 +566,18 @@
       ],
       "migration": "migrations/00037_guild_broadcast.sql",
       "owner": "GuildBroadcast",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_broadcast_sources": {
       "allowed_query_owners": [
@@ -377,7 +591,21 @@
       ],
       "migration": "migrations/00037_guild_broadcast.sql",
       "owner": "GuildBroadcast",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": false,
+        "references": [
+          "leader_player_id"
+        ],
+        "retention": null,
+        "review": "server-wide broadcast source ledger owned by a guild"
+      }
     },
     "guild_invite_projection_cursors": {
       "allowed_query_owners": [
@@ -391,7 +619,18 @@
       ],
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "GuildInviteProjection",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_invite_projection_deliveries": {
       "allowed_query_owners": [
@@ -405,7 +644,18 @@
       ],
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "GuildInviteProjection",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_invite_projection_markers": {
       "allowed_query_owners": [
@@ -419,7 +669,18 @@
       ],
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "GuildInviteProjection",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "subject_player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_invite_projection_sources": {
       "allowed_query_owners": [
@@ -433,7 +694,20 @@
       ],
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "GuildInviteProjection",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [
+          "inviter_player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_invite_send_events": {
       "allowed_query_owners": [
@@ -447,7 +721,21 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": false,
+        "references": [
+          "invited_player_id",
+          "inviter_player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_invites": {
       "allowed_query_owners": [
@@ -461,7 +749,22 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "shared",
+        "backup": false,
+        "references": [
+          "invited_player_id",
+          "inviter_player_id"
+        ],
+        "retention": null,
+        "review": "guild-scoped invite row whose kind is shared because two players hold it"
+      }
     },
     "guild_membership_events": {
       "allowed_query_owners": [
@@ -475,7 +778,21 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": false,
+        "references": [
+          "actor_player_id",
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_memberships": {
       "allowed_query_owners": [
@@ -489,7 +806,20 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_server_allocators": {
       "allowed_query_owners": [
@@ -503,7 +833,18 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guilds": {
       "allowed_query_owners": [
@@ -517,7 +858,18 @@
       ],
       "migration": "migrations/00012_i6c_guild_core.sql",
       "owner": "guild-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_activation": {
       "allowed_query_owners": [
@@ -535,7 +887,16 @@
       ],
       "migration": "migrations/00009_r4_immutable_content_revisions.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_appearance_live": {
       "allowed_query_owners": [
@@ -553,7 +914,16 @@
       ],
       "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_appearance_pet_styles": {
       "allowed_query_owners": [
@@ -571,7 +941,16 @@
       ],
       "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_appearance_skin_items": {
       "allowed_query_owners": [
@@ -589,7 +968,16 @@
       ],
       "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_appearance_skins": {
       "allowed_query_owners": [
@@ -607,7 +995,16 @@
       ],
       "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_equipment_primitives": {
       "allowed_query_owners": [
@@ -625,7 +1022,16 @@
       ],
       "migration": "migrations/00019_ca4_equipment_primitives.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_equipment_recipe_edges": {
       "allowed_query_owners": [
@@ -643,7 +1049,16 @@
       ],
       "migration": "migrations/00019_ca4_equipment_primitives.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_function_gates": {
       "allowed_query_owners": [
@@ -661,7 +1076,16 @@
       ],
       "migration": "migrations/00011_r5_foundation_repairs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_equipment": {
       "allowed_query_owners": [
@@ -679,7 +1103,16 @@
       ],
       "migration": "migrations/00020_ca4_2_hero_equipment.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_exp": {
       "allowed_query_owners": [
@@ -697,7 +1130,16 @@
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_exp_items": {
       "allowed_query_owners": [
@@ -715,7 +1157,16 @@
       ],
       "migration": "migrations/00015_ca2_hero_progression_content.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_fumo_materials": {
       "allowed_query_owners": [
@@ -733,7 +1184,16 @@
       ],
       "migration": "migrations/00021_ca4_3a_hero_fumo.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_fumo_targets": {
       "allowed_query_owners": [
@@ -751,7 +1211,16 @@
       ],
       "migration": "migrations/00021_ca4_3a_hero_fumo.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_normal_star": {
       "allowed_query_owners": [
@@ -769,7 +1238,16 @@
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_practice_thresholds": {
       "allowed_query_owners": [
@@ -787,7 +1265,16 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_promotion_restoration_denominations": {
       "allowed_query_owners": [
@@ -805,7 +1292,16 @@
       ],
       "migration": "migrations/00022_ca4_3b_hero_promotion_restoration.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_promotion_restoration_equipment": {
       "allowed_query_owners": [
@@ -823,7 +1319,16 @@
       ],
       "migration": "migrations/00022_ca4_3b_hero_promotion_restoration.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_promotion_restoration_fractions": {
       "allowed_query_owners": [
@@ -841,7 +1346,16 @@
       ],
       "migration": "migrations/00022_ca4_3b_hero_promotion_restoration.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_super_star": {
       "allowed_query_owners": [
@@ -859,7 +1373,16 @@
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_hero_templates": {
       "allowed_query_owners": [
@@ -877,7 +1400,16 @@
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_objective_definitions": {
       "allowed_query_owners": [
@@ -895,7 +1427,16 @@
       ],
       "migration": "migrations/00009_r4_immutable_content_revisions.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_acquisition": {
       "allowed_query_owners": [
@@ -913,7 +1454,16 @@
       ],
       "migration": "migrations/00017_ca3_pet_acquisition.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_acquisition_policy": {
       "allowed_query_owners": [
@@ -931,7 +1481,16 @@
       ],
       "migration": "migrations/00017_ca3_pet_acquisition.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_equipment": {
       "allowed_query_owners": [
@@ -949,7 +1508,16 @@
       ],
       "migration": "migrations/00023_ca4_4a_pet_equipment_content.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_evolution": {
       "allowed_query_owners": [
@@ -967,7 +1535,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_exp": {
       "allowed_query_owners": [
@@ -985,7 +1562,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_exp_items": {
       "allowed_query_owners": [
@@ -1003,7 +1589,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_practice_thresholds": {
       "allowed_query_owners": [
@@ -1021,7 +1616,16 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_progression": {
       "allowed_query_owners": [
@@ -1039,7 +1643,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_progression_policy": {
       "allowed_query_owners": [
@@ -1057,7 +1670,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_promotion_restoration_equipment": {
       "allowed_query_owners": [
@@ -1075,7 +1697,16 @@
       ],
       "migration": "migrations/00025_ca4_4b_pet_promotion_restoration_content.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_skill_books": {
       "allowed_query_owners": [
@@ -1093,7 +1724,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_skill_slot_policy": {
       "allowed_query_owners": [
@@ -1111,7 +1751,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_skill_slots": {
       "allowed_query_owners": [
@@ -1129,7 +1778,16 @@
       ],
       "migration": "migrations/00018_ca3_pet_progression.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_pet_templates": {
       "allowed_query_owners": [
@@ -1147,7 +1805,16 @@
       ],
       "migration": "migrations/00016_ca3_pet_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_player_progression": {
       "allowed_query_owners": [
@@ -1165,7 +1832,16 @@
       ],
       "migration": "migrations/00009_r4_immutable_content_revisions.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_practice_locks": {
       "allowed_query_owners": [
@@ -1183,7 +1859,16 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_practice_methods": {
       "allowed_query_owners": [
@@ -1201,7 +1886,16 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_practice_policy_facts": {
       "allowed_query_owners": [
@@ -1219,7 +1913,16 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_practice_vip_bless": {
       "allowed_query_owners": [
@@ -1237,7 +1940,16 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_resource_definitions": {
       "allowed_query_owners": [
@@ -1255,7 +1967,16 @@
       ],
       "migration": "migrations/00009_r4_immutable_content_revisions.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_revisions": {
       "allowed_query_owners": [
@@ -1273,7 +1994,16 @@
       ],
       "migration": "migrations/00009_r4_immutable_content_revisions.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_super_equipment_caps": {
       "allowed_query_owners": [
@@ -1291,7 +2021,16 @@
       ],
       "migration": "migrations/00027_ca4_5_super_equipment_content.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_super_equipment_positions": {
       "allowed_query_owners": [
@@ -1309,7 +2048,16 @@
       ],
       "migration": "migrations/00027_ca4_5_super_equipment_content.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_super_equipment_tiers": {
       "allowed_query_owners": [
@@ -1327,7 +2075,16 @@
       ],
       "migration": "migrations/00027_ca4_5_super_equipment_content.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_content_super_hero_prerequisites": {
       "allowed_query_owners": [
@@ -1345,7 +2102,16 @@
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "gxb_operation_receipts": {
       "allowed_query_owners": [
@@ -1362,7 +2128,16 @@
       ],
       "migration": "migrations/00001_kernel_receipts.sql",
       "owner": "kernel/idempotency",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "ledger",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "i5_resource_registry": {
       "allowed_query_owners": [
@@ -1374,7 +2149,16 @@
       "allowed_write_paths": [],
       "migration": "migrations/00006_i5_transactional_policies.sql",
       "owner": "typed-economy-policy",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "logical_servers": {
       "allowed_query_owners": [
@@ -1391,7 +2175,19 @@
       ],
       "migration": "migrations/00002_identity_logicalserver_bootstrap.sql",
       "owner": "identity/logicalserver/bootstrap",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "max_player_id",
+          "next_player_id"
+        ],
+        "retention": null
+      }
     },
     "mail_attachments": {
       "allowed_query_owners": [
@@ -1407,7 +2203,16 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "mail",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "mail_records",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "mail_namespace_counters": {
       "allowed_query_owners": [
@@ -1423,7 +2228,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "mail",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "mail_records": {
       "allowed_query_owners": [
@@ -1439,7 +2255,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "mail",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "mail_tuning": {
       "allowed_query_owners": [
@@ -1453,7 +2280,16 @@
       ],
       "migration": "migrations/00108_i9_10_mail_tuning.sql",
       "owner": "mail",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "objective_definitions": {
       "allowed_query_owners": [
@@ -1465,7 +2301,16 @@
       "allowed_write_paths": [],
       "migration": "migrations/00006_i5_transactional_policies.sql",
       "owner": "objective-definition-policy",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "personal_dm_delivery": {
       "allowed_query_owners": [
@@ -1479,7 +2324,16 @@
       ],
       "migration": "migrations/00035_personal_dm_delivery.sql",
       "owner": "personal-dm",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "personal_dm_intents",
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "personal_dm_intents": {
       "allowed_query_owners": [
@@ -1493,7 +2347,20 @@
       ],
       "migration": "migrations/00035_personal_dm_delivery.sql",
       "owner": "personal-dm",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "sender_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [
+          "recipient_id"
+        ],
+        "retention": null
+      }
     },
     "personal_dm_payloads": {
       "allowed_query_owners": [
@@ -1507,7 +2374,16 @@
       ],
       "migration": "migrations/00035_personal_dm_delivery.sql",
       "owner": "personal-dm",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "personal_dm_intents",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_cosmetic_entitlements": {
       "allowed_query_owners": [
@@ -1523,7 +2399,18 @@
       ],
       "migration": "migrations/00047_i7b6a_player_display.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_currency_balances": {
       "allowed_query_owners": [
@@ -1539,7 +2426,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "typed-economy",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_crystal_spend_days": {
       "allowed_query_owners": [
@@ -1553,7 +2451,18 @@
       ],
       "migration": "migrations/00080_i9_2_crystal_spend_days.sql",
       "owner": "typed-economy",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_directory_profiles": {
       "allowed_query_owners": [
@@ -1571,7 +2480,18 @@
       ],
       "migration": "migrations/00004_player_directory_profile_bootstrap.sql",
       "owner": "player-directory-projection",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_display_admissions": {
       "allowed_query_owners": [
@@ -1587,7 +2507,18 @@
       ],
       "migration": "migrations/00047_i7b6a_player_display.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_display_selections": {
       "allowed_query_owners": [
@@ -1603,7 +2534,18 @@
       ],
       "migration": "migrations/00047_i7b6a_player_display.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_economy_owners": {
       "allowed_query_owners": [
@@ -1617,7 +2559,18 @@
       ],
       "migration": "migrations/00008_i5_economy_owner_fence.sql",
       "owner": "typed-economy",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_function_eligibility": {
       "allowed_query_owners": [
@@ -1631,7 +2584,18 @@
       ],
       "migration": "migrations/00011_r5_foundation_repairs.sql",
       "owner": "player-function-state",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_function_state_owners": {
       "allowed_query_owners": [
@@ -1645,7 +2609,18 @@
       ],
       "migration": "migrations/00011_r5_foundation_repairs.sql",
       "owner": "player-function-state",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_function_unlocks": {
       "allowed_query_owners": [
@@ -1661,7 +2636,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_guide_return_state": {
       "allowed_query_owners": [
@@ -1677,7 +2663,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_hero_live_entitlements": {
       "allowed_query_owners": [
@@ -1695,7 +2692,18 @@
       ],
       "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "character/hero-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_hero_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_hero_practice_candidates": {
       "allowed_query_owners": [
@@ -1713,7 +2721,18 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "character/practice",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_practice_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_hero_roots": {
       "allowed_query_owners": [
@@ -1731,7 +2750,18 @@
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
       "owner": "character/hero-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_hero_skin_entitlements": {
       "allowed_query_owners": [
@@ -1749,7 +2779,18 @@
       ],
       "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "character/hero-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_hero_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_heroes": {
       "allowed_query_owners": [
@@ -1767,7 +2808,18 @@
       ],
       "migration": "migrations/00014_ca2_hero_foundation.sql",
       "owner": "character/hero-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_hero_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_item_stacks": {
       "allowed_query_owners": [
@@ -1783,7 +2835,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "typed-economy",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_mission_instances": {
       "allowed_query_owners": [
@@ -1799,7 +2862,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "objective-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_pet_practice_candidates": {
       "allowed_query_owners": [
@@ -1817,7 +2891,18 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "character/practice",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_practice_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_pet_roots": {
       "allowed_query_owners": [
@@ -1835,7 +2920,18 @@
       ],
       "migration": "migrations/00016_ca3_pet_foundation.sql",
       "owner": "character/pet-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_pet_style_entitlements": {
       "allowed_query_owners": [
@@ -1853,7 +2949,18 @@
       ],
       "migration": "migrations/00030_ca7_2_appearance_foundation.sql",
       "owner": "character/pet-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_pet_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_pets": {
       "allowed_query_owners": [
@@ -1871,7 +2978,18 @@
       ],
       "migration": "migrations/00016_ca3_pet_foundation.sql",
       "owner": "character/pet-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_pet_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_practice_roots": {
       "allowed_query_owners": [
@@ -1889,7 +3007,18 @@
       ],
       "migration": "migrations/00029_ca6_2_practice_foundation.sql",
       "owner": "character/practice",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_profile_comment_operations": {
       "allowed_query_owners": [
@@ -1903,7 +3032,21 @@
       ],
       "migration": "migrations/00045_i7b4b_profile_comments.sql",
       "owner": "profile-feedback",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "target_player_id"
+        ],
+        "via": "player_profile_feedback_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [
+          "actor_player_id"
+        ],
+        "retention": null,
+        "review": "profile operation rows keyed to the profile owner, not the actor"
+      }
     },
     "player_profile_comment_reactions": {
       "allowed_query_owners": [
@@ -1917,7 +3060,18 @@
       ],
       "migration": "migrations/00045_i7b4b_profile_comments.sql",
       "owner": "profile-feedback",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "actor_player_id"
+        ],
+        "via": "player_profile_feedback_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_profile_comments": {
       "allowed_query_owners": [
@@ -1931,7 +3085,20 @@
       ],
       "migration": "migrations/00045_i7b4b_profile_comments.sql",
       "owner": "profile-feedback",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "target_player_id"
+        ],
+        "via": "player_profile_feedback_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "author_player_id"
+        ],
+        "retention": null
+      }
     },
     "player_profile_feedback_roots": {
       "allowed_query_owners": [
@@ -1945,7 +3112,18 @@
       ],
       "migration": "migrations/00044_i7b4a_profile_praise.sql",
       "owner": "profile-feedback",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_profile_praises": {
       "allowed_query_owners": [
@@ -1959,7 +3137,20 @@
       ],
       "migration": "migrations/00044_i7b4a_profile_praise.sql",
       "owner": "profile-feedback",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "target_player_id"
+        ],
+        "via": "player_profile_feedback_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "actor_player_id"
+        ],
+        "retention": null
+      }
     },
     "player_profiles": {
       "allowed_query_owners": [
@@ -1975,7 +3166,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_progression": {
       "allowed_query_owners": [
@@ -1991,7 +3193,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_public_profile_media_current": {
       "allowed_query_owners": [
@@ -2005,7 +3218,18 @@
       ],
       "migration": "migrations/00046_i7b5b_profile_media.sql",
       "owner": "public-profile",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_public_profile_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_public_profile_media_history": {
       "allowed_query_owners": [
@@ -2019,7 +3243,19 @@
       ],
       "migration": "migrations/00046_i7b5b_profile_media.sql",
       "owner": "public-profile",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_public_profile_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null,
+        "review": "append-only avatar history doubles as retention evidence"
+      }
     },
     "player_public_profile_roots": {
       "allowed_query_owners": [
@@ -2033,7 +3269,18 @@
       ],
       "migration": "migrations/00040_i7b2a_public_profile_foundation.sql",
       "owner": "public-profile",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_public_profile_showcase_slots": {
       "allowed_query_owners": [
@@ -2047,7 +3294,18 @@
       ],
       "migration": "migrations/00042_i7b3a_showcase_selection.sql",
       "owner": "public-profile",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_public_profile_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_saved_preset_heroes": {
       "allowed_query_owners": [
@@ -2065,7 +3323,18 @@
       ],
       "migration": "migrations/00028_ca5_2_saved_presets.sql",
       "owner": "character/saved-preset",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_saved_preset_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_saved_preset_lanes": {
       "allowed_query_owners": [
@@ -2083,7 +3352,18 @@
       ],
       "migration": "migrations/00028_ca5_2_saved_presets.sql",
       "owner": "character/saved-preset",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_saved_preset_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_saved_preset_roots": {
       "allowed_query_owners": [
@@ -2101,7 +3381,18 @@
       ],
       "migration": "migrations/00028_ca5_2_saved_presets.sql",
       "owner": "character/saved-preset",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_social_presence": {
       "allowed_query_owners": [
@@ -2115,7 +3406,18 @@
       ],
       "migration": "migrations/00031_i7a3_social_presence.sql",
       "owner": "social-presence",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_social_roots": {
       "allowed_query_owners": [
@@ -2129,7 +3431,18 @@
       ],
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_story_cursors": {
       "allowed_query_owners": [
@@ -2145,7 +3458,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "player-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_temporal_resources": {
       "allowed_query_owners": [
@@ -2161,7 +3485,18 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "typed-economy",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "players": {
       "allowed_query_owners": [
@@ -2190,7 +3525,18 @@
           "path": "internal/adapters/postgres/i5store/store.go",
           "reason": "Player Core service persists first_entry_pending through the I5 owner store; retained as an explicit column-level ownership exception."
         }
-      ]
+      ],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "publication_items": {
       "allowed_query_owners": [
@@ -2204,7 +3550,16 @@
       ],
       "migration": "migrations/00039_publication_v1.sql",
       "owner": "Publication",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "publication_picture_reads": {
       "allowed_query_owners": [
@@ -2218,7 +3573,19 @@
       ],
       "migration": "migrations/00039_publication_v1.sql",
       "owner": "Publication",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null,
+        "review": "read receipts kept as ledger evidence"
+      }
     },
     "publication_sets": {
       "allowed_query_owners": [
@@ -2232,7 +3599,16 @@
       ],
       "migration": "migrations/00039_publication_v1.sql",
       "owner": "Publication",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "realtime_presence_leases": {
       "allowed_query_owners": [
@@ -2246,7 +3622,18 @@
       ],
       "migration": "migrations/00031_i7a3_social_presence.sql",
       "owner": "social-presence",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "realtime_presence_owner_state": {
       "allowed_query_owners": [
@@ -2260,7 +3647,16 @@
       ],
       "migration": "migrations/00032_i7a3_presence_owner_fence_repair.sql",
       "owner": "social-presence",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "redeem_campaigns": {
       "allowed_query_owners": [
@@ -2276,7 +3672,16 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "redeem",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "redeem_codes": {
       "allowed_query_owners": [
@@ -2292,7 +3697,16 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "redeem",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "redeem_redemptions": {
       "allowed_query_owners": [
@@ -2308,7 +3722,20 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "redeem",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [
+          "subject_id"
+        ],
+        "retention": null
+      }
     },
     "redeem_reward_bundle_revisions": {
       "allowed_query_owners": [
@@ -2324,7 +3751,16 @@
       ],
       "migration": "migrations/00005_i5_player_economy_mail_objective_redeem.sql",
       "owner": "redeem",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "social_blocks": {
       "allowed_query_owners": [
@@ -2338,7 +3774,19 @@
       ],
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "player_social_roots",
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "blocked_player_id",
+          "blocker_player_id"
+        ],
+        "retention": null
+      }
     },
     "social_friend_requests": {
       "allowed_query_owners": [
@@ -2352,7 +3800,19 @@
       ],
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "player_social_roots",
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "requester_player_id",
+          "target_player_id"
+        ],
+        "retention": null
+      }
     },
     "social_friendships": {
       "allowed_query_owners": [
@@ -2366,7 +3826,19 @@
       ],
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "player_social_roots",
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "player_high_id",
+          "player_low_id"
+        ],
+        "retention": null
+      }
     },
     "social_gift_claim_operations": {
       "allowed_query_owners": [
@@ -2380,7 +3852,18 @@
       ],
       "migration": "migrations/00036_social_gift.sql",
       "owner": "social-gift",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "social_gift_epochs": {
       "allowed_query_owners": [
@@ -2394,7 +3877,18 @@
       ],
       "migration": "migrations/00036_social_gift.sql",
       "owner": "social-gift",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "social_gift_transfers": {
       "allowed_query_owners": [
@@ -2408,7 +3902,20 @@
       ],
       "migration": "migrations/00036_social_gift.sql",
       "owner": "social-gift",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [
+          "sender_player_id"
+        ],
+        "retention": null
+      }
     },
     "social_guild_invite_invalidations": {
       "allowed_query_owners": [
@@ -2422,7 +3929,18 @@
       ],
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "social-inbox",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "social_guild_invite_materializations": {
       "allowed_query_owners": [
@@ -2436,7 +3954,18 @@
       ],
       "migration": "migrations/00038_guild_invite_projection.sql",
       "owner": "social-inbox",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "social_notices": {
       "allowed_query_owners": [
@@ -2450,7 +3979,20 @@
       ],
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-inbox",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "recipient_player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "related_player_id"
+        ],
+        "retention": null
+      }
     },
     "social_request_epochs": {
       "allowed_query_owners": [
@@ -2464,7 +4006,18 @@
       ],
       "migration": "migrations/00033_i7a4a_social_foundation.sql",
       "owner": "social-relation",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_social_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_library_input_catalogs": {
       "allowed_query_owners": [
@@ -2482,7 +4035,16 @@
       ],
       "migration": "migrations/00049_i7c2b_library_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_roots": {
       "owner": "library-local-progression",
@@ -2498,7 +4060,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_heroes": {
       "owner": "library-local-progression",
@@ -2514,7 +4087,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_hero_logs": {
       "owner": "library-local-progression",
@@ -2530,7 +4114,19 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "journal",
+        "backup": false,
+        "references": [],
+        "retention": null,
+        "review": "hero log rows with no append-only store proof"
+      }
     },
     "player_library_admissions": {
       "owner": "library-local-progression",
@@ -2546,7 +4142,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_dialogs": {
       "owner": "library-local-progression",
@@ -2562,7 +4169,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_partner_missions": {
       "owner": "library-local-progression",
@@ -2578,7 +4196,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_act_awards": {
       "owner": "library-local-progression",
@@ -2594,7 +4223,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_talk_claims": {
       "owner": "library-local-progression",
@@ -2610,7 +4250,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_cg_claims": {
       "owner": "library-local-progression",
@@ -2626,7 +4277,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_library_backgrounds": {
       "owner": "library-local-progression",
@@ -2642,7 +4304,18 @@
         "sql/library/",
         "internal/adapters/postgres/librarystore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_library_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "library_forum_comments": {
       "owner": "library-forum",
@@ -2658,7 +4331,18 @@
         "sql/library/",
         "internal/adapters/postgres/libraryforumstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "author_player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "library_forum_reactions": {
       "owner": "library-forum",
@@ -2674,7 +4358,20 @@
         "sql/library/",
         "internal/adapters/postgres/libraryforumstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "viewer_player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "author_player_id"
+        ],
+        "retention": null
+      }
     },
     "player_dorm_roots": {
       "owner": "dorm-house",
@@ -2690,7 +4387,18 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_dorm_rooms": {
       "owner": "dorm-house",
@@ -2706,7 +4414,18 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_dorm_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_dorm_heroes": {
       "owner": "dorm-house",
@@ -2722,7 +4441,18 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_dorm_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_dorm_admissions": {
       "owner": "dorm-house",
@@ -2738,7 +4468,18 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_dorm_input_catalogs": {
       "allowed_query_owners": [
@@ -2756,7 +4497,16 @@
       ],
       "migration": "migrations/00050_i7c2c_dorm_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_book_roots": {
       "owner": "book-skill",
@@ -2772,7 +4522,18 @@
         "sql/book/",
         "internal/adapters/postgres/bookstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_event_centre_roots": {
       "owner": "event-centre",
@@ -2786,7 +4547,18 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/eventcentrestore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_event_centre_board_reports": {
       "owner": "event-centre",
@@ -2800,7 +4572,18 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/eventcentrestore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_book_admissions": {
       "owner": "book-skill",
@@ -2816,7 +4599,18 @@
         "sql/book/",
         "internal/adapters/postgres/bookstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_book_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_book_input_catalogs": {
       "allowed_query_owners": [
@@ -2834,7 +4628,16 @@
       ],
       "migration": "migrations/00051_i7c2d_book_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_course_input_catalogs": {
       "allowed_query_owners": [
@@ -2852,7 +4655,16 @@
       ],
       "migration": "migrations/00052_i7c2e_course_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_course_roots": {
       "owner": "course",
@@ -2868,7 +4680,18 @@
         "sql/course/",
         "internal/adapters/postgres/coursestore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_course_heroes": {
       "owner": "course",
@@ -2884,7 +4707,18 @@
         "sql/course/",
         "internal/adapters/postgres/coursestore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_course_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_course_admissions": {
       "owner": "course",
@@ -2900,7 +4734,18 @@
         "sql/course/",
         "internal/adapters/postgres/coursestore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_course_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_inscription_input_catalogs": {
       "allowed_query_owners": [
@@ -2918,7 +4763,16 @@
       ],
       "migration": "migrations/00053_i7c2f_inscription_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_inscription_roots": {
       "owner": "inscription",
@@ -2934,7 +4788,18 @@
         "sql/inscription/",
         "internal/adapters/postgres/inscriptionstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_inscription_heroes": {
       "owner": "inscription",
@@ -2950,7 +4815,18 @@
         "sql/inscription/",
         "internal/adapters/postgres/inscriptionstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_inscription_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_inscription_admissions": {
       "owner": "inscription",
@@ -2966,7 +4842,18 @@
         "sql/inscription/",
         "internal/adapters/postgres/inscriptionstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_inscription_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_inscription_imports": {
       "owner": "inscription",
@@ -2982,7 +4869,18 @@
         "sql/inscription/",
         "internal/adapters/postgres/inscriptionstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_inscription_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_element_input_catalogs": {
       "allowed_query_owners": [
@@ -3000,7 +4898,16 @@
       ],
       "migration": "migrations/00054_i7c2g_element_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_element_roots": {
       "owner": "elementequipment",
@@ -3016,7 +4923,18 @@
         "sql/elementequipment/",
         "internal/adapters/postgres/elementstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_element_heroes": {
       "owner": "elementequipment",
@@ -3032,7 +4950,18 @@
         "sql/elementequipment/",
         "internal/adapters/postgres/elementstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_element_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_element_admissions": {
       "owner": "elementequipment",
@@ -3048,7 +4977,18 @@
         "sql/elementequipment/",
         "internal/adapters/postgres/elementstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_element_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_spirit_input_catalogs": {
       "allowed_query_owners": [
@@ -3066,7 +5006,16 @@
       ],
       "migration": "migrations/00055_i7c2h_spirit_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_spirit_roots": {
       "owner": "spirit",
@@ -3082,7 +5031,18 @@
         "sql/spirit/",
         "internal/adapters/postgres/spiritstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_spirit_heroes": {
       "owner": "spirit",
@@ -3098,7 +5058,18 @@
         "sql/spirit/",
         "internal/adapters/postgres/spiritstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_spirit_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_spirit_admissions": {
       "owner": "spirit",
@@ -3114,7 +5085,18 @@
         "sql/spirit/",
         "internal/adapters/postgres/spiritstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_spirit_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_evolution_input_catalogs": {
       "allowed_query_owners": [
@@ -3132,7 +5114,16 @@
       ],
       "migration": "migrations/00056_i7c2i_hero_evolution.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_hero_evolution": {
       "allowed_query_owners": [
@@ -3150,7 +5141,18 @@
       ],
       "migration": "migrations/00056_i7c2i_hero_evolution.sql",
       "owner": "character/hero-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_hero_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_hero_evolution_admissions": {
       "allowed_query_owners": [
@@ -3168,7 +5170,18 @@
       ],
       "migration": "migrations/00056_i7c2i_hero_evolution.sql",
       "owner": "character/hero-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_hero_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_conquer_input_catalogs": {
       "allowed_query_owners": [
@@ -3186,7 +5199,16 @@
       ],
       "migration": "migrations/00057_i7c2j_conquer_facts.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_conquer_facts": {
       "owner": "conquer",
@@ -3202,7 +5224,18 @@
         "internal/adapters/postgres/conquerstore/",
         "sql/conquer/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_stat_rule_catalogs": {
       "allowed_query_owners": [
@@ -3220,7 +5253,16 @@
       ],
       "migration": "migrations/00058_i7c3a_stat_rules.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_stat_input_catalogs": {
       "allowed_query_owners": [
@@ -3238,7 +5280,16 @@
       ],
       "migration": "migrations/00059_i7c3b_stat_inputs.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_privilege_catalogs": {
       "allowed_query_owners": [
@@ -3256,7 +5307,16 @@
       ],
       "migration": "migrations/00060_i7c4a_cosmetic_privilege.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "commerce_privilege_roots": {
       "owner": "commerce-privilege",
@@ -3270,7 +5330,18 @@
         "internal/adapters/postgres/commerceprivilegestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00060_i7c4a_cosmetic_privilege.sql"
+      "migration": "migrations/00060_i7c4a_cosmetic_privilege.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_achievement_catalogs": {
       "allowed_query_owners": [
@@ -3288,7 +5359,16 @@
       ],
       "migration": "migrations/00061_i7c4b_achievement_facts.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "achievement_streaks": {
       "owner": "achievement",
@@ -3302,7 +5382,18 @@
         "internal/adapters/postgres/achievementstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "achievement_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_one_on_one_catalogs": {
       "owner": "content-registry",
@@ -3320,7 +5411,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "one_on_one_competitions": {
       "owner": "OneOnOne",
@@ -3334,7 +5434,16 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "one_on_one_players": {
       "owner": "OneOnOne",
@@ -3348,7 +5457,20 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "opponent"
+        ],
+        "retention": null
+      }
     },
     "one_on_one_matches": {
       "owner": "OneOnOne",
@@ -3362,7 +5484,20 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "attacker_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [
+          "defender_id"
+        ],
+        "retention": null
+      }
     },
     "one_on_one_rounds": {
       "owner": "OneOnOne",
@@ -3376,7 +5511,16 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "combat_attempts",
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "one_on_one_records": {
       "owner": "OneOnOne",
@@ -3390,7 +5534,18 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "owner_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "one_on_one_partner_usage": {
       "owner": "OneOnOne",
@@ -3404,7 +5559,18 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "one_on_one_settlements": {
       "owner": "OneOnOne",
@@ -3418,7 +5584,16 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "one_on_one_settlement_ranks": {
       "owner": "OneOnOne",
@@ -3432,7 +5607,18 @@
         "internal/adapters/postgres/oneononestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00066_i7c5c_one_on_one.sql"
+      "migration": "migrations/00066_i7c5c_one_on_one.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_top_floor_catalogs": {
       "owner": "content-registry",
@@ -3450,7 +5636,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_ladders": {
       "owner": "TopFloor",
@@ -3464,7 +5659,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_ranks": {
       "owner": "TopFloor",
@@ -3478,7 +5684,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_players": {
       "owner": "TopFloor",
@@ -3495,7 +5712,18 @@
       "migration": "migrations/00065_i7c5b_top_floor.sql",
       "alter_migrations": [
         "migrations/00155_i9_10_topfloor_win_streak.sql"
-      ]
+      ],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_fights": {
       "owner": "TopFloor",
@@ -3509,7 +5737,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "challenger_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_records": {
       "owner": "TopFloor",
@@ -3523,7 +5762,20 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "owner_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [
+          "opponent_player"
+        ],
+        "retention": null
+      }
     },
     "top_floor_partner_usage": {
       "owner": "TopFloor",
@@ -3537,7 +5789,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_offer_snapshots": {
       "owner": "TopFloor",
@@ -3551,7 +5814,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00117_i9_10_topfloor_offer_snapshots.sql"
+      "migration": "migrations/00117_i9_10_topfloor_offer_snapshots.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_day_settlements": {
       "owner": "TopFloor",
@@ -3565,7 +5839,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_day_ranks": {
       "owner": "TopFloor",
@@ -3579,7 +5864,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00065_i7c5b_top_floor.sql"
+      "migration": "migrations/00065_i7c5b_top_floor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "achievement_roots": {
       "owner": "achievement",
@@ -3593,7 +5889,18 @@
         "internal/adapters/postgres/achievementstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00061_i7c4b_achievement_facts.sql"
+      "migration": "migrations/00061_i7c4b_achievement_facts.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "achievement_events": {
       "owner": "achievement",
@@ -3607,7 +5914,19 @@
         "internal/adapters/postgres/achievementstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00061_i7c4b_achievement_facts.sql"
+      "migration": "migrations/00061_i7c4b_achievement_facts.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "achievement_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null,
+        "review": "dedup ledger but amendment 6A fixes its class as state"
+      }
     },
     "ranking_girls_roots": {
       "allowed_query_owners": [
@@ -3621,7 +5940,18 @@
       ],
       "migration": "migrations/00062_i7c4c_girls_ranking.sql",
       "owner": "Ranking",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "ranking_girls_snapshots": {
       "allowed_query_owners": [
@@ -3635,7 +5965,18 @@
       ],
       "migration": "migrations/00062_i7c4c_girls_ranking.sql",
       "owner": "Ranking",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "ranking_girls_periods": {
       "allowed_query_owners": [
@@ -3649,7 +5990,18 @@
       ],
       "migration": "migrations/00062_i7c4c_girls_ranking.sql",
       "owner": "Ranking",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "ranking_girls_awards": {
       "allowed_query_owners": [
@@ -3663,7 +6015,18 @@
       ],
       "migration": "migrations/00062_i7c4c_girls_ranking.sql",
       "owner": "Ranking",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "ranking_girls_birth_tracking": {
       "allowed_query_owners": [
@@ -3677,7 +6040,18 @@
       ],
       "migration": "migrations/00062_i7c4c_girls_ranking.sql",
       "owner": "Ranking",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "ranking_board_scores": {
       "allowed_query_owners": [
@@ -3691,7 +6065,18 @@
       ],
       "migration": "migrations/00159_r7_ranking_board_scores.sql",
       "owner": "Ranking",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_hero_raw_awakening": {
       "allowed_query_owners": [
@@ -3709,7 +6094,18 @@
       ],
       "migration": "migrations/00063_i7c4_character_raw_awakening_birth.sql",
       "owner": "character/hero-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_hero_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "combat_locator_roots": {
       "allowed_query_owners": [
@@ -3723,7 +6119,16 @@
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "combat_snapshots": {
       "allowed_query_owners": [
@@ -3737,7 +6142,17 @@
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null,
+        "review": "shared battle snapshot without a player key, treated as server data"
+      }
     },
     "combat_report_blobs": {
       "allowed_query_owners": [
@@ -3751,7 +6166,17 @@
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null,
+        "review": "shared battle blob without a player key, treated as server data"
+      }
     },
     "combat_resolutions": {
       "allowed_query_owners": [
@@ -3765,7 +6190,16 @@
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "combat_attempts": {
       "allowed_query_owners": [
@@ -3779,7 +6213,18 @@
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "actor_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "combat_start_packages": {
       "allowed_query_owners": [
@@ -3793,7 +6238,16 @@
       ],
       "migration": "migrations/00073_i8_4_combat_attempt_kinds.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "combat_attempts",
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "combat_attestations": {
       "allowed_query_owners": [
@@ -3807,7 +6261,16 @@
       ],
       "migration": "migrations/00073_i8_4_combat_attempt_kinds.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": "combat_attempts",
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "combat_attempt_members": {
       "allowed_query_owners": [
@@ -3821,7 +6284,18 @@
       ],
       "migration": "migrations/00075_i8_6c_attempt_members.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "member_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "combat_member_settlements": {
       "allowed_query_owners": [
@@ -3835,7 +6309,18 @@
       ],
       "migration": "migrations/00075_i8_6c_attempt_members.sql",
       "owner": "Combat",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "member_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_arena_catalogs": {
       "owner": "content-registry",
@@ -3853,7 +6338,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_competitions": {
       "owner": "Arena",
@@ -3867,7 +6361,16 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_players": {
       "owner": "Arena",
@@ -3881,7 +6384,20 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "opponent"
+        ],
+        "retention": null
+      }
     },
     "arena_matches": {
       "owner": "Arena",
@@ -3895,7 +6411,20 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "attacker_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [
+          "defender_id"
+        ],
+        "retention": null
+      }
     },
     "arena_records": {
       "owner": "Arena",
@@ -3909,7 +6438,18 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "owner_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_partner_usage": {
       "owner": "Arena",
@@ -3923,7 +6463,18 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_settlements": {
       "owner": "Arena",
@@ -3937,7 +6488,16 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_settlement_ranks": {
       "owner": "Arena",
@@ -3951,7 +6511,18 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00067_i7c5d_arena.sql"
+      "migration": "migrations/00067_i7c5d_arena.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_conquer_mode_catalogs": {
       "owner": "content-registry",
@@ -3969,7 +6540,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00068_i7c5e_conquer_school.sql"
+      "migration": "migrations/00068_i7c5e_conquer_school.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "conquer_school_players": {
       "owner": "conquer",
@@ -3983,7 +6563,18 @@
         "internal/adapters/postgres/conquerstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00068_i7c5e_conquer_school.sql"
+      "migration": "migrations/00068_i7c5e_conquer_school.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "conquer_school_reports": {
       "owner": "conquer",
@@ -3997,7 +6588,18 @@
         "internal/adapters/postgres/conquerstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00068_i7c5e_conquer_school.sql"
+      "migration": "migrations/00068_i7c5e_conquer_school.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "owner_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "conquer_school_report_views": {
       "owner": "conquer",
@@ -4011,7 +6613,18 @@
         "internal/adapters/postgres/conquerstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00068_i7c5e_conquer_school.sql"
+      "migration": "migrations/00068_i7c5e_conquer_school.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "viewer_player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_league_catalogs": {
       "allowed_query_owners": [
@@ -4025,7 +6638,16 @@
       ],
       "migration": "migrations/00069_i7c5f_champions_league.sql",
       "owner": "Content",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "league_competitions": {
       "allowed_query_owners": [
@@ -4039,7 +6661,16 @@
       ],
       "migration": "migrations/00069_i7c5f_champions_league.sql",
       "owner": "ChampionsLeague",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "league_cosmetic_origins": {
       "allowed_query_owners": [
@@ -4053,7 +6684,18 @@
       ],
       "migration": "migrations/00069_i7c5f_champions_league.sql",
       "owner": "ChampionsLeague",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "league_matches": {
       "allowed_query_owners": [
@@ -4067,7 +6709,16 @@
       ],
       "migration": "migrations/00069_i7c5f_champions_league.sql",
       "owner": "ChampionsLeague",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "league_players": {
       "allowed_query_owners": [
@@ -4081,7 +6732,18 @@
       ],
       "migration": "migrations/00069_i7c5f_champions_league.sql",
       "owner": "ChampionsLeague",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "league_settlements": {
       "allowed_query_owners": [
@@ -4095,7 +6757,16 @@
       ],
       "migration": "migrations/00069_i7c5f_champions_league.sql",
       "owner": "ChampionsLeague",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "achievement_award_claims": {
       "owner": "achievement",
@@ -4109,7 +6780,18 @@
         "internal/adapters/postgres/achievementstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00070_i7c4fa_achievement_catalog_ap.sql"
+      "migration": "migrations/00070_i7c4fa_achievement_catalog_ap.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "achievement_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "achievement_notices": {
       "owner": "achievement",
@@ -4123,7 +6805,19 @@
         "internal/adapters/postgres/achievementstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00070_i7c4fa_achievement_catalog_ap.sql"
+      "migration": "migrations/00070_i7c4fa_achievement_catalog_ap.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "achievement_roots",
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null,
+        "review": "derived notices with a delivery marker, treated as cache"
+      }
     },
     "client_log_capabilities": {
       "allowed_query_owners": [
@@ -4137,7 +6831,18 @@
       ],
       "migration": "migrations/00076_i8_5_3_client_observability.sql",
       "owner": "clientlog",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "client_log_uploads": {
       "allowed_query_owners": [
@@ -4151,7 +6856,18 @@
       ],
       "migration": "migrations/00076_i8_5_3_client_observability.sql",
       "owner": "clientlog",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "journal",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "client_log_rows": {
       "allowed_query_owners": [
@@ -4165,7 +6881,18 @@
       ],
       "migration": "migrations/00076_i8_5_3_client_observability.sql",
       "owner": "clientlog",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "journal",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "request_journal": {
       "allowed_query_owners": [
@@ -4179,7 +6906,18 @@
       ],
       "migration": "migrations/00076_i8_5_3_client_observability.sql",
       "owner": "clientlog",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "journal",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_campaign_catalogs": {
       "owner": "content-registry",
@@ -4197,7 +6935,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00081_i9_3a_campaign.sql"
+      "migration": "migrations/00081_i9_3a_campaign.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "campaign_players": {
       "allowed_query_owners": [
@@ -4211,7 +6958,18 @@
       ],
       "migration": "migrations/00081_i9_3a_campaign.sql",
       "owner": "Campaign",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "campaign_nodes": {
       "allowed_query_owners": [
@@ -4225,7 +6983,18 @@
       ],
       "migration": "migrations/00081_i9_3a_campaign.sql",
       "owner": "Campaign",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "daily_consumption_players": {
       "owner": "DailyConsumption",
@@ -4239,7 +7008,18 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/dailyconsumestore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_summon_catalogs": {
       "owner": "content-registry",
@@ -4257,7 +7037,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00084_i9_3e_summon.sql"
+      "migration": "migrations/00084_i9_3e_summon.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "summon_players": {
       "owner": "Summon",
@@ -4271,7 +7060,18 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/summonstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "summon_tuning": {
       "owner": "Summon",
@@ -4285,7 +7085,16 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/summonstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_mission_roots": {
       "allowed_query_owners": [
@@ -4299,7 +7108,18 @@
       ],
       "migration": "migrations/00085_i9_4_mission_root.sql",
       "owner": "objective-core",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_mission_activity_catalogs": {
       "owner": "content-registry",
@@ -4317,7 +7137,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00087_i9_4_mission_chests.sql"
+      "migration": "migrations/00087_i9_4_mission_chests.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_signin_roots": {
       "owner": "objective-core",
@@ -4331,7 +7160,18 @@
         "internal/adapters/postgres/i5store/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00088_i9_4_signin.sql"
+      "migration": "migrations/00088_i9_4_signin.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_monthly_signin_catalogs": {
       "owner": "content-registry",
@@ -4347,7 +7187,16 @@
         "internal/adapters/postgres/contentstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00088_i9_4_signin.sql"
+      "migration": "migrations/00088_i9_4_signin.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_awakening_catalogs": {
       "owner": "content-registry",
@@ -4363,7 +7212,16 @@
         "internal/adapters/postgres/contentstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00089_i9_4_awakening.sql"
+      "migration": "migrations/00089_i9_4_awakening.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_awakening_roots": {
       "owner": "objective-core",
@@ -4377,7 +7235,18 @@
         "internal/adapters/postgres/i5store/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00089_i9_4_awakening.sql"
+      "migration": "migrations/00089_i9_4_awakening.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_march_catalogs": {
       "owner": "content-registry",
@@ -4391,7 +7260,16 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/contentstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "march_players": {
       "owner": "march",
@@ -4405,7 +7283,18 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/marchstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_workplace_catalogs": {
       "owner": "content-registry",
@@ -4419,7 +7308,16 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/contentstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "workplace_players": {
       "owner": "workplace",
@@ -4433,7 +7331,18 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/workplacestore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_pet_campaign_catalogs": {
       "allowed_query_owners": [
@@ -4447,7 +7356,16 @@
       ],
       "migration": "migrations/00092_i9_5c_petcampaign.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "petcampaign_players": {
       "allowed_query_owners": [
@@ -4461,7 +7379,18 @@
       ],
       "migration": "migrations/00092_i9_5c_petcampaign.sql",
       "owner": "petcampaign",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_gods_trial_catalogs": {
       "allowed_query_owners": [
@@ -4475,7 +7404,16 @@
       ],
       "migration": "migrations/00093_i9_6a_gods_trial.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "godstrial_players": {
       "allowed_query_owners": [
@@ -4489,7 +7427,18 @@
       ],
       "migration": "migrations/00093_i9_6a_gods_trial.sql",
       "owner": "godstrial",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_dodgeball_catalogs": {
       "allowed_query_owners": [
@@ -4503,7 +7452,16 @@
       ],
       "migration": "migrations/00094_i9_6b_dodgeball.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "dodgeball_players": {
       "allowed_query_owners": [
@@ -4517,7 +7475,18 @@
       ],
       "migration": "migrations/00094_i9_6b_dodgeball.sql",
       "owner": "dodgeball",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_memoir_catalogs": {
       "allowed_query_owners": [
@@ -4531,7 +7500,16 @@
       ],
       "migration": "migrations/00095_i9_6c_memoir.sql",
       "owner": "content-registry",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "memoir_players": {
       "allowed_query_owners": [
@@ -4545,7 +7523,18 @@
       ],
       "migration": "migrations/00095_i9_6c_memoir.sql",
       "owner": "memoir",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_periods": {
       "owner": "TopFloor",
@@ -4559,7 +7548,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_ranks": {
       "owner": "TopFloor",
@@ -4573,7 +7573,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_players": {
       "owner": "TopFloor",
@@ -4587,7 +7598,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_preferences": {
       "owner": "TopFloor",
@@ -4601,7 +7623,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_fights": {
       "owner": "TopFloor",
@@ -4615,7 +7648,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "challenger_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_records": {
       "owner": "TopFloor",
@@ -4629,7 +7673,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "owner_player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_days": {
       "owner": "TopFloor",
@@ -4643,7 +7698,18 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00096_i9_7a_top_floor_task.sql"
+      "migration": "migrations/00096_i9_7a_top_floor_task.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "top_floor_task_bans": {
       "owner": "TopFloor",
@@ -4657,7 +7723,16 @@
         "internal/adapters/postgres/topfloorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00143_i9_10_task_operator_bans.sql"
+      "migration": "migrations/00143_i9_10_task_operator_bans.sql",
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_tournament_periods": {
       "owner": "Arena",
@@ -4671,7 +7746,16 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql",
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_tournament_rooms": {
       "owner": "Arena",
@@ -4685,7 +7769,19 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql",
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": null,
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "first_player",
+          "second_player"
+        ],
+        "retention": null
+      }
     },
     "arena_casual_entries": {
       "owner": "Arena",
@@ -4699,7 +7795,18 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_casual_scores": {
       "owner": "Arena",
@@ -4713,7 +7820,18 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_casual_sessions": {
       "owner": "Arena",
@@ -4727,7 +7845,16 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00097_i9_7b_tournament_casual.sql"
+      "migration": "migrations/00097_i9_7b_tournament_casual.sql",
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "arena_friend_invitations": {
       "owner": "Arena",
@@ -4741,7 +7868,19 @@
         "internal/adapters/postgres/arenastore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00098_i9_7c_friend_fight.sql"
+      "migration": "migrations/00098_i9_7c_friend_fight.sql",
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": null,
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "inviter_player",
+          "recipient_player"
+        ],
+        "retention": null
+      }
     },
     "content_world_boss_catalogs": {
       "owner": "content-registry",
@@ -4755,7 +7894,16 @@
         "internal/adapters/postgres/contentstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00099_i9_8a_world_boss.sql"
+      "migration": "migrations/00099_i9_8a_world_boss.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "worldboss_occurrences": {
       "owner": "worldboss",
@@ -4769,7 +7917,18 @@
         "internal/adapters/postgres/worldbossstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00099_i9_8a_world_boss.sql"
+      "migration": "migrations/00099_i9_8a_world_boss.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "worldboss_players": {
       "owner": "worldboss",
@@ -4783,7 +7942,18 @@
         "internal/adapters/postgres/worldbossstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00099_i9_8a_world_boss.sql"
+      "migration": "migrations/00099_i9_8a_world_boss.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "worldboss_player_totals": {
       "owner": "worldboss",
@@ -4797,7 +7967,18 @@
         "internal/adapters/postgres/worldbossstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00099_i9_8a_world_boss.sql"
+      "migration": "migrations/00099_i9_8a_world_boss.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "worldboss_attempts": {
       "owner": "worldboss",
@@ -4811,7 +7992,18 @@
         "internal/adapters/postgres/worldbossstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00099_i9_8a_world_boss.sql"
+      "migration": "migrations/00099_i9_8a_world_boss.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "shared_rooms": {
       "owner": "sharedroom",
@@ -4825,7 +8017,19 @@
         "internal/adapters/postgres/sharedroomstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "owner_player"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null,
+        "review": "ephemeral shared room rows with an owner player"
+      }
     },
     "shared_room_seats": {
       "owner": "sharedroom",
@@ -4839,7 +8043,18 @@
         "internal/adapters/postgres/sharedroomstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_illusion_catalogs": {
       "owner": "content-registry",
@@ -4853,7 +8068,16 @@
         "internal/adapters/postgres/contentstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "illusion_occurrences": {
       "owner": "illusion",
@@ -4867,7 +8091,18 @@
         "internal/adapters/postgres/illusionstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "illusion_players": {
       "owner": "illusion",
@@ -4881,7 +8116,18 @@
         "internal/adapters/postgres/illusionstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "illusion_occurrence_results": {
       "owner": "illusion",
@@ -4895,7 +8141,18 @@
         "internal/adapters/postgres/illusionstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "illusion_attempts": {
       "owner": "illusion",
@@ -4909,7 +8166,18 @@
         "internal/adapters/postgres/illusionstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "illusion_reports": {
       "owner": "illusion",
@@ -4923,7 +8191,18 @@
         "internal/adapters/postgres/illusionstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "illusion_settlements": {
       "owner": "illusion",
@@ -4937,7 +8216,18 @@
         "internal/adapters/postgres/illusionstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql"
+      "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "content_occult_catalogs": {
       "owner": "content-registry",
@@ -4951,7 +8241,16 @@
         "internal/adapters/postgres/contentstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00101_i9_8c_occult.sql"
+      "migration": "migrations/00101_i9_8c_occult.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "occult_players": {
       "owner": "occult",
@@ -4965,7 +8264,18 @@
         "internal/adapters/postgres/occultstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00101_i9_8c_occult.sql"
+      "migration": "migrations/00101_i9_8c_occult.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "occult_runs": {
       "owner": "occult",
@@ -4979,7 +8289,18 @@
         "internal/adapters/postgres/occultstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00101_i9_8c_occult.sql"
+      "migration": "migrations/00101_i9_8c_occult.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "occult_reports": {
       "owner": "occult",
@@ -4993,7 +8314,18 @@
         "internal/adapters/postgres/occultstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00101_i9_8c_occult.sql"
+      "migration": "migrations/00101_i9_8c_occult.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "occult_logs": {
       "owner": "occult",
@@ -5007,7 +8339,18 @@
         "internal/adapters/postgres/occultstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00101_i9_8c_occult.sql"
+      "migration": "migrations/00101_i9_8c_occult.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "journal",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_adventure_catalogs": {
       "owner": "content-registry",
@@ -5021,7 +8364,16 @@
         "internal/adapters/postgres/contentstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00102_i9_8d_adventure.sql"
+      "migration": "migrations/00102_i9_8d_adventure.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "adventure_occurrences": {
       "owner": "adventure",
@@ -5035,7 +8387,18 @@
         "internal/adapters/postgres/adventurestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00102_i9_8d_adventure.sql"
+      "migration": "migrations/00102_i9_8d_adventure.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "adventure_single_attempts": {
       "owner": "adventure",
@@ -5049,7 +8412,18 @@
         "internal/adapters/postgres/adventurestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00102_i9_8d_adventure.sql"
+      "migration": "migrations/00102_i9_8d_adventure.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "adventure_reports": {
       "owner": "adventure",
@@ -5063,7 +8437,18 @@
         "internal/adapters/postgres/adventurestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00102_i9_8d_adventure.sql"
+      "migration": "migrations/00102_i9_8d_adventure.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_guild_activity_days": {
       "owner": "guild-core",
@@ -5083,7 +8468,18 @@
           "reason": "Energy debit credits guild activity inside the I5 debit transaction (I9_GUILD_ACTIVITY_V1); insert-or-add on amount only."
         }
       ],
-      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+      "migration": "migrations/00103_i9_9a_guild_activity.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "player_guild_activity_totals": {
       "owner": "guild-core",
@@ -5097,7 +8493,18 @@
         "internal/adapters/postgres/guildstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+      "migration": "migrations/00103_i9_9a_guild_activity.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_activity_awards": {
       "owner": "guild-core",
@@ -5111,7 +8518,18 @@
         "internal/adapters/postgres/guildstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+      "migration": "migrations/00103_i9_9a_guild_activity.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_tea_wishes": {
       "owner": "guild-core",
@@ -5125,7 +8543,18 @@
         "internal/adapters/postgres/guildstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+      "migration": "migrations/00103_i9_9a_guild_activity.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_tea_gifts": {
       "owner": "guild-core",
@@ -5139,7 +8568,20 @@
         "internal/adapters/postgres/guildstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00103_i9_9a_guild_activity.sql"
+      "migration": "migrations/00103_i9_9a_guild_activity.sql",
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": null,
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "donor_id",
+          "receiver_id"
+        ],
+        "retention": null,
+        "review": "gift row between two players; scope chosen player with neither column an owner"
+      }
     },
     "guild_rental_offers": {
       "owner": "guild-core",
@@ -5153,7 +8595,19 @@
         "internal/adapters/postgres/guildstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00104_i9_9b_guild_rental.sql"
+      "migration": "migrations/00104_i9_9b_guild_rental.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "lender_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null,
+        "review": "player-owned rental offer listed under the guild system"
+      }
     },
     "guild_rental_uses": {
       "owner": "guild-core",
@@ -5167,7 +8621,20 @@
         "internal/adapters/postgres/guildstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00104_i9_9b_guild_rental.sql"
+      "migration": "migrations/00104_i9_9b_guild_rental.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "lender_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [
+          "borrower_id"
+        ],
+        "retention": null
+      }
     },
     "guild_campaign_chapters": {
       "owner": "guildcampaign",
@@ -5181,7 +8648,18 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_campaign_registrations": {
       "owner": "guildcampaign",
@@ -5195,7 +8673,20 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_campaign_copies": {
       "owner": "guildcampaign",
@@ -5209,7 +8700,20 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "holder_id"
+        ],
+        "retention": null
+      }
     },
     "guild_campaign_member_days": {
       "owner": "guildcampaign",
@@ -5223,7 +8727,18 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_campaign_damage": {
       "owner": "guildcampaign",
@@ -5237,7 +8752,18 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_campaign_awards": {
       "owner": "guildcampaign",
@@ -5251,7 +8777,18 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_campaign_applications": {
       "owner": "guildcampaign",
@@ -5265,7 +8802,18 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_campaign_application_days": {
       "owner": "guildcampaign",
@@ -5279,7 +8827,18 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "guild_campaign_distributions": {
       "owner": "guildcampaign",
@@ -5293,7 +8852,20 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_campaign_log": {
       "owner": "guildcampaign",
@@ -5307,7 +8879,21 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "guild",
+        "owner": [
+          "guild_id"
+        ],
+        "via": null,
+        "kind": "journal",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null,
+        "review": "guild campaign log holds player_id but is a guild journal"
+      }
     },
     "guild_campaign_server_records": {
       "owner": "guildcampaign",
@@ -5321,7 +8907,20 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
     },
     "guild_campaign_server_kills": {
       "owner": "guildcampaign",
@@ -5335,7 +8934,20 @@
         "internal/adapters/postgres/guildcampaignstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00105_i9_9c_guild_campaign.sql"
+      "migration": "migrations/00105_i9_9c_guild_campaign.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [
+          "first_player_id"
+        ],
+        "retention": null
+      }
     },
     "commerce_charge_purchases": {
       "owner": "commerce-privilege",
@@ -5349,7 +8961,18 @@
         "internal/adapters/postgres/commerceprivilegestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00109_i9_10g_charge.sql"
+      "migration": "migrations/00109_i9_10g_charge.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "commerce_charge_cards": {
       "owner": "commerce-privilege",
@@ -5363,7 +8986,18 @@
         "internal/adapters/postgres/commerceprivilegestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00109_i9_10g_charge.sql"
+      "migration": "migrations/00109_i9_10g_charge.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "commerce_vip_awards": {
       "owner": "commerce-privilege",
@@ -5377,7 +9011,18 @@
         "internal/adapters/postgres/commerceprivilegestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00109_i9_10g_charge.sql"
+      "migration": "migrations/00109_i9_10g_charge.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "commerce_recharge_tuning": {
       "owner": "commerce-privilege",
@@ -5391,7 +9036,16 @@
         "internal/adapters/postgres/commerceprivilegestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00109_i9_10g_charge.sql"
+      "migration": "migrations/00109_i9_10g_charge.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_charge_catalogs": {
       "owner": "content-registry",
@@ -5409,7 +9063,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00109_i9_10g_charge.sql"
+      "migration": "migrations/00109_i9_10g_charge.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "player_scalar_daily_floors": {
       "owner": "typed-economy",
@@ -5423,7 +9086,18 @@
         "internal/adapters/postgres/i5store/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00125_i9_10c_scalar_daily_floors.sql"
+      "migration": "migrations/00125_i9_10c_scalar_daily_floors.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_dorm_glue_purchases": {
       "owner": "dorm-house",
@@ -5437,7 +9111,18 @@
         "internal/adapters/postgres/dormstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00126_i9_10c_glue_purchases.sql"
+      "migration": "migrations/00126_i9_10c_glue_purchases.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_dorm_roots",
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_dorm_room_social": {
       "owner": "dorm-house",
@@ -5453,7 +9138,18 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_dorm_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_dorm_praises": {
       "owner": "dorm-house",
@@ -5469,7 +9165,20 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_dorm_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "actor_player_id"
+        ],
+        "retention": null
+      }
     },
     "player_dorm_comments": {
       "owner": "dorm-house",
@@ -5485,7 +9194,20 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_dorm_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "author_player_id"
+        ],
+        "retention": null
+      }
     },
     "player_dorm_comment_reactions": {
       "owner": "dorm-house",
@@ -5501,7 +9223,20 @@
         "sql/dorm/",
         "internal/adapters/postgres/dormstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "player_dorm_roots",
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "actor_player_id"
+        ],
+        "retention": null
+      }
     },
     "library_forum_boards": {
       "owner": "library-forum",
@@ -5517,7 +9252,16 @@
         "sql/library/",
         "internal/adapters/postgres/libraryforumstore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "content_social_input_catalogs": {
       "owner": "content-registry",
@@ -5535,7 +9279,16 @@
         "internal/adapters/postgres/contentqueries/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00116_i9_10e_social_content.sql"
+      "migration": "migrations/00116_i9_10e_social_content.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "social_exchange_tuning": {
       "owner": "socialexchange",
@@ -5549,7 +9302,16 @@
         "internal/adapters/postgres/socialexchangestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00119_i9_10e_exchange_tuning.sql"
+      "migration": "migrations/00119_i9_10e_exchange_tuning.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "social_recall_tasks": {
       "owner": "socialrecall",
@@ -5563,7 +9325,20 @@
         "internal/adapters/postgres/socialrecallstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00123_i9_10e_social_recall.sql"
+      "migration": "migrations/00123_i9_10e_social_recall.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "caller_player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "target_player_id"
+        ],
+        "retention": null
+      }
     },
     "player_login_observations": {
       "owner": "identity/logicalserver/bootstrap",
@@ -5577,7 +9352,19 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/i4store/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null,
+        "review": "append-only login observations used for dedup"
+      }
     },
     "social_recall_awards": {
       "owner": "socialrecall",
@@ -5591,7 +9378,18 @@
         "internal/adapters/postgres/socialrecallstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00124_i9_10e_social_recall_awards.sql"
+      "migration": "migrations/00124_i9_10e_social_recall_awards.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "social_invite_bindings": {
       "owner": "socialinvite",
@@ -5605,7 +9403,20 @@
         "internal/adapters/postgres/socialinvitestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00130_i9_10e_social_invite.sql"
+      "migration": "migrations/00130_i9_10e_social_invite.sql",
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": null,
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "invitee_player_id",
+          "inviter_player_id"
+        ],
+        "retention": null,
+        "review": "inviter/invitee pair with no foreign key path to players"
+      }
     },
     "social_invite_mission_claims": {
       "owner": "socialinvite",
@@ -5619,7 +9430,18 @@
         "internal/adapters/postgres/socialinvitestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00130_i9_10e_social_invite.sql"
+      "migration": "migrations/00130_i9_10e_social_invite.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "social_invite_tuning": {
       "owner": "socialinvite",
@@ -5633,7 +9455,16 @@
         "internal/adapters/postgres/socialinvitestore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00130_i9_10e_social_invite.sql"
+      "migration": "migrations/00130_i9_10e_social_invite.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     },
     "mentor_relations": {
       "owner": "mentor",
@@ -5647,7 +9478,19 @@
         "internal/adapters/postgres/mentorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00137_i9_10f_mentor.sql"
+      "migration": "migrations/00137_i9_10f_mentor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": null,
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "mentor_id",
+          "student_id"
+        ],
+        "retention": null
+      }
     },
     "mentor_states": {
       "owner": "mentor",
@@ -5661,7 +9504,18 @@
         "internal/adapters/postgres/mentorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00137_i9_10f_mentor.sql"
+      "migration": "migrations/00137_i9_10f_mentor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "mentor_applications": {
       "owner": "mentor",
@@ -5675,7 +9529,19 @@
         "internal/adapters/postgres/mentorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00137_i9_10f_mentor.sql"
+      "migration": "migrations/00137_i9_10f_mentor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [],
+        "via": null,
+        "kind": "shared",
+        "backup": true,
+        "references": [
+          "applicant_id",
+          "target_id"
+        ],
+        "retention": null
+      }
     },
     "mentor_mission_progress": {
       "owner": "mentor",
@@ -5689,7 +9555,18 @@
         "internal/adapters/postgres/mentorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00137_i9_10f_mentor.sql"
+      "migration": "migrations/00137_i9_10f_mentor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "mentor_exam_receipts": {
       "owner": "mentor",
@@ -5703,7 +9580,18 @@
         "internal/adapters/postgres/mentorstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00137_i9_10f_mentor.sql"
+      "migration": "migrations/00137_i9_10f_mentor.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "student_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "player_gm_questions": {
       "owner": "gmquestion",
@@ -5717,7 +9605,18 @@
       "migration": "migrations/00154_i9_10_gm_questions.sql",
       "allowed_query_owners": [
         "gmquestion"
-      ]
+      ],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     },
     "broadcast_outbox": {
       "owner": "broadcast",
@@ -5731,7 +9630,20 @@
       "allowed_write_paths": [
         "internal/adapters/postgres/broadcaststore/"
       ],
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "enemy_player_id"
+        ],
+        "retention": null
+      }
     },
     "hero_recommend_snapshots": {
       "owner": "HeroRecommend",
@@ -5745,7 +9657,18 @@
         "internal/adapters/postgres/herorecommendstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00157_i9_10_hero_recommend.sql"
+      "migration": "migrations/00157_i9_10_hero_recommend.sql",
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     }
   }
 }
