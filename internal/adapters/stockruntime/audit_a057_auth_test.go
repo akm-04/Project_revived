@@ -9,13 +9,36 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
+	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
+	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 )
 
 type auditUnavailableAuthority struct{ cause error }
 
 func (authority auditUnavailableAuthority) ResolveGameplayBearer(context.Context, string, time.Time) (identity.ActorContext, error) {
 	return identity.ActorContext{}, authority.cause
+}
+
+func TestAuditA057AuthPolicyControls(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		cause  error
+		status int
+		code   int64
+	}{
+		{"session", errors.New("bearer not live"), http.StatusUnauthorized, sessionFailureCode},
+		{"region", apprealtime.ErrRegionMismatch, http.StatusConflict, unprovenRefusalCode},
+		{"room", domainrt.ErrRoomNotAuthorized, http.StatusConflict, unprovenRefusalCode},
+		{"endpoint", apprealtime.ErrNoEndpoint, http.StatusInternalServerError, unprovenRefusalCode},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			response := authFailure(test.cause)
+			if response.HTTPStatus != test.status || response.Body["error_code"] != test.code {
+				t.Fatalf("status=%d body=%v", response.HTTPStatus, response.Body)
+			}
+		})
+	}
 }
 
 func TestAuditA057BearerLookupFaultDoesNotRestartSession(t *testing.T) {

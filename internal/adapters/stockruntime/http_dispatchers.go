@@ -103,10 +103,14 @@ func (d LobbyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 
 // authFailure classifies a rejected gameplay bearer by meaning: a region or room
 // claim that does not match the canonical actor is a permanent refusal, an
-// endpoint lookup fault is a server fault, and everything else is an expired,
+// transient lookup fault remains retryable, an endpoint configuration fault is
+// a server fault, and everything else is an expired,
 // replaced or invalid session. Credential and canonical actor details are never
 // reflected to stock callers.
 func authFailure(err error) httpedge.Response {
+	if isTransient(err) {
+		return failureReply(unavailable(err))
+	}
 	if errors.Is(err, apprealtime.ErrRegionMismatch) || errors.Is(err, domainrt.ErrRoomNotAuthorized) {
 		return failureReply(refusal(unprovenRefusalCode))
 	}
