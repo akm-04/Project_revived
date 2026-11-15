@@ -110,3 +110,43 @@ func TestI9_5BAdventurePvpUnresolvedNative(t *testing.T) {
 		t.Fatalf("the identical retry settled %d times", resolved)
 	}
 }
+
+// Each replacement closes the attempt it replaces under its own receipt, so a
+// player who returns to an earlier formation after a third stuck attempt in one
+// occurrence still gets a fight instead of a duplicate terminal receipt.
+func TestI9_5BAdventurePvpRepeatedReplacementNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, picks := adventureOwner(t, p, server, 11, 10001001, 10001002)
+	enemy := adventurePvpOpponent(t, p, server)
+	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
+	mode := adventureTestMode(t, p, clock, adventureOpponents{arena: enemy, arenaFound: true})
+	mode.Combat = saturatedTimes(mode.Combat.(cb.Service), 3)
+	revision := installed(t, p)
+	start := clock.at
+	putAdventureOccurrence(t, p, a.PlayerID, d.EventBattle, 0, start, start.Add(2*time.Hour), "pvp-replaced-twice")
+
+	formations := [][]int64{{picks[0]}, {picks[1]}, {picks[0]}, {picks[1]}}
+	for i, formation := range formations {
+		clock.Set(start.Add(time.Duration(i) * 6 * time.Minute))
+		op := opPinned(revision)
+		op.StartedAt = clock.at
+		response, err := mode.Fight(ctx, a, appadventure.FightRequest{Formation: formation}, op)
+		if i < len(formations)-1 {
+			if !errors.Is(err, cb.ErrWorkerSaturated) {
+				t.Fatalf("fight %d: saturated worker %v", i, err)
+			}
+			continue
+		}
+		if err != nil {
+			t.Fatal("fight after three stuck attempts", err)
+		}
+		if report, _ := response.Body["battle_report"].(string); report == "" {
+			t.Fatal("fight after three stuck attempts replied no report")
+		}
+	}
+	locator := adventureBattleLocator(a.PlayerID, start)
+	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 3 {
+		t.Fatalf("closed attempts %d", closed)
+	}
+}

@@ -34,25 +34,29 @@ func permanentFirst(service cb.Service) cb.Service {
 	return service
 }
 
-// saturatedOnceWorker refuses the first resolution as an admission fault, then
+// saturatedWorker refuses the first resolutions as an admission fault, then
 // delegates to the real worker so a retried fight can resolve.
-type saturatedOnceWorker struct {
+type saturatedWorker struct {
 	mu     sync.Mutex
 	worker cb.Worker
-	failed bool
+	left   int
 }
 
-func (w *saturatedOnceWorker) Resolve(ctx context.Context, snapshot []byte, hash string, root [32]byte) (cb.WorkerOutput, error) {
+func (w *saturatedWorker) Resolve(ctx context.Context, snapshot []byte, hash string, root [32]byte) (cb.WorkerOutput, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if !w.failed {
-		w.failed = true
+	if w.left > 0 {
+		w.left--
 		return cb.WorkerOutput{}, cb.ErrWorkerSaturated
 	}
 	return w.worker.Resolve(ctx, snapshot, hash, root)
 }
 
 func saturatedFirst(service cb.Service) cb.Service {
-	service.Worker = &saturatedOnceWorker{worker: service.Worker}
+	return saturatedTimes(service, 1)
+}
+
+func saturatedTimes(service cb.Service, times int) cb.Service {
+	service.Worker = &saturatedWorker{worker: service.Worker, left: times}
 	return service
 }

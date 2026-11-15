@@ -258,7 +258,7 @@ func (s Mode) startAttempt(c context.Context, sc gen.TimedScope, scope ca.Cohere
 		return started, err
 	}
 	_, closeErr := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: request.Locator, GenerationRef: request.GenerationRef,
-		TerminalKind: startClosedKind, SemanticReceiptID: "adventure-start-closed:" + request.StartFingerprint, At: sc.Operation.DecisionAt()})
+		TerminalKind: startClosedKind, SemanticReceiptID: "adventure-start-closed:" + sc.Operation.Operation().ID.String(), At: sc.Operation.DecisionAt()})
 	if closeErr != nil {
 		if errors.Is(closeErr, cd.ErrStale) {
 			return cb.Started{}, err
