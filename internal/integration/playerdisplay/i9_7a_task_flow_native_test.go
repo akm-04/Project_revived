@@ -251,12 +251,12 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	if scalar(t, database, `SELECT count(*) FROM top_floor_records WHERE owner_player_id=$1`, int64(actor.PlayerID)) != normalRecords {
 		t.Fatal("normal history contaminated")
 	}
-	replay, err := service.TaskReport(ctx, actor, records[0].Record.AttemptID.String())
+	replay, err := service.TaskReport(ctx, actor, records[0].Record.AttemptID.String(), op())
 	if err != nil || string(replay) != string(result.Report) {
 		t.Fatal("retained replay", err)
 	}
 	other, _, _ := topFloorPlayer(t, database, server)
-	if _, err = service.TaskReport(ctx, other, records[0].Record.AttemptID.String()); err == nil {
+	if _, err = service.TaskReport(ctx, other, records[0].Record.AttemptID.String(), op()); err == nil {
 		t.Fatal("foreign replay allowed")
 	}
 	service.Privileges = taskPrivilegeFixture{}

@@ -182,14 +182,14 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	if scalar(t, pool, `SELECT COALESCE(max(current),0) FROM achievement_streaks WHERE player_id=$1 AND achievement_id=100003`, int64(a.PlayerID)) != result.Player.KeepWin {
 		t.Fatal("Achievement 100003 follows the attack win streak")
 	}
-	records, err := s.Records(ctx, b)
+	records, err := s.Records(ctx, b, op())
 	if err != nil || len(records) != 1 || records[0].Record.Attack || records[0].Record.Win == result.Win || records[0].Opponent.Player != a.PlayerID {
 		t.Fatal("defender record", err)
 	}
-	if report, found, err := s.Report(ctx, records[0].ReportKey); err != nil || !found || len(report) == 0 {
+	if report, found, err := s.Report(ctx, records[0].ReportKey, op()); err != nil || !found || len(report) == 0 {
 		t.Fatal("record report", err)
 	}
-	partners, err := s.Partners(ctx, a)
+	partners, err := s.Partners(ctx, a, op())
 	if err != nil || len(partners.Usage) != 5 || partners.Player.TotalFight != 1 {
 		t.Fatal("partners", err)
 	}

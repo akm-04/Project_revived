@@ -394,14 +394,14 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	if scalar(t, pool, `SELECT count(*) FROM combat_attempts a JOIN one_on_one_rounds r USING(attempt_id) JOIN one_on_one_matches m USING(match_id) WHERE a.state='STAGED' AND m.attacker_id=$1`, int64(a.PlayerID)) != int64(3-len(result.Wins)) {
 		t.Fatal("a round after the decision must stay unsimulated")
 	}
-	report, err := s.Report(ctx, result.ReportKeys[0])
+	report, err := s.Report(ctx, result.ReportKeys[0], op())
 	if err != nil || len(report) == 0 {
 		t.Fatal("round report", err)
 	}
-	if keys, err := s.DefenseReportKeys(ctx, b); err != nil || len(keys) != len(result.ReportKeys) {
+	if keys, err := s.DefenseReportKeys(ctx, b, op()); err != nil || len(keys) != len(result.ReportKeys) {
 		t.Fatal("defense report keys", err, keys)
 	}
-	records, err := s.Records(ctx, b)
+	records, err := s.Records(ctx, b, op())
 	if err != nil || len(records) != 1 || records[0].Record.Attack || records[0].Record.Win == result.Win || records[0].Attacker.Player != a.PlayerID {
 		t.Fatal("defender record", err)
 	}

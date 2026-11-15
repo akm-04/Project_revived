@@ -213,10 +213,10 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	if err != nil || len(records) != 1 || !records[0].Record.Attack || records[0].Record.Win != fight.Win {
 		t.Fatal("records", err, len(records))
 	}
-	if report, err := s.Report(ctx, records[0].Record.AttemptID.String()); err != nil || string(report) != string(fight.Report) {
+	if report, err := s.Report(ctx, records[0].Record.AttemptID.String(), op()); err != nil || string(report) != string(fight.Report) {
 		t.Fatal("report replay", err)
 	}
-	if report, err := s.Report(ctx, "00000000-0000-4000-8000-000000000000"); err != nil || report != nil {
+	if report, err := s.Report(ctx, "00000000-0000-4000-8000-000000000000", op()); err != nil || report != nil {
 		t.Fatal("unknown report must answer out of date", err)
 	}
 	if scalar(t, pool, `SELECT fights FROM top_floor_partner_usage WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), refA.PartnerID) != 1 {

@@ -94,14 +94,14 @@ func TestI9_10TopFloorStaleOfferSnapshotNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	target := view.Enemies[0]
-	if err = service.PreFight(ctx, actor, target.Occupant.TableID()); err != nil {
+	if err = service.PreFight(ctx, actor, target.Occupant.TableID(), op()); err != nil {
 		t.Fatalf("fresh preflight: %v", err)
 	}
 	// An unrelated rank change must not invalidate the issued offer.
 	if err = swapRanks(t, pool, server, 500, 501); err != nil {
 		t.Fatal(err)
 	}
-	if err = service.PreFight(ctx, actor, target.Occupant.TableID()); err != nil {
+	if err = service.PreFight(ctx, actor, target.Occupant.TableID(), op()); err != nil {
 		t.Fatalf("unrelated rank change refused preflight: %v", err)
 	}
 	if _, err = service.Start(ctx, actor, app.StartCommand{Formation: []int64{hero.PartnerID}, Enemy: target.Occupant.TableID()}, op()); err != nil {
@@ -124,7 +124,7 @@ func TestI9_10TopFloorStaleOfferSnapshotNative(t *testing.T) {
 	tickets := func() int64 {
 		return scalar(t, pool, `SELECT tickets_left FROM top_floor_players WHERE player_id=$1`, int64(stale.PlayerID))
 	}
-	if err = service.PreFight(ctx, stale, staleTarget.Occupant.TableID()); !errors.Is(err, d.ErrOfferStale) {
+	if err = service.PreFight(ctx, stale, staleTarget.Occupant.TableID(), op()); !errors.Is(err, d.ErrOfferStale) {
 		t.Fatalf("stale preflight: %v", err)
 	}
 	if _, err = service.Start(ctx, stale, app.StartCommand{Formation: []int64{staleHero.PartnerID}, Enemy: staleTarget.Occupant.TableID()}, op()); !errors.Is(err, d.ErrOfferStale) {

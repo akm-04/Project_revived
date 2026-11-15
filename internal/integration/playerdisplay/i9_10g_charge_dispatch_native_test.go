@@ -133,7 +133,7 @@ func TestI910GChargeOverlayOffHidesProductAndRefusesTap(t *testing.T) {
 	a := bornActor(t, p)
 	exec(t, p, `INSERT INTO commerce_recharge_tuning(singleton,payload,updated_at)VALUES(true,$1::jsonb,clock_timestamp()) ON CONFLICT(singleton)DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at`, `{"version":1,"mode":"GRANT","products":{"80001007":{"off":true}}}`)
 	t.Cleanup(func() { exec(t, p, `DELETE FROM commerce_recharge_tuning`) })
-	reply, e := chargeService(p).Query(ctx, a, time.Unix(1700000000, 0))
+	reply, e := chargeService(p).Query(ctx, a, time.Unix(1700000000, 0), op())
 	if e != nil {
 		t.Fatal(e)
 	}
