@@ -49,3 +49,5 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00156: I9-10 lobby announcements (SYSTEM_BROADCAST 4101, ACTIVITY_BROADCAST 4096): one outbox row per produced announce, removed by the realtime listener after it fans out to the producing logical server. Empty on upgrade.
 - 00157: I9-10 Hero Recommend per-logical-server weekly derived snapshot.
 - 00159: R7 stored per-board score row (policy, player, score, score_since, revision, metric) with the board ordering index. Empty on upgrade; the R7 backfill seeds it.
+- 00161: R8-3 part A (A-040): 35 player columns that no foreign key covered now reference players(player_id), NOT VALID (new rows only, short lock), NO ACTION, no index. Client logs, request_journal, the logical_servers counters and the text redeem subject are excluded.
+- 00162: R8-3 part B: NO TRANSACTION, one VALIDATE CONSTRAINT per 00161 key. An orphan row fails the step and is reported; deletions, if any, go in their own reviewed migration.
