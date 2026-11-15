@@ -16,6 +16,7 @@
   {"mid": 609, "function": "Mode.GuildLog", "file": "internal/application/guildcampaign/reads.go", "line": 273},
   {"mid": 613, "function": "Mode.MapDetail", "file": "internal/application/guildcampaign/reads.go", "line": 376},
   {"mid": 615, "function": "Mode.DistributeRecord", "file": "internal/application/guildcampaign/awards.go", "line": 220},
+  {"mid": 832, "function": "Service.Read", "file": "internal/application/libraryforum/service.go", "line": 292},
   {"mid": 1283, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},
   {"mid": 1285, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},
   {"mid": 1286, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},

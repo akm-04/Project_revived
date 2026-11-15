@@ -289,7 +289,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, q PageQuery,
 		return Page{}, ErrRequest
 	}
 	var out Page
-	res, e := s.Reads.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc tx.Scope) error {
+	res, e := s.Reads.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc tx.Scope) error {
 		var e error
 		out, e = s.pageTx(ctx, sc.Tx, a.PlayerID, key, q.Start, q.End)
 		return e
