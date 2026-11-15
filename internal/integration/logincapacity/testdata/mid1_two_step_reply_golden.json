@@ -1,0 +1,3849 @@
+{
+ "token": "lHhCKkwd_zziFsDJUOIFYU5aXIHuD786aF55559DVPs",
+ "region": 1,
+ "uid": "11111111-1111-4111-8111-111111111101",
+ "is_new": 0,
+ "detail": {
+  "1056": {
+   "building_list": {
+    "1": {
+     "lev": 1,
+     "need_time": 0,
+     "new_evolve": 0,
+     "start_time": 0
+    },
+    "2": {
+     "lev": 1,
+     "need_time": 0,
+     "new_evolve": 0,
+     "start_time": 0
+    },
+    "3": {
+     "lev": 1,
+     "need_time": 0,
+     "new_evolve": 0,
+     "start_time": 0
+    },
+    "4": {
+     "lev": 1,
+     "need_time": 0,
+     "new_evolve": 0,
+     "start_time": 0
+    },
+    "5": {
+     "lev": 1,
+     "need_time": 0,
+     "new_evolve": 0,
+     "start_time": 0
+    },
+    "6": {
+     "lev": 1,
+     "need_time": 0,
+     "new_evolve": 0,
+     "start_time": 0
+    },
+    "7": {
+     "lev": 1,
+     "need_time": 0,
+     "new_evolve": 0,
+     "start_time": 0
+    }
+   },
+   "cabinet_info": {
+    "cur_learn_skill": 0,
+    "need_time": 0,
+    "recent_complete_skill": 0,
+    "start_time": 0
+   },
+   "desk_info": {
+    "is_making": 0,
+    "make_item": 0,
+    "make_need_time": 0,
+    "make_start_time": 0
+   },
+   "pet_cabin_info": {
+    "is_making": 0,
+    "make_item": 0,
+    "make_need_time": 0,
+    "make_start_time": 0,
+    "pet_id": 0
+   }
+  },
+  "112": {
+   "challenge": [],
+   "chapter_events": {},
+   "chapter_info": {
+    "normal_bonus_id": 0,
+    "normal_campaign_id": 0,
+    "normal_chapter_id": 0,
+    "normal_stars": 0,
+    "super_bonus_id": 0,
+    "super_campaign_id": 0,
+    "super_chapter_id": 0,
+    "super_stars": 0
+   },
+   "normal": [],
+   "super": []
+  },
+  "115": {
+   "challenge_info": {
+    "campaigns": [],
+    "challenges": []
+   },
+   "trial_info": {
+    "campaigns": [],
+    "trials": []
+   }
+  },
+  "1152": {
+   "is_enroll": false
+  },
+  "1304": [],
+  "1408": {
+   "awards": [],
+   "count": 0,
+   "daily_fight": 0,
+   "day_count": 0,
+   "defence_formation": {},
+   "exchange_times_1": 0,
+   "exchange_times_2": 0,
+   "exchange_times_3": 0,
+   "index": 0,
+   "keep_win_times": 0,
+   "mission_time": 0,
+   "missions": [],
+   "my_rank": 0,
+   "pet_id": 0,
+   "point": 0,
+   "star": 0,
+   "total": 0,
+   "total_fight": 0,
+   "win_times": 0
+  },
+  "17": {
+   "arena_beat_flag": 0,
+   "arena_coin": 0,
+   "avatar_frame_id": 0,
+   "avatar_id": 110001001,
+   "boss_incr_exp": 0,
+   "bubble_info": {
+    "bubble_id": 10001,
+    "end_time": 0
+   },
+   "buy_energy_times": 0,
+   "buy_glue_times": 2,
+   "buy_mana_times": 0,
+   "buy_skill_times": 0,
+   "buy_spirit_energy_times": 0,
+   "charge": 0,
+   "comment_open": 0,
+   "conquer_lev": 0,
+   "conquer_loop_id": 1,
+   "conquer_region": 0,
+   "crab_times": 0,
+   "crystal": 0,
+   "degree_cer": 0,
+   "energy": 0,
+   "energy_time": 0,
+   "exp": 0,
+   "fbshare_open": 0,
+   "first_main_touch": 0,
+   "friend_medal": 0,
+   "friendship_coin": 0,
+   "func_ids": [],
+   "glory": 0,
+   "glue": 0,
+   "god_war_coin": 0,
+   "graduate_cer": 0,
+   "guide_function_ids": {},
+   "guide_id": 0,
+   "guide_return_id": 0,
+   "guild_coin": 0,
+   "guild_id": 1000001,
+   "honor_coin": 0,
+   "ice_core": 0,
+   "invitation_time": 0,
+   "is_commented": 1,
+   "king_coin": 0,
+   "left_card_day": 0,
+   "left_month_tili_day": 0,
+   "left_week_card_day": 0,
+   "lev": 1,
+   "lucky_coin": 0,
+   "lvbu_coin": 0,
+   "magic_dust": 0,
+   "magic_energy": 0,
+   "magic_exp": 0,
+   "magic_liquid": 0,
+   "main_scene_type": 0,
+   "mana": 0,
+   "march_coin": 0,
+   "max_color": 0,
+   "max_energy": 0,
+   "max_invitation": 0,
+   "max_lev": 1,
+   "message_pushes": {},
+   "month_card_end": 0,
+   "month_card_start": 0,
+   "occult_ticket": 0,
+   "paradise_coin": 0,
+   "patent_cer": 0,
+   "player_id": 140001,
+   "player_name": "",
+   "player_type": 0,
+   "privilege_left_card_day": 0,
+   "privilege_month_card_end": 0,
+   "region": 1,
+   "region_coin": 0,
+   "region_name": "Server 1",
+   "save_pet": "1",
+   "save_team": "1",
+   "save_team_name": "Lane",
+   "skill_point": 0,
+   "skill_time": 0,
+   "skin_coin": 0,
+   "skin_fragment": 0,
+   "social": 0,
+   "spirit_energy": 0,
+   "spirit_energy_time": 0,
+   "spirit_stone": 0,
+   "story_id": 0,
+   "story_state": 0,
+   "summon_coin": 0,
+   "team_dungeon_coin": 0,
+   "title_info": {
+    "end_time": 0,
+    "title_id": 0,
+    "unique_id": 0
+   },
+   "top_coin": 0,
+   "tutor_coin": 0,
+   "uid": "11111111-1111-4111-8111-111111111101",
+   "vip": 0,
+   "vip_awards": []
+  },
+  "1808": {
+   "self_wish_info": {
+    "current_num": 0,
+    "item_id": 0,
+    "need_num": 0
+   }
+  },
+  "1856": {
+   "apply_list": [],
+   "mission_list": [
+    [],
+    []
+   ]
+  },
+  "2137": {
+   "study_infos": []
+  },
+  "2139": {
+   "is_has_gift": 0
+  },
+  "229": {
+   "list": []
+  },
+  "2416": {
+   "adventure_list": {
+    "list": {}
+   }
+  },
+  "2485": {
+   "records": []
+  },
+  "2501": {},
+  "2560": {},
+  "2561": {
+   "mission_list": []
+  },
+  "289": {
+   "records": []
+  },
+  "2984": {
+   "base_info": {
+    "adv_awarded_lev": 0,
+    "awarded_lev": 0,
+    "coin_num": 0,
+    "is_advanced": 0,
+    "limit_purchase_buy": 0,
+    "point": 0
+   },
+   "mission_info": {
+    "is_award": [],
+    "mission_counts": [],
+    "mission_list": []
+   }
+  },
+  "3101": {
+   "base_info": {}
+  },
+  "336": {
+   "enemies": [],
+   "hero_status": {},
+   "map_info": {
+    "is_external_award": 0,
+    "is_reborn": 0,
+    "passed_stage": 0,
+    "stage_done": 0
+   },
+   "rewards": []
+  },
+  "352": {
+   "awards": [],
+   "is_signed": 1,
+   "is_skin": 0,
+   "month": 1,
+   "partner_id": 0,
+   "sign_times": 0
+  },
+  "368": {
+   "mail_list": [],
+   "new_mail_total": 0,
+   "total": 0
+  },
+  "384": {
+   "invite_code": "",
+   "invite_players": [],
+   "invitor_id": 0,
+   "invitor_name": "",
+   "missions": []
+  },
+  "49": {
+   "heros": {
+    "1": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 1,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11001
+    },
+    "10": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 10,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11010
+    },
+    "11": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 11,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11011
+    },
+    "12": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 12,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11012
+    },
+    "13": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 13,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11013
+    },
+    "14": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 14,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11014
+    },
+    "15": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 15,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001001,
+     "unlocked_dynamic_card": ""
+    },
+    "16": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 16,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001002,
+     "unlocked_dynamic_card": ""
+    },
+    "17": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 17,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001003,
+     "unlocked_dynamic_card": ""
+    },
+    "18": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 18,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001004,
+     "unlocked_dynamic_card": ""
+    },
+    "19": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 19,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001005,
+     "unlocked_dynamic_card": ""
+    },
+    "2": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 2,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11002
+    },
+    "20": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 20,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001006,
+     "unlocked_dynamic_card": ""
+    },
+    "21": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 21,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001007,
+     "unlocked_dynamic_card": ""
+    },
+    "22": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 22,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001008,
+     "unlocked_dynamic_card": ""
+    },
+    "23": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 23,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001009,
+     "unlocked_dynamic_card": ""
+    },
+    "24": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 24,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001010,
+     "unlocked_dynamic_card": ""
+    },
+    "25": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 25,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001011,
+     "unlocked_dynamic_card": ""
+    },
+    "26": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 26,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001012,
+     "unlocked_dynamic_card": ""
+    },
+    "27": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 27,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001013,
+     "unlocked_dynamic_card": ""
+    },
+    "28": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 28,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001014,
+     "unlocked_dynamic_card": ""
+    },
+    "29": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 29,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001015,
+     "unlocked_dynamic_card": ""
+    },
+    "3": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 3,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11003
+    },
+    "30": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 30,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001016,
+     "unlocked_dynamic_card": ""
+    },
+    "31": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 31,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001017,
+     "unlocked_dynamic_card": ""
+    },
+    "32": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 32,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001018,
+     "unlocked_dynamic_card": ""
+    },
+    "33": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 33,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001019,
+     "unlocked_dynamic_card": ""
+    },
+    "34": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 34,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001020,
+     "unlocked_dynamic_card": ""
+    },
+    "35": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 35,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001021,
+     "unlocked_dynamic_card": ""
+    },
+    "36": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 36,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001022,
+     "unlocked_dynamic_card": ""
+    },
+    "37": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 37,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001023,
+     "unlocked_dynamic_card": ""
+    },
+    "38": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 38,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001024,
+     "unlocked_dynamic_card": ""
+    },
+    "39": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 39,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001025,
+     "unlocked_dynamic_card": ""
+    },
+    "4": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 4,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11004
+    },
+    "40": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 40,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001026,
+     "unlocked_dynamic_card": ""
+    },
+    "41": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 41,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001027,
+     "unlocked_dynamic_card": ""
+    },
+    "42": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 42,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001028,
+     "unlocked_dynamic_card": ""
+    },
+    "43": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 43,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001029,
+     "unlocked_dynamic_card": ""
+    },
+    "44": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 44,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001030,
+     "unlocked_dynamic_card": ""
+    },
+    "45": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 45,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001031,
+     "unlocked_dynamic_card": ""
+    },
+    "46": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 46,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001032,
+     "unlocked_dynamic_card": ""
+    },
+    "47": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 47,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001033,
+     "unlocked_dynamic_card": ""
+    },
+    "48": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 48,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001034,
+     "unlocked_dynamic_card": ""
+    },
+    "49": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 49,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001035,
+     "unlocked_dynamic_card": ""
+    },
+    "5": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 5,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11005
+    },
+    "50": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 50,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001036,
+     "unlocked_dynamic_card": ""
+    },
+    "51": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 51,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001037,
+     "unlocked_dynamic_card": ""
+    },
+    "52": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 52,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001038,
+     "unlocked_dynamic_card": ""
+    },
+    "53": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 53,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001039,
+     "unlocked_dynamic_card": ""
+    },
+    "54": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 54,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 2,
+     "table_id": 10001040,
+     "unlocked_dynamic_card": ""
+    },
+    "55": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 55,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001041,
+     "unlocked_dynamic_card": ""
+    },
+    "56": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 56,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001042,
+     "unlocked_dynamic_card": ""
+    },
+    "57": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 57,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001043,
+     "unlocked_dynamic_card": ""
+    },
+    "58": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 58,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001044,
+     "unlocked_dynamic_card": ""
+    },
+    "59": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 59,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 3,
+     "table_id": 10001045,
+     "unlocked_dynamic_card": ""
+    },
+    "6": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 6,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11006
+    },
+    "60": {
+     "color": 1,
+     "current_skin_id": 0,
+     "dynamic_card_state": "",
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumo_levels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 60,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 10001046,
+     "unlocked_dynamic_card": ""
+    },
+    "7": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 7,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11007
+    },
+    "8": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 8,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11008
+    },
+    "9": {
+     "color": 1,
+     "current_skin_id": 0,
+     "equips": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "illusion_skin_id": 0,
+     "is_like": 0,
+     "lev": 1,
+     "partner_id": 9,
+     "partner_type": 2,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skill_ids": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "skin_ids": {},
+     "star": 1,
+     "table_id": 11009
+    }
+   },
+   "sort_type": 0
+  },
+  "530": {
+   "sp_info": {
+    "sp": 0,
+    "sp_last_refresh_time": 0
+   },
+   "teams_info": []
+  },
+  "56": {
+   "crystal_free_time": 0,
+   "main_ids": [],
+   "mana_free_num": 0,
+   "mana_free_time": 0,
+   "mana_id": 0,
+   "partner_id": 0,
+   "pet_id": 0,
+   "second_ids": []
+  },
+  "612": {
+   "guild_info": {
+    "apply_type": 0,
+    "des": "",
+    "guild_id": 1000001,
+    "guild_leader": 140001,
+    "guild_leader_name": "nexus",
+    "huoyue": 0,
+    "icon": 10001,
+    "icon_frame": 0,
+    "member_num": 1,
+    "min_allow_level": 1,
+    "name": "Nexus"
+   },
+   "member_nums": 1,
+   "self_info": {
+    "huoyue_num": 0,
+    "job": 1,
+    "join_time": 1794711600,
+    "today_huoyue": 0
+   }
+  },
+  "624": {
+   "boss_info": {
+    "boss_brave": 0,
+    "boss_id": 0,
+    "current_boss": 0
+   },
+   "buy_times": 0,
+   "can_sweep": 0,
+   "challenge_times": 0,
+   "total_hurt": 0,
+   "total_rank": 0
+  },
+  "780": {
+   "pets": [
+    {
+     "active_style": 0,
+     "birthday": 0,
+     "color": 1,
+     "equips": [
+      0,
+      0,
+      0
+     ],
+     "exp": 0,
+     "fumos": [
+      0,
+      0,
+      0
+     ],
+     "is_born": 0,
+     "is_show": 0,
+     "lev": 1,
+     "pet_id": 1,
+     "pet_styles": [],
+     "player_id": 140001,
+     "practice_attr": [
+      0,
+      0,
+      0
+     ],
+     "skills": [
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "star": 1,
+     "table_id": 10010001
+    }
+   ]
+  },
+  "81": {
+   "list": [],
+   "sort_type": 0,
+   "spirit_list": []
+  },
+  "822": {
+   "begin_sweep_time": 0,
+   "can_sweep_times": 0,
+   "challenge_times": 0,
+   "is_can_sweep": 0,
+   "max_floor": 0,
+   "mission_sweep_times": 0,
+   "now_floor": 0
+  },
+  "836": {
+   "library_bg_infos": {
+    "bg_main": 1,
+    "bg_room": 2,
+    "has_buy": [],
+    "server_time": 1794715200
+   },
+   "library_cg_infos": [],
+   "library_infos": {},
+   "library_talk_infos": {}
+  }
+ }
+}
