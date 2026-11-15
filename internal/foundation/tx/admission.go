@@ -91,8 +91,15 @@ func WithAdmissionDeadline(ctx context.Context, deadline time.Time) context.Cont
 	return context.WithValue(ctx, admissionDeadlineKey{}, deadline)
 }
 
-func admissionWait(ctx context.Context, p Profile) time.Duration {
+// AdmissionDeadline reports the request deadline the edge set for admission and connection waits (C1-1). A worker
+// queue outside the transaction runner uses it to wait no longer than the client's remaining patience.
+func AdmissionDeadline(ctx context.Context) (time.Time, bool) {
 	deadline, ok := ctx.Value(admissionDeadlineKey{}).(time.Time)
+	return deadline, ok
+}
+
+func admissionWait(ctx context.Context, p Profile) time.Duration {
+	deadline, ok := AdmissionDeadline(ctx)
 	if !ok {
 		return p.AcquireTimeout
 	}

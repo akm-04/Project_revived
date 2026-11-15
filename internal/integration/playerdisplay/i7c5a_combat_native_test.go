@@ -59,7 +59,7 @@ var (
 
 func combatLauncher(t *testing.T) *combatworker.Launcher {
 	t.Helper()
-	launcher := combatworker.New(combatLimits(t), 3, 5*time.Second)
+	launcher := combatworker.New(combatLimits(t), 3, 5*time.Second, 0)
 	t.Cleanup(launcher.Close)
 	return launcher
 }

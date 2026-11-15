@@ -24,7 +24,7 @@ func TestI8_2BCombatAdmissionSoakNative(t *testing.T) {
 	server := rankingServer(t, pool)
 	a, rev, ref := combatOwner(t, pool, server)
 	s := combatService(t, pool)
-	launcher := combatworker.New(combatLimits(t), workers, 300*time.Millisecond)
+	launcher := combatworker.New(combatLimits(t), workers, 300*time.Millisecond, 0)
 	t.Cleanup(launcher.Close)
 	s.Worker = launcher
 	staged := make([]d.Attempt, attempts)
