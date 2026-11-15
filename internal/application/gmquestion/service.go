@@ -166,7 +166,7 @@ func (service Service) List(ctx context.Context, actor identity.ActorContext, cu
 		return nil, domain.ErrQuestion
 	}
 	var output []Entry
-	_, _, err := service.Timed.Run(ctx, current, profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(ctx context.Context, scope generation.TimedScope) error {
+	_, _, err := service.Timed.Run(ctx, current, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(ctx context.Context, scope generation.TimedScope) error {
 		output = make([]Entry, 0)
 		if err := service.Fence.FenceActorTx(ctx, scope.Tx, actor, scope.Operation.DecisionAt()); err != nil {
 			return err

@@ -156,7 +156,7 @@
     {
      "file": "internal/application/gmquestion/service.go",
      "line": 169,
-     "value": "false"
+     "value": "true"
     }
    ],
    "receipt_writes": [],
@@ -175,7 +175,7 @@
      "function": "Service.List",
      "isolation": "repeatable_read",
      "line": 169,
-     "read_only": "false",
+     "read_only": "true",
      "retry": "3"
     }
    ],

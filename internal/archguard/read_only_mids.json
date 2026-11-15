@@ -59,6 +59,7 @@
   {"mid": 2485, "function": "Service.DefenseReportKeys", "file": "internal/application/oneonone/reads.go", "line": 49},
   {"mid": 2487, "function": "Service.Records", "file": "internal/application/oneonone/reads.go", "line": 80},
   {"mid": 2565, "function": "Reader.read", "file": "internal/adapters/guildviewread/reader.go", "line": 37},
-  {"mid": 2768, "function": "Reader.readTx", "file": "internal/application/guildrental/reads.go", "line": 97}
+  {"mid": 2768, "function": "Reader.readTx", "file": "internal/application/guildrental/reads.go", "line": 97},
+  {"mid": 4, "function": "Service.List", "file": "internal/application/gmquestion/service.go", "line": 161}
  ]
 }
