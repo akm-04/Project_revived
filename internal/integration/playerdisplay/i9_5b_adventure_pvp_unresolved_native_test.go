@@ -150,3 +150,43 @@ func TestI9_5BAdventurePvpRepeatedReplacementNative(t *testing.T) {
 		t.Fatalf("closed attempts %d", closed)
 	}
 }
+
+// A-058: replaying an earlier replacement operation must not close a later
+// attempt with the receipt that already closed an earlier one.
+func TestI9_5BAdventurePvpReplayedReplacementNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, picks := adventureOwner(t, p, server, 11, 10001001, 10001002)
+	enemy := adventurePvpOpponent(t, p, server)
+	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
+	mode := adventureTestMode(t, p, clock, adventureOpponents{arena: enemy, arenaFound: true})
+	mode.Combat = saturatedTimes(mode.Combat.(cb.Service), 3)
+	revision := installed(t, p)
+	start := clock.at
+	putAdventureOccurrence(t, p, a.PlayerID, d.EventBattle, 0, start, start.Add(2*time.Hour), "pvp-replayed-replacement")
+
+	formations := [][]int64{{picks[0]}, {picks[1]}, {picks[0]}}
+	var replaced = opPinned(revision)
+	for i, formation := range formations {
+		clock.Set(start.Add(time.Duration(i) * 6 * time.Minute))
+		op := opPinned(revision)
+		op.StartedAt = clock.at
+		if i == 1 {
+			replaced = op
+		}
+		if _, err := mode.Fight(ctx, a, appadventure.FightRequest{Formation: formation}, op); !errors.Is(err, cb.ErrWorkerSaturated) {
+			t.Fatalf("fight %d: saturated worker %v", i, err)
+		}
+	}
+	clock.Set(start.Add(18 * time.Minute))
+	if _, err := mode.Fight(ctx, a, appadventure.FightRequest{Formation: formations[1]}, replaced); !errors.Is(err, cd.ErrStartConflict) {
+		t.Fatal("replayed replacement: want the start conflict, got", err)
+	}
+	locator := adventureBattleLocator(a.PlayerID, start)
+	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 2 {
+		t.Fatalf("closed attempts %d", closed)
+	}
+	if open := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND state<>'TERMINAL'`, locator); open != 1 {
+		t.Fatalf("unresolved attempts %d", open)
+	}
+}
