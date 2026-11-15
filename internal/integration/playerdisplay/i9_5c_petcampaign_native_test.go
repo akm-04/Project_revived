@@ -442,6 +442,75 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	}
 }
 
+func petSweepGraceFixture(t *testing.T) (*pg.Pool, app.Mode, identity.ActorContext, *workplaceTime, d.Sweep, func() int64) {
+	t.Helper()
+	p := pool(t)
+	a, rev := bornActor(t, p), installed(t, p)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	s := petCampaignMode(t, p, clock)
+	compositeLevel(t, p, a, rev, 100)
+	if _, e := s.Load(ctx, a, op()); e != nil {
+		t.Fatal(e)
+	}
+	r := petCampaignRecord(t, p, a)
+	r.Max = 2
+	seedTowerProgress(t, p, a, r, clock.at)
+	grantGenuine(t, p, a, rev, "sweep finish grace balance", []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 100}})
+	if _, e := s.BeginSweep(ctx, a, op()); e != nil {
+		t.Fatal(e)
+	}
+	job := petCampaignRecord(t, p, a).Sweep
+	if job == nil {
+		t.Fatal("no pending sweep")
+	}
+	balance := func() int64 {
+		return leagueScalar(t, p, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID))
+	}
+	return p, s, a, clock, *job, balance
+}
+func TestI9_5CSweepFinishGrace(t *testing.T) {
+	t.Run("within grace settles free", func(t *testing.T) {
+		p, s, a, clock, job, balance := petSweepGraceFixture(t)
+		clock.at = time.Unix(job.Due-1, 0).UTC()
+		before := balance()
+		out, e := s.FinishSweep(ctx, a, job.Due, op())
+		if e != nil {
+			t.Fatal(e)
+		}
+		if got := balance(); got != before {
+			t.Fatal("grace charged", before, got)
+		}
+		rows, ok := out["awards"].([]map[string]any)
+		if !ok || len(rows) == 0 {
+			t.Fatal("no awards", out)
+		}
+		if r := petCampaignRecord(t, p, a); r.Current != job.To || r.Sweep != nil {
+			t.Fatal(r)
+		}
+	})
+	t.Run("three seconds short stays paid", func(t *testing.T) {
+		_, s, a, clock, job, balance := petSweepGraceFixture(t)
+		clock.at = time.Unix(job.Due-3, 0).UTC()
+		before := balance()
+		if _, e := s.FinishSweep(ctx, a, job.Due, op()); e != nil {
+			t.Fatal(e)
+		}
+		if got := balance(); got != before-10 {
+			t.Fatal("early finish price", before, got)
+		}
+	})
+	t.Run("finish before due stays paid", func(t *testing.T) {
+		_, s, a, clock, job, balance := petSweepGraceFixture(t)
+		clock.at = time.Unix(job.Due-1, 0).UTC()
+		before := balance()
+		if _, e := s.FinishSweep(ctx, a, job.Due-1, op()); e != nil {
+			t.Fatal(e)
+		}
+		if got := balance(); got != before-10 {
+			t.Fatal("early finish price", before, got)
+		}
+	})
+}
 func TestI9_5CTimedPaidFinishUsesServerClock(t *testing.T) {
 	ctx, _ := changes.Track(ctx)
 	p := pool(t)
