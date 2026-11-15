@@ -95,7 +95,7 @@ func (r Reader) validate() error {
 }
 
 func (r Reader) readTx(c context.Context, op operation.Context, body func(context.Context, tx.Scope) error) error {
-	_, err := r.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, body)
+	_, err := r.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, body)
 	return err
 }
 
