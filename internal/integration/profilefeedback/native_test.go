@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgconn"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -125,6 +126,9 @@ func actor(t *testing.T, p *pg.Pool) identity.ActorContext {
 	cid, _ := identity.ContextIDFrom(g)
 	return identity.ActorContext{AccountID: aid, AccountUID: identity.AccountUID(a.String()), SessionID: sid, ContextID: cid, LogicalServerID: 1, PlayerID: identity.PlayerID(pid), ContextGeneration: 1, SessionLivenessVersion: 1, ContextLivenessVersion: 1}
 }
+
+const foreignKeyViolation = "23503"
+
 func sqlExec(t *testing.T, p *pg.Pool, s string, args ...any) {
 	t.Helper()
 	if _, e := p.Raw().Exec(ctx, s, args...); e != nil {
@@ -514,7 +518,12 @@ func TestPraiseHistoryPagingAndProviderFailure(t *testing.T) {
 		t.Fatal("read deleted/changed facts")
 	}
 	sqlExec(t, p, `DELETE FROM gameplay_contexts WHERE player_id=$1`, int64(actors[22].PlayerID))
-	sqlExec(t, p, `DELETE FROM players WHERE player_id=$1`, int64(actors[22].PlayerID))
+	// R8-3: players are never deleted; the key refuses it (00161).
+	_, e = p.Raw().Exec(ctx, `DELETE FROM players WHERE player_id=$1`, int64(actors[22].PlayerID))
+	var refusal *pgconn.PgError
+	if !errors.As(e, &refusal) || refusal.Code != foreignKeyViolation || refusal.ConstraintName != "player_profile_praises_actor_player_id_fkey" {
+		t.Fatal("retired author deletion not refused by 00161", e)
+	}
 	if _, e = s.List(ctx, target, app.PageRequest{Offset: 1}, op()); !errors.Is(e, app.ErrProvider) {
 		t.Fatal("absent canonical author fabricated", e)
 	}
