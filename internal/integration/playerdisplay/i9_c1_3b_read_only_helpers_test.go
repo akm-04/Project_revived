@@ -76,15 +76,24 @@ func (g *snapshotGate) unblock() {
 	g.releaseOnce.Do(func() { close(g.release) })
 }
 
+func (g *snapshotGate) scanned() <-chan struct{} { return g.firstScan }
+
+// pauseGate is a read paused at a chosen point: its snapshot's first statement
+// (snapshotGate) or before the snapshot opens (campaignBeginGate).
+type pauseGate interface {
+	scanned() <-chan struct{}
+	unblock()
+}
+
 // runReadUnderWrite commits the writer after the read has taken its snapshot,
 // then releases the read and returns its result.
-func runReadUnderWrite(t *testing.T, gate *snapshotGate, writer func(context.Context) error, read func(context.Context) error) error {
+func runReadUnderWrite(t *testing.T, gate pauseGate, writer func(context.Context) error, read func(context.Context) error) error {
 	t.Helper()
 	readResult := make(chan error, 1)
 	go func() { readResult <- read(ctx) }()
 	t.Cleanup(gate.unblock)
 	select {
-	case <-gate.firstScan:
+	case <-gate.scanned():
 	case err := <-readResult:
 		t.Fatalf("read finished before its snapshot: %v", err)
 	case <-time.After(10 * time.Second):
