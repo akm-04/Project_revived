@@ -77,6 +77,10 @@ func (r *Router) Lookup(mid uint16) (Dispatcher, bool) {
 	return h, ok
 }
 
+// QueueWaitEstimate is the rolling queue-to-commit measurement the edge consults before admitting a request
+// (C1-5). *tx.Semaphore implements it.
+type QueueWaitEstimate interface{ ExpectedWait() time.Duration }
+
 type Handler struct {
 	Limits    limits.Config
 	Admission *Admission
@@ -92,6 +96,16 @@ type Handler struct {
 	// QueueBudget bounds how long a request may queue for a database connection (C1-1); zero means
 	// DefaultQueueBudget.
 	QueueBudget time.Duration
+	// QueueWait, when set, refuses before dispatch when a transaction joining the queue now would take longer
+	// than the request's remaining budget (C1-5). Nil leaves only the in-flight cap in force.
+	QueueWait QueueWaitEstimate
+}
+
+func (h Handler) queueBudget() time.Duration {
+	if h.QueueBudget > 0 {
+		return h.QueueBudget
+	}
+	return DefaultQueueBudget
 }
 
 // DefaultQueueBudget is the stock client's 20 s HTTP timeout (Backend.lua:645-647) less a 2 s margin for the
@@ -150,6 +164,8 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 		edgeFailure(w, wire.ErrMalformed, "method_not_allowed")
 		return
 	}
+	arrived := time.Now()
+	budget := h.queueBudget()
 	decoded, edgeErr, saturated := h.decode(r)
 	if saturated {
 		writeSaturated(w)
@@ -162,6 +178,10 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 		return
 	}
 	defer decoded.Cleanup()
+	if h.QueueWait != nil && h.QueueWait.ExpectedWait() > budget-time.Since(arrived) {
+		writeSaturated(w)
+		return
+	}
 	if h.Admission == nil || !h.Admission.TryAcquire() {
 		writeSaturated(w)
 		return
@@ -211,10 +231,6 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 		Claims:          claims,
 		CatalogRevision: mids.CatalogRevision(),
 		RemoteLabel:     remoteLabel(r.RemoteAddr),
-	}
-	budget := h.QueueBudget
-	if budget <= 0 {
-		budget = DefaultQueueBudget
 	}
 	resp := dispatcher.Dispatch(tx.WithAdmissionDeadline(r.Context(), op.StartedAt.Add(budget)), DispatchRequest{Envelope: env, Upload: decoded.Upload})
 	record.ErrorCode = stockErrorCode(resp.Body)

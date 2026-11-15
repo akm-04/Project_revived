@@ -204,7 +204,8 @@ func main() {
 		}()
 	}
 	// Admission equals the pool, so an admitted transaction never waits inside pgx where no deadline or order applies (C1-1).
-	runner := tx.Runner{DB: pool, Admission: tx.NewSemaphore(poolConnections), Hooks: observability.TxHooks{Metrics: txMetrics}}
+	transactionAdmission := tx.NewSemaphore(poolConnections)
+	runner := tx.Runner{DB: pool, Admission: transactionAdmission, Hooks: observability.TxHooks{Metrics: txMetrics}}
 	broadcastEmitter := postgres.BroadcastEmitter{}
 	// Deployment must apply migrations first. Gate all HTTP traffic on content readiness.
 	contentCtx, contentCancel := context.WithTimeout(ctx, 3*registry.DefaultWriteProfile().OperationTimeout)
@@ -814,7 +815,7 @@ func main() {
 			mustRegister(mid, stockruntime.InactiveModeDispatcher{Authority: authority})
 		}
 	}
-	admission, err := httpedge.NewAdmission(envPositiveInt("GXB_HTTP_EDGE_MAX_IN_FLIGHT", 256))
+	admission, err := httpedge.NewAdmission(envPositiveInt("GXB_HTTP_EDGE_MAX_IN_FLIGHT", 1024))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -827,6 +828,7 @@ func main() {
 		Limits: limits.Default(), Admission: admission, Decoding: decoding,
 		Operations: operation.Factory{Clock: clock.System{}}, Router: router, Journal: journal,
 		QueueBudget: time.Duration(envPositiveInt("GXB_HTTP_QUEUE_BUDGET_SECONDS", int(httpedge.DefaultQueueBudget/time.Second))) * time.Second,
+		QueueWait:   transactionAdmission,
 	}
 	mux.Handle("/", h)
 	if mediaHandler != nil {
