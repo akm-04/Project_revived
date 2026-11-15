@@ -25,7 +25,7 @@ type combined7Recovery struct {
 }
 
 func (f *fixture) combined7Snapshot() string {
-	return f.text(`SELECT jsonb_build_object('gift',$1::jsonb,'friend',$2::jsonb,'general',(SELECT coalesce(jsonb_agg(to_jsonb(i) ORDER BY operation_id),'[]') FROM personal_dm_intents i),'general_payloads',(SELECT coalesce(jsonb_agg(to_jsonb(i) ORDER BY operation_id),'[]') FROM personal_dm_payloads i),'general_delivery',(SELECT coalesce(jsonb_agg(to_jsonb(i) ORDER BY operation_id),'[]') FROM personal_dm_delivery i),'notice_sequence',(SELECT row_to_json(q) FROM(SELECT last_value,is_called FROM social_notice_id_seq)q))::text`, f.giftState(), f.dmSnapshot())
+	return f.text(`SELECT jsonb_build_object('gift',$1::jsonb,'friend',$2::jsonb,'general',(SELECT coalesce(jsonb_agg(to_jsonb(i) ORDER BY operation_id),'[]') FROM personal_dm_intents i),'general_payloads',(SELECT coalesce(jsonb_agg(to_jsonb(i)-'payload_version' ORDER BY operation_id),'[]') FROM personal_dm_payloads i),'general_delivery',(SELECT coalesce(jsonb_agg(to_jsonb(i) ORDER BY operation_id),'[]') FROM personal_dm_delivery i),'notice_sequence',(SELECT row_to_json(q) FROM(SELECT last_value,is_called FROM social_notice_id_seq)q))::text`, f.giftState(), f.dmSnapshot())
 }
 func Test7B_CombinedRecoverySeedCompare(t *testing.T) {
 	mode := os.Getenv("GXB_I7A7B_RECOVERY_MODE")

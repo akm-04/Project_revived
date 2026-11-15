@@ -207,8 +207,8 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		t.Helper()
 		var digest string
 		e := db.QueryRow(ctx, `SELECT md5(coalesce(string_agg(v,E'\n' ORDER BY v),'')) FROM (
-   SELECT 'root:'||to_jsonb(x)::text v FROM ranking_girls_roots x WHERE logical_server_id=$1
-   UNION ALL SELECT 'snapshot:'||to_jsonb(x)::text FROM ranking_girls_snapshots x WHERE logical_server_id=$1
+   SELECT 'root:'||(to_jsonb(x)-'payload_version')::text v FROM ranking_girls_roots x WHERE logical_server_id=$1
+   UNION ALL SELECT 'snapshot:'||(to_jsonb(x)-'payload_version')::text FROM ranking_girls_snapshots x WHERE logical_server_id=$1
    UNION ALL SELECT 'period:'||to_jsonb(x)::text FROM ranking_girls_periods x WHERE logical_server_id=$1
    UNION ALL SELECT 'award:'||to_jsonb(x)::text FROM ranking_girls_awards x WHERE logical_server_id=$1
    UNION ALL SELECT 'birth:'||to_jsonb(x)::text FROM ranking_girls_birth_tracking x WHERE logical_server_id=$1
@@ -385,7 +385,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		var parts []string
 		for _, table := range []string{"player_hero_roots", "player_heroes", "player_library_heroes", "player_dorm_heroes", "player_course_heroes", "player_inscription_heroes", "player_element_heroes", "player_spirit_heroes", "player_hero_evolution", "player_hero_raw_awakening", "player_currency_balances", "player_item_stacks"} {
 			var raw string
-			if e := db.QueryRow(ctx, `SELECT coalesce(jsonb_agg(to_jsonb(x) ORDER BY to_jsonb(x)::text),'[]'::jsonb)::text FROM `+table+` x WHERE player_id=$1`, born).Scan(&raw); e != nil {
+			if e := db.QueryRow(ctx, `SELECT coalesce(jsonb_agg(to_jsonb(x)-'payload_version' ORDER BY (to_jsonb(x)-'payload_version')::text),'[]'::jsonb)::text FROM `+table+` x WHERE player_id=$1`, born).Scan(&raw); e != nil {
 				t.Fatal(table, e)
 			}
 			if raw == "[]" {
@@ -394,7 +394,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 			parts = append(parts, table+":"+raw)
 		}
 		var raw string
-		if e := db.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(x) ORDER BY receipt_id)::text FROM gxb_operation_receipts x WHERE owner_kind='player' AND owner_key=$1 AND domain='character-hero' AND operation IN('stone-summon','equip-item')`, strconv.FormatInt(born, 10)).Scan(&raw); e != nil {
+		if e := db.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(x)-'payload_version' ORDER BY receipt_id)::text FROM gxb_operation_receipts x WHERE owner_kind='player' AND owner_key=$1 AND domain='character-hero' AND operation IN('stone-summon','equip-item')`, strconv.FormatInt(born, 10)).Scan(&raw); e != nil {
 			t.Fatal(e)
 		}
 		parts = append(parts, "receipts:"+raw)

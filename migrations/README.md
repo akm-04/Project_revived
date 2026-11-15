@@ -51,3 +51,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00159: R7 stored per-board score row (policy, player, score, score_since, revision, metric) with the board ordering index. Empty on upgrade; the R7 backfill seeds it.
 - 00161: R8-3 part A (A-040): 35 player columns that no foreign key covered now reference players(player_id), NOT VALID (new rows only, short lock), NO ACTION, no index. Client logs, request_journal, the logical_servers counters and the text redeem subject are excluded.
 - 00162: R8-3 part B: NO TRANSACTION, one VALIDATE CONSTRAINT per 00161 key. An orphan row fails the step and is reported; deletions, if any, go in their own reviewed migration.
+- 00163: R8-2 (A-037): payload_version smallint NOT NULL DEFAULT 0 on the 133 tables whose JSON payload the code decodes (docs/data/PAYLOAD_COLUMNS.json). Existing rows are version 0; payload bytes and digests do not change. Metadata-only.

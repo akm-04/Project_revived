@@ -111,7 +111,7 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 		// assertion about an original server or a full future content installation.
 		rev := strings.Repeat("e", 64)
 		f.sql(`INSERT INTO gxb_content_revisions(revision_id,content_sha256,schema_version,compiler_version,parser_version,manifest)SELECT $1,decode($1,'hex'),schema_version,compiler_version,parser_version,jsonb_set(manifest,'{revision_id}',to_jsonb($1::text)) FROM gxb_content_revisions WHERE revision_id=$2 ON CONFLICT DO NOTHING`, rev, got.Revision)
-		f.sql(`INSERT INTO content_social_gift_catalogs SELECT $1,payload FROM content_social_gift_catalogs WHERE revision_id=$2 ON CONFLICT DO NOTHING`, rev, got.Revision)
+		f.sql(`INSERT INTO content_social_gift_catalogs(revision_id,payload) SELECT $1,payload FROM content_social_gift_catalogs WHERE revision_id=$2 ON CONFLICT DO NOTHING`, rev, got.Revision)
 		f.sql(`UPDATE social_gift_transfers SET reward_revision=$1 WHERE recipient_player_id=200001 AND claim_operation_id IS NULL AND sender_player_id=500001`, rev)
 		sequence := f.number(`SELECT last_value FROM social_notice_id_seq`)
 		rec := giftRecovery{ActorAccount: b.AccountID.UUID().String(), ActorSession: b.SessionID.UUID().String(), ActorContext: b.ContextID.UUID().String(), ActorUID: string(b.AccountUID), ActorPlayer: b.PlayerID, ActorServer: b.LogicalServerID, SenderAccount: a.AccountID.UUID().String(), SenderSession: a.SessionID.UUID().String(), SenderContext: a.ContextID.UUID().String(), SenderUID: string(a.AccountUID), SenderPlayer: a.PlayerID, SenderServer: a.LogicalServerID, Claim: op, ClaimInput: claimed, Old: old.NoticeIDs, Current: current.NoticeIDs, Deleted: gone.NoticeIDs, Result: got, Snapshot: f.giftState(), Sequence: sequence, At: f.now()}

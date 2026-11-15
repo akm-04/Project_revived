@@ -220,7 +220,7 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	}
 	snapshot := func() string {
 		var raw string
-		e := p.QueryRow(c, `SELECT jsonb_build_object('notes',(SELECT jsonb_agg(to_jsonb(n) ORDER BY notice_id) FROM social_notices n WHERE recipient_player_id=$1),'gifts',(SELECT jsonb_agg(to_jsonb(g) ORDER BY transfer_id) FROM social_gift_transfers g WHERE recipient_player_id=$1),'root',(SELECT to_jsonb(r) FROM player_social_roots r WHERE player_id=$1),'balance',(SELECT jsonb_agg(to_jsonb(b) ORDER BY resource_key) FROM player_currency_balances b WHERE player_id=$1),'claims',(SELECT jsonb_agg(to_jsonb(o) ORDER BY operation_id) FROM social_gift_claim_operations o WHERE recipient_player_id=$1))::text`, int64(actor.PlayerID)).Scan(&raw)
+		e := p.QueryRow(c, `SELECT jsonb_build_object('notes',(SELECT jsonb_agg(to_jsonb(n) ORDER BY notice_id) FROM social_notices n WHERE recipient_player_id=$1),'gifts',(SELECT jsonb_agg(to_jsonb(g) ORDER BY transfer_id) FROM social_gift_transfers g WHERE recipient_player_id=$1),'root',(SELECT to_jsonb(r) FROM player_social_roots r WHERE player_id=$1),'balance',(SELECT jsonb_agg(to_jsonb(b) ORDER BY resource_key) FROM player_currency_balances b WHERE player_id=$1),'claims',(SELECT jsonb_agg(to_jsonb(o)-'payload_version' ORDER BY operation_id) FROM social_gift_claim_operations o WHERE recipient_player_id=$1))::text`, int64(actor.PlayerID)).Scan(&raw)
 		if e != nil {
 			t.Fatal(e)
 		}

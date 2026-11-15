@@ -94,7 +94,7 @@ func (Store) ListHeroesTx(c context.Context, q tx.Queryer, p identity.PlayerID) 
 		return nil, course.ErrUnqualified
 	}
 	var raw string
-	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY partner_id),'[]'::jsonb)::text FROM player_course_heroes t WHERE player_id=$1`, int64(p)).Scan(&raw); e != nil {
+	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(to_jsonb(t)-'payload_version' ORDER BY partner_id),'[]'::jsonb)::text FROM player_course_heroes t WHERE player_id=$1`, int64(p)).Scan(&raw); e != nil {
 		return nil, e
 	}
 	var rows []struct {

@@ -98,7 +98,7 @@ func (Store) ListHeroesTx(ctx context.Context, q tx.Queryer, pid identity.Player
 		return nil, library.ErrInvalidFacts
 	}
 	var raw string
-	if e := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY partner_id),'[]'::jsonb)::text FROM player_library_heroes t WHERE player_id=$1`, int64(pid)).Scan(&raw); e != nil {
+	if e := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(t)-'payload_version' ORDER BY partner_id),'[]'::jsonb)::text FROM player_library_heroes t WHERE player_id=$1`, int64(pid)).Scan(&raw); e != nil {
 		return nil, e
 	}
 	var rows []struct {

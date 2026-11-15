@@ -54,7 +54,7 @@ func (f *fixture) gift() sg.Service {
 	return sg.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: f.p}}, Runner: r}, Reads: r, Store: socialgiftstore.Store{}, Content: content, Players: i4store.PlayerRootLocker{}, Relations: socialrelationstore.Store{}, Privacy: sr.FriendDMPrivacyProvider{Store: socialrelationstore.Store{}}, Inbox: socialinbox.GiftService{Store: inbox}, NoticeEvidence: inbox, Grants: gr, Admission: f.authority(), Fence: db}
 }
 func (f *fixture) giftState() string {
-	return f.text(`SELECT jsonb_build_object('epochs',(SELECT coalesce(jsonb_agg(to_jsonb(e) ORDER BY player_id,day_token),'[]') FROM social_gift_epochs e),'transfers',(SELECT coalesce(jsonb_agg(to_jsonb(g) ORDER BY transfer_id),'[]') FROM social_gift_transfers g),'claims',(SELECT coalesce(jsonb_agg(to_jsonb(o) ORDER BY operation_id),'[]') FROM social_gift_claim_operations o),'scalar',(SELECT coalesce(jsonb_agg(to_jsonb(s) ORDER BY player_id,resource_key),'[]') FROM player_currency_balances s),'social',$1::jsonb)::text`, f.snapshot())
+	return f.text(`SELECT jsonb_build_object('epochs',(SELECT coalesce(jsonb_agg(to_jsonb(e) ORDER BY player_id,day_token),'[]') FROM social_gift_epochs e),'transfers',(SELECT coalesce(jsonb_agg(to_jsonb(g) ORDER BY transfer_id),'[]') FROM social_gift_transfers g),'claims',(SELECT coalesce(jsonb_agg(to_jsonb(o)-'payload_version' ORDER BY operation_id),'[]') FROM social_gift_claim_operations o),'scalar',(SELECT coalesce(jsonb_agg(to_jsonb(s) ORDER BY player_id,resource_key),'[]') FROM player_currency_balances s),'social',$1::jsonb)::text`, f.snapshot())
 }
 func Test7A_SendClaimCanonicalKnownReplay(t *testing.T) {
 	f, s, a, b := giftFixture(t)
