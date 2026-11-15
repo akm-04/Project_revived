@@ -75,3 +75,20 @@ func TestHTTPPollRetryAfterAbandonedSendAppliesOnce(t *testing.T) {
 		t.Fatalf("recipient received %d chat messages for %d sends retried with the same client_sequence", received, sends)
 	}
 }
+
+func TestHTTPPollFullQueueStillCarriesSocketClose(t *testing.T) {
+	server, err := NewHTTPPollServer(t.Context(), newRealtimeTestServer(t), 5*time.Second, 100*time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	sessionID, _ := loginSocket(t, server.Handler(), "alpha", "world", 1)
+	server.mutex.Lock()
+	session := server.sessions[sessionID]
+	server.mutex.Unlock()
+	for session.enqueue("world", []byte(`{}`)) == nil {
+	}
+	if err := session.enqueueClosed("world"); err != nil {
+		t.Fatalf("a full queue dropped the socket close marker: %v", err)
+	}
+}
