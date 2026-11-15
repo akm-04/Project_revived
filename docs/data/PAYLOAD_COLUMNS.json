@@ -1,0 +1,3245 @@
+{
+ "authority": "R8 payload column inventory (generated from the PostgreSQL catalog and CANONICAL_TABLE_OWNERSHIP.json)",
+ "schema_version": 1,
+ "columns": [
+  {
+   "table": "account_provider_bindings",
+   "column": "provider_metadata",
+   "scope": "infrastructure",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "achievement_roots",
+   "column": "complete_times",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "[]*time.Time",
+   "decode_sites": [
+    "internal/adapters/postgres/achievementstore/store.go:28 Scan raw",
+    "internal/adapters/postgres/achievementstore/store.go:36 json.Unmarshal into []*time.Time"
+   ],
+   "writers": [
+    "internal/adapters/postgres/achievementstore/store.go:50 '[null,null,null]'::jsonb",
+    "internal/adapters/postgres/achievementstore/store.go:63 json.Marshal(r.CompleteTimes) -> UPDATE :67"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/achievementstore/catalog.go:106 jsonb_array_elements(r.complete_times) join, #>> field extraction in trophy totals"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "achievement_streaks",
+   "column": "complete_times",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "[]*time.Time",
+   "decode_sites": [
+    "internal/adapters/postgres/achievementstore/store.go:108 Scan raw",
+    "internal/adapters/postgres/achievementstore/store.go:116 json.Unmarshal into []*time.Time"
+   ],
+   "writers": [
+    "internal/adapters/postgres/achievementstore/store.go:128 json.Marshal(s.CompleteTimes) -> INSERT/UPDATE :132/:135"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/achievementstore/catalog.go:108 jsonb_array_elements(s.complete_times) join, #>> field extraction in trophy totals"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "arena_casual_entries",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arena.Entry",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/tournament.go:119 readJSON",
+    "internal/adapters/postgres/arenastore/tournament.go:128 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/tournament.go:144 encode(entry) -> INSERT :153 / UPDATE :155"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_casual_sessions",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "arena.CasualSession",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/tournament.go:181 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/tournament.go:192 encode(session) -> INSERT :197 / UPDATE :199"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_friend_invitations",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arena.Invitation",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/friend_fight.go:21 readJSON",
+    "internal/adapters/postgres/arenastore/friend_fight.go:30 readJSON",
+    "internal/adapters/postgres/arenastore/friend_fight.go:39 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/friend_fight.go:67 encode(invitation) -> INSERT :76 / UPDATE :78"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_matches",
+   "column": "defense_heroes",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arenastore.matchRow",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/store.go:249 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/store.go:287 encode(m.DefenseHeroes) -> INSERT :291"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_matches",
+   "column": "formation",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arenastore.matchRow",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/store.go:249 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/store.go:303 encode(m.Formation) -> UPDATE :319"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_matches",
+   "column": "outcome",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arenastore.matchRow",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/store.go:249 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/store.go:310 encode(m.Outcome) -> UPDATE :319"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_players",
+   "column": "awards",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arenastore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/store.go:128 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/store.go:150 encode(p.Awards) -> INSERT :174 / UPDATE :188"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_players",
+   "column": "defense",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arenastore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/store.go:128 readJSON into playerRow",
+    "internal/adapters/postgres/arenastore/recommend.go:48 json.Unmarshal into formation rows"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/store.go:144 encode(p.Defense) -> INSERT :174 / UPDATE :188"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/arenastore/store.go:206 jsonb_array_length(defense->'heroes')=5 filters standings",
+    "internal/adapters/postgres/arenastore/recommend.go:36 jsonb_array_length(defense->'heroes')>0 filters popular formations"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_players",
+   "column": "missions",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arenastore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/store.go:128 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/store.go:147 encode(p.Missions) -> INSERT :174 / UPDATE :188"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_players",
+   "column": "recent_offers",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arenastore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/store.go:128 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/store.go:157 encode(offers) -> INSERT :174 / UPDATE :188"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_tournament_periods",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "arena.TournamentPeriod",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/tournament.go:28 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/tournament.go:39 encode(period) -> INSERT :44 / UPDATE :46"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/arenastore/tournament.go:210 payload->>'settled' filters unsettled periods",
+    "internal/adapters/postgres/arenastore/tournament.go:220 payload->>'settled', payload->>'cancelled', jsonb_array_elements(payload->'entrants') filter champions"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "arena_tournament_rooms",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "arena.Room",
+   "decode_sites": [
+    "internal/adapters/postgres/arenastore/tournament.go:55 readJSON",
+    "internal/adapters/postgres/arenastore/tournament.go:99 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/arenastore/tournament.go:79 encode(room) -> INSERT :92 / UPDATE :94"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/arenastore/tournament.go:113 payload->'selection'->>'deadline' filters due rooms"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 6
+  },
+  {
+   "table": "broadcast_outbox",
+   "column": "fields",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "app.Fields",
+   "decode_sites": [
+    "internal/adapters/postgres/broadcaststore/store.go:46 json.Unmarshal into app.Fields"
+   ],
+   "writers": [
+    "internal/adapters/postgres/broadcaststore/store.go:21 json.Marshal(m.Fields) -> INSERT :26"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "campaign_players",
+   "column": "chapter_claims",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "campaign progress maps",
+   "decode_sites": [
+    "internal/adapters/postgres/campaignstore/store.go:72 json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/campaignstore/store.go:112 json.Marshal(r.Progress.ChapterClaims) -> UPDATE :133"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "campaign_players",
+   "column": "last_result",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/campaignstore/store.go:76-79 raw bytes kept as json.RawMessage"
+   ],
+   "writers": [
+    "internal/adapters/postgres/campaignstore/store.go:133 last_result=$7 from r.LastResult bytes"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "campaign_players",
+   "column": "pending_awakening",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/campaignstore/store.go:66-70 json.Valid then kept as json.RawMessage"
+   ],
+   "writers": [
+    "internal/adapters/postgres/campaignstore/store.go:133 pending_awakening=$13 from r.PendingAwakening bytes"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "campaign_players",
+   "column": "pending_items",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "campaign pending item slice",
+   "decode_sites": [
+    "internal/adapters/postgres/campaignstore/store.go:66 json.Unmarshal into r.PendingItems"
+   ],
+   "writers": [
+    "internal/adapters/postgres/campaignstore/store.go:103 json.Marshal(r.PendingItems) -> UPDATE :133"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "campaign_players",
+   "column": "story_claims",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "campaign progress maps",
+   "decode_sites": [
+    "internal/adapters/postgres/campaignstore/store.go:75 json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/campaignstore/store.go:119 json.Marshal(r.Progress.StoryClaims) -> UPDATE :133"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "campaign_players",
+   "column": "trial_wins",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "campaign progress maps",
+   "decode_sites": [
+    "internal/adapters/postgres/campaignstore/store.go:78 json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/campaignstore/store.go:126 json.Marshal(r.Progress.TrialWins) -> UPDATE :133"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 7
+  },
+  {
+   "table": "client_log_rows",
+   "column": "extras",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/clientlogstore/store.go:128 extras embedded in jsonb_build_object and returned as timeline json.RawMessage"
+   ],
+   "writers": [
+    "internal/adapters/postgres/clientlogstore/store.go:74 json.Marshal(row.Extras) -> INSERT :80"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "commerce_recharge_tuning",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "privilege.ChargeTuning",
+   "decode_sites": [
+    "internal/adapters/postgres/commerceprivilegestore/store.go:185 payload::text",
+    "internal/adapters/postgres/commerceprivilegestore/store.go:193 json.Unmarshal into ChargeTuning"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "conquer_school_players",
+   "column": "state",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "conquer player state",
+   "decode_sites": [
+    "internal/adapters/postgres/conquerstore/mode.go:23 Scan raw",
+    "internal/adapters/postgres/conquerstore/mode.go:30 json.Unmarshal into d state"
+   ],
+   "writers": [
+    "internal/adapters/postgres/conquerstore/mode.go:34 json.Marshal(m) -> INSERT :38 / UPDATE :44"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "conquer_school_reports",
+   "column": "heroes",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/conquerstore/mode.go:82-86 scanReport keeps json.RawMessage(heroes)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/conquerstore/mode.go:65 string(r.Heroes)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "conquer_school_reports",
+   "column": "pet",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/conquerstore/mode.go:86 scanReport keeps json.RawMessage(pet)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/conquerstore/mode.go:65 string(r.Pet)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "conquer_school_reports",
+   "column": "profile",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "conquer report profile",
+   "decode_sites": [
+    "internal/adapters/postgres/conquerstore/mode.go:86 json.Unmarshal(profile, &r.Profile)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/conquerstore/mode.go:61 json.Marshal(r.Profile) -> INSERT :65"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "conquer_school_reports",
+   "column": "report",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/conquerstore/mode.go:86 scanReport keeps json.RawMessage(body)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/conquerstore/mode.go:65 string(r.Body)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "content_achievement_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.AchievementCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/achievement.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/achievement.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/achievement.go:83 string(b.AchievementJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/achievement.go:56 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_adventure_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "adventure.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/adventure.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/adventure.go:43 string(b.AdventureJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_arena_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "arena.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/arena.go:29 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/arena.go:44 string(b.ArenaJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_awakening_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "objective.AwakeCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/awakening.go:20 json.Unmarshal into objective.AwakeCatalog"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/store.go:99 string(data.Awakening)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 1
+  },
+  {
+   "table": "content_book_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.BookInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/book_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/book_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/book_inputs.go:107 string(b.BookInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/book_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_campaign_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "campaign.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/campaign.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/campaign.go:43 string(b.CampaignJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_charge_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "privilege.ChargeCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/charge.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/charge.go:43 string(b.ChargeJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_conquer_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.ConquerInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/conquer_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/conquer_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/conquer_inputs.go:79 string(b.ConquerInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/conquer_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_conquer_mode_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "conquerschool.ModeCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/conquer_mode.go:26 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/conquer_mode.go:41 string(b.ConquerModeJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_course_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.CourseInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/course_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/course_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/course_inputs.go:109 string(b.CourseInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/course_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 1
+  },
+  {
+   "table": "content_dodgeball_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "dodgeball.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/dodgeball.go:20 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/dodgeball.go:31 string(bundle.DodgeballJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_dorm_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.DormInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/dorm_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/dorm_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/dorm_inputs.go:133 string(b.DormInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/dorm_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_element_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.ElementInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/element_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/element_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/element_inputs.go:87 string(b.ElementInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/element_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_emoticon_catalogs",
+   "column": "artifact",
+   "scope": "content",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:1183 InsertContentEmoticons $2::jsonb"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:1184 jsonb_array_length(artifact->'definitions') insert count",
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:1187 equality verify and jsonb_array_length(artifact->'definitions')",
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:1189 jsonb_path_query_first(artifact, ...) filters by definition id"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 2
+  },
+  {
+   "table": "content_evolution_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.EvolutionInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/evolution_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/evolution_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/evolution_inputs.go:79 string(b.EvolutionInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/evolution_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_gods_trial_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "godstrial.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/godstrial.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/godstrial.go:43 string(b.GodsTrialJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_guild_broadcast_policies",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.GuildBroadcastPolicy",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/guild_broadcast.go:37 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/guild_broadcast.go:50 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/store.go:870 string(b.GuildBroadcastJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/guild_broadcast.go:44 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_guild_invite_policies",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.GuildInvitePolicy",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/guild_invite.go:63 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/guild_invite.go:77 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/store.go:878 string(b.GuildInviteJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/guild_invite.go:70 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_illusion_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "illusion.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/illusion.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/illusion.go:43 string(b.IllusionJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_inscription_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.InscriptionInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/inscription_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/inscription_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/inscription_inputs.go:87 string(b.InscriptionInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/inscription_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 2
+  },
+  {
+   "table": "content_league_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "championsleague.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/league.go:26 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/league.go:41 string(b.LeagueJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 5
+  },
+  {
+   "table": "content_library_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.LibraryInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/library_inputs.go:72 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/library_inputs.go:86 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/library_inputs.go:19 string(b.LibraryInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/library_inputs.go:79 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_march_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "march.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/march.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/march.go:43 string(b.MarchJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_memoir_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "memoir.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/memoir.go:20 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/memoir.go:31 string(bundle.MemoirJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_mission_activity_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "objective.ActivityCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/missions.go:61 json.Unmarshal into objective.ActivityCatalog"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/store.go:81 string(data.Activity)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 3
+  },
+  {
+   "table": "content_monthly_signin_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "objective.SignCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/signin.go:20 json.Unmarshal into objective.SignCatalog"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/store.go:90 string(data.SignIn)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 3
+  },
+  {
+   "table": "content_occult_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "occult.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/occult.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/occult.go:43 string(b.OccultJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_one_on_one_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "oneonone.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/one_on_one.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/one_on_one.go:43 string(b.OneOnOneJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_pet_campaign_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "petcampaign.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/petcampaign.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/petcampaign.go:43 string(b.PetCampaignJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_player_display_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.PlayerDisplayCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/player_display.go:55 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/player_display.go:68 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/player_display.go:17 string(b.PlayerDisplayJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/player_display.go:62 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_privilege_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.PrivilegeCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/privilege.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/privilege.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/privilege.go:83 string(b.PrivilegeJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/privilege.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
+   "table": "content_public_profile_policies",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.PublicProfilePolicy",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/public_profile.go:65 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/public_profile.go:79 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/public_profile.go:20 string(b.PublicProfileJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/public_profile.go:72 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_public_showcase_policies",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.PublicShowcasePolicy",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/public_showcase.go:64 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/public_showcase.go:78 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/public_showcase.go:19 string(b.PublicShowcaseJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/public_showcase.go:71 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_social_gift_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "sg.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/social_gift.go:38 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/social_gift.go:51 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/store.go:848 string(b.SocialGiftJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/social_gift.go:45 sha256(canonicalized payload + 10) compared with manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_social_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.SocialInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/social_inputs.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/store.go:859 b.SocialInputsJSON()"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_spirit_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.SpiritInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/spirit_inputs.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/spirit_inputs.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/spirit_inputs.go:79 string(b.SpiritInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/spirit_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_stat_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.StatInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/stat_inputs.go:50 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/stat_inputs.go:64 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/stat_inputs.go:80 string(b.StatInputsJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/stat_inputs.go:57 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_stat_rule_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.StatRuleCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/stat_rules.go:49 generic map for artifact hash",
+    "internal/adapters/postgres/contentstore/stat_rules.go:63 strict struct"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/stat_rules.go:87 string(b.StatRulesJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/stat_rules.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_summon_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "summon.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/summon.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/summon.go:43 string(b.SummonJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_top_floor_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "topfloor.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/top_floor.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/top_floor.go:43 string(b.TopFloorJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_workplace_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "workplace.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/workplace.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/workplace.go:43 string(b.WorkplaceJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 4
+  },
+  {
+   "table": "content_world_boss_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "worldboss.Catalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/worldboss.go:28 readModeCatalog strict struct; generic map for artifact hash"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/worldboss.go:43 string(b.WorldBossJSON())"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:44-48 sha256 of canonicalized decoded payload compared with the manifest artifact hash"
+   ],
+   "batch": 5
+  },
+  {
+   "table": "daily_consumption_players",
+   "column": "counts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "application daily Counts",
+   "decode_sites": [
+    "internal/adapters/postgres/dailyconsumestore/store.go:23 Scan raw",
+    "internal/adapters/postgres/dailyconsumestore/store.go:31 json.Unmarshal into app.Counts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/dailyconsumestore/store.go:44 json.Marshal(counts) -> UPDATE :48"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "dodgeball_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "dodgeball.State",
+   "decode_sites": [
+    "internal/adapters/postgres/dodgeballstore/store.go:26 json.Unmarshal into dodgeball.State"
+   ],
+   "writers": [
+    "internal/adapters/postgres/dodgeballstore/store.go:40 json.Marshal(state) -> UPDATE :44"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "friend_dm_projection_receipts",
+   "column": "messages",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "[]dm.Projection",
+   "decode_sites": [
+    "internal/adapters/postgres/frienddmstore/store.go:83 json.Unmarshal into r.Messages"
+   ],
+   "writers": [
+    "internal/adapters/postgres/frienddmstore/store.go:195 json.Marshal(r.Messages) -> INSERT :199"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 15
+  },
+  {
+   "table": "godstrial_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "godstrial.State",
+   "decode_sites": [
+    "internal/adapters/postgres/godstrialstore/store.go:25 json.Unmarshal into d.State"
+   ],
+   "writers": [
+    "internal/adapters/postgres/godstrialstore/store.go:39 json.Marshal(s) -> UPDATE :43"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "guild_audit_log",
+   "column": "details",
+   "scope": "guild",
+   "decode": "struct",
+   "decode_type": "guild audit detail rows",
+   "decode_sites": [
+    "internal/adapters/postgres/guildstore/store.go:390 details->>'role' select",
+    "internal/adapters/postgres/guildstore/store.go:403 json.Unmarshal into rows"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildstore/store.go:377 $9::jsonb caller-built details JSON"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/guildstore/store.go:390 details->>'role' selects the role in the bounded member log"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "guild_broadcast_sources",
+   "column": "policy_refs",
+   "scope": "guild",
+   "decode": "struct",
+   "decode_type": "[]policy.Ref",
+   "decode_sites": [
+    "internal/adapters/postgres/guildbroadcaststore/store.go:69 Scan refs",
+    "internal/adapters/postgres/guildbroadcaststore/store.go:83 policy.ParseCanonicalJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildbroadcaststore/store.go:45 string(refs)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 16
+  },
+  {
+   "table": "guild_campaign_copies",
+   "column": "settled_body",
+   "scope": "guild",
+   "decode": "raw",
+   "decode_type": "[]byte",
+   "decode_sites": [
+    "internal/adapters/postgres/guildcampaignstore/mode.go:50 copy.SettledBody = []byte(settledBody)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildcampaignstore/mode.go:55-60 string(copy.SettledBody) -> UPDATE settled_body"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "guild_campaign_copies",
+   "column": "waves",
+   "scope": "guild",
+   "decode": "raw",
+   "decode_type": "[]byte",
+   "decode_sites": [
+    "internal/adapters/postgres/guildcampaignstore/mode.go:50 copy.Waves = []byte(waves)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildcampaignstore/mode.go:55-60 string(copy.Waves) -> UPDATE waves",
+    "internal/adapters/postgres/guildcampaignstore/store.go:77 $5 (copy.Waves) INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "guild_campaign_server_records",
+   "column": "partners",
+   "scope": "server",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/guildcampaignstore/mode.go:204 Partners json.RawMessage field",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:207 json.Unmarshal into rows"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildcampaignstore/mode.go:179 $6::jsonb partners"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "guild_invite_projection_markers",
+   "column": "cursor_proof",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "gi.CursorProof",
+   "decode_sites": [
+    "internal/adapters/postgres/guildinvitestore/store.go:169 gi.DecodeCursorProof"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildinvitestore/cursor.go:51 json.Marshal(p) -> UPDATE :64 cursor_proof"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 16
+  },
+  {
+   "table": "guild_invite_projection_markers",
+   "column": "source_payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "gi.Marker",
+   "decode_sites": [
+    "internal/adapters/postgres/guildinvitestore/store.go:169-175 gi.DecodeMarker"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildinvitestore/store.go:142 json.Marshal(m) -> INSERT :146"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/domain/guildinvite/encoding.go:41-43 DecodeMarker verifies sha256 fingerprint over decoded evidence"
+   ],
+   "batch": 16
+  },
+  {
+   "table": "guild_invite_projection_sources",
+   "column": "source_payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "gi.Issue",
+   "decode_sites": [
+    "internal/adapters/postgres/guildinvitestore/store.go:118 gi.DecodeIssue"
+   ],
+   "writers": [
+    "internal/adapters/postgres/guildinvitestore/store.go:87 json.Marshal(s) -> INSERT :91"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/domain/guildinvite/encoding.go:29-31 DecodeIssue verifies sha256 fingerprint over decoded evidence"
+   ],
+   "batch": 16
+  },
+  {
+   "table": "gxb_content_hero_fumo_targets",
+   "column": "attr_ids",
+   "scope": "content",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:331 InsertContentHeroFumo jsonb_to_recordset attr_ids"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_content_hero_fumo_targets",
+   "column": "stage_delta_by_attr",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "[]map[int64]string (via []map[string]string)",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/hero_fumo.go:72-79 json.Unmarshal into []map[string]string then keyed by attribute id"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:331 InsertContentHeroFumo jsonb_to_recordset stage_delta_by_attr"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_content_hero_fumo_targets",
+   "column": "threshold_increments",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "character.HeroFumoTarget.ThresholdIncrements",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/hero_fumo.go:67 json.Unmarshal into ThresholdIncrements"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:331 InsertContentHeroFumo jsonb_to_recordset threshold_increments"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_content_hero_templates",
+   "column": "skill_slots",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "[]builtin.HeroSkillSlot",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/hero_skills.go:30-34 ReadHeroSkillSlots then json.Unmarshal into []builtin.HeroSkillSlot"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:86 InsertContentHeroCore jsonb_to_recordset skill_slots"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_content_objective_definitions",
+   "column": "prerequisite_policy",
+   "scope": "content",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:68 InsertContentObjectives jsonb_to_recordset prerequisite_policy"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_content_objective_definitions",
+   "column": "presentation",
+   "scope": "content",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:68 InsertContentObjectives jsonb_to_recordset presentation"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_content_objective_definitions",
+   "column": "reward_plan",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "grant.Plan",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/store.go:793 decodeContentGrantPlan(reward_plan::text)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:68 InsertContentObjectives jsonb_to_recordset reward_plan"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_content_revisions",
+   "column": "manifest",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "registry.Manifest",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/mode_catalog.go:26 registry.DecodeManifestStrict",
+    "internal/adapters/postgres/contentstore/achievement.go:33 registry.DecodeManifestStrict"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentqueries/querytext_gen.go:8 TryInsertContentRevision $5::jsonb (bundle manifest)"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/contentstore/missions.go:50 manifest->'enabled_capabilities' ? ... filters",
+    "internal/adapters/postgres/contentstore/store.go:895 manifest->>'source_archive_sha256' selects"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "gxb_operation_receipts",
+   "column": "operation_policy_refs",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "policy.Refs",
+   "decode_sites": [
+    "internal/adapters/postgres/kernelstore/store.go:70-104 Scan and policy.ParseCanonicalJSON at :103"
+   ],
+   "writers": [
+    "internal/adapters/postgres/kernelstore/store.go:36 policy.MarshalCanonicalJSON(r.OperationPolicyRefs) -> INSERT :42"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "gxb_operation_receipts",
+   "column": "result_payload",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/kernelstore/store.go:95-104 json.RawMessage(payload) kept as bytes"
+   ],
+   "writers": [
+    "internal/adapters/postgres/kernelstore/store.go:42 string(r.ResultPayload) -> INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "hero_recommend_snapshots",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "herorecommend.Snapshot",
+   "decode_sites": [
+    "internal/adapters/postgres/herorecommendstore/store.go:25-32 json.Unmarshal into Snapshot"
+   ],
+   "writers": [
+    "internal/adapters/postgres/herorecommendstore/store.go:47 s.Encode() -> INSERT :49"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/application/herorecommend/refresh.go:216-220 sha256 of the marshalled snapshot becomes Snapshot.Digest stored beside the payload"
+   ],
+   "batch": 16
+  },
+  {
+   "table": "illusion_reports",
+   "column": "content",
+   "scope": "server",
+   "decode": "raw",
+   "decode_type": "string bytes",
+   "decode_sites": [
+    "internal/adapters/postgres/illusionstore/store.go:187 content::text returned to caller unchanged"
+   ],
+   "writers": [
+    "internal/adapters/postgres/illusionstore/store.go:179 $5::jsonb content"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "league_competitions",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "championsleague.Root",
+   "decode_sites": [
+    "internal/adapters/postgres/leaguestore/store.go:50 read helper json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/leaguestore/store.go:67-69 enc(r) -> INSERT/UPDATE"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "league_cosmetic_origins",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "league cosmetic origin",
+   "decode_sites": [
+    "internal/adapters/postgres/leaguestore/store.go:157 read helper json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/leaguestore/store.go:169 $6::jsonb payload",
+    "internal/adapters/postgres/leaguestore/store.go:177 payload=$3::jsonb equality verify"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "league_matches",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "championsleague match wire struct",
+   "decode_sites": [
+    "internal/adapters/postgres/leaguestore/recommend.go:52 json.Unmarshal into observed matches"
+   ],
+   "writers": [
+    "internal/adapters/postgres/leaguestore/store.go:128-131 enc(m) -> INSERT/UPDATE payload"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/leaguestore/recommend.go:42-44 payload->'Attack'->'Heroes' select and payload->>'Status'='SETTLED' filter",
+    "internal/adapters/postgres/leaguestore/store.go:135 payload->>'Status'='FIGHTING' filters",
+    "internal/adapters/postgres/leaguestore/store.go:140 payload->>'Status'='SETTLED' filters"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "league_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "championsleague player wire struct",
+   "decode_sites": [
+    "internal/adapters/postgres/leaguestore/recommend.go:34 json.Unmarshal into formation rows"
+   ],
+   "writers": [
+    "internal/adapters/postgres/leaguestore/store.go:96-98 enc(p) -> INSERT/UPDATE payload"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/leaguestore/recommend.go:22-25 payload->'Defense'->'Heroes', payload->'Defense'->>'Pet', payload->>'Points' select/filter/order",
+    "internal/adapters/postgres/leaguestore/recommend.go:42-44 payload->'Attack'->'Heroes' select"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "league_settlements",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "championsleague settlement",
+   "decode_sites": [
+    "internal/adapters/postgres/leaguestore/store.go:145 read helper json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/leaguestore/store.go:153 $4::jsonb payload"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "logical_servers",
+   "column": "operator_metadata",
+   "scope": "infrastructure",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 14
+  },
+  {
+   "table": "mail_attachments",
+   "column": "metadata",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "[]attachJSON (Metadata map[string]string)",
+   "decode_sites": [
+    "internal/adapters/postgres/i5store/store.go:552-565 mailListJSON embeds mail_attachments.metadata in the jsonb_agg",
+    "internal/adapters/postgres/i5store/store.go:863 decodeMailRows -> :820 json.Unmarshal into []attachJSON (Metadata map[string]string)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/i5store/store.go:529 json.Marshal(a.Line.Metadata) -> INSERT :541"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 15
+  },
+  {
+   "table": "mail_tuning",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "mail tuning",
+   "decode_sites": [
+    "internal/adapters/postgres/i5store/store.go:489 payload::text",
+    "internal/adapters/postgres/i5store/store.go:497 json.Unmarshal into tuning"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 15
+  },
+  {
+   "table": "march_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "march.State",
+   "decode_sites": [
+    "internal/adapters/postgres/marchstore/store.go:32 read helper json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/marchstore/store.go:42 json.Marshal(r) -> UPDATE :46"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "memoir_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "memoir.State",
+   "decode_sites": [
+    "internal/adapters/postgres/memoirstore/store.go:31 read helper json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/memoirstore/store.go:44 json.Marshal(r) -> UPDATE :48"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "mentor_exam_receipts",
+   "column": "items",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "exam items",
+   "decode_sites": [
+    "internal/adapters/postgres/mentorstore/missions.go:118-134 jsonb_build_object read into receipt"
+   ],
+   "writers": [
+    "internal/adapters/postgres/mentorstore/missions.go:152 json.Marshal(receipt.Items) -> INSERT :156"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "objective_definitions",
+   "column": "prerequisite_policy",
+   "scope": "content",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "objective_definitions",
+   "column": "presentation",
+   "scope": "content",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "objective_definitions",
+   "column": "reward_plan",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "grant.Plan",
+   "decode_sites": [
+    "internal/adapters/postgres/i5store/store.go:678 reward_plan::text",
+    "internal/adapters/postgres/i5store/store.go:985 decodeGrantPlan"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 5
+  },
+  {
+   "table": "occult_logs",
+   "column": "content",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "[]json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/occultstore/store.go:109-110 json.Unmarshal into []json.RawMessage"
+   ],
+   "writers": [
+    "internal/adapters/postgres/occultstore/store.go:95 $5::jsonb content"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "occult_players",
+   "column": "scores",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "occult.Scores (domain LoadScores)",
+   "decode_sites": [
+    "internal/adapters/postgres/occultstore/store.go:26-29 d.LoadScores(json.RawMessage(raw))",
+    "internal/adapters/postgres/occultstore/store.go:34-41 d.LoadScores"
+   ],
+   "writers": [
+    "internal/adapters/postgres/occultstore/store.go:45 json.Marshal(scores) -> UPDATE :49"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "occult_reports",
+   "column": "content",
+   "scope": "server",
+   "decode": "raw",
+   "decode_type": "string bytes",
+   "decode_sites": [
+    "internal/adapters/postgres/occultstore/store.go:77 content::text returned to caller unchanged"
+   ],
+   "writers": [
+    "internal/adapters/postgres/occultstore/store.go:69 $5::jsonb content"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 17
+  },
+  {
+   "table": "one_on_one_matches",
+   "column": "attack_teams",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "oneononestore.matchRow",
+   "decode_sites": [
+    "internal/adapters/postgres/oneononestore/store.go:274 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/oneononestore/store.go:306 encode(m.AttackTeams) -> INSERT :314"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "one_on_one_matches",
+   "column": "defense_teams",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "oneononestore.matchRow",
+   "decode_sites": [
+    "internal/adapters/postgres/oneononestore/store.go:274 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/oneononestore/store.go:310 encode(m.DefenseTeams) -> INSERT :314"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "one_on_one_matches",
+   "column": "outcome",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "oneononestore.matchRow",
+   "decode_sites": [
+    "internal/adapters/postgres/oneononestore/store.go:274 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/oneononestore/store.go:336 encode(m.Outcome) -> UPDATE :342"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "one_on_one_players",
+   "column": "candidates",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "oneononestore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/oneononestore/store.go:147 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/oneononestore/store.go:177 encode(p.Candidates) -> INSERT :201 / UPDATE :215"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "one_on_one_players",
+   "column": "offer_snapshot",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "oneononestore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/oneononestore/store.go:147 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/oneononestore/store.go:180-183 encode(p.OfferSnapshot) -> INSERT :201 / UPDATE :215"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "one_on_one_players",
+   "column": "offered",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "oneononestore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/oneononestore/store.go:147 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/oneononestore/store.go:174 encode(p.Offered) -> INSERT :201 / UPDATE :215"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "one_on_one_players",
+   "column": "teams",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "oneononestore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/oneononestore/store.go:147 readJSON into playerRow",
+    "internal/adapters/postgres/oneononestore/recommend.go:48 json.Unmarshal into team rows"
+   ],
+   "writers": [
+    "internal/adapters/postgres/oneononestore/store.go:171 encode(p.Teams) -> INSERT :201 / UPDATE :215"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/oneononestore/recommend.go:34 jsonb_array_length(teams) projects popular teams",
+    "internal/adapters/postgres/oneononestore/store.go:231 jsonb_array_length(teams)>0 filters defenders"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 8
+  },
+  {
+   "table": "personal_dm_delivery",
+   "column": "terminal_receipt",
+   "scope": "player",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [
+    "internal/adapters/postgres/generaldmstore/store.go:57 json.Marshal(map[string]anyEllipsis) -> UPDATE :60 terminal_receipt"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 15
+  },
+  {
+   "table": "personal_dm_payloads",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "dm.Intent",
+   "decode_sites": [
+    "internal/adapters/postgres/generaldmstore/store.go:85 Scan raw",
+    "internal/adapters/postgres/generaldmstore/store.go:93 json.Unmarshal into dm.Intent"
+   ],
+   "writers": [
+    "internal/adapters/postgres/generaldmstore/store.go:32 json.Marshal(i) -> INSERT :46"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/generaldmstore/store.go:96-99 sha256 of re-marshalled intent compared with payload_binding_digest"
+   ],
+   "batch": 15
+  },
+  {
+   "table": "petcampaign_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "petcampaign.State",
+   "decode_sites": [
+    "internal/adapters/postgres/petcampaignstore/store.go:29 read helper json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/petcampaignstore/store.go:39 json.Marshal(s) -> UPDATE :43"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/petcampaignstore/rank.go:14 (payload->>'Max'), (payload->>'Server') filter/order/rank",
+    "internal/adapters/postgres/petcampaignstore/rank.go:24 (payload->>'Max'), (payload->>'Attained'), (payload->>'Server') rank count",
+    "internal/adapters/postgres/petcampaignstore/rank.go:33 (payload->>'EliteMax'), (payload->>'Server') filter/order/rank",
+    "internal/adapters/postgres/petcampaignstore/rank.go:43 (payload->>'EliteMax'), (payload->>'Attained'), (payload->>'Server') rank count"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "player_awakening_roots",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "awakening root",
+   "decode_sites": [
+    "internal/adapters/postgres/i5store/awakening.go:43 Scan raw",
+    "internal/adapters/postgres/i5store/awakening.go:51 json.Unmarshal into root"
+   ],
+   "writers": [
+    "internal/adapters/postgres/i5store/awakening.go:23 json.Marshal(initial) -> INSERT :27",
+    "internal/adapters/postgres/i5store/awakening.go:64 json.Marshal(root) -> UPDATE :68"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "player_book_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "book admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/bookstore/admissions.go:21-34 strict json.Decoder into admission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/bookstore/admissions.go:52 json.Marshal(d) -> INSERT :56"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_book_roots",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "book.Facts",
+   "decode_sites": [
+    "internal/adapters/postgres/bookstore/store.go:20-25 json.Unmarshal into r.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/bookstore/store.go:44 json.Marshal(r.Facts) -> UPDATE :48",
+    "internal/adapters/postgres/bookstore/store.go:61 json.Marshal(book.Seed()) -> INSERT :62"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_conquer_facts",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "conquer.Payload",
+   "decode_sites": [
+    "internal/adapters/postgres/conquerstore/store.go:21-27 json.Unmarshal into f.Payload"
+   ],
+   "writers": [
+    "internal/adapters/postgres/conquerstore/store.go:60 json.Marshal(f.Payload) -> UPDATE :64",
+    "internal/adapters/postgres/conquerstore/store.go:82 json.Marshal(payload) -> INSERT :90"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "player_course_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "course admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/coursestore/admissions.go:21-34 strict json.Decoder into admission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/coursestore/admissions.go:52 json.Marshal(d) -> INSERT :56"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_course_heroes",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "course.HeroFacts",
+   "decode_sites": [
+    "internal/adapters/postgres/coursestore/store.go:71-76 json.Unmarshal into r.Facts",
+    "internal/adapters/postgres/coursestore/store.go:116 json.Unmarshal(row.Facts)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/coursestore/store.go:133 json.Marshal(r.Facts) -> UPDATE :137",
+    "internal/adapters/postgres/coursestore/store.go:150-159 course.SeedHero() -> INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_course_roots",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "course.Facts",
+   "decode_sites": [
+    "internal/adapters/postgres/coursestore/store.go:21-26 json.Unmarshal into r.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/coursestore/store.go:45 json.Marshal(r.Facts) -> UPDATE :49",
+    "internal/adapters/postgres/coursestore/store.go:62 course.Seed() -> INSERT :63"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_display_admissions",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "player display admission",
+   "decode_sites": [
+    "internal/adapters/postgres/i5store/player_display.go:109 Scan raw",
+    "internal/adapters/postgres/i5store/player_display.go:116 json.Unmarshal into out"
+   ],
+   "writers": [
+    "internal/adapters/postgres/i5store/player_display.go:132 json.Marshal(j) -> INSERT :136"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "player_dorm_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "dorm admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/dormstore/admissions.go:21-34 strict json.Decoder into admission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/dormstore/admissions.go:52 json.Marshal(d) -> INSERT :56"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_dorm_admissions",
+   "column": "result",
+   "scope": "player",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_dorm_heroes",
+   "column": "equipment",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "dorm hero equipment flags",
+   "decode_sites": [
+    "internal/adapters/postgres/dormstore/store.go:169 Scan raw",
+    "internal/adapters/postgres/dormstore/store.go:181 json.Unmarshal into flags"
+   ],
+   "writers": [
+    "internal/adapters/postgres/dormstore/store.go:200 json.Marshal(f.Equipment) -> UPDATE :208",
+    "internal/adapters/postgres/dormstore/store.go:231 '[0,0,0,0,0]'::jsonb -> INSERT",
+    "internal/adapters/postgres/dormstore/store.go:241 same insert"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_dorm_rooms",
+   "column": "furniture_record",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "dorm layout",
+   "decode_sites": [
+    "internal/adapters/postgres/dormstore/store.go:60 Scan raw",
+    "internal/adapters/postgres/dormstore/store.go:65 json.Unmarshal into r.Layout"
+   ],
+   "writers": [
+    "internal/adapters/postgres/dormstore/store.go:115 json.Marshal(r.Layout) -> INSERT :140 / UPDATE :154"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_dorm_rooms",
+   "column": "pending_expansion",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "dorm.Expansion",
+   "decode_sites": [
+    "internal/adapters/postgres/dormstore/store.go:70 json.Unmarshal into dorm.Expansion"
+   ],
+   "writers": [
+    "internal/adapters/postgres/dormstore/store.go:121 json.Marshal(r.Pending) -> UPDATE :154"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_element_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "element admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/elementstore/admissions.go:21-34 strict json.Decoder into admission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/elementstore/admissions.go:52 json.Marshal(d) -> INSERT :56"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_element_heroes",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "elementequipment.HeroFacts",
+   "decode_sites": [
+    "internal/adapters/postgres/elementstore/store.go:71-76 json.Unmarshal into r.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/elementstore/store.go:97 json.Marshal(r.Facts) -> UPDATE :101",
+    "internal/adapters/postgres/elementstore/store.go:114-123 elementequipment.SeedHero() -> INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_element_roots",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "elementequipment.Facts",
+   "decode_sites": [
+    "internal/adapters/postgres/elementstore/store.go:21-26 json.Unmarshal into r.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/elementstore/store.go:45 json.Marshal(r.Facts) -> UPDATE :49",
+    "internal/adapters/postgres/elementstore/store.go:62 elementequipment.Seed() -> INSERT :63"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_event_centre_roots",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "eventcentre.Facts",
+   "decode_sites": [
+    "internal/adapters/postgres/eventcentrestore/store.go:23-31 json.Unmarshal into root.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/eventcentrestore/store.go:58 eventcentre.Seed() -> INSERT :62",
+    "internal/adapters/postgres/eventcentrestore/store.go:101 json.Marshal(root.Facts) -> UPDATE :105"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "player_hero_evolution",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "evolution.Facts",
+   "decode_sites": [
+    "internal/adapters/postgres/characterstore/evolution.go:34 json.Unmarshal into f.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/characterstore/evolution.go:68 json.Marshal(f.Facts) -> UPDATE :72",
+    "internal/adapters/postgres/characterstore/evolution.go:85-93 evo.Seed() -> INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_hero_evolution_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "evolution admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/characterstore/evolution_admissions.go:21-34 strict json.Decoder into admission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/characterstore/evolution_admissions.go:52 json.Marshal(d) -> INSERT :56"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_hero_practice_candidates",
+   "column": "generation_policy_refs",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "[]policy.Ref",
+   "decode_sites": [
+    "internal/adapters/postgres/characterstore/practice.go:155 parseProposal",
+    "internal/adapters/postgres/characterstore/practice.go:180-190 policy decode of rawPolicies"
+   ],
+   "writers": [
+    "internal/adapters/postgres/characterstore/practice.go:197-199 policy.MarshalCanonicalJSON(p.GenerationPolicyRefs) -> query :271"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_inscription_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "inscription admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/inscriptionstore/admissions.go:21-34 strict json.Decoder into admission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/inscriptionstore/admissions.go:52 json.Marshal(d) -> INSERT :56"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "player_inscription_heroes",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "inscription.HeroFacts",
+   "decode_sites": [
+    "internal/adapters/postgres/inscriptionstore/store.go:71-76 json.Unmarshal into r.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/inscriptionstore/store.go:133 json.Marshal(r.Facts) -> UPDATE :137",
+    "internal/adapters/postgres/inscriptionstore/store.go:150-159 inscription.SeedHero() -> INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "player_inscription_roots",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "inscription.Facts",
+   "decode_sites": [
+    "internal/adapters/postgres/inscriptionstore/store.go:21-26 json.Unmarshal into r.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/inscriptionstore/store.go:45 json.Marshal(r.Facts) -> UPDATE :49",
+    "internal/adapters/postgres/inscriptionstore/store.go:62 inscription.Seed() -> INSERT :63"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 12
+  },
+  {
+   "table": "player_library_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "library admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/librarystore/admissions.go:22-35 strict json.Decoder into admission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/librarystore/admissions.go:53 json.Marshal(d) -> INSERT :57"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "player_library_admissions",
+   "column": "result",
+   "scope": "player",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "player_library_heroes",
+   "column": "feed_attrs",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "[]int64 applied axes",
+   "decode_sites": [
+    "internal/adapters/postgres/librarystore/store.go:47-54 json.Unmarshal into attrs"
+   ],
+   "writers": [
+    "internal/adapters/postgres/librarystore/store.go:232 json.Marshal(f.Applied) -> UPDATE :244"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "player_library_heroes",
+   "column": "pending_candidate",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "library.Candidate",
+   "decode_sites": [
+    "internal/adapters/postgres/librarystore/store.go:59-65 strict json.Decoder into library.Candidate"
+   ],
+   "writers": [
+    "internal/adapters/postgres/librarystore/store.go:238 json.Marshal(f.Pending) -> UPDATE :244"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "player_library_roots",
+   "column": "special_claims",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "special claim bits",
+   "decode_sites": [
+    "internal/adapters/postgres/librarystore/store.go:26-33 json.Unmarshal into bits"
+   ],
+   "writers": [
+    "internal/adapters/postgres/librarystore/store.go:171-175 json.Marshal(f.SpecialClaims) -> INSERT",
+    "internal/adapters/postgres/librarystore/store.go:264-268 json.Marshal(f.SpecialClaims) -> UPDATE",
+    "internal/adapters/postgres/librarystore/bootstrap.go:25-29 json.Marshal(f.SpecialClaims) -> INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 13
+  },
+  {
+   "table": "player_pet_practice_candidates",
+   "column": "generation_policy_refs",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "[]policy.Ref",
+   "decode_sites": [
+    "internal/adapters/postgres/characterstore/practice.go:251 parseProposal",
+    "internal/adapters/postgres/characterstore/practice.go:180-190 policy decode of rawPolicies"
+   ],
+   "writers": [
+    "internal/adapters/postgres/characterstore/practice.go:197-199 policy.MarshalCanonicalJSON(p.GenerationPolicyRefs) -> query :287"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 10
+  },
+  {
+   "table": "player_profile_comment_operations",
+   "column": "admission_payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "comment admission",
+   "decode_sites": [
+    "internal/adapters/postgres/profilefeedbackstore/comments.go:153 strict json.Decoder into app.CommentAdmission"
+   ],
+   "writers": [
+    "internal/adapters/postgres/profilefeedbackstore/comments.go:199 json.Marshal(a) -> INSERT :203"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "player_public_profile_media_history",
+   "column": "reference",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "app.MediaHistory reference",
+   "decode_sites": [
+    "internal/adapters/postgres/publicprofilestore/media.go:16-31 jsonb_build_object then json.Unmarshal into app.MediaHistory"
+   ],
+   "writers": [
+    "internal/adapters/postgres/publicprofilestore/media.go:61 json.Marshal(h.Reference) -> INSERT :65"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "player_spirit_admissions",
+   "column": "operation_context",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "spirit admission command",
+   "decode_sites": [
+    "internal/adapters/postgres/spiritstore/admissions.go:21-34 strict json.Decoder into admission",
+    "internal/adapters/postgres/spiritstore/admissions.go:56-69 strict json.Decoder"
+   ],
+   "writers": [
+    "internal/adapters/postgres/spiritstore/admissions.go:88 json.Marshal(d) -> INSERT :92"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_spirit_heroes",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "spirit.HeroFacts",
+   "decode_sites": [
+    "internal/adapters/postgres/spiritstore/store.go:71-76 json.Unmarshal into r.Facts",
+    "internal/adapters/postgres/spiritstore/store.go:136-141 json.Unmarshal into out"
+   ],
+   "writers": [
+    "internal/adapters/postgres/spiritstore/store.go:97 json.Marshal(r.Facts) -> UPDATE :101",
+    "internal/adapters/postgres/spiritstore/store.go:114-123 spirit.SeedHero() -> INSERT"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "player_spirit_roots",
+   "column": "facts",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "spirit.Facts",
+   "decode_sites": [
+    "internal/adapters/postgres/spiritstore/store.go:21-26 json.Unmarshal into r.Facts"
+   ],
+   "writers": [
+    "internal/adapters/postgres/spiritstore/store.go:45 json.Marshal(r.Facts) -> UPDATE :49",
+    "internal/adapters/postgres/spiritstore/store.go:62 spirit.Seed() -> INSERT :63"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 11
+  },
+  {
+   "table": "publication_items",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "pub.Item",
+   "decode_sites": [
+    "internal/adapters/postgres/publicationstore/store.go:48-56 jsonb_build_object items then json.Unmarshal into pub.Set"
+   ],
+   "writers": [
+    "internal/adapters/postgres/publicationstore/store.go:32 json.Marshal(item) -> INSERT :40"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/domain/publication/types.go:97-129 Canonical() sha256 covers the set items and is stored as publication_sets.input_digest"
+   ],
+   "batch": 16
+  },
+  {
+   "table": "ranking_board_scores",
+   "column": "metric",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/rankingstore/scores.go:43 Metric json.RawMessage",
+    "internal/adapters/postgres/rankingstore/scores.go:17 metric::text"
+   ],
+   "writers": [
+    "internal/adapters/postgres/rankingstore/scores.go:69 json.Marshal(r.Metric) -> INSERT :73"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 16
+  },
+  {
+   "table": "ranking_girls_roots",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "ranking.Board",
+   "decode_sites": [
+    "internal/adapters/postgres/rankingstore/board.go:34-38 json.Unmarshal into r",
+    "internal/adapters/postgres/rankingstore/scores.go:184-192 json.Unmarshal into root"
+   ],
+   "writers": [
+    "internal/adapters/postgres/rankingstore/board.go:25 json.Marshal(seed) -> INSERT :29",
+    "internal/adapters/postgres/rankingstore/board.go:50 json.Marshal(r) -> UPDATE :54"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 16
+  },
+  {
+   "table": "ranking_girls_snapshots",
+   "column": "payload",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "ranking.BoardSnapshot",
+   "decode_sites": [
+    "internal/adapters/postgres/rankingstore/board.go:102 decodeSnapshot"
+   ],
+   "writers": [
+    "internal/adapters/postgres/rankingstore/board.go:67 json.Marshal(s) -> INSERT :71"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/domain/ranking/board.go:282-285 snapshot digest recomputed over the decoded struct; board.go:71 stores s.Digest beside the payload"
+   ],
+   "batch": 16
+  },
+  {
+   "table": "redeem_campaigns",
+   "column": "audience_policy",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "redeem audience",
+   "decode_sites": [
+    "internal/adapters/postgres/i5store/store.go:738-741 audience_policy::text then decodeAudience"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "redeem_reward_bundle_revisions",
+   "column": "grant_plan",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "grant.Plan",
+   "decode_sites": [
+    "internal/adapters/postgres/i5store/store.go:738-741 grant_plan::text then decodeGrantPlan"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "shared_rooms",
+   "column": "payload",
+   "scope": "player",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/sharedroomstore/store.go:187-201 json.RawMessage(payload)"
+   ],
+   "writers": [
+    "internal/adapters/postgres/sharedroomstore/store.go:82 string(room.Payload) -> INSERT :79",
+    "internal/adapters/postgres/sharedroomstore/store.go:100 payload=$5::jsonb UPDATE"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 15
+  },
+  {
+   "table": "social_exchange_tuning",
+   "column": "payload",
+   "scope": "content",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/socialexchangestore/store.go:16-23 returned as json.RawMessage"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "social_gift_claim_operations",
+   "column": "semantic_result",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "sg.ClaimOperation",
+   "decode_sites": [
+    "internal/adapters/postgres/socialgiftstore/store.go:241 to_jsonb(o)",
+    "internal/adapters/postgres/socialgiftstore/store.go:246 json.Unmarshal into sg.ClaimOperation"
+   ],
+   "writers": [
+    "internal/adapters/postgres/socialgiftstore/store.go:292 json.Marshal(v.Result) -> INSERT :303"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 15
+  },
+  {
+   "table": "social_guild_invite_invalidations",
+   "column": "target_payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "gi.TargetProof",
+   "decode_sites": [
+    "internal/adapters/postgres/socialinboxstore/guild_invite.go:149 target_payload::text",
+    "internal/adapters/postgres/socialinboxstore/guild_invite.go:160-165 gi.DecodeTargetProof"
+   ],
+   "writers": [
+    "internal/adapters/postgres/socialinboxstore/guild_invite.go:122 json.Marshal(p) -> INSERT :130"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/socialinboxstore/guild_invite_set.go:27-42 target_payload->>'...' comparisons and target_payload->'MarkerFingerprint' guard filters"
+   ],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/socialinboxstore/guild_invite_payloads.go:19 sha256 over target_payload::text content"
+   ],
+   "batch": 15
+  },
+  {
+   "table": "social_guild_invite_materializations",
+   "column": "target_payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "gi.TargetProof",
+   "decode_sites": [
+    "internal/adapters/postgres/socialinboxstore/guild_invite.go:104 target_payload::text",
+    "internal/adapters/postgres/socialinboxstore/guild_invite_payloads.go:29 json.Unmarshal keys"
+   ],
+   "writers": [
+    "internal/adapters/postgres/socialinboxstore/guild_invite.go:79 json.Marshal(p) -> INSERT :87"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/socialinboxstore/guild_invite_payloads.go:19 sha256 over target_payload::text content"
+   ],
+   "batch": 15
+  },
+  {
+   "table": "social_invite_tuning",
+   "column": "payload",
+   "scope": "content",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/socialinvitestore/store.go:23-30 returned as json.RawMessage"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  },
+  {
+   "table": "summon_players",
+   "column": "counters",
+   "scope": "player",
+   "decode": "map",
+   "decode_type": "map[string]int64",
+   "decode_sites": [
+    "internal/adapters/postgres/summonstore/store.go:33-37 json.Unmarshal into s.Counters"
+   ],
+   "writers": [
+    "internal/adapters/postgres/summonstore/store.go:57-61 json.Marshal(counters) -> INSERT :45 / UPDATE :53"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 16
+  },
+  {
+   "table": "summon_tuning",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "summon tuning",
+   "decode_sites": [
+    "internal/adapters/postgres/summonstore/store.go:75 payload::text",
+    "internal/adapters/postgres/summonstore/store.go:83 json.Unmarshal into t"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 16
+  },
+  {
+   "table": "top_floor_fights",
+   "column": "formation",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloorstore.fightRow",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/store.go:336 readJSON into fightRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/store.go:385 json.Marshal(f.Formation) -> INSERT :390"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_fights",
+   "column": "outcome",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloorstore.fightRow",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/store.go:336 readJSON into fightRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/store.go:400 json.Marshal(f.Outcome) -> UPDATE :406"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_offer_snapshots",
+   "column": "offers",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloor offer snapshot row",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/store.go:234 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/store.go:246 json.Marshal(snapshot.Offers) -> INSERT :250"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_players",
+   "column": "defense",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloorstore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/store.go:207 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/store.go:279 json.Marshal(p.Defense) -> INSERT :291 / UPDATE :303"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/topfloorstore/store.go:265 jsonb_array_length(defense)>0 filters defenders"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_players",
+   "column": "offered",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloorstore.playerRow",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/store.go:207 readJSON into playerRow"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/store.go:275 json.Marshal(p.Offered) -> INSERT :291 / UPDATE :303"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_task_days",
+   "column": "payload",
+   "scope": "server",
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:97 json.Marshal(day) -> INSERT :101"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_task_fights",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloor task fight",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:19 readJSON",
+    "internal/adapters/postgres/topfloorstore/task_fight.go:27 readJSON",
+    "internal/adapters/postgres/topfloorstore/task_fight.go:35 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:42 json.Marshal(fight) -> INSERT :46 / UPDATE :52"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_task_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloor task player",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/task_player.go:21 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/task_player.go:32 json.Marshal(player) -> INSERT :36 / UPDATE :44"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_task_preferences",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloor task defense",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:60 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:64 json.Marshal(defense) -> INSERT :68"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "top_floor_task_records",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "topfloor task record",
+   "decode_sites": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:83 readJSON",
+    "internal/adapters/postgres/topfloorstore/task_fight.go:88 readJSON"
+   ],
+   "writers": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:71 json.Marshal(record) -> INSERT :75"
+   ],
+   "sql_paths": [
+    "internal/adapters/postgres/topfloorstore/task_fight.go:83 payload->'Record' nested update in select",
+    "internal/adapters/postgres/topfloorstore/task_fight.go:88 payload->'Record' nested update in select"
+   ],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 9
+  },
+  {
+   "table": "workplace_players",
+   "column": "payload",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "workplace.State",
+   "decode_sites": [
+    "internal/adapters/postgres/workplacestore/store.go:32 read helper json.Unmarshal"
+   ],
+   "writers": [
+    "internal/adapters/postgres/workplacestore/store.go:42 json.Marshal(r) -> UPDATE :46"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 18
+  }
+ ]
+}
