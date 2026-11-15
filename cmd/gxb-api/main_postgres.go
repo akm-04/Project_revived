@@ -482,7 +482,8 @@ func main() {
 		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
 		roomInvites := roominvite.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{},
-			Notices: postgres.RoomInviteNoticeListEmitter{Pool: pool, OnError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
+			Notices: postgres.RoomInviteNoticeListEmitter{Pool: pool, OnError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }},
+			Limiter: roominvite.NewSenderRateLimiter(envPositiveDuration("GXB_ROOM_INVITE_SENDER_INTERVAL", roominvite.DefaultSenderInterval), envPositiveInt("GXB_ROOM_INVITE_SENDER_BURST", roominvite.DefaultSenderBurst))}
 		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms, roomInvites)
 		ranking.Illusion = illusion
 		roomChat = illusion

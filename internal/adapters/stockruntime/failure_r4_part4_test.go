@@ -11,6 +11,7 @@ import (
 	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
 	appcombat "gxb.local/backend/v2/internal/application/combat"
 	appranking "gxb.local/backend/v2/internal/application/ranking"
+	approominvite "gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -96,6 +97,7 @@ func TestR4Part4SharedFailureRows(t *testing.T) {
 		{"pet promotion content inactive", apppet.ErrPetPromotionContentInactive, http.StatusConflict, unprovenRefusalCode},
 		{"pet appearance content inactive", apppet.ErrPetAppearanceContentInactive, http.StatusConflict, unprovenRefusalCode},
 		{"practice content inactive", apppractice.ErrContentInactive, http.StatusConflict, unprovenRefusalCode},
+		{"room invite sender rate", approominvite.ErrSenderLimited, http.StatusConflict, unprovenRefusalCode},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

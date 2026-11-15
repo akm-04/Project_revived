@@ -11,6 +11,7 @@ import (
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
 	appcombat "gxb.local/backend/v2/internal/application/combat"
+	approominvite "gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -186,6 +187,8 @@ var sharedFailureRows = []failureRow{
 	{match: apppet.ErrPetPromotionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apppet.ErrPetAppearanceContentInactive, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apppractice.ErrContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	// A room invite over its PRIVATE_POLICY sender rate is a permanent refusal.
+	{match: approominvite.ErrSenderLimited, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 // isTransient lists the faults where the same request may succeed later. A

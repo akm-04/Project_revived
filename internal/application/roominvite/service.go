@@ -5,6 +5,7 @@ package roominvite
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -17,10 +18,82 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-var ErrUnresolved = errors.New("room invite materialize unresolved")
+var (
+	ErrUnresolved    = errors.New("room invite materialize unresolved")
+	ErrSenderLimited = errors.New("room invite sender rate exceeded")
+)
+
+// ROOM_INVITE_SENDER_RATE_V1 is a PRIVATE_POLICY anti-flood cap, not an
+// original-server rule: the source invite lists only bound the target's level.
+const (
+	SenderRatePolicyID    = "ROOM_INVITE_SENDER_RATE_V1"
+	DefaultSenderInterval = 3 * time.Second
+	DefaultSenderBurst    = 3
+	maxTrackedSenders     = 4096
+)
 
 // NoticeListRoute wakes the realtime friend-notice reload for one recipient.
 const NoticeListRoute = "social.room-invite.notice-list.v1"
+
+type senderTokenBucket struct {
+	tokens float64
+	at     time.Time
+}
+
+// SenderRateLimiter is one process's per-sender invite bucket. It is shared by
+// the Occult, Adventure co-op and defense, and Illusion invite paths, which all
+// materialize through this service.
+//
+// shortcut: per-process bucket, upgrade when a second API process serves room
+// invites and the rate must be global.
+type SenderRateLimiter struct {
+	interval time.Duration
+	burst    int
+	mu       sync.Mutex
+	buckets  map[identity.PlayerID]senderTokenBucket
+}
+
+func NewSenderRateLimiter(interval time.Duration, burst int) *SenderRateLimiter {
+	if interval <= 0 || burst < 1 {
+		return nil
+	}
+	return &SenderRateLimiter{interval: interval, burst: burst, buckets: make(map[identity.PlayerID]senderTokenBucket)}
+}
+
+// Allow consumes one invite from sender's bucket. The entry cap keeps the map
+// bounded when many one-off senders pass through a long-lived process.
+func (l *SenderRateLimiter) Allow(sender identity.PlayerID, at time.Time) bool {
+	if l == nil || !sender.Valid() {
+		return true
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	bucket, ok := l.buckets[sender]
+	if !ok {
+		bucket = senderTokenBucket{tokens: float64(l.burst), at: at}
+	} else {
+		bucket.tokens += float64(at.Sub(bucket.at)) / float64(l.interval)
+		if bucket.tokens > float64(l.burst) {
+			bucket.tokens = float64(l.burst)
+		}
+		bucket.at = at
+	}
+	if bucket.tokens < 1 {
+		l.buckets[sender] = bucket
+		return false
+	}
+	bucket.tokens--
+	l.buckets[sender] = bucket
+	if len(l.buckets) > maxTrackedSenders {
+		for tracked := range l.buckets {
+			if tracked != sender {
+				delete(l.buckets, tracked)
+				break
+			}
+		}
+	}
+	return true
+}
 
 type NoticeListNotifier interface {
 	NoticeListChanged(context.Context, identity.PlayerID)
@@ -44,6 +117,7 @@ type Service struct {
 	Roots   socialrelation.RootService
 	Store   Store
 	Notices NoticeListNotifier
+	Limiter *SenderRateLimiter
 }
 
 func MaterializeProfile() tx.Profile {
@@ -65,6 +139,11 @@ func childOperation(parent operation.Context, source socialinbox.SourceKey) (ope
 func (s Service) Materialize(c context.Context, actor identity.ActorContext, invite socialinbox.RoomInvite, op operation.Context) error {
 	if !s.valid() || !actor.PlayerID.Valid() || !actor.LogicalServerID.Valid() || actor.PlayerID == invite.Recipient {
 		return socialinbox.ErrInvalidNotice
+	}
+	// PRIVATE_POLICY ROOM_INVITE_SENDER_RATE_V1: refused before the notice
+	// transaction; the inviter can retry once the bucket refills.
+	if s.Limiter != nil && !s.Limiter.Allow(actor.PlayerID, time.Now()) {
+		return ErrSenderLimited
 	}
 	source, err := invite.SourceKey()
 	if err != nil {

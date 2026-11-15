@@ -68,6 +68,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "senderrate_test.go"
+  ]
  }
 }
