@@ -191,22 +191,23 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 }
 
 // GetReport answers 1362 from the stored team report of the actor's server.
-func (s Mode) GetReport(c context.Context, a identity.ActorContext, reportID string, _ operation.Context) (map[string]any, error) {
+func (s Mode) GetReport(c context.Context, a identity.ActorContext, reportID string, op operation.Context) (map[string]any, error) {
 	if s.Store == nil || s.Timed.Binder.Time == nil || reportID == "" {
 		return nil, d.ErrUnavailable
 	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	raw, found, err := s.Store.ReadReportTx(c, s.Fresh, reportID, int64(a.LogicalServerID), at)
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		return nil, d.ErrRefused
-	}
-	return reportArray([]byte(raw)), nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		raw, found, err := s.Store.ReadReportTx(c, sc.Tx, reportID, int64(a.LogicalServerID), sc.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		if !found {
+			return d.ErrRefused
+		}
+		out = reportArray([]byte(raw))
+		return nil
+	})
+	return out, err
 }
 
 func (s Mode) lockOccurrence(c context.Context, t tx.Tx, server identity.LogicalServerID, at time.Time) (d.Occurrence, d.Catalog, error) {

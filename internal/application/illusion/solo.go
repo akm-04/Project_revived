@@ -27,40 +27,44 @@ var summaryPolicy = cd.SummaryPolicy{ID: "I9_ILLUSION_SUMMARY_V1", Version: 1, M
 // It answers below the unlock because the stock main scene sends it at every
 // lobby load and indexes paradise_info on any 200.
 func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	op, err := s.pin(c, op)
-	if err != nil {
-		return nil, err
-	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		occurrence = d.NewOccurrence(int64(a.LogicalServerID), d.FirstCampaignID, modes.Day(at))
-	}
-	player, found, err := s.Store.ReadPlayerTx(c, s.Fresh, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		player = d.Player{PlayerID: int64(a.PlayerID)}
-	}
-	player.Reset(modes.Day(at))
-	hurt, rank, err := s.personalPlace(c, s.Fresh, occurrence, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	revision, _ := op.Policies.Get("content")
-	catalog, err := s.Content.IllusionCatalogTx(c, s.Fresh, revision)
-	if err != nil {
-		return nil, err
-	}
-	return infoBody(catalog, occurrence, player, hurt, rank, at), nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		bound, err := s.pinTx(c, sc.Tx, sc.Operation.Operation())
+		if err != nil {
+			return err
+		}
+		at := sc.Operation.DecisionAt()
+		occurrence, found, err := s.Store.ReadOccurrenceTx(c, sc.Tx, int64(a.LogicalServerID))
+		if err != nil {
+			return err
+		}
+		if !found {
+			occurrence = d.NewOccurrence(int64(a.LogicalServerID), d.FirstCampaignID, modes.Day(at))
+		}
+		player, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			player = d.Player{PlayerID: int64(a.PlayerID)}
+		}
+		player.Reset(modes.Day(at))
+		hurt, rank, err := s.personalPlace(c, sc.Tx, occurrence, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		revision, _ := bound.Policies.Get("content")
+		catalog, err := s.Content.IllusionCatalogTx(c, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		out = infoBody(catalog, occurrence, player, hurt, rank, at)
+		return nil
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // Buy answers 1345: the next refresh_cost ladder entry, capped by
 // vip.paradise_buy_num, adds chances_per_buy chances through the I5 debiter.
