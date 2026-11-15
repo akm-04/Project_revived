@@ -159,10 +159,14 @@ func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, e
 	if !s.ready() {
 		return op, d.ErrUnavailable
 	}
+	return s.pinTx(c, s.Fresh, op)
+}
+
+func (s Mode) pinTx(c context.Context, q tx.Queryer, op operation.Context) (operation.Context, error) {
 	if _, bound := op.Policies.Get("content"); bound {
 		return op, nil
 	}
-	revision, err := s.Content.ActiveRevision(c, s.Fresh)
+	revision, err := s.Content.ActiveRevision(c, q)
 	if err != nil {
 		return op, err
 	}
@@ -544,17 +548,24 @@ func (s Mode) keep(c context.Context, sc gen.TimedScope, a identity.ActorContext
 
 // Reports answers 1571 with the best kept reports of one team, across servers.
 func (s Mode) Reports(c context.Context, loop, mission, team int64, op operation.Context) ([]d.Report, error) {
-	op, err := s.pin(c, op)
-	if err != nil {
-		return nil, err
-	}
-	revision, _ := op.Policies.Get("content")
-	catalog, err := s.Content.ConquerModeCatalogTx(c, s.Fresh, revision)
-	if err != nil {
-		return nil, err
-	}
-	return s.Store.ReportsTx(c, s.Fresh, loop, mission, team, catalog.ReportLimit)
+	var out []d.Report
+	_, _, err := s.Timed.Run(c, op, ModeProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		bound, err := s.pinTx(c, sc.Tx, sc.Operation.Operation())
+		if err != nil {
+			return err
+		}
+		revision, _ := bound.Policies.Get("content")
+		catalog, err := s.Content.ConquerModeCatalogTx(c, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		out, err = s.Store.ReportsTx(c, sc.Tx, loop, mission, team, catalog.ReportLimit)
+		return err
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // Report answers 1572. A viewer's first view of another player's report on a
 // 05:00 day mails its owner the view reward, at most report_reward_limit a day.
