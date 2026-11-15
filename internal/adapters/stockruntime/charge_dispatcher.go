@@ -17,7 +17,7 @@ import (
 var ChargeMIDs = []uint16{354, 657, mids.MIDRechargeTap}
 
 type ChargePort interface {
-	Query(context.Context, identity.ActorContext, time.Time) (map[string]any, error)
+	Query(context.Context, identity.ActorContext, time.Time, operation.Context) (map[string]any, error)
 	ClaimVIPAward(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error)
 	Tap(context.Context, identity.ActorContext, app.TapRequest, operation.Context) (map[string]any, error)
 }
@@ -44,7 +44,7 @@ func (o ChargeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		if !onlyStockGameplayParams(p) {
 			return bad
 		}
-		body, err = o.Service.Query(ctx, a, req.Envelope.ReceivedAt)
+		body, err = o.Service.Query(ctx, a, req.Envelope.ReceivedAt, op)
 	case 657:
 		level, ok := topFloorInteger(p, "id", true)
 		if !ok || !onlyStockGameplayParams(p, "id") {

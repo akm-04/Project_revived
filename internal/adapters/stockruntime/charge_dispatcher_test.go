@@ -19,7 +19,7 @@ type chargeProbe struct {
 	err     error
 }
 
-func (p *chargeProbe) Query(context.Context, identity.ActorContext, time.Time) (map[string]any, error) {
+func (p *chargeProbe) Query(context.Context, identity.ActorContext, time.Time, operation.Context) (map[string]any, error) {
 	p.queries++
 	return map[string]any{"charges": []any{}, "giftbags": []any{}, "server_time": int64(1)}, p.err
 }
