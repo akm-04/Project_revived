@@ -12,6 +12,7 @@ import (
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -30,6 +31,9 @@ const (
 	NoticeRoute = "adventure.notice.v1"
 
 	attemptLimit = 5 * time.Minute
+
+	// startClosedKind ends an unresolved attempt a different START replaces.
+	startClosedKind = "ADVENTURE_START_CLOSED"
 
 	listLimit           = 64
 	noticeLimit         = 64
@@ -234,14 +238,34 @@ func locator(a identity.ActorContext, occurrence d.Occurrence, kind string) cd.L
 		DomainLocator: fmt.Sprintf("player:%d/%d/%d", a.PlayerID, occurrence.EventType, occurrence.OccurredAt.Unix())}
 }
 
-func startFingerprint(a identity.ActorContext, operationID string, formation []int64) string {
+// startFingerprint identifies the START by its gameplay input, not by the
+// operation that carried it, so a retried START resumes the frozen attempt.
+func startFingerprint(a identity.ActorContext, formation []int64) string {
 	raw, _ := json.Marshal(struct {
 		Player    int64
-		Operation string
 		Formation []int64
-	}{int64(a.PlayerID), operationID, formation})
+	}{int64(a.PlayerID), formation})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
+}
+
+// startAttempt freezes the locator's fight. A different START replaces an
+// unresolved attempt the mode may close, so an attempt the resolver can never
+// finish does not own the locator until its occurrence expires.
+func (s Mode) startAttempt(c context.Context, sc gen.TimedScope, scope ca.CoherentReadScope, request cb.StartRequest) (cb.Started, error) {
+	started, err := s.Combat.StartTx(c, sc.Tx, scope, request)
+	if !errors.Is(err, cd.ErrStartConflict) {
+		return started, err
+	}
+	_, closeErr := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: request.Locator, GenerationRef: request.GenerationRef,
+		TerminalKind: startClosedKind, SemanticReceiptID: "adventure-start-closed:" + request.StartFingerprint, At: sc.Operation.DecisionAt()})
+	if closeErr != nil {
+		if errors.Is(closeErr, cd.ErrStale) {
+			return cb.Started{}, err
+		}
+		return cb.Started{}, closeErr
+	}
+	return s.Combat.StartTx(c, sc.Tx, scope, request)
 }
 
 func (s Mode) coherentScope(sc gen.TimedScope, at time.Time) (ca.CoherentReadScope, error) {
