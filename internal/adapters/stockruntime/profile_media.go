@@ -94,7 +94,22 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 
 // MediaGET exposes only committed immutable capabilities. The read completes
 // before OpenValidated; no filesystem read is performed under database locks.
-type ProfileMediaGET struct{ Service app.MediaService }
+type ProfileMediaGET struct {
+	Service app.MediaService
+	// Bound keeps this unauthenticated route to a share of the gameplay pool (C1-9).
+	Bound *httpedge.Admission
+}
+
+// mediaReadFailure separates a request whose context ended (the client is gone
+// or out of patience, so the pool wait was cancelled) from a media integrity
+// fault. Only the latter is a server error.
+func mediaReadFailure(w http.ResponseWriter, r *http.Request) {
+	if r.Context().Err() != nil {
+		busyReply(w, "media_unavailable")
+		return
+	}
+	http.Error(w, "media_integrity", http.StatusInternalServerError)
+}
 
 func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.Service.Media == nil || h.Service.Blobs == nil || h.Service.Commands.Fresh == nil {
@@ -105,6 +120,13 @@ func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", "GET, HEAD")
 		http.Error(w, "method_not_allowed", 405)
 		return
+	}
+	if h.Bound != nil && !h.Bound.TryAcquire() {
+		busyReply(w, "media_unavailable")
+		return
+	}
+	if h.Bound != nil {
+		defer h.Bound.Release()
 	}
 	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/profile-media/"), "/")
 	if !strings.HasPrefix(r.URL.Path, "/profile-media/") || len(parts) != 2 || r.URL.RawQuery != "" || !strings.HasSuffix(parts[1], ".png") {
@@ -118,7 +140,7 @@ func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	hist, ok, e := h.Service.Media.ReadMediaHistoryTx(r.Context(), h.Service.Commands.Fresh, op)
 	if e != nil {
-		http.Error(w, "media_integrity", 500)
+		mediaReadFailure(w, r)
 		return
 	}
 	if !ok || hist.Reference.Operation != op || parts[1] != hist.Reference.Asset.SHA256+".png" {
@@ -127,7 +149,7 @@ func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	f, e := h.Service.Blobs.OpenValidated(r.Context(), hist.Reference.Asset)
 	if e != nil {
-		http.Error(w, "media_integrity", 500)
+		mediaReadFailure(w, r)
 		return
 	}
 	defer f.Close()

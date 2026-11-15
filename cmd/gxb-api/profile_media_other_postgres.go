@@ -14,6 +14,6 @@ import (
 	"net/http"
 )
 
-func registerProfileMedia(context.Context, *pg.Pool, tx.Runner, realtimeauth.GameplayAuthorityPort, receipt.Store, contentstore.Store, *httpedge.Router, string, string) (http.Handler, error) {
+func registerProfileMedia(context.Context, *pg.Pool, tx.Runner, realtimeauth.GameplayAuthorityPort, receipt.Store, contentstore.Store, *httpedge.Router, string, string, int) (http.Handler, error) {
 	return nil, errors.New("qualified profile media local adapter requires Linux")
 }

@@ -36,6 +36,13 @@ func envBool(name string) bool {
 	return value
 }
 
+// handlerConcurrency reads a route-level concurrency cap and clamps it to at
+// most half the gameplay pool, so a route outside edge admission can never hold
+// more than its share of connections.
+func handlerConcurrency(name string, fallback, poolConnections int) int {
+	return min(envPositiveInt(name, fallback), max(poolConnections/2, 1))
+}
+
 func envPositiveDuration(name string, fallback time.Duration) time.Duration {
 	raw := os.Getenv(name)
 	if raw == "" {

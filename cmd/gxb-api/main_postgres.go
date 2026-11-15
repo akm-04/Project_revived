@@ -418,7 +418,7 @@ func main() {
 		mustRegister(mid, prelogin)
 	}
 	mux := http.NewServeMux()
-	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, txMetrics, mux)
+	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
@@ -804,7 +804,7 @@ func main() {
 	for _, mid := range []uint16{160, 169, 170, 352, 353} {
 		mustRegister(mid, i5d)
 	}
-	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin)
+	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin, handlerConcurrency("GXB_PROFILE_MEDIA_GET_MAX_CONCURRENT", 8, poolConnections))
 	if err != nil {
 		log.Fatalf("Profile media startup: %v", err)
 	}

@@ -13,6 +13,7 @@ import (
 
 	app "gxb.local/backend/v2/internal/application/clientlog"
 	domain "gxb.local/backend/v2/internal/domain/clientlog"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 // ClientLogIngest is the ClientLog service seen by the log URL route.
@@ -26,6 +27,9 @@ type ClientLogIngest interface {
 type ClientLogHandler struct {
 	Ingest   ClientLogIngest
 	BasePath string
+	// Bound caps concurrent uploads. This route bypasses the HTTP edge on the
+	// raw gameplay pool, so without it one host can take every connection (C1-9).
+	Bound *httpedge.Admission
 }
 
 // ClientLogBasePath is the route path of GXB_CLIENT_LOG_URL.
@@ -45,6 +49,13 @@ func (h ClientLogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
+	}
+	if h.Bound != nil && !h.Bound.TryAcquire() {
+		busyReply(w, "client_log_busy")
+		return
+	}
+	if h.Bound != nil {
+		defer h.Bound.Release()
 	}
 	request := readUpload(r)
 	request.Capability = strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, h.BasePath), "/")
