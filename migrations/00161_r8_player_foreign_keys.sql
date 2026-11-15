@@ -8,6 +8,7 @@
 ALTER TABLE guild_broadcast_recipients ADD CONSTRAINT guild_broadcast_recipients_recipient_player_id_fkey FOREIGN KEY (recipient_player_id) REFERENCES players(player_id) NOT VALID;
 ALTER TABLE guild_broadcast_sources ADD CONSTRAINT guild_broadcast_sources_leader_player_id_fkey FOREIGN KEY (leader_player_id) REFERENCES players(player_id) NOT VALID;
 ALTER TABLE guild_campaign_copies ADD CONSTRAINT guild_campaign_copies_holder_id_fkey FOREIGN KEY (holder_id) REFERENCES players(player_id) NOT VALID;
+ALTER TABLE guild_campaign_copies ADD CONSTRAINT guild_campaign_copies_settled_by_fkey FOREIGN KEY (settled_by) REFERENCES players(player_id) NOT VALID;
 ALTER TABLE guild_campaign_distributions ADD CONSTRAINT guild_campaign_distributions_player_id_fkey FOREIGN KEY (player_id) REFERENCES players(player_id) NOT VALID;
 ALTER TABLE guild_campaign_log ADD CONSTRAINT guild_campaign_log_player_id_fkey FOREIGN KEY (player_id) REFERENCES players(player_id) NOT VALID;
 ALTER TABLE guild_campaign_server_kills ADD CONSTRAINT guild_campaign_server_kills_first_player_id_fkey FOREIGN KEY (first_player_id) REFERENCES players(player_id) NOT VALID;

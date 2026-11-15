@@ -25,6 +25,14 @@ AUTHORITY = "R8 player data manifest (generated from CANONICAL_TABLE_OWNERSHIP.j
 PLAYER_NAMED = re.compile(r"(^|_)player_id$|^(challenger|attacker|defender|student|lender|holder|mentor|apprentice|owner|"
                           r"inviter|invitee|sender|recipient|viewer|author|subject|actor|member|leader|target|blocked)_id$")
 
+# References that intentionally have no key to players: journals, allocators, polymorphic text.
+UNKEYED_PLAYER_REFERENCES = {
+    ("client_log_capabilities", "player_id"),
+    ("logical_servers", "max_player_id"),
+    ("logical_servers", "next_player_id"),
+    ("redeem_redemptions", "subject_id"),
+}
+
 TABLES_SQL = ("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT LIKE 'river_%' "
               "AND tablename <> 'goose_db_version' ORDER BY 1")
 COLUMNS_SQL = ("SELECT table_name, column_name, data_type FROM information_schema.columns "
@@ -84,6 +92,21 @@ def player_columns(catalog, table):
     direct = [column for column, target in catalog.foreign_keys.get(table, []) if target == "players"]
     named = [column for column in catalog.columns.get(table, []) if PLAYER_NAMED.search(column)]
     return sorted(set(named) | set(direct))
+
+
+def reference_problems(catalog, classes):
+    """A classified reference must key players directly or through player-scoped tables."""
+    player_scoped = {table for table in classes if classes[table].get("scope") == "player"}
+    problems = []
+    for table in catalog.tables:
+        for column in (classes.get(table) or {}).get("references") or []:
+            if (table, column) in UNKEYED_PLAYER_REFERENCES:
+                continue
+            targets = {target for keyed, target in catalog.foreign_keys.get(table, []) if keyed == column}
+            if targets & (player_scoped | {"players"}):
+                continue
+            problems.append(f"{table}.{column}: player reference has no key to players")
+    return problems
 
 
 def parent_tables(catalog, classes=None):
@@ -238,6 +261,7 @@ def check(catalog, classes, manifest):
         for column in player_columns(catalog, table):
             if column not in owned and column not in referenced:
                 problems.append(f"{table}.{column}: player column is in neither owner nor references")
+    problems.extend(reference_problems(catalog, classes))
     cyclic = strong_components(catalog)
     problems.extend(order_problems(catalog, manifest.get("tables") or [], cyclic))
     expected = build_manifest(catalog, classes)

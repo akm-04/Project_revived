@@ -1,5 +1,6 @@
 """Unit checks for the R8 player data manifest (no database)."""
 import copy
+import json
 import unittest
 
 import player_data_manifest as manifest_tool
@@ -18,6 +19,7 @@ def fake_catalog():
         foreign_keys={
             "player_a": [("player_id", "players")],
             "player_b": [("player_id", "players"), ("parent_id", "player_a")],
+            "shared": [("player_low_id", "players"), ("player_high_id", "players")],
         },
         primary_keys={"players": ["player_id"], "player_a": ["player_id"],
                       "player_b": ["player_id"], "player_via": ["player_id"],
@@ -69,6 +71,17 @@ class PlayerDataManifestTests(unittest.TestCase):
         problems = manifest_tool.check(catalog, classes, manifest_tool.build_manifest(catalog, classes))
         self.assertTrue(any("player_a.player_id: player column is in neither owner nor references" in problem
                             for problem in problems))
+
+    def test_player_reference_without_a_key_fails(self):
+        classes = {table: entry["data"] for table, entry in
+                   json.loads(manifest_tool.CONTRACT_PATH.read_text())["tables"].items()
+                   if table in ("players", "guild_campaign_copies")}
+        catalog = manifest_tool.Catalog(
+            ["players", "guild_campaign_copies"],
+            {"players": ["player_id"], "guild_campaign_copies": ["guild_id", "holder_id", "settled_by"]},
+            {"guild_campaign_copies": [("holder_id", "players")]}, {}, {})
+        problems = manifest_tool.check(catalog, classes, manifest_tool.build_manifest(catalog, classes))
+        self.assertTrue(any("settled_by" in problem for problem in problems))
 
     def test_child_before_parent_fails(self):
         catalog = fake_catalog()
