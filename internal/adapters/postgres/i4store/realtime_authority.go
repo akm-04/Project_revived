@@ -43,6 +43,29 @@ SELECT EXISTS(
    AND (s.idle_timeout_seconds IS NULL OR $9 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision))
 )`
 
+// validateActorsLiveness keeps the single-actor predicate field for field. The
+// expected CTE supplies every actor of one message so the fan-out costs one
+// read instead of one transaction per recipient.
+const validateActorsLiveness = `
+WITH expected(context_id,session_id,account_id,logical_server_id,player_id,context_generation,context_liveness_version,session_liveness_version,account_uid) AS (
+ SELECT * FROM unnest($1::uuid[],$2::uuid[],$3::uuid[],$4::int[],$5::bigint[],$6::bigint[],$7::bigint[],$8::bigint[],$9::text[])
+)
+SELECT COALESCE(array_agg(DISTINCT c.context_id::text), '{}'::text[])
+FROM expected e
+JOIN gameplay_contexts c ON c.context_id=e.context_id
+JOIN account_sessions s ON s.session_id=c.session_id
+JOIN accounts a ON a.account_id=c.account_id
+WHERE c.session_id=e.session_id AND c.account_id=e.account_id
+  AND c.logical_server_id=e.logical_server_id AND c.player_id=e.player_id
+  AND c.context_generation=e.context_generation
+  AND c.liveness_version=e.context_liveness_version
+  AND s.liveness_version=e.session_liveness_version
+  AND a.account_uid=e.account_uid
+  AND a.status='ACTIVE' AND a.disabled_at IS NULL
+  AND c.ended_at IS NULL AND s.revoked_at IS NULL
+  AND (s.absolute_expires_at IS NULL OR $10 < s.absolute_expires_at)
+  AND (s.idle_timeout_seconds IS NULL OR $10 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision))`
+
 type RealtimeAuthority struct {
 	Queryer         tx.Queryer
 	DigestSecret    []byte
@@ -196,6 +219,62 @@ func (a RealtimeAuthority) ValidateActor(ctx context.Context, actor identity.Act
 		return ErrGameplayBearerNotLive
 	}
 	return nil
+}
+
+// ValidateActors reports, in input order, which actors pass the same liveness
+// fence as ValidateActor. An empty actor set performs no database read.
+func (a RealtimeAuthority) ValidateActors(ctx context.Context, actors []identity.ActorContext, now time.Time) ([]bool, error) {
+	live := make([]bool, len(actors))
+	if len(actors) == 0 {
+		return live, nil
+	}
+	if a.Queryer == nil {
+		return nil, errors.New("incomplete realtime authority adapter")
+	}
+	contextIDs := make([]string, 0, len(actors))
+	sessionIDs := make([]string, 0, len(actors))
+	accountIDs := make([]string, 0, len(actors))
+	logicalServers := make([]int32, 0, len(actors))
+	playerIDs := make([]int64, 0, len(actors))
+	contextGenerations := make([]int64, 0, len(actors))
+	contextLivenessVersions := make([]int64, 0, len(actors))
+	sessionLivenessVersions := make([]int64, 0, len(actors))
+	accountUIDs := make([]string, 0, len(actors))
+	indexes := make([]int, 0, len(actors))
+	for i, actor := range actors {
+		if actor.ContextID.UUID().IsZero() || actor.SessionID.UUID().IsZero() || actor.AccountID.UUID().IsZero() {
+			continue
+		}
+		contextIDs = append(contextIDs, actor.ContextID.UUID().String())
+		sessionIDs = append(sessionIDs, actor.SessionID.UUID().String())
+		accountIDs = append(accountIDs, actor.AccountID.UUID().String())
+		logicalServers = append(logicalServers, int32(actor.LogicalServerID))
+		playerIDs = append(playerIDs, int64(actor.PlayerID))
+		contextGenerations = append(contextGenerations, actor.ContextGeneration)
+		contextLivenessVersions = append(contextLivenessVersions, actor.ContextLivenessVersion)
+		sessionLivenessVersions = append(sessionLivenessVersions, actor.SessionLivenessVersion)
+		accountUIDs = append(accountUIDs, string(actor.AccountUID))
+		indexes = append(indexes, i)
+	}
+	if len(indexes) == 0 {
+		return live, nil
+	}
+	var liveContexts []string
+	err := a.Queryer.QueryRow(ctx, validateActorsLiveness,
+		contextIDs, sessionIDs, accountIDs, logicalServers, playerIDs, contextGenerations,
+		contextLivenessVersions, sessionLivenessVersions, accountUIDs, now.UTC(),
+	).Scan(&liveContexts)
+	if err != nil {
+		return nil, err
+	}
+	liveSet := make(map[string]bool, len(liveContexts))
+	for _, contextID := range liveContexts {
+		liveSet[contextID] = true
+	}
+	for position, actorIndex := range indexes {
+		live[actorIndex] = liveSet[contextIDs[position]]
+	}
+	return live, nil
 }
 
 func nullableTime(v any) (*time.Time, error) {

@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -36,6 +37,60 @@ type Reader struct{}
 func (r Reader) ReadTx(ctx context.Context, t tx.Tx, a apprealtime.Admission, prepare bool) (playerpresentation.Minimal, error) {
 	v, e := r.ObserveTx(ctx, t, a, prepare)
 	return v.Sender, e
+}
+
+// AuthorizeRecipientsTx keeps the per-delivery checks of ObserveTx but takes one
+// now() and one batch liveness read for the entire recipient set. Guild rooms
+// also take one batch read of the current I6C JOIN incarnations.
+func (Reader) AuthorizeRecipientsTx(ctx context.Context, t tx.Tx, admissions []apprealtime.Admission) ([]bool, error) {
+	authorized := make([]bool, len(admissions))
+	if t == nil {
+		return nil, errors.New("invalid channel recipient read transaction")
+	}
+	if len(admissions) == 0 {
+		return authorized, nil
+	}
+	actors := make([]identity.ActorContext, len(admissions))
+	guildActors := make([]identity.ActorContext, 0, len(admissions))
+	for i, a := range admissions {
+		actors[i] = a.Domain.Actor
+		if a.Domain.Role == domainrt.Guild {
+			guildActors = append(guildActors, a.Domain.Actor)
+		}
+	}
+	now, err := (postgres.AuthoritativeTime{Queryer: t}).Now(ctx)
+	if err != nil {
+		return nil, err
+	}
+	live, err := (i4store.RealtimeAuthority{Queryer: t}).ValidateActors(ctx, actors, now)
+	if err != nil {
+		return nil, err
+	}
+	var bindings map[int64]apprealtime.GuildBinding
+	if len(guildActors) > 0 {
+		bindings, err = (guildprojection.RealtimeMembership{Queryer: t}).CurrentGuildBindings(ctx, guildActors)
+		if err != nil {
+			return nil, err
+		}
+	}
+	for i, a := range admissions {
+		if !live[i] {
+			continue
+		}
+		guildID := int64(0)
+		if a.Domain.Role == domainrt.Guild {
+			binding, ok := bindings[int64(a.Domain.Actor.PlayerID)]
+			if !ok || a.GuildBinding == nil || !a.GuildBinding.Valid() || binding != *a.GuildBinding {
+				continue
+			}
+			guildID = binding.GuildID
+		}
+		if _, err := domainrt.AuthorizeRoom(a.Domain.Actor, a.Domain.Role, a.Domain.RoomID, guildID); err != nil {
+			continue
+		}
+		authorized[i] = true
+	}
+	return authorized, nil
 }
 func (Reader) ObserveTx(ctx context.Context, t tx.Tx, a apprealtime.Admission, prepare bool) (channelchat.Observation, error) {
 	if t == nil || !a.Domain.Role.Valid() || a.Domain.RoomID <= 0 {

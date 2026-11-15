@@ -42,6 +42,66 @@ type readFunc func(context.Context, tx.Tx, apprealtime.Admission, bool) (playerp
 func (f readFunc) ReadTx(c context.Context, t tx.Tx, a apprealtime.Admission, b bool) (playerpresentation.Minimal, error) {
 	return f(c, t, a, b)
 }
+
+type batchReadFake func(context.Context, tx.Tx, []apprealtime.Admission) ([]bool, error)
+
+func (f batchReadFake) ReadTx(context.Context, tx.Tx, apprealtime.Admission, bool) (playerpresentation.Minimal, error) {
+	return playerpresentation.Minimal{}, nil
+}
+
+func (f batchReadFake) AuthorizeRecipientsTx(c context.Context, t tx.Tx, a []apprealtime.Admission) ([]bool, error) {
+	return f(c, t, a)
+}
+
+func TestAuthorizeRecipientsUsesOneBoundedRead(t *testing.T) {
+	ft := &fakeTx{}
+	db := &fakeDB{t: ft}
+	var seen []apprealtime.Admission
+	s := Service{Runner: tx.Runner{DB: db}, Operations: operation.Factory{Clock: clock.System{}}, Reader: batchReadFake(func(_ context.Context, q tx.Tx, admissions []apprealtime.Admission) ([]bool, error) {
+		if q != ft {
+			t.Fatal("wrong transaction")
+		}
+		seen = admissions
+		return []bool{true, false}, nil
+	})}
+	admissions := []apprealtime.Admission{{}, {}}
+	verdicts, err := s.AuthorizeRecipients(context.Background(), admissions)
+	if err != nil || len(verdicts) != 2 || !verdicts[0] || verdicts[1] || len(seen) != 2 {
+		t.Fatalf("verdicts=%v err=%v", verdicts, err)
+	}
+	if db.begins != 1 || ft.commits != 1 || db.options != (tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}) {
+		t.Fatalf("one read expected: begins=%d commits=%d options=%+v", db.begins, ft.commits, db.options)
+	}
+}
+
+func TestAuthorizeRecipientsEmptySetSkipsDatabase(t *testing.T) {
+	db := &fakeDB{t: &fakeTx{}}
+	s := Service{Runner: tx.Runner{DB: db}, Operations: operation.Factory{Clock: clock.System{}}, Reader: batchReadFake(func(context.Context, tx.Tx, []apprealtime.Admission) ([]bool, error) {
+		t.Fatal("database read for an empty recipient set")
+		return nil, nil
+	})}
+	verdicts, err := s.AuthorizeRecipients(context.Background(), nil)
+	if err != nil || len(verdicts) != 0 || db.begins != 0 {
+		t.Fatalf("verdicts=%v err=%v begins=%d", verdicts, err, db.begins)
+	}
+}
+
+func TestAuthorizeRecipientsFailsClosedOnUnknownCommitAndMissingBatchReader(t *testing.T) {
+	ft := &fakeTx{commitError: errors.New("lost commit reply")}
+	s := Service{Runner: tx.Runner{DB: &fakeDB{t: ft}}, Operations: operation.Factory{Clock: clock.System{}}, Reader: batchReadFake(func(context.Context, tx.Tx, []apprealtime.Admission) ([]bool, error) {
+		return []bool{true}, nil
+	})}
+	if verdicts, err := s.AuthorizeRecipients(context.Background(), []apprealtime.Admission{{}}); err == nil || verdicts != nil {
+		t.Fatalf("unknown commit returned verdicts=%v err=%v", verdicts, err)
+	}
+	plain := Service{Runner: tx.Runner{DB: &fakeDB{t: &fakeTx{}}}, Operations: operation.Factory{Clock: clock.System{}}, Reader: readFunc(func(context.Context, tx.Tx, apprealtime.Admission, bool) (playerpresentation.Minimal, error) {
+		return playerpresentation.Minimal{}, nil
+	})}
+	if _, err := plain.AuthorizeRecipients(context.Background(), []apprealtime.Admission{{}}); !errors.Is(err, ErrIncompleteRead) {
+		t.Fatalf("missing batch reader err=%v", err)
+	}
+}
+
 func TestChannelReadDefiniteCommitAndUnknownPrivacy(t *testing.T) {
 	for _, ambiguous := range []bool{false, true} {
 		t.Run(map[bool]string{false: "definite", true: "unknown"}[ambiguous], func(t *testing.T) {

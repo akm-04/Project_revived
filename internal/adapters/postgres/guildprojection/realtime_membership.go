@@ -28,4 +28,18 @@ func (r RealtimeMembership) CurrentGuildBinding(ctx context.Context, actor ident
 	return out, true, nil
 }
 
+// CurrentGuildBindings translates the same canonical incarnation for a whole
+// recipient set in one owner read.
+func (r RealtimeMembership) CurrentGuildBindings(ctx context.Context, actors []identity.ActorContext) (map[int64]apprealtime.GuildBinding, error) {
+	bindings, err := (guildstore.Store{Queryer: r.Queryer}).CurrentRealtimeBindings(ctx, actors)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[int64]apprealtime.GuildBinding, len(bindings))
+	for playerID, binding := range bindings {
+		out[int64(playerID)] = apprealtime.GuildBinding{GuildID: binding.GuildID, JoinEventID: binding.JoinEventID}
+	}
+	return out, nil
+}
+
 var _ apprealtime.GuildMembershipPort = RealtimeMembership{}
