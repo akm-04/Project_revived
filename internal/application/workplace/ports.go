@@ -58,6 +58,7 @@ type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	CloseTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Closed, error)
 }
 type Values interface {
 	WorkplaceSPTx(context.Context, tx.Tx, identity.PlayerID, operation.Context) (economy.MaterializedTemporal, error)

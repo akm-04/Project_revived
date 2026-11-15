@@ -455,6 +455,7 @@
     "*TerminalTx"
    ],
    "workplace": [
+    "*CloseTx",
     "*Resolve",
     "*StartTx",
     "*TerminalTx"
@@ -5712,6 +5713,7 @@
     "*LockStoryRosterTx"
    ],
    "combat": [
+    "*CloseTx",
     "*Resolve",
     "*StartTx",
     "*TerminalTx"
