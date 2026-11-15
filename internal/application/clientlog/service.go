@@ -141,7 +141,11 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 	if err != nil {
 		return http.StatusServiceUnavailable
 	}
-	if attribution == AttributedByCapability && !s.limiter.allow(request.Capability, now) {
+	bucket := request.Capability
+	if attribution != AttributedByCapability {
+		bucket = unattributedBucket
+	}
+	if !s.limiter.allow(bucket, now) {
 		return http.StatusTooManyRequests
 	}
 	id, err := ids.NewUUID()
@@ -252,6 +256,10 @@ func (s *Service) byCapability(ctx context.Context, capability string, now time.
 	}
 	return &Owner{AccountUID: grant.AccountUID, PlayerID: grant.PlayerID, SessionRef: grant.SessionRef}, AttributedByCapability, nil
 }
+
+// unattributedBucket is shared by every upload that resolves to no grant; a
+// granted capability is never empty, so the two cannot collide.
+const unattributedBucket = ""
 
 // rateLimiter is a fixed one-minute window per capability (R5, D47).
 // shortcut: per-process counts; a multi-replica gxb-api needs a shared limiter (I12).
