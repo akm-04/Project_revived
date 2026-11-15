@@ -158,7 +158,12 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 			t.Fatal("concurrent fight intent", e)
 		}
 	}
+	// A fight still in the worker after the reply wait returns pending with no report; replay until the worker deadline.
 	fight := leagueDo(t, s, a, cmd)
+	for finishBy := time.Now().Add(150 * time.Second); len(fight.Report) == 0 && time.Now().Before(finishBy); {
+		time.Sleep(2 * time.Second)
+		fight = leagueDo(t, s, a, cmd)
+	}
 	if len(fight.Report) == 0 {
 		t.Fatal("concurrent fight never finished")
 	}
