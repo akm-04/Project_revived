@@ -78,8 +78,11 @@ func (r *Router) Lookup(mid uint16) (Dispatcher, bool) {
 }
 
 type Handler struct {
-	Limits     limits.Config
-	Admission  *Admission
+	Limits    limits.Config
+	Admission *Admission
+	// Decoding bounds the request bodies read at once; Admission is taken only after the body is read (A-047), so a
+	// stalled body never holds a dispatch slot. Nil means no bound.
+	Decoding   *Admission
 	Operations operation.Factory
 	Policies   policy.Set
 	Router     *Router
@@ -125,15 +128,42 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.Journal.Record(record)
 }
 
+func (h Handler) decode(r *http.Request) (*Decoded, *wire.EdgeError, bool) {
+	if h.Decoding != nil {
+		if !h.Decoding.TryAcquire() {
+			return nil, nil, true
+		}
+		defer h.Decoding.Release()
+	}
+	decoded, edgeErr := Decode(r, h.Limits)
+	return decoded, edgeErr, false
+}
+
+func writeSaturated(w http.ResponseWriter) {
+	w.Header().Set("Retry-After", "1")
+	edgeFailure(w, wire.ErrSaturated, "edge_saturated")
+}
+
 func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observability.RequestRecord) {
 	if r.Method != http.MethodPost {
 		record.Disposition = observability.RequestUndecodable
 		edgeFailure(w, wire.ErrMalformed, "method_not_allowed")
 		return
 	}
+	decoded, edgeErr, saturated := h.decode(r)
+	if saturated {
+		writeSaturated(w)
+		return
+	}
+	if edgeErr != nil {
+		record.Disposition = observability.RequestUndecodable
+		record.Cause = edgeErr
+		edgeFailure(w, edgeErr.Class, edgeErr.PublicCode)
+		return
+	}
+	defer decoded.Cleanup()
 	if h.Admission == nil || !h.Admission.TryAcquire() {
-		w.Header().Set("Retry-After", "1")
-		edgeFailure(w, wire.ErrSaturated, "edge_saturated")
+		writeSaturated(w)
 		return
 	}
 	defer h.Admission.Release()
@@ -144,14 +174,6 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 		edgeFailure(w, wire.ErrInternal, "operation_context")
 		return
 	}
-	decoded, edgeErr := Decode(r, h.Limits)
-	if edgeErr != nil {
-		record.Disposition = observability.RequestUndecodable
-		record.Cause = edgeErr
-		edgeFailure(w, edgeErr.Class, edgeErr.PublicCode)
-		return
-	}
-	defer decoded.Cleanup()
 	record.MID, record.HasMID = int(decoded.MID), true
 	record.RequestSHA256 = decoded.RawSHA256[:]
 

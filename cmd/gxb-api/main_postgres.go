@@ -817,8 +817,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Bodies read at once; each is bounded by limits.Default, so this caps edge memory, not database work (A-047).
+	decoding, err := httpedge.NewAdmission(envPositiveInt("GXB_HTTP_EDGE_MAX_DECODING", 1024))
+	if err != nil {
+		log.Fatal(err)
+	}
 	h := httpedge.Handler{
-		Limits: limits.Default(), Admission: admission,
+		Limits: limits.Default(), Admission: admission, Decoding: decoding,
 		Operations: operation.Factory{Clock: clock.System{}}, Router: router, Journal: journal,
 		QueueBudget: time.Duration(envPositiveInt("GXB_HTTP_QUEUE_BUDGET_SECONDS", int(httpedge.DefaultQueueBudget/time.Second))) * time.Second,
 	}
