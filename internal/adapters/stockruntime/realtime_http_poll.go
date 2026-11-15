@@ -609,14 +609,17 @@ func (session *httpPollSession) deliver(ctx context.Context, sequence uint64, re
 			return ErrHTTPPollSocketLimit
 		}
 		batch := &pollBatch{frames: grouped[tag], done: make(chan struct{})}
+		// The handoff ignores the request's own cancellation: once a socket loop holds the frames they will be
+		// applied, so the sequence is recorded at once and a retry of an abandoned request cannot apply them again.
 		select {
 		case socket.source.incoming <- batch:
 		case <-socket.done:
 			return errHTTPPollUnknownFrame
-		case <-ctx.Done():
-			return ctx.Err()
 		case <-session.ctx.Done():
 			return session.ctx.Err()
+		}
+		if len(batches) == 0 {
+			session.markApplied(sequence)
 		}
 		batches = append(batches, batch)
 	}
@@ -629,7 +632,6 @@ func (session *httpPollSession) deliver(ctx context.Context, sequence uint64, re
 			return session.ctx.Err()
 		}
 	}
-	session.markApplied(sequence)
 	return nil
 }
 
