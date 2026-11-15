@@ -18,7 +18,7 @@ func (service Service) PlayoffsView(requestContext context.Context, actor identi
 	if !service.ready() {
 		return result, d.ErrUnavailable
 	}
-	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
+	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
 		result.At = scope.Operation.DecisionAt()
 		if err := service.Fence.FenceActorTx(requestContext, scope.Tx, actor, result.At); err != nil {
 			return err
@@ -67,7 +67,7 @@ func (service Service) CasualView(requestContext context.Context, actor identity
 	if !service.ready() {
 		return result, d.ErrUnavailable
 	}
-	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
+	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
 		result.At = scope.Operation.DecisionAt()
 		result.Period = d.CasualPeriodAt(result.At)
 		if err := service.Fence.FenceActorTx(requestContext, scope.Tx, actor, result.At); err != nil {

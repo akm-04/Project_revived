@@ -6,6 +6,16 @@
   {"mid": 112, "function": "Mode.Load", "file": "internal/application/campaign/mode.go", "line": 281},
   {"mid": 115, "function": "Mode.TrialLoad", "file": "internal/application/campaign/trials.go", "line": 95},
   {"mid": 122, "function": "Mode.Caps", "file": "internal/application/campaign/awards.go", "line": 165},
-  {"mid": 123, "function": "Mode.TrialLoad", "file": "internal/application/campaign/trials.go", "line": 95}
+  {"mid": 123, "function": "Mode.TrialLoad", "file": "internal/application/campaign/trials.go", "line": 95},
+  {"mid": 276, "function": "Service.CasualView", "file": "internal/application/arena/tournament_view.go", "line": 70},
+  {"mid": 1283, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},
+  {"mid": 1285, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},
+  {"mid": 1286, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},
+  {"mid": 1289, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},
+  {"mid": 1291, "function": "Service.PlayoffsView", "file": "internal/application/arena/tournament_view.go", "line": 21},
+  {"mid": 1292, "function": "Service.TournamentRoom", "file": "internal/application/arena/tournament_reads.go", "line": 23},
+  {"mid": 1292, "function": "Service.TournamentSelectionView", "file": "internal/application/arena/tournament_reads.go", "line": 118},
+  {"mid": 1872, "function": "Service.CasualView", "file": "internal/application/arena/tournament_view.go", "line": 70},
+  {"mid": 1873, "function": "Service.CasualView", "file": "internal/application/arena/tournament_view.go", "line": 70}
  ]
 }

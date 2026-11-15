@@ -20,7 +20,7 @@ func (service Service) TournamentRoom(requestContext context.Context, actor iden
 	if !service.ready() || identifier.IsZero() {
 		return room, d.ErrUnavailable
 	}
-	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
+	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
 		if err := service.Fence.FenceActorTx(requestContext, scope.Tx, actor, scope.Operation.DecisionAt()); err != nil {
 			return err
 		}
@@ -115,7 +115,7 @@ func (service Service) TournamentSelectionView(requestContext context.Context, a
 	if !service.ready() {
 		return view, d.ErrUnavailable
 	}
-	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
+	_, _, err := service.Timed.Run(requestContext, operationContext, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, retry(), nil, func(requestContext context.Context, scope gen.TimedScope) error {
 		if err := service.Fence.FenceActorTx(requestContext, scope.Tx, actor, scope.Operation.DecisionAt()); err != nil {
 			return err
 		}
