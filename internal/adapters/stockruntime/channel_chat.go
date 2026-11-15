@@ -89,6 +89,42 @@ func sameAdmission(a, b apprealtime.Admission) bool {
 	}
 	return *a.GuildBinding == *b.GuildBinding
 }
+
+type chatRecipientJob struct {
+	recipient SessionHandle
+	index     int
+}
+
+// authorizeOrdinaryRecipients authorizes every still-current recipient of one
+// ordinary message from a single transaction. Handles that cannot admit the
+// message at all stay false and are counted ineligible by the worker.
+func (d *ChannelChatDispatcher) authorizeOrdinaryRecipients(ctx context.Context, handles []SessionHandle, exact apprealtime.Admission) ([]bool, error) {
+	authorized := make([]bool, len(handles))
+	admissions := make([]apprealtime.Admission, 0, len(handles))
+	indexes := make([]int, 0, len(handles))
+	for i, recipient := range handles {
+		a, ok := recipient.Admission()
+		if !ok || !d.Registry.IsCurrent(recipient) || a.Domain.Role != exact.Domain.Role || a.Domain.RoomID != exact.Domain.RoomID {
+			continue
+		}
+		admissions = append(admissions, a)
+		indexes = append(indexes, i)
+	}
+	if len(admissions) == 0 {
+		return authorized, nil
+	}
+	verdicts, err := d.Service.AuthorizeRecipients(ctx, admissions)
+	if err != nil {
+		return nil, err
+	}
+	if len(verdicts) != len(admissions) {
+		return nil, channelchat.ErrIncompleteRead
+	}
+	for position, verdict := range verdicts {
+		authorized[indexes[position]] = verdict
+	}
+	return authorized, nil
+}
 func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h SessionHandle, admitted apprealtime.Admission, f wireRT.Frame) ([]wireRT.Frame, error) {
 	if f.MID != mids.MIDSendChatMessage {
 		return nil, ErrUnsupportedRealtimeMID
@@ -169,7 +205,25 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	report := ChannelChatReport{Outcomes: make(map[ChannelChatOutcome]int)}
 	var mu sync.Mutex
 	count := func(o ChannelChatOutcome) { mu.Lock(); report.Outcomes[o]++; mu.Unlock() }
-	jobs := make(chan SessionHandle)
+	// Ordinary chat authorizes the whole recipient set with one read taken for
+	// this message. Structured cards keep their per-recipient owner gate.
+	var authorized []bool
+	if r.Type == 0 {
+		var authorizeErr error
+		authorized, authorizeErr = d.authorizeOrdinaryRecipients(publication, handles, exact)
+		if authorizeErr != nil {
+			outcome := ChatIneligible
+			if publication.Err() != nil {
+				outcome = ChatBudget
+			}
+			for range handles {
+				count(outcome)
+			}
+			d.report(report)
+			return nil, nil
+		}
+	}
+	jobs := make(chan chatRecipientJob)
 	var joined sync.WaitGroup
 	n := d.policy.LocalWorkers
 	if len(handles) < n {
@@ -179,7 +233,7 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 		joined.Add(1)
 		go func() {
 			defer joined.Done()
-			for recipient := range jobs {
+			for job := range jobs {
 				if publication.Err() != nil {
 					count(ChatBudget)
 					continue
@@ -192,17 +246,16 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 				}
 				outcome := func() ChannelChatOutcome {
 					defer func() { <-d.workers }()
+					recipient := job.recipient
 					a, ok := recipient.Admission()
 					if !ok || !d.Registry.IsCurrent(recipient) || a.Domain.Role != exact.Domain.Role || a.Domain.RoomID != exact.Domain.RoomID {
 						return ChatIneligible
 					}
-					authorize := func() error {
-						if r.Type == 0 {
-							return d.Service.AuthorizeRecipient(publication, a)
+					if authorized != nil {
+						if !authorized[job.index] {
+							return ChatIneligible
 						}
-						return d.Service.AuthorizeStructuredRecipient(publication, a, structured)
-					}
-					if err := authorize(); err != nil {
+					} else if err := d.Service.AuthorizeStructuredRecipient(publication, a, structured); err != nil {
 						if publication.Err() != nil {
 							return ChatBudget
 						}
@@ -226,7 +279,7 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 sendLoop:
 	for i, recipient := range handles {
 		select {
-		case jobs <- recipient:
+		case jobs <- chatRecipientJob{recipient: recipient, index: i}:
 		case <-publication.Done():
 			for range handles[i:] {
 				count(ChatBudget)
