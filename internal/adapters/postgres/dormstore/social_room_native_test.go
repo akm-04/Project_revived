@@ -32,6 +32,14 @@ func TestDormSocialRoomMetadataCASAndRollback(t *testing.T) {
 	defer transaction.Rollback(ctx)
 	at := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
 	// Owned structural fixtures; no content activation or gameplay creation is claimed.
+	_, err = transaction.Exec(ctx, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES(gen_random_uuid(),'dorm-social-room-native','ACTIVE',$1)`, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = transaction.Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) SELECT 125701,account_id,1,$1,'dorm-native' FROM accounts WHERE account_uid='dorm-social-room-native'`, at)
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, err = transaction.Exec(ctx, `INSERT INTO player_dorm_roots VALUES(125701,2,1,$1,$1)`, at)
 	if err != nil {
 		t.Fatal(err)

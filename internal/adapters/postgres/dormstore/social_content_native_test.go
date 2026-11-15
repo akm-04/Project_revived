@@ -40,6 +40,7 @@ func socialFixture(t *testing.T, pool *pg.Pool, players ...identity.PlayerID) ti
 	t.Helper()
 	ctx := context.Background()
 	now := time.Now().UTC().Truncate(time.Microsecond)
+	seedPlayers(t, pool, 1, players...)
 	for _, player := range players {
 		if _, err := pool.Raw().Exec(ctx, `INSERT INTO player_dorm_roots(player_id,next_house_id,state_version,created_at,updated_at) VALUES($1,2,1,$2,$2) ON CONFLICT DO NOTHING`, int64(player), now); err != nil {
 			t.Fatal(err)
@@ -267,10 +268,11 @@ func TestDormSocialNativePageBounds(t *testing.T) {
 	pool := socialNativePool(t)
 	ctx := context.Background()
 	owner := identity.PlayerID(125731)
+	actors := []identity.PlayerID{125732, 125733}
+	seedPlayers(t, pool, 1, actors...)
 	now := socialFixture(t, pool, owner)
 	store := dormstore.Store{Queryer: pool}
 	target := domain.RoomTarget{Server: 1, Owner: owner, HouseID: 1}
-	actors := []identity.PlayerID{125732, 125733}
 	for index, actor := range actors {
 		socialInTx(t, pool, func(transaction tx.Tx) {
 			if err := store.InsertPraiseTx(ctx, transaction, domain.HousePraise{Owner: owner, HouseID: 1, Actor: actor, FirstAt: now.Add(time.Duration(index) * time.Second)}); err != nil {

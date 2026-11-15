@@ -28,9 +28,10 @@ func TestDormNativeOwnerRoundtripRollbackAndPreservation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	s := dormstore.Store{Queryer: pool}
-	pid := identity.PlayerID(777309)
+	pid := identity.PlayerID(177309)
+	seedPlayers(t, pool, 1, pid)
 	ref := character.HeroRef{PlayerID: pid, PartnerID: 1}
 	var now time.Time
 	if e = pool.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); e != nil {
