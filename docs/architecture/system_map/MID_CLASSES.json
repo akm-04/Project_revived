@@ -36699,7 +36699,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "repeatable_read"
     }
    ],
@@ -36707,7 +36707,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "true"
     }
    ],
@@ -36715,7 +36715,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "1"
     }
    ],
@@ -36726,7 +36726,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 129,
+     "line": 122,
      "read_only": "true",
      "retry": "1"
     }
@@ -36770,12 +36770,12 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 135,
+     "line": 136,
      "value": "serializable"
     }
    ],
@@ -36783,12 +36783,12 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "true"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 135,
+     "line": 136,
      "value": "false"
     }
    ],
@@ -36796,12 +36796,12 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "1"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 135,
+     "line": 136,
      "value": "3"
     }
    ],
@@ -36821,7 +36821,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 129,
+     "line": 122,
      "read_only": "true",
      "retry": "1"
     },
@@ -36829,7 +36829,7 @@
      "file": "internal/application/guildcampaign/service.go",
      "function": "Service.beginRun",
      "isolation": "serializable",
-     "line": 135,
+     "line": 136,
      "read_only": "false",
      "retry": "3"
     }
@@ -36913,7 +36913,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "repeatable_read"
     }
    ],
@@ -36921,7 +36921,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "true"
     }
    ],
@@ -36929,7 +36929,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "1"
     }
    ],
@@ -36940,7 +36940,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 129,
+     "line": 122,
      "read_only": "true",
      "retry": "1"
     }
@@ -37389,7 +37389,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 68,
+     "line": 61,
      "value": "repeatable_read"
     }
    ],
@@ -37397,7 +37397,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 68,
+     "line": 61,
      "value": "true"
     }
    ],
@@ -37405,7 +37405,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 68,
+     "line": 61,
      "value": "1"
     }
    ],
@@ -37416,7 +37416,7 @@
      "file": "internal/application/guildcampaign/awards.go",
      "function": "Mode.AwardRead",
      "isolation": "repeatable_read",
-     "line": 68,
+     "line": 61,
      "read_only": "true",
      "retry": "1"
     }
@@ -37549,7 +37549,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 198,
+     "line": 191,
      "value": "repeatable_read"
     }
    ],
@@ -37557,7 +37557,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 198,
+     "line": 191,
      "value": "true"
     }
    ],
@@ -37565,7 +37565,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 198,
+     "line": 191,
      "value": "1"
     }
    ],
@@ -37576,7 +37576,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.DamageRank",
      "isolation": "repeatable_read",
-     "line": 198,
+     "line": 191,
      "read_only": "true",
      "retry": "1"
     }
@@ -37681,7 +37681,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 273,
+     "line": 266,
      "value": "repeatable_read"
     }
    ],
@@ -37689,7 +37689,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 273,
+     "line": 266,
      "value": "true"
     }
    ],
@@ -37697,7 +37697,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 273,
+     "line": 266,
      "value": "1"
     }
    ],
@@ -37708,7 +37708,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.GuildLog",
      "isolation": "repeatable_read",
-     "line": 273,
+     "line": 266,
      "read_only": "true",
      "retry": "1"
     }
@@ -38035,12 +38035,12 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 135,
+     "line": 136,
      "value": "serializable"
     }
    ],
@@ -38048,12 +38048,12 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "true"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 135,
+     "line": 136,
      "value": "false"
     }
    ],
@@ -38061,12 +38061,12 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 129,
+     "line": 122,
      "value": "1"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 135,
+     "line": 136,
      "value": "3"
     }
    ],
@@ -38086,7 +38086,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 129,
+     "line": 122,
      "read_only": "true",
      "retry": "1"
     },
@@ -38094,7 +38094,7 @@
      "file": "internal/application/guildcampaign/service.go",
      "function": "Service.beginRun",
      "isolation": "serializable",
-     "line": 135,
+     "line": 136,
      "read_only": "false",
      "retry": "3"
     }
@@ -38217,7 +38217,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 376,
+     "line": 369,
      "value": "repeatable_read"
     }
    ],
@@ -38225,7 +38225,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 376,
+     "line": 369,
      "value": "true"
     }
    ],
@@ -38233,7 +38233,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 376,
+     "line": 369,
      "value": "1"
     }
    ],
@@ -38244,7 +38244,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.MapDetail",
      "isolation": "repeatable_read",
-     "line": 376,
+     "line": 369,
      "read_only": "true",
      "retry": "1"
     }
@@ -38361,7 +38361,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 220,
+     "line": 213,
      "value": "repeatable_read"
     }
    ],
@@ -38369,7 +38369,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 220,
+     "line": 213,
      "value": "true"
     }
    ],
@@ -38377,7 +38377,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 220,
+     "line": 213,
      "value": "1"
     }
    ],
@@ -38388,7 +38388,7 @@
      "file": "internal/application/guildcampaign/awards.go",
      "function": "Mode.DistributeRecord",
      "isolation": "repeatable_read",
-     "line": 220,
+     "line": 213,
      "read_only": "true",
      "retry": "1"
     }

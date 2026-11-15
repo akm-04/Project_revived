@@ -53,6 +53,7 @@ type NoticeMail struct {
 
 type Guilds interface {
 	ReadMembership(context.Context, identity.PlayerID) (guild.Membership, bool, error)
+	ReadMembershipTx(context.Context, tx.Queryer, identity.PlayerID) (guild.Membership, bool, error)
 	LockGuildTx(context.Context, tx.Tx, guild.ID) (guild.Guild, bool, error)
 	LockMembershipTx(context.Context, tx.Tx, identity.PlayerID) (guild.Membership, bool, error)
 	ListMembershipsTx(context.Context, tx.Queryer, guild.ID) ([]guild.Membership, error)

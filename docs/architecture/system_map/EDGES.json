@@ -3680,6 +3680,7 @@
     "*LockGuildTx",
     "*LockMembershipTx",
     "*ReadMembership",
+    "*ReadMembershipTx",
     "*SaveGuildTx"
    ],
    "store:i4store": [
