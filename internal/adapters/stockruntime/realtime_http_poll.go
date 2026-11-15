@@ -576,7 +576,8 @@ func (session *httpPollSession) enqueueLocked(outbound pollOutbound) error {
 	if session.closed {
 		return ErrRealtimeWriterClosed
 	}
-	if len(session.outbound) >= session.server.config.WriterFrames {
+	// A close marker is one small entry per socket and must reach the client, or it keeps a dead socket.
+	if !outbound.closed && len(session.outbound) >= session.server.config.WriterFrames {
 		return wireRT.ErrQueueFull
 	}
 	if !outbound.closed && len(outbound.frame) > session.server.config.WriterBytes-session.outboundBytes {
