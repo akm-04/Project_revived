@@ -44,7 +44,7 @@ func registerGuildBroadcast(c context.Context, p *postgres.Pool, r tx.Runner, a 
 	if e != nil {
 		return e
 	}
-	source := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Store: guildbroadcaststore.Store{}, Guild: g, Names: i4store.PlayerRootLocker{}, Players: i4store.PlayerRootLocker{}, Fence: i5, Receipts: receipts, Content: content, Enqueue: queue}
+	source := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Store: guildbroadcaststore.Store{}, Guild: g, Names: i4store.PlayerRootLocker{}, Players: i4store.PlayerRootLocker{}, Fence: i5, Receipts: receipts, Content: content, Enqueue: queue, DailyLimit: envPositiveInt("GXB_GUILD_BROADCAST_DAILY_LIMIT", app.DefaultDailyLimit)}
 	prepared, e := stockruntime.PrepareGuildBroadcast(a, source)
 	if e != nil {
 		return e

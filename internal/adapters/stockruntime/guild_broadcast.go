@@ -91,5 +91,10 @@ func (d GuildBroadcastDispatcher) Dispatch(c context.Context, r httpedge.Dispatc
 	if errors.Is(e, guildbroadcast.ErrLeader) {
 		return failureReply(refusal(unprovenRefusalCode))
 	}
+	// A daily quota refusal has no client-proven code; D5 gives 35028 (the
+	// socialgift daily quota row uses the same mapping).
+	if errors.Is(e, guildbroadcast.ErrDailyLimit) {
+		return failureReply(refusal(unprovenRefusalCode))
+	}
 	return failGuild(e)
 }

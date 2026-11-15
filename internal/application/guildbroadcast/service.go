@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	gb "gxb.local/backend/v2/internal/domain/guildbroadcast"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/obligation"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -23,10 +24,18 @@ import (
 )
 
 var (
-	ErrContent  = errors.New("Guild broadcast policy unavailable")
-	ErrConflict = errors.New("Guild broadcast proof conflict")
-	ErrStale    = errors.New("Guild broadcast snapshot newer than bound decision")
-	ErrLeader   = errors.New("Guild broadcast requires current leader")
+	ErrContent    = errors.New("Guild broadcast policy unavailable")
+	ErrConflict   = errors.New("Guild broadcast proof conflict")
+	ErrStale      = errors.New("Guild broadcast snapshot newer than bound decision")
+	ErrLeader     = errors.New("Guild broadcast requires current leader")
+	ErrDailyLimit = errors.New("Guild broadcast daily limit reached")
+)
+
+// GUILD_BROADCAST_DAILY_LIMIT_V1 is a PRIVATE_POLICY anti-flood cap, not a
+// recovered original-server number: the stock client only bounds the text.
+const (
+	DailyLimitPolicyID = "GUILD_BROADCAST_DAILY_LIMIT_V1"
+	DefaultDailyLimit  = 5
 )
 
 const (
@@ -47,17 +56,18 @@ type SourceStore interface {
 	ReadSourceReceiptIDTx(context.Context, tx.Queryer, ids.UUID) (ids.UUID, error)
 }
 type Service struct {
-	Timed    gen.TimedRunner
-	Reads    tx.Runner
-	Fresh    tx.Queryer
-	Store    SourceStore
-	Guild    sourceGuild
-	Names    playerroot.NameReader
-	Players  playerroot.TxLocker
-	Fence    guildcore.ActorFencer
-	Receipts receipt.Store
-	Content  ContentReader
-	Enqueue  obligation.Queue
+	Timed      gen.TimedRunner
+	Reads      tx.Runner
+	Fresh      tx.Queryer
+	Store      SourceStore
+	Guild      sourceGuild
+	Names      playerroot.NameReader
+	Players    playerroot.TxLocker
+	Fence      guildcore.ActorFencer
+	Receipts   receipt.Store
+	Content    ContentReader
+	Enqueue    obligation.Queue
+	DailyLimit int
 }
 type SubmitResult struct {
 	SourceID       ids.UUID `json:"source_id"`
@@ -242,6 +252,21 @@ func (s Service) Submit(c context.Context, actor identity.ActorContext, request 
 		}
 		if g.UpdatedAt.After(at) {
 			return ErrStale
+		}
+		// GUILD_BROADCAST_DAILY_LIMIT_V1 counts inside the broadcast transaction
+		// under the locked guild row, so concurrent submits cannot both see an
+		// unused slot. A replay returned above and never consumes the day.
+		limit := s.DailyLimit
+		if limit <= 0 {
+			limit = DefaultDailyLimit
+		}
+		day := modes.Day(at)
+		sent, e := s.Store.CountSourcesTx(c, sc.Tx, gid, modes.DayBegins(day), modes.DayBegins(day+1), limit)
+		if e != nil {
+			return e
+		}
+		if sent >= limit {
+			return ErrDailyLimit
 		}
 		roster, e := s.Guild.ListMembershipsTx(c, sc.Tx, gid)
 		if e != nil {

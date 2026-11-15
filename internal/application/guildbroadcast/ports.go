@@ -26,6 +26,7 @@ type Store interface {
 	ReadBindingTx(context.Context, tx.Queryer, ids.UUID, identity.PlayerID) (gb.Binding, bool, error)
 	InsertSourceTx(context.Context, tx.Tx, gb.Source, ids.UUID) error
 	InsertBindingTx(context.Context, tx.Tx, gb.Binding, gb.Member) error
+	CountSourcesTx(context.Context, tx.Queryer, guild.ID, time.Time, time.Time, int) (int, error)
 }
 
 // SchedulingReader is a delivery accelerator only. PENDING source facts remain
