@@ -6,6 +6,7 @@ import (
 	"time"
 
 	cb "gxb.local/backend/v2/internal/application/combat"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -17,24 +18,28 @@ var eventTypes = [...]int64{d.EventDefense, d.EventFavor, d.EventShop, d.EventBa
 // List answers 2416 from canonical occurrences; absent event types are empty
 // objects, so the stock model can rebuild every type on each reload.
 func (s Mode) List(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	op, err := s.pin(c, op)
-	if err != nil {
-		return nil, err
-	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	revision, _ := op.Policies.Get("content")
-	catalog, err := s.Content.AdventureCatalogTx(c, s.Fresh, revision)
-	if err != nil {
-		return nil, err
-	}
-	if err = s.admit(c, s.Fresh, a, catalog, at); err != nil {
-		return nil, err
-	}
-	return s.listBody(c, s.Fresh, a, at)
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		bound, err := s.pinTx(c, sc.Tx, sc.Operation.Operation())
+		if err != nil {
+			return err
+		}
+		at := sc.Operation.DecisionAt()
+		revision, _ := bound.Policies.Get("content")
+		catalog, err := s.Content.AdventureCatalogTx(c, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		if err = s.admit(c, sc.Tx, a, catalog, at); err != nil {
+			return err
+		}
+		out, err = s.listBody(c, sc.Tx, a, at)
+		return err
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 func (s Mode) listBody(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time) (map[string]any, error) {
 	occurrences, err := s.Store.ListOccurrencesTx(c, q, a.LogicalServerID, a.PlayerID, at, listLimit)
