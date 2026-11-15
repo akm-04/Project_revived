@@ -92,3 +92,34 @@ func TestHTTPPollFullQueueStillCarriesSocketClose(t *testing.T) {
 		t.Fatalf("a full queue dropped the socket close marker: %v", err)
 	}
 }
+
+func TestHTTPPollSocketWithDeadWriterIsClosed(t *testing.T) {
+	server, err := NewHTTPPollServer(t.Context(), newRealtimeTestServer(t), 5*time.Second, 100*time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	handler := server.Handler()
+	alphaSession, _ := loginSocket(t, handler, "alpha", "world", 1)
+	betaSession, _ := loginSocket(t, handler, "beta", "world", 1)
+	server.mutex.Lock()
+	session := server.sessions[alphaSession]
+	server.mutex.Unlock()
+	for session.enqueue("world", []byte(`{}`)) == nil {
+	}
+	if status, _ := sendChat(t, handler, betaSession, "world", 10, "overflow"); status != http.StatusOK {
+		t.Fatalf("send status=%d", status)
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		session.mutex.Lock()
+		open := len(session.sockets)
+		closedMarker := len(session.outbound) > 0 && session.outbound[len(session.outbound)-1].closed
+		session.mutex.Unlock()
+		if open == 0 && closedMarker {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatal("a socket whose writer died on a full queue stayed open and the client was not told")
+}
