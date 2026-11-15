@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgconn"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
@@ -45,8 +44,8 @@ func TestAuditA057BearerLookupFaultDoesNotRestartSession(t *testing.T) {
 	for name, cause := range map[string]error{
 		"deadline":            context.DeadlineExceeded,
 		"canceled":            context.Canceled,
-		"database restarting": &pgconn.PgError{Code: "57P01"},
-		"pool exhausted":      &pgconn.PgError{Code: "53300"},
+		"database restarting": auditSQLStateError("57P01"),
+		"pool exhausted":      auditSQLStateError("53300"),
 	} {
 		t.Run(name, func(t *testing.T) {
 			dispatcher := LobbyDispatcher{Authority: auditUnavailableAuthority{cause: fmt.Errorf("bearer lookup: %w", cause)}}
@@ -60,3 +59,9 @@ func TestAuditA057BearerLookupFaultDoesNotRestartSession(t *testing.T) {
 		})
 	}
 }
+
+// auditSQLStateError stands in for a driver error; pgx stays adapter-only (archguard).
+type auditSQLStateError string
+
+func (e auditSQLStateError) Error() string    { return "sqlstate " + string(e) }
+func (e auditSQLStateError) SQLState() string { return string(e) }
