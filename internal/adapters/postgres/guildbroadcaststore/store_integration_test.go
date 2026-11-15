@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -73,6 +74,15 @@ func TestRealPostgresSourceRoundtripAndRestoreHole(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer x.Rollback(context.Background())
+	for _, player := range []int64{100001, 100002} {
+		accountUID := "guild-broadcast-source-native-" + strconv.FormatInt(player, 10)
+		if _, e = x.Exec(c, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES(gen_random_uuid(),$1,'ACTIVE',$2) ON CONFLICT (account_uid) DO NOTHING`, accountUID, decision); e != nil {
+			t.Fatal(e)
+		}
+		if _, e = x.Exec(c, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) SELECT $1,account_id,1,$2,'guild-broadcast-source-native' FROM accounts WHERE account_uid=$3 ON CONFLICT (player_id) DO NOTHING`, player, decision, accountUID); e != nil {
+			t.Fatal(e)
+		}
+	}
 	if e = (Store{}).InsertSourceTx(c, x, s, rr.ID); e != nil {
 		t.Fatal(e)
 	}

@@ -28,9 +28,15 @@ func TestLibraryNativeFacetPersistenceRollbackBackfill(t *testing.T) {
 	}
 	defer p.Close()
 	s := librarystore.Store{}
-	pid := identity.PlayerID(777301)
+	pid := identity.PlayerID(177301)
 	ref := character.HeroRef{PlayerID: pid, PartnerID: 1}
 	now := time.Now().UTC().Truncate(time.Microsecond)
+	if _, e = p.Raw().Exec(ctx, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES(gen_random_uuid(),'library-native-player-177301','ACTIVE',$1) ON CONFLICT (account_uid) DO NOTHING`, now); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = p.Raw().Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) SELECT $1,account_id,1,$2,'library-native' FROM accounts WHERE account_uid='library-native-player-177301' ON CONFLICT (player_id) DO NOTHING`, int64(pid), now); e != nil {
+		t.Fatal(e)
+	}
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {
 		t.Fatal(e)

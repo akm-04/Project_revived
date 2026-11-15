@@ -18,6 +18,24 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// seedRecallProjectionPlayers seeds the caller and target rows the recall foreign keys require;
+// the enclosing transaction owns them and rolls them back with the fixture.
+func seedRecallProjectionPlayers(t *testing.T, ctx context.Context, transaction tx.Tx, players ...identity.PlayerID) {
+	t.Helper()
+	for _, player := range players {
+		account, err := ids.NewUUID()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = transaction.Exec(ctx, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1::uuid,$2,'ACTIVE',$3)`, account.String(), account.String(), targetAt); err != nil {
+			t.Fatal(err)
+		}
+		if _, err = transaction.Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES($1,$2::uuid,$3,$4,'recall-projection-native')`, int64(player), account.String(), int64(player)/100000, targetAt); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 func TestRecallDoingProjectionOwnerSQLTimeScopeAndOverflow(t *testing.T) {
 	databaseURL := os.Getenv("GXB_SOCIAL_RECALL_DSN")
 	if databaseURL == "" {
@@ -34,6 +52,7 @@ func TestRecallDoingProjectionOwnerSQLTimeScopeAndOverflow(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer transaction.Rollback(ctx)
+	seedRecallProjectionPlayers(t, ctx, transaction, 125901, 125902, 125903, 125904, 225901, 225902, 125905, 125906)
 	at := targetAt
 	for _, entry := range []struct {
 		caller, target identity.PlayerID
