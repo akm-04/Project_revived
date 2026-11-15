@@ -11,11 +11,13 @@ import (
 
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/application/clientlog"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	domainclientlog "gxb.local/backend/v2/internal/domain/clientlog"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/observability"
+	"gxb.local/backend/v2/internal/foundation/tx"
 
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/projection/lobby"
@@ -28,6 +30,7 @@ import (
 type DiscoveryDispatcher struct {
 	Realtime apprealtime.Service
 	Tracker  *lobby.BootTracker
+	Reads    tx.Runner
 }
 
 func (d DiscoveryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -35,11 +38,21 @@ func (d DiscoveryDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 	if err != nil || room <= 0 {
 		return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_room", cause: err})
 	}
-	adm, err := d.Realtime.Discover(ctx, apprealtime.Claims{
+	claims := apprealtime.Claims{
 		Bearer: req.Envelope.Claims.Token,
 		Region: req.Envelope.Claims.Region,
 		RoomID: room,
-	}, req.Envelope.ReceivedAt)
+	}
+	var adm apprealtime.Admission
+	if d.Reads.DB == nil {
+		adm, err = d.Realtime.Discover(ctx, claims, req.Envelope.ReceivedAt)
+	} else {
+		_, err = d.Reads.Run(ctx, req.Envelope.Operation, appi5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
+			var readErr error
+			adm, readErr = d.Realtime.DiscoverTx(c, scope.Tx, claims, req.Envelope.ReceivedAt)
+			return readErr
+		})
+	}
 	if err != nil {
 		return authFailure(err)
 	}

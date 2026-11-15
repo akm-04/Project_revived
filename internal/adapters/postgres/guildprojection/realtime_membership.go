@@ -17,7 +17,11 @@ import (
 type RealtimeMembership struct{ Queryer tx.Queryer }
 
 func (r RealtimeMembership) CurrentGuildBinding(ctx context.Context, actor identity.ActorContext) (apprealtime.GuildBinding, bool, error) {
-	binding, ok, err := (guildstore.Store{Queryer: r.Queryer}).CurrentRealtimeBinding(ctx, actor)
+	return r.CurrentGuildBindingTx(ctx, r.Queryer, actor)
+}
+
+func (r RealtimeMembership) CurrentGuildBindingTx(ctx context.Context, q tx.Queryer, actor identity.ActorContext) (apprealtime.GuildBinding, bool, error) {
+	binding, ok, err := (guildstore.Store{Queryer: q}).CurrentRealtimeBinding(ctx, actor)
 	if err != nil || !ok {
 		return apprealtime.GuildBinding{}, ok, err
 	}

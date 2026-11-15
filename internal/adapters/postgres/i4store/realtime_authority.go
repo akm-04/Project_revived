@@ -82,7 +82,22 @@ func (a RealtimeAuthority) resolveBearerKey(ctx context.Context, id string) (app
 }
 
 func (a RealtimeAuthority) ResolveGameplayBearer(ctx context.Context, raw string, now time.Time) (identity.ActorContext, error) {
-	if a.Queryer == nil || len(a.DigestSecret) < 16 {
+	if a.Queryer == nil {
+		return identity.ActorContext{}, errors.New("incomplete realtime authority adapter")
+	}
+	return a.resolveGameplayBearer(ctx, a.Queryer, raw, now)
+}
+
+// ResolveGameplayBearerTx reads the same credential through a caller snapshot.
+func (a RealtimeAuthority) ResolveGameplayBearerTx(ctx context.Context, q tx.Queryer, raw string, now time.Time) (identity.ActorContext, error) {
+	if q == nil {
+		return identity.ActorContext{}, errors.New("incomplete realtime authority adapter")
+	}
+	return a.resolveGameplayBearer(ctx, q, raw, now)
+}
+
+func (a RealtimeAuthority) resolveGameplayBearer(ctx context.Context, q tx.Queryer, raw string, now time.Time) (identity.ActorContext, error) {
+	if len(a.DigestSecret) < 16 {
 		return identity.ActorContext{}, errors.New("incomplete realtime authority adapter")
 	}
 	if a.BearerKeys == nil && (a.DerivationKeyID == "" || len(a.BearerSecret) < 16) {
@@ -100,7 +115,7 @@ func (a RealtimeAuthority) ResolveGameplayBearer(ctx context.Context, raw string
 	var logicalServer int32
 	var playerID int64
 	var credentialGeneration int32
-	err = a.Queryer.QueryRow(ctx, selectGameplayAuthority, digest[:]).Scan(
+	err = q.QueryRow(ctx, selectGameplayAuthority, digest[:]).Scan(
 		&accountID, &accountUID, &accountStatus, &accountCreated, &accountDisabledRaw, &accountLV,
 		&sessionID, &authProfile, &sessionIssued, &sessionAbsRaw, &idleRaw, &sessionActivity, &sessionRevokedRaw, &sessionReasonRaw, &sessionLV,
 		&contextID, &logicalServer, &playerID, &contextGeneration, &contextCreated, &contextEndedRaw, &contextReasonRaw, &contextLV,
