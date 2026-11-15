@@ -164,7 +164,7 @@ func TestD13UnknownWakeupFailsClosedAndJoinsUnauthenticatedSocket(t *testing.T) 
 	if e == nil {
 		t.Fatal("unauthenticated connection retained")
 	}
-	if f.number(`SELECT count(*)FROM pg_locks l JOIN pg_stat_activity a USING(pid)WHERE a.application_name='gxb-v2-i4-realtime' AND l.locktype='advisory'`) != 0 {
+	if f.number(`SELECT count(*)FROM pg_locks l JOIN pg_stat_activity a USING(pid)WHERE a.application_name='gxb-v2-i4-realtime' AND l.locktype='advisory' AND l.database=(SELECT oid FROM pg_database WHERE datname=current_database())`) != 0 {
 		t.Fatal("owner guard leaked")
 	}
 	t.Log("REAL_PG unknownroute ->production fatal shutdown joins preauth read,listener andwriters beforeowner guardrelease")

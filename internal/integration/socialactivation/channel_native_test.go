@@ -373,7 +373,7 @@ func TestChatA14ReadOnlyRepeatableReadSingleCommitAndNoEffects(t *testing.T) {
 	if w.begins.Load() != 3 || w.commits.Load() != 3 || w.active.Load() != 0 || f.snapshot() != before {
 		t.Fatal("transaction/effect violation", w.begins.Load(), w.commits.Load(), w.active.Load())
 	}
-	if f.number(`SELECT count(*) FROM pg_locks WHERE mode LIKE '%ExclusiveLock' AND relation IN('players'::regclass,'guild_memberships'::regclass,'social_friendships'::regclass) AND granted`) != 0 {
+	if f.number(`SELECT count(*) FROM pg_locks WHERE database=(SELECT oid FROM pg_database WHERE datname=current_database()) AND mode LIKE '%ExclusiveLock' AND relation IN('players'::regclass,'guild_memberships'::regclass,'social_friendships'::regclass) AND granted`) != 0 {
 		t.Fatal("gameplay lock stranded")
 	}
 }
