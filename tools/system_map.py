@@ -1629,6 +1629,14 @@ def show_entry(key):
         record["calls"] = edges["calls"].get(key, {})
         record["called_by"] = edges["called_by"].get(key, {})
         record["composition"] = edges["composition"].get(key, [])
+        owned = record.get("tables", {}).get("owned") or []
+        if owned:
+            ownership = json.loads(read_text(ROOT / "docs" / "architecture" / "CANONICAL_TABLE_OWNERSHIP.json"))["tables"]
+            record["owned_table_data"] = {
+                table: {field: (ownership.get(table, {}).get("data") or {}).get(field)
+                        for field in ("scope", "kind", "retention")}
+                for table in sorted(owned)
+            }
         if requested_key in SHOW_ALIASES:
             record = {
                 "alias": requested_key,
