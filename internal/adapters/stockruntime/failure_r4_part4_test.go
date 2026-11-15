@@ -10,6 +10,7 @@ import (
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
 	appcombat "gxb.local/backend/v2/internal/application/combat"
+	appranking "gxb.local/backend/v2/internal/application/ranking"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -66,6 +67,8 @@ func TestR4Part4FailureClassTable(t *testing.T) {
 		{name: "idle transaction timeout", got: failureFromRows(nil, sqlStateString("25P03")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
 		{name: "unique violation", got: failureFromRows(nil, sqlStateString("23505")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
 		{name: "defect", got: failureFromRows(nil, errors.New("plain failure")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
+		// Item 11: a ranking board that cannot be read is a defect, not a transient fault.
+		{name: "ranking unavailable", got: failureFromRows(nil, appranking.ErrUnavailable), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
 		{name: "unknown commit", got: failureReply(unknownCommit("practice_commit_unknown", errors.New("commit unknown"))), wantStatus: http.StatusUnauthorized, wantCode: sessionFailureCode, wantError: "practice_commit_unknown", wantMessage: sessionFailureMessage},
 		{name: "session", got: failureReply(sessionFailure()), wantStatus: http.StatusUnauthorized, wantCode: sessionFailureCode, wantMessage: sessionFailureMessage},
 	})

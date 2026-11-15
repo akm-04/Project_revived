@@ -96,7 +96,7 @@ func (o SummonDispatcher) summon(ctx context.Context, a identity.ActorContext, r
 	return okI5(body)
 }
 
-// failSummon keeps result = [] on a refusal: SelfPlayer.summonHero iterates it (V1 Pass41.3).
+// A refusal answers non-200, so Backend.lua never hands it to SelfPlayer.summonHero, which iterates result.
 var summonFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "summon_invalid_parameter"},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},

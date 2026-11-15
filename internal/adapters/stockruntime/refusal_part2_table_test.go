@@ -16,6 +16,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
+	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	"gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/championsleague"
@@ -129,6 +130,8 @@ func TestPart2OneOnOneFailureRows(t *testing.T) {
 		{"offer stale", failOneOnOne(oneonone.ErrOfferStale), http.StatusConflict, oneOnOneRankChangedError, ""},
 		{"refused", failOneOnOne(oneonone.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid", failOneOnOne(oneonone.ErrInvalid), http.StatusBadRequest, 0, "one_on_one_request_refused"},
+		{"unresolved", failOneOnOne(apponeonone.ErrUnresolved), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"unavailable", failOneOnOne(oneonone.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 		{"insufficient", failOneOnOne(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},
 		{"fallback", failOneOnOne(errors.New("one on one dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 	})

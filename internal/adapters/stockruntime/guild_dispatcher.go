@@ -337,9 +337,8 @@ func sourceGuildProtocolError(err error) (httpedge.Response, bool) {
 	}
 }
 
-// The mapper table marks Guild not-found and permission rows "preserve": their
-// 404/403 statuses sit outside F4's refusal/fault classes, as do bootstrap auth
-// statuses (D5 amendment, mapper table distinctions).
+// Guild not-found and permission errors are refusals too (R4 amendment items 5
+// and 7): failGuild answers them 409 before these rows are consulted.
 var guildFailureRows = []failureRow{
 	{match: guildcore.ErrGuildClosed, class: failureRefusal, code: 30014},
 	{match: guildcore.ErrGuildFull, class: failureRefusal, code: 30020},
