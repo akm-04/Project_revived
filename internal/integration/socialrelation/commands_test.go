@@ -860,7 +860,7 @@ func TestDynamicChildLocksAndSourcesBeforeEffectsAndCallerTxReaders(t *testing.T
 		if strings.Contains(q, "realtime_presence_leases") && !strings.Contains(q, "FOR UPDATE") {
 			presence++
 		}
-		if strings.Contains(q, "FROM players WHERE player_id=") && strings.Contains(q, "FOR UPDATE") {
+		if strings.Contains(q, "FROM players WHERE player_id=") && strings.Contains(q, "FOR NO KEY UPDATE") {
 			roots = append(roots, e.args[0].(int64))
 		}
 		if strings.Contains(q, "FROM social_notices") && strings.Contains(q, "FOR UPDATE") {
