@@ -423,7 +423,7 @@ func main() {
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
-	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
+	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner})
 	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys.
 	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher { return stockruntime.Decorated{Next: d} }
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
@@ -712,7 +712,7 @@ func main() {
 	for _, mid := range []uint16{124, 125, 126, 127, 128, 129, 130, 131, 132, 133} {
 		mustRegister(mid, practiceD)
 	}
-	activityD := stockruntime.ActivityDispatcher{Authority: authority, Service: activityRuntime}
+	activityD := stockruntime.ActivityDispatcher{Authority: authority, Service: activityRuntime, Reads: runner, Levels: i4store.PlayerDirectoryReader{}}
 	for _, mid := range []uint16{229, 234} {
 		mustRegister(mid, activityD)
 	}

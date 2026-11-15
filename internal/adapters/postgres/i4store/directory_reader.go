@@ -16,6 +16,13 @@ func (r PlayerDirectoryReader) Profile(ctx context.Context, pid identity.PlayerI
 	return r.ProfileTx(ctx, r.Queryer, pid)
 }
 
+// PlayerLevelTx projects the same directory level a provider needs inside a
+// caller snapshot.
+func (r PlayerDirectoryReader) PlayerLevelTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) (int64, bool, error) {
+	profile, found, err := r.ProfileTx(ctx, q, pid)
+	return profile.Level, found, err
+}
+
 func (PlayerDirectoryReader) ProfileTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) (playerdirectory.Profile, bool, error) {
 	if q == nil || !pid.Valid() {
 		return playerdirectory.Profile{}, false, errors.New("invalid player directory read")

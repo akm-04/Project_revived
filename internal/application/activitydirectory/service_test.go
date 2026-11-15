@@ -126,7 +126,7 @@ func TestProviderMismatchMalformedAndAbsentFailClosed(t *testing.T) {
 		return activity.Projection{}, false, nil
 	})
 	r, _ = NewRegistry([]Registration{{Name: "abs", TableID: 10, RuntimeCapability: "abs", Provider: abs}}, nil)
-	_, ok, err := (Directory{Registry: r}).LookupAt(context.Background(), actor(t), time.Unix(1, 0).UTC(), 10)
+	_, ok, err := (Directory{Registry: r}).LookupAt(context.Background(), actor(t), time.Unix(1, 0).UTC(), 10, nil)
 	if err != nil || ok {
 		t.Fatalf("absent ok=%t err=%v", ok, err)
 	}
