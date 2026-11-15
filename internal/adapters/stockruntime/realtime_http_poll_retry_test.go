@@ -123,3 +123,27 @@ func TestHTTPPollSocketWithDeadWriterIsClosed(t *testing.T) {
 	}
 	t.Fatal("a socket whose writer died on a full queue stayed open and the client was not told")
 }
+
+func TestHTTPPollSocketLimitRefusalLeavesSequenceUnapplied(t *testing.T) {
+	server, err := NewHTTPPollServer(t.Context(), newRealtimeTestServer(t), 5*time.Second, 100*time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	sessionID, _ := loginSocket(t, server.Handler(), "alpha", "world", 1)
+	server.mutex.Lock()
+	session := server.sessions[sessionID]
+	server.mutex.Unlock()
+
+	frames := makePollFrames(t, "world", realtimeChatRequest("first tag"))
+	for index := 0; index < maxPollSocketsPerSession; index++ {
+		frames = append(frames, makePollFrames(t, fmt.Sprintf("extra%d", index), realtimeChatRequest("over the limit"))...)
+	}
+	const sequence = 100
+	if err := session.deliver(context.Background(), sequence, frames); err != ErrHTTPPollSocketLimit {
+		t.Fatalf("deliver over the socket limit: %v", err)
+	}
+	if session.wasApplied(sequence) {
+		t.Fatal("a refused send was recorded as applied, so its retry would drop the frames")
+	}
+}

@@ -603,12 +603,18 @@ func (session *httpPollSession) deliver(ctx context.Context, sequence uint64, re
 		return nil
 	}
 	tags, grouped := groupPollFrames(requestFrames, session.server.config)
-	batches := make([]*pollBatch, 0, len(tags))
+	// Every socket is resolved before the first handoff, so a refusal leaves the sequence unapplied for the retry.
+	sockets := make([]*pollSocketState, 0, len(tags))
 	for _, tag := range tags {
 		socket, ok := session.socketFor(tag)
 		if !ok {
 			return ErrHTTPPollSocketLimit
 		}
+		sockets = append(sockets, socket)
+	}
+	batches := make([]*pollBatch, 0, len(tags))
+	for index, tag := range tags {
+		socket := sockets[index]
 		batch := &pollBatch{frames: grouped[tag], done: make(chan struct{})}
 		// The handoff ignores the request's own cancellation: once a socket loop holds the frames they will be
 		// applied, so the sequence is recorded at once and a retry of an abandoned request cannot apply them again.
