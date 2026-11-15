@@ -53,15 +53,23 @@ WHERE gc.context_id=$1::uuid AND gc.session_id=$2::uuid AND gc.account_id=$3::uu
   AND gc.liveness_version=$7 AND s.liveness_version=$8
   AND gc.ended_at IS NULL AND s.revoked_at IS NULL AND a.status='ACTIVE' AND a.disabled_at IS NULL
   AND (s.absolute_expires_at IS NULL OR $9::timestamptz < s.absolute_expires_at)
-  AND (s.idle_timeout_seconds IS NULL OR $9::timestamptz < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds))
-FOR SHARE OF gc,s,a`
+  AND (s.idle_timeout_seconds IS NULL OR $9::timestamptz < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds))`
+
+// The write fence pins the session against revocation until commit. A read-only
+// transaction cannot take FOR SHARE (PostgreSQL rejects row locks in READ ONLY),
+// and its fixed snapshot needs no lock.
+const fenceActorWriteLock = ` FOR SHARE OF gc,s,a`
 
 func (Store) FenceActorTx(ctx context.Context, t tx.Tx, a identity.ActorContext, now time.Time) error {
 	if t == nil || a.ContextID.UUID().IsZero() || now.IsZero() {
 		return errors.New("invalid actor fence")
 	}
+	statement := fenceActorSQL
+	if !readOnlyTransaction(t) {
+		statement += fenceActorWriteLock
+	}
 	var one int
-	err := t.QueryRow(ctx, fenceActorSQL, a.ContextID.UUID().String(), a.SessionID.UUID().String(), a.AccountID.UUID().String(), int32(a.LogicalServerID), int64(a.PlayerID), a.ContextGeneration, a.ContextLivenessVersion, a.SessionLivenessVersion, now.UTC()).Scan(&one)
+	err := t.QueryRow(ctx, statement, a.ContextID.UUID().String(), a.SessionID.UUID().String(), a.AccountID.UUID().String(), int32(a.LogicalServerID), int64(a.PlayerID), a.ContextGeneration, a.ContextLivenessVersion, a.SessionLivenessVersion, now.UTC()).Scan(&one)
 	if err != nil {
 		if noRows(err) {
 			return errors.New("actor liveness fence rejected")
@@ -69,6 +77,11 @@ func (Store) FenceActorTx(ctx context.Context, t tx.Tx, a identity.ActorContext,
 		return err
 	}
 	return nil
+}
+
+func readOnlyTransaction(t tx.Tx) bool {
+	probe, ok := t.(interface{ ReadOnly() bool })
+	return ok && probe.ReadOnly()
 }
 
 func (Store) LockStoryTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) (player.StoryCursor, error) {

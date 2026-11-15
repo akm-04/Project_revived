@@ -108,7 +108,7 @@ func (p *Pool) Begin(ctx context.Context, o ftx.Options) (ftx.Tx, error) {
 	if err != nil {
 		return nil, normalize(err)
 	}
-	return &wrappedTx{raw: raw}, nil
+	return &wrappedTx{raw: raw, readOnly: o.ReadOnly}, nil
 }
 func (p *Pool) QueryRow(ctx context.Context, q string, args ...any) ftx.Row {
 	if err := nestedAcquire(ctx); err != nil {
@@ -118,7 +118,14 @@ func (p *Pool) QueryRow(ctx context.Context, q string, args ...any) ftx.Row {
 }
 func (p *Pool) Raw() *pgxpool.Pool { return p.raw }
 
-type wrappedTx struct{ raw pgx.Tx }
+type wrappedTx struct {
+	raw      pgx.Tx
+	readOnly bool
+}
+
+// ReadOnly lets owner stores avoid row-locking statements that PostgreSQL
+// rejects inside a read-only transaction.
+func (t *wrappedTx) ReadOnly() bool { return t.readOnly }
 
 func (t *wrappedTx) Exec(ctx context.Context, q string, args ...any) (ftx.CommandTag, error) {
 	tag, err := t.raw.Exec(ctx, q, args...)
