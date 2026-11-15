@@ -45,6 +45,7 @@ type channelHarnessOptions struct {
 	limits   *limits.Config
 	reader   channelchat.Reader
 	db       tx.Beginner
+	hooks    tx.Hooks
 	decorate func(net.Conn) net.Conn
 }
 
@@ -55,7 +56,7 @@ func chatHarness(t *testing.T, f *fixture, o channelHarnessOptions) *channelHarn
 	if e != nil {
 		t.Fatal(e)
 	}
-	svc := channelchat.Service{Runner: tx.Runner{DB: f.p}, Operations: operation.Factory{Clock: clock.System{}}, Reader: channelchatread.Reader{}, Owners: o.owners}
+	svc := channelchat.Service{Runner: tx.Runner{DB: f.p, Hooks: o.hooks}, Operations: operation.Factory{Clock: clock.System{}}, Reader: channelchatread.Reader{}, Owners: o.owners}
 	if o.reader != nil {
 		svc.Reader = o.reader
 	}
@@ -215,10 +216,20 @@ func (f *fixture) chatRejoin(pid identity.PlayerID, gid int64) {
 	f.sql(`INSERT INTO guild_membership_events(player_id,guild_id,event_kind,actor_player_id,occurred_at,policy_revision)VALUES($1,$2,'JOIN',$1,$3,'fixture')`, int64(pid), gid, f.now())
 }
 
-type channelReadFunc func(context.Context, tx.Tx, ar.Admission, bool) (playerpresentation.Minimal, error)
+type channelReadFunc struct {
+	read      func(context.Context, tx.Tx, ar.Admission, bool) (playerpresentation.Minimal, error)
+	authorize func(context.Context, tx.Tx, []ar.Admission) ([]bool, error)
+}
 
 func (f channelReadFunc) ReadTx(c context.Context, t tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
-	return f(c, t, a, b)
+	return f.read(c, t, a, b)
+}
+
+func (f channelReadFunc) AuthorizeRecipientsTx(c context.Context, t tx.Tx, a []ar.Admission) ([]bool, error) {
+	if f.authorize != nil {
+		return f.authorize(c, t, a)
+	}
+	return (channelchatread.Reader{}).AuthorizeRecipientsTx(c, t, a)
 }
 
 // blockChatConn delays an actual TCP write under an explicit fault schedule.
@@ -314,6 +325,35 @@ func (t *witnessTx) Rollback(c context.Context) error {
 	}
 	return e
 }
+
+// gatedChatWrite blocks each MIDChatMessage write until gate closes and records
+// how many writes are in flight, the observable socket-writer worker bound.
+type gatedChatWrite struct {
+	net.Conn
+	gate    <-chan struct{}
+	entered chan<- struct{}
+	active  *atomic.Int64
+	peak    *atomic.Int64
+}
+
+func (c *gatedChatWrite) Write(b []byte) (int, error) {
+	if len(b) >= rt.HeaderBytes && binary.BigEndian.Uint16(b[4:6]) == mids.MIDChatMessage {
+		n := c.active.Add(1)
+		defer c.active.Add(-1)
+		for old := c.peak.Load(); n > old; old = c.peak.Load() {
+			if c.peak.CompareAndSwap(old, n) {
+				break
+			}
+		}
+		select {
+		case c.entered <- struct{}{}:
+		default:
+		}
+		<-c.gate
+	}
+	return c.Conn.Write(b)
+}
+
 func readChat(t *testing.T, c net.Conn, message string) map[string]any {
 	t.Helper()
 	frame := frameRead(t, c, mids.MIDChatMessage)
