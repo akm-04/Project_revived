@@ -219,6 +219,17 @@ func resolvedRetry(r tx.RetryPolicy) tx.RetryPolicy {
 	return r
 }
 
+// mid1RetryPolicy de-phases the short SERIALIZABLE login-write transactions
+// that contend on the login tables: a 40001 retry rejoins the queue after a
+// jittered delay instead of colliding again immediately (C1 design section 4).
+// A caller-provided policy still wins.
+func mid1RetryPolicy(r tx.RetryPolicy) tx.RetryPolicy {
+	if r.MaxAttempts != 0 {
+		return r
+	}
+	return tx.RetryPolicy{MaxAttempts: 6, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 160 * time.Millisecond}
+}
+
 func (s BootstrapService) MID18(ctx context.Context, creds appboot.AccountCredentials, op operation.Context) (appboot.MID18Result, error) {
 	if err := s.validate(); err != nil {
 		return appboot.MID18Result{}, err
@@ -284,7 +295,7 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 	dynamic := &dynamicReceiptResolver{Reader: s.ReceiptReader}
 	var out appboot.MID1Result
 	boundOp := req.Operation
-	runResult, runErr := s.Runner.Run(ctx, req.Operation, resolvedProfile(s.Profile), tx.Options{Isolation: tx.Serializable}, resolvedRetry(s.Retry), dynamic, func(txctx context.Context, scope tx.Scope) error {
+	runResult, runErr := s.Runner.Run(ctx, req.Operation, resolvedProfile(s.Profile), tx.Options{Isolation: tx.Serializable}, mid1RetryPolicy(s.Retry), dynamic, func(txctx context.Context, scope tx.Scope) error {
 		account, session, err := s.authenticatePair(txctx, scope.Tx, req.Credentials, req.Operation.StartedAt, true)
 		if err != nil {
 			return err
@@ -372,9 +383,6 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 					return err
 				}
 			}
-			if err := s.projectMID1Detail(txctx, scope.Tx, actor, decisionAt, &planned); err != nil {
-				return err
-			}
 			out = planned
 			return nil
 		}
@@ -412,12 +420,8 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 			}
 		}
 
-		// Projection happens only after all required canonical owner rows exist in
-		// this transaction, so a fresh player is hydrated from persisted truth.
-		if err := s.projectMID1Detail(txctx, scope.Tx, actor, decisionAt, &planned); err != nil {
-			return err
-		}
-
+		// The receipt freezes selection evidence only; step 2 hydrates the reply
+		// from a fresh read-only snapshot after this transaction commits.
 		payload, err := buildMID1SelectionPayload(planned, selectedKey.ID)
 		if err != nil {
 			return err
@@ -448,7 +452,14 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 			return s.hydrateCommittedMID1(ctx, req, stored, decisionAt)
 		}
 	}
-	return out, nil
+	if !out.Player.PlayerID.Valid() || out.ContextPlan.Selected.ID.UUID().IsZero() {
+		return appboot.MID1Result{}, errors.New("committed MID1 transaction produced no selection")
+	}
+	return s.readMID1Reply(ctx, req, mid1ReplySelection{
+		contextID:     out.ContextPlan.Selected.ID,
+		playerID:      out.Player.PlayerID,
+		playerCreated: out.PlayerCreated,
+	}, nil, decisionAt)
 }
 
 func (s BootstrapService) projectMID1Detail(ctx context.Context, q tx.Queryer, actor identity.ActorContext, now time.Time, planned *appboot.MID1Result) error {
@@ -959,11 +970,19 @@ func validateStoredMID1Selection(stored receipt.Receipt, current appboot.MID1Res
 	}
 }
 
-func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.RuntimeMID1Request, stored receipt.Receipt, decisionAt time.Time) (appboot.MID1Result, error) {
+// mid1ReplySelection is the immutable selection the committed (or replayed)
+// write step produced. Step 2 hydrates exactly that selection.
+type mid1ReplySelection struct {
+	contextID     identity.ContextID
+	playerID      identity.PlayerID
+	playerCreated bool
+}
+
+// readMID1Reply builds the stock MID1 reply from one REPEATABLE READ READ ONLY
+// snapshot taken after the login writes committed. Baseline hydration and every
+// detail contributor read through that transaction's queryer only.
+func (s BootstrapService) readMID1Reply(ctx context.Context, req appboot.RuntimeMID1Request, selection mid1ReplySelection, stored *receipt.Receipt, decisionAt time.Time) (appboot.MID1Result, error) {
 	var out appboot.MID1Result
-	// Reconciliation has already proved the write receipt committed. This second
-	// transaction is read-only current hydration; it must not replay the old stock
-	// snapshot and must not mint another gameplay context.
 	_, err := s.Runner.Run(ctx, req.Operation, resolvedProfile(s.Profile), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(txctx context.Context, scope tx.Scope) error {
 		account, session, err := s.authenticatePair(txctx, scope.Tx, req.Credentials, req.Operation.StartedAt, false)
 		if err != nil {
@@ -976,6 +995,9 @@ func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.
 		if player == nil {
 			return errors.New("committed MID1 selection missing canonical player")
 		}
+		if selection.playerID.Valid() && player.PlayerID != selection.playerID {
+			return errors.New("committed MID1 selection changed player")
+		}
 		server, err := loadServer(txctx, scope.Tx, req.Region)
 		if err != nil {
 			return err
@@ -984,7 +1006,7 @@ func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.
 		if err != nil {
 			return err
 		}
-		if live == nil || live.ID.UUID() != stored.ContextID || live.AccountID != account.ID || live.LogicalServerID != req.Region || live.PlayerID != player.PlayerID {
+		if live == nil || live.ID != selection.contextID || live.AccountID != account.ID || live.LogicalServerID != req.Region || live.PlayerID != player.PlayerID {
 			return errors.New("committed MID1 selection is no longer the live target")
 		}
 		var storedDigest []byte
@@ -1011,13 +1033,27 @@ func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.
 		if err != nil {
 			return err
 		}
-		out = appboot.MID1Result{Token: token, Region: int32(server.ID), UID: account.UID, IsNew: logicalserver.MID1IsNew(*player), Player: *player, Server: server, ContextPlan: identity.SelectionPlan{Kind: identity.SelectionCoalesced, Selected: *live}}
+		out = appboot.MID1Result{Token: token, Region: int32(server.ID), UID: account.UID, IsNew: logicalserver.MID1IsNew(*player), Player: *player, Server: server, ContextPlan: identity.SelectionPlan{Kind: identity.SelectionCoalesced, Selected: *live}, PlayerCreated: selection.playerCreated}
 		if err := s.projectMID1Detail(txctx, scope.Tx, actor, decisionAt, &out); err != nil {
 			return err
 		}
-		return validateStoredMID1Selection(stored, out, storedKeyID)
+		if stored != nil {
+			return validateStoredMID1Selection(*stored, out, storedKeyID)
+		}
+		return nil
 	})
 	return out, err
+}
+
+func (s BootstrapService) hydrateCommittedMID1(ctx context.Context, req appboot.RuntimeMID1Request, stored receipt.Receipt, decisionAt time.Time) (appboot.MID1Result, error) {
+	selectedID, err := identity.ContextIDFrom(stored.ContextID)
+	if err != nil {
+		return appboot.MID1Result{}, err
+	}
+	// Reconciliation has already proved the write receipt committed. This second
+	// transaction is read-only current hydration; it must not replay the old stock
+	// snapshot and must not mint another gameplay context.
+	return s.readMID1Reply(ctx, req, mid1ReplySelection{contextID: selectedID}, &stored, decisionAt)
 }
 
 type dynamicReceiptResolver struct {

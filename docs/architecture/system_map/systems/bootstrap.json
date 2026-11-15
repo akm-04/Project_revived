@@ -315,6 +315,7 @@
  },
  "tests": {
   "integration": [
+   "logincapacity",
    "playerdisplay"
   ],
   "scenarios_naming": [

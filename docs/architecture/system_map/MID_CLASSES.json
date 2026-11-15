@@ -6,12 +6,12 @@
    "isolation": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 287,
+     "line": 298,
      "value": "serializable"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 967,
+     "line": 986,
      "value": "repeatable_read"
     }
    ],
@@ -19,34 +19,34 @@
    "read_only": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 287,
+     "line": 298,
      "value": "false"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 967,
+     "line": 986,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:437"
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:441"
    ],
    "retry": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 287,
-     "value": "3"
+     "line": 298,
+     "value": "6"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 967,
+     "line": 986,
      "value": "1"
     }
    ],
    "state_writes": [
     "internal/adapters/postgres/clientlogstore/store.go:20",
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:811",
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:841",
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:822",
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:852",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66"
    ],
    "system": "bootstrap",
@@ -55,15 +55,15 @@
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
      "function": "BootstrapService.MID1",
      "isolation": "serializable",
-     "line": 287,
+     "line": 298,
      "read_only": "false",
-     "retry": "3"
+     "retry": "6"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "function": "BootstrapService.hydrateCommittedMID1",
+     "function": "BootstrapService.readMID1Reply",
      "isolation": "repeatable_read",
-     "line": 967,
+     "line": 986,
      "read_only": "true",
      "retry": "1"
     }
@@ -86,22 +86,22 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 505,
+     "line": 516,
      "statement": "SELECT credential_id::text,session_id::text,kind,digest,issued_at,expires_at,revoked_at FROM account_session_credentials WHERE digest=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 723,
+     "line": 734,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1 FOR SHARE"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 723,
+     "line": 734,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1 FOR UPDATE"
     },
     {
@@ -295,7 +295,7 @@
    "isolation": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 230,
+     "line": 241,
      "value": "read_committed"
     }
    ],
@@ -303,7 +303,7 @@
    "read_only": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 230,
+     "line": 241,
      "value": "false"
     }
    ],
@@ -311,12 +311,12 @@
    "retry": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 230,
+     "line": 241,
      "value": "3"
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:222"
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:233"
    ],
    "system": "bootstrap",
    "transactions": [
@@ -324,7 +324,7 @@
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
      "function": "BootstrapService.MID18",
      "isolation": "read_committed",
-     "line": 230,
+     "line": 241,
      "read_only": "false",
      "retry": "3"
     }
@@ -332,12 +332,12 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 505,
+     "line": 516,
      "statement": "SELECT credential_id::text,session_id::text,kind,digest,issued_at,expires_at,revoked_at FROM account_session_credentials WHERE digest=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 609,
+     "line": 620,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'logical_server_id',logical_server_id,'name',name,'first_opened_at',first_opened_at, 'directory_visible',directory_visible,'existing_login_allowed',existing_login_allowed, 'new_character_allowed',new_character_allowed,'next_player_id',next_player_id, 'max_player_id',max_player_id,'state_version',state_version,'created_at',created_at, 'retired_at',retired_at) ORDER BY logical_server_id),'[]'::jsonb)::text FROM logical_servers WHERE directory_visible=true"
     }
    ],
@@ -23427,7 +23427,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -27458,7 +27458,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -31473,7 +31473,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -31558,7 +31558,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -38763,7 +38763,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -39926,7 +39926,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -67495,7 +67495,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -67610,7 +67610,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -67811,7 +67811,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -67902,7 +67902,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -68136,7 +68136,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -68241,7 +68241,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -68401,7 +68401,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -69290,7 +69290,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -81804,7 +81804,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -81870,7 +81870,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 713,
+     "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
