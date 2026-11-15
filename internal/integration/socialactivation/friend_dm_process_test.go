@@ -130,7 +130,7 @@ func Test6A_G26_G28_G30_G31_G32_G38_G39ProductionProcesses(t *testing.T) {
 	if rt.ValidateFriendDM(frame.Params) != nil {
 		t.Fatal(frame)
 	}
-	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %' LIMIT 1`)
+	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %' LIMIT 1`)
 	f.sql(`SELECT pg_terminate_backend($1)`, old)
 	code, body = postProcess(t, api, sender, 1, 515, map[string]any{"player_id": 200001, "msg": `{"message":"listener recovery","msgType":0}`})
 	if code != 200 {

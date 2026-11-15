@@ -27,7 +27,7 @@ func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 	senderWorld := worldLogin(t, world, sender, 1)
 	recipientWorld := worldLogin(t, world, recipient, 2)
 	deadline := time.Now().Add(3 * time.Second)
-	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %'`) == 0 {
+	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %'`) == 0 {
 		if time.Now().After(deadline) {
 			t.Fatal("dedicated listener missing")
 		}
@@ -65,10 +65,10 @@ func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 		t.Fatal(status, body)
 	}
 	// Actual listener connection replacement still reuses the sole reference bus.
-	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %' LIMIT 1`)
+	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %' LIMIT 1`)
 	f.sql(`SELECT pg_terminate_backend($1)`, old)
 	deadline = time.Now().Add(3 * time.Second)
-	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %' AND pid<>$1`, old) == 0 {
+	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %' AND pid<>$1`, old) == 0 {
 		if time.Now().After(deadline) {
 			t.Fatal("listener did not reconnect")
 		}
