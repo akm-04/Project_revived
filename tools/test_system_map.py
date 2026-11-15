@@ -95,6 +95,32 @@ class SystemMapViewTests(unittest.TestCase):
                     system_map.show_entry('unhandled')
         self.assertEqual(json.loads(captured.getvalue()), finding)
 
+    def test_show_mid_includes_its_class(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            systems = output / 'systems'
+            systems.mkdir()
+            (output / 'INDEX.json').write_text(json.dumps({
+                'systems': [{'name': 'i5'}],
+                'lookups': {'mid_to_system': {'161': 'i5'}},
+            }))
+            (systems / 'i5.json').write_text(json.dumps({'name': 'i5', 'mids': [{'mid': 161}]}))
+            class_row = {'mid': 161, 'writes': 'state', 'isolation': [], 'read_only': [], 'retry': []}
+            (output / 'MID_CLASSES.json').write_text(json.dumps({'mids': [class_row]}))
+            with patch.object(system_map, 'OUTPUT_DIRECTORY', output), \
+                    patch.object(system_map, 'SYSTEMS_DIRECTORY', systems), \
+                    patch.object(system_map, 'load_client_callers', return_value={}):
+                captured = io.StringIO()
+                with contextlib.redirect_stdout(captured):
+                    system_map.show_entry('161')
+        self.assertEqual(json.loads(captured.getvalue())['class'], class_row)
+
+    def test_mid_class_validation_rejects_unknown_write_class(self):
+        with self.assertRaisesRegex(SystemExit, 'unknown writes class'):
+            system_map.validate_mid_classes([{'mid': 1, 'writes': 'sometimes'}])
+        with self.assertRaisesRegex(SystemExit, 'duplicate mid'):
+            system_map.validate_mid_classes([{'mid': 1, 'writes': 'none'}, {'mid': 1, 'writes': 'none'}])
+
     def test_unresolved_lock_target_is_not_an_empty_table(self):
         lock = {'table': '', 'store': 'store/example', 'method': 'LockTx'}
         callers = {('store/example', 'LockTx'): {'owner'}}

@@ -1118,11 +1118,37 @@ def row_locks_by_system(systems, locks, callers):
     return {system: sorted(tables) for system, tables in rows.items()}
 
 
+MID_WRITE_CLASSES = {"state", "receipt", "none", "UNKNOWN"}
+MID_ISOLATIONS = {"read_committed", "repeatable_read", "serializable", "unset", "UNKNOWN"}
+MID_READ_ONLY = {"true", "false", "UNKNOWN"}
+
+
+def validate_mid_classes(classes):
+    seen = set()
+    for row in classes:
+        mid = row.get("mid")
+        if not isinstance(mid, int) or mid in seen:
+            raise SystemExit("MID class row has a missing or duplicate mid: %r" % (mid,))
+        seen.add(mid)
+        if row.get("writes") not in MID_WRITE_CLASSES:
+            raise SystemExit("MID %s has an unknown writes class %r" % (mid, row.get("writes")))
+        for field, allowed in (("isolation", MID_ISOLATIONS), ("read_only", MID_READ_ONLY)):
+            for evidence in row.get(field) or []:
+                if evidence.get("value") not in allowed:
+                    raise SystemExit("MID %s has an unknown %s value %r" % (mid, field, evidence.get("value")))
+        for evidence in row.get("retry") or []:
+            value = evidence.get("value")
+            if value != "UNKNOWN" and not str(value).isdigit():
+                raise SystemExit("MID %s has an unknown retry value %r" % (mid, value))
+    return classes
+
+
 def build_system_map():
     helper = run_helper()
     typed = helper["typed"]
     if typed.get("analysis_errors"):
         raise SystemExit("typed analysis incomplete: " + "; ".join(typed["analysis_errors"]))
+    mid_classes = validate_mid_classes(helper.get("mid_classes") or [])
     client = load_client_callers()
     registrations = helper["registrations"]
     grouped = group_registrations(registrations)
@@ -1437,7 +1463,12 @@ def build_system_map():
         "called_by": reverse_call_edges,
         "composition": composition_by_system,
     }
-    files = {"README.md": read_text(ROOT / "tools" / "system_map_readme.md"), "INDEX.json": json_text(index), "FINDINGS.json": findings_text(findings), "EDGES.json": json_text(edges_document)}
+    mid_classes_document = {
+        "note": "C1-3a static classification: each registered stock HTTP MID's reached transaction, write class and unbounded reads. UNKNOWN is a marker that the route trace could not decide; check the source before acting.",
+        "generated_by": "tools/system_map.py --write",
+        "mids": mid_classes,
+    }
+    files = {"README.md": read_text(ROOT / "tools" / "system_map_readme.md"), "INDEX.json": json_text(index), "FINDINGS.json": findings_text(findings), "EDGES.json": json_text(edges_document), "MID_CLASSES.json": json_text(mid_classes_document)}
     for system, record in system_records.items():
         files["systems/" + system + ".json"] = json_text(record)
     return files
@@ -1615,6 +1646,16 @@ def check_output(files):
 SHOW_ALIASES = {"missions": "i5"}
 
 
+def mid_class(key):
+    path = OUTPUT_DIRECTORY / "MID_CLASSES.json"
+    if not path.is_file():
+        return None
+    for row in json.loads(read_text(path)).get("mids") or []:
+        if str(row.get("mid")) == str(key):
+            return row
+    return None
+
+
 def show_entry(key):
     index = json.loads(read_text(OUTPUT_DIRECTORY / "INDEX.json"))
     requested_key = key
@@ -1648,6 +1689,7 @@ def show_entry(key):
         print(json.dumps({
             "system": system,
             "mid": rows[0] if rows else None,
+            "class": mid_class(key),
             "client": client,
         }, indent=1, ensure_ascii=False))
         return

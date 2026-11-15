@@ -27,6 +27,14 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 - `mids` – registered stock HTTP MIDs, client names, and the handler `file:line`
   (the dispatcher's `Dispatch` method); dispatcher files once per system. Registration
   does not imply positive gameplay support: a route can deliberately refuse a legacy MID.
+- `MID_CLASSES.json` – C1-3a static class of every registered stock HTTP MID; `show <mid>`
+  prints one row. `isolation`, `read_only` and `retry` list every `Runner.Run` the route
+  reaches, with the call site `file:line`. `writes` is `state` (write SQL other than the
+  receipt store itself), `receipt` (the route records an operation receipt and writes no
+  other state), `none`, or `UNKNOWN`. `unbounded_read` lists read SQL with no `LIMIT` and no player/actor key in
+  its `WHERE`. A `FANOUT`, `UNRESOLVED` or `BOUND` marker is kept in `unknown`; when one
+  could hide a write the class stays `UNKNOWN`, never a guess. Inactive fallback
+  registrations have no route and are `UNKNOWN` with that reason.
 - `pushes` – realtime S2C registrations attributable to the system.
 - `tables.owned` – tables whose ownership `owner` names this system.
 - `tables.read` / `tables.written` – tables in the SQL of this system's own package and of the
