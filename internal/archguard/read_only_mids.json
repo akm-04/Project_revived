@@ -1,0 +1,11 @@
+{
+ "note": "C1-3a read-only MID guard. Each MID must keep every Runner.Run in its named service function at tx.RepeatableRead with ReadOnly true. Seed entries are MIDs that already run repeatable-read read-only today; C1-3b adds migrated MIDs here.",
+ "mids": [
+  {"mid": 28, "function": "Mode.TrialLoad", "file": "internal/application/campaign/trials.go", "line": 95},
+  {"mid": 56, "function": "Mode.Load", "file": "internal/application/summon/mode.go", "line": 178},
+  {"mid": 112, "function": "Mode.Load", "file": "internal/application/campaign/mode.go", "line": 281},
+  {"mid": 115, "function": "Mode.TrialLoad", "file": "internal/application/campaign/trials.go", "line": 95},
+  {"mid": 122, "function": "Mode.Caps", "file": "internal/application/campaign/awards.go", "line": 165},
+  {"mid": 123, "function": "Mode.TrialLoad", "file": "internal/application/campaign/trials.go", "line": 95}
+ ]
+}
