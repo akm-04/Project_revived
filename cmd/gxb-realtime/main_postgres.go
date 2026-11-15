@@ -246,7 +246,11 @@ func run() error {
 			AdventureIllusion: channelchatread.AdventureIllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
 			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}},
 			Defense:           channelchatread.DefenseRoomReader{Store: sharedroomstore.Store{}}}}
-	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
+	chatPolicy := stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections)
+	if err := chatPolicy.ApplyEnv(os.Getenv); err != nil {
+		log.Fatalf("invalid channel chat policy: %v", err)
+	}
+	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, chatPolicy)
 	if err != nil {
 		return err
 	}

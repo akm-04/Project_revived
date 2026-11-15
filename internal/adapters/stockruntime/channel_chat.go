@@ -12,24 +12,95 @@ import (
 	"gxb.local/backend/v2/internal/protocol/mids"
 	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
 	"log"
+	"strconv"
 	"sync"
 	"time"
+)
+
+// CHANNEL_CHAT_SENDER_RATE_V1 is a PRIVATE_POLICY per-socket send rate, not an
+// original-server rule. It keeps one noisy sender from filling the global
+// message slots that other players need.
+const (
+	ChannelChatSenderRatePolicyID = "CHANNEL_CHAT_SENDER_RATE_V1"
+	defaultChatSenderInterval     = time.Second
+	defaultChatSenderBurst        = 5
 )
 
 // ChannelChatPolicy is selected V2 capacity policy, not an original-server rate rule.
 type ChannelChatPolicy struct {
 	MaxMessages, GlobalWorkers, LocalWorkers, MaxHandles int
 	PrepareWait, PublicationWait, CommandWait            time.Duration
+	SenderInterval                                       time.Duration
+	SenderBurst                                          int
 }
 
 func DefaultChannelChatPolicy(maxHandles int) ChannelChatPolicy {
-	return ChannelChatPolicy{16, 8, 8, maxHandles, 3 * time.Second, 2 * time.Second, 5 * time.Second}
+	return ChannelChatPolicy{MaxMessages: 16, GlobalWorkers: 8, LocalWorkers: 8, MaxHandles: maxHandles, PrepareWait: 3 * time.Second, PublicationWait: 2 * time.Second, CommandWait: 5 * time.Second, SenderInterval: defaultChatSenderInterval, SenderBurst: defaultChatSenderBurst}
 }
+
+// ApplyEnv applies the optional PRIVATE_POLICY overrides. Absent variables keep
+// the defaults; an invalid value is an error so a typo cannot silently change
+// the rate.
+func (p *ChannelChatPolicy) ApplyEnv(getenv func(string) string) error {
+	if p == nil || getenv == nil {
+		return nil
+	}
+	if value := getenv("GXB_CHANNEL_CHAT_SENDER_INTERVAL"); value != "" {
+		interval, err := time.ParseDuration(value)
+		if err != nil {
+			return err
+		}
+		p.SenderInterval = interval
+	}
+	if value := getenv("GXB_CHANNEL_CHAT_SENDER_BURST"); value != "" {
+		burst, err := strconv.Atoi(value)
+		if err != nil {
+			return err
+		}
+		p.SenderBurst = burst
+	}
+	return p.validate()
+}
+
 func (p ChannelChatPolicy) validate() error {
-	if p.MaxMessages < 1 || p.MaxMessages > 16 || p.GlobalWorkers < 1 || p.GlobalWorkers > 8 || p.LocalWorkers < 1 || p.LocalWorkers > 8 || p.MaxHandles < 1 || p.PrepareWait <= 0 || p.PrepareWait > 3*time.Second || p.PublicationWait <= 0 || p.PublicationWait > 2*time.Second || p.CommandWait <= 0 || p.CommandWait > 5*time.Second {
+	if p.MaxMessages < 1 || p.MaxMessages > 16 || p.GlobalWorkers < 1 || p.GlobalWorkers > 8 || p.LocalWorkers < 1 || p.LocalWorkers > 8 || p.MaxHandles < 1 || p.PrepareWait <= 0 || p.PrepareWait > 3*time.Second || p.PublicationWait <= 0 || p.PublicationWait > 2*time.Second || p.CommandWait <= 0 || p.CommandWait > 5*time.Second || p.SenderInterval <= 0 || p.SenderBurst < 1 {
 		return errors.New("invalid bounded channel chat policy")
 	}
 	return nil
+}
+
+// chatSenderBucket is one socket's allowance. The registry session owns it, so
+// it lives and dies with that socket and needs no global keyed map.
+type chatSenderBucket struct {
+	mu     sync.Mutex
+	tokens float64
+	at     time.Time
+}
+
+func (b *chatSenderBucket) allow(at time.Time, interval time.Duration, burst int) bool {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.at.IsZero() {
+		b.tokens = float64(burst)
+	} else {
+		b.tokens += float64(at.Sub(b.at)) / float64(interval)
+		if b.tokens > float64(burst) {
+			b.tokens = float64(burst)
+		}
+	}
+	b.at = at
+	if b.tokens < 1 {
+		return false
+	}
+	b.tokens--
+	return true
+}
+
+func (h SessionHandle) allowChatSender(at time.Time, interval time.Duration, burst int) bool {
+	if h.session == nil {
+		return false
+	}
+	return h.session.chatSender.allow(at, interval, burst)
 }
 
 type ChannelChatOutcome string
@@ -39,6 +110,7 @@ const (
 	ChatIneligible             ChannelChatOutcome = "NOT_ATTEMPTED_INELIGIBLE"
 	ChatBudget                 ChannelChatOutcome = "NOT_ATTEMPTED_BUDGET"
 	ChatSendUnknown            ChannelChatOutcome = "SEND_OUTCOME_UNKNOWN_OR_ERROR"
+	ChatSenderLimited          ChannelChatOutcome = "NOT_ATTEMPTED_SENDER_LIMITED"
 )
 
 // ChannelChatReport is aggregate ephemeral telemetry. It retains neither text nor token.
@@ -143,6 +215,13 @@ func (d *ChannelChatDispatcher) HandleSessionClientFrame(ctx context.Context, h 
 	if r.Type != 0 && (ingress.Selector == nil || !d.Service.Owners.Available(channelchat.Kind(ingress.Selector.Kind))) {
 		log.Printf("structured channel chat refused: type=%d channel=%d owner unavailable", r.Type, r.Channel)
 		d.report(ChannelChatReport{ProviderGated: true})
+		return nil, nil
+	}
+	// PRIVATE_POLICY CHANNEL_CHAT_SENDER_RATE_V1: the per-socket bucket is
+	// consulted before a fan-out slot is taken, so a sender over its rate cannot
+	// starve other senders of the global slots.
+	if !h.allowChatSender(time.Now(), d.policy.SenderInterval, d.policy.SenderBurst) {
+		d.report(ChannelChatReport{Outcomes: map[ChannelChatOutcome]int{ChatSenderLimited: 1}})
 		return nil, nil
 	}
 	select {

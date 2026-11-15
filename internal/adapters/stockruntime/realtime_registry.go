@@ -62,6 +62,7 @@ type registrySession struct {
 	guildBinding apprealtime.GuildBinding
 	meta         SessionMetadata
 	writer       *connWriter
+	chatSender   chatSenderBucket
 
 	lifecycle sync.Mutex
 	retired   bool

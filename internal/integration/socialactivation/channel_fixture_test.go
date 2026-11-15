@@ -64,6 +64,9 @@ func chatHarness(t *testing.T, f *fixture, o channelHarnessOptions) *channelHarn
 		svc.Runner.DB = o.db
 	}
 	p := stockruntime.DefaultChannelChatPolicy(2048)
+	// The suite sends many frames from one socket inside one second; the
+	// per-sender rate is exercised by its own unit test.
+	p.SenderBurst = 4096
 	if o.policy != nil {
 		p = *o.policy
 	}
