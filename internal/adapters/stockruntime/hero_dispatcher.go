@@ -31,7 +31,7 @@ type HeroServicePort interface {
 	PowerUpHero(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroPromotionResult, error)
 	OneClickJinjie(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroPromotionResult, error)
 	Evolve(context.Context, identity.ActorContext, int64, operation.Context) error
-	HeroPieces(context.Context, identity.ActorContext) (map[int64]int64, error)
+	HeroPieces(context.Context, identity.ActorContext, operation.Context) (map[int64]int64, error)
 	SummonNormal(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (character.Hero, error)
 	CreateVows(context.Context, identity.ActorContext, int64, operation.Context) (character.Hero, error)
 }
@@ -529,7 +529,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if !onlyStockGameplayParams(req.Envelope.Params) {
 			return badHero("invalid_hero_pieces")
 		}
-		pieces, err := d.Service.HeroPieces(ctx, actor)
+		pieces, err := d.Service.HeroPieces(ctx, actor, req.Envelope.Operation)
 		if err != nil {
 			return failHero(err)
 		}

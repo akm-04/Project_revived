@@ -37,6 +37,7 @@ type ProgressionStore interface {
 
 type ProgressionContent interface {
 	HeroProgressionActive(context.Context) (string, bool, error)
+	HeroProgressionActiveTx(context.Context, tx.Queryer) (string, bool, error)
 	HeroProgressionRevision(context.Context, string) (bool, error)
 	HeroExpItemTx(context.Context, tx.Queryer, string, int64) (int64, error)
 	HeroMaxLevelTx(context.Context, tx.Queryer, string, int64) (int64, error)
@@ -46,6 +47,7 @@ type ProgressionContent interface {
 	HeroSuperEvolutionTx(context.Context, tx.Queryer, string, int64) (character.HeroEvolutionPolicy, error)
 	HeroSuperPrerequisitesTx(context.Context, tx.Queryer, string, int64) ([]int64, error)
 	HeroPieceMappings(context.Context, string) ([]character.HeroPieceMapping, error)
+	HeroPieceMappingsTx(context.Context, tx.Queryer, string) ([]character.HeroPieceMapping, error)
 }
 
 type ExpResult struct {
@@ -450,39 +452,44 @@ func (s Service) Evolve(ctx context.Context, actor identity.ActorContext, partne
 
 // HeroPieces projects canonical I5 fragment stacks into the source MID67 map:
 // numeric-string Hero origin table_id -> currently owned fragment quantity.
-func (s Service) HeroPieces(ctx context.Context, actor identity.ActorContext) (map[int64]int64, error) {
+func (s Service) HeroPieces(ctx context.Context, actor identity.ActorContext, op operation.Context) (map[int64]int64, error) {
 	if err := s.validateProgression(); err != nil {
 		return nil, err
 	}
 	if !actor.PlayerID.Valid() {
 		return nil, errors.New("character hero: invalid Hero pieces actor")
 	}
-	revision, ok, err := s.Progression.HeroProgressionActive(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if !ok {
-		return nil, ErrHeroProgressionContentInactive
-	}
-	mappings, err := s.Progression.HeroPieceMappings(ctx, revision)
-	if err != nil {
-		return nil, err
-	}
-	stacks, err := s.Backpack.ListStacks(ctx, actor.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	byItem := make(map[int64]int64, len(stacks))
-	for _, st := range stacks {
-		if st.Quantity > 0 {
-			byItem[st.ItemID] = st.Quantity
+	var out map[int64]int64
+	_, err := s.Runner.Run(ctx, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc tx.Scope) error {
+		revision, ok, err := s.Progression.HeroProgressionActiveTx(ctx, sc.Tx)
+		if err != nil {
+			return err
 		}
-	}
-	out := make(map[int64]int64)
-	for _, m := range mappings {
-		if qty := byItem[m.ItemID]; qty > 0 {
-			out[m.OriginTableID] = qty
+		if !ok {
+			return ErrHeroProgressionContentInactive
 		}
-	}
-	return out, nil
+		mappings, err := s.Progression.HeroPieceMappingsTx(ctx, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		stacks, err := s.Backpack.ListStacksTx(ctx, sc.Tx, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		byItem := make(map[int64]int64, len(stacks))
+		for _, st := range stacks {
+			if st.Quantity > 0 {
+				byItem[st.ItemID] = st.Quantity
+			}
+		}
+		pieces := make(map[int64]int64)
+		for _, m := range mappings {
+			if qty := byItem[m.ItemID]; qty > 0 {
+				pieces[m.OriginTableID] = qty
+			}
+		}
+		out = pieces
+		return nil
+	})
+	return out, err
 }

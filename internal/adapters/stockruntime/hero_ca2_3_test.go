@@ -55,7 +55,7 @@ func (s *ca23HeroService) OneClickJinjie(context.Context, identity.ActorContext,
 func (s *ca23HeroService) Evolve(context.Context, identity.ActorContext, int64, operation.Context) error {
 	return nil
 }
-func (s *ca23HeroService) HeroPieces(context.Context, identity.ActorContext) (map[int64]int64, error) {
+func (s *ca23HeroService) HeroPieces(context.Context, identity.ActorContext, operation.Context) (map[int64]int64, error) {
 	return map[int64]int64{}, nil
 }
 func ca23Hero(kind character.HeroKind, table, partner, star int64) character.Hero {

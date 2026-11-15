@@ -60,7 +60,14 @@ func (s Store) HeroProgressionActive(ctx context.Context) (string, bool, error) 
 	if s.Queryer == nil {
 		return "", false, errors.New("content store: nil Hero progression queryer")
 	}
-	summary, ok, err := (Store{}).ReadActiveSummary(ctx, s.Queryer)
+	return (Store{}).HeroProgressionActiveTx(ctx, s.Queryer)
+}
+
+func (Store) HeroProgressionActiveTx(ctx context.Context, q tx.Queryer) (string, bool, error) {
+	if q == nil {
+		return "", false, errors.New("content store: nil Hero progression queryer")
+	}
+	summary, ok, err := (Store{}).ReadActiveSummary(ctx, q)
 	if err != nil || !ok {
 		return "", false, err
 	}
@@ -198,11 +205,18 @@ func (Store) HeroSuperPrerequisitesTx(ctx context.Context, q tx.Queryer, revisio
 }
 
 func (s Store) HeroPieceMappings(ctx context.Context, revision string) ([]character.HeroPieceMapping, error) {
-	if s.Queryer == nil || len(revision) != 64 {
+	if s.Queryer == nil {
+		return nil, errors.New("content store: invalid Hero piece mapping lookup")
+	}
+	return (Store{}).HeroPieceMappingsTx(ctx, s.Queryer, revision)
+}
+
+func (Store) HeroPieceMappingsTx(ctx context.Context, q tx.Queryer, revision string) ([]character.HeroPieceMapping, error) {
+	if q == nil || len(revision) != 64 {
 		return nil, errors.New("content store: invalid Hero piece mapping lookup")
 	}
 	var raw string
-	if err := s.Queryer.QueryRow(ctx, contentqueries.ReadHeroPieceMappings, revision).Scan(&raw); err != nil {
+	if err := q.QueryRow(ctx, contentqueries.ReadHeroPieceMappings, revision).Scan(&raw); err != nil {
 		return nil, err
 	}
 	var out []character.HeroPieceMapping

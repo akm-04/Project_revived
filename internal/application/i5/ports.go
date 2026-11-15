@@ -97,6 +97,7 @@ type FunctionAnnouncementProvider interface {
 // It exposes canonical ordinary stacks only; Spirit-equipment ownership remains deferred.
 type BackpackReader interface {
 	ListStacks(context.Context, identity.PlayerID) ([]economy.StackState, error)
+	ListStacksTx(context.Context, tx.Queryer, identity.PlayerID) ([]economy.StackState, error)
 }
 
 type DirectoryLevelProjection struct {
