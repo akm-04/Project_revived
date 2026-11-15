@@ -45,11 +45,10 @@ func TestAdmissionWaitExtendsToRequestDeadline(t *testing.T) {
 	}
 }
 
-// C1-1: a deadline already past never shortens the profile's own acquire timeout.
-func TestAdmissionWaitNeverBelowAcquireTimeout(t *testing.T) {
+func TestAdmissionWaitExpiredRequestDoesNotRenewAcquireTimeout(t *testing.T) {
 	ctx := WithAdmissionDeadline(context.Background(), time.Now().Add(-time.Second))
-	if got := admissionWait(ctx, shortAcquireProfile()); got != 50*time.Millisecond {
-		t.Fatalf("wait=%v want 50ms", got)
+	if got := admissionWait(ctx, shortAcquireProfile()); got != 0 {
+		t.Fatalf("wait=%v want no remaining wait", got)
 	}
 }
 

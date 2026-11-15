@@ -53,7 +53,7 @@ func admissionWait(ctx context.Context, p Profile) time.Duration {
 	if !ok {
 		return p.AcquireTimeout
 	}
-	return max(time.Until(deadline), p.AcquireTimeout)
+	return max(time.Until(deadline), 0)
 }
 
 type holdsConnectionKey struct{}
