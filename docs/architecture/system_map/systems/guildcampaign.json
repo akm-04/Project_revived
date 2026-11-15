@@ -342,6 +342,8 @@
    "i9_9c_guild_campaign.json",
    "playtest4_fixes.json"
   ],
-  "unit": []
+  "unit": [
+   "audit_snapshot_test.go"
+  ]
  }
 }
