@@ -644,6 +644,24 @@
    ]
   },
   {
+   "table": "gxb_operation_receipts",
+   "scope": "player",
+   "owner": [
+    "owner_key"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 108,
+   "payload_columns": [
+    "result_payload",
+    "operation_policy_refs"
+   ],
+   "owner_where": "owner_kind = 'player'"
+  },
+  {
    "table": "guild_broadcast_recipients",
    "scope": "player",
    "owner": [

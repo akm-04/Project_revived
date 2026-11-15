@@ -2130,13 +2130,17 @@
       "owner": "kernel/idempotency",
       "write_exceptions": [],
       "data": {
-        "scope": "infrastructure",
-        "owner": [],
+        "scope": "player",
+        "owner": [
+          "owner_key"
+        ],
+        "owner_where": "owner_kind = 'player'",
         "via": null,
         "kind": "ledger",
-        "backup": false,
+        "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "lead: player receipts are the player's replay and evidence ledger (U7, 6A); guild, session, provider and operator receipts stay with their owner and are not in a player backup"
       }
     },
     "i5_resource_registry": {

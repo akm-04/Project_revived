@@ -105,6 +105,17 @@ class PlayerDataManifestTests(unittest.TestCase):
         player_b = next(entry for entry in manifest["tables"] if entry["table"] == "player_b")
         self.assertEqual(player_b["payload_columns"], ["payload"])
 
+    def test_owner_where_needs_an_owner_and_reaches_the_manifest(self):
+        catalog = fake_catalog()
+        classes = fake_classes()
+        classes["shared"]["owner_where"] = "kind = 'player'"
+        problems = manifest_tool.check(catalog, classes, manifest_tool.build_manifest(catalog, classes))
+        self.assertIn("shared: owner_where without an owner column", problems)
+        classes["player_a"]["owner_where"] = "kind = 'player'"
+        player_a = next(entry for entry in manifest_tool.build_manifest(catalog, classes)["tables"]
+                        if entry["table"] == "player_a")
+        self.assertEqual(player_a["owner_where"], "kind = 'player'")
+
 
 if __name__ == "__main__":
     unittest.main()

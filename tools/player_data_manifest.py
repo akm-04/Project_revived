@@ -5,6 +5,7 @@ The table classes live in docs/architecture/CANONICAL_TABLE_OWNERSHIP.json under
 each table's "data" object. This tool joins them with the live PostgreSQL catalog,
 computes restore order from the foreign keys and writes
 docs/data/PLAYER_DATA_MANIFEST.json (player tables only, in restore order).
+"owner_where" narrows a shared table to its player rows (receipts: owner_kind = 'player').
 
 --check exits 1 with one line per problem.
 """
@@ -194,6 +195,8 @@ def build_manifest(catalog, classes):
             "restore_order": position[table],
             "payload_columns": catalog.json_columns.get(table, []),
         })
+        if data.get("owner_where"):
+            entries[-1]["owner_where"] = data["owner_where"]
     return {"authority": AUTHORITY, "schema_version": 1, "tables": entries}
 
 
@@ -229,6 +232,8 @@ def check(catalog, classes, manifest):
         if table not in classes:
             continue
         owned = set(classes[table].get("owner") or [])
+        if classes[table].get("owner_where") and not owned:
+            problems.append(f"{table}: owner_where without an owner column")
         referenced = set(classes[table].get("references") or [])
         for column in player_columns(catalog, table):
             if column not in owned and column not in referenced:
