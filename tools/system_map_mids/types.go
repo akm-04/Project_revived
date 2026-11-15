@@ -68,15 +68,16 @@ type typedTables struct {
 }
 
 type typedWorld struct {
-	root     string
-	fset     *token.FileSet
-	packages map[string]*listedPackage
-	importer types.Importer
-	source   *sourceImporter
-	appNames []string
-	types    []*types.Named
-	typePkg  map[*types.Named]string
-	iface    map[string][]*types.Named
+	root       string
+	fset       *token.FileSet
+	packages   map[string]*listedPackage
+	importer   types.Importer
+	source     *sourceImporter
+	appNames   []string
+	types      []*types.Named
+	typePkg    map[*types.Named]string
+	iface      map[string][]*types.Named
+	traceCache map[string]*tracePackage
 }
 
 type checkedPackage struct {
@@ -157,14 +158,10 @@ func parseListed(fset *token.FileSet, listed *listedPackage) []*ast.File {
 }
 
 func newTypedWorld(root string) *typedWorld {
-	return &typedWorld{root: root, fset: token.NewFileSet(), packages: map[string]*listedPackage{}, typePkg: map[*types.Named]string{}, iface: map[string][]*types.Named{}}
+	return &typedWorld{root: root, fset: token.NewFileSet(), packages: map[string]*listedPackage{}, typePkg: map[*types.Named]string{}, iface: map[string][]*types.Named{}, traceCache: map[string]*tracePackage{}}
 }
 
-func collectTyped(root string) typedOutput {
-	world := newTypedWorld(root)
-	if err := world.load(); err != nil {
-		return typedOutput{Gaps: []string{err.Error()}}
-	}
+func collectTyped(world *typedWorld) typedOutput {
 	output := typedOutput{Edges: []typedEdge{}, Facts: []typedFact{}, RowLocks: []typedLock{}, Gaps: []string{}, Tables: map[string]typedTables{}}
 	edgeSet := map[string]bool{}
 	for _, path := range sortedApplicationPaths(world.packages) {

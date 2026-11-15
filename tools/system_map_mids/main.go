@@ -461,6 +461,7 @@ type output struct {
 	Registrations []registration `json:"registrations"`
 	Pushes        []push         `json:"pushes"`
 	Typed         typedOutput    `json:"typed"`
+	MIDClasses    []midClass     `json:"mid_classes"`
 }
 
 type walker struct {
@@ -1324,7 +1325,13 @@ func main() {
 		fmt.Print(text)
 		return
 	}
-	out.Typed = collectTyped(root)
+	typedWorld := newTypedWorld(root)
+	if err := typedWorld.load(); err != nil {
+		out.Typed = typedOutput{Gaps: []string{err.Error()}}
+	} else {
+		out.Typed = collectTyped(typedWorld)
+		out.MIDClasses = collectMIDClasses(out, typedWorld)
+	}
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", " ")
 	if err := encoder.Encode(out); err != nil {

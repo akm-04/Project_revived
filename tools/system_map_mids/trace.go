@@ -62,6 +62,13 @@ type tracer struct {
 	boundary      string
 	read          map[string]bool
 	written       map[string]bool
+
+	// C1-3a classification. class is nil for a plain trace; skipRunnerInternals
+	// keeps the class walk out of tx.Runner.Run's retry/cancel machinery, whose
+	// internals say nothing about what the route writes.
+	class               *classBuilder
+	skipRunnerInternals bool
+	currentFunction     traceTarget
 }
 
 func newTracer(w *typedWorld, mid int) *tracer {
@@ -135,6 +142,10 @@ func (t *tracer) packageFor(path string) (*tracePackage, bool) {
 	if pkg, ok := t.pkgs[path]; ok {
 		return pkg, pkg != nil
 	}
+	if pkg, ok := t.w.traceCache[path]; ok {
+		t.pkgs[path] = pkg
+		return pkg, pkg != nil
+	}
 	listed, ok := t.w.packages[path]
 	if !ok {
 		t.pkgs[path] = nil
@@ -164,6 +175,10 @@ func (t *tracer) packageFor(path string) (*tracePackage, bool) {
 			return true
 		})
 	}
+	if t.w.traceCache == nil {
+		t.w.traceCache = map[string]*tracePackage{}
+	}
+	t.w.traceCache[path] = pkg
 	t.pkgs[path] = pkg
 	return pkg, true
 }
@@ -319,6 +334,7 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 	if depth > traceDepthLimit {
 		t.truncated = true
 		t.line(depth, fmt.Sprintf("BOUND depth %d reached", traceDepthLimit))
+		t.mark(fmt.Sprintf("BOUND depth %d", traceDepthLimit))
 		return
 	}
 	if t.outsideBoundary(target.pkgPath) {
@@ -332,6 +348,7 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 	}
 	if t.nodes >= t.nodeLimit() {
 		t.truncated = true
+		t.mark(fmt.Sprintf("BOUND node limit %d", t.nodeLimit()))
 		return
 	}
 	t.visited[target.key()] = true
@@ -339,11 +356,13 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 	pkg, ok := t.packageFor(target.pkgPath)
 	if !ok {
 		t.line(depth, "UNRESOLVED "+target.display()+" ("+target.pkgPath+" type information unavailable)")
+		t.mark("UNRESOLVED " + target.display() + " (type information unavailable)")
 		return
 	}
 	decl := pkg.decls[target.key()]
 	if decl == nil {
 		t.line(depth, "UNRESOLVED "+target.display()+" (definition not found)")
+		t.mark("UNRESOLVED " + target.display() + " (definition not found)")
 		return
 	}
 	position := t.w.fset.Position(decl.Pos())
@@ -352,6 +371,9 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 		prefix += "  at " + target.callFile + ":" + strconv.Itoa(target.callLine)
 	}
 	t.line(depth, prefix)
+	previousFunction := t.currentFunction
+	t.currentFunction = target
+	defer func() { t.currentFunction = previousFunction }()
 	first := len(t.lines)
 	defer func() {
 		for _, line := range t.lines[first:] {
@@ -470,15 +492,23 @@ func (t *tracer) inspectCalls(node ast.Node, pkg *tracePackage, depth int) {
 		if !isCall {
 			return true
 		}
+		t.observeCall(call, pkg)
+		runCall := t.skipRunnerInternals && t.isRunCall(call, pkg)
 		children, unresolved := t.targets(call, pkg)
 		if unresolved != "" {
 			t.line(depth+1, "UNRESOLVED "+unresolved)
+			t.mark("UNRESOLVED " + unresolved)
 		}
 		if len(children) > traceFanoutLimit {
-			t.line(depth+1, fanoutLine(children))
+			line := fanoutLine(children)
+			t.line(depth+1, line)
+			t.mark(line)
 			return true
 		}
 		for _, child := range children {
+			if runCall && (child.pkgPath == txPackagePath || child.pkgPath == generationPackagePath) {
+				continue
+			}
 			if strings.HasPrefix(child.name, "Push") {
 				t.line(depth+1, "push: "+child.pkgPath+"."+child.name)
 			}
@@ -486,6 +516,12 @@ func (t *tracer) inspectCalls(node ast.Node, pkg *tracePackage, depth int) {
 		}
 		return true
 	})
+}
+
+func (t *tracer) mark(reason string) {
+	if t.class != nil {
+		t.class.noteMarker(reason)
+	}
 }
 
 var (
@@ -672,6 +708,17 @@ func functionSQLText(decl *ast.FuncDecl, info *types.Info) string {
 func (t *tracer) sqlAndFacts(decl *ast.FuncDecl, file *ast.File, pkg *tracePackage, depth int) {
 	text := functionSQLText(decl, pkg.info)
 	read, write, locks := traceSQLTables(text)
+	if t.class != nil {
+		position := t.w.fset.Position(decl.Pos())
+		site := t.w.relativeFilename(position.Filename) + ":" + strconv.Itoa(position.Line)
+		// The receipt store's own insert is the receipt class, not a state write.
+		if len(write) > 0 && decl.Name.Name != "PutTx" {
+			t.class.recordStateWrite(site)
+		}
+		for _, statement := range unboundedSQLStatements(text) {
+			t.class.recordUnbounded(unboundedRead{Statement: statement, File: t.w.relativeFilename(position.Filename), Line: position.Line})
+		}
+	}
 	if len(locks) == 0 && traceLock.MatchString(text) {
 		t.line(depth+1, "UNRESOLVED SQL lock target; clause passed or assembled outside this function")
 	}
