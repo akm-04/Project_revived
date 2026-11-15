@@ -700,7 +700,14 @@ func (session *httpPollSession) runSocket(ctx context.Context, socket *pollSocke
 	policy := session.server.policy
 	err := session.server.server.serve(ctx, session.server.config, policy, socket.source, func() (*connWriter, error) {
 		return newFrameWriter(ctx, session.server.config, policy.WriteTimeout, wireRT.EncodeJSONFrame,
-			func(_ context.Context, frame []byte) error { return session.enqueue(socket.tag, frame) },
+			func(_ context.Context, frame []byte) error {
+				err := session.enqueue(socket.tag, frame)
+				if err != nil {
+					// The writer stops at its first failure; end the socket with it so the client reopens.
+					socket.cancel()
+				}
+				return err
+			},
 			func() {})
 	})
 	session.removeSocket(socket, err)
