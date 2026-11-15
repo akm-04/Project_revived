@@ -194,3 +194,83 @@ func TestTraceSelectsMIDNotEqual(t *testing.T) {
 		}
 	}
 }
+
+func traceFixture(t *testing.T, source string, mid int) string {
+	t.Helper()
+	world, pkg := fixturePackage(t, source)
+	walker := newTracer(world, mid)
+	path := modulePath + "internal/application/fixture"
+	walker.pkgs[path] = pkg
+	walker.walk(traceTarget{pkgPath: path, receiver: "Dispatcher", name: "Dispatch"}, 0, true)
+	return strings.Join(walker.lines, "\n")
+}
+
+func TestFunctionValueMethodResolvedAndClosureHasNoMarker(t *testing.T) {
+	result := traceFixture(t, `package fixture
+ type Service struct{}
+ func (Service) Load() {}
+ func (Service) Refresh() {}
+ type Dispatcher struct { Service Service }
+ func (d Dispatcher) Dispatch(mid int) {
+  check := func() {}
+  check()
+  load := d.Service.Load
+  if mid == 2 { load = d.Service.Refresh }
+  load()
+ }
+ `, 1)
+	if strings.Contains(result, "UNRESOLVED") {
+		t.Fatalf("resolvable function value left UNKNOWN:\n%s", result)
+	}
+	if !strings.Contains(result, "Service.Load ") || !strings.Contains(result, "Service.Refresh ") {
+		t.Fatalf("method value target not followed:\n%s", result)
+	}
+}
+
+func TestFunctionValueOpaqueParameterStaysUnknown(t *testing.T) {
+	result := traceFixture(t, `package fixture
+ func applyBody(body func()) { body() }
+ type Dispatcher struct{}
+ func (d Dispatcher) Dispatch() { applyBody(func() {}) }
+ `, 1)
+	if !strings.Contains(result, "UNRESOLVED") {
+		t.Fatalf("opaque function parameter was treated as resolved:\n%s", result)
+	}
+}
+
+func TestFunctionValueMapLookupUsesRequestMID(t *testing.T) {
+	source := `package fixture
+ type Request struct { MID int }
+ type Service struct{}
+ func (Service) Load() {}
+ func (Service) Refresh() {}
+ type Dispatcher struct { Service Service }
+ func (d Dispatcher) Dispatch(r Request) {
+  change := map[int]func(){1: d.Service.Load, 2: d.Service.Refresh}[r.MID]
+  change()
+ }
+ `
+	first := traceFixture(t, source, 1)
+	if strings.Contains(first, "UNRESOLVED") || !strings.Contains(first, "Service.Load ") || strings.Contains(first, "Service.Refresh ") {
+		t.Fatalf("map lookup picked the wrong key:\n%s", first)
+	}
+	second := traceFixture(t, source, 2)
+	if !strings.Contains(second, "Service.Refresh ") || strings.Contains(second, "Service.Load ") {
+		t.Fatalf("map lookup picked the wrong key:\n%s", second)
+	}
+}
+
+func TestFunctionValueOpaqueMapLookupStaysUnknown(t *testing.T) {
+	result := traceFixture(t, `package fixture
+ type Service struct{}
+ func (Service) Load() {}
+ type Dispatcher struct { Service Service }
+ func (d Dispatcher) Dispatch(key int) {
+  change := map[int]func(){1: d.Service.Load}[key]
+  change()
+ }
+ `, 1)
+	if !strings.Contains(result, "UNRESOLVED") {
+		t.Fatalf("opaque map lookup was treated as resolved:\n%s", result)
+	}
+}

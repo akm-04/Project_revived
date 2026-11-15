@@ -20,6 +20,10 @@ const (
 	// An interface with more implementers than this is a registry, not one
 	// path; following all of them would bury the route the request really takes.
 	traceFanoutLimit = 3
+	// Classification follows every implementer of a small finite port (a sound
+	// over-approximation: the wired value is one of them); above this bound the
+	// interface is a registry and the FANOUT marker stands.
+	classFanoutLimit = implementerThreshold
 )
 
 type traceTarget struct {
@@ -66,9 +70,11 @@ type tracer struct {
 	// C1-3a classification. class is nil for a plain trace; skipRunnerInternals
 	// keeps the class walk out of tx.Runner.Run's retry/cancel machinery, whose
 	// internals say nothing about what the route writes.
-	class               *classBuilder
-	skipRunnerInternals bool
-	currentFunction     traceTarget
+	class                   *classBuilder
+	skipRunnerInternals     bool
+	currentFunction         traceTarget
+	currentDecl             *ast.FuncDecl
+	resolvingFunctionValues map[string]bool
 }
 
 func newTracer(w *typedWorld, mid int) *tracer {
@@ -253,6 +259,9 @@ func (t *tracer) targets(call *ast.CallExpr, pkg *tracePackage) ([]traceTarget, 
 		}
 		if value := pkg.info.Types[typed].Type; value != nil {
 			if _, isSignature := value.Underlying().(*types.Signature); isSignature {
+				if children, resolved := t.functionValueTargets(typed.Name, pkg); resolved {
+					return children, ""
+				}
 				return nil, t.expressionText(pkg, typed)
 			}
 		}
@@ -296,6 +305,197 @@ func (t *tracer) targets(call *ast.CallExpr, pkg *tracePackage) ([]traceTarget, 
 		return nil, ""
 	}
 	return nil, ""
+}
+
+// functionValueTargets follows a call through a local function-valued variable
+// (a method value such as `load := t.Service.Load`, or a closure). It resolves
+// only names declared inside the current function, never parameters or outer
+// bindings, and refuses when any assignment is not statically resolvable, so a
+// reads-nothing class cannot hide an opaque writer. A function literal needs no
+// target: the walk already inspects its body where it is written.
+func (t *tracer) functionValueTargets(name string, pkg *tracePackage) ([]traceTarget, bool) {
+	if t.currentDecl == nil || name == "" {
+		return nil, false
+	}
+	if functionParameter(t.currentDecl, name) {
+		return nil, false
+	}
+	if t.resolvingFunctionValues == nil {
+		t.resolvingFunctionValues = map[string]bool{}
+	}
+	key := fmt.Sprintf("%p/%s", t.currentDecl, name)
+	if t.resolvingFunctionValues[key] {
+		return nil, false
+	}
+	t.resolvingFunctionValues[key] = true
+	defer delete(t.resolvingFunctionValues, key)
+	declared := false
+	expressions := []ast.Expr{}
+	ast.Inspect(t.currentDecl.Body, func(node ast.Node) bool {
+		switch typed := node.(type) {
+		case *ast.AssignStmt:
+			for index, lhs := range typed.Lhs {
+				ident, ok := unwrapExpr(lhs).(*ast.Ident)
+				if !ok || ident.Name != name {
+					continue
+				}
+				if typed.Tok == token.DEFINE {
+					declared = true
+				}
+				if len(typed.Rhs) == 1 && len(typed.Lhs) > 1 {
+					expressions = append(expressions, typed.Rhs[0])
+					continue
+				}
+				if index < len(typed.Rhs) {
+					expressions = append(expressions, typed.Rhs[index])
+				}
+			}
+		case *ast.ValueSpec:
+			for index, ident := range typed.Names {
+				if ident.Name != name {
+					continue
+				}
+				declared = true
+				if len(typed.Values) == 1 && len(typed.Names) > 1 {
+					expressions = append(expressions, typed.Values[0])
+					continue
+				}
+				if index < len(typed.Values) {
+					expressions = append(expressions, typed.Values[index])
+				}
+			}
+		}
+		return true
+	})
+	if !declared {
+		return nil, false
+	}
+	children := []traceTarget{}
+	seen := map[string]bool{}
+	for _, expression := range expressions {
+		if _, isLiteral := unwrapExpr(expression).(*ast.FuncLit); isLiteral {
+			continue
+		}
+		position := t.w.fset.Position(expression.Pos())
+		targets, resolved := t.valueTargets(expression, pkg, t.w.relativeFilename(position.Filename), position.Line)
+		if !resolved {
+			return nil, false
+		}
+		for _, target := range targets {
+			if seen[target.key()] {
+				continue
+			}
+			seen[target.key()] = true
+			children = append(children, target)
+		}
+	}
+	return children, true
+}
+
+// valueTargets resolves an expression that evaluates to a function. It answers
+// false for anything it does not understand, so a caller never mistakes an
+// opaque value (a map lookup, a parameter) for a value with no effects.
+func (t *tracer) valueTargets(expr ast.Expr, pkg *tracePackage, callFile string, callLine int) ([]traceTarget, bool) {
+	if index, ok := unwrapExpr(expr).(*ast.IndexExpr); ok {
+		return t.mapLookupTargets(index, pkg, callFile, callLine)
+	}
+	switch typed := unwrapCallFun(expr).(type) {
+	case *ast.Ident:
+		if function, ok := pkg.info.Uses[typed].(*types.Func); ok {
+			return moduleTarget(function, callFile, callLine), true
+		}
+		return nil, false
+	case *ast.SelectorExpr:
+		selection := pkg.info.Selections[typed]
+		if selection == nil {
+			if function, ok := pkg.info.Uses[typed.Sel].(*types.Func); ok {
+				return moduleTarget(function, callFile, callLine), true
+			}
+			return nil, false
+		}
+		function, ok := selection.Obj().(*types.Func)
+		if !ok {
+			return nil, false
+		}
+		receiver := selection.Recv()
+		if named := derefNamed(receiver); named != nil {
+			if interfaceType, isInterface := named.Underlying().(*types.Interface); isInterface {
+				if !interfaceAllowed(named, interfaceType) {
+					return nil, false
+				}
+				name := "anonymous"
+				if named.Obj().Pkg() != nil {
+					name = named.Obj().Pkg().Path() + "." + named.Obj().Name()
+				}
+				return t.interfaceTargets(interfaceType, name, function.Name(), callFile, callLine), true
+			}
+			return moduleTarget(function, callFile, callLine), true
+		}
+		if interfaceType, isInterface := receiver.Underlying().(*types.Interface); isInterface {
+			if !interfaceAllowed(nil, interfaceType) {
+				return nil, false
+			}
+			return t.interfaceTargets(interfaceType, "", function.Name(), callFile, callLine), true
+		}
+	}
+	return nil, false
+}
+
+// mapLookupTargets resolves a function value selected from a map literal keyed
+// by the request's MID, the shape a dispatcher uses to pick one of several
+// command methods for a shared case clause.
+func (t *tracer) mapLookupTargets(index *ast.IndexExpr, pkg *tracePackage, callFile string, callLine int) ([]traceTarget, bool) {
+	literal, ok := unwrapExpr(index.X).(*ast.CompositeLit)
+	if !ok {
+		return nil, false
+	}
+	key, known := t.mapLookupKey(index.Index, pkg)
+	if !known {
+		return nil, false
+	}
+	for _, element := range literal.Elts {
+		pair, isPair := element.(*ast.KeyValueExpr)
+		if !isPair {
+			continue
+		}
+		value := pkg.info.Types[pair.Key].Value
+		if value == nil || value.Kind() != constant.Int {
+			continue
+		}
+		candidate, exact := constant.Int64Val(value)
+		if !exact || int(candidate) != key {
+			continue
+		}
+		return t.valueTargets(pair.Value, pkg, callFile, callLine)
+	}
+	return nil, false
+}
+
+// mapLookupKey reads the map key: a constant, or the request's own MID field,
+// which the walker already uses to choose the handler branch.
+func (t *tracer) mapLookupKey(expr ast.Expr, pkg *tracePackage) (int, bool) {
+	if value := pkg.info.Types[expr].Value; value != nil && value.Kind() == constant.Int {
+		key, exact := constant.Int64Val(value)
+		return int(key), exact
+	}
+	if selector, ok := unwrapExpr(expr).(*ast.SelectorExpr); ok && selector.Sel.Name == "MID" {
+		return t.mid, t.mid >= 0
+	}
+	return 0, false
+}
+
+func functionParameter(decl *ast.FuncDecl, name string) bool {
+	if decl.Type.Params == nil {
+		return false
+	}
+	for _, field := range decl.Type.Params.List {
+		for _, ident := range field.Names {
+			if ident.Name == name {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (t *tracer) expressionText(pkg *tracePackage, expr ast.Expr) string {
@@ -373,7 +573,12 @@ func (t *tracer) walk(target traceTarget, depth int, handler bool) {
 	t.line(depth, prefix)
 	previousFunction := t.currentFunction
 	t.currentFunction = target
-	defer func() { t.currentFunction = previousFunction }()
+	previousDecl := t.currentDecl
+	t.currentDecl = decl
+	defer func() {
+		t.currentFunction = previousFunction
+		t.currentDecl = previousDecl
+	}()
 	first := len(t.lines)
 	defer func() {
 		for _, line := range t.lines[first:] {
@@ -496,13 +701,16 @@ func (t *tracer) inspectCalls(node ast.Node, pkg *tracePackage, depth int) {
 		runCall := t.skipRunnerInternals && t.isRunCall(call, pkg)
 		children, unresolved := t.targets(call, pkg)
 		if unresolved != "" {
-			t.line(depth+1, "UNRESOLVED "+unresolved)
-			t.mark("UNRESOLVED " + unresolved)
+			file, line := t.callSite(call)
+			reason := fmt.Sprintf("UNRESOLVED %s at %s:%d", unresolved, file, line)
+			t.line(depth+1, reason)
+			t.mark(reason)
 		}
-		if len(children) > traceFanoutLimit {
-			line := fanoutLine(children)
-			t.line(depth+1, line)
-			t.mark(line)
+		if len(children) > traceFanoutLimit && (t.class == nil || len(children) > classFanoutLimit) {
+			file, line := t.callSite(call)
+			reason := fmt.Sprintf("%s at %s:%d", fanoutLine(children), file, line)
+			t.line(depth+1, reason)
+			t.mark(reason)
 			return true
 		}
 		for _, child := range children {
