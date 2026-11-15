@@ -101,7 +101,7 @@ func badSavedPreset(code string) httpedge.Response {
 
 var savedPresetFailureRows = []failureRow{
 	{match: appsavedpreset.ErrInvalidCommand, class: failureMalformed, detail: "saved_preset_rejected"},
-	{match: characterasset.ErrReferenceNotFound, class: failureMalformed, detail: "saved_preset_rejected"},
+	{match: characterasset.ErrReferenceNotFound, class: failureRefusal, code: unprovenRefusalCode},
 	{match: appsavedpreset.ErrAmbiguousLegacyDelete, class: failureRefusal, code: staleConflictCode},
 	{match: appsavedpreset.ErrStaleLegacyDelete, class: failureRefusal, code: staleConflictCode},
 }

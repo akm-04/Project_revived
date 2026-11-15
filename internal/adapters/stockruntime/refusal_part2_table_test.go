@@ -236,7 +236,7 @@ func TestPart2PracticeFailureRows(t *testing.T) {
 func TestPart2SavedPresetFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"invalid command", failSavedPreset(appsavedpreset.ErrInvalidCommand), http.StatusBadRequest, 0, "saved_preset_rejected"},
-		{"reference not found", failSavedPreset(characterasset.ErrReferenceNotFound), http.StatusBadRequest, 0, "saved_preset_rejected"},
+		{"reference not found", failSavedPreset(characterasset.ErrReferenceNotFound), http.StatusConflict, unprovenRefusalCode, ""},
 		{"ambiguous delete", failSavedPreset(appsavedpreset.ErrAmbiguousLegacyDelete), http.StatusConflict, staleConflictCode, ""},
 		{"stale delete", failSavedPreset(appsavedpreset.ErrStaleLegacyDelete), http.StatusConflict, staleConflictCode, ""},
 		{"receipt conflict", failSavedPreset(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},

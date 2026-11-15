@@ -86,7 +86,7 @@ func TestSavedPresetDispatcherUsesD5RefusalCodes(t *testing.T) {
 		code int64
 	}{
 		{appsavedpreset.ErrInvalidCommand, http.StatusBadRequest, 0},
-		{characterasset.ErrReferenceNotFound, http.StatusBadRequest, 0},
+		{characterasset.ErrReferenceNotFound, http.StatusConflict, unprovenRefusalCode},
 		{appsavedpreset.ErrAmbiguousLegacyDelete, http.StatusConflict, staleConflictCode},
 		{appsavedpreset.ErrStaleLegacyDelete, http.StatusConflict, staleConflictCode},
 		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusUnauthorized, sessionFailureCode},
