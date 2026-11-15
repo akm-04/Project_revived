@@ -22,13 +22,13 @@ type TopFloorPort interface {
 	Load(context.Context, identity.ActorContext, operation.Context) (app.ArenaView, error)
 	Refresh(context.Context, identity.ActorContext, operation.Context) (app.ArenaView, error)
 	SaveDefense(context.Context, identity.ActorContext, []int64, int64, operation.Context) error
-	PreFight(context.Context, identity.ActorContext, int64) error
+	PreFight(context.Context, identity.ActorContext, int64, operation.Context) error
 	Start(context.Context, identity.ActorContext, app.StartCommand, operation.Context) (app.FightView, error)
 	BuyTicket(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	ResetTimer(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	Records(context.Context, identity.ActorContext) ([]app.RecordView, error)
 	RecordReplay(context.Context, int64) (app.RecordReplay, error)
-	Report(context.Context, string) ([]byte, error)
+	Report(context.Context, string, operation.Context) ([]byte, error)
 	RecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, d.Record, error)
 	Formation(context.Context, identity.ActorContext, int64, operation.Context) (d.Display, error)
 }
@@ -177,7 +177,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p, "player_id", "report_key") || !ok {
 			return badHero("invalid_top_floor_parameter")
 		}
-		report, err := t.Service.Report(ctx, key)
+		report, err := t.Service.Report(ctx, key, op)
 		if err != nil {
 			return failTopFloor(err)
 		}
@@ -207,7 +207,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p, "enemy_id") || !ok {
 			return badHero("invalid_top_floor_parameter")
 		}
-		if err := t.Service.PreFight(ctx, a, enemy); err != nil {
+		if err := t.Service.PreFight(ctx, a, enemy, op); err != nil {
 			return failTopFloor(err)
 		}
 		return okI5(map[string]any{})

@@ -141,7 +141,7 @@ func (s Service) RecordReplay(c context.Context, recordID int64) (RecordReplay, 
 var reportRetention = cd.Retention{ID: "C5B_TOP_FLOOR_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
 
 // Report replays a fight while any retained record references it; nil is ARENA_RECORD_OUT_OF_DATE.
-func (s Service) Report(c context.Context, key string) ([]byte, error) {
+func (s Service) Report(c context.Context, key string, op operation.Context) ([]byte, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
@@ -149,17 +149,20 @@ func (s Service) Report(c context.Context, key string) ([]byte, error) {
 	if err != nil {
 		return nil, nil
 	}
-	retained, err := s.Store.RetainedTx(c, s.Fresh, id)
-	if err != nil || !retained {
-		return nil, err
-	}
-	now, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	result, _, err := s.Combat.ReplayTx(c, s.Fresh, id, reportRetention, now)
-	return result.Report, err
+	var report []byte
+	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		retained, err := s.Store.RetainedTx(c, sc.Tx, id)
+		if err != nil || !retained {
+			return err
+		}
+		result, _, err := s.Combat.ReplayTx(c, sc.Tx, id, reportRetention, sc.Operation.DecisionAt())
+		report = result.Report
+		return err
+	})
+	return report, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // RecordInfo is the opponent of one of the player's own records with its revenge state.
 func (s Service) RecordInfo(c context.Context, a identity.ActorContext, recordID int64) (RecordInfo, d.Record, error) {

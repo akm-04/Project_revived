@@ -339,13 +339,19 @@ func (service Service) SaveTaskDefense(requestContext context.Context, actor ide
 	})
 	return err
 }
-func (service Service) TaskSchedule(requestContext context.Context) ([]domain.TaskModeRotation, error) {
-	catalog, at, err := service.readContext(requestContext)
-	if err != nil {
-		return nil, err
-	}
-	if catalog.TaskModes == nil {
-		return nil, domain.ErrUnavailable
-	}
-	return catalog.TaskModes.ScheduleFrom(at)
+func (service Service) TaskSchedule(requestContext context.Context, op operation.Context) ([]domain.TaskModeRotation, error) {
+	var out []domain.TaskModeRotation
+	_, _, err := service.Timed.Run(requestContext, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		_, catalog, err := service.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		if catalog.TaskModes == nil {
+			return domain.ErrUnavailable
+		}
+		var readErr error
+		out, readErr = catalog.TaskModes.ScheduleFrom(sc.Operation.DecisionAt())
+		return readErr
+	})
+	return out, err
 }

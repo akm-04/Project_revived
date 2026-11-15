@@ -38,7 +38,9 @@ func (f *topFloorFake) SaveDefense(_ context.Context, _ identity.ActorContext, h
 	f.defense, f.pet = heroes, pet
 	return nil
 }
-func (f *topFloorFake) PreFight(context.Context, identity.ActorContext, int64) error { return nil }
+func (f *topFloorFake) PreFight(context.Context, identity.ActorContext, int64, operation.Context) error {
+	return nil
+}
 func (f *topFloorFake) Start(_ context.Context, _ identity.ActorContext, r app.StartCommand, _ operation.Context) (app.FightView, error) {
 	f.calls++
 	f.start = r
@@ -56,7 +58,9 @@ func (f *topFloorFake) Records(context.Context, identity.ActorContext) ([]app.Re
 func (f *topFloorFake) RecordReplay(context.Context, int64) (app.RecordReplay, error) {
 	return app.RecordReplay{Record: d.Record{ID: 4, Owner: 100001, Attack: true, Win: true, At: time.Unix(1700000000, 0)}, Self: d.Display{Name: "me", Level: 3, AvatarID: 4, FrameID: 5}, Opponent: d.Display{Name: "them", Level: 6, AvatarID: 7, FrameID: 8}, Report: f.report}, nil
 }
-func (f *topFloorFake) Report(context.Context, string) ([]byte, error) { return f.report, nil }
+func (f *topFloorFake) Report(context.Context, string, operation.Context) ([]byte, error) {
+	return f.report, nil
+}
 func (f *topFloorFake) RecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, d.Record, error) {
 	return app.RecordInfo{Opponent: topFloorRobot, AvengeType: 3}, d.Record{}, nil
 }

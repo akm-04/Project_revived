@@ -24,9 +24,9 @@ type TopFloorTaskPort interface {
 	StartTask(context.Context, identity.ActorContext, app.TaskStartCommand, operation.Context) (app.FightView, error)
 	PurchaseTask(context.Context, identity.ActorContext, operation.Context, bool) (domain.Player, error)
 	TaskFormation(context.Context, identity.ActorContext, int64) (domain.Display, error)
-	TaskReport(context.Context, identity.ActorContext, string) ([]byte, error)
+	TaskReport(context.Context, identity.ActorContext, string, operation.Context) ([]byte, error)
 	TaskRecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, error)
-	TaskSchedule(context.Context) ([]domain.TaskModeRotation, error)
+	TaskSchedule(context.Context, operation.Context) ([]domain.TaskModeRotation, error)
 }
 type TopFloorTaskDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
@@ -150,7 +150,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		if !valid || !playerOK || player != 0 && player != int64(actor.PlayerID) || !onlyStockGameplayParams(parameters, "player_id", "report_key") {
 			return bad
 		}
-		report, err := dispatcher.Service.TaskReport(requestContext, actor, key)
+		report, err := dispatcher.Service.TaskReport(requestContext, actor, key, request.Envelope.Operation)
 		if err != nil {
 			return failTopFloorTask(err)
 		}
@@ -169,7 +169,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		if !onlyStockGameplayParams(parameters) {
 			return bad
 		}
-		schedule, err := dispatcher.Service.TaskSchedule(requestContext)
+		schedule, err := dispatcher.Service.TaskSchedule(requestContext, request.Envelope.Operation)
 		if err != nil {
 			return failTopFloorTask(err)
 		}

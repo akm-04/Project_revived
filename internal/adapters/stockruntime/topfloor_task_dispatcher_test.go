@@ -28,7 +28,7 @@ func (fixture *taskWireFixture) StartTask(_ context.Context, _ identity.ActorCon
 	fixture.command = command
 	return application.FightView{Report: []byte(`{"star":1}`), Win: true, Enemy: topFloorRobot}, nil
 }
-func (*taskWireFixture) TaskSchedule(context.Context) ([]domain.TaskModeRotation, error) {
+func (*taskWireFixture) TaskSchedule(context.Context, operation.Context) ([]domain.TaskModeRotation, error) {
 	return []domain.TaskModeRotation{{Mode: 3, StartsAt: time.Unix(100, 0), EndsAt: time.Unix(200, 0)}, {Mode: 4, StartsAt: time.Unix(200, 0), EndsAt: time.Unix(300, 0)}}, nil
 }
 func TestI97ATaskWireAndValidation(t *testing.T) {

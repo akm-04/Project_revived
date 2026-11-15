@@ -251,26 +251,27 @@ func (service Service) TaskRecordInfo(requestContext context.Context, actor iden
 	}
 	return info, nil
 }
-func (service Service) TaskReport(requestContext context.Context, actor identity.ActorContext, key string) ([]byte, error) {
+func (service Service) TaskReport(requestContext context.Context, actor identity.ActorContext, key string, op operation.Context) ([]byte, error) {
 	id, err := ids.ParseUUID(key)
 	if err != nil {
 		return nil, domain.ErrInvalid
 	}
-	records, err := service.Store.TaskRecordsTx(requestContext, service.Fresh, actor.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	retained := false
-	for _, record := range records {
-		retained = retained || record.Record.AttemptID == id
-	}
-	if !retained {
-		return nil, domain.ErrRefused
-	}
-	now, err := service.Timed.Binder.Time.Now(requestContext)
-	if err != nil {
-		return nil, err
-	}
-	result, _, err := service.Combat.ReplayTx(requestContext, service.Fresh, id, reportRetention, now)
-	return result.Report, err
+	var report []byte
+	_, _, err = service.Timed.Run(requestContext, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		records, err := service.Store.TaskRecordsTx(c, sc.Tx, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		retained := false
+		for _, record := range records {
+			retained = retained || record.Record.AttemptID == id
+		}
+		if !retained {
+			return domain.ErrRefused
+		}
+		result, _, err := service.Combat.ReplayTx(c, sc.Tx, id, reportRetention, sc.Operation.DecisionAt())
+		report = result.Report
+		return err
+	})
+	return report, err
 }

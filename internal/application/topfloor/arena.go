@@ -553,34 +553,37 @@ func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes 
 // PreFight checks that the named opponent is currently admissible without
 // consuming anything; revenge sends no enemy and is checked at START. A moved
 // challenger or offered target rank is refused before the formation opens.
-func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int64) error {
+func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int64, op operation.Context) error {
 	if !s.ready() {
 		return d.ErrUnavailable
 	}
-	p, found, err := s.Store.ReadPlayerTx(c, s.Fresh, a.PlayerID, false)
-	if err != nil || !found {
-		return errors.Join(err, d.ErrRefused)
-	}
-	if enemy == 0 {
-		return nil
-	}
-	occupant, ok := offered(p, enemy)
-	if !ok {
-		return d.ErrRefused
-	}
-	rank, ok, err := s.Store.RankOfTx(c, s.Fresh, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
-	if err != nil || !ok {
-		return errors.Join(err, d.ErrRefused)
-	}
-	targetRank, ok, err := s.Store.RankOfTx(c, s.Fresh, a.LogicalServerID, occupant)
-	if err != nil || !ok {
-		return errors.Join(err, d.ErrRefused)
-	}
-	snapshot, found, err := s.Store.ReadOfferSnapshotTx(c, s.Fresh, a.PlayerID, d.OfferScopeNormal, false)
-	if err != nil {
-		return err
-	}
-	return d.MatchOfferSnapshot(snapshot, found, 0, rank, occupant, targetRank)
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		p, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, false)
+		if err != nil || !found {
+			return errors.Join(err, d.ErrRefused)
+		}
+		if enemy == 0 {
+			return nil
+		}
+		occupant, ok := offered(p, enemy)
+		if !ok {
+			return d.ErrRefused
+		}
+		rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
+		if err != nil || !ok {
+			return errors.Join(err, d.ErrRefused)
+		}
+		targetRank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, occupant)
+		if err != nil || !ok {
+			return errors.Join(err, d.ErrRefused)
+		}
+		snapshot, found, err := s.Store.ReadOfferSnapshotTx(c, sc.Tx, a.PlayerID, d.OfferScopeNormal, false)
+		if err != nil {
+			return err
+		}
+		return d.MatchOfferSnapshot(snapshot, found, 0, rank, occupant, targetRank)
+	})
+	return err
 }
 
 func offered(p d.Player, table int64) (d.Occupant, bool) {
