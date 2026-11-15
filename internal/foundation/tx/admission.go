@@ -3,16 +3,30 @@ package tx
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 )
 
 var ErrAdmissionClosed = errors.New("transaction admission closed")
 
+// admissionWaitSamples bounds the rolling queue-to-commit measurement (C1-5).
+const admissionWaitSamples = 256
+
 type Admission interface {
 	Acquire(context.Context) (func(), error)
+	// Observe records one transaction's measured queue-to-commit duration for ExpectedWait.
+	Observe(time.Duration)
 }
 
-type Semaphore struct{ slots chan struct{} }
+type Semaphore struct {
+	slots chan struct{}
+	// The edge reads ExpectedWait under mu; the ring keeps the last admissionWaitSamples transactions.
+	mu      sync.Mutex
+	samples [admissionWaitSamples]time.Duration
+	next    int
+	count   int
+	total   time.Duration
+}
 
 func NewSemaphore(max int) *Semaphore {
 	if max < 1 {
@@ -35,9 +49,38 @@ func (s *Semaphore) Acquire(ctx context.Context) (func(), error) {
 	}
 }
 
+// Observe records one measured queue-to-commit duration. Only the most recent samples count.
+func (s *Semaphore) Observe(duration time.Duration) {
+	if duration < 0 {
+		duration = 0
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.count == len(s.samples) {
+		s.total -= s.samples[s.next]
+	} else {
+		s.count++
+	}
+	s.samples[s.next] = duration
+	s.total += duration
+	s.next = (s.next + 1) % len(s.samples)
+}
+
+// ExpectedWait is the rolling mean of measured queue-to-commit durations, or zero before the first sample. It is
+// the one read method the HTTP edge consults before admitting a request (C1-5).
+func (s *Semaphore) ExpectedWait() time.Duration {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.count == 0 {
+		return 0
+	}
+	return s.total / time.Duration(s.count)
+}
+
 type NoopAdmission struct{}
 
 func (NoopAdmission) Acquire(context.Context) (func(), error) { return func() {}, nil }
+func (NoopAdmission) Observe(time.Duration)                   {}
 
 type admissionDeadlineKey struct{}
 

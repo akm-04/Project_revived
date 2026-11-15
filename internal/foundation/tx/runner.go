@@ -135,6 +135,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 		// shortcut: a commit proven only by reconciliation keeps no changes, so its response omits F17 keys; the client
 		// reloads on its next MID1.
 		staged.Keep()
+		r.Admission.Observe(time.Since(started))
 		r.event(op, profile, attempt, "commit", DefiniteCommit, nil, time.Since(started))
 		return Result{Outcome: DefiniteCommit, Attempts: attempt}, actionReturn, nil
 	}

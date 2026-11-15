@@ -52,6 +52,55 @@ func TestAdmissionWaitExpiredRequestDoesNotRenewAcquireTimeout(t *testing.T) {
 	}
 }
 
+// C1-5: the edge reads one rolling measurement of queue-to-commit time; it is zero before the first sample.
+func TestSemaphoreExpectedWaitIsRollingMeanOfQueueToCommit(t *testing.T) {
+	s := NewSemaphore(16)
+	if got := s.ExpectedWait(); got != 0 {
+		t.Fatalf("expected wait without samples=%v want 0", got)
+	}
+	s.Observe(100 * time.Millisecond)
+	s.Observe(200 * time.Millisecond)
+	s.Observe(400 * time.Millisecond)
+	if got := s.ExpectedWait(); got/time.Millisecond != 233 {
+		t.Fatalf("rolling mean=%v want 233ms", got)
+	}
+	// Bounded memory: the ring keeps only the newest admissionWaitSamples durations.
+	for i := 0; i < 10*admissionWaitSamples; i++ {
+		s.Observe(time.Second)
+	}
+	if got := s.ExpectedWait(); got != time.Second {
+		t.Fatalf("mean after old samples aged out=%v want 1s", got)
+	}
+}
+
+type recordingAdmission struct{ observed []time.Duration }
+
+func (r *recordingAdmission) Acquire(context.Context) (func(), error) { return func() {}, nil }
+func (r *recordingAdmission) Observe(d time.Duration)                 { r.observed = append(r.observed, d) }
+
+// C1-5: the runner records queue-to-commit only when the transaction commits; a rolled-back attempt is not a wait
+// estimate sample.
+func TestRunnerRecordsQueueToCommitOnCommitOnly(t *testing.T) {
+	admission := &recordingAdmission{}
+	run := Runner{DB: &fakeDB{txs: []*fakeTx{{}}}, Admission: admission}
+	if _, err := run.Run(context.Background(), opctx(), profile(), Options{Isolation: Serializable}, RetryPolicy{MaxAttempts: 1}, nil, noopBody); err != nil {
+		t.Fatal(err)
+	}
+	if len(admission.observed) != 1 || admission.observed[0] <= 0 {
+		t.Fatalf("observed=%v want one positive queue-to-commit sample", admission.observed)
+	}
+	failing := &recordingAdmission{}
+	failingRun := Runner{DB: &fakeDB{txs: []*fakeTx{{}}}, Admission: failing}
+	if _, err := failingRun.Run(context.Background(), opctx(), profile(), Options{Isolation: Serializable}, RetryPolicy{MaxAttempts: 1}, nil, func(context.Context, Scope) error {
+		return stateErr("40001")
+	}); err == nil {
+		t.Fatal("expected abort")
+	}
+	if len(failing.observed) != 0 {
+		t.Fatalf("observed=%v want no sample for a rolled-back attempt", failing.observed)
+	}
+}
+
 // C1-2: the body's context says it already holds a connection; the outer one does not.
 func TestBodyContextIsMarkedAsHoldingAConnection(t *testing.T) {
 	var inside bool
