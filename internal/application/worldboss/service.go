@@ -153,35 +153,39 @@ func (s Mode) open(c context.Context, sc gen.TimedScope, a identity.ActorContext
 
 // Info answers 624 from canonical state; the lazy counter reset is projected
 // without a write.
-func (s Mode) Info(c context.Context, a identity.ActorContext, _ operation.Context) (map[string]any, error) {
+func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		occurrence = d.Occurrence{LogicalServerID: int64(a.LogicalServerID), Generation: 1, CurrentBoss: d.FirstBossID}
-	}
-	player, found, err := s.Store.ReadPlayerTx(c, s.Fresh, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		player = d.Player{PlayerID: int64(a.PlayerID)}
-	}
-	player.Reset(modes.Day(at))
-	rank, hurt, err := s.rankAndHurt(c, s.Fresh, occurrence.Board(), a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	return infoBody(occurrence, player, rank, hurt), nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		occurrence, found, err := s.Store.ReadOccurrenceTx(c, sc.Tx, int64(a.LogicalServerID))
+		if err != nil {
+			return err
+		}
+		if !found {
+			occurrence = d.Occurrence{LogicalServerID: int64(a.LogicalServerID), Generation: 1, CurrentBoss: d.FirstBossID}
+		}
+		player, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			player = d.Player{PlayerID: int64(a.PlayerID)}
+		}
+		player.Reset(modes.Day(at))
+		rank, hurt, err := s.rankAndHurt(c, sc.Tx, occurrence.Board(), a.PlayerID)
+		if err != nil {
+			return err
+		}
+		out = infoBody(occurrence, player, rank, hurt)
+		return nil
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 func infoBody(occurrence d.Occurrence, player d.Player, rank, hurt int64) map[string]any {
 	return map[string]any{
