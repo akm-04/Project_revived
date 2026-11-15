@@ -24,10 +24,10 @@ type OneOnOnePort interface {
 	Match(context.Context, identity.ActorContext, operation.Context) ([]d.Entry, error)
 	EnemyTeam(context.Context, identity.PlayerID) ([]d.TeamView, error)
 	Start(context.Context, identity.ActorContext, app.StartCommand, operation.Context) (d.MatchView, error)
-	Report(context.Context, string) ([]byte, error)
-	DefenseReportKeys(context.Context, identity.ActorContext) ([]string, error)
+	Report(context.Context, string, operation.Context) ([]byte, error)
+	DefenseReportKeys(context.Context, identity.ActorContext, operation.Context) ([]string, error)
 	BuyTimes(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
-	Records(context.Context, identity.ActorContext) ([]d.RecordView, error)
+	Records(context.Context, identity.ActorContext, operation.Context) ([]d.RecordView, error)
 	ResetTime(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	RecordDetail(context.Context, int64) (d.RecordDetail, error)
 }
@@ -125,13 +125,13 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return badHero("invalid_one_on_one_parameter")
 		}
 		if !keyed {
-			keys, err := o.Service.DefenseReportKeys(ctx, a)
+			keys, err := o.Service.DefenseReportKeys(ctx, a, op)
 			if err != nil {
 				return failOneOnOne(err)
 			}
 			return httpedge.Response{HTTPStatus: http.StatusOK, JSON: projection.ReportKeys(keys)}
 		}
-		report, err := o.Service.Report(ctx, key)
+		report, err := o.Service.Report(ctx, key, op)
 		if err != nil {
 			return failOneOnOne(err)
 		}
@@ -153,7 +153,7 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p) {
 			return badHero("invalid_one_on_one_parameter")
 		}
-		records, err := o.Service.Records(ctx, a)
+		records, err := o.Service.Records(ctx, a, op)
 		if err != nil {
 			return failOneOnOne(err)
 		}

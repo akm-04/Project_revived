@@ -57,16 +57,16 @@ func (f *oneOnOneFake) Start(_ context.Context, _ identity.ActorContext, r app.S
 	}
 	return d.MatchView{Arena: f.arena(), ReportKeys: []string{"a", "", "c"}, Wins: []int64{1, 1}, Win: true}, nil
 }
-func (f *oneOnOneFake) Report(context.Context, string) ([]byte, error) {
+func (f *oneOnOneFake) Report(context.Context, string, operation.Context) ([]byte, error) {
 	return []byte(`{"star":1}`), nil
 }
-func (f *oneOnOneFake) DefenseReportKeys(context.Context, identity.ActorContext) ([]string, error) {
+func (f *oneOnOneFake) DefenseReportKeys(context.Context, identity.ActorContext, operation.Context) ([]string, error) {
 	return []string{"k1"}, nil
 }
 func (f *oneOnOneFake) BuyTimes(context.Context, identity.ActorContext, operation.Context) (d.Player, error) {
 	return d.Player{TriesLeft: 10, Purchases: 2}, nil
 }
-func (f *oneOnOneFake) Records(context.Context, identity.ActorContext) ([]d.RecordView, error) {
+func (f *oneOnOneFake) Records(context.Context, identity.ActorContext, operation.Context) ([]d.RecordView, error) {
 	return []d.RecordView{{Record: d.Record{ID: 5, Win: true, Mode: d.ModePromotion, At: time.Unix(1700000000, 0)}, Attacker: d.Face{Player: 100001}, Defender: d.Face{Player: 200007}}}, nil
 }
 func (f *oneOnOneFake) ResetTime(context.Context, identity.ActorContext, operation.Context) (d.Player, error) {
