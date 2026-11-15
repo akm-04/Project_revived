@@ -55,7 +55,7 @@ func (s Mode) stateBody(c context.Context, q tx.Queryer, a identity.ActorContext
 	body["progress"] = progress
 	base["room_id"], base["chapter_id"], base["dispatch_limit"] = view.room.ID, state.ChapterID, state.DispatchLimit
 	members := view.room.Members()
-	online, err := s.Presence.OnlineAt(c, members, view.at)
+	online, err := s.Presence.OnlineAtTx(c, q, members, view.at)
 	if err != nil {
 		return nil, err
 	}

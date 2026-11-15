@@ -90,6 +90,7 @@ type Combat interface {
 // database instant of the read.
 type Presence interface {
 	OnlineAt(context.Context, []identity.PlayerID, time.Time) (map[identity.PlayerID]bool, error)
+	OnlineAtTx(context.Context, tx.Queryer, []identity.PlayerID, time.Time) (map[identity.PlayerID]bool, error)
 }
 
 // Values settles rewards through I5; the mode never writes a stack itself.

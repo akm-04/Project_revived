@@ -307,6 +307,12 @@ func (s Store) OnlineAt(ctx context.Context, playerIDs []identity.PlayerID, obse
 	return states, nil
 }
 
+// OnlineAtTx is the same read through a caller transaction, so a request that
+// already holds a snapshot never opens a second connection.
+func (s Store) OnlineAtTx(ctx context.Context, q tx.Queryer, playerIDs []identity.PlayerID, observedAt time.Time) (map[identity.PlayerID]bool, error) {
+	return (Store{Queryer: q}).OnlineAt(ctx, playerIDs, observedAt)
+}
+
 const expiredPlayersSQL = `
 SELECT COALESCE(jsonb_agg(player_id ORDER BY player_id),'[]'::jsonb)::text
 FROM (

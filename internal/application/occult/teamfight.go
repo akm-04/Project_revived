@@ -630,21 +630,26 @@ func (s Mode) TeamReport(c context.Context, a identity.ActorContext, reportKey s
 	if reportKey == "" {
 		return nil, d.ErrInvalid
 	}
-	loaded, err := s.read(c, a, op)
-	if err != nil {
-		return nil, err
-	}
-	stored, err := s.storedReport(c, s.Fresh, a, reportKey, loaded.at)
-	if err != nil {
-		return nil, err
-	}
-	body, err := s.body(c, a, loaded)
-	if err != nil {
-		return nil, err
-	}
-	body["battle_report"] = []map[string]any{{"report": stored["battle_report"]}}
-	body["award_info"] = stored["award_info"]
-	return body, nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		loaded, err := s.readTx(c, sc.Tx, a, sc.Operation.Operation(), sc.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		stored, err := s.storedReport(c, sc.Tx, a, reportKey, loaded.at)
+		if err != nil {
+			return err
+		}
+		body, err := s.stateBody(c, sc.Tx, a, loaded.catalog, loaded.scores, loaded.tickets, loaded.view)
+		if err != nil {
+			return err
+		}
+		body["battle_report"] = []map[string]any{{"report": stored["battle_report"]}}
+		body["award_info"] = stored["award_info"]
+		out = body
+		return nil
+	})
+	return out, err
 }
 
 func teamLocator(roomID int64, server identity.LogicalServerID) cd.Locator {

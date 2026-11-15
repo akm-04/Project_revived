@@ -48,31 +48,35 @@ type snapshot struct {
 
 // read gates function 67 and loads the player's held room without writing.
 func (s Mode) read(c context.Context, a identity.ActorContext, op operation.Context) (snapshot, error) {
-	op, err := s.pin(c, op)
-	if err != nil {
-		return snapshot{}, err
-	}
 	at, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
 		return snapshot{}, err
 	}
-	catalog, err := s.readCatalog(c, s.Fresh, op)
+	return s.readTx(c, s.Fresh, a, op, at)
+}
+
+func (s Mode) readTx(c context.Context, q tx.Queryer, a identity.ActorContext, op operation.Context, at time.Time) (snapshot, error) {
+	bound, err := s.pinTx(c, q, op)
 	if err != nil {
 		return snapshot{}, err
 	}
-	if err = s.admit(c, s.Fresh, a, catalog, at); err != nil {
-		return snapshot{}, err
-	}
-	scores, err := s.Store.ReadScoresTx(c, s.Fresh, a.PlayerID)
+	catalog, err := s.readCatalog(c, q, bound)
 	if err != nil {
 		return snapshot{}, err
 	}
-	tickets, err := s.Tickets.OccultTicketsTx(c, s.Fresh, a.PlayerID)
+	if err = s.admit(c, q, a, catalog, at); err != nil {
+		return snapshot{}, err
+	}
+	scores, err := s.Store.ReadScoresTx(c, q, a.PlayerID)
+	if err != nil {
+		return snapshot{}, err
+	}
+	tickets, err := s.Tickets.OccultTicketsTx(c, q, a.PlayerID)
 	if err != nil {
 		return snapshot{}, err
 	}
 	loaded := snapshot{catalog: catalog, scores: scores, tickets: tickets, at: at}
-	room, found, err := s.RoomStore.ReadPlayerRoomTx(c, s.Fresh, a.PlayerID, RoomFamily, RoomSlot)
+	room, found, err := s.RoomStore.ReadPlayerRoomTx(c, q, a.PlayerID, RoomFamily, RoomSlot)
 	if err != nil || !found {
 		return loaded, err
 	}
@@ -102,31 +106,38 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Cont
 
 // CampaignInfo answers 2364 with the monsters of every stage of a reachable campaign.
 func (s Mode) CampaignInfo(c context.Context, a identity.ActorContext, campaignID int64, op operation.Context) (map[string]any, error) {
-	loaded, err := s.read(c, a, op)
-	if err != nil {
-		return nil, err
-	}
-	campaign, err := reachableCampaign(loaded.view, campaignID)
-	if err != nil {
-		return nil, err
-	}
-	stages := loaded.view.state.StagesOf(campaign.ID)
-	monsterInfos := make([][]map[string]any, 0, len(campaign.FightIDs))
-	for index, fightID := range campaign.FightIDs {
-		waves, err := s.Combat.MonsterWaves(fightID)
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		loaded, err := s.readTx(c, sc.Tx, a, sc.Operation.Operation(), sc.Operation.DecisionAt())
 		if err != nil {
-			return nil, err
+			return err
 		}
-		monsters := []map[string]any{}
-		for _, wave := range waves {
-			for _, monster := range wave {
-				monsters = append(monsters, map[string]any{"monster_id": monster.Identity, "partner_id": monster.Identity, "hp": stages[index].HP, "total_hp": stages[index].TotalHP})
+		campaign, err := reachableCampaign(loaded.view, campaignID)
+		if err != nil {
+			return err
+		}
+		stages := loaded.view.state.StagesOf(campaign.ID)
+		monsterInfos := make([][]map[string]any, 0, len(campaign.FightIDs))
+		for index, fightID := range campaign.FightIDs {
+			waves, err := s.Combat.MonsterWaves(fightID)
+			if err != nil {
+				return err
 			}
+			monsters := []map[string]any{}
+			for _, wave := range waves {
+				for _, monster := range wave {
+					monsters = append(monsters, map[string]any{"monster_id": monster.Identity, "partner_id": monster.Identity, "hp": stages[index].HP, "total_hp": stages[index].TotalHP})
+				}
+			}
+			monsterInfos = append(monsterInfos, monsters)
 		}
-		monsterInfos = append(monsterInfos, monsters)
-	}
-	return map[string]any{"monster_infos": monsterInfos}, nil
+		out = map[string]any{"monster_infos": monsterInfos}
+		return nil
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // MemberStat answers 2365 for a seated member: dispatched heroes with their
 // remaining status and the rest of the roster.
