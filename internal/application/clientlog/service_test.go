@@ -206,3 +206,28 @@ func TestJournalRowsRedactAndClassify(t *testing.T) {
 		t.Fatalf("ok=%+v", ok)
 	}
 }
+
+// A-048: uploads that resolve to no grant share one bucket, so a poster without
+// a capability cannot store without bound.
+func TestIngestRateLimitsUnattributedUploads(t *testing.T) {
+	service, store, _ := newService()
+	payload := deflate(t, `{}`)
+	for index := range domain.UploadsPerMinute {
+		request := UploadRequest{Capability: strings.Repeat("A", 42) + string(rune('a'+index%26)), Kind: domain.KindErrorLog, Payload: payload}
+		if status := service.Ingest(context.Background(), request); status != http.StatusOK {
+			t.Fatalf("upload %d status=%d", index, status)
+		}
+	}
+	for _, capability := range []string{"", strings.Repeat("B", 43)} {
+		if status := service.Ingest(context.Background(), UploadRequest{Capability: capability, Kind: domain.KindErrorLog, Payload: payload}); status != http.StatusTooManyRequests {
+			t.Fatalf("capability %q over limit status=%d", capability, status)
+		}
+	}
+	if len(store.uploads) != domain.UploadsPerMinute {
+		t.Fatalf("stored=%d", len(store.uploads))
+	}
+	attributed := UploadRequest{Capability: issue(t, service), Kind: domain.KindErrorLog, Payload: payload}
+	if status := service.Ingest(context.Background(), attributed); status != http.StatusOK {
+		t.Fatalf("attributed upload shares the unattributed bucket: status=%d", status)
+	}
+}
