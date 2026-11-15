@@ -1584,7 +1584,7 @@
   },
   {
    "callees": 15,
-   "callers": 19,
+   "callers": 18,
    "mids": 5,
    "name": "workplace",
    "path": "internal/application/workplace",
@@ -1592,7 +1592,7 @@
    "tables": 1
   },
   {
-   "callees": 11,
+   "callees": 10,
    "callers": 1,
    "mids": 5,
    "name": "worldboss",

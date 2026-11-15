@@ -50,7 +50,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-    "line": 20
+    "line": 33
    },
    "mid": 229,
    "name": "ACTIVITIES"
@@ -58,7 +58,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-    "line": 20
+    "line": 33
    },
    "mid": 234,
    "name": "LOAD_SINGLE_ACTIVITY"
@@ -74,7 +74,8 @@
  },
  "tests": {
   "integration": [
-   "logincapacity"
+   "logincapacity",
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [

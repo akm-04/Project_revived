@@ -28,7 +28,7 @@ func (f *arenaFake) Info(context.Context, identity.ActorContext, operation.Conte
 	f.calls++
 	return d.InfoView{Player: arenaPlayer, Season: d.Season{Number: 33, OpensAt: time.Unix(1700000000, 0)}, Rank: 7, Total: 20, KingCoin: 640, At: time.Unix(1700000000+2*86400, 0)}, nil
 }
-func (f *arenaFake) Partners(context.Context, identity.ActorContext) (d.PartnersView, error) {
+func (f *arenaFake) Partners(context.Context, identity.ActorContext, operation.Context) (d.PartnersView, error) {
 	return d.PartnersView{Player: arenaPlayer, Usage: []d.Usage{{TableID: 11001, Fights: 2, Wins: 1, Kills: 3, Harms: "1200.500000"}}}, nil
 }
 func (f *arenaFake) ModifyDefence(_ context.Context, _ identity.ActorContext, heroes []int64, pet int64, _ operation.Context) (d.Player, error) {
@@ -56,10 +56,10 @@ func (f *arenaFake) Fight(_ context.Context, _ identity.ActorContext, r app.Figh
 func (f *arenaFake) Stop(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (d.Player, error) {
 	return d.Player{Star: 11}, nil
 }
-func (f *arenaFake) Records(context.Context, identity.ActorContext) ([]d.RecordView, error) {
+func (f *arenaFake) Records(context.Context, identity.ActorContext, operation.Context) ([]d.RecordView, error) {
 	return []d.RecordView{{Record: d.Record{Win: true, At: time.Unix(1700000000, 0)}, Opponent: d.Face{Player: 200007, Name: "rival"}, ReportKey: "k1"}}, nil
 }
-func (f *arenaFake) Report(_ context.Context, key string) ([]byte, bool, error) {
+func (f *arenaFake) Report(_ context.Context, key string, _ operation.Context) ([]byte, bool, error) {
 	return []byte(`{"star":1}`), key == "k1", nil
 }
 func (f *arenaFake) GiveUpMission(context.Context, identity.ActorContext, int64, operation.Context) (d.MissionsView, error) {

@@ -37,6 +37,10 @@
  "locks": {
   "profiles": [
    {
+    "lock_timeout_ms": 2000,
+    "name": "charge-read"
+   },
+   {
     "lock_timeout_ms": 5000,
     "name": "charge-tap"
    }

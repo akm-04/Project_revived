@@ -21,14 +21,14 @@ var ArenaMIDs = []uint16{666, 768, 769, 770, 771, 772, 773, 774, 775, 776, 777, 
 
 type ArenaPort interface {
 	Info(context.Context, identity.ActorContext, operation.Context) (d.InfoView, error)
-	Partners(context.Context, identity.ActorContext) (d.PartnersView, error)
+	Partners(context.Context, identity.ActorContext, operation.Context) (d.PartnersView, error)
 	ModifyDefence(context.Context, identity.ActorContext, []int64, int64, operation.Context) (d.Player, error)
 	Match(context.Context, identity.ActorContext, bool, operation.Context) (d.EnemyView, error)
 	Start(context.Context, identity.ActorContext, operation.Context) error
 	Fight(context.Context, identity.ActorContext, app.FightCommand, operation.Context) (d.FightView, error)
 	Stop(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (d.Player, error)
-	Records(context.Context, identity.ActorContext) ([]d.RecordView, error)
-	Report(context.Context, string) ([]byte, bool, error)
+	Records(context.Context, identity.ActorContext, operation.Context) ([]d.RecordView, error)
+	Report(context.Context, string, operation.Context) ([]byte, bool, error)
 	GiveUpMission(context.Context, identity.ActorContext, int64, operation.Context) (d.MissionsView, error)
 	ClaimMission(context.Context, identity.ActorContext, int64, operation.Context) (d.MissionsView, error)
 	Exchange(context.Context, identity.ActorContext, int64, int64, operation.Context) (d.MissionsView, error)
@@ -63,7 +63,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if !onlyStockGameplayParams(p) {
 			return bad
 		}
-		v, err := o.Service.Partners(ctx, a)
+		v, err := o.Service.Partners(ctx, a, op)
 		if err != nil {
 			return failArena(err)
 		}
@@ -119,7 +119,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if !onlyStockGameplayParams(p) {
 			return bad
 		}
-		records, err := o.Service.Records(ctx, a)
+		records, err := o.Service.Records(ctx, a, op)
 		if err != nil {
 			return failArena(err)
 		}
@@ -129,7 +129,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if !onlyStockGameplayParams(p, "report_key") || !keyed {
 			return bad
 		}
-		report, found, err := o.Service.Report(ctx, key)
+		report, found, err := o.Service.Report(ctx, key, op)
 		if err != nil && !errors.Is(err, d.ErrInvalid) {
 			return failArena(err)
 		}

@@ -1077,7 +1077,7 @@
     "*DebitHeroExpItemsTx",
     "*DebitMaterialCostTx",
     "*FenceActorTx",
-    "*ListStacks",
+    "*ListStacksTx",
     "*LockEconomyOwnerTx",
     "*LockStackTx",
     "*MaxHeroColorPolicyRevision",
@@ -2114,9 +2114,6 @@
    ],
    "topfloor": [
     "*Now"
-   ],
-   "worldboss": [
-    "*Now"
    ]
   },
   "worldboss": {
@@ -2627,7 +2624,7 @@
     "*DebitHeroExpItemsTx",
     "*DebitMaterialCostTx",
     "*FenceActorTx",
-    "*ListStacks",
+    "*ListStacksTx",
     "*LockEconomyOwnerTx",
     "*LockStackTx",
     "*MaxHeroColorPolicyRevision",
@@ -2750,9 +2747,10 @@
     "*HeroNormalEvolutionTx",
     "*HeroNormalSummonTx",
     "*HeroOriginCatalogTx",
-    "*HeroPieceMappings",
+    "*HeroPieceMappingsTx",
     "*HeroPracticeThresholdsTx",
     "*HeroProgressionActive",
+    "*HeroProgressionActiveTx",
     "*HeroProgressionRevision",
     "*HeroPromotionRestorationEligibilityTx",
     "*HeroPromotionRestorationPolicyTx",
@@ -4672,7 +4670,7 @@
     "*PutTx"
    ],
    "store:presencestore": [
-    "*OnlineAt"
+    "*OnlineAtTx"
    ],
    "workplace": [
     "*Now"
@@ -5148,10 +5146,12 @@
   },
   "realtimeauth": {
    "store:guildprojection": [
-    "*CurrentGuildBinding"
+    "*CurrentGuildBinding",
+    "*CurrentGuildBindingTx"
    ],
    "store:i4store": [
     "*ResolveGameplayBearer",
+    "*ResolveGameplayBearerTx",
     "*ValidateActor"
    ]
   },
@@ -5801,9 +5801,6 @@
    ],
    "store:kernelstore": [
     "*PutTx"
-   ],
-   "workplace": [
-    "*Now"
    ]
   }
  },
