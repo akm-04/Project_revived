@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -365,10 +366,13 @@ func payloadDigestRunTool(t *testing.T, name string, arguments ...string) string
 	t.Helper()
 	output, err := exec.Command(name, arguments...).CombinedOutput()
 	if err != nil {
-		t.Fatalf("%s %v: %v %s", name, arguments, err, output)
+		t.Fatal(payloadDigestUserinfo.ReplaceAllString(fmt.Sprintf("%s %v: %v %s", name, arguments, err, output), "://[REDACTED]@"))
 	}
 	return string(output)
 }
+
+// A tool failure echoes its DSN arguments; drop URL userinfo so a password never reaches the test log (A-061).
+var payloadDigestUserinfo = regexp.MustCompile(`://[^/\s]*@`)
 
 func payloadDigestMigrationsRoot(t *testing.T) string {
 	t.Helper()
