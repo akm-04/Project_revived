@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/nativebirth"
@@ -71,6 +72,16 @@ func (f *fixture) sql(q string, args ...any) {
 	f.t.Helper()
 	if _, e := f.p.Raw().Exec(ctx, q, args...); e != nil {
 		f.t.Fatalf("fixture SQL: %v", e)
+	}
+}
+
+const foreignKeyViolation = "23503"
+
+func (f *fixture) refusedByPlayerKey(e error, constraint string) {
+	f.t.Helper()
+	var refusal *pgconn.PgError
+	if !errors.As(e, &refusal) || refusal.Code != foreignKeyViolation || refusal.ConstraintName != constraint {
+		f.t.Fatalf("want %s refusal by %s, got %v", foreignKeyViolation, constraint, e)
 	}
 }
 func (f *fixture) number(q string, args ...any) int64 {

@@ -104,7 +104,9 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 		f.sql(`DELETE FROM gameplay_contexts WHERE player_id=500001`)
 		clearBirthOwners(f, f.p.Raw(), 500001)
 		f.sql(`DELETE FROM player_directory_profiles WHERE player_id=500001`)
-		f.sql(`DELETE FROM players WHERE player_id=500001`)
+		// R8-3: players are never deleted; the key refuses it (00161).
+		_, e = f.p.Raw().Exec(ctx, `DELETE FROM players WHERE player_id=500001`)
+		f.refusedByPlayerKey(e, "player_dorm_roots_player_id_fkey")
 		// Synthetic future immutable gift revision: exact same vector/catalog, no
 		// assertion about an original server or a full future content installation.
 		rev := strings.Repeat("e", 64)
@@ -117,7 +119,7 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 		if e = os.WriteFile(path, raw, 0600); e != nil {
 			t.Fatal(e)
 		}
-		t.Log("REAL_PG nonempty restore seed: nine current claimed, old unclaimed, current unclaimed, deleted sender with synthetic equivalent issued revision, full semantic operation and sequence witness")
+		t.Log("REAL_PG nonempty restore seed: nine current claimed, old unclaimed, current unclaimed, refused sender deletion with synthetic equivalent issued revision, full semantic operation and sequence witness")
 		return
 	}
 	if mode != "compare" {
@@ -160,7 +162,7 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 	if e != nil || next.Amount != 10 || f.number(`SELECT amount FROM player_currency_balances WHERE player_id=200001 AND resource_key='friendship_coin'`) != 60 {
 		t.Fatal("rollover mixed equivalent source revisions/tombstone", next, e)
 	}
-	t.Log("REAL_PG separately restored full backup: all facts+sequence identical, claimed replay/no recredit, natural uniqueness, last-slot quota, next-day mixed issued revisions and deleted sender value")
+	t.Log("REAL_PG separately restored full backup: all facts+sequence identical, claimed replay/no recredit, natural uniqueness, last-slot quota, next-day mixed issued revisions and refused-deletion sender value")
 }
 func Test7A_UpgradeActivationCompatibility(t *testing.T) {
 	if os.Getenv("GXB_I7A7A_UPGRADE_MODE") == "" {

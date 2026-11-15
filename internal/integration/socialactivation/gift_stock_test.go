@@ -384,13 +384,11 @@ func Test7B_WindowTiesDeletedSenderAndDayOccupancy(t *testing.T) {
 	f.sql(`DELETE FROM gameplay_contexts WHERE player_id=100001`)
 	clearBirthOwners(f, f.p.Raw(), 100001)
 	f.sql(`DELETE FROM player_directory_profiles WHERE player_id=100001`)
-	f.sql(`DELETE FROM players WHERE player_id=100001`)
-	got, e = base.LoadList(ctx, b, sp.Notice, f.op())
-	if e != nil || len(got.Notices) != 0 {
-		t.Fatal("fabricated deleted sender", got, e)
-	}
+	// R8-3: players are never deleted; the key refuses it (00161).
+	_, e = f.p.Raw().Exec(ctx, `DELETE FROM players WHERE player_id=100001`)
+	f.refusedByPlayerKey(e, "player_dorm_roots_player_id_fkey")
 	if _, e = s.Claim(ctx, b, r.NoticeIDs, f.op()); e != nil {
 		t.Fatal("hidden gift lost value", e)
 	}
-	t.Log("deleted sender hidden from stock projection, exact Gift claim and receipt retained")
+	t.Log("sender deletion refused by 00161, exact Gift claim and receipt retained")
 }
