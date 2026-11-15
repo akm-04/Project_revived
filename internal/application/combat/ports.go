@@ -46,7 +46,7 @@ type WorkerOutput struct {
 }
 
 // ErrWorkerSaturated refuses an attempt before any worker ran it
-// (I8_WORKER_ADMISSION_V1); the attempt stays untouched and runnable.
+// (I8_WORKER_ADMISSION_V2); the attempt stays untouched and runnable.
 var ErrWorkerSaturated = fmt.Errorf("%w: worker admission saturated", d.ErrResolverRetryable)
 
 // Worker resolves one snapshot in an isolated process. Errors wrap

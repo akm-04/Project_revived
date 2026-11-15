@@ -66,6 +66,8 @@ func TestR4Part4FailureClassTable(t *testing.T) {
 		{name: "lock timeout", got: failureFromRows(nil, sqlStateString("55P03")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
 		{name: "statement timeout", got: failureFromRows(nil, sqlStateString("57014")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
 		{name: "idle transaction timeout", got: failureFromRows(nil, sqlStateString("25P03")), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
+		// C1-6: a START past the worker admission bound is the same coded transient refusal.
+		{name: "combat worker saturated", got: failureFromRows(nil, appcombat.ErrWorkerSaturated), wantStatus: http.StatusServiceUnavailable, wantCode: serverBusyCode},
 		{name: "unique violation", got: failureFromRows(nil, sqlStateString("23505")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
 		{name: "defect", got: failureFromRows(nil, errors.New("plain failure")), wantStatus: http.StatusInternalServerError, wantCode: unprovenRefusalCode},
 		// Item 11: a ranking board that cannot be read is a defect, not a transient fault.

@@ -4,11 +4,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
 	"gxb.local/backend/v2/internal/application/dailyconsume"
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/combatkeys"
@@ -108,12 +112,48 @@ func canonicalCombat(p *postgres.Pool, r tx.Runner, content contentstore.Store, 
 	stats := canonicalPublicStats(p, content, o)
 	conquer := appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: characterstore.Store{Queryer: p}, Kinds: content, Players: i4store.PlayerRootLocker{}}
 	limits := combatworker.Limits{Binary: binary, Deadline: 120 * time.Second, AddressSpace: 4 << 30, CPUSeconds: 180, OpenFiles: 64, MaxOutputBytes: 16 << 20, ExpectedCorpus: corpus.ID()}
-	// I8_WORKER_ADMISSION_V1 (private policy): a warm worker peaks near 2.7 GiB,
-	// so three live workers bound memory; a busy pool refuses after five seconds.
-	worker := combatworker.New(limits, envPositiveInt("GXB_COMBAT_WORKER_COUNT", 3), envPositiveDuration("GXB_COMBAT_ADMISSION_WAIT", 5*time.Second))
+	// I8_WORKER_ADMISSION_V2 (private policy): a warm worker peaks near 2.7 GiB, so live workers are bounded by
+	// logical CPUs / 3 and available memory / 3 GiB. START waits in the launcher queue up to the request's
+	// remaining 18 s budget (C1-1); GXB_COMBAT_ADMISSION_WAIT caps that wait and jobs without a request keep 5 s.
+	memory, _ := availableMemoryBytes()
+	workers := envPositiveInt("GXB_COMBAT_WORKER_COUNT", defaultCombatWorkers())
+	admissionCap := envPositiveDuration("GXB_COMBAT_ADMISSION_WAIT", 0)
+	log.Printf("combat workers=%d (CPUs=%d, available memory=%d MiB) admission cap=%s", workers, runtime.NumCPU(), memory>>20, admissionCap)
+	worker := combatworker.New(limits, workers, 5*time.Second, admissionCap)
 	worker.Warm()
 	return combat.Service{Rules: corpus, Keys: keys, Worker: worker, Store: combatstore.Store{}, Content: content, Runner: r, Fresh: p,
 		Inputs: combat.Inputs{Heroes: o.roster(content), Pets: characterstore.PetBootstrapProjection{Content: content}, Stats: stats, Awakening: stats.Awakening, Collection: o.library, Conquer: conquer, Stacks: i5store.Store{Queryer: p}, Lending: lending}}, true, nil
+}
+
+const combatWorkerMemoryBytes = 3 << 30
+
+func defaultCombatWorkers() int {
+	workers := runtime.NumCPU() / 3
+	if memory, err := availableMemoryBytes(); err == nil {
+		workers = min(workers, int(memory/combatWorkerMemoryBytes))
+	}
+	return max(workers, 1)
+}
+
+// availableMemoryBytes reads MemAvailable from /proc/meminfo.
+// shortcut: host MemAvailable only, use a cgroup-aware probe if container limits diverge from host memory.
+func availableMemoryBytes() (uint64, error) {
+	data, err := os.ReadFile("/proc/meminfo")
+	if err != nil {
+		return 0, err
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 || fields[0] != "MemAvailable:" {
+			continue
+		}
+		kibibytes, err := strconv.ParseUint(fields[1], 10, 64)
+		if err != nil {
+			return 0, err
+		}
+		return kibibytes << 10, nil
+	}
+	return 0, errors.New("MemAvailable absent from /proc/meminfo")
 }
 
 func canonicalPublicStats(p *postgres.Pool, content contentstore.Store, o topFloorOwners) publicstats.Service {
