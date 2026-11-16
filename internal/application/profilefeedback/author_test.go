@@ -45,3 +45,11 @@ func TestAuthorRefusesMissingDirectoryRow(t *testing.T) {
 		t.Fatalf("missing directory row accepted: %v", e)
 	}
 }
+
+func TestAuthorTreatsMissingDirectoryPortAsCompositionDefect(t *testing.T) {
+	pid := identity.PlayerID(100001)
+	_, e := (Service{}).author(context.Background(), nil, authorBasis(pid), "rev", time.Unix(100, 0), 1)
+	if !errors.Is(e, ErrInvalid) {
+		t.Fatalf("missing directory port not a defect: %v", e)
+	}
+}

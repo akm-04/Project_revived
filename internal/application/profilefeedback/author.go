@@ -11,7 +11,7 @@ import (
 func (s Service) author(c context.Context, q tx.Queryer, b i5.PublicPlayerBasis, rev string, at time.Time, server identity.LogicalServerID) (Author, error) {
 	out := Author{PlayerID: int64(b.Profile.PlayerID), Name: b.Profile.DisplayName, Avatar: b.Profile.AvatarID, Frame: b.Profile.AvatarFrameID, Level: b.Progression.Level, Region: int32(server)}
 	if s.Directory == nil {
-		return Author{}, ErrProvider
+		return Author{}, ErrInvalid
 	}
 	directory, found, e := s.Directory.ProfileTx(c, q, b.Profile.PlayerID)
 	if e != nil {
