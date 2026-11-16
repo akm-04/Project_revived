@@ -22,6 +22,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/summon"
 	"gxb.local/backend/v2/internal/domain/character"
 	d "gxb.local/backend/v2/internal/domain/summon"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
 )
@@ -61,14 +62,21 @@ func TestI9_3ESummonNative(t *testing.T) {
 	}
 
 	tutorial := op()
-	body, e := s.Summon(ctx, a, app.Pull{Type: 1, Index: 1}, tutorial)
+	tracked, _ := changes.Track(ctx)
+	body, e := s.Summon(tracked, a, app.Pull{Type: 1, Index: 1}, tutorial)
 	rows := summonRows(t, body)
 	if e != nil || len(rows) != 1 || rows[0]["is_partner"] != true || fmt.Sprint(rows[0]["table_id"]) != "10001002" || fmt.Sprint(body["reward"]) != "map[item_id:50001002 item_num:10]" {
 		t.Fatal("Small tutorial pull is Lavia with summon_reward", body, e)
 	}
-	replay, e := summonMode(p).Summon(ctx, a, app.Pull{Type: 1, Index: 1}, tutorial)
+	if _, present := body["economy_"]; present {
+		t.Fatal("a free pull without a balance change reports economy_ (I9_MODE_FRAMEWORK_V1 F17)", body["economy_"])
+	}
+	replay, e := summonMode(p).Summon(tracked, a, app.Pull{Type: 1, Index: 1}, tutorial)
 	if e != nil || fmt.Sprint(summonRows(t, replay)) != fmt.Sprint(rows) {
 		t.Fatal("receipt replay", replay, e)
+	}
+	if _, present := replay["economy_"]; present {
+		t.Fatal("the free pull receipt stored economy_", replay["economy_"])
 	}
 	if _, e = s.Summon(ctx, a, app.Pull{Type: 1, Index: 1}, op()); !errors.Is(e, d.ErrRefused) {
 		t.Fatal("Small free inside 600 s", e)
@@ -87,7 +95,8 @@ func TestI9_3ESummonNative(t *testing.T) {
 	}
 
 	exec(t, p, `UPDATE player_currency_balances SET amount=2600 WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID))
-	body, e = s.Summon(ctx, a, app.Pull{Type: 2, Index: 2}, op())
+	tracked, _ = changes.Track(ctx)
+	body, e = s.Summon(tracked, a, app.Pull{Type: 2, Index: 2}, op())
 	rows = summonRows(t, body)
 	hasHero := false
 	for _, row := range rows {
@@ -99,6 +108,9 @@ func TestI9_3ESummonNative(t *testing.T) {
 	var crystal int64
 	if e = p.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID)).Scan(&crystal); e != nil || crystal != 10 {
 		t.Fatal("Medium ten costs 2590", crystal, e)
+	}
+	if balances, ok := body["economy_"].(map[string]int64); !ok || balances["crystal"] != 10 {
+		t.Fatal("a paid pull reports the crystal balance", body["economy_"])
 	}
 	if body, e = s.Summon(ctx, a, app.Pull{Type: 2, Index: 1}, op()); !errors.Is(e, d.ErrRefused) {
 		t.Fatal("unpaid Medium", body, e)

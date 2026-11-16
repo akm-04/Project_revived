@@ -125,6 +125,14 @@ func Recorded(ctx context.Context) (map[string]int64, []int64) {
 	return set.Balances(), set.Functions()
 }
 
+// WriteEconomy adds the F17 economy_ key to a stored reply body; an owner that reported nothing writes no key.
+func WriteEconomy(body map[string]any, balances map[string]int64) {
+	if len(balances) == 0 {
+		return
+	}
+	body["economy_"] = balances
+}
+
 func Missions(ctx context.Context, fields map[string]any) {
 	set, _ := ctx.Value(contextKey{}).(*Set)
 	if set == nil {

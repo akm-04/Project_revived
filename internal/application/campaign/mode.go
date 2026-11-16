@@ -753,7 +753,8 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		body[key] = v.catalog.TrialRow(outcome.Progress, g, v.day, buys[g.ConsumeID], v.groupOpen(g))
 	}
 	balances, functions := changes.Recorded(c)
-	stored := map[string]any{"economy_": balances}
+	stored := map[string]any{}
+	changes.WriteEconomy(stored, balances)
 	if len(functions) > 0 {
 		stored["new_funcs_"] = functions
 	}
