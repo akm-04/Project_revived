@@ -76,6 +76,15 @@ func (Store) FindUnresolvedTx(c context.Context, q tx.Queryer, l d.Locator) (d.A
 	return scanAttempt(q.QueryRow(c, `SELECT `+attemptColumns+` FROM combat_attempts WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 AND state<>'TERMINAL'`, l.DomainKind, l.AuthorityScope, l.DomainLocator))
 }
 
+// CurrentAttemptTx returns the locator's open attempt, else its newest terminal
+// one; found is false when the locator never had an attempt.
+func (Store) CurrentAttemptTx(c context.Context, q tx.Queryer, l d.Locator) (d.Attempt, bool, error) {
+	if q == nil || !l.Valid() {
+		return d.Attempt{}, false, d.ErrInvalid
+	}
+	return scanAttempt(q.QueryRow(c, `SELECT `+attemptColumns+` FROM combat_attempts WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 ORDER BY (state<>'TERMINAL') DESC,terminal_at DESC NULLS LAST,started_at DESC LIMIT 1`, l.DomainKind, l.AuthorityScope, l.DomainLocator))
+}
+
 func (Store) FindTerminalTx(c context.Context, q tx.Queryer, l d.Locator, receipt string) (d.Attempt, bool, error) {
 	if q == nil || !l.Valid() || receipt == "" {
 		return d.Attempt{}, false, d.ErrInvalid

@@ -8014,6 +8014,31 @@
         "retention": null
       }
     },
+    "worldboss_attempt_settlements": {
+      "owner": "worldboss",
+      "allowed_query_owners": [
+        "worldboss"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/worldbossstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00167_r5d_attempt_settlements.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
     "shared_rooms": {
       "owner": "sharedroom",
       "allowed_query_owners": [
@@ -8176,6 +8201,31 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00100_i9_8b_shared_room_illusion.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "illusion_attempt_settlements": {
+      "owner": "illusion",
+      "allowed_query_owners": [
+        "illusion"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/illusionstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00167_r5d_attempt_settlements.sql",
       "data": {
         "scope": "player",
         "owner": [
@@ -8422,6 +8472,31 @@
       ],
       "write_exceptions": [],
       "migration": "migrations/00102_i9_8d_adventure.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "report",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "adventure_attempt_settlements": {
+      "owner": "adventure",
+      "allowed_query_owners": [
+        "adventure"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/adventurestore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00167_r5d_attempt_settlements.sql",
       "data": {
         "scope": "player",
         "owner": [

@@ -145,6 +145,7 @@
  ],
  "tables": {
   "owned": [
+   "worldboss_attempt_settlements",
    "worldboss_attempts",
    "worldboss_occurrences",
    "worldboss_player_totals",

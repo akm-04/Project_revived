@@ -265,6 +265,7 @@
  ],
  "tables": {
   "owned": [
+   "illusion_attempt_settlements",
    "illusion_attempts",
    "illusion_occurrence_results",
    "illusion_occurrences",

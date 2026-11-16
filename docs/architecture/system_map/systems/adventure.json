@@ -261,6 +261,7 @@
  ],
  "tables": {
   "owned": [
+   "adventure_attempt_settlements",
    "adventure_occurrences",
    "adventure_reports",
    "adventure_single_attempts"
