@@ -464,7 +464,7 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, a identity.
 	if err != nil {
 		return cb.Started{}, err
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: teamLocator(view.room.ID, view.room.LogicalServerID), GenerationRef: teamGeneration(view.room.ID, team),
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeOccultTeam, Actor: a, Locator: teamLocator(view.room.ID, view.room.LogicalServerID), GenerationRef: teamGeneration(view.room.ID, team),
 		StartFingerprint: teamFingerprint(view.room.ID, team, roster), ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle,
 		TrustProfile: cd.ServerReport, Members: roster})
 }

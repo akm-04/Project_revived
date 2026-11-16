@@ -303,7 +303,7 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, actor ident
 		return cb.Started{}, err
 	}
 	members := room.Members()
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: actor, Locator: teamLocator(room), GenerationRef: teamGeneration(room, occurrence),
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeIllusionTeam, Actor: actor, Locator: teamLocator(room), GenerationRef: teamGeneration(room, occurrence),
 		StartFingerprint: teamFingerprint(room, team, occurrence), ResultDeadline: at.Add(attemptLimit), Battle: battle,
 		TrustProfile: cd.ServerReport, Members: members})
 }

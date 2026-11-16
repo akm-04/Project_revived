@@ -302,7 +302,7 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil {
 			return err
 		}
-		started, err := m.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(request.ChapterID, request.CopyID),
+		started, err := m.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeGuildCampaign, Actor: a, Locator: locator(a), GenerationRef: generationRef(request.ChapterID, request.CopyID),
 			StartFingerprint: fingerprint(a, request, formation), ResultDeadline: at.Add(time.Duration(m.Settings.BattleSeconds) * time.Second),
 			Battle: battleRequest(a, info, formation, request), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},
 			Package: func(*cd.Stream) (any, error) { return map[string]any{}, nil }})

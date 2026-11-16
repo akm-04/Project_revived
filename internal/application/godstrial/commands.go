@@ -101,7 +101,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if same {
 			deadline = time.Unix(r.Fight.Deadline, 0)
 		}
-		started, e := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: deadline, Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(stream *cd.Stream) (any, error) { return v.catalog.Lines(v.catalog.Drop(box, stream)), nil }})
+		started, e := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeGodsTrial, Actor: a, Locator: locator(a), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: deadline, Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(stream *cd.Stream) (any, error) { return v.catalog.Lines(v.catalog.Drop(box, stream)), nil }})
 		if e != nil {
 			return nil, e
 		}

@@ -551,7 +551,7 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 		return awakeningStartPackage{Items: items, Awakening: &next}, nil
 	}
 	window := time.Duration(v.catalog.PrivatePolicy.ResultWindowSeconds) * time.Second
-	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(node.Type, node.ID),
+	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeCampaign, Actor: a, Locator: locator(a), GenerationRef: generation(node.Type, node.ID),
 		StartFingerprint: fingerprint(a, node.Type, node.ID, request.Formation, request.Pet, request.PetFormation, request), ResultDeadline: at.Add(window), Battle: battle,
 		TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Package: drops})
 }

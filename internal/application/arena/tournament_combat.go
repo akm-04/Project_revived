@@ -94,9 +94,11 @@ func (service Service) StartTournamentCombat(requestContext context.Context, ide
 			first, firstPets := tournamentParticipants(actor.PlayerID, formations[0], cd.OwnedSelf)
 			second, secondPets := tournamentParticipants(room.Selection.Players[1], formations[1], cd.OwnedForeign)
 			campaignType := d.CampaignType
+			mode := cd.ModeArenaPlayoffs
 			battleContext := &cd.BattleContext{Transform: tournamentTransform}
 			if room.IsFriendFight() {
 				campaignType = 31
+				mode = cd.ModeArenaFriendFight
 				if room.FriendMode == 1 {
 					battleContext = nil
 				}
@@ -107,7 +109,7 @@ func (service Service) StartTournamentCombat(requestContext context.Context, ide
 				return err
 			}
 			digest := sha256.Sum256(payload)
-			requests = append(requests, combat.StartRequest{Actor: actor, Locator: tournamentLocator(*room, round+1), GenerationRef: room.ContractIdentifier(), StartFingerprint: hex.EncodeToString(digest[:]), ResultDeadline: scope.Operation.DecisionAt().Add(resultWindow), Battle: battle})
+			requests = append(requests, combat.StartRequest{Mode: mode, Actor: actor, Locator: tournamentLocator(*room, round+1), GenerationRef: room.ContractIdentifier(), StartFingerprint: hex.EncodeToString(digest[:]), ResultDeadline: scope.Operation.DecisionAt().Add(resultWindow), Battle: battle})
 			requestRounds = append(requestRounds, round)
 		}
 		room.Attempts = make([]ids.UUID, d.SelectionTeamCount)

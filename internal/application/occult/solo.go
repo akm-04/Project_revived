@@ -534,7 +534,7 @@ func (s Mode) attest(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	// shortcut: stock 2379 carries no formation and ClientSummaryAttested needs a
 	// frozen one, so Combat starts and attests inside 2372; the 150 s fight timer
 	// is the room's own, checked above.
-	started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: reference, StartFingerprint: startFingerprint(a, reference, op),
+	started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeOccultSolo, Actor: a, Locator: locator(a), GenerationRef: reference, StartFingerprint: startFingerprint(a, reference, op),
 		ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 	if err != nil {
 		return nil, err

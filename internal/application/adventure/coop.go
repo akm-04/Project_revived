@@ -436,7 +436,7 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		if err != nil {
 			return err
 		}
-		started, err = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: coopLocator(*room),
+		started, err = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeAdventureCoop, Actor: a, Locator: coopLocator(*room),
 			GenerationRef: coopGeneration(*room), StartFingerprint: coopFingerprint(*room, state),
 			ResultDeadline: at.Add(attemptLimit), Battle: battle, TrustProfile: cd.ServerReport, Members: room.Members()})
 		return err

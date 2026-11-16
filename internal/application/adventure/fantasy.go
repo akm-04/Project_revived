@@ -46,7 +46,7 @@ func (s Mode) StartSingle(c context.Context, a identity.ActorContext, request Fi
 		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
 			return nil, err
 		}
-		started, err := s.startAttempt(c, sc, scope, cb.StartRequest{Actor: a, Locator: locator(a, occurrence, "ADVENTURE_ILLUSION"),
+		started, err := s.startAttempt(c, sc, scope, cb.StartRequest{Mode: cd.ModeAdventureIllusion, Actor: a, Locator: locator(a, occurrence, "ADVENTURE_ILLUSION"),
 			GenerationRef:    "ADVENTURE_ILLUSION/" + occurrence.SourceKey,
 			StartFingerprint: startFingerprint(a, request.Formation),
 			ResultDeadline:   at.Add(attemptLimit), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},

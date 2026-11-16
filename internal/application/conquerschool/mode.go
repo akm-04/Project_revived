@@ -334,7 +334,7 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if pet > 0 {
 		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: pet})
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(st.run), StartFingerprint: fingerprint(a, st.run, formation, pet, op),
+	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeConquerSchool, Actor: a, Locator: locator(a), GenerationRef: generation(st.run), StartFingerprint: fingerprint(a, st.run, formation, pet, op),
 		ResultDeadline: at.Add(resultWindow), Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
 

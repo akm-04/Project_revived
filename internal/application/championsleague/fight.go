@@ -102,7 +102,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	ha, pa := participants(p.ID, cmd.Lineup, cd.OwnedSelf)
 	hb, pb := participants(enemy.ID, enemy.Defense, cd.OwnedForeign)
 	id := op.ID
-	started, e := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(id), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(time.Duration(d.ResultSeconds) * time.Second), Battle: combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: ha, PetsA: pa, WavesB: [][]combat.Participant{hb}, PetsB: pb}})
+	started, e := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeChampionsLeague, Actor: a, Locator: locator(id), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(time.Duration(d.ResultSeconds) * time.Second), Battle: combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: ha, PetsA: pa, WavesB: [][]combat.Participant{hb}, PetsB: pb}})
 	if e != nil {
 		return d.Match{}, e
 	}

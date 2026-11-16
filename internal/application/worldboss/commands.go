@@ -149,7 +149,7 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if request.RentUnit > 0 && request.RentPlayer > 0 {
 		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.Borrowed, Kind: cd.HeroActor, Player: identity.PlayerID(request.RentPlayer), Identity: request.RentUnit})
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence.Board()),
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeWorldBoss, Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence.Board()),
 		StartFingerprint: startFingerprint(a, StartRequest{CampaignID: boss.ID, Formation: formation, RentPlayer: request.RentPlayer, RentUnit: request.RentUnit}, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
 		Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }

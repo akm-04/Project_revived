@@ -145,7 +145,7 @@ func (mode Mode) StartFight(ctx context.Context, actor identity.ActorContext, po
 			return nil, err
 		}
 		deadline := current.timed.Operation.DecisionAt().Add(time.Duration(memoir.ResultWindowSeconds) * time.Second)
-		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, applicationcombat.StartRequest{Actor: actor, Locator: locator(actor), GenerationRef: generation, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: deadline, Battle: battle, TrustProfile: combat.ClientFullReportAttested, Replay: combat.ReplaySpec{Response: combat.ReplayFightExist, ErrorCode: combat.FightExistCode}, Package: func(_ *combat.Stream) (any, error) {
+		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, applicationcombat.StartRequest{Mode: combat.ModeMemoirBattle, Actor: actor, Locator: locator(actor), GenerationRef: generation, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: deadline, Battle: battle, TrustProfile: combat.ClientFullReportAttested, Replay: combat.ReplaySpec{Response: combat.ReplayFightExist, ErrorCode: combat.FightExistCode}, Package: func(_ *combat.Stream) (any, error) {
 			return map[string]any{"heroes_status": state.Heroes, "enemies_status": carry.Statuses, "round": carry.Round}, nil
 		}})
 		if err != nil {

@@ -184,9 +184,9 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if q.Pet > 0 {
 			battle.PetsA = []cb.Participant{{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: q.Pet}}
 		}
-		trust := cd.ClientSummaryAttested
+		trust, mode := cd.ClientSummaryAttested, cd.ModePetCampaign
 		if q.Practice {
-			trust = cd.PracticeNoValue
+			trust, mode = cd.PracticeNoValue, cd.ModePetCampaignPractice
 		}
 		fp, e := receipt.FingerprintRequest(struct {
 			ID      string
@@ -195,7 +195,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if e != nil {
 			return nil, e
 		}
-		if _, e = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a, q.Practice), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: at.Add(time.Hour), Battle: battle, TrustProfile: trust, Replay: cd.ReplaySpec{Response: cd.ReplayOK}}); e != nil {
+		if _, e = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: mode, Actor: a, Locator: locator(a, q.Practice), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: at.Add(time.Hour), Battle: battle, TrustProfile: trust, Replay: cd.ReplaySpec{Response: cd.ReplayOK}}); e != nil {
 			return nil, e
 		}
 		if q.Practice {

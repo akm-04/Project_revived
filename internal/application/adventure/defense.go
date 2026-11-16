@@ -239,7 +239,7 @@ func (s Mode) StartDefense(c context.Context, a identity.ActorContext, request F
 		if err != nil {
 			return err
 		}
-		started, err := s.startAttempt(c, sc, scope, cb.StartRequest{Actor: a, Locator: defenseLocator(*room, position),
+		started, err := s.startAttempt(c, sc, scope, cb.StartRequest{Mode: cd.ModeAdventureDefense, Actor: a, Locator: defenseLocator(*room, position),
 			GenerationRef: defenseGeneration(*room, position), StartFingerprint: startFingerprint(a, request.Formation),
 			ResultDeadline: at.Add(attemptLimit), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},
 			Battle: cb.BattleRequest{CampaignType: defenseCampaignType, RentalMode: d.DefenseRentalMode, BattleID: campaign.BattleIDs[position-1], TeamA: ownedTeam(a.PlayerID, request.Formation), Formation: request.Formation, WavesB: waves}})

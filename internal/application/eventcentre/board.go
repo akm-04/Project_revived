@@ -469,7 +469,7 @@ func (s Service) startBoardAttempt(ctx context.Context, sc tx.Scope, a identity.
 	if err != nil {
 		return "", err
 	}
-	started, err := s.Combat.StartTx(ctx, sc.Tx, scope, appcombat.StartRequest{Actor: a, Locator: boardLocator(a, mission), GenerationRef: boardGeneration(mission),
+	started, err := s.Combat.StartTx(ctx, sc.Tx, scope, appcombat.StartRequest{Mode: cd.ModeEventCentreBoard, Actor: a, Locator: boardLocator(a, mission), GenerationRef: boardGeneration(mission),
 		StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: at.Add(time.Duration(rule.Duration) * time.Second), Battle: battle})
 	if err != nil {
 		return "", err
