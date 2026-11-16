@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const expected7BSelectionSHA = "9201fa904ac2ed801abe34adc4a39a97f53e84b740a94a956cb3b6cdccfb1b78"
+
 func selectedGiftStockActivation(t *testing.T) bool {
 	root := repoRoot(t)
 	raw, e := os.ReadFile(filepath.Join(root, "BUILD_INFO.json"))
@@ -24,7 +26,7 @@ func selectedGiftStockActivation(t *testing.T) bool {
 		return false
 	}
 	raw, e = os.ReadFile(filepath.Join(root, "docs/i7a7b/IMPLEMENTATION_SELECTION.json"))
-	if e != nil || fmt.Sprintf("%x", sha256.Sum256(raw)) != build["i7a7b_contract_sha256"] {
+	if e != nil || fmt.Sprintf("%x", sha256.Sum256(raw)) != expected7BSelectionSHA || build["i7a7b_contract_sha256"] != expected7BSelectionSHA {
 		t.Fatal("Gift stock selection identity")
 	}
 	var s struct{ Contracts map[string]string }
