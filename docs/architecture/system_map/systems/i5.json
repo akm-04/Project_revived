@@ -610,6 +610,7 @@
    "march_binding_test.go",
    "material_exchange_test.go",
    "max_hero_color_policy_test.go",
+   "mission_bootstrap_test.go",
    "mission_fact_binding_test.go",
    "mission_projection_test.go",
    "missions_test.go",
