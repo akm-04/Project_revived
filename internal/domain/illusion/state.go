@@ -167,18 +167,11 @@ type Result struct {
 	Killed   bool  `json:"killed"`
 }
 
-// Record keeps only the personal best (D428): a kill beats any loss, between
-// kills the shorter time wins, and between losses the higher damage, then the
-// shorter time.
+// Record keeps only the personal best, ordered exactly as the board ranks it
+// (OrderRank, D428): the result a board would place higher replaces the kept one.
 func (r *Result) Record(hurt, costTime int64, killed bool) {
-	better := hurt > r.Hurt || hurt == r.Hurt && costTime < r.CostTime
-	if killed && r.Killed {
-		better = costTime < r.CostTime
-	}
-	if killed != r.Killed {
-		better = killed
-	}
-	if better {
+	candidate := Result{PlayerID: r.PlayerID, Hurt: hurt, CostTime: costTime, Killed: killed}
+	if compareRank(candidate, *r) < 0 {
 		r.Hurt, r.CostTime, r.Killed = hurt, costTime, killed
 	}
 }

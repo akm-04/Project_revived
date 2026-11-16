@@ -126,6 +126,15 @@ func TestResultKeepsPersonalBest(t *testing.T) {
 	if killed.CostTime != 30 {
 		t.Fatalf("a slower kill replaced a faster one: %+v", killed)
 	}
+	// A-085: the kept personal best follows the board order (equal-time kills rank by higher hurt).
+	killed.Record(900, 30, true)
+	if killed.Hurt != 900 {
+		t.Fatalf("an equal-time kill with higher hurt must replace the kept one: %+v", killed)
+	}
+	killed.Record(850, 30, true)
+	if killed.Hurt != 900 {
+		t.Fatalf("an equal-time kill with lower hurt replaced the kept one: %+v", killed)
+	}
 }
 
 func TestCyclePhaseSettlementAndRestDay(t *testing.T) {
