@@ -25,6 +25,7 @@ func (i Identity) Validate() error {
 
 type Receipt struct {
 	ID                  ids.UUID
+	OperationID         ids.UUID
 	Identity            Identity
 	OperationClass      string
 	RequestFingerprint  [32]byte
@@ -113,7 +114,7 @@ func New(op operation.Context, id Identity, class, resultSchema string, result j
 	if err != nil {
 		return Receipt{}, err
 	}
-	r := Receipt{ID: rid, Identity: id, OperationClass: class, RequestFingerprint: fingerprint, ResultSchema: resultSchema, ResultPayload: append(json.RawMessage(nil), result...), OperationStartedAt: op.StartedAt.UTC(), OperationPolicyRefs: op.Policies}
+	r := Receipt{ID: rid, OperationID: op.ID, Identity: id, OperationClass: class, RequestFingerprint: fingerprint, ResultSchema: resultSchema, ResultPayload: append(json.RawMessage(nil), result...), OperationStartedAt: op.StartedAt.UTC(), OperationPolicyRefs: op.Policies}
 	if err := r.Validate(); err != nil {
 		return Receipt{}, err
 	}

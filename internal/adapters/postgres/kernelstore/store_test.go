@@ -38,27 +38,28 @@ func (f *fakeTx) Rollback(context.Context) error { return nil }
 func receiptRow(r receipt.Receipt) row {
 	return row{scan: func(v ...any) error {
 		*(v[0].(*string)) = r.ID.String()
-		*(v[1].(*string)) = r.Identity.OwnerKind
-		*(v[2].(*string)) = r.Identity.OwnerKey
-		*(v[3].(*string)) = r.Identity.Domain
-		*(v[4].(*string)) = r.Identity.Operation
-		*(v[5].(*string)) = r.Identity.SemanticKey
-		*(v[6].(*string)) = r.OperationClass
-		*(v[7].(*string)) = "0000000000000000000000000000000000000000000000000000000000000001"
-		*(v[8].(*string)) = r.ResultSchema
-		*(v[9].(*string)) = string(r.ResultPayload)
-		*(v[10].(*time.Time)) = r.OperationStartedAt
-		*(v[11].(*string)) = r.PolicyVersion
+		*(v[1].(*string)) = optionalUUID(r.OperationID)
+		*(v[2].(*string)) = r.Identity.OwnerKind
+		*(v[3].(*string)) = r.Identity.OwnerKey
+		*(v[4].(*string)) = r.Identity.Domain
+		*(v[5].(*string)) = r.Identity.Operation
+		*(v[6].(*string)) = r.Identity.SemanticKey
+		*(v[7].(*string)) = r.OperationClass
+		*(v[8].(*string)) = "0000000000000000000000000000000000000000000000000000000000000001"
+		*(v[9].(*string)) = r.ResultSchema
+		*(v[10].(*string)) = string(r.ResultPayload)
+		*(v[11].(*time.Time)) = r.OperationStartedAt
+		*(v[12].(*string)) = r.PolicyVersion
 		policyJSON, err := policy.MarshalCanonicalJSON(r.OperationPolicyRefs)
 		if err != nil {
 			return err
 		}
-		*(v[12].(*string)) = string(policyJSON)
-		*(v[13].(*string)) = r.ActorAccountUID
-		*(v[14].(*string)) = ""
-		*(v[15].(*time.Time)) = r.RecordedAt
-		*(v[16].(*bool)) = false
-		*(v[17].(*time.Time)) = time.Unix(0, 0)
+		*(v[13].(*string)) = string(policyJSON)
+		*(v[14].(*string)) = r.ActorAccountUID
+		*(v[15].(*string)) = ""
+		*(v[16].(*time.Time)) = r.RecordedAt
+		*(v[17].(*bool)) = false
+		*(v[18].(*time.Time)) = time.Unix(0, 0)
 		return nil
 	}}
 }
@@ -126,10 +127,10 @@ func TestPutWritesCanonicalPolicyJSON(t *testing.T) {
 	if _, err := (Store{}).PutTx(context.Background(), f, r); err != nil {
 		t.Fatal(err)
 	}
-	if len(f.queryArgs) < 1 || len(f.queryArgs[0]) != 16 {
+	if len(f.queryArgs) < 1 || len(f.queryArgs[0]) != 17 {
 		t.Fatalf("insert args=%d/%d", len(f.queryArgs), len(f.queryArgs[0]))
 	}
-	if got, want := f.queryArgs[0][12], `[{"name":"content","version":"r1"},{"name":"zeta","version":"v2"}]`; got != want {
+	if got, want := f.queryArgs[0][13], `[{"name":"content","version":"r1"},{"name":"zeta","version":"v2"}]`; got != want {
 		t.Fatalf("policy json=%v want=%s", got, want)
 	}
 }
@@ -142,7 +143,7 @@ func TestFindRejectsInvalidStoredPolicyEvidence(t *testing.T) {
 		if err := original(v...); err != nil {
 			return err
 		}
-		*(v[12].(*string)) = `[{"name":"z","version":"1"},{"name":"a","version":"2"}]`
+		*(v[13].(*string)) = `[{"name":"z","version":"1"},{"name":"a","version":"2"}]`
 		return nil
 	}
 	f := &fakeTx{rows: []row{bad}}
