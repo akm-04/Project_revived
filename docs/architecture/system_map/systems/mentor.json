@@ -185,7 +185,8 @@
    "i9_10f_mentor.json"
   ],
   "unit": [
-   "calendar_test.go"
+   "calendar_test.go",
+   "read_test.go"
   ]
  }
 }
