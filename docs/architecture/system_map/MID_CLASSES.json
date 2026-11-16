@@ -115904,6 +115904,11 @@
      "statement": "SELECT hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count FROM gxb_content_appearance_live WHERE revision_id=$1 AND model_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/arena.go",
+     "line": 56,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_array(table_id,origin_table_id,kind='SUPER',is_awakened,initial_star) ORDER BY table_id),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -116017,6 +116022,16 @@
      "file": "internal/adapters/postgres/contentstore/library_inputs.go",
      "line": 48,
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
     },
     {
      "file": "internal/adapters/postgres/contentstore/practice.go",
@@ -116166,15 +116181,15 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/herorecommend/refresh.go:327",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:128",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:133",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:138",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:143",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:148",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:154",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:159",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:153",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:158",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:164",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:169",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:174",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:179",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -116275,6 +116290,11 @@
      "statement": "SELECT hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count FROM gxb_content_appearance_live WHERE revision_id=$1 AND model_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/arena.go",
+     "line": 56,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_array(table_id,origin_table_id,kind='SUPER',is_awakened,initial_star) ORDER BY table_id),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -116388,6 +116408,16 @@
      "file": "internal/adapters/postgres/contentstore/library_inputs.go",
      "line": 48,
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
     },
     {
      "file": "internal/adapters/postgres/contentstore/practice.go",
@@ -116537,15 +116567,15 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/herorecommend/refresh.go:327",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:128",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:133",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:138",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:143",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:148",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:154",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:159",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:153",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:158",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:164",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:169",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:174",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:179",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -116646,6 +116676,11 @@
      "statement": "SELECT hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count FROM gxb_content_appearance_live WHERE revision_id=$1 AND model_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/arena.go",
+     "line": 56,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_array(table_id,origin_table_id,kind='SUPER',is_awakened,initial_star) ORDER BY table_id),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -116759,6 +116794,16 @@
      "file": "internal/adapters/postgres/contentstore/library_inputs.go",
      "line": 48,
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
     },
     {
      "file": "internal/adapters/postgres/contentstore/practice.go",
@@ -116908,15 +116953,15 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/herorecommend/refresh.go:327",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:128",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:133",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:138",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:143",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:148",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:154",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:159",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:153",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:158",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:164",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:169",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:174",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:179",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -117017,6 +117062,11 @@
      "statement": "SELECT hero_origin_table_id,crystal_cost,activation_item_id,activation_item_count FROM gxb_content_appearance_live WHERE revision_id=$1 AND model_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/arena.go",
+     "line": 56,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_array(table_id,origin_table_id,kind='SUPER',is_awakened,initial_star) ORDER BY table_id),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -117130,6 +117180,16 @@
      "file": "internal/adapters/postgres/contentstore/library_inputs.go",
      "line": 48,
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
     },
     {
      "file": "internal/adapters/postgres/contentstore/practice.go",
@@ -117279,15 +117339,15 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/herorecommend/refresh.go:327",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:128",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:133",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:138",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:143",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:148",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:154",
-    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:159",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:153",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:158",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:164",
     "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:169",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:174",
+    "FANOUT OverlayRosterTx has 9 implementers, not followed: bookskill.Service.OverlayRosterTx, characterhero.Service.OverlayRosterTx, course.Service.OverlayRosterTx, dormhouse.Service.OverlayRosterTx, elementequipment.Service.OverlayRosterTx, heroevolution.Service.OverlayRosterTx, inscription.Service.OverlayRosterTx, librarylocal.Service.OverlayRosterTx, spirit.Service.OverlayRosterTx at internal/adapters/postgres/characterstore/hero_projection.go:179",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"

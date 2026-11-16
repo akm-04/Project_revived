@@ -594,6 +594,7 @@
    "r1_arena_room_pet.json"
   ],
   "unit": [
+   "picks_test.go",
    "tournament_view_test.go"
   ]
  }

@@ -19,7 +19,8 @@ func flag(b bool) int64 {
 func awards(p d.Player) []map[string]any {
 	out := []map[string]any{}
 	for _, a := range p.Awards {
-		out = append(out, map[string]any{"table_id": a.TableID, "add_star": a.AddStar, "is_awake": flag(a.Awake), "is_summon": flag(a.Summon), "region_arena_times": a.Picks})
+		// ARENA_HERO_PICKS_V1: the client adds the roster value to this one.
+		out = append(out, map[string]any{"table_id": a.TableID, "add_star": a.AddStar, "is_awake": flag(a.Awake), "is_summon": flag(a.Summon), "region_arena_times": int64(0)})
 	}
 	return out
 }
@@ -60,7 +61,7 @@ func Missions(v d.MissionsView) map[string]any {
 		body["awards"] = []map[string]any{{"table_id": int64(-1), "item_num": v.Coins, "king_coin": v.Coins}}
 	}
 	if v.Award != nil {
-		body["award"] = map[string]any{"table_id": v.Award.TableID, "add_star": v.Award.AddStar, "is_awake": flag(v.Award.Awake), "is_summon": flag(v.Award.Summon), "region_arena_times": v.Award.Picks}
+		body["award"] = map[string]any{"table_id": v.Award.TableID, "add_star": v.Award.AddStar, "is_awake": flag(v.Award.Awake), "is_summon": flag(v.Award.Summon), "region_arena_times": int64(0)}
 	}
 	return body
 }

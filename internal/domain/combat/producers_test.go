@@ -105,6 +105,27 @@ func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	if current.CheckOwned(HeroActor, withParam(board, "force", 1)) == nil {
 		t.Fatal("display producer activated")
 	}
+	// ARENA_HERO_PICKS_V1 moves the roster's region_arena_times to its own
+	// active producer in the current profile only.
+	if status, ok := current.Keys(HeroActor)["region_arena_times"]; !ok || status != ProducerActive {
+		t.Fatalf("current profile arena picks producer %v %v", status, ok)
+	}
+	if err := current.CheckOwned(HeroActor, withParam(params, "region_arena_times", 2)); err != nil {
+		t.Fatal("current profile refused arena picks", err)
+	}
+	for _, profile := range []ProducerProfile{legacy, awakening} {
+		if profile.CheckOwned(HeroActor, withParam(params, "region_arena_times", 2)) == nil {
+			t.Fatal("pinned profile admitted arena picks", profile.ID)
+		}
+		if _, ok := profile.Keys(HeroActor)["region_arena_times"]; !ok {
+			t.Fatal("pinned profile lost region_arena_times", profile.ID)
+		}
+		for _, producer := range profile.Producers {
+			if producer.ID == "ARENA_PICKS" {
+				t.Fatal("pinned profile gained ARENA_PICKS", profile.ID)
+			}
+		}
+	}
 	for _, p := range current.Producers {
 		if p.ID == "CHAR_RUNE" && p.Status != ProducerDeclaredInactive {
 			t.Fatal("Rune activated")

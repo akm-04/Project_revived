@@ -98,14 +98,17 @@ func petRequiredProfile(library ProducerProfile) ProducerProfile {
 }
 
 // libraryBoardProfile moves the I9_LIBRARY_V1 board keys, which the roster
-// carries for every hero, from the inactive display producer to Library.
+// carries for every hero, from the inactive display producer to Library, and
+// ARENA_HERO_PICKS_V1's region_arena_times to its own active producer.
 func libraryBoardProfile(awakening ProducerProfile) ProducerProfile {
 	board := []string{"is_board", "board_card", "board_model_id"}
 	current := ProducerProfile{ID: LibraryProducerProfileID}
 	for _, producer := range awakening.Producers {
 		if producer.ID == "HERO_DISPLAY" {
-			producer.HeroKeys = []string{"force", "region_arena_times"}
-			current.Producers = append(current.Producers, Producer{ID: "LIBRARY_BOARD", Status: ProducerActive, Owner: "I9_LIBRARY_V1 board partner, card and model (836/835)", HeroKeys: board})
+			producer.HeroKeys = []string{"force"}
+			current.Producers = append(current.Producers,
+				Producer{ID: "LIBRARY_BOARD", Status: ProducerActive, Owner: "I9_LIBRARY_V1 board partner, card and model (836/835)", HeroKeys: board},
+				Producer{ID: "ARENA_PICKS", Status: ProducerActive, Owner: "ARENA_HERO_PICKS_V1 season pick count", HeroKeys: []string{"region_arena_times"}})
 		}
 		current.Producers = append(current.Producers, producer)
 	}

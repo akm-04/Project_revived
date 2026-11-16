@@ -31,7 +31,9 @@ type Award struct {
 	AddStar int64 `json:"add_star"`
 	Awake   bool  `json:"is_awake"`
 	Summon  bool  `json:"is_summon"`
-	Picks   int64 `json:"region_arena_times"`
+	// Picks is the wire field only: ARENA_HERO_PICKS_V1 sends 0 here and the
+	// roster row carries the season count.
+	Picks int64 `json:"region_arena_times"`
 }
 
 type MissionSlot struct {
