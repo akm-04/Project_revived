@@ -214,13 +214,14 @@ func TestJournalRowsRedactAndClassify(t *testing.T) {
 	journal.Record(observability.RequestRecord{Disposition: observability.RequestDispatched, MID: 7, HasMID: true, HTTPStatus: 503, Cause: errors.New("dial: password=hunter2"), Actor: observability.RequestActor{AccountUID: "u1", SessionID: "s"}})
 	journal.Record(observability.RequestRecord{Disposition: observability.RequestUnknownMID, MID: 65000, HasMID: true, HTTPStatus: 404, Raw: []byte("payload=%7B%22mid%22%3A65000%2C%22token%22%3A%22abc%22%7D")})
 	journal.Record(observability.RequestRecord{Disposition: observability.RequestDispatched, MID: 7, HasMID: true, HTTPStatus: 200, Cause: errors.New("ignored")})
+	journal.Record(observability.RequestRecord{Disposition: observability.RequestDispatched, MID: 1, HasMID: true, HTTPStatus: 503, Cause: errors.New("log post failed log_url=https://api.test/client-log/secret")})
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	journal.Run(ctx)
-	if len(store.journal) != 3 {
+	if len(store.journal) != 4 {
 		t.Fatalf("rows=%d", len(store.journal))
 	}
-	failure, unknown, ok := store.journal[0], store.journal[1], store.journal[2]
+	failure, unknown, ok, logURL := store.journal[0], store.journal[1], store.journal[2], store.journal[3]
 	if failure.Outcome != domain.OutcomeServerError || failure.Class != domain.Error || failure.Cause != "dial: password=[REDACTED]" || failure.ErrorClass != "*errors.errorString" || failure.Owner.AccountUID != "u1" {
 		t.Fatalf("failure=%+v", failure)
 	}
@@ -229,6 +230,9 @@ func TestJournalRowsRedactAndClassify(t *testing.T) {
 	}
 	if ok.Outcome != domain.OutcomeOK || ok.Cause != "" || ok.Class != domain.Routine {
 		t.Fatalf("ok=%+v", ok)
+	}
+	if logURL.Cause != "log post failed log_url=[REDACTED]" {
+		t.Fatalf("log url cause=%q", logURL.Cause)
 	}
 }
 
