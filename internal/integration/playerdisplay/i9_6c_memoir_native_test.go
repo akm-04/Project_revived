@@ -597,6 +597,77 @@ func (owner *interruptedMemoirCombat) Resolve(ctx context.Context, operationCont
 	}
 	return owner.Combat.Resolve(ctx, operationContext, attempt)
 }
+
+// TestClosureE4MemoirPlayerStartReplayIdentityNative: a player START whose only
+// change is the formation replays the frozen pending attempt
+// (I8_PARENT_CONTRACT_V1 generation_supersede).
+func TestClosureE4MemoirPlayerStartReplayIdentityNative(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	compositeLevel(t, pool, actor, revision, 100)
+	bornHero(t, pool, actor, revision, 10001001, 1)
+	bornHero(t, pool, actor, revision, 10001002, 2)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = mode.Start(ctx, actor, catalog.Selected[0], op()); err != nil {
+		t.Fatal(err)
+	}
+	state := memoirRecord(t, pool, actor)
+	grid := 0
+	for index, kind := range state.Board.Cells {
+		if kind == memoir.Player {
+			grid = index + 1
+			break
+		}
+	}
+	if grid == 0 {
+		t.Fatal("no player encounter")
+	}
+	mode.Combat = &interruptedMemoirCombat{Combat: mode.Combat, interrupt: true}
+	first := application.PlayerFight{Grid: grid, Formation: []int64{1}}
+	if _, err = mode.PlayerFight(ctx, actor, first, op()); !errors.Is(err, combat.ErrResolverRetryable) {
+		t.Fatalf("admission interruption err=%v", err)
+	}
+	pending := memoirRecord(t, pool, actor).Pending
+	if pending == nil || pending.Grid != grid {
+		t.Fatalf("pending %+v", pending)
+	}
+	energy := func() int64 {
+		return scalar(t, pool, `SELECT stored_amount FROM player_temporal_resources WHERE player_id=$1 AND resource_key='energy'`, int64(actor.PlayerID))
+	}
+	attempts := func() int64 {
+		return scalar(t, pool, `SELECT count(*) FROM combat_attempts WHERE actor_player_id=$1 AND domain_kind='MEMOIR'`, int64(actor.PlayerID))
+	}
+	if attempts() != 1 {
+		t.Fatalf("admission attempts=%d want 1", attempts())
+	}
+	before := energy()
+	second := application.PlayerFight{Grid: grid, Formation: []int64{2}}
+	response, err := mode.PlayerFight(ctx, actor, second, op())
+	if err != nil || response["battle_info"] == nil {
+		t.Fatalf("a changed formation must replay the frozen pending attempt: %v %v", err, response)
+	}
+	if energy() != before || attempts() != 1 {
+		t.Fatalf("the replay spent energy or started another attempt: energy %d->%d attempts %d", before, energy(), attempts())
+	}
+	battle := response["battle_info"].(map[string]any)
+	health := battle["health_status"].(map[string]any)
+	team, present := health["team_A"].(map[int64]combat.ActorStatus)
+	if !present || team[1].Identity != 1 {
+		t.Fatalf("the replay must carry the frozen formation 1: %v", health["team_A"])
+	}
+	if _, changed := team[2]; changed {
+		t.Fatalf("the replay used the changed formation: %v", team)
+	}
+	if active := memoirRecord(t, pool, actor); active.Pending != nil {
+		t.Fatal("the replay left the attempt pending")
+	}
+}
+
 func TestI9_6CMemoirNativePlayerRecoveryAfterAdmission(t *testing.T) {
 	pool := pool(t)
 	actor, revision := bornActor(t, pool), installed(t, pool)

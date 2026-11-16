@@ -27,6 +27,11 @@ type PlayerFight struct {
 	Pet       int64
 }
 
+// The stage is the grid, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only the formation changed.
+func samePendingStage(pending *memoir.Pending, request PlayerFight) bool {
+	return pending != nil && pending.Kind == memoir.Player && pending.Grid == request.Grid
+}
 func (request PlayerFight) valid() bool {
 	if request.Grid < 1 || request.Grid > memoir.BoardCells || request.Pet < 0 || len(request.Formation) < 1 || len(request.Formation) > memoir.TeamLimit {
 		return false
@@ -81,7 +86,7 @@ func (mode Mode) PlayerFight(ctx context.Context, actor identity.ActorContext, r
 	if err != nil {
 		return nil, err
 	}
-	if prior.Pending != nil && prior.Pending.Kind == memoir.Player && prior.Pending.Grid == request.Grid && slices.Equal(prior.Pending.Formation, request.Formation) && prior.Pending.Pet == request.Pet {
+	if samePendingStage(prior.Pending, request) {
 		response, err = mode.run(ctx, actor, "player_start", request, operationContext, func(_ context.Context, _ scope, _ *memoir.State) (map[string]any, error) { return response, nil })
 		if err != nil {
 			return nil, err
@@ -100,7 +105,7 @@ func (mode Mode) PlayerFight(ctx context.Context, actor identity.ActorContext, r
 			return nil, memoir.ErrRefused
 		}
 		if state.Pending != nil && state.Pending.Kind == memoir.Player {
-			if state.Pending.Grid != request.Grid || !slices.Equal(state.Pending.Formation, request.Formation) || state.Pending.Pet != request.Pet {
+			if state.Pending.Grid != request.Grid {
 				return nil, memoir.ErrRefused
 			}
 			return map[string]any{"attempt": state.Pending.Attempt}, nil
