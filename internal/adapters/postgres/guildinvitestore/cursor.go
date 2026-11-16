@@ -10,6 +10,7 @@ import (
 	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -48,7 +49,7 @@ func (Store) AdvanceProvenMarkerTx(c context.Context, t tx.Tx, old gi.MarkerProg
 	if t == nil || old.Validate() != nil || old.Complete || p.ReceiptID.IsZero() || p.Request.MarkerID != old.MarkerID || p.Request.From != old.CursorSerial || p.Request.To < old.CursorSerial || p.Request.To > old.MaxIssueSerial || p.DecisionAt.Before(old.LastEnqueueAt) {
 		return gi.ErrEvidence
 	}
-	raw, e := json.Marshal(p)
+	raw, version, e := payload.Encode(p)
 	if e != nil {
 		return e
 	}
@@ -61,7 +62,7 @@ func (Store) AdvanceProvenMarkerTx(c context.Context, t tx.Tx, old gi.MarkerProg
 		state = "COMPLETE"
 		done = p.DecisionAt
 	}
-	tag, e := t.Exec(c, `UPDATE guild_invite_projection_markers SET cursor_serial=$2,state=$3,last_enqueue_at=$4,next_wakeup_at=$5,completed_at=$6,cursor_receipt_id=$9::uuid,cursor_proof=$10::jsonb WHERE marker_id=$1::uuid AND state='PENDING' AND cursor_serial=$7 AND max_issue_serial=$8`, old.MarkerID.String(), p.Request.To, state, p.DecisionAt, p.DecisionAt.Add(time.Minute), done, old.CursorSerial, old.MaxIssueSerial, p.ReceiptID.String(), string(raw))
+	tag, e := t.Exec(c, `UPDATE guild_invite_projection_markers SET cursor_serial=$2,state=$3,last_enqueue_at=$4,next_wakeup_at=$5,completed_at=$6,cursor_receipt_id=$9::uuid,cursor_proof=$10::jsonb,payload_version=$11 WHERE marker_id=$1::uuid AND state='PENDING' AND cursor_serial=$7 AND max_issue_serial=$8`, old.MarkerID.String(), p.Request.To, state, p.DecisionAt, p.DecisionAt.Add(time.Minute), done, old.CursorSerial, old.MaxIssueSerial, p.ReceiptID.String(), string(raw), version)
 	return one(tag, e)
 }
 

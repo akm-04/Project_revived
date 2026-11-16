@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+
+	"gxb.local/backend/v2/internal/foundation/payload"
 )
 
 // JSONB may reorder object fields, but must not add or erase evidence. The
@@ -21,9 +23,9 @@ func decode(raw []byte, v any) error {
 	return nil
 }
 
-func DecodeIssue(raw []byte, fingerprint string) (Issue, error) {
+func DecodeIssue(table string, version int16, raw []byte, fingerprint string) (Issue, error) {
 	var v Issue
-	if decode(raw, &v) != nil {
+	if payload.Decode(table, version, raw, &v) != nil {
 		return v, ErrEvidence
 	}
 	fp, e := v.Fingerprint()
@@ -33,9 +35,9 @@ func DecodeIssue(raw []byte, fingerprint string) (Issue, error) {
 	return v, nil
 }
 
-func DecodeMarker(raw []byte, fingerprint string) (Marker, error) {
+func DecodeMarker(table string, version int16, raw []byte, fingerprint string) (Marker, error) {
 	var v Marker
-	if decode(raw, &v) != nil {
+	if payload.Decode(table, version, raw, &v) != nil {
 		return v, ErrEvidence
 	}
 	fp, e := v.Fingerprint()
