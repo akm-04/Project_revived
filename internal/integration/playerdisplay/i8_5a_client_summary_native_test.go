@@ -109,7 +109,7 @@ func storedReason(t *testing.T, attestation d.Attestation) string {
 
 // H-01, H-02, H-41, H-05, H-45, H-06 and the deadline drain through one locator.
 func TestI8_5AClientSummaryAttemptNative(t *testing.T) {
-	f := newKindFixture(t, "client-summary")
+	f := newKindFixture(t, "client-summary", d.ModeGodsTrial)
 	s := f.service
 	unformed := f.summaryStart("stage-1", "g1", nil)
 	if _, err := f.start(unformed, 1); !errors.Is(err, d.ErrInvalid) {
@@ -194,7 +194,7 @@ func TestI8_5AClientSummaryAttemptNative(t *testing.T) {
 
 // H-27: impossible values reject and close; the force bound uses the frozen projection.
 func TestI8_5ABossDamageBoundsNative(t *testing.T) {
-	f := newKindFixture(t, "boss-damage")
+	f := newKindFixture(t, "boss-damage", d.ModeGodsTrial)
 	started, err := f.start(f.summaryStart("boss", "g1", f.slot(0)), 3)
 	if err != nil {
 		t.Fatal(err)
@@ -231,7 +231,7 @@ func TestI8_5ABossDamageBoundsNative(t *testing.T) {
 
 // H-03: concurrent duplicate RESULTs settle once; the rest drain.
 func TestI8_5AConcurrentDuplicateResultNative(t *testing.T) {
-	f := newKindFixture(t, "concurrent-result")
+	f := newKindFixture(t, "concurrent-result", d.ModeGodsTrial)
 	if _, err := f.start(f.summaryStart("stage", "g1", f.slot(0)), 3); err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestI8_5AConcurrentDuplicateResultNative(t *testing.T) {
 // H-04: an ambiguous RESULT commit reconciles from the attempt's own receipt;
 // one that rolled back stays unknown and a retry settles exactly once.
 func TestI8_5AAmbiguousResultCommitNative(t *testing.T) {
-	f := newKindFixture(t, "ambiguous-result")
+	f := newKindFixture(t, "ambiguous-result", d.ModeGodsTrial)
 	if _, err := f.start(f.summaryStart("stage", "g1", f.slot(0)), 3); err != nil {
 		t.Fatal(err)
 	}

@@ -291,8 +291,8 @@ func TestI8_3BGenuineFullLiveOwnedSnapshotNative(t *testing.T) {
 	}
 
 	s := combatService(t, pool)
-	locator := d.Locator{DomainKind: "i8-3b-fixture-mode", AuthorityScope: "genuine-full-live", DomainLocator: fmt.Sprint(a.PlayerID)}
-	started := must(fixtureStart(t, s, rev, combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("i8-3b-genuine"), Battle: combat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "genuine-full-live", DomainLocator: fmt.Sprint(a.PlayerID)}
+	started := must(fixtureStart(t, s, rev, combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("i8-3b-genuine"), Battle: combat.BattleRequest{CampaignType: 1,
 		TeamA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: main}},
 		PetsA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.PetActor, Player: a.PlayerID, Identity: owned.PetID}},
 		WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}, pool))(t, "start")

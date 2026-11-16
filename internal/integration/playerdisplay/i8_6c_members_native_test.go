@@ -60,7 +60,7 @@ func newMemberFixture(t *testing.T) memberFixture {
 }
 
 func (f memberFixture) locator(scope string) d.Locator {
-	return d.Locator{DomainKind: "i8-6c-fixture-mode", AuthorityScope: scope, DomainLocator: fmt.Sprint(f.members[0].PlayerID)}
+	return d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: scope, DomainLocator: fmt.Sprint(f.members[0].PlayerID)}
 }
 
 // request has member `convener` start the room's fight: every member fields
@@ -68,7 +68,7 @@ func (f memberFixture) locator(scope string) d.Locator {
 func (f memberFixture) request(t *testing.T, scope string, convener int) combat.StartRequest {
 	t.Helper()
 	locator := f.locator(scope)
-	request := combat.StartRequest{Actor: f.members[convener], Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+	request := combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.members[convener], Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 		Battle: combat.BattleRequest{CampaignType: 1, BattleID: singleWaveFight, WavesB: must(combat.MonsterWaves(f.service.Rules, singleWaveFight))(t, "monster waves")}}
 	for i := range f.members {
 		seat := (convener + i) % len(f.members)
@@ -83,7 +83,7 @@ func (f memberFixture) request(t *testing.T, scope string, convener int) combat.
 }
 
 func (f memberFixture) attempts(t *testing.T) int64 {
-	return scalar(t, f.pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='i8-6c-fixture-mode' AND domain_locator=$1`, fmt.Sprint(f.members[0].PlayerID))
+	return scalar(t, f.pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='EVENT_CENTRE_BOARD' AND domain_locator=$1`, fmt.Sprint(f.members[0].PlayerID))
 }
 
 func (f memberFixture) roster(t *testing.T, attempt d.Attempt) []identity.PlayerID {

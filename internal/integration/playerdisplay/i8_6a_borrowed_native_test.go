@@ -97,13 +97,13 @@ func newBorrowFixture(t *testing.T) borrowFixture {
 }
 
 func (f borrowFixture) locator(scope string) d.Locator {
-	return d.Locator{DomainKind: "i8-6a-fixture-mode", AuthorityScope: scope, DomainLocator: fmt.Sprint(f.borrower.PlayerID)}
+	return d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: scope, DomainLocator: fmt.Sprint(f.borrower.PlayerID)}
 }
 
 // request fights the borrower's Hero beside the rented Hero and Pet.
 func (f borrowFixture) request(scope string) combat.StartRequest {
 	locator := f.locator(scope)
-	return combat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+	return combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 		Battle: combat.BattleRequest{CampaignType: 1,
 			TeamA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.borrower.PlayerID, Identity: f.own}, {Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: f.hero}},
 			PetsA:  []combat.Participant{{Origin: d.Borrowed, Kind: d.PetActor, Player: f.lender.PlayerID, Identity: f.pet}},
@@ -117,7 +117,7 @@ func (f borrowFixture) snapshot(t *testing.T, attempt d.Attempt) ([]byte, d.Snap
 }
 
 func (f borrowFixture) attempts(t *testing.T) int64 {
-	return scalar(t, f.pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='i8-6a-fixture-mode' AND domain_locator=$1`, fmt.Sprint(f.borrower.PlayerID))
+	return scalar(t, f.pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='EVENT_CENTRE_BOARD' AND domain_locator=$1`, fmt.Sprint(f.borrower.PlayerID))
 }
 
 func (f borrowFixture) heroVersion(t *testing.T) int64 {

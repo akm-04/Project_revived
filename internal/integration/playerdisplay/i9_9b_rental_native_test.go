@@ -164,8 +164,8 @@ func (f rentalFixture) borrow(t *testing.T, scope string, campaignType int64, he
 // client sent, the split I9_GUILD_RENTAL_V1 C3/C4 requires.
 func (f rentalFixture) borrowMode(t *testing.T, scope string, campaignType, rentalMode int64, hero, pet int64) (appcombat.Started, error) {
 	t.Helper()
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
-	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 		Battle: appcombat.BattleRequest{CampaignType: campaignType, RentalMode: rentalMode,
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	if hero > 0 {
@@ -179,8 +179,8 @@ func (f rentalFixture) borrowMode(t *testing.T, scope string, campaignType, rent
 
 func (f rentalFixture) borrowBoth(t *testing.T, scope string, campaignType int64, hero int64, heroLender identity.PlayerID, pet int64, petLender identity.PlayerID) (appcombat.Started, error) {
 	t.Helper()
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
-	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 		Battle: appcombat.BattleRequest{CampaignType: campaignType, RentalMode: campaignType,
 			TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: heroLender, Identity: hero}},
 			PetsA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.PetActor, Player: petLender, Identity: pet}},
@@ -262,8 +262,8 @@ func TestI9_9BBorrowedTableCollisionRefunds(t *testing.T) {
 	}
 	definition := must(contentstore.Store{Queryer: f.pool}.HeroNormalSummonTx(ctx, f.pool, f.revision, genuineHeroTable))(t, "summon policy")
 	owned := must(genuineHeroService(f.pool).SummonNormal(ctx, f.borrower, genuineHeroTable, int64(definition.Template.FragmentItemID), definition.FragmentCount, op))(t, "borrower summon")
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/collision"}
-	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-collision", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/collision"}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-collision", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 		Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 			TeamA: []appcombat.Participant{
 				{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.borrower.PlayerID, Identity: owned.PartnerID},
@@ -462,8 +462,8 @@ func rentalDeparture(t *testing.T) (rentalFixture, guildcore.Service, int64, int
 	if err := f.service.Place(ctx, f.borrower, guild.RentalHero, idle.PartnerID, opPinned(revision)); err != nil {
 		t.Fatal("place idle offer", err)
 	}
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.lender.LogicalServerID), DomainLocator: fmt.Sprint(f.lender.PlayerID) + "/departure"}
-	request := appcombat.StartRequest{Actor: f.lender, Locator: locator, GenerationRef: "gen-departure", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.lender.LogicalServerID), DomainLocator: fmt.Sprint(f.lender.PlayerID) + "/departure"}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.lender, Locator: locator, GenerationRef: "gen-departure", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 		Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 			TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.borrower.PlayerID, Identity: borrowed.PartnerID}},
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
@@ -526,8 +526,8 @@ func TestI9_9BDepartureClosesRentals(t *testing.T) {
 		if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.second, op); err != nil {
 			t.Fatal("place idle offer", err)
 		}
-		locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/dissolve"}
-		request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-dissolve", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+		locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/dissolve"}
+		request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-dissolve", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 			Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 				TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: f.hero}},
 				WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
