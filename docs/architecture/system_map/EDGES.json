@@ -1571,6 +1571,9 @@
    "profilefeedback": [
     "Validate"
    ],
+   "publicprofile": [
+    "Validate"
+   ],
    "ranking": [
     "Validate"
    ],
@@ -5023,6 +5026,9 @@
    "oneonone": [
     "*PublicHistoryTx"
    ],
+   "playerdirectory": [
+    "Validate"
+   ],
    "playerdisplay": [
     "*CosmeticCountTx",
     "*ReadEffectivePlayerDisplayTx",
@@ -5058,8 +5064,12 @@
     "*ReadPublicProfilePolicy",
     "*ReadPublicShowcasePolicy"
    ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
    "store:i4store": [
-    "*LockPlayerRootsTx"
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
    ],
    "store:kernelstore": [
     "*FindTx",

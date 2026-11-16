@@ -161,6 +161,7 @@
  "stores": [
   "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
@@ -184,6 +185,7 @@
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
+   "player_directory_profiles",
    "player_function_unlocks",
    "player_hero_roots",
    "player_heroes",

@@ -8,6 +8,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -40,6 +41,12 @@ type HistoryObservation struct {
 type HistoryReader interface {
 	ReadPublicHistoryTx(context.Context, tx.Scope, identity.PlayerID, int16, string, time.Time) (HistoryObservation, error)
 }
+
+// DirectoryReader is the I4-owned directory projection the 1829 basic cell
+// already derives its display facts from.
+type DirectoryReader interface {
+	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
+}
 type ReadRequest struct {
 	MID     uint16
 	Target  identity.PlayerID
@@ -62,6 +69,7 @@ type ReadService struct {
 	Characters ShowcaseCharacterReader
 	Records    ShowcaseRecordBuilder
 	History    HistoryReader
+	Directory  DirectoryReader
 }
 
 // Pin one instant/revision before entering one caller transaction. Providers
@@ -215,8 +223,18 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 	if display.ContentRevision != rev || !display.ObservedAt.Equal(at) || display.ProfileVersion != basic.PlayerProfileVersion || display.ProgressionVersion != basic.ProgressionVersion || display.AvatarID <= 0 || display.AvatarFrameID < 0 {
 		return nil, ErrProfileProvider
 	}
+	if s.Directory == nil {
+		return nil, ErrProfileProvider
+	}
+	directory, found, e := s.Directory.ProfileTx(c, sc.Tx, q.Target)
+	if e != nil {
+		return nil, e
+	}
+	if !found || directory.PlayerID != q.Target || directory.Validate() != nil {
+		return nil, ErrProfileProvider
+	}
 	id := basic.Identity
-	info := map[string]any{"player_id": int64(id.PlayerID), "region": int32(id.Server), "player_name": id.Name, "avatar_id": display.AvatarID, "avatar_frame_id": display.AvatarFrameID, "player_type": id.PlayerType, "lev": id.Level, "exp": id.Exp}
+	info := map[string]any{"player_id": int64(id.PlayerID), "region": int32(id.Server), "player_name": id.Name, "avatar_id": display.AvatarID, "avatar_frame_id": display.AvatarFrameID, "player_type": id.PlayerType, "lev": id.Level, "exp": id.Exp, "conquer_lev": directory.ConquerLevel, "conquer_loop_id": directory.ConquerLoopID}
 	out := map[string]any{"player_info": info, "is_in_blacklist": basic.ActorBlocked}
 	if sub == 1 && !basic.Eligible[1] {
 		return out, nil

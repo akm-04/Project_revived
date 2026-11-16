@@ -84,7 +84,7 @@ func composer(t *testing.T, p *pg.Pool) app.ReadService {
 	}
 	fb := feedback.Service{Roots: feedback.RootService{Store: profilefeedbackstore.Store{}}, Content: content, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Directory: i4store.PlayerDirectoryReader{}}
 	display := playerdisplay.Service{Store: i5store.Store{}, Content: content, Characters: characterstore.DisplayReader{Store: characterstore.Store{}, Content: content}}
-	return app.ReadService{Runner: r, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Content: content, Basic: b.Basic, Display: display, Guilds: guildcore.PublicViewReader{Store: guildstore.Store{}, Invites: inv.Source}, Feedback: fb.Roots, Comments: feedback.CommentService{Base: fb, Store: profilefeedbackstore.Store{}}, Media: publicprofilestore.Store{}, Metrics: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}, Slots: b.Slots, Characters: b.Characters, Records: app.UnavailableShowcaseRecords{}}
+	return app.ReadService{Runner: r, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Content: content, Basic: b.Basic, Display: display, Guilds: guildcore.PublicViewReader{Store: guildstore.Store{}, Invites: inv.Source}, Feedback: fb.Roots, Comments: feedback.CommentService{Base: fb, Store: profilefeedbackstore.Store{}}, Media: publicprofilestore.Store{}, Metrics: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}, Slots: b.Slots, Characters: b.Characters, Records: app.UnavailableShowcaseRecords{}, Directory: i4store.PlayerDirectoryReader{}}
 }
 func profileActor(t *testing.T, p *pg.Pool) identity.ActorContext {
 	a := actor(t, p)
