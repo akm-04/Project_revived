@@ -40,7 +40,7 @@ type Store interface {
 	DeleteAttemptTx(context.Context, tx.Tx, string, identity.PlayerID) error
 	InsertReportTx(context.Context, tx.Tx, string, int64, int64, []int64, string, time.Time) error
 	ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error)
-	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
+	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error)
 	PurgeOccurrencesTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
 }
 
@@ -137,6 +137,9 @@ type Mode struct {
 	Mail      Mail
 	Partners  Partners
 	HeroWire  HeroWire
+	// RetentionDays is the R8 cap (U4) on the owner's report window; zero
+	// keeps the owner window alone.
+	RetentionDays int
 }
 
 func (s Mode) ready() bool {

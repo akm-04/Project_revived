@@ -28,7 +28,7 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 		if err != nil || purged >= int64(limit) {
 			return err
 		}
-		reports, err := s.Store.PurgeExpiredReportsTx(c, sc.Tx, at, int64(limit)-purged)
+		reports, err := s.Store.PurgeExpiredReportsTx(c, sc.Tx, at, s.RetentionDays, int64(limit)-purged)
 		purged += reports
 		return err
 	})
