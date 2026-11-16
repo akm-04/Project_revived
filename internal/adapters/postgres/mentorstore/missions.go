@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -91,38 +92,34 @@ func (Store) PutMissionProgressTx(ctx context.Context, t tx.Tx, previous *mentor
 	return nil
 }
 
-type examJSON struct {
-	RelationID string            `json:"relation_id"`
-	WonAt      time.Time         `json:"won_at"`
-	Items      []mentor.ExamItem `json:"items"`
-	Version    int64             `json:"state_version"`
-}
-
-func decodeExam(student identity.PlayerID, mission int64, raw string) (mentor.ExamReceipt, error) {
-	var row examJSON
-	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+func decodeExam(student identity.PlayerID, mission int64, relationID string, wonAt time.Time, version int64, payloadVersion int16, itemsRaw string) (mentor.ExamReceipt, error) {
+	relation, err := ids.ParseUUID(relationID)
+	if err != nil || version < 1 || wonAt.IsZero() {
 		return mentor.ExamReceipt{}, domain.ErrRelationship
 	}
-	relation, err := ids.ParseUUID(row.RelationID)
-	if err != nil || row.Version < 1 || row.WonAt.IsZero() {
+	var items []mentor.ExamItem
+	if err = payload.Decode("mentor_exam_receipts", payloadVersion, []byte(itemsRaw), &items); err != nil {
 		return mentor.ExamReceipt{}, domain.ErrRelationship
 	}
-	return mentor.ExamReceipt{StudentID: student, MissionID: mission, RelationID: relation, WonAt: row.WonAt.UTC(), Items: row.Items, Version: row.Version}, nil
+	return mentor.ExamReceipt{StudentID: student, MissionID: mission, RelationID: relation, WonAt: wonAt.UTC(), Items: items, Version: version}, nil
 }
 
 func (Store) ReadExamReceiptTx(ctx context.Context, q tx.Queryer, student identity.PlayerID, mission int64) (mentor.ExamReceipt, bool, error) {
 	if q == nil || !student.Valid() || mission <= 0 {
 		return mentor.ExamReceipt{}, false, domain.ErrRelationship
 	}
-	var raw string
-	err := q.QueryRow(ctx, `SELECT jsonb_build_object('relation_id',relation_id::text,'won_at',won_at,'items',items,'state_version',state_version)::text FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2`, int64(student), mission).Scan(&raw)
+	var relationID, itemsRaw string
+	var wonAt time.Time
+	var version int64
+	var payloadVersion int16
+	err := q.QueryRow(ctx, `SELECT relation_id::text,won_at,items::text,state_version,payload_version FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2`, int64(student), mission).Scan(&relationID, &wonAt, &itemsRaw, &version, &payloadVersion)
 	if err != nil {
 		if isNoRows(err) {
 			return mentor.ExamReceipt{}, false, nil
 		}
 		return mentor.ExamReceipt{}, false, err
 	}
-	receipt, err := decodeExam(student, mission, raw)
+	receipt, err := decodeExam(student, mission, relationID, wonAt, version, payloadVersion, itemsRaw)
 	return receipt, err == nil, err
 }
 
@@ -130,15 +127,18 @@ func (Store) LockExamReceiptTx(ctx context.Context, t tx.Tx, student identity.Pl
 	if t == nil || !student.Valid() || mission <= 0 {
 		return mentor.ExamReceipt{}, false, domain.ErrRelationship
 	}
-	var raw string
-	err := t.QueryRow(ctx, `SELECT jsonb_build_object('relation_id',relation_id::text,'won_at',won_at,'items',items,'state_version',state_version)::text FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2 FOR UPDATE`, int64(student), mission).Scan(&raw)
+	var relationID, itemsRaw string
+	var wonAt time.Time
+	var version int64
+	var payloadVersion int16
+	err := t.QueryRow(ctx, `SELECT relation_id::text,won_at,items::text,state_version,payload_version FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2 FOR UPDATE`, int64(student), mission).Scan(&relationID, &wonAt, &itemsRaw, &version, &payloadVersion)
 	if err != nil {
 		if isNoRows(err) {
 			return mentor.ExamReceipt{}, false, nil
 		}
 		return mentor.ExamReceipt{}, false, err
 	}
-	receipt, err := decodeExam(student, mission, raw)
+	receipt, err := decodeExam(student, mission, relationID, wonAt, version, payloadVersion, itemsRaw)
 	return receipt, err == nil, err
 }
 
@@ -149,11 +149,11 @@ func (Store) InsertExamReceiptTx(ctx context.Context, t tx.Tx, receipt mentor.Ex
 	if !receipt.StudentID.Valid() || receipt.MissionID <= 0 || receipt.RelationID.IsZero() || receipt.WonAt.IsZero() || len(receipt.Items) == 0 || receipt.Version != 1 {
 		return domain.ErrRelationship
 	}
-	raw, err := json.Marshal(receipt.Items)
+	raw, version, err := payload.Encode(receipt.Items)
 	if err != nil {
 		return err
 	}
-	result, err := t.Exec(ctx, `INSERT INTO mentor_exam_receipts(student_id,mission_id,relation_id,won_at,items,state_version)VALUES($1,$2,$3,$4,$5::jsonb,1) ON CONFLICT(student_id,mission_id) DO NOTHING`, int64(receipt.StudentID), receipt.MissionID, receipt.RelationID.String(), receipt.WonAt.UTC(), string(raw))
+	result, err := t.Exec(ctx, `INSERT INTO mentor_exam_receipts(student_id,mission_id,relation_id,won_at,items,payload_version,state_version)VALUES($1,$2,$3,$4,$5::jsonb,$6,1) ON CONFLICT(student_id,mission_id) DO NOTHING`, int64(receipt.StudentID), receipt.MissionID, receipt.RelationID.String(), receipt.WonAt.UTC(), string(raw), version)
 	if err != nil {
 		return err
 	}
