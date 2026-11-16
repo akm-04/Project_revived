@@ -10,6 +10,7 @@ import (
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/clientlogstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/illusionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
@@ -231,6 +232,57 @@ VALUES($1,$2,0,100001,'{}'::jsonb,$3::timestamptz,($3::timestamptz + interval '7
 	}
 	if !rowPresent(t, ctx, pool, `SELECT count(*) FROM illusion_reports WHERE report_id=$1`, young) {
 		t.Fatal("one-day-old illusion report was purged inside the cap")
+	}
+}
+
+func TestAdventureReportsPurgeCapsWindow(t *testing.T) {
+	pool, ctx := openPool(t)
+	server := int64(886020 + time.Now().UnixNano()%1000)
+	seedLogicalServer(t, ctx, pool, server)
+	now := time.Now().UTC()
+	insertReport := func(createdAt time.Time) string {
+		t.Helper()
+		name := "r8-4-adventure-" + token(t)
+		if _, err := pool.Raw().Exec(ctx, `INSERT INTO adventure_reports(report_id,logical_server_id,room_id,member_ids,content,created_at,expires_at)
+VALUES($1,$2,1,'{1}'::bigint[],'{}',$3::timestamptz,($3::timestamptz + interval '7 days'))`, name, server, createdAt); err != nil {
+			t.Fatal(err)
+		}
+		return name
+	}
+	young := insertReport(now.Add(-2 * 24 * time.Hour))
+	old := insertReport(now.Add(-8 * 24 * time.Hour))
+
+	transaction, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(open tx.Tx) { _ = open.Rollback(ctx) }(transaction)
+	if _, err = (adventurestore.Store{}).PurgeExpiredReportsTx(ctx, transaction, now, 15, 100); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if !rowPresent(t, ctx, pool, `SELECT count(*) FROM adventure_reports WHERE report_id=$1`, young) {
+		t.Fatal("two-day-old adventure report was purged inside the fifteen-day cap")
+	}
+	if rowPresent(t, ctx, pool, `SELECT count(*) FROM adventure_reports WHERE report_id=$1`, old) {
+		t.Fatal("eight-day-old adventure report survived past the owner window")
+	}
+
+	transaction, err = pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func(open tx.Tx) { _ = open.Rollback(ctx) }(transaction)
+	if _, err = (adventurestore.Store{}).PurgeExpiredReportsTx(ctx, transaction, now, 1, 100); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if rowPresent(t, ctx, pool, `SELECT count(*) FROM adventure_reports WHERE report_id=$1`, young) {
+		t.Fatal("two-day-old adventure report survived the one-day cap")
 	}
 }
 
