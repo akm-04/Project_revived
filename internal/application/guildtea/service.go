@@ -110,7 +110,7 @@ type Store interface {
 	ListWishesTx(context.Context, tx.Queryer, guild.ID, int64) ([]guild.Wish, error)
 	GiftedReceiversTx(context.Context, tx.Queryer, identity.PlayerID, int64) (map[identity.PlayerID]bool, error)
 	ClaimGiftsTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (int64, error)
-	DeleteExpiredWishesTx(context.Context, tx.Tx, guild.ID, int64) error
+	DeleteExpiredWishesTx(context.Context, tx.Tx, int64) error
 	DeleteExpiredGiftsForPlayerTx(context.Context, tx.Tx, identity.PlayerID, int64) error
 }
 
@@ -337,14 +337,12 @@ func (s Service) Request(c context.Context, a identity.ActorContext, itemID int6
 		if err := s.Store.InsertWishTx(c, t, guild.Wish{PlayerID: a.PlayerID, GameDay: day, ItemID: itemID, NeedNum: need}); err != nil {
 			return err
 		}
-		member, found, err := s.Store.ReadMembershipTx(c, t, a.PlayerID)
-		if err != nil {
+		if _, found, err := s.Store.ReadMembershipTx(c, t, a.PlayerID); err != nil {
 			return err
-		}
-		if !found {
+		} else if !found {
 			return ErrNotInGuild
 		}
-		if err := s.Store.DeleteExpiredWishesTx(c, t, member.GuildID, day); err != nil {
+		if err := s.Store.DeleteExpiredWishesTx(c, t, day); err != nil {
 			return err
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
@@ -409,7 +407,7 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		} else if !advanced {
 			return ErrWishFull
 		}
-		if err := s.Store.DeleteExpiredWishesTx(c, t, donor.GuildID, day); err != nil {
+		if err := s.Store.DeleteExpiredWishesTx(c, t, day); err != nil {
 			return err
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
@@ -470,14 +468,8 @@ func (s Service) Confirm(c context.Context, a identity.ActorContext, op operatio
 		if !found {
 			return ErrNoWish
 		}
-		member, memberFound, err := s.Store.ReadMembershipTx(c, t, a.PlayerID)
-		if err != nil {
+		if err := s.Store.DeleteExpiredWishesTx(c, t, day); err != nil {
 			return err
-		}
-		if memberFound {
-			if err := s.Store.DeleteExpiredWishesTx(c, t, member.GuildID, day); err != nil {
-				return err
-			}
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
 			return err

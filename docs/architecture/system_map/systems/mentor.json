@@ -144,6 +144,7 @@
  "stores": [
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
   "internal/adapters/postgres/librarystore",
   "internal/adapters/postgres/mentorstore"
@@ -165,6 +166,7 @@
    "mentor_relations",
    "mentor_states",
    "player_directory_profiles",
+   "player_function_unlocks",
    "player_library_backgrounds",
    "players"
   ],
@@ -186,6 +188,7 @@
   ],
   "unit": [
    "calendar_test.go",
+   "commands_test.go",
    "friendship_refusal_test.go",
    "read_test.go"
   ]

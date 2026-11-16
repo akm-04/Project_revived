@@ -22709,7 +22709,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     },
     {
@@ -22747,7 +22747,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     },
     {
@@ -22773,7 +22773,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/mentor/service.go:189",
+    "internal/application/mentor/service.go:194",
     "internal/application/socialinvite/claim.go:192",
     "internal/application/socialrecall/claim.go:173",
     "internal/application/workplace/mode.go:229"
@@ -22791,7 +22791,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     },
     {
@@ -22863,7 +22863,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     },
@@ -23140,12 +23140,12 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/workplace/mode.go:127",
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
     "UNRESOLVED apply at internal/application/workplace/mode.go:202",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },
@@ -33525,7 +33525,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     },
     {
@@ -33563,7 +33563,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     },
     {
@@ -33589,7 +33589,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/mentor/service.go:189",
+    "internal/application/mentor/service.go:194",
     "internal/application/socialinvite/claim.go:192",
     "internal/application/socialrecall/claim.go:173",
     "internal/application/workplace/mode.go:229"
@@ -33607,7 +33607,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     },
     {
@@ -33679,7 +33679,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     },
@@ -33956,12 +33956,12 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/workplace/mode.go:127",
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
     "UNRESOLVED apply at internal/application/workplace/mode.go:202",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },
@@ -79361,7 +79361,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildstore/tea.go:166",
+    "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
     "internal/adapters/postgres/guildstore/tea.go:45"
    ],
@@ -79456,7 +79456,7 @@
     "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/characterstore/store.go:63",
     "internal/adapters/postgres/characterstore/store.go:77",
-    "internal/adapters/postgres/guildstore/tea.go:166",
+    "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
     "internal/adapters/postgres/guildstore/tea.go:60",
     "internal/adapters/postgres/guildstore/tea.go:71",
@@ -79701,7 +79701,7 @@
     "internal/adapters/postgres/characterstore/store.go:63",
     "internal/adapters/postgres/characterstore/store.go:77",
     "internal/adapters/postgres/guildstore/tea.go:149",
-    "internal/adapters/postgres/guildstore/tea.go:166",
+    "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
@@ -83854,7 +83854,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -83862,7 +83862,7 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -83870,7 +83870,7 @@
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -83881,7 +83881,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -83899,9 +83899,9 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "UNKNOWN"
   },
@@ -83910,7 +83910,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -83918,17 +83918,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:189"
+    "internal/application/mentor/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -83943,7 +83943,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -83996,10 +83996,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },
@@ -84008,7 +84008,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -84016,7 +84016,7 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -84024,7 +84024,7 @@
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -84035,7 +84035,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -84068,9 +84068,9 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "UNKNOWN"
   },
@@ -84079,7 +84079,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -84087,17 +84087,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:189"
+    "internal/application/mentor/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -84116,7 +84116,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -84184,10 +84184,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },
@@ -84196,7 +84196,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -84204,17 +84204,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:189"
+    "internal/application/mentor/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -84227,7 +84227,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -84265,10 +84265,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },
@@ -84277,7 +84277,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -84285,17 +84285,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:189"
+    "internal/application/mentor/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -84311,7 +84311,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -84354,10 +84354,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },
@@ -84366,7 +84366,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -84374,18 +84374,18 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/mentor/service.go:189"
+    "internal/application/mentor/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -84414,7 +84414,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -84568,11 +84568,11 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },
@@ -84581,7 +84581,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
@@ -84589,18 +84589,18 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/mentor/service.go:189"
+    "internal/application/mentor/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 123,
+     "line": 128,
      "value": "3"
     }
    ],
@@ -84629,7 +84629,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 123,
+     "line": 128,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -84778,11 +84778,11 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
+    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED body at internal/application/mentor/service.go:129",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
    ],
    "writes": "state"
   },

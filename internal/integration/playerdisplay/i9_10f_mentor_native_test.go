@@ -39,6 +39,7 @@ func mentorActorOn(t *testing.T, p *pg.Pool, server identity.LogicalServerID, le
 	exec(t, p, `INSERT INTO player_economy_owners(player_id,state_version,created_at)VALUES($1,1,clock_timestamp()-interval '1 day')`, int64(a.PlayerID))
 	exec(t, p, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'crystal',1000,1,clock_timestamp()-interval '1 day')`, int64(a.PlayerID))
 	exec(t, p, `UPDATE player_directory_profiles SET lev=$2 WHERE player_id=$1`, int64(a.PlayerID), level)
+	grantMentorFunction50(t, p, a.PlayerID)
 	return a
 }
 
@@ -47,7 +48,14 @@ func mentorActor(t *testing.T, p *pg.Pool, level int64) identity.ActorContext {
 	a := actor(t, p)
 	exec(t, p, `UPDATE player_progression SET level=$2 WHERE player_id=$1`, int64(a.PlayerID), level)
 	exec(t, p, `UPDATE player_directory_profiles SET lev=$2 WHERE player_id=$1`, int64(a.PlayerID), level)
+	grantMentorFunction50(t, p, a.PlayerID)
 	return a
+}
+
+// grantMentorFunction50 writes the durable function-50 unlock the My Class gate reads.
+func grantMentorFunction50(t *testing.T, p *pg.Pool, player identity.PlayerID) {
+	t.Helper()
+	exec(t, p, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version)VALUES($1,50,clock_timestamp(),$2,1) ON CONFLICT(player_id,function_id) DO NOTHING`, int64(player), fmt.Sprintf("i9-10f-test:function-50:%d", player))
 }
 
 var poolForService *pg.Pool
@@ -66,6 +74,7 @@ func mentorService(p *pg.Pool) appmentor.Service {
 		Cards:       socialpresentation.TransactionReader{},
 		Friendships: socialrelation.FriendshipEnsurer{Players: i4store.PlayerRootLocker{}, Store: socialrelationstore.Store{}},
 		Backgrounds: librarystore.Store{},
+		Functions:   store,
 		Grants:      grant,
 		Content:     content,
 		Receipts:    kernelstore.Store{},
@@ -223,6 +232,22 @@ func TestI9_10FMentorFindingFilterStaysOnTheActorServer(t *testing.T) {
 	}
 }
 
+// An expired application is not an active class cooldown: message.lua 34002 is the
+// cooldown text and has no expired-application row, so the refusal is the stock 35028.
+func TestI9_10FMentorExpiredApplicationRefusal(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	teacher := mentorActor(t, p, 60)
+	student := mentorActor(t, p, 20)
+	expectMentorOK(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
+	exec(t, p, `UPDATE mentor_applications SET created_at=clock_timestamp()-interval '3 days',expires_at=clock_timestamp()-interval '1 day' WHERE applicant_id=$1 AND target_id=$2`, int64(student.PlayerID), int64(teacher.PlayerID))
+
+	expectMentorRefusal(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859, 35028)
+	if count := mentorRelationCount(t, p, teacher.PlayerID, student.PlayerID, true); count != 0 {
+		t.Fatalf("expired application created relations=%d", count)
+	}
+}
+
 func TestI9_10FMentorDailyApplicationLimit(t *testing.T) {
 	p := pool(t)
 	service := mentorService(p)
@@ -282,6 +307,7 @@ func TestI9_10FFunction50Kind8Gate(t *testing.T) {
 		t.Fatal(err)
 	}
 	nobody := mentorActorOn(t, p, server, 10)
+	exec(t, p, `DELETE FROM player_function_unlocks WHERE player_id=$1 AND function_id=50`, int64(nobody.PlayerID))
 	exec(t, p, `INSERT INTO player_function_state_owners(player_id,state_version,updated_at)VALUES($1,1,clock_timestamp())`, int64(nobody.PlayerID))
 	service := appi5.Service{Runner: tx.Runner{DB: p}, Store: i5store.Store{Queryer: p}, Content: contentstore.Store{Queryer: p}, Privileges: appi5.BaselinePrivilegeProvider{}, Functions: appi5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5store.Store{Queryer: p}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, ServerLevels: i5store.Store{Queryer: p}, RedeemSecret: []byte("i9-10f-test-redeem-key-0000000000")}
 	transaction, err := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
@@ -321,6 +347,31 @@ func TestI9_10FFunction50Kind8Gate(t *testing.T) {
 	if !opened50 {
 		t.Fatalf("function 50 did not open after a server player reached 60: %v", opened)
 	}
+}
+
+// Both the applicant and the recipient must hold the durable function-50 unlock; a missing
+// fact refuses Apply and Accept with the stock generic refusal.
+func TestI9_10FMentorFunction50Gate(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	teacher := mentorActor(t, p, 60)
+	student := mentorActor(t, p, 20)
+
+	exec(t, p, `DELETE FROM player_function_unlocks WHERE player_id=$1 AND function_id=50`, int64(student.PlayerID))
+	expectMentorRefusal(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": ""}), 1857, 35028)
+	grantMentorFunction50(t, p, student.PlayerID)
+	exec(t, p, `DELETE FROM player_function_unlocks WHERE player_id=$1 AND function_id=50`, int64(teacher.PlayerID))
+	expectMentorRefusal(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": ""}), 1857, 35028)
+	grantMentorFunction50(t, p, teacher.PlayerID)
+	expectMentorOK(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
+
+	exec(t, p, `DELETE FROM player_function_unlocks WHERE player_id=$1 AND function_id=50`, int64(student.PlayerID))
+	expectMentorRefusal(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859, 35028)
+	grantMentorFunction50(t, p, student.PlayerID)
+	exec(t, p, `DELETE FROM player_function_unlocks WHERE player_id=$1 AND function_id=50`, int64(teacher.PlayerID))
+	expectMentorRefusal(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859, 35028)
+	grantMentorFunction50(t, p, teacher.PlayerID)
+	expectMentorOK(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859)
 }
 
 func TestI9_10FMentorDenyBondAndLoginProjection(t *testing.T) {

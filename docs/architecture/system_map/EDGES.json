@@ -1329,6 +1329,7 @@
     "StockRepresentableBulkAwards"
    ],
    "mentor": [
+    "*ReadFunctionUnlockTx",
     "*SettleGrantTx",
     "StockRepresentableBulkAwards"
    ],
@@ -4606,6 +4607,7 @@
     "Run"
    ],
    "i5": [
+    "*ReadFunctionUnlockTx",
     "*SettleGrantTx",
     "StockRepresentableBulkAwards"
    ],

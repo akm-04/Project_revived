@@ -233,7 +233,7 @@ func (recovery startRecovery) decode(stored receipt.Receipt) (map[string]any, er
 	foundTarget := false
 	rows := make([]any, 0, len(terminal.Doing))
 	for _, entry := range terminal.Doing {
-		if !entry.PlayerID.Valid() || entry.PlayerID == recovery.actor.PlayerID || logicalserver.PlayerRegion(entry.PlayerID) != recovery.actor.LogicalServerID || seen[entry.PlayerID] || entry.PlayerName == "" || !utf8.ValidString(entry.PlayerName) || entry.RecallingTime < 0 || entry.RecallingTime > task.StartedAt.Unix() {
+		if !entry.PlayerID.Valid() || entry.PlayerID == recovery.actor.PlayerID || logicalserver.PlayerRegion(entry.PlayerID) != recovery.actor.LogicalServerID || seen[entry.PlayerID] || !utf8.ValidString(entry.PlayerName) || entry.RecallingTime < 0 || entry.RecallingTime > task.StartedAt.Unix() {
 			return nil, ErrRecallProof
 		}
 		seen[entry.PlayerID] = true

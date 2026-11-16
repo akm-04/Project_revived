@@ -47,6 +47,14 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 		if !found {
 			return refusal(34014)
 		}
+		applicantGate, err := service.functionQualified(ctx, t, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		recipientGate, err := service.functionQualified(ctx, t, target)
+		if err != nil {
+			return err
+		}
 		if domain.BreakCooldownActive(rules, state.BrokeAt, at) {
 			return refusal(34002)
 		}
@@ -75,7 +83,7 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 		plan, err := domain.PlanApplication(domain.ApplicationFacts{
 			Applicant:         domain.PlayerState{PlayerID: actor.PlayerID, LogicalServerID: actor.LogicalServerID, AcademyLevel: actorLevel},
 			Recipient:         domain.PlayerState{PlayerID: target, LogicalServerID: actor.LogicalServerID, AcademyLevel: targetProfile.Level},
-			ApplicantGateOpen: true, RecipientGateOpen: true, Seeking: domain.Slot(relationType),
+			ApplicantGateOpen: applicantGate, RecipientGateOpen: recipientGate, Seeking: domain.Slot(relationType),
 		}, rules)
 		if err != nil {
 			studentLevel := actorLevel
@@ -178,6 +186,14 @@ func (service Service) Accept(ctx context.Context, actor identity.ActorContext, 
 		if err != nil {
 			return err
 		}
+		applicantGate, err := service.functionQualified(ctx, t, from)
+		if err != nil {
+			return err
+		}
+		recipientGate, err := service.functionQualified(ctx, t, actor.PlayerID)
+		if err != nil {
+			return err
+		}
 		if domain.BreakCooldownActive(rules, actorState.BrokeAt, at) {
 			return refusal(34002)
 		}
@@ -192,7 +208,8 @@ func (service Service) Accept(ctx context.Context, actor identity.ActorContext, 
 			return refusal(34010)
 		}
 		if !application.ExpiresAt.After(at) {
-			return refusal(34002)
+			// message.lua has no expired-application row; 34002 is the class-cooldown text (user ruling DL-8d76e623).
+			return refusal(35028)
 		}
 		actorRelations, err := service.Store.LockRelationshipsTx(ctx, t, actor.PlayerID, actor.LogicalServerID)
 		if err != nil {
@@ -217,7 +234,7 @@ func (service Service) Accept(ctx context.Context, actor identity.ActorContext, 
 		plan, err := domain.PlanApplication(domain.ApplicationFacts{
 			Applicant:         domain.PlayerState{PlayerID: from, LogicalServerID: actor.LogicalServerID, AcademyLevel: applicantLevel},
 			Recipient:         domain.PlayerState{PlayerID: actor.PlayerID, LogicalServerID: actor.LogicalServerID, AcademyLevel: actorLevel},
-			ApplicantGateOpen: true, RecipientGateOpen: true, Seeking: applicantSlot,
+			ApplicantGateOpen: applicantGate, RecipientGateOpen: recipientGate, Seeking: applicantSlot,
 		}, rules)
 		if err != nil {
 			studentLevel := applicantLevel
@@ -427,8 +444,20 @@ func (service Service) sampleStudentFactsTx(ctx context.Context, t tx.Tx, catalo
 	return advanceMissionCategoryTx(ctx, t, service.Store, relation.Mentor, missions, domain.MissionTypeMentor, domain.CategoryStudentBG, added, at)
 }
 
+// functionQualified reads the durable function-50 unlock fact for one player.
+func (service Service) functionQualified(ctx context.Context, q tx.Queryer, player identity.PlayerID) (bool, error) {
+	unlock, found, err := service.Functions.ReadFunctionUnlockTx(ctx, q, player, MentorFunctionID)
+	if err != nil {
+		return false, err
+	}
+	return found && unlock.FunctionID == MentorFunctionID, nil
+}
+
 func applicationRefusal(err error, studentLevel int64, rules domain.Rules) error {
 	switch {
+	case errors.Is(err, domain.ErrGateUnqualified):
+		// message.lua has no row for a closed function-50 gate; 35028 is the stock generic refusal row.
+		return refusal(35028)
 	case errors.Is(err, domain.ErrServerMismatch):
 		return refusal(34018)
 	case errors.Is(err, domain.ErrSamePersonBothRoles):

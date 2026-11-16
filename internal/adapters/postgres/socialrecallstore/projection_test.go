@@ -14,10 +14,11 @@ import (
 
 type recallDirectory struct {
 	playerdirectory.TxDiscoveryReader
-	query   tx.Tx
-	players []identity.PlayerID
-	missing bool
-	foreign bool
+	query     tx.Tx
+	players   []identity.PlayerID
+	missing   bool
+	foreign   bool
+	emptyName bool
 }
 
 func (directory *recallDirectory) ProfileTx(_ context.Context, query tx.Tx, player identity.PlayerID) (playerdirectory.Profile, bool, error) {
@@ -26,7 +27,11 @@ func (directory *recallDirectory) ProfileTx(_ context.Context, query tx.Tx, play
 	if directory.foreign {
 		player++
 	}
-	return playerdirectory.Profile{PlayerID: player, Name: "Recall target", Level: 51}, !directory.missing, nil
+	name := "Recall target"
+	if directory.emptyName {
+		name = ""
+	}
+	return playerdirectory.Profile{PlayerID: player, Name: name, Level: 51}, !directory.missing, nil
 }
 
 func TestDoingProjectionUsesBoundedOwnerRowsAndTypedDirectory(t *testing.T) {
@@ -77,5 +82,17 @@ func TestDoingProjectionRefusesCorruptOrUnavailableFacts(t *testing.T) {
 	rows, err := (socialrecallstore.DoingProjection{Directory: &recallDirectory{}}).DoingRecallTx(context.Background(), query, 125001, strings.Repeat("a", 64), targetAt, 3)
 	if err != nil || rows == nil || len(rows) != 0 {
 		t.Fatal("empty list not preserved", rows, err)
+	}
+}
+
+func TestDoingProjectionAcceptsUnnamedTarget(t *testing.T) {
+	query := &snapshotQueryer{presenceCells: `[{"target_player_id":125002,"started_at":"2026-11-05T11:00:00Z"}]`}
+	directory := &recallDirectory{emptyName: true}
+	rows, err := (socialrecallstore.DoingProjection{Directory: directory}).DoingRecallTx(context.Background(), query, 125001, strings.Repeat("a", 64), targetAt, 3)
+	if err != nil {
+		t.Fatalf("unnamed target refused: %v", err)
+	}
+	if len(rows) != 1 || rows[0].PlayerID != 125002 || rows[0].PlayerName != "" {
+		t.Fatalf("doing rows = %+v", rows)
 	}
 }
