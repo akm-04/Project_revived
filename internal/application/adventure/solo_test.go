@@ -46,7 +46,7 @@ func (s *noticeStore) InsertReportTx(context.Context, tx.Tx, string, int64, int6
 func (s *noticeStore) ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error) {
 	return "", false, nil
 }
-func (s *noticeStore) PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error) {
+func (s *noticeStore) PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error) {
 	return 0, nil
 }
 func (s *noticeStore) PurgeOccurrencesTx(context.Context, tx.Tx, time.Time, int64) (int64, error) {

@@ -2,18 +2,18 @@
 package kernelqueries
 
 // SourceSHA256 is the exact owner query-source hash.
-const SourceSHA256 = "905bea90e98762742c7b5ebeb6fbd75411192c8629655efd40f592252f343065"
+const SourceSHA256 = "0fb970ddcf0e3bf9ac35dd9c11d7dc61827803878fd109fbebbc49b0085643c4"
 
 const InsertOperationReceipt = `WITH ins AS (
     INSERT INTO gxb_operation_receipts (
-        receipt_id, owner_kind, owner_key, domain, operation, operation_class,
+        receipt_id, operation_id, owner_kind, owner_key, domain, operation, operation_class,
         semantic_key, request_fingerprint, result_schema, result_payload,
         operation_started_at, policy_version, operation_policy_refs,
         actor_account_uid, context_id, retain_until, payload_version
     ) VALUES (
-        $1::uuid, $2, $3, $4, $5, $6, $7, $8::bytea, $9, $10::jsonb,
-        $11::timestamptz, NULLIF($12, ''), $13::jsonb, NULLIF($14, ''),
-        NULLIF($15, '')::uuid, $16::timestamptz, $17
+        $1::uuid, NULLIF($2, '')::uuid, $3, $4, $5, $6, $7, $8, $9::bytea, $10, $11::jsonb,
+        $12::timestamptz, NULLIF($13, ''), $14::jsonb, NULLIF($15, ''),
+        NULLIF($16, '')::uuid, $17::timestamptz, $18
     )
     ON CONFLICT (owner_kind, owner_key, domain, operation, semantic_key)
     DO NOTHING
@@ -23,6 +23,7 @@ SELECT EXISTS(SELECT 1 FROM ins) AS inserted;`
 
 const FindOperationReceipt = `SELECT
     receipt_id::text,
+    COALESCE(operation_id::text, '') AS operation_id,
     owner_kind,
     owner_key,
     domain,

@@ -1,0 +1,3368 @@
+{
+ "authority": "R8 player restore plan (generated from PLAYER_DATA_MANIFEST.json, CANONICAL_TABLE_OWNERSHIP.json and the PostgreSQL catalog)",
+ "schema_version": 1,
+ "tables": [
+  {
+   "table": "players",
+   "action": "restore",
+   "select": "SELECT * FROM \"players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "arena_friend_invitations_inviter_player_fkey",
+     "table": "arena_friend_invitations",
+     "columns": [
+      "inviter_player"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "arena_friend_invitations_recipient_player_fkey",
+     "table": "arena_friend_invitations",
+     "columns": [
+      "recipient_player"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "arena_players_opponent_fkey",
+     "table": "arena_players",
+     "columns": [
+      "opponent"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "arena_tournament_rooms_first_player_fkey",
+     "table": "arena_tournament_rooms",
+     "columns": [
+      "first_player"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "arena_tournament_rooms_second_player_fkey",
+     "table": "arena_tournament_rooms",
+     "columns": [
+      "second_player"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "broadcast_outbox_enemy_player_id_fkey",
+     "table": "broadcast_outbox",
+     "columns": [
+      "enemy_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "commerce_charge_purchases_player_id_fkey",
+     "table": "commerce_charge_purchases",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "commerce_vip_awards_player_id_fkey",
+     "table": "commerce_vip_awards",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "friend_dm_occurrences_sender_id_fkey",
+     "table": "friend_dm_occurrences",
+     "columns": [
+      "sender_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "friend_dm_projection_receipts_recipient_id_fkey",
+     "table": "friend_dm_projection_receipts",
+     "columns": [
+      "recipient_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "gameplay_context_player_account_server_fk",
+     "table": "gameplay_contexts",
+     "columns": [
+      "player_id",
+      "account_id",
+      "logical_server_id"
+     ],
+     "references": [
+      "player_id",
+      "account_id",
+      "logical_server_id"
+     ]
+    },
+    {
+     "constraint": "gameplay_contexts_player_id_fkey",
+     "table": "gameplay_contexts",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_applications_player_id_fkey",
+     "table": "guild_applications",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_audit_log_actor_player_id_fkey",
+     "table": "guild_audit_log",
+     "columns": [
+      "actor_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_audit_log_subject_player_id_fkey",
+     "table": "guild_audit_log",
+     "columns": [
+      "subject_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_broadcast_recipients_recipient_player_id_fkey",
+     "table": "guild_broadcast_recipients",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_broadcast_sources_leader_player_id_fkey",
+     "table": "guild_broadcast_sources",
+     "columns": [
+      "leader_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_campaign_copies_holder_id_fkey",
+     "table": "guild_campaign_copies",
+     "columns": [
+      "holder_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_campaign_copies_settled_by_fkey",
+     "table": "guild_campaign_copies",
+     "columns": [
+      "settled_by"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_campaign_distributions_player_id_fkey",
+     "table": "guild_campaign_distributions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_campaign_log_player_id_fkey",
+     "table": "guild_campaign_log",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_campaign_registrations_player_id_fkey",
+     "table": "guild_campaign_registrations",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_campaign_server_kills_first_player_id_fkey",
+     "table": "guild_campaign_server_kills",
+     "columns": [
+      "first_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_campaign_server_records_player_id_fkey",
+     "table": "guild_campaign_server_records",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_cursors_recipient_player_id_fkey",
+     "table": "guild_invite_projection_cursors",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_deliveries_recipient_player_id_fkey",
+     "table": "guild_invite_projection_deliveries",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_markers_subject_player_id_fkey",
+     "table": "guild_invite_projection_markers",
+     "columns": [
+      "subject_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_sources_inviter_player_id_fkey",
+     "table": "guild_invite_projection_sources",
+     "columns": [
+      "inviter_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_sources_recipient_player_id_fkey",
+     "table": "guild_invite_projection_sources",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_send_events_invited_player_id_fkey",
+     "table": "guild_invite_send_events",
+     "columns": [
+      "invited_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_send_events_inviter_player_id_fkey",
+     "table": "guild_invite_send_events",
+     "columns": [
+      "inviter_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invites_invited_player_id_fkey",
+     "table": "guild_invites",
+     "columns": [
+      "invited_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_invites_inviter_player_id_fkey",
+     "table": "guild_invites",
+     "columns": [
+      "inviter_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_membership_events_actor_player_id_fkey",
+     "table": "guild_membership_events",
+     "columns": [
+      "actor_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_membership_events_player_id_fkey",
+     "table": "guild_membership_events",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_memberships_player_id_fkey",
+     "table": "guild_memberships",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_rental_uses_borrower_id_fkey",
+     "table": "guild_rental_uses",
+     "columns": [
+      "borrower_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_rental_uses_lender_id_fkey",
+     "table": "guild_rental_uses",
+     "columns": [
+      "lender_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_tea_gifts_donor_id_fkey",
+     "table": "guild_tea_gifts",
+     "columns": [
+      "donor_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_tea_gifts_receiver_id_fkey",
+     "table": "guild_tea_gifts",
+     "columns": [
+      "receiver_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "guild_tea_wishes_player_id_fkey",
+     "table": "guild_tea_wishes",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "mentor_applications_applicant_id_fkey",
+     "table": "mentor_applications",
+     "columns": [
+      "applicant_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "mentor_applications_target_id_fkey",
+     "table": "mentor_applications",
+     "columns": [
+      "target_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "mentor_exam_receipts_student_id_fkey",
+     "table": "mentor_exam_receipts",
+     "columns": [
+      "student_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "mentor_relations_mentor_id_fkey",
+     "table": "mentor_relations",
+     "columns": [
+      "mentor_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "mentor_relations_student_id_fkey",
+     "table": "mentor_relations",
+     "columns": [
+      "student_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "occult_logs_player_id_fkey",
+     "table": "occult_logs",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "one_on_one_players_opponent_fkey",
+     "table": "one_on_one_players",
+     "columns": [
+      "opponent"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "personal_dm_intents_recipient_id_fkey",
+     "table": "personal_dm_intents",
+     "columns": [
+      "recipient_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "personal_dm_intents_sender_id_fkey",
+     "table": "personal_dm_intents",
+     "columns": [
+      "sender_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_directory_profiles_player_id_fkey",
+     "table": "player_directory_profiles",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_dorm_admissions_player_id_fkey",
+     "table": "player_dorm_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_dorm_comment_reactions_actor_player_id_fkey",
+     "table": "player_dorm_comment_reactions",
+     "columns": [
+      "actor_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_dorm_comments_author_player_id_fkey",
+     "table": "player_dorm_comments",
+     "columns": [
+      "author_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_dorm_praises_actor_player_id_fkey",
+     "table": "player_dorm_praises",
+     "columns": [
+      "actor_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_guild_activity_days_player_id_fkey",
+     "table": "player_guild_activity_days",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_guild_activity_totals_player_id_fkey",
+     "table": "player_guild_activity_totals",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_library_admissions_player_id_fkey",
+     "table": "player_library_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_login_observations_player_id_fkey",
+     "table": "player_login_observations",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_profile_comment_operations_actor_player_id_fkey",
+     "table": "player_profile_comment_operations",
+     "columns": [
+      "actor_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_profile_comment_operations_target_player_id_fkey",
+     "table": "player_profile_comment_operations",
+     "columns": [
+      "target_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_profile_comments_author_player_id_fkey",
+     "table": "player_profile_comments",
+     "columns": [
+      "author_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_profile_praises_actor_player_id_fkey",
+     "table": "player_profile_praises",
+     "columns": [
+      "actor_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "publication_picture_reads_player_id_fkey",
+     "table": "publication_picture_reads",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "redeem_redemptions_player_id_fkey",
+     "table": "redeem_redemptions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "shared_room_seats_player_id_fkey",
+     "table": "shared_room_seats",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "shared_rooms_owner_player_fkey",
+     "table": "shared_rooms",
+     "columns": [
+      "owner_player"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_gift_claim_operations_recipient_player_id_fkey",
+     "table": "social_gift_claim_operations",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_gift_transfers_recipient_player_id_fkey",
+     "table": "social_gift_transfers",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_gift_transfers_sender_player_id_fkey",
+     "table": "social_gift_transfers",
+     "columns": [
+      "sender_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_guild_invite_invalidations_recipient_player_id_fkey",
+     "table": "social_guild_invite_invalidations",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_guild_invite_materializations_recipient_player_id_fkey",
+     "table": "social_guild_invite_materializations",
+     "columns": [
+      "recipient_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_invite_bindings_invitee_player_id_fkey",
+     "table": "social_invite_bindings",
+     "columns": [
+      "invitee_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_invite_bindings_inviter_player_id_fkey",
+     "table": "social_invite_bindings",
+     "columns": [
+      "inviter_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_invite_mission_claims_player_id_fkey",
+     "table": "social_invite_mission_claims",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_notices_related_player_id_fkey",
+     "table": "social_notices",
+     "columns": [
+      "related_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_recall_awards_player_id_fkey",
+     "table": "social_recall_awards",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_recall_tasks_target_player_id_fkey",
+     "table": "social_recall_tasks",
+     "columns": [
+      "target_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "top_floor_offer_snapshots_player_id_fkey",
+     "table": "top_floor_offer_snapshots",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "top_floor_records_opponent_player_fkey",
+     "table": "top_floor_records",
+     "columns": [
+      "opponent_player"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "achievement_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"achievement_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "achievement_award_claims_player_id_fkey",
+     "table": "achievement_award_claims",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "achievement_notices_player_id_fkey",
+     "table": "achievement_notices",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "achievement_award_claims",
+   "action": "keep",
+   "select": "SELECT * FROM \"achievement_award_claims\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "achievement_events",
+   "action": "restore",
+   "select": "SELECT * FROM \"achievement_events\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "achievement_streaks",
+   "action": "restore",
+   "select": "SELECT * FROM \"achievement_streaks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "adventure_occurrences",
+   "action": "restore",
+   "select": "SELECT * FROM \"adventure_occurrences\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "adventure_single_attempts",
+   "action": "restore",
+   "select": "SELECT * FROM \"adventure_single_attempts\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "arena_friend_invitations",
+   "action": "skip",
+   "select": "SELECT * FROM \"arena_friend_invitations\" WHERE \"inviter_player\" = $1::bigint OR \"recipient_player\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "arena_tournament_rooms_friend_invitation_id_fkey",
+     "table": "arena_tournament_rooms",
+     "columns": [
+      "friend_invitation_id"
+     ],
+     "references": [
+      "invitation_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "arena_tournament_rooms",
+   "action": "skip",
+   "select": "SELECT * FROM \"arena_tournament_rooms\" WHERE \"first_player\" = $1::bigint OR \"second_player\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "arena_casual_entries_room_id_fkey",
+     "table": "arena_casual_entries",
+     "columns": [
+      "room_id"
+     ],
+     "references": [
+      "room_id"
+     ]
+    },
+    {
+     "constraint": "arena_friend_invitations_room_id_fkey",
+     "table": "arena_friend_invitations",
+     "columns": [
+      "room_id"
+     ],
+     "references": [
+      "room_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "arena_casual_entries",
+   "action": "restore",
+   "select": "SELECT * FROM \"arena_casual_entries\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "arena_casual_scores",
+   "action": "restore",
+   "select": "SELECT * FROM \"arena_casual_scores\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "arena_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"arena_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "arena_matches_defender_id_fkey",
+     "table": "arena_matches",
+     "columns": [
+      "defender_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "combat_attempts",
+   "action": "restore",
+   "select": "SELECT * FROM \"combat_attempts\" WHERE \"actor_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "arena_matches_attempt_id_fkey",
+     "table": "arena_matches",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "combat_attempt_members_attempt_id_fkey",
+     "table": "combat_attempt_members",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "combat_attempts_supersedes_attempt_id_fkey",
+     "table": "combat_attempts",
+     "columns": [
+      "supersedes_attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "league_matches_attempt_id_fkey",
+     "table": "league_matches",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "top_floor_fights_attempt_id_fkey",
+     "table": "top_floor_fights",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "top_floor_task_fights_attempt_id_fkey",
+     "table": "top_floor_task_fights",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "arena_matches",
+   "action": "restore",
+   "select": "SELECT * FROM \"arena_matches\" WHERE \"attacker_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "arena_records_match_id_fkey",
+     "table": "arena_records",
+     "columns": [
+      "match_id"
+     ],
+     "references": [
+      "match_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "arena_partner_usage",
+   "action": "restore",
+   "select": "SELECT * FROM \"arena_partner_usage\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "arena_records",
+   "action": "restore",
+   "select": "SELECT * FROM \"arena_records\" WHERE \"owner_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "arena_settlement_ranks",
+   "action": "restore",
+   "select": "SELECT * FROM \"arena_settlement_ranks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "broadcast_outbox",
+   "action": "restore",
+   "select": "SELECT * FROM \"broadcast_outbox\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "campaign_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"campaign_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "campaign_nodes",
+   "action": "restore",
+   "select": "SELECT * FROM \"campaign_nodes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "combat_attempt_members",
+   "action": "restore",
+   "select": "SELECT * FROM \"combat_attempt_members\" WHERE \"member_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "combat_attestations",
+   "action": "restore",
+   "select": "SELECT * FROM \"combat_attestations\" c WHERE EXISTS (SELECT 1 FROM \"combat_attempts\" p WHERE p.\"actor_player_id\" = $1::bigint AND c.\"attempt_id\" = p.\"attempt_id\")",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "combat_member_settlements",
+   "action": "restore",
+   "select": "SELECT * FROM \"combat_member_settlements\" WHERE \"member_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "combat_start_packages",
+   "action": "restore",
+   "select": "SELECT * FROM \"combat_start_packages\" c WHERE EXISTS (SELECT 1 FROM \"combat_attempts\" p WHERE p.\"actor_player_id\" = $1::bigint AND c.\"attempt_id\" = p.\"attempt_id\")",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "commerce_charge_cards",
+   "action": "restore",
+   "select": "SELECT * FROM \"commerce_charge_cards\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "commerce_charge_purchases",
+   "action": "keep",
+   "select": "SELECT * FROM \"commerce_charge_purchases\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "commerce_privilege_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"commerce_privilege_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "commerce_vip_awards",
+   "action": "keep",
+   "select": "SELECT * FROM \"commerce_vip_awards\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_conquer_facts",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_conquer_facts\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "conquer_school_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"conquer_school_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "conquer_school_reports",
+   "action": "restore",
+   "select": "SELECT * FROM \"conquer_school_reports\" WHERE \"owner_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "conquer_school_report_views_report_key_fkey",
+     "table": "conquer_school_report_views",
+     "columns": [
+      "report_key"
+     ],
+     "references": [
+      "report_key"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "conquer_school_report_views",
+   "action": "restore",
+   "select": "SELECT * FROM \"conquer_school_report_views\" WHERE \"viewer_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "daily_consumption_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"daily_consumption_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "dodgeball_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"dodgeball_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "friend_dm_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"friend_dm_roots\" WHERE \"recipient_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "friend_dm_delivery_recipient_id_fkey",
+     "table": "friend_dm_delivery",
+     "columns": [
+      "recipient_id"
+     ],
+     "references": [
+      "recipient_id"
+     ]
+    },
+    {
+     "constraint": "friend_dm_occurrences_recipient_id_fkey",
+     "table": "friend_dm_occurrences",
+     "columns": [
+      "recipient_id"
+     ],
+     "references": [
+      "recipient_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "friend_dm_occurrences",
+   "action": "keep",
+   "select": "SELECT * FROM \"friend_dm_occurrences\" WHERE \"sender_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "friend_dm_delivery_occurrence_id_recipient_id_fkey",
+     "table": "friend_dm_delivery",
+     "columns": [
+      "occurrence_id",
+      "recipient_id"
+     ],
+     "references": [
+      "occurrence_id",
+      "recipient_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "godstrial_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"godstrial_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "gxb_operation_receipts",
+   "action": "keep",
+   "select": "SELECT * FROM \"gxb_operation_receipts\" WHERE \"owner_key\" = $1::text AND (owner_kind = 'player')",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "guild_broadcast_sources_source_receipt_id_fkey",
+     "table": "guild_broadcast_sources",
+     "columns": [
+      "source_receipt_id"
+     ],
+     "references": [
+      "receipt_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_markers_core_receipt_id_fkey",
+     "table": "guild_invite_projection_markers",
+     "columns": [
+      "core_receipt_id"
+     ],
+     "references": [
+      "receipt_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_markers_cursor_receipt_id_fkey",
+     "table": "guild_invite_projection_markers",
+     "columns": [
+      "cursor_receipt_id"
+     ],
+     "references": [
+      "receipt_id"
+     ]
+    },
+    {
+     "constraint": "guild_invite_projection_sources_core_receipt_id_fkey",
+     "table": "guild_invite_projection_sources",
+     "columns": [
+      "core_receipt_id"
+     ],
+     "references": [
+      "receipt_id"
+     ]
+    },
+    {
+     "constraint": "redeem_redemptions_grant_receipt_id_fkey",
+     "table": "redeem_redemptions",
+     "columns": [
+      "grant_receipt_id"
+     ],
+     "references": [
+      "receipt_id"
+     ]
+    },
+    {
+     "constraint": "social_guild_invite_invalidations_receipt_id_fkey",
+     "table": "social_guild_invite_invalidations",
+     "columns": [
+      "receipt_id"
+     ],
+     "references": [
+      "receipt_id"
+     ]
+    },
+    {
+     "constraint": "social_guild_invite_materializations_receipt_id_fkey",
+     "table": "social_guild_invite_materializations",
+     "columns": [
+      "receipt_id"
+     ],
+     "references": [
+      "receipt_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "guild_campaign_application_days",
+   "action": "restore",
+   "select": "SELECT * FROM \"guild_campaign_application_days\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "guild_campaign_applications",
+   "action": "restore",
+   "select": "SELECT * FROM \"guild_campaign_applications\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "guild_campaign_damage",
+   "action": "restore",
+   "select": "SELECT * FROM \"guild_campaign_damage\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "guild_campaign_member_days",
+   "action": "restore",
+   "select": "SELECT * FROM \"guild_campaign_member_days\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "guild_rental_offers",
+   "action": "restore",
+   "select": "SELECT * FROM \"guild_rental_offers\" WHERE \"lender_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "guild_rental_uses",
+   "action": "keep",
+   "select": "SELECT * FROM \"guild_rental_uses\" WHERE \"lender_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "guild_tea_gifts",
+   "action": "skip",
+   "select": "SELECT * FROM \"guild_tea_gifts\" WHERE \"donor_id\" = $1::bigint OR \"receiver_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "illusion_attempts",
+   "action": "restore",
+   "select": "SELECT * FROM \"illusion_attempts\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "illusion_occurrence_results",
+   "action": "restore",
+   "select": "SELECT * FROM \"illusion_occurrence_results\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "illusion_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"illusion_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "illusion_settlements",
+   "action": "restore",
+   "select": "SELECT * FROM \"illusion_settlements\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "league_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"league_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "league_matches_attacker_fkey",
+     "table": "league_matches",
+     "columns": [
+      "attacker"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "league_matches_defender_fkey",
+     "table": "league_matches",
+     "columns": [
+      "defender"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "league_cosmetic_origins",
+   "action": "restore",
+   "select": "SELECT * FROM \"league_cosmetic_origins\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "library_forum_comments",
+   "action": "restore",
+   "select": "SELECT * FROM \"library_forum_comments\" WHERE \"author_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "library_forum_reactions_comment_fkey",
+     "table": "library_forum_reactions",
+     "columns": [
+      "forum_type",
+      "table_id",
+      "author_player_id"
+     ],
+     "references": [
+      "forum_type",
+      "table_id",
+      "author_player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "library_forum_reactions",
+   "action": "restore",
+   "select": "SELECT * FROM \"library_forum_reactions\" WHERE \"viewer_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "mail_records",
+   "action": "restore",
+   "select": "SELECT * FROM \"mail_records\" WHERE \"recipient_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "mail_attachments",
+   "action": "restore",
+   "select": "SELECT * FROM \"mail_attachments\" c WHERE EXISTS (SELECT 1 FROM \"mail_records\" p WHERE p.\"recipient_player_id\" = $1::bigint AND c.\"mail_uuid\" = p.\"mail_uuid\")",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "mail_namespace_counters",
+   "action": "restore",
+   "select": "SELECT * FROM \"mail_namespace_counters\" WHERE \"recipient_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "march_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"march_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "memoir_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"memoir_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "mentor_applications",
+   "action": "skip",
+   "select": "SELECT * FROM \"mentor_applications\" WHERE \"applicant_id\" = $1::bigint OR \"target_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "mentor_exam_receipts",
+   "action": "keep",
+   "select": "SELECT * FROM \"mentor_exam_receipts\" WHERE \"student_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "mentor_mission_progress",
+   "action": "restore",
+   "select": "SELECT * FROM \"mentor_mission_progress\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "mentor_relations",
+   "action": "skip",
+   "select": "SELECT * FROM \"mentor_relations\" WHERE \"mentor_id\" = $1::bigint OR \"student_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "mentor_states",
+   "action": "restore",
+   "select": "SELECT * FROM \"mentor_states\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "occult_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"occult_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "one_on_one_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"one_on_one_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "one_on_one_matches_defender_id_fkey",
+     "table": "one_on_one_matches",
+     "columns": [
+      "defender_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "one_on_one_matches",
+   "action": "restore",
+   "select": "SELECT * FROM \"one_on_one_matches\" WHERE \"attacker_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "one_on_one_records_match_id_fkey",
+     "table": "one_on_one_records",
+     "columns": [
+      "match_id"
+     ],
+     "references": [
+      "match_id"
+     ]
+    },
+    {
+     "constraint": "one_on_one_rounds_match_id_fkey",
+     "table": "one_on_one_rounds",
+     "columns": [
+      "match_id"
+     ],
+     "references": [
+      "match_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "one_on_one_partner_usage",
+   "action": "restore",
+   "select": "SELECT * FROM \"one_on_one_partner_usage\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "one_on_one_records",
+   "action": "restore",
+   "select": "SELECT * FROM \"one_on_one_records\" WHERE \"owner_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "one_on_one_rounds",
+   "action": "restore",
+   "select": "SELECT * FROM \"one_on_one_rounds\" c WHERE EXISTS (SELECT 1 FROM \"combat_attempts\" p WHERE p.\"actor_player_id\" = $1::bigint AND c.\"attempt_id\" = p.\"attempt_id\")",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "one_on_one_settlement_ranks",
+   "action": "restore",
+   "select": "SELECT * FROM \"one_on_one_settlement_ranks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "personal_dm_intents",
+   "action": "keep",
+   "select": "SELECT * FROM \"personal_dm_intents\" WHERE \"sender_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "personal_dm_delivery_operation_id_fkey",
+     "table": "personal_dm_delivery",
+     "columns": [
+      "operation_id"
+     ],
+     "references": [
+      "operation_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "personal_dm_payloads",
+   "action": "restore",
+   "select": "SELECT * FROM \"personal_dm_payloads\" c WHERE EXISTS (SELECT 1 FROM \"personal_dm_intents\" p WHERE p.\"sender_id\" = $1::bigint AND c.\"operation_id\" = p.\"operation_id\")",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "petcampaign_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"petcampaign_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_awakening_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_awakening_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_book_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_book_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_book_admissions_player_id_fkey",
+     "table": "player_book_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_book_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_book_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_profiles",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_profiles\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_display_admissions_player_id_fkey",
+     "table": "player_display_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_cosmetic_entitlements",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_cosmetic_entitlements\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_course_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_course_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_course_admissions_player_id_fkey",
+     "table": "player_course_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_course_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_course_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_course_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_course_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_crystal_spend_days",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_crystal_spend_days\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_currency_balances",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_currency_balances\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_display_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_display_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_display_selections",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_display_selections\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_dorm_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_dorm_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_dorm_glue_purchases_player_id_fkey",
+     "table": "player_dorm_glue_purchases",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_dorm_rooms",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_dorm_rooms\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_comments",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_dorm_comments\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_comment_reactions",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_dorm_comment_reactions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_glue_purchases",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_dorm_glue_purchases\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_dorm_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_praises",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_dorm_praises\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_dorm_room_social",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_dorm_room_social\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_economy_owners",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_economy_owners\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_element_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_element_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_element_admissions_player_id_fkey",
+     "table": "player_element_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_element_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_element_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_element_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_element_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_event_centre_board_reports",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_event_centre_board_reports\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_event_centre_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_event_centre_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_function_eligibility",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_function_eligibility\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_function_state_owners",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_function_state_owners\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_function_unlocks",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_function_unlocks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_gm_questions",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_gm_questions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_guide_return_state",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_guide_return_state\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_hero_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_hero_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_hero_evolution_admissions_player_id_fkey",
+     "table": "player_hero_evolution_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_hero_evolution",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_hero_evolution\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_hero_evolution_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_hero_evolution_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_hero_live_entitlements",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_hero_live_entitlements\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_practice_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_practice_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_hero_practice_candidates",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_hero_practice_candidates\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_hero_raw_awakening",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_hero_raw_awakening\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_hero_skin_entitlements",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_hero_skin_entitlements\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_inscription_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_inscription_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_inscription_admissions_player_id_fkey",
+     "table": "player_inscription_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_inscription_imports_player_id_fkey",
+     "table": "player_inscription_imports",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_inscription_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_inscription_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_inscription_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_inscription_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_inscription_imports",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_inscription_imports\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_item_stacks",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_item_stacks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_library_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_library_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_library_cg_claims_player_id_fkey",
+     "table": "player_library_cg_claims",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "player_library_talk_claims_player_id_fkey",
+     "table": "player_library_talk_claims",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_library_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_library_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_library_act_awards_player_id_partner_id_fkey",
+     "table": "player_library_act_awards",
+     "columns": [
+      "player_id",
+      "partner_id"
+     ],
+     "references": [
+      "player_id",
+      "partner_id"
+     ]
+    },
+    {
+     "constraint": "player_library_hero_logs_player_id_partner_id_fkey",
+     "table": "player_library_hero_logs",
+     "columns": [
+      "player_id",
+      "partner_id"
+     ],
+     "references": [
+      "player_id",
+      "partner_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_library_act_awards",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_library_act_awards\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_library_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_library_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_library_backgrounds",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_library_backgrounds\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_library_cg_claims",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_library_cg_claims\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_library_dialogs",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_library_dialogs\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_library_partner_missions",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_library_partner_missions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_library_talk_claims",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_library_talk_claims\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_login_observations",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_login_observations\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_mission_instances",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_mission_instances\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_mission_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_mission_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_pet_practice_candidates",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_pet_practice_candidates\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_pet_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_pet_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_pets",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_pets\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_pet_style_entitlements",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_pet_style_entitlements\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_profile_feedback_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_profile_feedback_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_profile_comment_operations",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_profile_comment_operations\" WHERE \"target_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_profile_comments",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_profile_comments\" WHERE \"target_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "player_profile_comment_reactions_comment_id_fkey",
+     "table": "player_profile_comment_reactions",
+     "columns": [
+      "comment_id"
+     ],
+     "references": [
+      "comment_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_profile_comment_reactions",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_profile_comment_reactions\" WHERE \"actor_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_profile_praises",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_profile_praises\" WHERE \"target_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_progression",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_progression\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_public_profile_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_public_profile_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_public_profile_media_history_player_id_fkey",
+     "table": "player_public_profile_media_history",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_public_profile_media_history",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_public_profile_media_history\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_public_profile_media_current",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_public_profile_media_current\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_public_profile_showcase_slots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_public_profile_showcase_slots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_saved_preset_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_saved_preset_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_saved_preset_lanes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_saved_preset_lanes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_saved_preset_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_saved_preset_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_scalar_daily_floors",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_scalar_daily_floors\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_signin_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_signin_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_social_presence",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_social_presence\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "realtime_presence_leases_player_id_fkey",
+     "table": "realtime_presence_leases",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_social_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_social_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "social_blocks_blocked_player_id_fkey",
+     "table": "social_blocks",
+     "columns": [
+      "blocked_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_blocks_blocker_player_id_fkey",
+     "table": "social_blocks",
+     "columns": [
+      "blocker_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_friend_requests_requester_player_id_fkey",
+     "table": "social_friend_requests",
+     "columns": [
+      "requester_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_friend_requests_target_player_id_fkey",
+     "table": "social_friend_requests",
+     "columns": [
+      "target_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_friendships_player_high_id_fkey",
+     "table": "social_friendships",
+     "columns": [
+      "player_high_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "social_friendships_player_low_id_fkey",
+     "table": "social_friendships",
+     "columns": [
+      "player_low_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_spirit_roots",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_spirit_roots\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "player_spirit_admissions_player_id_fkey",
+     "table": "player_spirit_admissions",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "player_spirit_admissions",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_spirit_admissions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_spirit_heroes",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_spirit_heroes\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_story_cursors",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_story_cursors\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_temporal_resources",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_temporal_resources\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "publication_picture_reads",
+   "action": "keep",
+   "select": "SELECT * FROM \"publication_picture_reads\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "ranking_board_scores",
+   "action": "restore",
+   "select": "SELECT * FROM \"ranking_board_scores\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "ranking_girls_awards",
+   "action": "restore",
+   "select": "SELECT * FROM \"ranking_girls_awards\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "ranking_girls_birth_tracking",
+   "action": "restore",
+   "select": "SELECT * FROM \"ranking_girls_birth_tracking\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "redeem_redemptions",
+   "action": "keep",
+   "select": "SELECT * FROM \"redeem_redemptions\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_blocks",
+   "action": "skip",
+   "select": "SELECT * FROM \"social_blocks\" c WHERE EXISTS (SELECT 1 FROM \"player_social_roots\" p WHERE p.\"player_id\" = $1::bigint AND c.\"blocked_player_id\" = p.\"player_id\") OR EXISTS (SELECT 1 FROM \"player_social_roots\" p WHERE p.\"player_id\" = $1::bigint AND c.\"blocker_player_id\" = p.\"player_id\")",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_friend_requests",
+   "action": "skip",
+   "select": "SELECT * FROM \"social_friend_requests\" c WHERE EXISTS (SELECT 1 FROM \"player_social_roots\" p WHERE p.\"player_id\" = $1::bigint AND c.\"requester_player_id\" = p.\"player_id\") OR EXISTS (SELECT 1 FROM \"player_social_roots\" p WHERE p.\"player_id\" = $1::bigint AND c.\"target_player_id\" = p.\"player_id\")",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_friendships",
+   "action": "skip",
+   "select": "SELECT * FROM \"social_friendships\" c WHERE EXISTS (SELECT 1 FROM \"player_social_roots\" p WHERE p.\"player_id\" = $1::bigint AND c.\"player_high_id\" = p.\"player_id\") OR EXISTS (SELECT 1 FROM \"player_social_roots\" p WHERE p.\"player_id\" = $1::bigint AND c.\"player_low_id\" = p.\"player_id\")",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_gift_epochs",
+   "action": "restore",
+   "select": "SELECT * FROM \"social_gift_epochs\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "social_gift_claim_operations_claim_generation_id_fkey",
+     "table": "social_gift_claim_operations",
+     "columns": [
+      "claim_generation_id"
+     ],
+     "references": [
+      "generation_id"
+     ]
+    },
+    {
+     "constraint": "social_gift_transfers_claim_generation_id_fkey",
+     "table": "social_gift_transfers",
+     "columns": [
+      "claim_generation_id"
+     ],
+     "references": [
+      "generation_id"
+     ]
+    },
+    {
+     "constraint": "social_gift_transfers_sender_generation_id_fkey",
+     "table": "social_gift_transfers",
+     "columns": [
+      "sender_generation_id"
+     ],
+     "references": [
+      "generation_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "social_gift_claim_operations",
+   "action": "keep",
+   "select": "SELECT * FROM \"social_gift_claim_operations\" WHERE \"recipient_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "social_gift_transfers_claim_operation_id_fkey",
+     "table": "social_gift_transfers",
+     "columns": [
+      "claim_operation_id"
+     ],
+     "references": [
+      "operation_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "social_notices",
+   "action": "restore",
+   "select": "SELECT * FROM \"social_notices\" WHERE \"recipient_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "social_gift_transfers_recipient_player_id_notice_id_fkey",
+     "table": "social_gift_transfers",
+     "columns": [
+      "recipient_player_id",
+      "notice_id"
+     ],
+     "references": [
+      "recipient_player_id",
+      "notice_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "social_gift_transfers",
+   "action": "keep",
+   "select": "SELECT * FROM \"social_gift_transfers\" WHERE \"recipient_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_invite_bindings",
+   "action": "skip",
+   "select": "SELECT * FROM \"social_invite_bindings\" WHERE \"invitee_player_id\" = $1::bigint OR \"inviter_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_invite_mission_claims",
+   "action": "keep",
+   "select": "SELECT * FROM \"social_invite_mission_claims\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_recall_awards",
+   "action": "keep",
+   "select": "SELECT * FROM \"social_recall_awards\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_recall_tasks",
+   "action": "restore",
+   "select": "SELECT * FROM \"social_recall_tasks\" WHERE \"caller_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "social_request_epochs",
+   "action": "restore",
+   "select": "SELECT * FROM \"social_request_epochs\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "summon_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"summon_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_day_ranks",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_day_ranks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
+   },
+   "inbound": [
+    {
+     "constraint": "top_floor_fights_defender_player_fkey",
+     "table": "top_floor_fights",
+     "columns": [
+      "defender_player"
+     ],
+     "references": [
+      "player_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "top_floor_fights",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_fights\" WHERE \"challenger_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "top_floor_records_attempt_id_fkey",
+     "table": "top_floor_records",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "top_floor_partner_usage",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_partner_usage\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_ranks",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_ranks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_records",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_records\" WHERE \"owner_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_task_fights",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_task_fights\" WHERE \"challenger_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "top_floor_task_records_attempt_id_fkey",
+     "table": "top_floor_task_records",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "top_floor_task_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_task_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_task_preferences",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_task_preferences\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_task_ranks",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_task_ranks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "top_floor_task_records",
+   "action": "restore",
+   "select": "SELECT * FROM \"top_floor_task_records\" WHERE \"owner_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "workplace_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"workplace_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "worldboss_attempts",
+   "action": "restore",
+   "select": "SELECT * FROM \"worldboss_attempts\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "worldboss_player_totals",
+   "action": "restore",
+   "select": "SELECT * FROM \"worldboss_player_totals\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "worldboss_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"worldboss_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": true
+   },
+   "inbound": []
+  }
+ ]
+}

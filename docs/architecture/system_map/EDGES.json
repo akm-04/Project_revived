@@ -1552,6 +1552,7 @@
    ]
   },
   "petcampaign": {},
+  "playerdata": {},
   "playerdirectory": {
    "dormhouse": [
     "Validate"
@@ -4204,6 +4205,20 @@
    ]
   },
   "identitylifecycle": {
+   "store:identitystore": [
+    "*FindProviderBindingTx",
+    "*InsertProviderBindingTx",
+    "*InsertSessionCredentialTx",
+    "*InsertSessionTx",
+    "*LockAccountTx",
+    "*LockLiveContextTx",
+    "*LockSessionTx",
+    "*RevokeGameplayCredentialsTx",
+    "*RevokeSessionCredentialsTx",
+    "*SaveEndedContextTx",
+    "*SaveRevokedSessionTx",
+    "*TouchSessionActivityTx"
+   ],
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"
@@ -4797,6 +4812,11 @@
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"
+   ]
+  },
+  "playerdata": {
+   "store:i4store": [
+    "*LockPlayerRootsTx"
    ]
   },
   "playerdirectory": {},
@@ -5967,6 +5987,7 @@
   "petcampaign": [
    "cmd/gxb-api/petcampaign_postgres.go"
   ],
+  "playerdata": [],
   "playerdirectory": [],
   "playerdisplay": [
    "cmd/gxb-api/player_display_postgres.go"

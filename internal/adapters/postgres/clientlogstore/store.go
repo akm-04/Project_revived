@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	app "gxb.local/backend/v2/internal/application/clientlog"
+	domain "gxb.local/backend/v2/internal/domain/clientlog"
 )
 
 type Store struct{ Pool *pgxpool.Pool }
@@ -102,17 +103,39 @@ func (s Store) SaveJournal(ctx context.Context, rows []app.JournalRow) error {
 
 var purgedTables = []string{"request_journal", "client_log_rows", "client_log_uploads", "client_log_capabilities"}
 
-// PurgeExpired deletes at most batch expired rows from each table.
-func (s Store) PurgeExpired(ctx context.Context, now time.Time, batch int) (int64, error) {
+// PurgeExpired deletes at most batch expired rows from each table. The R8 cap
+// (U4) shortens each retention class' window to min(owner window, retention
+// days); zero keeps the owner's windows alone.
+func (s Store) PurgeExpired(ctx context.Context, now time.Time, retentionDays, batch int) (int64, error) {
 	var total int64
 	for _, table := range purgedTables {
-		tag, err := s.Pool.Exec(ctx, fmt.Sprintf(`DELETE FROM %[1]s WHERE ctid IN (SELECT ctid FROM %[1]s WHERE expires_at<=$1 LIMIT $2)`, table), now, batch)
+		query := fmt.Sprintf(`DELETE FROM %[1]s WHERE ctid IN (SELECT ctid FROM %[1]s WHERE expires_at<=$1 LIMIT $2)`, table)
+		arguments := []any{now, batch}
+		if table != "client_log_capabilities" && retentionDays > 0 {
+			routineCutoff := now.Add(-cappedWindow(domain.RoutineRetention, retentionDays))
+			incidentCutoff := now.Add(-cappedWindow(domain.IncidentRetention, retentionDays))
+			query = fmt.Sprintf(`DELETE FROM %[1]s WHERE ctid IN (
+SELECT ctid FROM %[1]s
+WHERE expires_at<=$1 OR (retention_class='ROUTINE' AND received_at<$2) OR (retention_class<>'ROUTINE' AND received_at<$3)
+ORDER BY expires_at
+LIMIT $4)`, table)
+			arguments = []any{now, routineCutoff, incidentCutoff, batch}
+		}
+		tag, err := s.Pool.Exec(ctx, query, arguments...)
 		if err != nil {
 			return total, err
 		}
 		total += tag.RowsAffected()
 	}
 	return total, nil
+}
+
+func cappedWindow(ownerWindow time.Duration, retentionDays int) time.Duration {
+	window := time.Duration(retentionDays) * 24 * time.Hour
+	if window < ownerWindow {
+		return window
+	}
+	return ownerWindow
 }
 
 // Timeline returns one uid's journal rows, uploads and client rows in time

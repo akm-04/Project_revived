@@ -1,0 +1,70 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "playerdata",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/playerdatastore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "account_sessions",
+   "gameplay_contexts",
+   "players"
+  ],
+  "written": [
+   "account_session_credentials",
+   "account_sessions",
+   "gameplay_context_credentials",
+   "gameplay_contexts"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdata"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "audit_row_owner_test.go",
+   "plan_test.go"
+  ]
+ }
+}

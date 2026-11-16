@@ -84,7 +84,7 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 		}
 	}
 	_, _, err = s.Timed.Run(c, timed.Operation(), profile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
-		_, err := s.Store.PurgeExpiredReportsTx(c, sc.Tx, sc.Operation.DecisionAt(), int64(limit))
+		_, err := s.Store.PurgeExpiredReportsTx(c, sc.Tx, sc.Operation.DecisionAt(), s.RetentionDays, int64(limit))
 		return err
 	})
 	return out, err

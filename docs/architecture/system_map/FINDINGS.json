@@ -9348,6 +9348,7 @@
     "guildtea",
     "heroevolution",
     "i5",
+    "identitylifecycle",
     "illusion",
     "inscription",
     "libraryforum",
@@ -9403,6 +9404,7 @@
     "guildtea",
     "heroevolution",
     "i5",
+    "identitylifecycle",
     "illusion",
     "inscription",
     "libraryforum",
@@ -9458,6 +9460,7 @@
     "guildtea",
     "heroevolution",
     "i5",
+    "identitylifecycle",
     "illusion",
     "inscription",
     "libraryforum",
@@ -9579,6 +9582,7 @@
     "librarylocal",
     "mentor",
     "occult",
+    "playerdata",
     "playerdisplay",
     "profilefeedback",
     "publication",
@@ -9610,6 +9614,70 @@
  ],
  "tables_with_several_writers": [
   {
+   "table": "combat_attempt_members",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_attempts",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_attestations",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_member_settlements",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_report_blobs",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_resolutions",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_snapshots",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_start_packages",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
    "table": "gameplay_context_credentials",
    "packages": [
     "internal/adapters/postgres/i4store",
@@ -9622,6 +9690,22 @@
    "packages": [
     "internal/adapters/postgres/i4store",
     "internal/adapters/postgres/identitystore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "gxb_operation_receipts",
+   "packages": [
+    "internal/adapters/postgres/kernelqueries",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "hero_recommend_snapshots",
+   "packages": [
+    "internal/adapters/postgres/herorecommendstore",
+    "internal/adapters/postgres/retentionstore"
    ],
    "declared": true
   },
@@ -9650,10 +9734,26 @@
    "declared": true
   },
   {
+   "table": "player_public_profile_media_history",
+   "packages": [
+    "internal/adapters/postgres/publicprofilestore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
    "table": "players",
    "packages": [
     "internal/adapters/postgres/i4store",
     "internal/adapters/postgres/i5store"
+   ],
+   "declared": true
+  },
+  {
+   "table": "ranking_girls_snapshots",
+   "packages": [
+    "internal/adapters/postgres/rankingstore",
+    "internal/adapters/postgres/retentionstore"
    ],
    "declared": true
   }

@@ -43,6 +43,22 @@ func TestResolverCommittedMissingIsUnknownAndConflict(t *testing.T) {
 	}
 }
 
+func TestNewRecordsOperationID(t *testing.T) {
+	opID, err := ids.NewUUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	op := operation.Context{ID: opID, StartedAt: time.Unix(10, 0).UTC()}
+	id := Identity{OwnerKind: "player", OwnerKey: "1", Domain: "mail", Operation: "claim", SemanticKey: "m1"}
+	r, err := New(op, id, "write", "v1", json.RawMessage(`{"ok":true}`), [32]byte{1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.OperationID != op.ID {
+		t.Fatalf("operation id=%s want %s", r.OperationID, op.ID)
+	}
+}
+
 func TestNewCapturesOperationPolicyRefs(t *testing.T) {
 	ps, err := policy.NewSet(policy.Ref{Name: "content", Version: "r1"})
 	if err != nil {

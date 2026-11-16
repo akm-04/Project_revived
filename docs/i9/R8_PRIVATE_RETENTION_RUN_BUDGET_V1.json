@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "policy_id": "R8_PRIVATE_RETENTION_RUN_BUDGET_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "source": "R8_PLAYER_DATA_DESIGN.md section 4 and R8_4_RETENTION_TASKS.md, A-039",
+  "environment": "GXB_RETENTION_RUN_BUDGET",
+  "default": "20s",
+  "range": {
+    "minimum": "1s",
+    "maximum": "5m",
+    "unit": "duration"
+  },
+  "rule": "One retention sweep run repeats batches until every rule reports no rows or this budget is spent. Values outside the range refuse startup."
+}

@@ -39,7 +39,7 @@ func (Store) PutTx(ctx context.Context, t tx.Tx, r receipt.Receipt) (receipt.Put
 		return receipt.PutResult{}, fmt.Errorf("operation policy refs: %w", err)
 	}
 	err = t.QueryRow(ctx, kernelqueries.InsertOperationReceipt,
-		r.ID.String(), r.Identity.OwnerKind, r.Identity.OwnerKey, r.Identity.Domain, r.Identity.Operation, r.OperationClass, r.Identity.SemanticKey,
+		r.ID.String(), optionalUUID(r.OperationID), r.Identity.OwnerKind, r.Identity.OwnerKey, r.Identity.Domain, r.Identity.Operation, r.OperationClass, r.Identity.SemanticKey,
 		r.RequestFingerprint[:], r.ResultSchema, string(r.ResultPayload), r.OperationStartedAt.UTC(), r.PolicyVersion, string(policyRefs), r.ActorAccountUID, optionalUUID(r.ContextID), retain, policyRefsVersion,
 	).Scan(&inserted)
 	if err != nil {
@@ -65,12 +65,12 @@ func (Store) FindTx(ctx context.Context, q tx.Queryer, id receipt.Identity) (rec
 	if err := id.Validate(); err != nil {
 		return receipt.Receipt{}, false, err
 	}
-	var rid, ownerKind, ownerKey, domain, operation, semanticKey, class, fpHex, schema, resultPayload, policyVersion, policyRefsJSON, actor, contextID string
+	var rid, operationID, ownerKind, ownerKey, domain, operation, semanticKey, class, fpHex, schema, resultPayload, policyVersion, policyRefsJSON, actor, contextID string
 	var started, recorded, retain time.Time
 	var hasRetain bool
 	var payloadVersion int16
 	err := q.QueryRow(ctx, kernelqueries.FindOperationReceipt, id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, id.SemanticKey).Scan(
-		&rid, &ownerKind, &ownerKey, &domain, &operation, &semanticKey, &class, &fpHex, &schema, &resultPayload, &started, &policyVersion, &policyRefsJSON, &actor, &contextID, &recorded, &hasRetain, &retain, &payloadVersion,
+		&rid, &operationID, &ownerKind, &ownerKey, &domain, &operation, &semanticKey, &class, &fpHex, &schema, &resultPayload, &started, &policyVersion, &policyRefsJSON, &actor, &contextID, &recorded, &hasRetain, &retain, &payloadVersion,
 	)
 	if err != nil {
 		if isNoRows(err) {
@@ -81,6 +81,13 @@ func (Store) FindTx(ctx context.Context, q tx.Queryer, id receipt.Identity) (rec
 	parsedID, err := ids.ParseUUID(rid)
 	if err != nil {
 		return receipt.Receipt{}, false, fmt.Errorf("stored receipt id: %w", err)
+	}
+	var parsedOperationID ids.UUID
+	if operationID != "" {
+		parsedOperationID, err = ids.ParseUUID(operationID)
+		if err != nil {
+			return receipt.Receipt{}, false, fmt.Errorf("stored operation id: %w", err)
+		}
 	}
 	fp, err := hex.DecodeString(fpHex)
 	if err != nil || len(fp) != 32 {
@@ -103,7 +110,7 @@ func (Store) FindTx(ctx context.Context, q tx.Queryer, id receipt.Identity) (rec
 	if err := payload.Decode("gxb_operation_receipts", payloadVersion, []byte(policyRefsJSON), &policyRefs); err != nil {
 		return receipt.Receipt{}, false, fmt.Errorf("stored receipt operation policy refs: %w", err)
 	}
-	out := receipt.Receipt{ID: parsedID, Identity: receipt.Identity{OwnerKind: ownerKind, OwnerKey: ownerKey, Domain: domain, Operation: operation, SemanticKey: semanticKey}, OperationClass: class, RequestFingerprint: fpa, ResultSchema: schema, ResultPayload: raw, OperationStartedAt: started.UTC(), PolicyVersion: policyVersion, OperationPolicyRefs: policyRefs, ActorAccountUID: actor, ContextID: cid, RecordedAt: recorded.UTC()}
+	out := receipt.Receipt{ID: parsedID, OperationID: parsedOperationID, Identity: receipt.Identity{OwnerKind: ownerKind, OwnerKey: ownerKey, Domain: domain, Operation: operation, SemanticKey: semanticKey}, OperationClass: class, RequestFingerprint: fpa, ResultSchema: schema, ResultPayload: raw, OperationStartedAt: started.UTC(), PolicyVersion: policyVersion, OperationPolicyRefs: policyRefs, ActorAccountUID: actor, ContextID: cid, RecordedAt: recorded.UTC()}
 	if hasRetain {
 		x := retain.UTC()
 		out.RetainUntil = &x

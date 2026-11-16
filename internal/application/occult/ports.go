@@ -41,7 +41,7 @@ type Store interface {
 	ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error)
 	InsertLogTx(context.Context, tx.Tx, int64, int64, int, identity.PlayerID, string, time.Time) error
 	ReadLogsTx(context.Context, tx.Queryer, int64, identity.PlayerID, int64) ([]json.RawMessage, error)
-	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
+	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error)
 }
 
 type Content interface {
@@ -130,6 +130,9 @@ type Mode struct {
 	Facts       Facts
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
+	// RetentionDays is the R8 cap (U4) on the owner's report window; zero
+	// keeps the owner window alone.
+	RetentionDays int
 }
 
 func (s Mode) ready() bool {

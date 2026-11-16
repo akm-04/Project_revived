@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "policy_id": "PROFILE_MEDIA_HISTORY_RETENTION_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "source": "R8_PLAYER_DATA_DESIGN.md section 6B A-051, user ruling 2026-11-15",
+  "environment": "GXB_PROFILE_MEDIA_HISTORY_DAYS",
+  "default": 15,
+  "range": {
+    "minimum": 1,
+    "maximum": "R8_PRIVATE_RETENTION_DAYS_V1",
+    "unit": "days"
+  },
+  "rule": "A replaced custom avatar stays readable for this many days; values outside the range refuse startup.",
+  "tables": [
+    "player_public_profile_media_history",
+    "player_public_profile_media_current"
+  ]
+}

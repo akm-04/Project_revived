@@ -1224,7 +1224,7 @@
    "tables": 0
   },
   {
-   "callees": 1,
+   "callees": 2,
    "callers": 0,
    "mids": 0,
    "name": "identitylifecycle",
@@ -1330,6 +1330,15 @@
    "path": "internal/application/petcampaign",
    "purpose": "",
    "tables": 1
+  },
+  {
+   "callees": 1,
+   "callers": 0,
+   "mids": 0,
+   "name": "playerdata",
+   "path": "internal/application/playerdata",
+   "purpose": "is the I11A operator capability that exports one player's rows",
+   "tables": 0
   },
   {
    "callees": 0,

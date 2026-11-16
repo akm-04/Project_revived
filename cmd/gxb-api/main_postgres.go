@@ -63,6 +63,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/retentionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialexchangestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
@@ -168,6 +169,10 @@ func main() {
 	}
 	if cfg.PublicEngineURL == "" {
 		log.Fatal("GXB_PUBLIC_ENGINE_URL is required for stock UpdateScene MID20480 discovery")
+	}
+	retentionPolicies, err := retentionstore.PoliciesFromEnvironment()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -419,7 +424,7 @@ func main() {
 		mustRegister(mid, prelogin)
 	}
 	mux := http.NewServeMux()
-	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
+	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: dailyreset.ZeroCounters{}}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
 	mustRegister(18, boot)
@@ -495,10 +500,10 @@ func main() {
 			Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{},
 			Notices: postgres.RoomInviteNoticeListEmitter{Pool: pool, OnError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }},
 			Limiter: roominvite.NewSenderRateLimiter(envPositiveDuration("GXB_ROOM_INVITE_SENDER_INTERVAL", roominvite.DefaultSenderInterval), envPositiveInt("GXB_ROOM_INVITE_SENDER_BURST", roominvite.DefaultSenderBurst))}
-		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms, roomInvites)
+		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms, roomInvites, retentionPolicies.RetentionDays)
 		ranking.Illusion = illusion
 		roomChat = illusion
-		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites)
+		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites, retentionPolicies.RetentionDays)
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners, broadcastEmitter)
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
@@ -583,7 +588,7 @@ func main() {
 		for _, mid := range stockruntime.IllusionMIDs {
 			mustRegister(mid, stockruntime.IllusionDispatcher{Authority: authority, Service: illusion})
 		}
-		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero, roomInvites)
+		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero, roomInvites, retentionPolicies.RetentionDays)
 		// 1362 is shared: Illusion answers its own reports, Adventure the co-op ones.
 		for _, mid := range stockruntime.IllusionRoomMIDs {
 			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion, ReportFallback: adventureMode})
