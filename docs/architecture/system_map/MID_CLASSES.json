@@ -24013,9 +24013,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -24091,6 +24121,16 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 500,
      "statement": "SELECT payload::text FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -24362,9 +24402,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -24440,6 +24510,16 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 500,
      "statement": "SELECT payload::text FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -25047,6 +25127,16 @@
      "statement": "SELECT item_id,classification FROM gxb_content_pet_equipment WHERE revision_id=$1 AND pet_table_id=$2 AND color=$3 AND slot=$4"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
@@ -25065,6 +25155,16 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -25180,6 +25280,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -25428,6 +25538,36 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -25436,6 +25576,41 @@
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 485,
+     "statement": "SELECT kind FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -25466,6 +25641,16 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 500,
      "statement": "SELECT payload::text FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -25505,7 +25690,8 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:481",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497"
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
   },
@@ -25582,6 +25768,36 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -25590,6 +25806,41 @@
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 485,
+     "statement": "SELECT kind FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -25620,6 +25871,16 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 500,
      "statement": "SELECT payload::text FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -25659,7 +25920,8 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:481",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497"
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
   },
@@ -25824,6 +26086,36 @@
    "transactions": [],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -25832,6 +26124,41 @@
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 485,
+     "statement": "SELECT kind FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -25859,6 +26186,16 @@
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
     },
     {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
+    },
+    {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
      "line": 132,
      "statement": "SELECT rank FROM top_floor_ranks WHERE logical_server_id=$1 AND robot_team=$2"
@@ -25881,7 +26218,8 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:481",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497"
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "UNKNOWN"
   },
@@ -26299,6 +26637,16 @@
      "statement": "SELECT item_id,classification FROM gxb_content_pet_equipment WHERE revision_id=$1 AND pet_table_id=$2 AND color=$3 AND slot=$4"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
@@ -26317,6 +26665,16 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -26432,6 +26790,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -26972,9 +27340,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -27045,6 +27443,16 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -27296,9 +27704,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -27369,6 +27807,16 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -27541,9 +27989,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -27614,6 +28092,16 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -27698,6 +28186,36 @@
    "transactions": [],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/library_inputs.go",
+     "line": 48,
+     "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -27706,6 +28224,41 @@
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 485,
+     "statement": "SELECT kind FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -27733,6 +28286,16 @@
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
     },
     {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
+    },
+    {
      "file": "internal/adapters/postgres/topfloorstore/task_period.go",
      "line": 13,
      "statement": "SELECT content_revision,mode,submode,starts_at,ends_at,size,settled_day,state_version,created_at,updated_at FROM top_floor_task_periods WHERE logical_server_id=$1 AND period_number=$2 FOR UPDATE"
@@ -27745,7 +28308,8 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:481",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497"
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "UNKNOWN"
   },
@@ -28142,9 +28706,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -28215,6 +28809,16 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -29463,9 +30067,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -29546,6 +30180,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -29734,9 +30378,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -29817,6 +30491,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -30051,6 +30735,16 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
@@ -30064,6 +30758,16 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -30159,6 +30863,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -30404,6 +31118,16 @@
      "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
@@ -30417,6 +31141,16 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -30542,6 +31276,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -30812,6 +31556,16 @@
      "statement": "SELECT item_id,classification FROM gxb_content_pet_equipment WHERE revision_id=$1 AND pet_table_id=$2 AND color=$3 AND slot=$4"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
@@ -30830,6 +31584,16 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -30940,6 +31704,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -31199,6 +31973,16 @@
      "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
@@ -31212,6 +31996,16 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -31337,6 +32131,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -31585,6 +32389,16 @@
      "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
@@ -31598,6 +32412,16 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -31728,6 +32552,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -91948,9 +92782,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -92031,6 +92895,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -92508,9 +93382,39 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/player_display.go",
+     "line": 32,
+     "statement": "SELECT payload::text FROM content_player_display_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/practice.go",
      "line": 122,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'need_value',need_value,'target_attr_type',target_attr_type,'bonus_value',bonus_value) ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_hero_practice_thresholds WHERE revision_id=$1 AND hero_table_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/public_profile.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_public_profile_policies WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -92591,6 +93495,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 60,
      "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 46,
+     "statement": "SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL' FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/leaguestore/store.go",
+     "line": 143,
+     "statement": "SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",

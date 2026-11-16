@@ -56,6 +56,9 @@ func Enemy(v d.Display) map[string]any {
 	if v.Pet != nil {
 		row["pet"] = v.Pet
 	}
+	if v.TitleInfo != nil {
+		row["title_info"] = v.TitleInfo
+	}
 	return row
 }
 

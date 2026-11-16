@@ -131,33 +131,34 @@ type Guilds interface {
 }
 
 type Service struct {
-	Timed        gen.TimedRunner
-	Fresh        tx.Queryer
-	Store        Store
-	Content      Content
-	Fence        Fence
-	Functions    Functions
-	Privileges   i5.PrivilegeSnapshotProvider
-	Costs        i5.TxMaterialCostDebiter
-	FrameStacks  i5.MaterialCostStore
-	Mail         Mail
-	Achievements Achievements
-	Combat       Combat
-	Heroes       Roster
-	Pets         Roster
-	HeroPower    HeroPower
-	OwnedHeroes  OwnedHeroReader
-	Directory    Directory
-	Guilds       Guilds
-	Facts        Facts
-	Receipts     receipt.Store
-	ReceiptRead  receipt.Reader
-	Broadcast    broadcast.Emitter
+	Timed         gen.TimedRunner
+	Fresh         tx.Queryer
+	Store         Store
+	Content       Content
+	Fence         Fence
+	Functions     Functions
+	Privileges    i5.PrivilegeSnapshotProvider
+	Costs         i5.TxMaterialCostDebiter
+	FrameStacks   i5.MaterialCostStore
+	Mail          Mail
+	Achievements  Achievements
+	Combat        Combat
+	Heroes        Roster
+	Pets          Roster
+	HeroPower     HeroPower
+	OwnedHeroes   OwnedHeroReader
+	Directory     Directory
+	PlayerDisplay i5.TxEffectivePlayerDisplayReader
+	Guilds        Guilds
+	Facts         Facts
+	Receipts      receipt.Store
+	ReceiptRead   receipt.Reader
+	Broadcast     broadcast.Emitter
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.OwnedHeroes != nil && s.Directory != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil &&
+		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.OwnedHeroes != nil && s.Directory != nil && s.PlayerDisplay != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil &&
 		s.Broadcast != nil
 }
 

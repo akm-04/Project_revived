@@ -17,4 +17,5 @@ type Display struct {
 	Leader       int64
 	Heroes       []map[string]any
 	Pet          map[string]any
+	TitleInfo    map[string]any
 }

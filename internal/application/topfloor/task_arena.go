@@ -181,7 +181,7 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 		}
 		return display, nil
 	}
-	display, err := service.playerDisplay(requestContext, query, occupant)
+	display, err := service.playerDisplay(requestContext, query, occupant, at)
 	if err != nil {
 		return display, err
 	}
