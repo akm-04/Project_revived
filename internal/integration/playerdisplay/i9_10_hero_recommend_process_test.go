@@ -78,6 +78,20 @@ func TestI9_10HeroRecommendProcessStockMIDs(t *testing.T) {
 		t.Fatalf("2499 ranking body %+v", body)
 	}
 
+	var offBoardTableID, offBoardOriginTableID int64
+	if err := pool.Raw().QueryRow(ctx, `SELECT table_id,origin_table_id FROM gxb_content_hero_templates WHERE revision_id=$1 AND NOT is_awakened AND table_id NOT IN ($2,$3) ORDER BY table_id LIMIT 1`, revision, currentTableID, originTableID).Scan(&offBoardTableID, &offBoardOriginTableID); err != nil {
+		t.Fatal(err)
+	}
+	bornHeroCard(t, pool, actor, revision, offBoardTableID, offBoardOriginTableID, 2)
+	status, body = process.post(2499, map[string]any{"table_id": offBoardOriginTableID})
+	if status != 200 {
+		t.Fatalf("2499 empty-board status %d body %+v", status, body)
+	}
+	myRank = i9Object(t, body["my_rank"])
+	if i9Number(t, myRank["rank"]) != 1 || i9Number(t, myRank["force"]) <= 0 || len(i9List(t, body["rank_list"])) != 0 {
+		t.Fatalf("2499 empty board ranks the owning viewer first: %+v", body)
+	}
+
 	exec(t, pool, `UPDATE one_on_one_partner_usage SET fights=20,wins=20,kill_count=20 WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
 	status, body = process.post(2497, map[string]any{})
 	if status != 200 || i9Number(t, i9Object(t, i9List(t, body["total_rank_list"])[0])["recommend_score"]) != 15 {
