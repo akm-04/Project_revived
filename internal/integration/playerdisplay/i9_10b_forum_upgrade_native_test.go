@@ -16,7 +16,6 @@ import (
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
-	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	app "gxb.local/backend/v2/internal/application/libraryforum"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
@@ -24,7 +23,6 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
-	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 // TestI9_10BForumLegacy111To118Upgrade proves the real d1f521e schema-111 forum
@@ -248,16 +246,19 @@ func forumLegacyReceipt(t *testing.T, p *pg.Pool, actor identity.ActorContext, c
 	stored.ActorAccountUID = string(actor.AccountUID)
 	stored.ContextID = actor.ContextID.UUID()
 	stored.PolicyVersion = app.LifecyclePolicy
-	stored.RecordedAt = result.DecisionAt
-	tr, e := p.Begin(ctx, tx.Options{})
+	if e = stored.Validate(); e != nil {
+		t.Fatal(e)
+	}
+	refs, e := json.Marshal(stored.OperationPolicyRefs)
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer tr.Rollback(ctx)
-	if _, e = (kernelstore.Store{}).PutTx(ctx, tr, stored); e != nil {
-		t.Fatal(e)
-	}
-	if e = tr.Commit(ctx); e != nil {
+	// The database is still at schema 111: write the row a 111-era build wrote. Today's kernelstore also writes the
+	// R8 columns (operation_id, payload_version) that only migrations 163/164 add.
+	if _, e = p.Raw().Exec(ctx, `INSERT INTO gxb_operation_receipts(receipt_id,owner_kind,owner_key,domain,operation,operation_class,semantic_key,request_fingerprint,result_schema,result_payload,operation_started_at,policy_version,operation_policy_refs,actor_account_uid,context_id)
+VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8::bytea,$9,$10::jsonb,$11::timestamptz,$12,$13::jsonb,$14,$15::uuid)`,
+		stored.ID.String(), id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, stored.OperationClass, id.SemanticKey, stored.RequestFingerprint[:], stored.ResultSchema, string(stored.ResultPayload),
+		stored.OperationStartedAt.UTC(), stored.PolicyVersion, string(refs), stored.ActorAccountUID, stored.ContextID.String()); e != nil {
 		t.Fatal(e)
 	}
 	return operation.Context{ID: opCtx.ID, StartedAt: opCtx.StartedAt, EntropySeed: opCtx.EntropySeed, Policies: policies}

@@ -485,6 +485,11 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	}
 	defer p.Close()
 	prepGate, writeGate := make(chan struct{}), make(chan struct{})
+	// A failed wait must still release blocked socket writers, or the harness stop hangs until the package timeout.
+	releaseWrites := sync.OnceFunc(func() { close(writeGate) })
+	defer releaseWrites()
+	// Occupancy waits are liveness bounds only; the worker bound itself is checked by peak and the 150ms probe.
+	const occupancyWait = 10 * time.Second
 	prepared := make(chan struct{}, 16)
 	entered := make(chan struct{}, 16)
 	var active, peak atomic.Int64
@@ -510,7 +515,7 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	for i := 0; i < 16; i++ {
 		select {
 		case <-prepared:
-		case <-time.After(time.Second):
+		case <-time.After(occupancyWait):
 			t.Fatal("16 sender slots not occupied")
 		}
 	}
@@ -534,7 +539,7 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	for i := 0; i < 8; i++ {
 		select {
 		case <-entered:
-		case <-time.After(time.Second):
+		case <-time.After(occupancyWait):
 			t.Fatal("8 socket write slots not occupied")
 		}
 	}
@@ -546,7 +551,7 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	if peak.Load() != 8 {
 		t.Fatal("global worker bound", peak.Load())
 	}
-	close(writeGate)
+	releaseWrites()
 	for i := 0; i < 16; i++ {
 		r := h.report()
 		if r.Outcomes[stockruntime.ChatTransportWriteRecorded] != 17 {

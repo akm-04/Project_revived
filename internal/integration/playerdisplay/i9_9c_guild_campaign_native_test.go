@@ -1378,7 +1378,12 @@ func TestI9_9CDetailShapesFightInfoForAnAbsentHolderProfile(t *testing.T) {
 		t.Fatal("open", err)
 	}
 	chapterID, copyID := f.copyID(t)
-	absentHolder := int64(999999999)
+	// The holder must be a player (R8 holder_id FK); only the directory profile is absent.
+	holder, _ := genuinePlayer(t, f.pool, f.server)
+	if _, err := f.pool.Raw().Exec(ctx, `DELETE FROM player_directory_profiles WHERE player_id=$1`, int64(holder.PlayerID)); err != nil {
+		t.Fatal(err)
+	}
+	absentHolder := int64(holder.PlayerID)
 	f.mutateCopy(t, chapterID, copyID, func(copy *d.Copy, _ map[int64][]app.EnemyRow) {
 		copy.HolderID = absentHolder
 		copy.HolderStage = d.StagePrepare

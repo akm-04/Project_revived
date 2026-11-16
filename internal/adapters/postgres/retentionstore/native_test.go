@@ -146,7 +146,7 @@ VALUES(884001,'r8-4c-native',1,$1,$2,clock_timestamp(),repeat('a',64),'{}'::json
 	receiptHeld := putProbeReceipt(t, ctx, pool, "")
 	ageReceipt(t, ctx, pool, receiptHeld.ID, old)
 	if _, err := pool.Raw().Exec(ctx, `INSERT INTO social_gift_claim_operations(operation_id,recipient_player_id,request_fingerprint,operation_started_at,decision_at,created_at,claim_day,content_revision,grant_receipt_id,semantic_result)
-VALUES($1,88400100001,repeat('c',64),clock_timestamp(),clock_timestamp(),clock_timestamp(),'2026-11-16',$2,$3,'{}'::jsonb)`, newUUID(t), revision, receiptHeld.ID.String()); err != nil {
+VALUES($1,88400100001,repeat('c',64),now(),now(),now(),'2026-11-16',$2,$3,'{}'::jsonb)`, newUUID(t), revision, receiptHeld.ID.String()); err != nil {
 		t.Fatal(err)
 	}
 

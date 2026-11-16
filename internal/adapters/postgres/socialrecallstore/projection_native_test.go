@@ -97,6 +97,21 @@ func TestRecallProjectionAdvertisesOnlyLiveReservations(t *testing.T) {
 	ctx := context.Background()
 	world := seedRecallWorld(t, pool, 135071, 135072, [2]string{"Caller135071", "Target135072"})
 	liveTarget := identity.PlayerID(135073)
+	seeding, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if err != nil {
+		t.Fatal(err)
+	}
+	seedRecallProjectionPlayers(t, ctx, seeding, liveTarget)
+	if err := seeding.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	// Registered before the task cleanup so it runs after it (R8 target_player_id FK).
+	t.Cleanup(func() {
+		var account string
+		if err := pool.Raw().QueryRow(context.Background(), `DELETE FROM players WHERE player_id=$1 RETURNING account_id::text`, int64(liveTarget)).Scan(&account); err == nil {
+			_, _ = pool.Raw().Exec(context.Background(), `DELETE FROM accounts WHERE account_id=$1::uuid`, account)
+		}
+	})
 	t.Cleanup(func() {
 		_, _ = pool.Raw().Exec(context.Background(), `DELETE FROM social_recall_tasks WHERE caller_player_id=$1 OR target_player_id=ANY($2::bigint[])`, int64(world.caller), []int64{int64(world.target), int64(liveTarget)})
 	})

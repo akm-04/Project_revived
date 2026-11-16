@@ -102,6 +102,7 @@ func TestCanonicalActivityAndRecallThroughFreshRetainedMID1(t *testing.T) {
 	if err != nil || !first.PlayerCreated {
 		t.Fatal("fresh MID1 failed", err)
 	}
+	caller := allocateActivityPlayerID(t, pool, 1)
 	t.Cleanup(func() {
 		player := int64(first.Player.PlayerID)
 		for _, statement := range []struct {
@@ -109,7 +110,7 @@ func TestCanonicalActivityAndRecallThroughFreshRetainedMID1(t *testing.T) {
 			arguments []any
 		}{
 			{`DELETE FROM social_recall_tasks WHERE caller_player_id=$1 OR target_player_id=$1`, []any{player}},
-			{`DELETE FROM social_recall_tasks WHERE caller_player_id=$1`, []any{int64(199801)}},
+			{`DELETE FROM social_recall_tasks WHERE caller_player_id=$1`, []any{int64(caller)}},
 			{`DELETE FROM gameplay_context_credentials WHERE context_id IN (SELECT context_id FROM gameplay_contexts WHERE player_id=$1)`, []any{player}},
 			{`DELETE FROM gameplay_contexts WHERE player_id=$1`, []any{player}},
 			{`DELETE FROM player_login_observations WHERE player_id=$1`, []any{player}},
@@ -117,7 +118,7 @@ func TestCanonicalActivityAndRecallThroughFreshRetainedMID1(t *testing.T) {
 			{`DELETE FROM account_session_credentials WHERE session_id=$1::uuid`, []any{session.String()}},
 			{`DELETE FROM account_session_server_observations WHERE session_id=$1::uuid`, []any{session.String()}},
 			{`DELETE FROM account_sessions WHERE account_id=$1::uuid OR session_id=$2::uuid`, []any{account.String(), session.String()}},
-			{`DELETE FROM players WHERE player_id IN ($1,$2)`, []any{player, int64(199801)}},
+			{`DELETE FROM players WHERE player_id IN ($1,$2)`, []any{player, int64(caller)}},
 			{`DELETE FROM accounts WHERE account_id IN ($1::uuid,$2::uuid)`, []any{account.String(), callerAccount.String()}},
 		} {
 			if _, err := pool.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
@@ -129,7 +130,6 @@ func TestCanonicalActivityAndRecallThroughFreshRetainedMID1(t *testing.T) {
 	if err != nil || !known || !observed.LastLoginAt.Equal(clock.at) || observed.StateVersion != 1 {
 		t.Fatal("fresh MID1 missed canonical activity", observed, known, err)
 	}
-	caller := allocateActivityPlayerID(t, pool, 1)
 	execute(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2,1,$3,'activity-native')`, int64(caller), callerAccount.String(), at)
 	task, err := domain.NewTask(caller, first.Player.PlayerID, 1, identifier(), at.Add(time.Minute), 72*time.Hour, domain.Baseline{AcademyLevel: 51, OwnedHeroCount: 3})
 	if err != nil {

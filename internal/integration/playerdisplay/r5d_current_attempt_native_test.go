@@ -20,17 +20,17 @@ func TestR5DCurrentAttemptNative(t *testing.T) {
 	a, rev, ref := combatOwner(t, pool, rankingServer(t, pool))
 	s := combatService(t, pool)
 	formation := []int64{ref.PartnerID}
-	locator := d.Locator{DomainKind: "r5d-fixture-mode", AuthorityScope: "current", DomainLocator: fmt.Sprint(a.PlayerID)}
+	locator := d.Locator{DomainKind: d.MustMode(d.ModePetCampaign).Family, AuthorityScope: "current", DomainLocator: fmt.Sprint(a.PlayerID)}
 	read := func(at d.Locator) (combat.CurrentAttempt, bool, error) {
 		return s.CurrentAttemptTx(ctx, pool, at)
 	}
 
-	if _, found, err := read(d.Locator{DomainKind: "r5d-fixture-mode", AuthorityScope: "current", DomainLocator: "absent"}); err != nil || found {
+	if _, found, err := read(d.Locator{DomainKind: d.MustMode(d.ModePetCampaign).Family, AuthorityScope: "current", DomainLocator: "absent"}); err != nil || found {
 		t.Fatal("R5D-01 a locator that never had an attempt must not be found", found, err)
 	}
 	start := func(generation, name string) combat.Started {
 		t.Helper()
-		request := combat.StartRequest{Actor: a, Locator: locator, GenerationRef: generation, StartFingerprint: fingerprint(name),
+		request := combat.StartRequest{Mode: d.ModePetCampaign, Actor: a, Locator: locator, GenerationRef: generation, StartFingerprint: fingerprint(name),
 			Battle: combat.BattleRequest{CampaignType: 1, BattleID: 0, Formation: formation,
 				TeamA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}},
 				WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}},

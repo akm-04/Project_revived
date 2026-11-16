@@ -56,7 +56,7 @@ func Test6BActualAPICompositionMediaPrivacyAndWireRecovery(t *testing.T) {
 	}
 	p := pool(t)
 	installed(t, p)
-	a, b := actor(t, p), actor(t, p)
+	a, b := bornActor(t, p), bornActor(t, p)
 	token := displayToken(t, p, a)
 	other := displayToken(t, p, b)
 	original := op()

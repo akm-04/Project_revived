@@ -359,6 +359,12 @@
    "kind": "operator",
    "reason": "requires a retained schema-116 upgrade database and its historical player capture",
    "excluded_from_suites": true
+  },
+  {
+   "test": "internal/integration/retention.TestRetentionSweepKeepsReferencedModeReports",
+   "kind": "operator",
+   "reason": "requires a copy of a database the mode natives populated (the gate gives each DSN a fresh empty one); per-rule keep proofs run in retentionstore natives",
+   "excluded_from_suites": true
   }
  ]
 }

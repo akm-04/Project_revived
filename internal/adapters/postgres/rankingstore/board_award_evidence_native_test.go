@@ -144,15 +144,16 @@ func TestBoardAwardEvidenceReadsSettledRows(t *testing.T) {
 		t.Fatalf("first snapshot score sum=%d want 15", sum)
 	}
 
+	// Origin keys carry the UTC date of the R3 game-week start (Monday 05:00 GMT+8 = Sunday 21:00 UTC).
 	evidence, err := store.BoardAwardEvidenceTx(ctx, fixture.transaction, d.GirlsBoard, awardPlayer)
 	if err != nil {
 		t.Fatal("BoardAwardEvidenceTx", err)
 	}
 	wantWeekOne := d.BoardAwardEvidence{Snapshot: first, Award: d.BoardAward{Player: awardPlayer, Rank: 1, TitleID: d.GirlsBoard.Titles[0],
-		OriginKey: "ranking:" + d.GirlsPolicy + ":11:2026-11-09:1100001", StartsAt: firstWeek, EndTime: firstWeek.Unix() + d.BoardTitleDuration},
+		OriginKey: "ranking:" + d.GirlsPolicy + ":11:2026-11-08:1100001", StartsAt: firstWeek, EndTime: firstWeek.Unix() + d.BoardTitleDuration},
 		Server: int64(awardServer), Generation: first.Generation, SnapshotDigest: first.Digest, SettledAt: firstSettled}
 	wantWeekTwo := d.BoardAwardEvidence{Snapshot: second, Award: d.BoardAward{Player: awardPlayer, Rank: 2, TitleID: d.GirlsBoard.Titles[1],
-		OriginKey: "ranking:" + d.GirlsPolicy + ":11:2026-11-16:1100001", StartsAt: secondWeek, EndTime: secondWeek.Unix() + d.BoardTitleDuration},
+		OriginKey: "ranking:" + d.GirlsPolicy + ":11:2026-11-15:1100001", StartsAt: secondWeek, EndTime: secondWeek.Unix() + d.BoardTitleDuration},
 		Server: int64(awardServer), Generation: second.Generation, SnapshotDigest: second.Digest, SettledAt: secondSettled}
 	requireAwardEvidence(t, evidence, []d.BoardAwardEvidence{wantWeekOne, wantWeekTwo})
 
@@ -161,7 +162,7 @@ func TestBoardAwardEvidenceReadsSettledRows(t *testing.T) {
 		t.Fatal("BoardAwardEvidenceTx skins", err)
 	}
 	wantSkins := d.BoardAwardEvidence{Snapshot: skins, Award: d.BoardAward{Player: awardPlayer, Rank: 1, TitleID: d.SkinsBoard.Titles[0],
-		OriginKey: "ranking:" + d.SkinsPolicy + ":11:2026-11-09:1100001", StartsAt: firstWeek, EndTime: firstWeek.Unix() + d.BoardTitleDuration},
+		OriginKey: "ranking:" + d.SkinsPolicy + ":11:2026-11-08:1100001", StartsAt: firstWeek, EndTime: firstWeek.Unix() + d.BoardTitleDuration},
 		Server: int64(awardServer), Generation: skins.Generation, SnapshotDigest: skins.Digest, SettledAt: firstSettled}
 	requireAwardEvidence(t, skinsEvidence, []d.BoardAwardEvidence{wantSkins})
 
