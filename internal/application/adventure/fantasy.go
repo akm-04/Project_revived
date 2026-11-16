@@ -50,7 +50,7 @@ func (s Mode) StartSingle(c context.Context, a identity.ActorContext, request Fi
 			GenerationRef:    "ADVENTURE_ILLUSION/" + occurrence.SourceKey,
 			StartFingerprint: startFingerprint(a, sc.Operation.Operation().ID.String(), request.Formation),
 			ResultDeadline:   at.Add(attemptLimit), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},
-			Battle: cb.BattleRequest{CampaignType: campaign.CampaignType, BattleID: campaign.FightID,
+			Battle: cb.BattleRequest{CampaignType: campaign.CampaignType, RentalMode: d.IllusionSingleRentalMode, BattleID: campaign.FightID,
 				TeamA: ownedTeam(a.PlayerID, request.Formation), Formation: request.Formation}})
 		if err != nil {
 			return nil, err

@@ -3971,6 +3971,7 @@
     "*ReadMany"
    ],
    "store:guildstore": [
+    "*ActivityRankOf",
     "*ListActivityBoard",
     "*ListGuildApplications",
     "*ListGuilds",

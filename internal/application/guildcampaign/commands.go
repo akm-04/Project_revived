@@ -330,7 +330,7 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 }
 
 func battleRequest(a identity.ActorContext, info CopyInfo, formation []int64, request Fight) combat.BattleRequest {
-	battle := combat.BattleRequest{CampaignType: 7, BattleID: info.FightID, Formation: formation}
+	battle := combat.BattleRequest{CampaignType: 7, RentalMode: 7, BattleID: info.FightID, Formation: formation}
 	for _, partner := range formation {
 		if partner > 0 {
 			battle.TeamA = append(battle.TeamA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: partner})

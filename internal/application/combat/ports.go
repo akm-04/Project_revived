@@ -122,8 +122,9 @@ type Loan struct {
 	Kind     d.ActorKind
 	Identity int64
 	Locator  d.Locator
-	// CampaignType keys the capability's table of modes that allow borrowing.
-	CampaignType int64
+	// RentalMode is the mode the caller offered the rental under (the client's
+	// rent-list campaign_type), never the battle's content type.
+	RentalMode int64
 	// Held marks a unit the mode already holds on loan (a March run's girl).
 	Held bool
 }

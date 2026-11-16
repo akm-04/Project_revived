@@ -58,6 +58,16 @@ func (s Mode) RankList(c context.Context, a identity.ActorContext, subtype int64
 			}
 			rows = append(rows, map[string]any{"player_id": int64(p.PlayerID), "player_name": p.Name, "level": p.Level, "avatar_id": p.AvatarID, "avatar_frame_id": p.AvatarFrameID, "conquer_lev": p.ConquerLevel, "conquer_loop_id": p.ConquerLoopID, "rank": int64(i + 1), "max_floor": row.Floor, "score": row.Floor})
 		}
-		return map[string]any{"rank_list": []map[string]any{{"rank_type": subtype, "rank_info": map[string]any{"my_rank": map[string]any{"rank": rank, "my_floor": selfFloor}, "rank_info": rows}}}}, nil
+		return petcampaignRankListBody(subtype, rank, selfFloor, rows), nil
 	})
+}
+
+// petcampaignRankListBody sends an empty my_rank table when the viewer is not
+// ranked; the stock rank window hides the rank number for an empty table.
+func petcampaignRankListBody(subtype, rank, selfFloor int64, rows []map[string]any) map[string]any {
+	mine := map[string]any{}
+	if rank > 0 {
+		mine = map[string]any{"rank": rank, "my_floor": selfFloor}
+	}
+	return map[string]any{"rank_list": []map[string]any{{"rank_type": subtype, "rank_info": map[string]any{"my_rank": mine, "rank_info": rows}}}}
 }

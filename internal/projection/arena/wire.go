@@ -131,5 +131,9 @@ func RankList(list d.RankList) map[string]any {
 	for _, e := range list.Rows {
 		rows = append(rows, rankRow(e))
 	}
-	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(6), "rank_info": map[string]any{"my_rank": list.Mine.Rank, "rank_info": rows}}}}
+	mine := any(map[string]any{})
+	if list.Mine.Rank > 0 {
+		mine = list.Mine.Rank
+	}
+	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(6), "rank_info": map[string]any{"my_rank": mine, "rank_info": rows}}}}
 }

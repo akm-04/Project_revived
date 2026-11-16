@@ -172,5 +172,9 @@ func RankList(list d.RankList, rankType int64) map[string]any {
 		row["level"], row["rank_level"], row["rank"], row["score"], row["server_id"] = r.Face.Level, r.Ranked.Level, position(r.Ranked), score(r.Ranked), int64(r.Ranked.Server)
 		rows = append(rows, row)
 	}
-	return map[string]any{"rank_list": []map[string]any{{"rank_type": rankType, "rank_info": map[string]any{"my_rank": position(list.Mine), "rank_info": rows}}}}
+	mine := any(map[string]any{})
+	if rank := position(list.Mine); rank > 0 {
+		mine = rank
+	}
+	return map[string]any{"rank_list": []map[string]any{{"rank_type": rankType, "rank_info": map[string]any{"my_rank": mine, "rank_info": rows}}}}
 }

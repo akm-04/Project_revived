@@ -54,7 +54,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2410,
    "name": "ADVENTURE_DEFENSE_FIGHT_ROOM_RESULT"
@@ -62,7 +62,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2411,
    "name": "ADVENTURE_ILLUSION_TEAM_FIGHT"
@@ -70,7 +70,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2412,
    "name": "ADVENTURE_DEFENSE_PREPARE_ROOM_FIGHT"
@@ -78,7 +78,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2413,
    "name": "ADVENTURE_DEFENSE_QUIT_ROOM_FIGHT"
@@ -86,7 +86,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2416,
    "name": "GET_ADVENTURE_LIST"
@@ -94,7 +94,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2417,
    "name": "GET_ADVENTURE_INFO"
@@ -102,7 +102,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2418,
    "name": "BUY_ADVENTURE_ITEM"
@@ -110,7 +110,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2419,
    "name": "START_PVP_FIGHT"
@@ -118,7 +118,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2420,
    "name": "BUY_ADVENTURE_CARD"
@@ -126,7 +126,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2421,
    "name": "START_PARADISE_FIGHT"
@@ -134,7 +134,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2422,
    "name": "FIGHT_PARADISE_FIGHT"
@@ -142,7 +142,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2423,
    "name": "ADVENTURE_ILLUSION_CREATE_TEAM_ROOM"
@@ -150,7 +150,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2424,
    "name": "ADVENTURE_ILLUSION_KICK_MEMBER"
@@ -158,7 +158,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2425,
    "name": "ADVENTURE_ILLUSION_JOIN_ROOM"
@@ -166,7 +166,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2426,
    "name": "ADVENTURE_ILLUSION_EXIT_ROOM"
@@ -174,7 +174,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2427,
    "name": "ADVENTURE_ILLUSION_INVITE_FRIEND"
@@ -182,7 +182,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2428,
    "name": "ADVENTURE_ILLUSION_ENTER_TEAM_FIGHT"
@@ -190,7 +190,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2429,
    "name": "ADVENTURE_ILLUSION_PICK_TEAM_FIGHT"
@@ -198,7 +198,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2430,
    "name": "ADVENTURE_ILLUSION_PREPARE_TEAM_FIGHT"
@@ -206,7 +206,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
-    "line": 58
+    "line": 63
    },
    "mid": 2431,
    "name": "ADVENTURE_DEFENSE_START_ROOM_FIGHT"

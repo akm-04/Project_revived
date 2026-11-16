@@ -45,6 +45,11 @@ const (
 	RankCommunity int64 = 25
 	RankGuild     int64 = 26
 	RankTeam      int64 = 27
+
+	// RentalCampaignType is the mode the stock rent window asks under: the
+	// client sends CampaignType.ILLUSION = 32, not the battle type ELEMENT = 8
+	// (IllusionDetailWindow.lua:154, app/common/enums.lua:1519).
+	RentalCampaignType int64 = 32
 )
 
 var (

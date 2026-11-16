@@ -174,5 +174,9 @@ func RankList(rows []d.Display, myRank int64, server identity.LogicalServerID) m
 		}
 		out = append(out, map[string]any{"player_id": id, "player_name": v.Name, "level": v.Level, "avatar_id": v.AvatarID, "avatar_frame_id": v.FrameID, "conquer_lev": v.ConquerLevel, "conquer_loop_id": v.ConquerLoop, "score": v.Rank, "rank": v.Rank})
 	}
-	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(1), "rank_info": map[string]any{"my_rank": myRank, "rank_info": out}}}}
+	mine := any(map[string]any{})
+	if myRank > 0 {
+		mine = myRank
+	}
+	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(1), "rank_info": map[string]any{"my_rank": mine, "rank_info": out}}}}
 }
