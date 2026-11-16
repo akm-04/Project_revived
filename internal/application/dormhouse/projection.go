@@ -188,18 +188,10 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 					return e
 				}
 				if !at.Before(due) {
-					if _, e = s.Content.DormCatalogTx(ctx, sc.Tx, r.Pending.ContentRevision); e != nil {
+					if e = s.completePendingExpansion(ctx, sc.Tx, a, r, rooms, catalog, at); e != nil {
 						return e
 					}
-					old := r.StateVersion
-					r.StateVersion++
-					r.ExpansionLevel = r.Pending.NextLevel
-					r.Pending = nil
-					r.UpdatedAt = at
-					rooms[r.ID] = r
-					if e = s.Owner.SaveRoomTx(ctx, sc.Tx, r, old); e != nil {
-						return e
-					}
+					r = rooms[r.ID]
 					mutated = true
 				}
 			}

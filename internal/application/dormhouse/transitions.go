@@ -360,21 +360,10 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	case Finish:
 		if room.Pending != nil {
 			mutated = true
-			if _, e = s.Content.DormCatalogTx(ctx, t, room.Pending.ContentRevision); e != nil {
-				return nil, e
-			}
-			room.ExpansionLevel = room.Pending.NextLevel
-			room.Pending = nil
-			if e = touchRoom(room); e != nil {
+			if e = s.completePendingExpansion(ctx, t, a, room, rooms, catalog, at); e != nil {
 				return nil, e
 			}
 			room = rooms[room.ID]
-			if rule, ok := catalog.Types[room.MainType]; ok && rule.MaxExpansion > 0 && room.ExpansionLevel >= rule.MaxExpansion {
-				message := broadcast.Message{MID: broadcast.ActivityMID, MsgType: broadcast.DormExpand, Server: a.LogicalServerID, Player: a.PlayerID}
-				if e = s.Broadcast.EmitTx(ctx, t, message); e != nil {
-					return nil, e
-				}
-			}
 		}
 	}
 	if c.Family != Open && mutated {
@@ -401,6 +390,35 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	}
 	body["changed_heroes"] = changed
 	return body, nil
+}
+
+// completePendingExpansion applies a due or paid expansion using the room's
+// state version and announces the room type's final level in the same
+// transaction. The explicit Finish command and the owner read that settles a
+// lapsed deadline share it so the announcement cannot diverge.
+func (s Service) completePendingExpansion(ctx context.Context, t tx.Tx, a identity.ActorContext, room dorm.Room, rooms map[int64]dorm.Room, catalog dorm.Catalog, at time.Time) error {
+	if room.Pending == nil {
+		return nil
+	}
+	if _, e := s.Content.DormCatalogTx(ctx, t, room.Pending.ContentRevision); e != nil {
+		return e
+	}
+	old := room.StateVersion
+	room.StateVersion++
+	room.ExpansionLevel = room.Pending.NextLevel
+	room.Pending = nil
+	room.UpdatedAt = at
+	rooms[room.ID] = room
+	if e := s.Owner.SaveRoomTx(ctx, t, room, old); e != nil {
+		return e
+	}
+	rule, ok := catalog.Types[room.MainType]
+	isFinalLevel := ok && rule.MaxExpansion > 0 && room.ExpansionLevel >= rule.MaxExpansion
+	if !isFinalLevel {
+		return nil
+	}
+	message := broadcast.Message{MID: broadcast.ActivityMID, MsgType: broadcast.DormExpand, Server: a.LogicalServerID, Player: a.PlayerID}
+	return s.Broadcast.EmitTx(ctx, t, message)
 }
 func (s Service) settleLounge(ctx context.Context, t tx.Tx, r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, level int64, rev string, at time.Time, body map[string]any) error {
 	exp := []any{}
