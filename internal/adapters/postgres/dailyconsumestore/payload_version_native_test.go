@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -63,10 +62,6 @@ VALUES(26,'payload-version-daily-consume',NULL,false,false,false,2625001,2699999
 	if err := pool.Raw().QueryRow(ctx, `SELECT counts::text,payload_version FROM daily_consumption_players WHERE player_id=$1`, int64(player)).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH17_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/dailyconsumestore/testdata/payloads/daily_consumption_players.counts"), storedText)
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -105,26 +100,5 @@ func assertSameJSON(t *testing.T, got, want any) {
 	}
 	if !bytes.Equal(gotRaw, wantRaw) {
 		t.Fatalf("decoded=%s want=%s", gotRaw, wantRaw)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded app.Counts
-	if err := payload.Decode("daily_consumption_players", 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	expected, err := json.MarshalIndent(decoded, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
