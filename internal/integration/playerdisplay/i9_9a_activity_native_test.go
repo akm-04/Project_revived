@@ -478,6 +478,11 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 		t.Fatalf("claim idempotency %+v", again)
 	}
 
+	// A departed member's expired wish has no membership row to attribute it;
+	// the next command still purges it by expiry alone (C15, N7).
+	exec(t, pool, `DELETE FROM guild_memberships WHERE player_id=$1 AND guild_id=$2`, int64(c.PlayerID), int64(gid))
+	exec(t, pool, `INSERT INTO guild_tea_wishes(player_id,game_day,item_id,need_num,current_num)VALUES($1,$2,$3,3,0) ON CONFLICT DO NOTHING`, int64(c.PlayerID), day-1, scroll)
+
 	exec(t, pool, `INSERT INTO guild_tea_wishes(player_id,game_day,item_id,need_num,current_num)VALUES($1,$2,$3,3,0) ON CONFLICT DO NOTHING`, int64(b.PlayerID), day-1, scroll)
 	exec(t, pool, `INSERT INTO guild_tea_gifts(receiver_id,donor_id,game_day,item_id)VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING`, int64(b.PlayerID), int64(a.PlayerID), day-1, scroll)
 	if got := call("receiver", 1808, map[string]any{"is_self": int64(1)}); got.HTTPStatus != 200 {
@@ -497,6 +502,9 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	}
 	if expired := scalar(t, pool, `SELECT COUNT(*) FROM guild_tea_wishes WHERE player_id=$1 AND game_day<$2`, int64(b.PlayerID), day); expired != 0 {
 		t.Fatalf("expired wishes not removed by a command: %d", expired)
+	}
+	if expired := scalar(t, pool, `SELECT COUNT(*) FROM guild_tea_wishes WHERE player_id=$1 AND game_day<$2`, int64(c.PlayerID), day); expired != 0 {
+		t.Fatalf("departed member's expired wish not removed by a command: %d", expired)
 	}
 }
 

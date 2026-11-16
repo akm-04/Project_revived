@@ -78524,7 +78524,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildstore/tea.go:166",
+    "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
     "internal/adapters/postgres/guildstore/tea.go:45"
    ],
@@ -78619,7 +78619,7 @@
     "internal/adapters/postgres/adventurestore/store.go:51",
     "internal/adapters/postgres/characterstore/store.go:63",
     "internal/adapters/postgres/characterstore/store.go:77",
-    "internal/adapters/postgres/guildstore/tea.go:166",
+    "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
     "internal/adapters/postgres/guildstore/tea.go:60",
     "internal/adapters/postgres/guildstore/tea.go:71",
@@ -78864,7 +78864,7 @@
     "internal/adapters/postgres/characterstore/store.go:63",
     "internal/adapters/postgres/characterstore/store.go:77",
     "internal/adapters/postgres/guildstore/tea.go:149",
-    "internal/adapters/postgres/guildstore/tea.go:166",
+    "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
