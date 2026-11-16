@@ -81,13 +81,21 @@ func (Store) ReadReportTx(ctx context.Context, q tx.Queryer, reportID string, se
 	return content, err == nil, err
 }
 
+// reportRetention is I9_OCCULT_POLICY_V1 reports.retention_days before the R8
+// cap (U4) may shorten it.
+const reportRetention = 7 * 24 * time.Hour
+
 // PurgeExpiredReportsTx deletes one bounded batch past retention; only the
-// reconciler calls it.
-func (Store) PurgeExpiredReportsTx(ctx context.Context, t tx.Tx, at time.Time, limit int64) (int64, error) {
+// reconciler calls it. The window is min(I9_OCCULT_POLICY_V1, retention days).
+func (Store) PurgeExpiredReportsTx(ctx context.Context, t tx.Tx, at time.Time, retentionDays int, limit int64) (int64, error) {
 	if limit < 1 || limit > 10000 {
 		return 0, d.ErrInvalid
 	}
-	tag, err := t.Exec(ctx, `DELETE FROM occult_reports WHERE report_id IN (SELECT report_id FROM occult_reports WHERE expires_at<=$1 ORDER BY expires_at,report_id LIMIT $2)`, at, limit)
+	window := reportRetention
+	if retentionDays > 0 && time.Duration(retentionDays)*24*time.Hour < window {
+		window = time.Duration(retentionDays) * 24 * time.Hour
+	}
+	tag, err := t.Exec(ctx, `DELETE FROM occult_reports WHERE report_id IN (SELECT report_id FROM occult_reports WHERE expires_at<=$1 OR created_at<=$2 ORDER BY expires_at,report_id LIMIT $3)`, at, at.Add(-window), limit)
 	return tag.RowsAffected(), err
 }
 

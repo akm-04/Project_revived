@@ -45,7 +45,9 @@ func (m *memoryStore) SaveJournal(_ context.Context, rows []JournalRow) error {
 	m.journal = append(m.journal, rows...)
 	return nil
 }
-func (m *memoryStore) PurgeExpired(context.Context, time.Time, int) (int64, error) { return 0, nil }
+func (m *memoryStore) PurgeExpired(context.Context, time.Time, int, int) (int64, error) {
+	return 0, nil
+}
 
 type tokenResolver map[string]string
 

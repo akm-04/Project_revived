@@ -23,7 +23,7 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 	var purged int64
 	_, _, err := s.Timed.Run(c, timed.Operation(), profile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
 		var err error
-		purged, err = s.Store.PurgeExpiredReportsTx(c, sc.Tx, sc.Operation.DecisionAt(), int64(limit))
+		purged, err = s.Store.PurgeExpiredReportsTx(c, sc.Tx, sc.Operation.DecisionAt(), s.RetentionDays, int64(limit))
 		return err
 	})
 	if err != nil {

@@ -71,7 +71,7 @@ type Store interface {
 	Grant(ctx context.Context, digest [32]byte) (Grant, bool, error)
 	SaveUpload(context.Context, Upload) error
 	SaveJournal(context.Context, []JournalRow) error
-	PurgeExpired(ctx context.Context, now time.Time, batch int) (int64, error)
+	PurgeExpired(ctx context.Context, now time.Time, retentionDays, batch int) (int64, error)
 }
 
 // BearerResolver resolves the type 1 form token (the stock gameplay token).
@@ -108,7 +108,9 @@ type Service struct {
 	Bearers BearerResolver
 	Clock   clock.Clock
 	BaseURL string
-	limiter rateLimiter
+	// RetentionDays is the R8 cap (U4); zero keeps the owner's class windows.
+	RetentionDays int
+	limiter       rateLimiter
 }
 
 // IssueLogURL returns the per-session log_url for a MID1 response. An empty
@@ -277,7 +279,7 @@ func (s *Service) Purge(ctx context.Context) (int64, error) {
 	const batch = 5000
 	var total int64
 	for {
-		deleted, err := s.Store.PurgeExpired(ctx, s.Clock.Now(), batch)
+		deleted, err := s.Store.PurgeExpired(ctx, s.Clock.Now(), s.RetentionDays, batch)
 		total += deleted
 		if err != nil || deleted < batch {
 			return total, err
