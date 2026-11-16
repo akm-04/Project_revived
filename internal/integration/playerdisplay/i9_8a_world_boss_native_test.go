@@ -12,6 +12,7 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
@@ -35,7 +36,7 @@ func worldBossService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority) app.Mod
 	values, content := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}
 	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: worldbossstore.Store{}, Content: content,
 		Fence: values, Players: i4store.PlayerRootLocker{}, Directory: i4store.PlayerDirectoryReader{}, Population: i4store.PlayerDirectoryReader{},
-		Heroes: fight.Inputs.Heroes, Combat: fight, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content},
+		Heroes: fight.Inputs.Heroes, Guilds: guildstore.Store{}, Combat: fight, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content},
 		Mail: i5.SettlementMail{Store: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 }
 
