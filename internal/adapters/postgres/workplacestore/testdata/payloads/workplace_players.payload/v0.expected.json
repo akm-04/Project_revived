@@ -1,0 +1,58 @@
+{
+  "Sequence": 9,
+  "Day": 5,
+  "Initialized": true,
+  "BonusLocation": 2,
+  "BonusBase": 100,
+  "BonusUsed": true,
+  "Slots": {
+    "1": {
+      "ID": "slot-1",
+      "Team": 3,
+      "Job": 7,
+      "Revision": "rev-1",
+      "PolicySHA": "",
+      "Start": 1794805800654,
+      "Quote": {
+        "sp": 0,
+        "seconds": 0,
+        "base_reward": 0,
+        "quantity": 0,
+        "total_level": 0,
+        "total_star": 0,
+        "total_color": 0,
+        "chest_percent": 0,
+        "rival_percent": 0
+      },
+      "Workers": null,
+      "Fingerprint": "",
+      "Award": {
+        "coins": 5
+      },
+      "Lines": null,
+      "RivalReward": [
+        0,
+        0
+      ],
+      "Attempt": "",
+      "PartnersInfo": null
+    }
+  },
+  "Selections": {
+    "1": [
+      4,
+      5
+    ]
+  },
+  "Last": {
+    "1": {
+      "result": "ok"
+    }
+  },
+  "Diary": [
+    {
+      "day": 5,
+      "note": "worked"
+    }
+  ]
+}
