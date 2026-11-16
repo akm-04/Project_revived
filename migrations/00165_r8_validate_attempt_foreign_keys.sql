@@ -1,6 +1,0 @@
--- +goose Up
--- +goose NO TRANSACTION
--- owner: R8 retention (A-040)
--- R8-4b part B: one VALIDATE CONSTRAINT per statement for the keys 00164 adds. 00164 adds no attempt-id key (every
--- uuid attempt-id column already carries one, and the lead's text attempt ids cannot reference a uuid key), so this
--- migration validates none.
