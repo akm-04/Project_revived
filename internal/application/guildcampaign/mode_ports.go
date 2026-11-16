@@ -10,6 +10,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/domain/character"
 	dcombat "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	d "gxb.local/backend/v2/internal/domain/guildcampaign"
@@ -262,6 +263,16 @@ type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
 
+// Roster reads one player's Character-owned Hero rows.
+type Roster interface {
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
+}
+
+// Awakenings reads one player's Character-owned raw twice-awake stages.
+type Awakenings interface {
+	ListRawAwakeningsTx(context.Context, tx.Queryer, identity.PlayerID, []int64) (map[int64]character.RawAwakeningBirth, error)
+}
+
 // Mailer is i5's settlement mail.
 type Mailer interface {
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
@@ -310,19 +321,21 @@ type Content interface {
 // reset and departure paths; Mode adds claim, fight, settle, awards and reads.
 type Mode struct {
 	Service
-	ModeStore ModeStore
-	Content   Content
-	Tables    map[int64]ChapterInfo
-	Settings  Settings
-	Combat    ModeCombat
-	Grants    Grants
-	Facts     Facts
-	Directory Directory
-	Mail      Mailer
-	Notifier  Notifier
-	Timed     gen.TimedRunner
-	Fresh     tx.Queryer
-	Revisions ContentRevisions
+	ModeStore  ModeStore
+	Content    Content
+	Tables     map[int64]ChapterInfo
+	Settings   Settings
+	Combat     ModeCombat
+	Grants     Grants
+	Facts      Facts
+	Directory  Directory
+	Roster     Roster
+	Awakenings Awakenings
+	Mail       Mailer
+	Notifier   Notifier
+	Timed      gen.TimedRunner
+	Fresh      tx.Queryer
+	Revisions  ContentRevisions
 }
 
 // ContentRevisions names the installed content a live request binds.

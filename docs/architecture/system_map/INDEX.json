@@ -1125,7 +1125,7 @@
    "tables": 2
   },
   {
-   "callees": 7,
+   "callees": 9,
    "callers": 2,
    "mids": 14,
    "name": "guildcampaign",

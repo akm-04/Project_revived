@@ -169,12 +169,18 @@ func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
 	}
 
 	at := time.Unix(1700000000, 0).UTC()
-	stub.server = app.ServerView{Fast: &app.FastKiller{GuildID: 3, GuildName: "g", Seconds: 12},
-		Boss: &app.Killer{Profile: profile, GuildID: 3, GuildName: "g", At: at}, Ranks: []app.ServerRankRow{{Rank: 1, Damage: 5000, Profile: profile}}}
+	stub.server = app.ServerView{Fast: &app.FastKiller{GuildID: 3, GuildName: "g", GuildIcon: 20010001, Seconds: 12},
+		Boss: &app.Killer{Profile: profile, GuildID: 3, GuildName: "g", At: at},
+		Ranks: []app.ServerRankRow{{Rank: 1, Damage: 5000, Profile: profile, GuildID: 3, GuildName: "g",
+			Partners: []app.Partner{{TableID: 10001001, Color: 6, Star: 5, Level: 41, CurrentSkinID: 2, TwiceAwakeStage: 3}}}}}
 	server := campaignDispatch(t, stub, 608, map[string]any{"copy_id": int64(700028)})
 	serverRow := server.Body["rank_list"].([]any)[0].(map[string]any)
-	if server.Body["fast_boss_killer"].(map[string]any)["cost_time"] != int64(12) || server.Body["boss_killer"].(map[string]any)["time"] != at.Unix() ||
-		len(serverRow["partners"].([]any)) != 0 {
+	fast := server.Body["fast_boss_killer"].(map[string]any)
+	partner := serverRow["partners"].([]any)[0].(map[string]any)
+	if fast["cost_time"] != int64(12) || fast["name"] != "g" || fast["icon"] != int64(20010001) ||
+		server.Body["boss_killer"].(map[string]any)["time"] != at.Unix() || server.Body["boss_killer"].(map[string]any)["guild_name"] != "g" ||
+		serverRow["guild_name"] != "g" || partner["table_id"] != int64(10001001) || partner["color"] != int64(6) ||
+		partner["star"] != int64(5) || partner["lev"] != int64(41) || partner["current_skin_id"] != int64(2) || partner["twice_awake_stage"] != int64(3) {
 		t.Fatalf("608 %+v", server.Body)
 	}
 

@@ -392,7 +392,7 @@ func damageRank(rows []guildcampaign.RankRow) []any {
 func serverRank(view guildcampaign.ServerView) map[string]any {
 	body := map[string]any{}
 	if view.Fast != nil {
-		body["fast_boss_killer"] = map[string]any{"name": view.Fast.GuildName, "guild_id": view.Fast.GuildID, "icon": int64(0), "cost_time": view.Fast.Seconds}
+		body["fast_boss_killer"] = map[string]any{"name": view.Fast.GuildName, "guild_id": view.Fast.GuildID, "icon": view.Fast.GuildIcon, "cost_time": view.Fast.Seconds}
 	}
 	if view.Boss != nil {
 		body["boss_killer"] = map[string]any{"player_name": view.Boss.Profile.Name, "guild_name": view.Boss.GuildName, "lev": view.Boss.Profile.Level,
@@ -401,12 +401,22 @@ func serverRank(view guildcampaign.ServerView) map[string]any {
 	}
 	rows := make([]any, 0, len(view.Ranks))
 	for _, row := range view.Ranks {
-		rows = append(rows, map[string]any{"rank": row.Rank, "damage": row.Damage, "player_name": row.Profile.Name, "guild_name": "",
+		rows = append(rows, map[string]any{"rank": row.Rank, "damage": row.Damage, "player_name": row.Profile.Name, "guild_name": row.GuildName,
 			"lev": row.Profile.Level, "avatar_id": row.Profile.AvatarID, "avatar_frame_id": row.Profile.AvatarFrameID,
-			"conquer_lev": row.Profile.ConquerLevel, "conquer_loop_id": row.Profile.ConquerLoopID, "partners": []any{}})
+			"conquer_lev": row.Profile.ConquerLevel, "conquer_loop_id": row.Profile.ConquerLoopID, "partners": serverRankPartners(row.Partners)})
 	}
 	body["rank_list"] = rows
 	return body
+}
+
+// serverRankPartners is the hero rows AllServerDamageWindow.lua:217-235 draws.
+func serverRankPartners(partners []guildcampaign.Partner) []any {
+	out := make([]any, 0, len(partners))
+	for _, partner := range partners {
+		out = append(out, map[string]any{"table_id": partner.TableID, "color": partner.Color, "star": partner.Star, "lev": partner.Level,
+			"current_skin_id": partner.CurrentSkinID, "twice_awake_stage": partner.TwiceAwakeStage})
+	}
+	return out
 }
 
 func guildLog(rows []guildcampaign.LogRow) []any {
