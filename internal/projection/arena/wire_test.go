@@ -8,6 +8,23 @@ import (
 	d "gxb.local/backend/v2/internal/domain/arena"
 )
 
+// ARENA_HERO_PICKS_V1: the client adds the award value to the roster value, so
+// award rows never carry a count of their own.
+func TestAwardRowsCarryZeroRegionArenaTimes(t *testing.T) {
+	info := awards(d.Player{Awards: []d.Award{{TableID: 10001001, Picks: 7}}})
+	if got := info[0]["region_arena_times"]; got != int64(0) {
+		t.Fatalf("info award region_arena_times = %#v, want 0", got)
+	}
+	missions := Missions(d.MissionsView{Award: &d.Award{TableID: 10001002, Picks: 9}})
+	row, ok := missions["award"].(map[string]any)
+	if !ok {
+		t.Fatalf("mission award row missing: %#v", missions["award"])
+	}
+	if got := row["region_arena_times"]; got != int64(0) {
+		t.Fatalf("mission award region_arena_times = %#v, want 0", got)
+	}
+}
+
 func TestInfoKeepsTheDefenceFormationAnArray(t *testing.T) {
 	body := Info(d.InfoView{Player: d.Player{Defense: d.Lineup{Heroes: nil}}})
 	defence, ok := body["defence_formation"].([]int64)

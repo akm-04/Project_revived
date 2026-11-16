@@ -309,7 +309,8 @@ func main() {
 	librarySvc.Grants = i5svc
 	librarySvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}
 	eventCentreSvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}
-	librarySvc.Roster = characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
+	rosterProjection := &characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
+	librarySvc.Roster = rosterProjection
 	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc, skins: displayService}, txMetrics)
 	mentorTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
 	socialRelationDB := socialrelationstore.Store{}
@@ -368,7 +369,7 @@ func main() {
 		Receipts:    kernelstore.Store{},
 		ReceiptRead: kernelstore.Reader{Queryer: pool},
 	}
-	heroBootstrap := characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
+	heroBootstrap := &characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
 	bootstrap := i4store.BootstrapService{
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,
@@ -537,6 +538,10 @@ func main() {
 		}
 		go runReconcile(ctx, pool, apponeonone.Reconciler{Service: oneOnOne})
 		arena := canonicalArena(pool, runner, contentDB, i5db, i5svc, fight, owners)
+		// ARENA_HERO_PICKS_V1: both MID1 key49 and MID49 roster bodies read Arena's
+		// season pick count (ledger DL-b024e8a4).
+		rosterProjection.SeasonPicks = arena
+		heroBootstrap.SeasonPicks = arena
 		ranking.Arena = arena
 		for _, mid := range stockruntime.ArenaMIDs {
 			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})
