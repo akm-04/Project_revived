@@ -247,6 +247,7 @@
   ],
   "scenarios_naming": [],
   "unit": [
+   "audit_insert_cost_test.go",
    "finish_result_test.go"
   ]
  }
