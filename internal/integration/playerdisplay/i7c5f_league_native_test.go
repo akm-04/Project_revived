@@ -16,12 +16,16 @@ import (
 	ach "gxb.local/backend/v2/internal/application/achievement"
 	app "gxb.local/backend/v2/internal/application/championsleague"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	display "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	d "gxb.local/backend/v2/internal/domain/championsleague"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	leagueprojection "gxb.local/backend/v2/internal/projection/championsleague"
 	"sync"
@@ -643,5 +647,58 @@ func TestI7C5FLeagueRecoveredRowsNative(t *testing.T) {
 				t.Fatal("recovered origin", e)
 			}
 		}
+	}
+}
+
+// stalledLeague withholds resolution from FIGHT, leaving a staged attempt.
+type stalledLeague struct{ app.Combat }
+
+func (stalledLeague) ResolveDetached(context.Context, operation.Context, ids.UUID) *combat.Flight {
+	f := &combat.Flight{Done: make(chan struct{}), Err: cd.ErrResolverRetryable}
+	close(f.Done)
+	return f
+}
+
+// I8_PARENT_CONTRACT_V1 generation_supersede rule 2: an open Champion League
+// fight replays its frozen START when only the lineup changed; after settlement
+// the recorded result still requires the same lineup.
+func TestI7C5FLeagueChangedLineupReplaysOpenFightNative(t *testing.T) {
+	p := pool(t)
+	s, _, _, a, b, ha, _ := leagueActors(t, p)
+	leagueDo(t, s, a, app.Command{Kind: "ENEMY", Enemy: b.PlayerID})
+	frozenLineup := d.Lineup{Heroes: []int64{ha}}
+	stalled := s
+	stalled.Combat = stalledLeague{s.Combat}
+	if _, e := stalled.Execute(ctx, a, app.Command{Kind: "FIGHT", Enemy: b.PlayerID, Lineup: frozenLineup}, op()); e == nil {
+		t.Fatal("a vanished resolution answered a result")
+	}
+	if leagueScalar(t, p, `SELECT count(*) FROM league_matches WHERE attacker=$1 AND payload->>'Status'='FIGHTING'`, int64(a.PlayerID)) != 1 ||
+		leagueScalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ACADEMY_LEAGUE' AND actor_player_id=$1`, int64(a.PlayerID)) != 1 {
+		t.Fatal("the fight was not left open with one staged attempt")
+	}
+
+	changed := app.Command{Kind: "FIGHT", Enemy: b.PlayerID, Lineup: d.Lineup{Heroes: []int64{ha, ha + 1}, Pet: 1}}
+	var replay app.Reply
+	var e error
+	for i := 0; i < 100; i++ {
+		replay, e = s.Execute(ctx, a, changed, op())
+		if e != nil || len(replay.Report) > 0 {
+			break
+		}
+	}
+	if e != nil {
+		t.Fatalf("a changed lineup must replay the frozen START: %v", e)
+	}
+	if len(replay.Report) == 0 || len(replay.Match.Attack.Heroes) != 1 || replay.Match.Attack.Heroes[0] != ha {
+		t.Fatalf("the reply did not carry the frozen team and result: %+v", replay.Match.Attack)
+	}
+	if leagueScalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ACADEMY_LEAGUE' AND actor_player_id=$1`, int64(a.PlayerID)) != 1 {
+		t.Fatal("a replay admitted another attempt")
+	}
+	if _, e = s.Execute(ctx, a, changed, op()); e == nil {
+		t.Fatal("a changed lineup after settlement must not replay the recorded result")
+	}
+	if same, e := s.Execute(ctx, a, app.Command{Kind: "FIGHT", Enemy: b.PlayerID, Lineup: frozenLineup}, op()); e != nil || same.Match.ID != replay.Match.ID || string(same.Report) != string(replay.Report) {
+		t.Fatalf("the frozen lineup must replay the settled result: %v", e)
 	}
 }

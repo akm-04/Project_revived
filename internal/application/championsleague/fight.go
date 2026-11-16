@@ -6,6 +6,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"slices"
+	"time"
+
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -16,21 +19,29 @@ import (
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	"time"
 )
 
 func locator(id ids.UUID) cd.Locator {
 	return cd.Locator{DomainKind: "ACADEMY_LEAGUE", AuthorityScope: d.CompetitionID, DomainLocator: "fight:" + id.String()}
 }
+
+// The stage is the intent and the opponent, not the chosen lineup:
+// I8_PARENT_CONTRACT_V1 generation_supersede replays the frozen START when only
+// the lineup changed.
 func fightHash(a identity.PlayerID, intent int64, cmd Command) string {
 	b, _ := json.Marshal(struct {
 		Player identity.PlayerID
 		Intent int64
 		Enemy  identity.PlayerID
-		Lineup d.Lineup
-	}{a, intent, cmd.Enemy, cmd.Lineup})
+	}{a, intent, cmd.Enemy})
 	h := sha256.Sum256(b)
 	return hex.EncodeToString(h[:])
+}
+
+// sameLineup is the settled-replay gate: a recorded result replays only for the
+// lineup that produced it.
+func sameLineup(frozen, chosen d.Lineup) bool {
+	return frozen.Pet == chosen.Pet && slices.Equal(frozen.Heroes, chosen.Heroes)
 }
 func participants(pid identity.PlayerID, l d.Lineup, origin cd.Origin) ([]combat.Participant, []combat.Participant) {
 	h := []combat.Participant{}
@@ -56,6 +67,9 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		return m, e
 	} else if ok {
 		if m.Fingerprint != fp || m.Defender != cmd.Enemy {
+			return m, d.ErrRefused
+		}
+		if m.Status != "FIGHTING" && !sameLineup(m.Attack, cmd.Lineup) {
 			return m, d.ErrRefused
 		}
 		return m, nil

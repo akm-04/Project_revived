@@ -212,6 +212,8 @@
   "scenarios_naming": [
    "league.json"
   ],
-  "unit": []
+  "unit": [
+   "fight_test.go"
+  ]
  }
 }

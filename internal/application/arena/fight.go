@@ -214,10 +214,18 @@ type FightCommand struct {
 	Pet       int64
 }
 
+// The stage is the opponent, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only the formation changed.
 func fingerprint(pid identity.PlayerID, r FightCommand) string {
-	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "enemy": int64(r.Enemy), "practice": r.Practice, "formation": r.Formation, "pet": r.Pet})
+	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "enemy": int64(r.Enemy), "practice": r.Practice})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
+}
+
+// sameChoices is the settled-replay gate: a recorded result replays only for
+// the formation and pet that produced it.
+func sameChoices(m d.Match, r FightCommand) bool {
+	return m.AttackPet == r.Pet && slices.EqualFunc(m.Formation, r.Formation, func(f d.Fighter, id int64) bool { return f.TableID == id })
 }
 
 // Fight freezes the battle of the started match, resolves it within the
@@ -242,7 +250,7 @@ func (s Service) Fight(c context.Context, a identity.ActorContext, r FightComman
 	if err != nil || !found {
 		return d.FightView{}, errors.Join(err, d.ErrRefused)
 	}
-	if m.Fingerprint == fp && m.Status == d.StatusSettled {
+	if m.Fingerprint == fp && m.Status == d.StatusSettled && sameChoices(m, r) {
 		return s.fightView(c, m)
 	}
 	if m.Defender != r.Enemy || m.Practice != r.Practice || m.Fingerprint != fp {
@@ -251,7 +259,7 @@ func (s Service) Fight(c context.Context, a identity.ActorContext, r FightComman
 		if err != nil {
 			return d.FightView{}, errors.Join(err, d.ErrRefused)
 		}
-		if replayFound {
+		if replayFound && sameChoices(settled, r) {
 			return s.fightView(c, settled)
 		}
 	}
@@ -389,7 +397,14 @@ func (s Service) admitFight(c context.Context, a identity.ActorContext, id ids.U
 				return err
 			}
 			if started.Replayed {
-				return d.ErrConflict
+				// The stage's frozen START is already admitted: serve its persisted
+				// match and team instead of refusing the duplicate (I8 generation_supersede).
+				frozen, found, readErr := s.Store.ReadMatchTx(c, s.Fresh, m.ID, false)
+				if readErr != nil || !found {
+					return errors.Join(readErr, d.ErrConflict)
+				}
+				out = frozen
+				return nil
 			}
 			next := m
 			next.Formation, next.AttackPet, next.AttemptID, next.Fingerprint, next.Status, next.StateVersion = formation, r.Pet, started.Attempt.ID, fp, d.StatusFighting, m.StateVersion+1
