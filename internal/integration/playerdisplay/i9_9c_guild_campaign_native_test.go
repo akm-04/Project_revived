@@ -1127,6 +1127,40 @@ func TestI9_9CServerRankCarriesGuildNameIconAndPartners(t *testing.T) {
 	}
 }
 
+// TestI9_9CDetailShapesFightInfoForAnAbsentHolderProfile
+func TestI9_9CDetailShapesFightInfoForAnAbsentHolderProfile(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.copyID(t)
+	absentHolder := int64(999999999)
+	f.mutateCopy(t, chapterID, copyID, func(copy *d.Copy, _ map[int64][]app.EnemyRow) {
+		copy.HolderID = absentHolder
+		copy.HolderStage = d.StagePrepare
+		copy.LastFightTime = &f.at
+		copy.StartFightTime = nil
+	})
+	request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{
+		Operation: f.op(), MID: 613,
+		Params:     map[string]any{"copy_id": copyID, "token": "bearer", "region": int64(f.server)},
+		Claims:     wire.CredentialClaims{Token: "bearer", Region: int64(f.server)},
+		ReceivedAt: f.at,
+	}}
+	response := stockruntime.GuildCampaignDispatcher{Authority: fixedSocialAuthority{actor: f.leader}, Service: f.mode}.Dispatch(ctx, request)
+	if response.HTTPStatus != http.StatusOK || response.Body["current_fight_player"] != absentHolder {
+		t.Fatalf("613 %d %+v", response.HTTPStatus, response.Body)
+	}
+	info, ok := response.Body["fight_info"].(map[string]any)
+	if !ok {
+		t.Fatalf("the live holder without a profile lost fight_info: %+v", response.Body)
+	}
+	if info["player_name"] != "" || info["lev"] != int64(0) || info["avatar_id"] != int64(0) || info["conquer_lev"] != int64(0) {
+		t.Fatalf("fight_info %+v", info)
+	}
+}
+
 // TestI9_9CChallengeFactsAndMemberRow
 func TestI9_9CChallengeFactsAndMemberRow(t *testing.T) {
 	f := newCampaignFixture(t)

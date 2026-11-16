@@ -432,7 +432,9 @@ func detailWire(view guildcampaign.DetailView) map[string]any {
 	body := map[string]any{"current_index": view.CurrentIndex, "monster_status": enemyStatus(view.Waves), "is_open": flag(view.IsOpen),
 		"is_win": flag(view.IsWin), "current_fight_player": view.CurrentFight, "last_fight_time": view.LastFight,
 		"start_fight_time": view.StartFight, "stage": view.Stage}
-	if view.FightInfo.PlayerID.Valid() {
+	// The client indexes fight_info whenever it sees a live holder
+	// (MapWindow.lua:1121-1130), so profile hydration cannot gate the shape.
+	if view.CurrentFight > 0 {
 		body["fight_info"] = map[string]any{"player_name": view.FightInfo.Name, "lev": view.FightInfo.Level,
 			"avatar_id": view.FightInfo.AvatarID, "conquer_lev": view.FightInfo.ConquerLevel}
 	}

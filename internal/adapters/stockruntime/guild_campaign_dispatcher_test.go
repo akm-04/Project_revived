@@ -146,6 +146,29 @@ func TestI9_9CDispatcherChapterAndCopyJSON(t *testing.T) {
 	}
 }
 
+func TestI9_9CDetailCarriesFightInfoForTheLiveHolder(t *testing.T) {
+	// MapWindow.lua:1100,1121-1130 and GuildMapDetailWindow.lua:60-82 index
+	// fight_info whenever current_fight_player>0 and last_fight_time>0, so the
+	// reply owes the shape even when the holder's profile row did not read back.
+	stub := &campaignStub{detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, IsOpen: true,
+		CurrentFight: 9, Stage: 1, LastFight: 1700000000, StartFight: 1700000000}}
+	got := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028)})
+	if got.HTTPStatus != http.StatusOK {
+		t.Fatalf("613 %d %+v", got.HTTPStatus, got.Body)
+	}
+	info, ok := got.Body["fight_info"].(map[string]any)
+	if !ok {
+		t.Fatalf("613 without a holder profile omitted fight_info: %+v", got.Body)
+	}
+	if info["player_name"] != "" || info["lev"] != int64(0) || info["avatar_id"] != int64(0) || info["conquer_lev"] != int64(0) {
+		t.Fatalf("fight_info %+v", info)
+	}
+	stub.detail = app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, IsOpen: true}
+	if free := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028)}); free.Body["fight_info"] != nil {
+		t.Fatalf("613 without a holder carried fight_info: %+v", free.Body)
+	}
+}
+
 func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
 	profile := app.ProfileView{PlayerID: 11, Name: "p", Level: 41, AvatarID: 1, AvatarFrameID: 0, ConquerLevel: 3, ConquerLoopID: 1}
 	stub := &campaignStub{award: app.AwardBody{NextApplyTime: 60, SelfItemID: 20001091, SelfRank: 1, ApplyTimes: 1,
