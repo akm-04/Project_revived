@@ -60,6 +60,24 @@ func TestModeRegistryRows(t *testing.T) {
 	}
 }
 
+func TestModeChoiceChangeRules(t *testing.T) {
+	for _, registration := range modeRegistrations {
+		switch registration.Trust {
+		case ServerReport:
+			if registration.OnChoiceChange != ChoiceReplaysFrozen {
+				t.Fatalf("%s: server-report mode does not replay the frozen START on a choice change", registration.Key)
+			}
+		case ClientSummaryAttested:
+			if registration.OnChoiceChange != ChoiceSupersedes {
+				t.Fatalf("%s: client-attested mode does not supersede on a choice change", registration.Key)
+			}
+		}
+		if registration.OnChoiceChange != ChoiceReplaysFrozen && registration.OnChoiceChange != ChoiceSupersedes {
+			t.Fatalf("%s does not state a choice-change rule", registration.Key)
+		}
+	}
+}
+
 func TestModeRegistrationGuards(t *testing.T) {
 	duplicate := append([]ModeRegistration{}, modeRegistrations...)
 	duplicate = append(duplicate, modeRegistrations[0])
@@ -75,6 +93,24 @@ func TestModeRegistrationGuards(t *testing.T) {
 	badProducer.Producer = "NO_SUCH_PRODUCER_V1"
 	if err := validateModeRegistrations([]ModeRegistration{badProducer}); err == nil {
 		t.Fatal("unregistered producer accepted")
+	}
+	serverSupersede := MustMode(ModeArena)
+	serverSupersede.Key = ModeKey("FIXTURE_MODE")
+	serverSupersede.OnChoiceChange = ChoiceSupersedes
+	if err := validateModeRegistrations([]ModeRegistration{serverSupersede}); err == nil {
+		t.Fatal("server-report mode accepted a supersede on a choice change")
+	}
+	clientReplay := MustMode(ModeCampaign)
+	clientReplay.Key = ModeKey("FIXTURE_MODE")
+	clientReplay.OnChoiceChange = ChoiceReplaysFrozen
+	if err := validateModeRegistrations([]ModeRegistration{clientReplay}); err == nil {
+		t.Fatal("client-attested mode accepted a replay on a choice change")
+	}
+	unstated := MustMode(ModeCampaign)
+	unstated.Key = ModeKey("FIXTURE_MODE")
+	unstated.OnChoiceChange = ""
+	if err := validateModeRegistrations([]ModeRegistration{unstated}); err == nil {
+		t.Fatal("mode without a choice-change rule accepted")
 	}
 	if _, ok := LookupMode("NO_SUCH_MODE"); ok {
 		t.Fatal("unknown mode looked up")
