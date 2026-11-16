@@ -25694,17 +25694,17 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 123,
+     "line": 126,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 383,
+     "line": 386,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 536,
+     "line": 539,
      "value": "repeatable_read"
     },
     {
@@ -25727,17 +25727,17 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 123,
+     "line": 126,
      "value": "false"
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 383,
+     "line": 386,
      "value": "false"
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 536,
+     "line": 539,
      "value": "false"
     },
     {
@@ -25763,17 +25763,17 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 123,
+     "line": 126,
      "value": "6"
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 383,
+     "line": 386,
      "value": "6"
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 536,
+     "line": 539,
      "value": "6"
     },
     {
@@ -25839,7 +25839,7 @@
      "file": "internal/application/topfloor/fight.go",
      "function": "Service.Start",
      "isolation": "repeatable_read",
-     "line": 123,
+     "line": 126,
      "read_only": "false",
      "retry": "6"
     },
@@ -25847,7 +25847,7 @@
      "file": "internal/application/topfloor/fight.go",
      "function": "Service.settle",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 386,
      "read_only": "false",
      "retry": "6"
     },
@@ -25855,7 +25855,7 @@
      "file": "internal/application/topfloor/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 536,
+     "line": 539,
      "read_only": "false",
      "retry": "6"
     },
