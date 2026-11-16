@@ -190,6 +190,22 @@ func TestI9_10FMentorLifeCycleThroughDispatcher(t *testing.T) {
 	expectMentorRefusal(t, mentorCall(t, service, teacher, 1857, map[string]any{"to_player_id": int64(student.PlayerID), "relation_type": int64(2), "msg": ""}), 1857, 34002)
 }
 
+// An expired application is not an active class cooldown: message.lua 34002 is the
+// cooldown text and has no expired-application row, so the refusal is the stock 35028.
+func TestI9_10FMentorExpiredApplicationRefusal(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	teacher := mentorActor(t, p, 60)
+	student := mentorActor(t, p, 20)
+	expectMentorOK(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": ""}), 1857)
+	exec(t, p, `UPDATE mentor_applications SET created_at=clock_timestamp()-interval '3 days',expires_at=clock_timestamp()-interval '1 day' WHERE applicant_id=$1 AND target_id=$2`, int64(student.PlayerID), int64(teacher.PlayerID))
+
+	expectMentorRefusal(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859, 35028)
+	if count := mentorRelationCount(t, p, teacher.PlayerID, student.PlayerID, true); count != 0 {
+		t.Fatalf("expired application created relations=%d", count)
+	}
+}
+
 func TestI9_10FMentorDailyApplicationLimit(t *testing.T) {
 	p := pool(t)
 	service := mentorService(p)

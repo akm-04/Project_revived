@@ -207,7 +207,8 @@ func (service Service) Accept(ctx context.Context, actor identity.ActorContext, 
 			return refusal(34010)
 		}
 		if !application.ExpiresAt.After(at) {
-			return refusal(34002)
+			// message.lua has no expired-application row; 34002 is the class-cooldown text (user ruling DL-8d76e623).
+			return refusal(35028)
 		}
 		actorRelations, err := service.Store.LockRelationshipsTx(ctx, t, actor.PlayerID, actor.LogicalServerID)
 		if err != nil {
