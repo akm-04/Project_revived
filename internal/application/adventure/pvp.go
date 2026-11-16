@@ -50,7 +50,7 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if err != nil {
 			return err
 		}
-		started, err = s.startAttempt(c, sc, scope, cb.StartRequest{Actor: a, Locator: locator(a, occurrence, "ADVENTURE_PVP"),
+		started, err = s.startAttempt(c, sc, scope, cb.StartRequest{Mode: cd.ModeAdventurePVP, Actor: a, Locator: locator(a, occurrence, "ADVENTURE_PVP"),
 			GenerationRef: "ADVENTURE_PVP/" + occurrence.SourceKey, StartFingerprint: startFingerprint(a, request.Formation),
 			ResultDeadline: at.Add(attemptLimit), Battle: pvpBattle(a, request, enemy)})
 		return err

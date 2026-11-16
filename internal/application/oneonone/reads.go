@@ -19,9 +19,6 @@ import (
 // rankListSize is the private-policy length of the 1 on 1 rank lists.
 const rankListSize = 50
 
-// reportRetention is the 1 on 1 replay window (D25a private policy, at the D9 Q6 ceiling).
-var reportRetention = cd.Retention{ID: "C5C_ONE_ON_ONE_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
-
 // Report replays a round while a retained record references its match; nil is ARENA_RECORD_OUT_OF_DATE.
 func (s Service) Report(c context.Context, key string, op operation.Context) ([]byte, error) {
 	if !s.ready() {
@@ -37,7 +34,7 @@ func (s Service) Report(c context.Context, key string, op operation.Context) ([]
 		if err != nil || !retained {
 			return err
 		}
-		result, _, err := s.Combat.ReplayTx(c, sc.Tx, id, reportRetention, sc.Operation.DecisionAt())
+		result, _, err := s.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeOneOnOne).Retention, sc.Operation.DecisionAt())
 		report = result.Report
 		return err
 	})

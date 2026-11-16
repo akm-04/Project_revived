@@ -95,7 +95,7 @@ func (s Mode) Start(ctx context.Context, actor identity.ActorContext, id int64, 
 		}
 		fp := sha256.Sum256(raw)
 		// Source 866 omits the selected team; this snapshots only its mandatory canonical girl witness.
-		_, e = s.Combat.StartTx(ctx, sc.Tx, scope, combat.StartRequest{Actor: actor, Locator: locator(actor), GenerationRef: generation(a), StartFingerprint: hex.EncodeToString(fp[:]), ResultDeadline: at.Add(time.Duration(frozen.WindowSeconds) * time.Second), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Battle: combat.BattleRequest{CampaignType: 27, BattleID: id, Formation: []int64{a.OwnerID}, TeamA: []combat.Participant{{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: actor.PlayerID, Identity: a.OwnerID}}}})
+		_, e = s.Combat.StartTx(ctx, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeAwakeningBlood, Actor: actor, Locator: locator(actor), GenerationRef: generation(a), StartFingerprint: hex.EncodeToString(fp[:]), ResultDeadline: at.Add(time.Duration(frozen.WindowSeconds) * time.Second), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Battle: combat.BattleRequest{CampaignType: 27, BattleID: id, Formation: []int64{a.OwnerID}, TeamA: []combat.Participant{{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: actor.PlayerID, Identity: a.OwnerID}}}})
 		return e
 	})
 	if e != nil {

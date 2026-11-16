@@ -39,7 +39,7 @@ func (s Mode) StartSingle(c context.Context, a identity.ActorContext, request Fi
 		if err != nil {
 			return nil, err
 		}
-		_, err = s.startAttempt(c, sc, scope, cb.StartRequest{Actor: a, Locator: singleLocator(a),
+		_, err = s.startAttempt(c, sc, scope, cb.StartRequest{Mode: cd.ModeAdventureIllusion, Actor: a, Locator: singleLocator(a),
 			GenerationRef:    d.FantasyGeneration(occurrence),
 			StartFingerprint: startFingerprint(a, request.Formation),
 			ResultDeadline:   at.Add(attemptLimit), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},

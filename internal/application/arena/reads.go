@@ -88,9 +88,6 @@ func readRetry() tx.RetryPolicy {
 	return tx.RetryPolicy{MaxAttempts: 1}
 }
 
-// reportRetention is the arena replay window (D25a private policy, at the D9 Q6 ceiling).
-var reportRetention = cd.Retention{ID: "C5D_ARENA_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
-
 // Report replays a retained record's battle report; an expired key is absent.
 func (s Service) Report(c context.Context, key string, op operation.Context) ([]byte, bool, error) {
 	if !s.ready() {
@@ -107,7 +104,7 @@ func (s Service) Report(c context.Context, key string, op operation.Context) ([]
 		if err != nil || !retained {
 			return err
 		}
-		result, found, err := s.Combat.ReplayTx(c, sc.Tx, id, reportRetention, sc.Operation.DecisionAt())
+		result, found, err := s.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeArena).Retention, sc.Operation.DecisionAt())
 		report, served = result.Report, found
 		return err
 	})

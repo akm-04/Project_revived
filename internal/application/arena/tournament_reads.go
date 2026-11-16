@@ -37,8 +37,6 @@ func (service Service) TournamentRoom(requestContext context.Context, actor iden
 	return room, err
 }
 
-var tournamentRetention = cd.Retention{ID: "I9_ARENA_TOURNAMENT_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
-
 func (service Service) TournamentReport(requestContext context.Context, actor identity.ActorContext, identifier ids.UUID, round int, stage int, operationContext operation.Context) (d.TournamentRoomView, error) {
 	view := d.TournamentRoomView{}
 	if !service.ready() || identifier.IsZero() || round < 1 || round > d.SelectionTeamCount {
@@ -65,7 +63,11 @@ func (service Service) TournamentReport(requestContext context.Context, actor id
 		if room.Status != d.RoomSettled || round > len(played) {
 			return d.ErrRefused
 		}
-		result, retained, err := service.Combat.ReplayTx(requestContext, scope.Tx, room.Attempts[played[round-1]], tournamentRetention, scope.Operation.DecisionAt())
+		mode := cd.ModeArenaPlayoffs
+		if room.IsFriendFight() {
+			mode = cd.ModeArenaFriendFight
+		}
+		result, retained, err := service.Combat.ReplayTx(requestContext, scope.Tx, room.Attempts[played[round-1]], *cd.MustMode(mode).Retention, scope.Operation.DecisionAt())
 		if err != nil || !retained {
 			return errors.Join(err, d.ErrRefused)
 		}

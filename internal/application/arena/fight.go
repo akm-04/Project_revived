@@ -384,7 +384,7 @@ func (s Service) admitFight(c context.Context, a identity.ActorContext, id ids.U
 				return err
 			}
 			battle := combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: teamA, PetsA: petsA, WavesB: [][]combat.Participant{teamB}, PetsB: petsB, Context: &cd.BattleContext{Transform: d.Transform}}
-			started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(m.ID), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
+			started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeArena, Actor: a, Locator: locator(m.ID), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
 			if err != nil {
 				return err
 			}

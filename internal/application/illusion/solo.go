@@ -154,7 +154,7 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if request.RentPetUnit > 0 && request.RentPetPlayer > 0 {
 		battle.PetsA = append(battle.PetsA, cb.Participant{Origin: cd.Borrowed, Kind: cd.PetActor, Player: identity.PlayerID(request.RentPetPlayer), Identity: request.RentPetUnit})
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence),
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeIllusionSolo, Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence),
 		StartFingerprint: startFingerprint(a, request, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
 		Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }

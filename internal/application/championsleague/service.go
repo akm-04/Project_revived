@@ -88,9 +88,8 @@ func set(players []d.Player, p d.Player) []d.Player {
 	return append(players, p)
 }
 
-// ReportRetention is the league replay window (D25a private policy; the
-// accepted C5F five days, under the D9 Q6 ceiling).
-var ReportRetention = cd.Retention{ID: "C5F_LEAGUE_REPORT_RETENTION_V1", Version: 1, Window: 5 * 24 * time.Hour}
+// ReportRetention is the league replay window, the mode registry's row.
+var ReportRetention = *cd.MustMode(cd.ModeChampionsLeague).Retention
 
 func (s Service) savePlayer(c context.Context, t tx.Tx, p *d.Player, at time.Time) error {
 	old := p.Version

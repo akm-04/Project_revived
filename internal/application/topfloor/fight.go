@@ -245,7 +245,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if r.PetID > 0 {
 		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: r.PetID})
 	}
-	started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(server, a.PlayerID), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
+	started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeTopFloor, Actor: a, Locator: locator(server, a.PlayerID), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
 	if err != nil {
 		return d.Fight{}, err
 	}

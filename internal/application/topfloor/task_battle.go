@@ -212,7 +212,7 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 		if err != nil {
 			return err
 		}
-		started, err := service.Combat.StartTx(requestContext, scope.Tx, coherent, combat.StartRequest{Actor: actor, Locator: taskLocator(actor.LogicalServerID, actor.PlayerID), GenerationRef: domain.TaskModeContractID, StartFingerprint: fingerprint, ResultDeadline: at.Add(resultWindow), Battle: battle})
+		started, err := service.Combat.StartTx(requestContext, scope.Tx, coherent, combat.StartRequest{Mode: cd.ModeTopFloorTask, Actor: actor, Locator: taskLocator(actor.LogicalServerID, actor.PlayerID), GenerationRef: domain.TaskModeContractID, StartFingerprint: fingerprint, ResultDeadline: at.Add(resultWindow), Battle: battle})
 		if err != nil {
 			return err
 		}

@@ -88,7 +88,7 @@ func (mode Mode) Start(ctx context.Context, actor identity.ActorContext, marked 
 		if err != nil {
 			return nil, err
 		}
-		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, combat.StartRequest{Actor: actor, Locator: locator(actor), GenerationRef: pending.Identity, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: time.Unix(pending.Deadline, 0), TrustProfile: combatdomain.ServerEntropyClientDerived, Replay: combatdomain.ReplaySpec{Response: combatdomain.ReplayFightExist, ErrorCode: combatdomain.FightExistCode}, Challenge: &combatdomain.Challenge{Targets: pending.Board.Monsters}, Package: current.catalog.DrawPolicy().Build})
+		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, combat.StartRequest{Mode: combatdomain.ModeDodgeball, Actor: actor, Locator: locator(actor), GenerationRef: pending.Identity, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: time.Unix(pending.Deadline, 0), TrustProfile: combatdomain.ServerEntropyClientDerived, Replay: combatdomain.ReplaySpec{Response: combatdomain.ReplayFightExist, ErrorCode: combatdomain.FightExistCode}, Challenge: &combatdomain.Challenge{Targets: pending.Board.Monsters}, Package: current.catalog.DrawPolicy().Build})
 		if err != nil {
 			return nil, err
 		}

@@ -170,7 +170,7 @@ func (mode Mode) PlayerFight(ctx context.Context, actor identity.ActorContext, r
 			return nil, err
 		}
 		deadline := current.timed.Operation.DecisionAt().Add(time.Duration(memoir.ResultWindowSeconds) * time.Second)
-		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, applicationcombat.StartRequest{Actor: actor, Locator: locator(actor), GenerationRef: generation, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: deadline, Battle: battle})
+		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, applicationcombat.StartRequest{Mode: combat.ModeMemoirPlayer, Actor: actor, Locator: locator(actor), GenerationRef: generation, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: deadline, Battle: battle})
 		if err != nil {
 			return nil, err
 		}

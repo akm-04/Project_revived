@@ -18,7 +18,10 @@ import (
 var ErrAttemptNotFound = errors.New("combat: no attempt for locator; RESULT cannot create one")
 
 type StartRequest struct {
-	Actor            identity.ActorContext
+	Actor identity.ActorContext
+	// Mode is the registered I8-4 tuple this START belongs to; START refuses an
+	// unregistered mode or a request that differs from its registration.
+	Mode             d.ModeKey
 	Locator          d.Locator
 	GenerationRef    string
 	StartFingerprint string
@@ -88,7 +91,34 @@ func (s Service) StartManyTx(ctx context.Context, t tx.Tx, scope ca.CoherentRead
 	return out, nil
 }
 
+// validateStartMode refuses a START that is not the tuple its registered mode
+// declares, before anything is read or staged (PASS763 I8-REGISTRATION-TUPLE).
+func validateStartMode(request StartRequest) error {
+	registration, ok := d.LookupMode(request.Mode)
+	if !ok || request.Locator.DomainKind != registration.Family {
+		return d.ErrInvalid
+	}
+	profile, replay, _ := request.kind()
+	if profile != registration.Trust || replay != registration.Replay {
+		return d.ErrInvalid
+	}
+	if request.Battle.Context != nil && request.Battle.Context.Transform != registration.Transform {
+		return d.ErrInvalid
+	}
+	producer := d.ProducerProfileID
+	if request.Challenge != nil {
+		producer = ""
+	}
+	if registration.Producer != producer {
+		return d.ErrInvalid
+	}
+	return nil
+}
+
 func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope, request StartRequest, f *freezer) (Started, error) {
+	if err := validateStartMode(request); err != nil {
+		return Started{}, err
+	}
 	profile, replay, status := request.kind()
 	if t == nil || scope.Validate() != nil || scope.Queryer() != tx.Queryer(t) || !request.Actor.PlayerID.Valid() || request.Actor.ContextID.UUID().IsZero() || !request.Locator.Valid() || request.GenerationRef == "" || len(request.StartFingerprint) != 64 || !request.ResultDeadline.After(scope.ObservedAt) {
 		return Started{}, d.ErrInvalid

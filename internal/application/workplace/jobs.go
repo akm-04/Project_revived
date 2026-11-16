@@ -147,7 +147,7 @@ func (s Mode) Dispatch(c context.Context, a identity.ActorContext, q Dispatch, o
 			if err != nil {
 				return nil, err
 			}
-			started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a, q.Team), GenerationRef: o.ID, StartFingerprint: fingerprint, ResultDeadline: sc.Operation.DecisionAt().Add(time.Duration(v.catalog.Policy.AttemptLifetime) * time.Second), Battle: cb.BattleRequest{CampaignType: v.catalog.Policy.CampaignType, BattleID: v.catalog.Policy.BattleID, TeamA: allies, WavesB: [][]cb.Participant{enemies}}})
+			started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeWorkplace, Actor: a, Locator: locator(a, q.Team), GenerationRef: o.ID, StartFingerprint: fingerprint, ResultDeadline: sc.Operation.DecisionAt().Add(time.Duration(v.catalog.Policy.AttemptLifetime) * time.Second), Battle: cb.BattleRequest{CampaignType: v.catalog.Policy.CampaignType, BattleID: v.catalog.Policy.BattleID, TeamA: allies, WavesB: [][]cb.Participant{enemies}}})
 			if err != nil {
 				return nil, err
 			}

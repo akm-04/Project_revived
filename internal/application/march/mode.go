@@ -302,7 +302,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if err != nil {
 			return nil, err
 		}
-		_, err = s.Combat.StartTx(c, sc.Tx, scope, appcombat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: r.Pending, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: sc.Operation.DecisionAt().Add(time.Duration(v.catalog.Policy.ResultWindow) * time.Second), Battle: battle, TrustProfile: cd.ClientFullReportAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(_ *cd.Stream) (any, error) {
+		_, err = s.Combat.StartTx(c, sc.Tx, scope, appcombat.StartRequest{Mode: cd.ModeMarch, Actor: a, Locator: locator(a), GenerationRef: r.Pending, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: sc.Operation.DecisionAt().Add(time.Duration(v.catalog.Policy.ResultWindow) * time.Second), Battle: battle, TrustProfile: cd.ClientFullReportAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(_ *cd.Stream) (any, error) {
 			return map[string]any{"hero_status": r.Heroes, "enemies": enemy, "power_drink": r.Drinks, "policy": d.PolicyID}, nil
 		}})
 		if err != nil {
