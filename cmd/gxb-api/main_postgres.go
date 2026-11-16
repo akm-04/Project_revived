@@ -63,6 +63,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/restorestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialexchangestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
@@ -183,6 +184,9 @@ func main() {
 	defer pool.Close()
 	if err := pool.Ping(ctx); err != nil {
 		log.Fatal(err)
+	}
+	if err := (restorestore.Store{}).CheckWritable(ctx, pool); err != nil {
+		log.Fatalf("refusing to start: %v", err)
 	}
 	if short, err := postgres.SerializableLockShortfall(ctx, pool); err != nil || len(short) > 0 {
 		log.Printf("WARNING: PostgreSQL SSI lock budget below C1 Tier 0, expect 40001 between unrelated players under load: %v %v", short, err)
