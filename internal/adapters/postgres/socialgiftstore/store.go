@@ -240,7 +240,8 @@ type claimWire struct {
 func (Store) ReadClaim(c context.Context, q tx.Queryer, id ids.UUID) (sg.ClaimOperation, bool, error) {
 	var raw []byte
 	var payloadVersion int16
-	e := q.QueryRow(c, `SELECT to_jsonb(o)-'payload_version',o.payload_version FROM social_gift_claim_operations o WHERE operation_id=$1::uuid`, id.String()).Scan(&raw, &payloadVersion)
+	// The row JSON also carries payload_version; absent (a pre-00163 row) means version 0.
+	e := q.QueryRow(c, `SELECT to_jsonb(o)-'payload_version',COALESCE((to_jsonb(o)->>'payload_version')::smallint,0) FROM social_gift_claim_operations o WHERE operation_id=$1::uuid`, id.String()).Scan(&raw, &payloadVersion)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return sg.ClaimOperation{}, false, nil
 	}
