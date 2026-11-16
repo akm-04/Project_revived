@@ -23,7 +23,6 @@ import (
 	"os"
 	osexec "os/exec"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -54,8 +53,16 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	}
 	bearer := displayToken(t, p, a)
 	original := op()
-	first, e := rankingService(p, p).ReadBoard(ctx, d.GirlsBoard, a, original)
-	if e != nil {
+	initial := rankingService(p, p)
+	if e := initial.BackfillBoardServer(ctx, original, d.GirlsBoard, server, r7ServerPlayers(t, p, server)); e != nil {
+		t.Fatal(e)
+	}
+	if e := initial.SettleBoardServer(ctx, original, d.GirlsBoard, server); e != nil {
+		t.Fatal(e)
+	}
+	// The scored read refreshes only its viewer; warm the other ranker's row so
+	// the shared page still has both players.
+	if _, e := initial.ReadBoard(ctx, d.GirlsBoard, b, op()); e != nil {
 		t.Fatal(e)
 	}
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
@@ -166,7 +173,16 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 			t.Fatal("unsupported/mixed/forged ranking accepted", fields, out)
 		}
 	}
-	if n := rankingCount(t, p, server, "ranking_girls_snapshots"); n != 2 {
+	// The API's own ranking worker settles every board policy, so only the Girls policy is counted.
+	girlsCount := func(db *pg.Pool, table string) int64 {
+		t.Helper()
+		var n int64
+		if e := db.QueryRow(ctx, `SELECT count(*) FROM `+table+` WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), d.GirlsPolicy).Scan(&n); e != nil {
+			t.Fatal(e)
+		}
+		return n
+	}
+	if n := girlsCount(p, "ranking_girls_snapshots"); n != 1 {
 		t.Fatal("invalid request mutated Ranking", n)
 	}
 	code, out := post(2492, map[string]any{"title_id": 100059, "unique_id": 0})
@@ -184,9 +200,8 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	running = true
 	board(3)
 	// Bind all durable Ranking and recipient/receipt state across relocation.
-	snapshot, e := rankingService(p, p).RefreshBoard(ctx, d.GirlsBoard, a, original)
-	if e != nil || !reflect.DeepEqual(snapshot, first) {
-		t.Fatal("restart original receipt", e)
+	if e := rankingService(p, p).SettleBoardServer(ctx, original, d.GirlsBoard, server); e != nil {
+		t.Fatal("restart settlement replay", e)
 	}
 	fingerprint := func(db *pg.Pool) string {
 		t.Helper()
@@ -204,8 +219,9 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		}
 		return digest
 	}
-	before := fingerprint(p)
+	// Fingerprint after stop: the API's background maintenance may still write until it exits.
 	stop()
+	before := fingerprint(p)
 	tool := func(name string, args ...string) {
 		raw, e := osexec.Command(name, args...).CombinedOutput()
 		if e != nil {
@@ -231,12 +247,11 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if after := fingerprint(restored); after != before {
 		t.Fatal("relocated durable state changed", before, after)
 	}
-	recovered, e := rankingService(restored, restored).ReadBoard(ctx, d.GirlsBoard, a, original)
-	if e != nil || !reflect.DeepEqual(first, recovered) {
-		t.Fatal("restored immutable snapshot/Kernel receipt", e)
+	if e := rankingService(restored, restored).SettleBoardServer(ctx, original, d.GirlsBoard, server); e != nil {
+		t.Fatal("restored settlement replay", e)
 	}
 	// Both rankers own the birth companion, so both titled ranks are awarded.
-	if n := rankingCount(t, restored, server, "ranking_girls_awards"); n != 2 {
+	if n := girlsCount(restored, "ranking_girls_awards"); n != 2 {
 		t.Fatal("duplicate restored awards", n)
 	}
 	cmd = start()

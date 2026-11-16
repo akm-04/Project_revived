@@ -48,3 +48,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00155: I9-10 SYSTEM_BROADCAST 3002: consecutive Top Floor attack wins on the player row, reset by an attack loss or forfeit. Existing players start at 0.
 - 00156: I9-10 lobby announcements (SYSTEM_BROADCAST 4101, ACTIVITY_BROADCAST 4096): one outbox row per produced announce, removed by the realtime listener after it fans out to the producing logical server. Empty on upgrade.
 - 00157: I9-10 Hero Recommend per-logical-server weekly derived snapshot.
+- 00159: R7 stored per-board score row (policy, player, score, score_since, revision, metric) with the board ordering index. Empty on upgrade; the R7 backfill seeds it.

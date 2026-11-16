@@ -90,7 +90,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/ranking.go",
-    "line": 64
+    "line": 65
    },
    "mid": 301,
    "name": "LOAD_RANK_LIST"
@@ -101,14 +101,15 @@
  "stores": [
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/dormstore",
-  "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/presencestore",
   "internal/adapters/postgres/rankingstore"
  ],
  "tables": {
   "owned": [
+   "ranking_board_scores",
    "ranking_girls_awards",
    "ranking_girls_birth_tracking",
    "ranking_girls_periods",
@@ -129,7 +130,10 @@
    "player_dorm_heroes",
    "player_dorm_rooms",
    "player_dorm_roots",
+   "player_login_observations",
+   "player_social_presence",
    "players",
+   "ranking_board_scores",
    "ranking_girls_awards",
    "ranking_girls_birth_tracking",
    "ranking_girls_periods",
@@ -138,6 +142,7 @@
   ],
   "written": [
    "gxb_operation_receipts",
+   "ranking_board_scores",
    "ranking_girls_awards",
    "ranking_girls_periods",
    "ranking_girls_roots",

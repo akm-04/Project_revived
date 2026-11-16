@@ -24,6 +24,8 @@ type RuntimeConfig struct {
 	SoftStopTimeout time.Duration
 	PollOnly        bool
 	JobTimeout      time.Duration
+	// RegisterWorkers adds feature-owned workers beside the obligation worker.
+	RegisterWorkers func(*river.Workers) error
 }
 
 func (c RuntimeConfig) riverQueues() (map[string]river.QueueConfig, error) {
@@ -56,6 +58,11 @@ func NewRuntime(pool *pgxpool.Pool, dispatcher appgeneration.ObligationDispatche
 	if err != nil {
 		return nil, err
 	}
+	if cfg.RegisterWorkers != nil {
+		if err = cfg.RegisterWorkers(workers); err != nil {
+			return nil, err
+		}
+	}
 	queues, err := cfg.riverQueues()
 	if err != nil {
 		return nil, err
@@ -85,6 +92,17 @@ func (r *Runtime) Stop(ctx context.Context) error {
 		return errors.New("nil River runtime")
 	}
 	return r.client.Stop(ctx)
+}
+
+// Insert enqueues one auxiliary job outside a canonical transaction. Feature
+// workers use it only for maintenance work; gameplay effects stay in owner
+// transactions.
+func (r *Runtime) Insert(c context.Context, args river.JobArgs, opts *river.InsertOpts) error {
+	if r == nil || r.client == nil {
+		return errors.New("nil River runtime")
+	}
+	_, e := r.client.Insert(c, args, opts)
+	return e
 }
 
 func (r *Runtime) Queue() obligation.Queue {

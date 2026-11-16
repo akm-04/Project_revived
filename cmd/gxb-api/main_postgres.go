@@ -441,6 +441,9 @@ func main() {
 	boardRanking.Metrics = profileMetrics
 	boardRanking.TopForce = profileMetrics
 	boardRanking.Comfort = dormstore.Store{Queryer: pool}
+	boardRanking.Presence = presencestore.Store{}
+	boardRanking.Login = i4store.PlayerLoginActivity{}
+	startRankingJobs(ctx, pool, boardRanking)
 	rentalPolicy, err := guildrentalpolicy.LoadBuiltin()
 	if err != nil {
 		log.Fatalf("I9-9B Guild rental policy: %v", err)

@@ -1,0 +1,164 @@
+{
+ "contract": "R7_RANKING_DESIGN.md acceptance 1",
+ "method": "At one owned instant, the retained RefreshBoard snapshot (ordered entries) is compared with ranking_board_scores read in index order after BackfillScoresServer.",
+ "fixture": "fresh migrated+deployed DB; four players on one isolated server: two combat owners, one summoned roster, one ladder actor; real production Hero commands; skin and dorm facts seeded.",
+ "result": "EQUAL",
+ "boards": {
+  "achievement-point": [
+   {
+    "player": 4818025001,
+    "score": 282,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025002,
+    "score": 94,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025004,
+    "score": 94,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025003,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   }
+  ],
+  "awaken-count": [
+   {
+    "player": 4818025001,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025002,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025003,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025004,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   }
+  ],
+  "dorm-comfort": [
+   {
+    "player": 4818025003,
+    "score": 12,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025001,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025002,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025004,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   }
+  ],
+  "girls": [
+   {
+    "player": 4818025001,
+    "score": 3,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025002,
+    "score": 1,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025004,
+    "score": 1,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025003,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   }
+  ],
+  "skins": [
+   {
+    "player": 4818025002,
+    "score": 1,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025001,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025003,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025004,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   }
+  ],
+  "star-count": [
+   {
+    "player": 4818025001,
+    "score": 3,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025002,
+    "score": 1,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025004,
+    "score": 1,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025003,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   }
+  ],
+  "top-five-force": [
+   {
+    "player": 4818025001,
+    "score": 282,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025002,
+    "score": 94,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025004,
+    "score": 94,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   },
+   {
+    "player": 4818025003,
+    "score": 0,
+    "score_since": "2026-11-14T01:53:36.801237Z"
+   }
+  ]
+ },
+ "revision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+ "server": 48180
+}

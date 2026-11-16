@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 )
 
@@ -15,64 +14,34 @@ func girlsFixture() (BoardRoot, time.Time, string, ids.UUID) {
 	op, _ := ids.NewUUID()
 	return r, at, strings.Repeat("a", 64), op
 }
-func girlsInput(pid, score int64, at time.Time, rev string) BoardInput {
-	return BoardInput{Metric: BoardMetric{Player: identity.PlayerID(pid), Owner: "CharacterHero", Policy: GirlsBoard.SourcePolicy, Semantics: GirlsBoard.SourceSemantics, Revision: rev, PopulationDigest: strings.Repeat("b", 64), FieldID: 1001, Value: score, SourceVersion: 1, PopulationVersion: 1, ObservedAt: at}, Display: BoardPresentation{Player: identity.PlayerID(pid), Name: "Player", Level: 1}}
-}
-func TestGirlsObservedRunsDoNotInventFirstReachOrResetForEquipment(t *testing.T) {
-	r, at, rev, op := girlsFixture()
-	n, s, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{girlsInput(9, 2, at, rev), girlsInput(3, 2, at, rev)})
-	if e != nil || s.Entries[0].Metric.Player != 3 || !s.Entries[0].ScoreSince.Equal(at) {
-		t.Fatal(s, e)
-	}
-	// A source version/digest change without a count change preserves the observed
-	// score-run time. Canonical equipment changes must not move an equal count.
-	later := at.Add(time.Hour)
-	in := girlsInput(9, 2, later, rev)
-	in.Metric.SourceVersion = 2
-	in.Metric.PopulationVersion = 2
-	in.Metric.PopulationDigest = strings.Repeat("c", 64)
-	n2, s2, e := BuildBoardSnapshot(n, later, rev, op, []BoardInput{in, girlsInput(3, 1, later, rev)})
-	if e != nil || s2.Entries[0].Metric.Player != 9 || !n2.Runs[9].Since.Equal(at) || !n2.Runs[3].Since.Equal(later) {
-		t.Fatal(n2, s2, e)
-	}
-	// Returning to a previous value starts a new current-value run; it is not a
-	// lifetime highwater or the first-ever historical time for that value.
-	later2 := later.Add(time.Hour)
-	_, s3, e := BuildBoardSnapshot(n2, later2, rev, op, []BoardInput{girlsInput(3, 2, later2, rev), girlsInput(9, 2, later2, rev)})
-	if e != nil || s3.Entries[0].Metric.Player != 9 || !s3.Entries[1].ScoreSince.Equal(later2) {
-		t.Fatal(s3, e)
-	}
-	if len(r.Runs) != 0 || len(n.Runs) != 2 || n.Runs[3].Score != 2 {
-		t.Fatal("build mutated earlier root")
-	}
-	newRev := strings.Repeat("d", 64)
-	_, changed, e := BuildBoardSnapshot(n2, later2, newRev, op, []BoardInput{girlsInput(9, 2, later2, newRev)})
-	if e != nil || !changed.Entries[0].ScoreSince.Equal(later2) {
-		t.Fatal(changed, e)
-	}
-}
+
 func TestGirlsSnapshotRejectsIncompleteConflictingOrTamperedInputs(t *testing.T) {
 	r, at, rev, op := girlsFixture()
-	one := girlsInput(1, 1, at, rev)
-	cases := []BoardInput{one, one, one, one, one, one}
-	cases[0].Metric.Owner = "client"
-	cases[1].Metric.ObservedAt = at.Add(time.Second)
-	cases[2].Metric.Policy = "future"
-	cases[3].Metric.PopulationDigest = ""
-	cases[4].Display.Player = 2
-	cases[5].Metric.Value = -1
-	for _, v := range cases {
-		if _, _, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{v}); e == nil {
+	one := boardEntry(GirlsBoard, 1, 1, at, at, rev)
+	badOwner := one
+	badOwner.Metric.Owner = "client"
+	badObservation := one
+	badObservation.Metric.ObservedAt = at.Add(time.Second)
+	badPolicy := one
+	badPolicy.Metric.Policy = "future"
+	badDigest := one
+	badDigest.Metric.PopulationDigest = ""
+	badDisplay := one
+	badDisplay.Display.Player = 2
+	negative := one
+	negative.Metric.Value = -1
+	for _, v := range []BoardEntry{badOwner, badObservation, badPolicy, badDigest, badDisplay, negative} {
+		if _, _, e := FreezeBoardSnapshot(r, at, rev, op, []BoardEntry{v}); e == nil {
 			t.Fatal("accepted unqualified source", v)
 		}
 	}
-	if _, _, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{one, one}); e == nil {
+	if _, _, e := FreezeBoardSnapshot(r, at, rev, op, []BoardEntry{one, one}); e == nil {
 		t.Fatal("duplicate subject")
 	}
-	if _, _, e := BuildBoardSnapshot(r, at.Add(-time.Second), rev, op, []BoardInput{one}); e != ErrStale {
+	if _, _, e := FreezeBoardSnapshot(r, at.Add(-time.Second), rev, op, []BoardEntry{one}); e != ErrStale {
 		t.Fatal(e)
 	}
-	_, s, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{one})
+	_, s, e := FreezeBoardSnapshot(r, at, rev, op, []BoardEntry{one})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -93,14 +62,11 @@ func TestDormComfortBoardPublishesTopHundredWithoutTitles(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	in := []BoardInput{}
+	entries := make([]BoardEntry, 0, 101)
 	for p := int64(1); p <= 101; p++ {
-		in = append(in, BoardInput{
-			Metric:  BoardMetric{Player: identity.PlayerID(p), Owner: b.SourceOwner, Policy: b.SourcePolicy, Semantics: b.SourceSemantics, Revision: rev, PopulationDigest: strings.Repeat("b", 64), FieldID: b.FieldID, Value: 102 - p, SourceVersion: 1, PopulationVersion: 1, ObservedAt: at},
-			Display: BoardPresentation{Player: identity.PlayerID(p), Name: "Player", Level: 1},
-		})
+		entries = append(entries, boardEntry(b, p, 102-p, at, at, rev))
 	}
-	_, snapshot, e := BuildBoardSnapshot(root, at, rev, op, in)
+	_, snapshot, e := FreezeBoardSnapshot(root, at, rev, op, entries)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -114,15 +80,15 @@ func TestDormComfortBoardPublishesTopHundredWithoutTitles(t *testing.T) {
 
 func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *testing.T) {
 	r, at, rev, op := girlsFixture()
-	in := []BoardInput{}
+	entries := []BoardEntry{}
 	for p := int64(1); p <= 22; p++ {
 		score := int64(1)
 		if p == 22 {
 			score = 0
 		}
-		in = append(in, girlsInput(p, score, at, rev))
+		entries = append(entries, boardEntry(GirlsBoard, p, score, at, at, rev))
 	}
-	_, s, e := BuildBoardSnapshot(r, at, rev, op, in)
+	_, s, e := FreezeBoardSnapshot(r, at, rev, op, entries)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -152,7 +118,7 @@ func TestGirlsTitlesUseSourceTiersPositivePopulationAndFixedSnapshotTime(t *test
 	if e != nil || !zone.Equal(week) {
 		t.Fatal(zone, e)
 	}
-	_, empty, e := BuildBoardSnapshot(r, at, rev, op, []BoardInput{girlsInput(1, 0, at, rev)})
+	_, empty, e := FreezeBoardSnapshot(r, at, rev, op, []BoardEntry{boardEntry(GirlsBoard, 1, 0, at, at, rev)})
 	if e != nil {
 		t.Fatal(e)
 	}

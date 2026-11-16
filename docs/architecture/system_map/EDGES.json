@@ -2109,6 +2109,9 @@
    "publicprofile": [
     "*Now"
    ],
+   "ranking": [
+    "*Now"
+   ],
    "socialpresence": [
     "*Now"
    ],
@@ -5132,17 +5135,21 @@
    "store:dormstore": [
     "*ComfortFactTx"
    ],
-   "store:guildrentalread": [
-    "*ProfileTx"
-   ],
    "store:i4store": [
-    "*ListPlayerRootsTx",
+    "*LastLoginAtTx",
     "*LockPlayerRootsTx",
-    "*ProfileTx"
+    "*ProfilesTx",
+    "*ServerTx"
    ],
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"
+   ],
+   "store:presencestore": [
+    "*LastSeenAtTx"
+   ],
+   "workplace": [
+    "*Now"
    ]
   },
   "realtimeauth": {

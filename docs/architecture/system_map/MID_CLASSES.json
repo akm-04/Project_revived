@@ -618,11 +618,6 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -5454,11 +5449,6 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -5774,11 +5764,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -7574,11 +7559,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -28350,14 +28330,14 @@
      "value": "repeatable_read"
     },
     {
-     "file": "internal/application/ranking/refresh.go",
-     "line": 230,
+     "file": "internal/application/ranking/read.go",
+     "line": 107,
      "value": "serializable"
     },
     {
-     "file": "internal/application/ranking/settlement.go",
-     "line": 140,
-     "value": "serializable"
+     "file": "internal/application/ranking/read.go",
+     "line": 126,
+     "value": "read_committed"
     }
    ],
    "mid": 301,
@@ -28368,20 +28348,18 @@
      "value": "false"
     },
     {
-     "file": "internal/application/ranking/refresh.go",
-     "line": 230,
+     "file": "internal/application/ranking/read.go",
+     "line": 107,
      "value": "false"
     },
     {
-     "file": "internal/application/ranking/settlement.go",
-     "line": 140,
-     "value": "false"
+     "file": "internal/application/ranking/read.go",
+     "line": 126,
+     "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183",
-    "internal/application/ranking/refresh.go:329",
-    "internal/application/ranking/settlement.go:227"
+    "internal/application/petcampaign/run.go:183"
    ],
    "retry": [
     {
@@ -28390,25 +28368,21 @@
      "value": "6"
     },
     {
-     "file": "internal/application/ranking/refresh.go",
-     "line": 230,
+     "file": "internal/application/ranking/read.go",
+     "line": 107,
      "value": "8"
     },
     {
-     "file": "internal/application/ranking/settlement.go",
-     "line": 140,
-     "value": "8"
+     "file": "internal/application/ranking/read.go",
+     "line": 126,
+     "value": "1"
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/i5store/player_display.go:81",
     "internal/adapters/postgres/petcampaignstore/store.go:31",
     "internal/adapters/postgres/petcampaignstore/store.go:38",
-    "internal/adapters/postgres/rankingstore/board.go:122",
-    "internal/adapters/postgres/rankingstore/board.go:170",
-    "internal/adapters/postgres/rankingstore/board.go:21",
-    "internal/adapters/postgres/rankingstore/board.go:47",
-    "internal/adapters/postgres/rankingstore/board.go:64"
+    "internal/adapters/postgres/rankingstore/scores.go:65",
+    "internal/adapters/postgres/rankingstore/scores.go:83"
    ],
    "system": "ranking",
    "transactions": [
@@ -28421,20 +28395,20 @@
      "retry": "6"
     },
     {
-     "file": "internal/application/ranking/refresh.go",
-     "function": "Service.RefreshBoard",
+     "file": "internal/application/ranking/read.go",
+     "function": "Service.ReadBoard",
      "isolation": "serializable",
-     "line": 230,
+     "line": 107,
      "read_only": "false",
      "retry": "8"
     },
     {
-     "file": "internal/application/ranking/settlement.go",
-     "function": "Service.settleBoardPeriod",
-     "isolation": "serializable",
-     "line": 140,
-     "read_only": "false",
-     "retry": "8"
+     "file": "internal/application/ranking/read.go",
+     "function": "Service.ReadBoard",
+     "isolation": "read_committed",
+     "line": 126,
+     "read_only": "true",
+     "retry": "1"
     }
    ],
    "unbounded_read": [
@@ -28704,11 +28678,6 @@
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -28742,31 +28711,6 @@
      "file": "internal/adapters/postgres/oneononestore/store.go",
      "line": 221,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id,'defense',jsonb_array_length(teams)>0,'level',level,'slot',COALESCE(slot,0),'points',points,'points_at',points_at) ORDER BY player_id),'[]'::jsonb)::text FROM one_on_one_players"
-    },
-    {
-     "file": "internal/adapters/postgres/rankingstore/board.go",
-     "line": 21,
-     "statement": "SELECT payload::text,state_version FROM ranking_girls_roots WHERE logical_server_id=$1 AND policy_id=$2 FOR UPDATE"
-    },
-    {
-     "file": "internal/adapters/postgres/rankingstore/board.go",
-     "line": 99,
-     "statement": "SELECT payload::text,digest FROM ranking_girls_snapshots WHERE logical_server_id=$1 AND policy_id=$2 AND generation=$3"
-    },
-    {
-     "file": "internal/adapters/postgres/rankingstore/board.go",
-     "line": 109,
-     "statement": "SELECT payload::text,digest FROM ranking_girls_snapshots WHERE operation_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/rankingstore/board.go",
-     "line": 133,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('Server',logical_server_id,'Policy',policy_id,'Week',week_start,'Generation',snapshot_generation) ORDER BY week_start),'[]'::jsonb)::text FROM ranking_girls_periods WHERE logical_server_id=$1 AND policy_id=$2 AND settled_at IS NULL"
-    },
-    {
-     "file": "internal/adapters/postgres/rankingstore/board.go",
-     "line": 153,
-     "statement": "SELECT snapshot_generation,settled_at FROM ranking_girls_periods WHERE logical_server_id=$1 AND policy_id=$2 AND week_start=$3"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -39767,11 +39711,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -70750,11 +70689,6 @@
      "statement": "WITH a AS ("
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -79469,11 +79403,6 @@
      "statement": "SELECT guild_id,logical_server_id,name,icon,icon_frame,des,apply_type,min_allow_level,vitality,policy_revision,state_version,created_at,updated_at,retired_at FROM guilds WHERE guild_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -79921,11 +79850,6 @@
      "file": "internal/adapters/postgres/contentstore/super_equipment.go",
      "line": 36,
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -80387,11 +80311,6 @@
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -80726,11 +80645,6 @@
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -80946,11 +80860,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 557,
      "statement": "WITH a AS ("
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -81186,11 +81095,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 557,
      "statement": "WITH a AS ("
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -81587,11 +81491,6 @@
      "statement": "SELECT guild_id,logical_server_id,name,icon,icon_frame,des,apply_type,min_allow_level,vitality,policy_revision,state_version,created_at,updated_at,retired_at FROM guilds WHERE guild_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -81774,11 +81673,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 557,
      "statement": "WITH a AS ("
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -82160,11 +82054,6 @@
      "statement": "SELECT guild_id,logical_server_id,name,icon,icon_frame,des,apply_type,min_allow_level,vitality,policy_revision,state_version,created_at,updated_at,retired_at FROM guilds WHERE guild_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -82405,11 +82294,6 @@
      "statement": "WITH a AS ("
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -82587,11 +82471,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 557,
      "statement": "WITH a AS ("
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -109216,11 +109095,6 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -109536,11 +109410,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -109860,11 +109729,6 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -110180,11 +110044,6 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/conquer_enumeration.go",
-     "line": 34,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id) ORDER BY player_id),'[]'::jsonb)::text FROM players"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",

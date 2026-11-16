@@ -4,7 +4,6 @@ import (
 	"context"
 
 	app "gxb.local/backend/v2/internal/application/playerdisplay"
-	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/ranking"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -19,7 +18,7 @@ func sameOrigin(a, b app.Origin) bool {
 func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r app.CatalogOriginRequest) (app.CatalogOriginObservation, error) {
 	out := app.CatalogOriginObservation{Request: r, Origins: []app.Origin{}}
 	board, known := d.BoardOfTitle(r.CatalogID)
-	if !known || q == nil || s.Store == nil || s.Cohort == nil || s.Ledger == nil || s.Content == nil || !r.PlayerID.Valid() || r.Family != "title" || r.ObservedAt.Unix() <= 0 || len(r.Revision) != 64 {
+	if !known || q == nil || s.Store == nil || s.Directory == nil || s.Ledger == nil || s.Content == nil || !r.PlayerID.Valid() || r.Family != "title" || r.ObservedAt.Unix() <= 0 || len(r.Revision) != 64 {
 		return out, app.ErrUnavailable
 	}
 	catalog, e := s.Content.ReadPlayerDisplayCatalogTx(c, q, r.Revision)
@@ -30,22 +29,11 @@ func (s Service) ReadCatalogDisplayOriginsTx(c context.Context, q tx.Queryer, r 
 	if !ok || v.Type != board.TitleType || v.Days != d.BoardTitleDuration {
 		return out, app.ErrConflict
 	}
-	roots, e := s.Cohort.ListPlayerRootsTx(c, q)
+	server, found, e := s.Directory.ServerTx(c, q, r.PlayerID)
 	if e != nil {
 		return out, e
 	}
-	server := identity.LogicalServerID(0)
-	seen := map[identity.PlayerID]bool{}
-	for _, x := range roots {
-		if x.Validate() != nil || seen[x.PlayerID] {
-			return out, app.ErrConflict
-		}
-		seen[x.PlayerID] = true
-		if x.PlayerID == r.PlayerID {
-			server = x.LogicalServerID
-		}
-	}
-	if !server.Valid() {
+	if !found || !server.Valid() {
 		return out, app.ErrUnavailable
 	}
 	tracked, e := s.Store.BoardTrackingTx(c, q, board, r.PlayerID, server, r.ObservedAt)

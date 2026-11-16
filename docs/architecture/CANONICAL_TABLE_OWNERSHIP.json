@@ -3679,6 +3679,20 @@
       "owner": "Ranking",
       "write_exceptions": []
     },
+    "ranking_board_scores": {
+      "allowed_query_owners": [
+        "Ranking"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/rankingstore/"
+      ],
+      "migration": "migrations/00159_r7_ranking_board_scores.sql",
+      "owner": "Ranking",
+      "write_exceptions": []
+    },
     "player_hero_raw_awakening": {
       "allowed_query_owners": [
         "character/hero-core"

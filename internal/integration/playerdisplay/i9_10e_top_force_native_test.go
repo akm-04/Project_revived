@@ -14,7 +14,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	rankingdomain "gxb.local/backend/v2/internal/domain/ranking"
-	projection "gxb.local/backend/v2/internal/projection/ranking"
 )
 
 // summonHeroes runs the real Character summon command for each table. The
@@ -83,21 +82,21 @@ func TestI9_10ETopFiveForceBoardOrdersAndIsolatesServers(t *testing.T) {
 	s := rankingService(p, p)
 	s.TopForce = metrics
 
+	if _, e := s.ReadBoard(ctx, rankingdomain.TopForceBoard, b, op()); e != nil {
+		t.Fatal(e)
+	}
 	board, e := s.ReadBoard(ctx, rankingdomain.TopForceBoard, a, op())
 	if e != nil {
 		t.Fatal(e)
 	}
-	if len(board.Entries) != 2 || board.Server != server {
+	if len(board.Rows) != 2 || board.Server != server {
 		t.Fatal(board)
 	}
-	order := []identity.PlayerID{board.Entries[0].Metric.Player, board.Entries[1].Metric.Player}
-	if !reflect.DeepEqual(order, []identity.PlayerID{a.PlayerID, b.PlayerID}) || board.Entries[0].Metric.Value != expected || board.Entries[0].Metric.FieldID != 1012 {
-		t.Fatal(board.Entries)
+	order := []identity.PlayerID{board.Rows[0].Player, board.Rows[1].Player}
+	if !reflect.DeepEqual(order, []identity.PlayerID{a.PlayerID, b.PlayerID}) || board.Rows[0].Score != expected || board.Rows[0].Metric.FieldID != 1012 {
+		t.Fatal(board.Rows)
 	}
-	wire, e := projection.BoardList(board, a.PlayerID)
-	if e != nil {
-		t.Fatal(e)
-	}
+	wire := boardWire(t, board)
 	list := wire["rank_list"].([]map[string]any)[0]
 	info := list["rank_info"].(map[string]any)
 	mine := info["my_rank"].(map[string]any)
@@ -110,7 +109,7 @@ func TestI9_10ETopFiveForceBoardOrdersAndIsolatesServers(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	if len(otherBoard.Entries) != 1 || otherBoard.Server != other || otherBoard.Entries[0].Metric.Player != c.PlayerID || otherBoard.Entries[0].Metric.Value != otherExpected {
+	if len(otherBoard.Rows) != 1 || otherBoard.Server != other || otherBoard.Rows[0].Player != c.PlayerID || otherBoard.Rows[0].Score != otherExpected {
 		t.Fatal(otherBoard)
 	}
 }

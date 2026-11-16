@@ -12,6 +12,12 @@ import (
 
 const modulePrefix = "gxb.local/backend/v2/"
 
+// defectOwners declare ErrUnavailable for states that are defects, not faults,
+// so they must stay out of unavailableSentinels (R4_FAILURE_STATUS_AMENDMENT item 11).
+var defectOwners = map[string]bool{
+	modulePrefix + "internal/application/ranking": true,
+}
+
 // TestR4UnavailableSentinelsCoverEveryImportedOwner keeps the hand-kept
 // unavailableSentinels list complete: an owner package that stockruntime
 // imports and that declares ErrUnavailable must be listed, or its
@@ -27,7 +33,7 @@ func TestR4UnavailableSentinelsCoverEveryImportedOwner(t *testing.T) {
 		}
 		for path := range importPaths(t, filepath.Join(base, name)) {
 			isOwner := strings.HasPrefix(path, modulePrefix+"internal/application/") || strings.HasPrefix(path, modulePrefix+"internal/domain/")
-			if isOwner && declaresErrUnavailable(t, filepath.Join(root, strings.TrimPrefix(path, modulePrefix))) {
+			if isOwner && !defectOwners[path] && declaresErrUnavailable(t, filepath.Join(root, strings.TrimPrefix(path, modulePrefix))) {
 				owners[path] = true
 			}
 		}

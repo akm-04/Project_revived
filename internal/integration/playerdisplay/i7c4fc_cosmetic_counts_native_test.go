@@ -207,20 +207,18 @@ func TestI7C4FCSkinsBoardRanksAndTitlesSevenDays(t *testing.T) {
 	skillHero(t, p, a, rev, 10001001, 1)
 	s := rankingService(p, p)
 	s.Metrics = countingMetrics(p, nil)
-	board, e := s.ReadBoard(ctx, ranking.SkinsBoard, a, op())
-	if e != nil {
-		t.Fatal(e)
-	}
+	opContext := op()
+	board := settleRanking(t, p, s, ranking.SkinsBoard, a.LogicalServerID, opContext)
 	if len(board.Entries) != 2 || board.Entries[0].Metric.Player != b.PlayerID || board.Entries[0].Metric.Value != 2 || board.Entries[0].Metric.FieldID != 1003 || board.Entries[1].Metric.Value != 0 {
 		t.Fatal(board.Entries)
 	}
 	var winner, title int64
-	if e = p.QueryRow(ctx, `SELECT player_id,title_id FROM ranking_girls_awards WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), ranking.SkinsPolicy).Scan(&winner, &title); e != nil || winner != int64(b.PlayerID) || title != 100063 {
+	if e := p.QueryRow(ctx, `SELECT player_id,title_id FROM ranking_girls_awards WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), ranking.SkinsPolicy).Scan(&winner, &title); e != nil || winner != int64(b.PlayerID) || title != 100063 {
 		t.Fatal("Skins No.1 title", winner, title, e)
 	}
 	ds := countingDisplay(p)
 	ds.CatalogExternal = append(cosmeticOriginRoutes(p), display.CatalogOriginRoute{Family: "title", First: 100063, Last: 100066, Owner: s})
-	e = coherentRead(t, p, rev, func(c context.Context, _ tx.Scope, sc ca.CoherentReadScope) error {
+	e := coherentRead(t, p, rev, func(c context.Context, _ tx.Scope, sc ca.CoherentReadScope) error {
 		titles, e := ds.ReadEligibilityTx(c, sc, display.EligibilityRequest{PlayerID: b.PlayerID, Family: "title"})
 		if e != nil {
 			return e

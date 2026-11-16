@@ -47,29 +47,32 @@ func TestI910CDormComfortRankTotalsScopeTiesAndRefresh(t *testing.T) {
 	comfortRooms(t, p, second.PlayerID, revision, map[int64]int64{1: 10, 2: 7})
 	service := comfortRankingService(p)
 	board := func(a identity.ActorContext) (players []identity.PlayerID, values []int64, since []time.Time) {
-		snapshot, e := service.ReadBoard(ctx, d.DormComfortBoard, a, op())
+		read, e := service.ReadBoard(ctx, d.DormComfortBoard, a, op())
 		if e != nil {
 			t.Fatal(e)
 		}
-		for _, entry := range snapshot.Entries {
-			players = append(players, entry.Metric.Player)
-			values = append(values, entry.Metric.Value)
-			since = append(since, entry.ScoreSince)
+		for _, row := range read.Rows {
+			players = append(players, row.Player)
+			values = append(values, row.Score)
+			since = append(since, row.ScoreSince)
 		}
 		return players, values, since
 	}
+	board(first)
 	players, values, _ := board(second)
 	if len(players) != 2 || players[0] != second.PlayerID || values[0] != 17 || values[1] != 10 {
 		t.Fatalf("lounge-inclusive totals %v %v", players, values)
 	}
 
 	comfortRooms(t, p, second.PlayerID, revision, map[int64]int64{2: 0})
+	board(second)
 	players, values, _ = board(first)
 	if players[0] != first.PlayerID || values[0] != 10 || values[1] != 10 {
 		t.Fatalf("stable-ID tie %v %v", players, values)
 	}
 
 	comfortRooms(t, p, second.PlayerID, revision, map[int64]int64{1: 5})
+	board(second)
 	players, values, _ = board(first)
 	if players[0] != first.PlayerID || values[0] != 10 || values[1] != 5 {
 		t.Fatalf("comfort drop %v %v", players, values)
@@ -77,12 +80,14 @@ func TestI910CDormComfortRankTotalsScopeTiesAndRefresh(t *testing.T) {
 
 	time.Sleep(2 * time.Millisecond)
 	comfortRooms(t, p, first.PlayerID, revision, map[int64]int64{1: 5})
-	players, values, since := board(second)
+	board(second)
+	players, values, since := board(first)
 	if players[0] != second.PlayerID || values[0] != 5 || !since[0].Before(since[1]) {
 		t.Fatalf("first-observed tie %v %v %v", players, values, since)
 	}
 
 	comfortRooms(t, p, first.PlayerID, revision, map[int64]int64{1: 30})
+	board(first)
 	players, values, _ = board(second)
 	if players[0] != first.PlayerID || values[0] != 30 {
 		t.Fatalf("refresh after comfort change %v %v", players, values)
