@@ -1333,7 +1333,7 @@
   },
   {
    "callees": 0,
-   "callers": 7,
+   "callers": 8,
    "mids": 0,
    "name": "playerdirectory",
    "path": "internal/application/playerdirectory",
@@ -1377,7 +1377,7 @@
    "tables": 0
   },
   {
-   "callees": 10,
+   "callees": 12,
    "callers": 1,
    "mids": 6,
    "name": "profilefeedback",

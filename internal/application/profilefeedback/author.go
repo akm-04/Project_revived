@@ -10,6 +10,18 @@ import (
 
 func (s Service) author(c context.Context, q tx.Queryer, b i5.PublicPlayerBasis, rev string, at time.Time, server identity.LogicalServerID) (Author, error) {
 	out := Author{PlayerID: int64(b.Profile.PlayerID), Name: b.Profile.DisplayName, Avatar: b.Profile.AvatarID, Frame: b.Profile.AvatarFrameID, Level: b.Progression.Level, Region: int32(server)}
+	if s.Directory == nil {
+		return Author{}, ErrProvider
+	}
+	directory, found, e := s.Directory.ProfileTx(c, q, b.Profile.PlayerID)
+	if e != nil {
+		return Author{}, e
+	}
+	if !found || directory.PlayerID != b.Profile.PlayerID || directory.Validate() != nil {
+		return Author{}, ErrProvider
+	}
+	out.ConquerLevel = directory.ConquerLevel
+	out.ConquerLoopID = directory.ConquerLoopID
 	// Nil is the retained legacy component seam. Production binds qualified6A.
 	if s.Display == nil {
 		return out, nil

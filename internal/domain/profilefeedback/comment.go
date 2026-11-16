@@ -60,12 +60,14 @@ func (r CommentReaction) Validate() error {
 // Typed current public projection. It contains no operation receipts or
 // credentials; all required author values come from the accepted I4/I5 ports.
 type PublicAuthor struct {
-	PlayerID int64  `json:"player_id"`
-	Name     string `json:"player_name"`
-	Avatar   int64  `json:"avatar_id"`
-	Frame    int64  `json:"avatar_frame_id"`
-	Level    int64  `json:"lev"`
-	Region   int32  `json:"region"`
+	PlayerID      int64  `json:"player_id"`
+	Name          string `json:"player_name"`
+	Avatar        int64  `json:"avatar_id"`
+	Frame         int64  `json:"avatar_frame_id"`
+	Level         int64  `json:"lev"`
+	Region        int32  `json:"region"`
+	ConquerLevel  int64  `json:"conquer_lev"`
+	ConquerLoopID int64  `json:"conquer_loop_id"`
 }
 type CommentRow struct {
 	ID          int64             `json:"comment_id"`

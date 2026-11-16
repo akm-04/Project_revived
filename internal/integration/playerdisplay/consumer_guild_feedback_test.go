@@ -34,7 +34,7 @@ import (
 func feedback6C(p *pg.Pool) fb.Service {
 	content := contentstore.Store{}
 	r := tx.Runner{DB: p}
-	return fb.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Roots: fb.RootService{Store: profilefeedbackstore.Store{}}, Basic: pp.BasicReader{Roots: pp.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, PlayerBasis: i5store.Store{}, Relations: socialrelationstore.Store{}, Content: content}, Content: content, Receipts: kernelstore.Store{}, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Display: service(p, p)}
+	return fb.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Roots: fb.RootService{Store: profilefeedbackstore.Store{}}, Basic: pp.BasicReader{Roots: pp.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, PlayerBasis: i5store.Store{}, Relations: socialrelationstore.Store{}, Content: content}, Content: content, Receipts: kernelstore.Store{}, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Display: service(p, p), Directory: i4store.PlayerDirectoryReader{}}
 }
 func Test6CGuildRosterCanonicalNamesAndRetirement(t *testing.T) {
 	p := pool(t)

@@ -126,6 +126,7 @@
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
@@ -148,6 +149,7 @@
    "gxb_content_revisions",
    "gxb_operation_receipts",
    "logical_servers",
+   "player_directory_profiles",
    "player_function_unlocks",
    "player_profile_comment_operations",
    "player_profile_comment_reactions",
@@ -174,6 +176,8 @@
    "publicshowcase"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "author_test.go"
+  ]
  }
 }

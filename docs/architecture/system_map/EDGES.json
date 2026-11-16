@@ -1568,6 +1568,9 @@
    "mentor": [
     "Validate"
    ],
+   "profilefeedback": [
+    "Validate"
+   ],
    "ranking": [
     "Validate"
    ],
@@ -4906,6 +4909,9 @@
     "DefaultProfile",
     "Validate"
    ],
+   "playerdirectory": [
+    "Validate"
+   ],
    "playerdisplay": [
     "*ReadEffectivePlayerDisplayTx"
    ],
@@ -4924,8 +4930,12 @@
     "*ActiveRevision",
     "*ReadPublicProfilePolicy"
    ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
    "store:i4store": [
     "*LockPlayerRootsTx",
+    "*ProfileTx",
     "*ReadBoundRecipientTx"
    ],
    "store:kernelstore": [

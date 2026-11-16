@@ -250,6 +250,7 @@ func TestCommentActualAPIProcess(t *testing.T) {
 	for _, player := range []identity.ActorContext{a, b} {
 		sqlExec(t, p, `DELETE FROM player_profiles WHERE player_id=$1`, int64(player.PlayerID))
 		sqlExec(t, p, `DELETE FROM player_progression WHERE player_id=$1`, int64(player.PlayerID))
+		sqlExec(t, p, `DELETE FROM player_directory_profiles WHERE player_id=$1`, int64(player.PlayerID))
 		sqlExec(t, p, `INSERT INTO player_directory_profiles(player_id,name,created_at,updated_at)VALUES($1,$2,clock_timestamp(),clock_timestamp())`, int64(player.PlayerID), fmt.Sprint(player.PlayerID))
 		if e := nativebirth.Persist(ctx, p, player.AccountID.UUID(), player.LogicalServerID, player.PlayerID); e != nil {
 			t.Fatal(e)
