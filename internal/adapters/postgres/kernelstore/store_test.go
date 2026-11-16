@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -59,6 +60,7 @@ func receiptRow(r receipt.Receipt) row {
 		*(v[15].(*time.Time)) = r.RecordedAt
 		*(v[16].(*bool)) = false
 		*(v[17].(*time.Time)) = time.Unix(0, 0)
+		*(v[18].(*int16)) = payload.Current
 		return nil
 	}}
 }
@@ -126,7 +128,7 @@ func TestPutWritesCanonicalPolicyJSON(t *testing.T) {
 	if _, err := (Store{}).PutTx(context.Background(), f, r); err != nil {
 		t.Fatal(err)
 	}
-	if len(f.queryArgs) < 1 || len(f.queryArgs[0]) != 16 {
+	if len(f.queryArgs) < 1 || len(f.queryArgs[0]) != 17 {
 		t.Fatalf("insert args=%d/%d", len(f.queryArgs), len(f.queryArgs[0]))
 	}
 	if got, want := f.queryArgs[0][12], `[{"name":"content","version":"r1"},{"name":"zeta","version":"v2"}]`; got != want {
