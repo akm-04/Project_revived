@@ -735,14 +735,15 @@ func (Store) SaveObjectiveTx(ctx context.Context, t tx.Tx, i objective.Instance,
 func (Store) LockRedeemByDigestTx(ctx context.Context, t tx.Tx, digest [32]byte) (appi5.RedeemCode, appi5.RedeemCampaign, grant.Plan, error) {
 	var codeID, campaignID, codeKind, codeStatus, campStatus, subject, policy, rewardID, rewardJSON, audienceJSON string
 	var useCount, stateVersion, perSubject int64
+	var audienceVersion, rewardVersion int16
 	var global, total *int64
 	var starts, ends *time.Time
-	q := `SELECT rc.code_id::text,rc.campaign_id::text,rc.code_kind,rc.global_use_limit,rc.use_count,rc.status,rc.state_version,c.status,c.redemption_subject,c.starts_at,c.ends_at,c.audience_policy::text,c.reward_bundle_revision_id::text,c.total_cap,c.per_subject_cap,c.policy_version,b.grant_plan::text FROM redeem_codes rc JOIN redeem_campaigns c ON c.campaign_id=rc.campaign_id JOIN redeem_reward_bundle_revisions b ON b.reward_bundle_revision_id=c.reward_bundle_revision_id WHERE rc.lookup_digest=$1 FOR UPDATE OF rc,c`
-	err := t.QueryRow(ctx, q, digest[:]).Scan(&codeID, &campaignID, &codeKind, &global, &useCount, &codeStatus, &stateVersion, &campStatus, &subject, &starts, &ends, &audienceJSON, &rewardID, &total, &perSubject, &policy, &rewardJSON)
+	q := `SELECT rc.code_id::text,rc.campaign_id::text,rc.code_kind,rc.global_use_limit,rc.use_count,rc.status,rc.state_version,c.status,c.redemption_subject,c.starts_at,c.ends_at,c.audience_policy::text,c.payload_version,c.reward_bundle_revision_id::text,c.total_cap,c.per_subject_cap,c.policy_version,b.grant_plan::text,b.payload_version FROM redeem_codes rc JOIN redeem_campaigns c ON c.campaign_id=rc.campaign_id JOIN redeem_reward_bundle_revisions b ON b.reward_bundle_revision_id=c.reward_bundle_revision_id WHERE rc.lookup_digest=$1 FOR UPDATE OF rc,c`
+	err := t.QueryRow(ctx, q, digest[:]).Scan(&codeID, &campaignID, &codeKind, &global, &useCount, &codeStatus, &stateVersion, &campStatus, &subject, &starts, &ends, &audienceJSON, &audienceVersion, &rewardID, &total, &perSubject, &policy, &rewardJSON, &rewardVersion)
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
-	ap, err := decodeAudience([]byte(audienceJSON))
+	ap, err := decodeAudience(audienceVersion, []byte(audienceJSON))
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
@@ -754,7 +755,7 @@ func (Store) LockRedeemByDigestTx(ctx context.Context, t tx.Tx, digest [32]byte)
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
-	plan, err := decodeGrantPlan([]byte(rewardJSON))
+	plan, err := decodeGrantPlanVersioned(rewardVersion, []byte(rewardJSON))
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
@@ -1019,6 +1020,18 @@ func decodeGrantPlan(raw []byte) (grant.Plan, error) {
 	if err := json.Unmarshal(raw, &p); err != nil {
 		return grant.Plan{}, err
 	}
+	return validateGrantPlan(p)
+}
+
+func decodeGrantPlanVersioned(version int16, raw []byte) (grant.Plan, error) {
+	var p grant.Plan
+	if err := payload.Decode("redeem_reward_bundle_revisions", version, raw, &p); err != nil {
+		return grant.Plan{}, err
+	}
+	return validateGrantPlan(p)
+}
+
+func validateGrantPlan(p grant.Plan) (grant.Plan, error) {
 	if p.Source.PolicyVersion == "" {
 		return grant.Plan{}, errors.New("grant plan policy version missing")
 	}
@@ -1039,10 +1052,10 @@ type audienceJSON struct {
 	LogicalServers []int32 `json:"logical_servers"`
 }
 
-func decodeAudience(raw []byte) (redeem.AudiencePolicy, error) {
+func decodeAudience(version int16, raw []byte) (redeem.AudiencePolicy, error) {
 	var x audienceJSON
 	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &x); err != nil {
+		if err := payload.Decode("redeem_campaigns", version, raw, &x); err != nil {
 			return redeem.AudiencePolicy{}, err
 		}
 	}
