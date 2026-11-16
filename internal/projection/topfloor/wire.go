@@ -30,15 +30,21 @@ func heroes(v d.Display) []map[string]any {
 	out := []map[string]any{}
 	looksRobot := !v.Occupant.IsRobot() && v.Occupant.TableID() <= d.RobotTableLimit
 	for _, h := range v.Heroes {
-		if !looksRobot {
+		leader := v.Leader > 0 && h["partner_id"] == v.Leader
+		if !looksRobot && !leader {
 			out = append(out, h)
 			continue
 		}
-		row := make(map[string]any, len(h))
+		row := make(map[string]any, len(h)+1)
 		for k, x := range h {
 			row[k] = x
 		}
-		row["partner_id"] = h["table_id"]
+		if looksRobot {
+			row["partner_id"] = h["table_id"]
+		}
+		if leader {
+			row["is_leader"] = int64(1)
+		}
 		out = append(out, row)
 	}
 	return out

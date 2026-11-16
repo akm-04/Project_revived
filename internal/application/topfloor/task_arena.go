@@ -176,6 +176,9 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 			parameters, _ := catalog.RobotHeroParams(hero.ID)
 			display.Heroes = append(display.Heroes, parameters)
 		}
+		if period.Rotation.Mode == domain.TaskModeLeader && len(display.Heroes) > 0 {
+			display.Leader, _ = display.Heroes[0]["partner_id"].(int64)
+		}
 		return display, nil
 	}
 	display, err := service.playerDisplay(requestContext, query, occupant)
@@ -191,6 +194,7 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 		return display, domain.ErrRefused
 	}
 	display.Wins = player.Player.Wins
+	display.Leader = player.Leader
 	display.Heroes, display.Pet, err = service.taskTeam(requestContext, query, catalog, period, occupant.Player, domain.TaskModeDefense{Heroes: player.Player.Defense, Pet: player.Player.DefensePet, Leader: player.Leader}, at)
 	display.Force = teamForce(display.Heroes)
 	return display, err

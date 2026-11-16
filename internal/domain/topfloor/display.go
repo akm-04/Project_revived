@@ -14,6 +14,7 @@ type Display struct {
 	GuildName    string
 	Wins         int64
 	Force        int64
+	Leader       int64
 	Heroes       []map[string]any
 	Pet          map[string]any
 }
