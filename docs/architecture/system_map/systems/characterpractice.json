@@ -223,9 +223,7 @@
   ]
  },
  "tests": {
-  "integration": [
-   "playerdisplay"
-  ],
+  "integration": [],
   "scenarios_naming": [],
   "unit": [
    "auto_test.go",
