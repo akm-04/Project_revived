@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/jackc/pgx/v5/pgconn"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildbroadcaststore"
@@ -27,6 +26,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -300,8 +300,8 @@ const foreignKeyViolation = "23503"
 
 func refusedByKey(t *testing.T, e error, constraint string) {
 	t.Helper()
-	var refusal *pgconn.PgError
-	if !errors.As(e, &refusal) || refusal.Code != foreignKeyViolation || refusal.ConstraintName != constraint {
+	var refusal interface{ SQLState() string }
+	if !errors.As(e, &refusal) || refusal.SQLState() != foreignKeyViolation || !strings.Contains(e.Error(), `"`+constraint+`"`) {
 		t.Fatalf("want %s refusal by %s, got %v", foreignKeyViolation, constraint, e)
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgconn"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/nativebirth"
@@ -27,6 +26,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -79,8 +79,8 @@ const foreignKeyViolation = "23503"
 
 func (f *fixture) refusedByPlayerKey(e error, constraint string) {
 	f.t.Helper()
-	var refusal *pgconn.PgError
-	if !errors.As(e, &refusal) || refusal.Code != foreignKeyViolation || refusal.ConstraintName != constraint {
+	var refusal interface{ SQLState() string }
+	if !errors.As(e, &refusal) || refusal.SQLState() != foreignKeyViolation || !strings.Contains(e.Error(), `"`+constraint+`"`) {
 		f.t.Fatalf("want %s refusal by %s, got %v", foreignKeyViolation, constraint, e)
 	}
 }

@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgconn"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -40,6 +39,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -520,8 +520,8 @@ func TestPraiseHistoryPagingAndProviderFailure(t *testing.T) {
 	sqlExec(t, p, `DELETE FROM gameplay_contexts WHERE player_id=$1`, int64(actors[22].PlayerID))
 	// R8-3: players are never deleted; the key refuses it (00161).
 	_, e = p.Raw().Exec(ctx, `DELETE FROM players WHERE player_id=$1`, int64(actors[22].PlayerID))
-	var refusal *pgconn.PgError
-	if !errors.As(e, &refusal) || refusal.Code != foreignKeyViolation || refusal.ConstraintName != "player_profile_praises_actor_player_id_fkey" {
+	var refusal interface{ SQLState() string }
+	if !errors.As(e, &refusal) || refusal.SQLState() != foreignKeyViolation || !strings.Contains(e.Error(), `"player_profile_praises_actor_player_id_fkey"`) {
 		t.Fatal("retired author deletion not refused by 00161", e)
 	}
 	if _, e = s.List(ctx, target, app.PageRequest{Offset: 1}, op()); !errors.Is(e, app.ErrProvider) {
