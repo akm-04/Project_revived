@@ -185,6 +185,12 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 		return okI5(body)
 	}
 
+	if rankingdomain.IsServedEmptySubType(subtype) {
+		body := projection.BoardList(subtype, []map[string]any{}, map[string]any{})
+		body["error_code"] = int64(0)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	}
+
 	board, known := rankingdomain.BoardOfSubType(subtype)
 	if !known {
 		return failureReply(refusal(unprovenRefusalCode))

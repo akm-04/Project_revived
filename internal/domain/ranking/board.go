@@ -93,6 +93,20 @@ func BoardOfSubType(subtype int64) (Board, bool) {
 	}
 	return Board{}, false
 }
+
+// ServedEmptySubTypes are the client's visible rank tabs whose owner is not
+// delivered. They answer a shaped empty rank_list and never a score (N8 user
+// ruling 2026-11-16); no score source exists for them.
+var ServedEmptySubTypes = []int64{5, 13, 14, 28, 29, 35, 36, 40, 41}
+
+func IsServedEmptySubType(subtype int64) bool {
+	for _, served := range ServedEmptySubTypes {
+		if served == subtype {
+			return true
+		}
+	}
+	return false
+}
 func BoardOfTitle(title int64) (Board, bool) {
 	for _, b := range Boards {
 		if b.HasTitle(title) {
