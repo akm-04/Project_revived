@@ -16,12 +16,18 @@ import (
 var assistFirstClearChain = []int64{100001, 100002, 100004, 100005}
 var assistFirstClearTeam = []int64{0, 1, 2, 0, 0}
 
-func assistPlayer(t *testing.T, s app.Mode, p *pg.Pool, revision string) identity.ActorContext {
+func assistPlayer(t *testing.T, p *pg.Pool, revision string) identity.ActorContext {
 	t.Helper()
 	a := bornActor(t, p)
 	bornHero(t, p, a, revision, 10001001, 1)
 	bornHero(t, p, a, revision, 10001002, 2)
 	exec(t, p, `UPDATE player_progression SET level=1,exp=0 WHERE player_id=$1`, int64(a.PlayerID))
+	return a
+}
+
+func assistPlayerAtStage(t *testing.T, s app.Mode, p *pg.Pool, revision string) identity.ActorContext {
+	t.Helper()
+	a := assistPlayer(t, p, revision)
 	for _, id := range assistFirstClearChain {
 		assistFirstClear(t, s, a, id, 0)
 	}
@@ -55,7 +61,7 @@ func TestI9_11CampaignAssistNative(t *testing.T) {
 	s := campaignMode(t, p)
 	revision := installed(t, p)
 
-	withoutPartner := assistPlayer(t, s, p, revision)
+	withoutPartner := assistPlayerAtStage(t, s, p, revision)
 	noPartner := assistFirstClear(t, s, withoutPartner, 100007, 0)
 	if awards, present := noPartner.Body["assist_awards"]; present {
 		t.Fatalf("award without an assist partner: %v", awards)
@@ -64,13 +70,13 @@ func TestI9_11CampaignAssistNative(t *testing.T) {
 		t.Fatalf("stones granted without an assist partner: %d", quantity)
 	}
 
-	withoutStones := assistPlayer(t, s, p, revision)
+	withoutStones := assistPlayer(t, p, revision)
 	plain := assistFirstClear(t, s, withoutStones, 100001, 10001053)
 	if awards, present := plain.Body["assist_awards"]; present {
 		t.Fatalf("award on a stage without assist stones: %v", awards)
 	}
 
-	withPartner := assistPlayer(t, s, p, revision)
+	withPartner := assistPlayerAtStage(t, s, p, revision)
 	won := assistFirstClear(t, s, withPartner, 100007, 10001053)
 	awards, ok := won.Body["assist_awards"].([]any)
 	if !ok || len(awards) != 1 {
