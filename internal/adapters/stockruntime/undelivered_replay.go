@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"errors"
 	"log"
 	"net/http"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/foundation/observability"
@@ -19,7 +21,9 @@ import (
 // UndeliveredReplay answers a state-changing resend from the mark the edge kept
 // when the first reply could not be delivered (R6 decision 6). It is one
 // decorator around every gameplay dispatcher, not a per-MID check. When no mark
-// matches, the request runs as today.
+// matches, the request runs as today. A state request reaches Next only after it
+// takes its claim; a failed take or a transient bearer fault is refused as
+// unavailable, because a dispatch could let an older mark survive it.
 type UndeliveredReplay struct {
 	Next      httpedge.Dispatcher
 	Authority apprealtime.GameplayAuthorityPort
@@ -38,20 +42,26 @@ func (d UndeliveredReplay) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	}
 	actor, err := d.Authority.ResolveGameplayBearer(ctx, token, req.Envelope.ReceivedAt)
 	if err != nil {
-		return d.Next.Dispatch(ctx, req)
+		if errors.Is(err, i4store.ErrGameplayBearerNotLive) {
+			return d.Next.Dispatch(ctx, req)
+		}
+		log.Printf("undelivered replay bearer: %v", err)
+		return failureReply(unavailable(err))
 	}
-	fingerprint, err := paramsFingerprint(req.Envelope.Params)
-	if err != nil {
-		return d.Next.Dispatch(ctx, req)
+	fingerprint, fingerprintErr := paramsFingerprint(req.Envelope.Params)
+	if fingerprintErr == nil {
+		observability.NoteParamsFingerprint(ctx, fingerprint)
 	}
-	observability.NoteParamsFingerprint(ctx, fingerprint)
 	take, err := d.Marks.TakeMark(ctx, int64(actor.PlayerID))
 	if err != nil {
-		log.Printf("undelivered replay lookup: %v", err)
-		return d.Next.Dispatch(ctx, req)
+		log.Printf("undelivered replay claim: %v", err)
+		if d.Metrics != nil {
+			d.Metrics.Counter(undelivered.TakeFailuresTotal, observability.Labels{}, 1)
+		}
+		return failureReply(unavailable(err))
 	}
 	observability.NoteClaim(ctx, take.Claim)
-	if !take.HasMark || !d.matches(take.Mark, actor.SessionID.UUID().String(), int64(req.Envelope.MID), fingerprint, req.Envelope.ReceivedAt) {
+	if fingerprintErr != nil || !take.HasMark || !d.matches(take.Mark, actor.SessionID.UUID().String(), int64(req.Envelope.MID), fingerprint, req.Envelope.ReceivedAt) {
 		return d.Next.Dispatch(ctx, req)
 	}
 	observability.NoteReplay(ctx)

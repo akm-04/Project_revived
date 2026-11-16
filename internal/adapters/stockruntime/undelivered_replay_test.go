@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/undelivered"
@@ -20,10 +21,10 @@ func (a replayAuthority) ResolveGameplayBearer(context.Context, string, time.Tim
 	return a.actor, nil
 }
 
-type rejectingAuthority struct{}
+type rejectingAuthority struct{ cause error }
 
-func (rejectingAuthority) ResolveGameplayBearer(context.Context, string, time.Time) (identity.ActorContext, error) {
-	return identity.ActorContext{}, errors.New("not live")
+func (a rejectingAuthority) ResolveGameplayBearer(context.Context, string, time.Time) (identity.ActorContext, error) {
+	return identity.ActorContext{}, a.cause
 }
 
 type replayTaker struct {
@@ -106,7 +107,6 @@ func TestUndeliveredReplayRunsWhenNothingMatches(t *testing.T) {
 		{name: "different params", mid: 5, params: params, token: "bearer", taker: &replayTaker{mark: replayMark(t, actor, 5, map[string]any{"token": "bearer", "region": int64(2)}, now), found: true}},
 		{name: "expired", mid: 5, params: params, token: "bearer", taker: &replayTaker{mark: undelivered.Mark{PlayerID: int64(actor.PlayerID), SessionID: actor.SessionID.UUID().String(), MID: 5, Fingerprint: mustFingerprint(t, params), Reply: []byte("x"), MarkedAt: now.Add(-11 * time.Minute)}, found: true}},
 		{name: "absent", mid: 5, params: params, token: "bearer", taker: &replayTaker{}},
-		{name: "lookup error", mid: 5, params: params, token: "bearer", taker: &replayTaker{err: errors.New("database down")}},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -120,14 +120,75 @@ func TestUndeliveredReplayRunsWhenNothingMatches(t *testing.T) {
 	}
 }
 
-func TestUndeliveredReplayRunsWhenTheBearerDoesNotResolve(t *testing.T) {
+func TestUndeliveredReplayRunsWhenTheBearerIsDefinitelyRefused(t *testing.T) {
 	now := time.Date(2026, 11, 16, 12, 0, 0, 0, time.UTC)
 	next := &nextDispatcher{}
 	taker := &replayTaker{}
-	guard := UndeliveredReplay{Next: next, Authority: rejectingAuthority{}, Marks: taker, Window: 10 * time.Minute}
+	guard := UndeliveredReplay{Next: next, Authority: rejectingAuthority{cause: i4store.ErrGameplayBearerNotLive}, Marks: taker, Window: 10 * time.Minute}
 	guard.Dispatch(context.Background(), replayRequest(t, 5, map[string]any{"token": "bearer"}, "bearer", now))
 	if next.calls != 1 || taker.calls != 0 {
 		t.Fatalf("next=%d taker=%d", next.calls, taker.calls)
+	}
+}
+
+func TestUndeliveredReplayRefusesWhenTheBearerLookupIsTransient(t *testing.T) {
+	now := time.Date(2026, 11, 16, 12, 0, 0, 0, time.UTC)
+	next := &nextDispatcher{}
+	taker := &replayTaker{}
+	guard := UndeliveredReplay{Next: next, Authority: rejectingAuthority{cause: errors.New("database down")}, Marks: taker, Window: 10 * time.Minute}
+	response := guard.Dispatch(context.Background(), replayRequest(t, 5, map[string]any{"token": "bearer"}, "bearer", now))
+	if next.calls != 0 || taker.calls != 0 {
+		t.Fatalf("next=%d taker=%d", next.calls, taker.calls)
+	}
+	if response.HTTPStatus != http.StatusServiceUnavailable || response.Body["error_code"] != serverBusyCode {
+		t.Fatalf("response=%#v", response)
+	}
+}
+
+func TestUndeliveredReplayRefusesWhenTheClaimFails(t *testing.T) {
+	now := time.Date(2026, 11, 16, 12, 0, 0, 0, time.UTC)
+	actor := actorForHTTP(t)
+	params := map[string]any{"token": "bearer", "region": int64(1)}
+	next := &nextDispatcher{}
+	metrics := &replayMetrics{}
+	guard := UndeliveredReplay{Next: next, Authority: replayAuthority{actor}, Marks: &replayTaker{err: errors.New("database down")}, Window: 10 * time.Minute, Metrics: metrics}
+	response := guard.Dispatch(context.Background(), replayRequest(t, 5, params, "bearer", now))
+	if next.calls != 0 {
+		t.Fatalf("a failed claim dispatched: next=%d", next.calls)
+	}
+	if response.HTTPStatus != http.StatusServiceUnavailable || response.Body["error_code"] != serverBusyCode {
+		t.Fatalf("response=%#v", response)
+	}
+	if metrics.counters[undelivered.TakeFailuresTotal] != 1 {
+		t.Fatalf("counters=%v", metrics.counters)
+	}
+}
+
+func TestUndeliveredReplayTakesTheClaimWhenTheFingerprintFails(t *testing.T) {
+	now := time.Date(2026, 11, 16, 12, 0, 0, 0, time.UTC)
+	actor := actorForHTTP(t)
+	params := map[string]any{"token": "bearer", "unencodable": func() {}}
+	next := &nextDispatcher{}
+	taker := &replayTaker{}
+	guard := UndeliveredReplay{Next: next, Authority: replayAuthority{actor}, Marks: taker, Window: 10 * time.Minute}
+	guard.Dispatch(context.Background(), replayRequest(t, 5, params, "bearer", now))
+	if next.calls != 1 || taker.calls != 1 {
+		t.Fatalf("next=%d taker=%d", next.calls, taker.calls)
+	}
+}
+
+func TestUndeliveredReplayRefusesWhenTheFingerprintAndTheClaimFail(t *testing.T) {
+	now := time.Date(2026, 11, 16, 12, 0, 0, 0, time.UTC)
+	actor := actorForHTTP(t)
+	params := map[string]any{"token": "bearer", "unencodable": func() {}}
+	next := &nextDispatcher{}
+	guard := UndeliveredReplay{Next: next, Authority: replayAuthority{actor}, Marks: &replayTaker{err: errors.New("database down")}, Window: 10 * time.Minute}
+	response := guard.Dispatch(context.Background(), replayRequest(t, 5, params, "bearer", now))
+	if next.calls != 0 {
+		t.Fatalf("a failed claim dispatched: next=%d", next.calls)
+	}
+	if response.HTTPStatus != http.StatusServiceUnavailable || response.Body["error_code"] != serverBusyCode {
+		t.Fatalf("response=%#v", response)
 	}
 }
 

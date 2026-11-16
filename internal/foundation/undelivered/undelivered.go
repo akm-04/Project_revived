@@ -1,6 +1,8 @@
 // Package undelivered is the persistence boundary for an edge-replay cache: the
 // latest committed reply an HTTP write could not deliver. It is not gameplay
-// authority; a missing or unusable mark falls back to ordinary dispatch.
+// authority. A missing mark falls back to ordinary dispatch, but a state request
+// whose claim cannot be taken is refused as unavailable: dispatching it would let
+// an older mark outlive the write and be replayed later.
 package undelivered
 
 import (
@@ -14,6 +16,7 @@ const (
 	MarksTotal        = "undelivered_marks_total"
 	MarkFailuresTotal = "undelivered_mark_failures_total"
 	ReplaysTotal      = "undelivered_replays_total"
+	TakeFailuresTotal = "undelivered_take_failures_total"
 )
 
 // ErrSuperseded reports a mark write whose claim a later state request took, so
