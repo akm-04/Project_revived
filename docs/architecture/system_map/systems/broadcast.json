@@ -50,7 +50,9 @@
   "written": []
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "playerdisplay"
+  ],
   "scenarios_naming": [],
   "unit": [
    "broadcast_test.go"

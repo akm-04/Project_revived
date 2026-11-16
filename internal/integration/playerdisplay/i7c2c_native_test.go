@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -665,5 +666,47 @@ func TestI7C2CKeyExchangeOverflowAndActorGate(t *testing.T) {
 	exec(t, p, `UPDATE account_sessions SET revoked_at=clock_timestamp(),revocation_reason='i7c2c-test',liveness_version=liveness_version+1 WHERE session_id=$1::uuid`, a.SessionID.UUID().String())
 	if _, e := s.Command(ctx, a, app.Command{Family: app.Open, ItemID: dormKey(c, 2, false), Floor: 1, Position: 1}, op()); e == nil {
 		t.Fatal("revoked actor succeeded")
+	}
+}
+
+func TestI7C2CFinalExpansionAnnouncesDormExpand(t *testing.T) {
+	p := pool(t)
+	a, _, c := dormFixture(t, p)
+	s := dormService(p, p)
+	villa := dormOpen(t, s, a, c, 4, 1)
+	announcements := func() int64 {
+		t.Helper()
+		var count int64
+		if e := p.QueryRow(ctx, `SELECT count(*) FROM broadcast_outbox WHERE player_id=$1 AND msg_type=$2`, int64(a.PlayerID), broadcast.DormExpand).Scan(&count); e != nil {
+			t.Fatal(e)
+		}
+		return count
+	}
+	if got := announcements(); got != 0 {
+		t.Fatal("announcement before final expansion", got)
+	}
+	for level := int64(1); level <= 3; level++ {
+		dormCommand(t, s, a, app.Command{Family: app.Start, HouseID: villa})
+		exec(t, p, `UPDATE player_dorm_rooms SET pending_expansion=jsonb_set(pending_expansion,'{StartedAt}',to_jsonb(date_trunc('second',clock_timestamp()-interval '4 hours'))) WHERE player_id=$1 AND house_id=$2`, int64(a.PlayerID), villa)
+		dormCommand(t, s, a, app.Command{Family: app.Finish, HouseID: villa})
+		room, e := s.Owner.ReadRoomTx(ctx, p, a.PlayerID, villa)
+		if e != nil || room.Pending != nil || room.ExpansionLevel != level {
+			t.Fatal(level, room, e)
+		}
+		want := int64(0)
+		if level == 3 {
+			want = 1
+		}
+		if got := announcements(); got != want {
+			t.Fatal(level, "announcement count", got)
+		}
+	}
+	var server, mid, msgType, player int64
+	var fields string
+	if e := p.QueryRow(ctx, `SELECT logical_server_id,mid,msg_type,player_id,fields::text FROM broadcast_outbox WHERE player_id=$1 AND msg_type=$2`, int64(a.PlayerID), broadcast.DormExpand).Scan(&server, &mid, &msgType, &player, &fields); e != nil {
+		t.Fatal(e)
+	}
+	if server != int64(a.LogicalServerID) || mid != int64(broadcast.ActivityMID) || msgType != broadcast.DormExpand || player != int64(a.PlayerID) || fields != "{}" {
+		t.Fatal(server, mid, msgType, player, fields)
 	}
 }
