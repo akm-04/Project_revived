@@ -191,6 +191,8 @@
   "scenarios_naming": [
    "conquer.json"
   ],
-  "unit": []
+  "unit": [
+   "start_choice_conformance_test.go"
+  ]
  }
 }

@@ -93,6 +93,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "start_choice_conformance_test.go"
+  ]
  }
 }
