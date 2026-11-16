@@ -2,25 +2,26 @@ package eventcentrestore
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	eventcentre "gxb.local/backend/v2/internal/domain/eventcentre"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
 
 type Store struct{ Queryer tx.Queryer }
 
-const columns = `player_id,state_version,creation_revision,facts::text,created_at,updated_at`
+const columns = `player_id,state_version,creation_revision,facts::text,payload_version,created_at,updated_at`
 
 func scan(row tx.Row) (eventcentre.Root, bool, error) {
 	var root eventcentre.Root
 	var playerID int64
 	var raw string
-	err := row.Scan(&playerID, &root.Version, &root.Revision, &raw, &root.CreatedAt, &root.UpdatedAt)
+	var version int16
+	err := row.Scan(&playerID, &root.Version, &root.Revision, &raw, &version, &root.CreatedAt, &root.UpdatedAt)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return eventcentre.Root{}, false, nil
 	}
@@ -28,7 +29,7 @@ func scan(row tx.Row) (eventcentre.Root, bool, error) {
 		return eventcentre.Root{}, false, err
 	}
 	root.Player = identity.PlayerID(playerID)
-	if err := json.Unmarshal([]byte(raw), &root.Facts); err != nil {
+	if err := payload.Decode("player_event_centre_roots", version, []byte(raw), &root.Facts); err != nil {
 		return eventcentre.Root{}, false, err
 	}
 	if root.Facts.Admin == nil {
@@ -55,11 +56,11 @@ func (Store) EnsureRootTx(ctx context.Context, t tx.Tx, player identity.PlayerID
 	if !player.Valid() || len(revision) != 64 || at.IsZero() {
 		return eventcentre.ErrUnqualified
 	}
-	raw, err := json.Marshal(eventcentre.Seed())
+	raw, version, err := payload.Encode(eventcentre.Seed())
 	if err != nil {
 		return err
 	}
-	_, err = t.Exec(ctx, `INSERT INTO player_event_centre_roots(player_id,state_version,creation_revision,facts,created_at,updated_at)VALUES($1,1,$2,$3::jsonb,$4,$4)ON CONFLICT(player_id)DO NOTHING`, int64(player), revision, string(raw), at)
+	_, err = t.Exec(ctx, `INSERT INTO player_event_centre_roots(player_id,state_version,creation_revision,facts,payload_version,created_at,updated_at)VALUES($1,1,$2,$3::jsonb,$4,$5,$5)ON CONFLICT(player_id)DO NOTHING`, int64(player), revision, string(raw), version, at)
 	return err
 }
 
@@ -98,11 +99,11 @@ func (Store) SaveRootTx(ctx context.Context, t tx.Tx, root eventcentre.Root, pre
 	if root.Version != previousVersion+1 {
 		return eventcentre.ErrUnqualified
 	}
-	raw, err := json.Marshal(root.Facts)
+	raw, version, err := payload.Encode(root.Facts)
 	if err != nil {
 		return err
 	}
-	tag, err := t.Exec(ctx, `UPDATE player_event_centre_roots SET facts=$2::jsonb,state_version=$3,updated_at=$4 WHERE player_id=$1 AND state_version=$5`, int64(root.Player), string(raw), root.Version, root.UpdatedAt, previousVersion)
+	tag, err := t.Exec(ctx, `UPDATE player_event_centre_roots SET facts=$2::jsonb,payload_version=$3,state_version=$4,updated_at=$5 WHERE player_id=$1 AND state_version=$6`, int64(root.Player), string(raw), version, root.Version, root.UpdatedAt, previousVersion)
 	if err != nil {
 		return err
 	}
