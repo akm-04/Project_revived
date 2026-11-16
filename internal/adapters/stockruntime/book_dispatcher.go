@@ -8,6 +8,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -18,6 +19,7 @@ type BookPort interface {
 type BookDispatcher struct {
 	Authority rt.GameplayAuthorityPort
 	Service   BookPort
+	Tracker   *lobby.BootTracker
 }
 
 func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -55,6 +57,9 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		body, e := d.Service.Read(ctx, a, mid, req.Envelope.Operation)
 		if e != nil {
 			return failBook(e)
+		}
+		if mid == 1056 && d.Tracker != nil {
+			_ = d.Tracker.Record(d.Tracker.Correlate(lobby.BootEvent{MID: 1056, Kind: lobby.BootLegitTimer, Phase: lobby.PhaseClientRequestObserved, At: req.Envelope.ReceivedAt}, a.SessionID.UUID().String(), a.ContextID.UUID().String(), ""))
 		}
 		return okI5(body)
 	}

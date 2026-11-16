@@ -750,7 +750,7 @@ func main() {
 	for _, mid := range []uint16{2128, 2129, 2130, 2131, 2132, 2133, 2134, 2135, 2136, 2137, 2138, 2139, 2140, 2141, 2142, 2500} {
 		mustRegister(mid, observing(authority, achievements, "Course", courseD))
 	}
-	bookD := stockruntime.BookDispatcher{Authority: authority, Service: bookSvc}
+	bookD := stockruntime.BookDispatcher{Authority: authority, Service: stockruntime.NewCoalescedBookRead(bookSvc), Tracker: tracker}
 	for _, mid := range []uint16{83, 1056, 1057, 1058, 1059, 1060, 1061, 1077, 1078, 1079, 1080} {
 		mustRegister(mid, observing(authority, achievements, "Book", bookD))
 	}
