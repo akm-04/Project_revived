@@ -72,3 +72,43 @@ func TestRecallDoingProjectionOwnerSQLTimeScopeAndOverflow(t *testing.T) {
 		t.Fatal("projection fixture leaked after rollback", count, err)
 	}
 }
+
+func TestRecallProjectionAdvertisesOnlyLiveReservations(t *testing.T) {
+	pool := openRecallStartPool(t)
+	ctx := context.Background()
+	world := seedRecallWorld(t, pool, 135071, 135072, [2]string{"Caller135071", "Target135072"})
+	liveTarget := identity.PlayerID(135073)
+	t.Cleanup(func() {
+		_, _ = pool.Raw().Exec(context.Background(), `DELETE FROM social_recall_tasks WHERE caller_player_id=$1 OR target_player_id=ANY($2::bigint[])`, int64(world.caller), []int64{int64(world.target), int64(liveTarget)})
+	})
+	at := dbClock(t, pool)
+	// The expired row stays ACTIVE in the database until a start or login transition sweeps it.
+	insertDoingTaskAt(t, pool, world.caller, world.target, at.Add(-2*time.Hour), at, time.Hour, world.revision)
+	insertDoingTaskAt(t, pool, world.caller, liveTarget, at.Add(-time.Hour), at, 72*time.Hour, world.revision)
+
+	_, targets := recallClaimHarness(world)
+	reader := socialrecallstore.RecallProjectionReader{Current: targets}
+	op, err := application.BindRecallPolicies(operationFor(t), world.revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transaction, err := pool.Begin(ctx, tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer transaction.Rollback(ctx)
+	base, err := reader.ReadRecallBaseTx(ctx, tx.Scope{Tx: transaction, Operation: op, Attempt: 1, Options: tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}}, world.actor, world.revision, at, []identity.PlayerID{world.target, liveTarget})
+	if err != nil {
+		t.Fatalf("recall reload read: %v", err)
+	}
+	if len(base.Recalling) != 1 || base.Recalling[0] != liveTarget {
+		t.Fatalf("expired reservation advertised as recalling: %+v", base.Recalling)
+	}
+	var status string
+	if err := pool.Raw().QueryRow(ctx, `SELECT status FROM social_recall_tasks WHERE caller_player_id=$1 AND target_player_id=$2`, int64(world.caller), int64(world.target)).Scan(&status); err != nil || status != "ACTIVE" {
+		t.Fatalf("expired fixture status: %q %v", status, err)
+	}
+	if err := transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+}

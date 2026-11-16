@@ -43,7 +43,7 @@ func (reader RecallProjectionReader) ReadRecallBaseTx(ctx context.Context, scope
 	if err := reader.readGotAndAwarded(ctx, scope, actor, &base); err != nil {
 		return application.RecallBase{}, err
 	}
-	if err := reader.readRecalling(ctx, scope, friends, &base); err != nil {
+	if err := reader.readRecalling(ctx, scope, friends, at, &base); err != nil {
 		return application.RecallBase{}, err
 	}
 	if err := base.Validate(actor.LogicalServerID); err != nil {
@@ -127,7 +127,7 @@ func (reader RecallProjectionReader) readGotAndAwarded(ctx context.Context, scop
 	return nil
 }
 
-func (reader RecallProjectionReader) readRecalling(ctx context.Context, scope tx.Scope, friends []identity.PlayerID, base *application.RecallBase) error {
+func (reader RecallProjectionReader) readRecalling(ctx context.Context, scope tx.Scope, friends []identity.PlayerID, at time.Time, base *application.RecallBase) error {
 	if len(friends) == 0 {
 		return nil
 	}
@@ -139,7 +139,7 @@ func (reader RecallProjectionReader) readRecalling(ctx context.Context, scope tx
 		values = append(values, int64(friend))
 	}
 	var raw string
-	if err := scope.Tx.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(target_player_id ORDER BY target_player_id),'[]'::jsonb)::text FROM (SELECT DISTINCT target_player_id FROM social_recall_tasks WHERE status='ACTIVE' AND target_player_id=ANY($1::bigint[]) ORDER BY target_player_id LIMIT $2) t`, values, recallProjectionGotLimit+1).Scan(&raw); err != nil {
+	if err := scope.Tx.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(target_player_id ORDER BY target_player_id),'[]'::jsonb)::text FROM (SELECT DISTINCT target_player_id FROM social_recall_tasks WHERE status='ACTIVE' AND started_at<=$2 AND expires_at>$2 AND target_player_id=ANY($1::bigint[]) ORDER BY target_player_id LIMIT $3) t`, values, at, recallProjectionGotLimit+1).Scan(&raw); err != nil {
 		return err
 	}
 	return json.Unmarshal([]byte(raw), &base.Recalling)
