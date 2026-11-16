@@ -17,6 +17,7 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/playerdatastore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/playerdata"
@@ -24,6 +25,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
@@ -706,5 +708,106 @@ func TestRestoreEndsPlayerSessions(t *testing.T) {
 	}
 	if response.Body["error_code"] != int64(20003) {
 		t.Fatalf("error_code %v, want 20003", response.Body["error_code"])
+	}
+}
+
+func actorForSession(t *testing.T, pool *pg.Pool, player exportedPlayer, sessionID, contextID ids.UUID) identity.ActorContext {
+	t.Helper()
+	var rawAccount string
+	if err := pool.QueryRow(context.Background(), `SELECT account_id::text FROM players WHERE player_id=$1`, player.id).Scan(&rawAccount); err != nil {
+		t.Fatal(err)
+	}
+	accountUUID, err := ids.ParseUUID(rawAccount)
+	if err != nil {
+		t.Fatal(err)
+	}
+	accountID, err := identity.AccountIDFrom(accountUUID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, err := identity.SessionIDFrom(sessionID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	contextDomain, err := identity.ContextIDFrom(contextID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return identity.ActorContext{AccountID: accountID, SessionID: session, ContextID: contextDomain, LogicalServerID: identity.LogicalServerID(player.server), PlayerID: identity.PlayerID(player.id), ContextGeneration: 1, SessionLivenessVersion: 1, ContextLivenessVersion: 1}
+}
+
+// restoreSignalStore reports the moment Restore starts ending sessions so the
+// test can play the gameplay transaction's next lock without polling.
+type restoreSignalStore struct {
+	playerdata.RestoreStore
+	revocationStarted chan struct{}
+}
+
+func (store restoreSignalStore) EndPlayerSessions(ctx context.Context, transaction tx.Tx, playerID int64, at time.Time) (int, error) {
+	close(store.revocationStarted)
+	return store.RestoreStore.EndPlayerSessions(ctx, transaction, playerID, at)
+}
+
+// A-072/Amendment 1B: gameplay takes the identity fence FOR SHARE and then the
+// player root. Restore must end sessions before it takes the root, or the two
+// transactions form a lock cycle. The fence transaction here is real; every
+// wait carries the test context deadline, so a deadlock fails instead of
+// hanging.
+func TestRestoreFenceOrderEndsSessionsBeforeRoot(t *testing.T) {
+	fixture := newRestoreFixture(t)
+	player := seedPlayer(t, fixture.pool, false)
+	sessionID, contextID, bearer := seedPlayerSession(t, fixture.pool, player)
+	document := fixture.exportPlayer(t, player.id)
+	actor := actorForSession(t, fixture.pool, player, sessionID, contextID)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	fence, err := fixture.pool.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer fence.Rollback(ctx)
+	if err := (i5store.Store{}).FenceActorTx(ctx, fence, actor, time.Now().UTC()); err != nil {
+		t.Fatalf("fixture gameplay fence: %v", err)
+	}
+
+	reached := make(chan struct{})
+	service := fixture.service()
+	service.Store = restoreSignalStore{RestoreStore: service.Store, revocationStarted: reached}
+	outcome := make(chan error, 1)
+	go func() {
+		_, err := service.Restore(ctx, fixture.plan, fixture.digest, player.id, document, time.Now().UTC())
+		outcome <- err
+	}()
+
+	select {
+	case <-reached:
+	case <-ctx.Done():
+		t.Fatalf("restore did not start ending sessions: %v", ctx.Err())
+	}
+
+	_, fenceRootErr := (i4store.PlayerRootLocker{}).LockPlayerRootsTx(ctx, fence, identity.LogicalServerID(player.server), []identity.PlayerID{identity.PlayerID(player.id)})
+	fenceCommitErr := fence.Commit(ctx)
+	var restoreErr error
+	select {
+	case restoreErr = <-outcome:
+	case <-ctx.Done():
+		t.Fatalf("restore did not finish under the held fence: %v", ctx.Err())
+	}
+
+	if fenceRootErr != nil {
+		t.Fatalf("gameplay root lock behind the restore: %v", fenceRootErr)
+	}
+	if fenceCommitErr != nil {
+		t.Fatalf("gameplay commit: %v", fenceCommitErr)
+	}
+	if restoreErr != nil {
+		t.Fatalf("restore beside a held gameplay fence: %v", restoreErr)
+	}
+
+	authority := i4store.RealtimeAuthority{Queryer: fixture.pool, DigestSecret: []byte(testDigestSecret), BearerSecret: []byte(testBearerSecret), DerivationKeyID: testKeyID}
+	if _, err := authority.ResolveGameplayBearer(ctx, bearer, time.Now().UTC()); !errors.Is(err, i4store.ErrGameplayBearerNotLive) {
+		t.Fatalf("the held command's bearer still resolves after the restore: %v", err)
 	}
 }
