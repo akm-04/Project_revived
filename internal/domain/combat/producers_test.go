@@ -1,6 +1,43 @@
 package combat
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
+
+func petParamsFixture() json.RawMessage {
+	fields := map[string]any{"player_id": int64(9)}
+	for _, key := range []string{"pet_id", "table_id", "star", "lev", "exp", "color", "skills", "equips", "fumos", "practice_attr", "birthday", "is_born", "is_show", "active_style", "pet_styles"} {
+		fields[key] = []any{}
+	}
+	raw, _ := CanonicalJSON(fields)
+	return raw
+}
+
+func TestCurrentProfileRequiresPetProducerKeys(t *testing.T) {
+	current := CurrentProducerProfile()
+	pet := petParamsFixture()
+	if err := current.CheckOwned(PetActor, pet); err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"pet_id", "table_id", "star", "lev", "exp", "color", "skills", "equips", "fumos", "practice_attr", "birthday", "is_born", "is_show", "active_style", "pet_styles"} {
+		if err := current.CheckOwned(PetActor, withoutParam(pet, key)); err == nil {
+			t.Fatalf("missing pet producer key %s admitted", key)
+		}
+	}
+	for _, id := range []string{LegacyProducerProfileID, AwakeningProducerProfileID, "I9_LIBRARY_BATTLE_PRODUCERS_V1"} {
+		pinned, ok := LookupProducerProfile(id)
+		if !ok {
+			t.Fatal("pinned profile missing", id)
+		}
+		if err := pinned.CheckOwned(PetActor, withoutParam(pet, "fumos")); err != nil {
+			t.Fatalf("pinned profile %s changed an admitted pet row: %v", id, err)
+		}
+	}
+	if current.ID == "I9_LIBRARY_BATTLE_PRODUCERS_V1" {
+		t.Fatal("a registry change takes a new profile ID")
+	}
+}
 
 func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	legacy, ok := LookupProducerProfile(LegacyProducerProfileID)
