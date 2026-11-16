@@ -325,7 +325,8 @@
    "i9_tutorial_switches.json"
   ],
   "unit": [
-   "awakening_test.go"
+   "awakening_test.go",
+   "start_choice_conformance_test.go"
   ]
  }
 }

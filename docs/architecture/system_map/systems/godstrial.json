@@ -160,6 +160,8 @@
   "scenarios_naming": [
    "i9_6a_gods_trial.json"
   ],
-  "unit": []
+  "unit": [
+   "start_choice_conformance_test.go"
+  ]
  }
 }

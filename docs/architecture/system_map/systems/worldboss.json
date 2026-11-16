@@ -187,7 +187,8 @@
   ],
   "unit": [
    "rank_test.go",
-   "service_test.go"
+   "service_test.go",
+   "start_choice_conformance_test.go"
   ]
  }
 }

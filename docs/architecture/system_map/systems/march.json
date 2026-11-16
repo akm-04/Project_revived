@@ -178,6 +178,8 @@
   "scenarios_naming": [
    "i9_5a_march.json"
   ],
-  "unit": []
+  "unit": [
+   "start_choice_conformance_test.go"
+  ]
  }
 }
