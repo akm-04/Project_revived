@@ -159,6 +159,7 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 		upload.Attachment, upload.AttachmentTruncated = boundedCopy(request.Payload, domain.MaxErrorLogBodyBytes)
 	}
 	upload.Class = uploadClass(upload)
+	domain.ClassifyUploadRows(upload.Rows, upload.Owner != nil, upload.QuarantineReason != "")
 	if err := s.Store.SaveUpload(ctx, upload); err != nil {
 		return http.StatusServiceUnavailable
 	}

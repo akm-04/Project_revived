@@ -199,6 +199,11 @@ func TestBadUploadsAreQuarantinedUnattributedWhenNoOwnerIsProven(t *testing.T) {
 	if len(unknown) != 1 || unknown[0].attribution != "UNATTRIBUTED_UNKNOWN" || unknown[0].status != "PARSED" {
 		t.Fatalf("unknown=%+v", unknown)
 	}
+	var rowRetention string
+	var rowExpiresIn time.Duration
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT retention_class, expires_at-received_at FROM client_log_rows WHERE account_uid IS NULL AND log=$1`, marker).Scan(&rowRetention, &rowExpiresIn); err != nil || rowRetention != "ANOMALY" || rowExpiresIn != lifetime(domain.Anomaly) {
+		t.Fatalf("unattributed row retention=%s expiresIn=%s err=%v", rowRetention, rowExpiresIn, err)
+	}
 }
 
 func TestRateLimitAnswers429(t *testing.T) {

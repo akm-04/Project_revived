@@ -114,7 +114,7 @@ func TestIngestNeverGuessesAnOwner(t *testing.T) {
 	service.Ingest(context.Background(), UploadRequest{Capability: capability, Kind: domain.KindErrorLog, Payload: payload})
 	want := []Attribution{UnattributedMissing, UnattributedUnknown, UnattributedExpired}
 	for index, upload := range store.uploads {
-		if upload.Attribution != want[index] || upload.Owner != nil || upload.Class != domain.Anomaly {
+		if upload.Attribution != want[index] || upload.Owner != nil || upload.Class != domain.Anomaly || upload.Rows[0].Class != domain.Anomaly {
 			t.Errorf("upload %d=%+v", index, upload)
 		}
 	}
