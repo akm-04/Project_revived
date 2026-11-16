@@ -2,12 +2,12 @@ package i5store
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -20,11 +20,11 @@ func (Store) LockAwakeningTx(c context.Context, t tx.Tx, p identity.PlayerID) (o
 		return objective.AwakeRoot{}, errors.New("invalid awakening root lock")
 	}
 	initial := objective.NewAwakeRoot()
-	raw, e := json.Marshal(initial)
+	raw, version, e := payload.Encode(initial)
 	if e != nil {
 		return initial, e
 	}
-	if _, e = t.Exec(c, `INSERT INTO player_awakening_roots(player_id,state_version,payload)VALUES($1,1,$2::jsonb) ON CONFLICT(player_id)DO NOTHING`, int64(p), string(raw)); e != nil {
+	if _, e = t.Exec(c, `INSERT INTO player_awakening_roots(player_id,state_version,payload,payload_version)VALUES($1,1,$2::jsonb,$3) ON CONFLICT(player_id)DO NOTHING`, int64(p), string(raw), version); e != nil {
 		return initial, e
 	}
 	return readAwakening(c, t, p, true)
@@ -34,13 +34,14 @@ func readAwakening(c context.Context, q tx.Queryer, p identity.PlayerID, lock bo
 	if q == nil || !p.Valid() {
 		return objective.AwakeRoot{}, errors.New("invalid awakening root read")
 	}
-	query := `SELECT state_version,payload::text FROM player_awakening_roots WHERE player_id=$1`
+	query := `SELECT state_version,payload::text,payload_version FROM player_awakening_roots WHERE player_id=$1`
 	if lock {
 		query += " FOR UPDATE"
 	}
 	var version int64
 	var raw string
-	e := q.QueryRow(c, query, int64(p)).Scan(&version, &raw)
+	var payloadVersion int16
+	e := q.QueryRow(c, query, int64(p)).Scan(&version, &raw, &payloadVersion)
 	if errors.Is(e, kernelstore.ErrNoRows) && !lock {
 		return objective.NewAwakeRoot(), nil
 	}
@@ -48,7 +49,7 @@ func readAwakening(c context.Context, q tx.Queryer, p identity.PlayerID, lock bo
 		return objective.AwakeRoot{}, e
 	}
 	var root objective.AwakeRoot
-	if e = json.Unmarshal([]byte(raw), &root); e != nil {
+	if e = payload.Decode("player_awakening_roots", payloadVersion, []byte(raw), &root); e != nil {
 		return root, e
 	}
 	if root.Version != version {
@@ -61,11 +62,11 @@ func (Store) SaveAwakeningTx(c context.Context, t tx.Tx, p identity.PlayerID, ro
 	if t == nil || !p.Valid() || root.Validate() != nil || root.Version != old+1 {
 		return errors.New("invalid awakening root CAS")
 	}
-	raw, e := json.Marshal(root)
+	raw, payloadVersion, e := payload.Encode(root)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `UPDATE player_awakening_roots SET state_version=$2,payload=$3::jsonb WHERE player_id=$1 AND state_version=$4`, int64(p), root.Version, string(raw), old)
+	tag, e := t.Exec(c, `UPDATE player_awakening_roots SET state_version=$2,payload=$3::jsonb,payload_version=$4 WHERE player_id=$1 AND state_version=$5`, int64(p), root.Version, string(raw), payloadVersion, old)
 	if e != nil {
 		return e
 	}

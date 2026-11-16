@@ -1,0 +1,11 @@
+{
+  "courses": [
+    {
+      "id": 1,
+      "progress": 100,
+      "quality": 1,
+      "add_skill": 0,
+      "exp": 100
+    }
+  ]
+}

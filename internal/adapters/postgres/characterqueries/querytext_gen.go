@@ -4,7 +4,7 @@ package characterqueries
 const SourceSHA256 = "db5f6a9077403bb0582758747343209e0f59c39f66f0cfc9aff823228fb3b81f"
 const PetSourceSHA256 = "07779a3b3acc6ae1ae1c065ffff81dccc3a7477193c5b339d07d06d537c0fd81"
 const PresetSourceSHA256 = "649a7d71bf475e6710bdd28f111a364cc208b5600270e88338fda2d28fb37cd6"
-const PracticeSourceSHA256 = "bca19b6a86b90f87e1ba26d994c06929d58fa5bba2b9068ff3cb3cdae66570bf"
+const PracticeSourceSHA256 = "2430376d883c60c8334244de06ed9b44071701069188257d38c6ff5507393489"
 
 const InsertHeroRoot = `INSERT INTO player_hero_roots(player_id,next_partner_id,sort_type,state_version,created_at,updated_at)
 VALUES ($1,1,0,1,$2,$2)
@@ -271,8 +271,8 @@ WHERE player_id=$1 AND state_version=$13;`
 const UpsertHeroPracticeCandidate = `INSERT INTO player_hero_practice_candidates(
   player_id,session_id,partner_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
   generation_operation_id,generation_context_id,generation_kind,generation_content_revision,
-  generation_policy_refs,created_at,updated_at
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14)
+  generation_policy_refs,payload_version,created_at,updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15)
 ON CONFLICT (player_id,session_id,partner_id) DO UPDATE
 SET actor_state_version=EXCLUDED.actor_state_version,
     proposed_str=EXCLUDED.proposed_str,proposed_int=EXCLUDED.proposed_int,proposed_agi=EXCLUDED.proposed_agi,
@@ -281,14 +281,15 @@ SET actor_state_version=EXCLUDED.actor_state_version,
     generation_kind=EXCLUDED.generation_kind,
     generation_content_revision=EXCLUDED.generation_content_revision,
     generation_policy_refs=EXCLUDED.generation_policy_refs,
+    payload_version=EXCLUDED.payload_version,
     created_at=EXCLUDED.created_at,
     updated_at=EXCLUDED.updated_at;`
 
 const UpsertPetPracticeCandidate = `INSERT INTO player_pet_practice_candidates(
   player_id,session_id,pet_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
   generation_operation_id,generation_context_id,generation_kind,generation_content_revision,
-  generation_policy_refs,created_at,updated_at
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14)
+  generation_policy_refs,payload_version,created_at,updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15)
 ON CONFLICT (player_id,session_id,pet_id) DO UPDATE
 SET actor_state_version=EXCLUDED.actor_state_version,
     proposed_str=EXCLUDED.proposed_str,proposed_int=EXCLUDED.proposed_int,proposed_agi=EXCLUDED.proposed_agi,
@@ -297,18 +298,19 @@ SET actor_state_version=EXCLUDED.actor_state_version,
     generation_kind=EXCLUDED.generation_kind,
     generation_content_revision=EXCLUDED.generation_content_revision,
     generation_policy_refs=EXCLUDED.generation_policy_refs,
+    payload_version=EXCLUDED.payload_version,
     created_at=EXCLUDED.created_at,
     updated_at=EXCLUDED.updated_at;`
 
 const ReadHeroPracticeCandidate = `SELECT player_id,session_id::text,partner_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_hero_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND partner_id=$3;`
 
 const LockHeroPracticeCandidate = `SELECT player_id,session_id::text,partner_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_hero_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND partner_id=$3 FOR UPDATE;`
 
@@ -317,13 +319,13 @@ WHERE player_id=$1 AND session_id=$2 AND partner_id=$3;`
 
 const ReadPetPracticeCandidate = `SELECT player_id,session_id::text,pet_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_pet_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND pet_id=$3;`
 
 const LockPetPracticeCandidate = `SELECT player_id,session_id::text,pet_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_pet_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND pet_id=$3 FOR UPDATE;`
 

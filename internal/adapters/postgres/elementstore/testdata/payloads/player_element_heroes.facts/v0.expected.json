@@ -1,0 +1,18 @@
+{
+  "slots": [
+    11,
+    0,
+    0,
+    0
+  ],
+  "levels": [
+    2,
+    0,
+    0,
+    0
+  ],
+  "backup": {
+    "5": 1
+  },
+  "policy": "C2G_EMPTY_PRESERVATION_SEED_V1"
+}
