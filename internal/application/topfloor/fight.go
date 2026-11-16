@@ -55,10 +55,10 @@ func (r StartCommand) Validate() error {
 	return nil
 }
 
-// The stage is the opponent, not the chosen team: I8_PARENT_CONTRACT_V1
-// generation_supersede replays the frozen START when only the formation changed.
+// The stage is the opponent and the vengeance, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only the formation or pet changed.
 func fingerprint(pid identity.PlayerID, r StartCommand) string {
-	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "pet": r.PetID, "enemy": r.Enemy, "avenge": r.Avenge})
+	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "enemy": r.Enemy, "avenge": r.Avenge})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
@@ -106,7 +106,7 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 		return FightView{}, err
 	}
 	openReplay := found && latest.Fingerprint == fp && latest.Status == d.StatusStarted
-	settledReplay := found && latest.Fingerprint == fp && slices.Equal(latest.Formation, r.Formation) && now.Sub(latest.StartedAt) < replayWindow
+	settledReplay := found && latest.Fingerprint == fp && slices.Equal(latest.Formation, r.Formation) && latest.PetID == r.PetID && now.Sub(latest.StartedAt) < replayWindow
 	if openReplay || settledReplay {
 		return s.finish(c, latest, op)
 	}

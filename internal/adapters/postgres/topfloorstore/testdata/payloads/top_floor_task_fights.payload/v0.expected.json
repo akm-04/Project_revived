@@ -23,6 +23,7 @@
   },
   "period_number": 1,
   "mode": 1,
+  "leader": 0,
   "formation": [
     {
       "table_id": 1

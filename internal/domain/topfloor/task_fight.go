@@ -6,6 +6,7 @@ type TaskModeFight struct {
 	Fight        Fight            `json:"fight"`
 	PeriodNumber int64            `json:"period_number"`
 	Mode         int64            `json:"mode"`
+	Leader       int64            `json:"leader"`
 	Formation    []map[string]any `json:"formation"`
 	Enemy        Display          `json:"enemy"`
 }
