@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -62,10 +61,6 @@ VALUES(25,'payload-version-occult',NULL,false,false,false,2525001,2599999,1,now(
 	if err := pool.Raw().QueryRow(ctx, `SELECT scores::text,payload_version FROM occult_players WHERE player_id=$1`, int64(player)).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH17_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/occultstore/testdata/payloads/occult_players.scores"), storedText)
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -104,26 +99,5 @@ func assertSameJSON(t *testing.T, got, want any) {
 	}
 	if !bytes.Equal(gotRaw, wantRaw) {
 		t.Fatalf("decoded=%s want=%s", gotRaw, wantRaw)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded d.Scores
-	if err := payload.Decode("occult_players", 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	expected, err := json.MarshalIndent(decoded, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
