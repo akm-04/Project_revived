@@ -122,6 +122,10 @@ func nativePool(t *testing.T) *postgres.Pool {
 }
 
 func newHarness(t *testing.T) *harness {
+	return newHarnessWithTaker(t, nil)
+}
+
+func newHarnessWithTaker(t *testing.T, wrap func(undeliveredstore.Store) undelivered.Taker) *harness {
 	t.Helper()
 	pool := nativePool(t)
 	player, session, gameplayContext := seedPlayer(t, pool)
@@ -138,12 +142,16 @@ func newHarness(t *testing.T) *harness {
 		t.Fatalf("bearer does not resolve: %v", err)
 	}
 	store := undeliveredstore.Store{Pool: pool.Raw()}
+	var taker undelivered.Taker = store
+	if wrap != nil {
+		taker = wrap(store)
+	}
 	journal := &captureJournal{}
 	metrics := &captureMetrics{}
 	dispatcher := stockruntime.GMQuestionDispatcher{Authority: authority, Service: gmQuestionService(pool)}
 	router := httpedge.NewRouter()
 	router.Wrap = func(next httpedge.Dispatcher) httpedge.Dispatcher {
-		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: next}, Authority: authority, Marks: store, Window: 10 * time.Minute, Metrics: metrics}
+		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: next}, Authority: authority, Marks: taker, Window: 10 * time.Minute, Metrics: metrics}
 	}
 	for _, mid := range []uint16{4, 5} {
 		if err := router.Register(mid, dispatcher); err != nil {
