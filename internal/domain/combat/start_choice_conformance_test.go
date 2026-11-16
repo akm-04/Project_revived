@@ -28,7 +28,7 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModeArena:               {rule: ChoiceReplaysFrozen, test: "TestI7C5DArenaChangedFormationReplaysOpenFightNative"},
 	ModeArenaPlayoffs:       {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceArenaTournament", reason: "the team is the room selection, frozen before START (arena/selection.go:66,83-85; arena/tournament_combat.go:78)"},
 	ModeArenaFriendFight:    {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceArenaTournament", reason: "the team is the room selection, frozen before START (arena/selection.go:66,83-85; arena/tournament_combat.go:78)"},
-	ModeAwakeningBlood:      {rule: ChoiceSupersedes, test: "TestAwakeningWireRoutesAndTrustBoundary", reason: "MID 866 carries no team; the team is the frozen occurrence owner (awakeningbattle/mode.go:83,98; stockruntime/awakening_blood_dispatcher.go:41-44)"},
+	ModeAwakeningBlood:      {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceAwakeningBlood", reason: "MID 866 carries no team; the team is the frozen occurrence owner (awakeningbattle/mode.go:83,98; stockruntime/awakening_blood_dispatcher.go:41-44)"},
 	ModeCampaign:            {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceCampaign"},
 	ModeChampionsLeague:     {rule: ChoiceReplaysFrozen, test: "TestI7C5FLeagueChangedLineupReplaysOpenFightNative"},
 	ModeConquerSchool:       {rule: ChoiceSupersedes, test: "TestI8_5DConquerStartBindsCombatAttemptNative"},
