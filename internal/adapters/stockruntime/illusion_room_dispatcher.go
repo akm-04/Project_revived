@@ -229,6 +229,7 @@ var illusionRoomFailureRows = []failureRow{
 	{match: sharedroom.ErrExpired, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sharedroom.ErrFull, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sharedroom.ErrKicked, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sharedroom.ErrJoinThrottled, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sharedroom.ErrNotOwner, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sharedroom.ErrNotSeated, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sharedroom.ErrNotFound, class: failureRefusal, code: unprovenRefusalCode},

@@ -23,14 +23,15 @@ const (
 )
 
 var (
-	ErrInvalid   = errors.New("shared room: invalid room")
-	ErrClosed    = errors.New("shared room: room is closed")
-	ErrExpired   = errors.New("shared room: room lease expired")
-	ErrFull      = errors.New("shared room: room is full")
-	ErrKicked    = errors.New("shared room: player was kicked from this room")
-	ErrNotOwner  = errors.New("shared room: actor is not the owner")
-	ErrNotSeated = errors.New("shared room: player is not seated")
-	ErrNotFound  = errors.New("shared room: room not found")
+	ErrInvalid       = errors.New("shared room: invalid room")
+	ErrClosed        = errors.New("shared room: room is closed")
+	ErrExpired       = errors.New("shared room: room lease expired")
+	ErrFull          = errors.New("shared room: room is full")
+	ErrKicked        = errors.New("shared room: player was kicked from this room")
+	ErrNotOwner      = errors.New("shared room: actor is not the owner")
+	ErrNotSeated     = errors.New("shared room: player is not seated")
+	ErrNotFound      = errors.New("shared room: room not found")
+	ErrJoinThrottled = errors.New("shared room: joined this room too recently")
 )
 
 type Status string
@@ -56,6 +57,13 @@ const (
 // KickCooldown is how long a kicked player stays out of that room. PRIVATE_POLICY:
 // the user recalls 2-3 minutes on the original server.
 const KickCooldown = 3 * time.Minute
+
+// JoinThrottle is how long a player waits before taking the same room's seat
+// again. The stock client blocks a second join of one room for 30 s
+// (Illusion.lua:114-138, AdventureEvent.lua:433-455, "Can't join this room in
+// 30s!"), and C3 requires the server to refuse it too. A seated player's
+// repeated join stays idempotent, so a lost-response replay still converges.
+const JoinThrottle = 30 * time.Second
 
 // Seat is one ordered slot of a room. A left or kicked player keeps their row.
 // On a kicked seat JoinedAt holds the kick time.
@@ -191,6 +199,10 @@ func (r *Room) Join(player identity.PlayerID, at time.Time) error {
 		case SeatKicked:
 			if at.Before(r.Seats[index].JoinedAt.Add(KickCooldown)) {
 				return ErrKicked
+			}
+		case SeatLeft:
+			if at.Before(r.Seats[index].JoinedAt.Add(JoinThrottle)) {
+				return ErrJoinThrottled
 			}
 		}
 		if r.activeCount() >= int(r.Capacity) {

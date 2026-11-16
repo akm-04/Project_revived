@@ -200,7 +200,9 @@ func (s Service) observeOwnedTx(c context.Context, sc gen.TimedScope, rev string
 	if e != nil {
 		return catalog, e
 	}
-	// C4F_LEGACY_STATE_BACKFILL_V1: a legacy character gets its root now.
+	// C4F_LEGACY_STATE_BACKFILL_V1: a legacy character gets its root now, and
+	// every owned-state family and 100014 are evaluated at this first instant
+	// even when an owner command triggered the observation for one family.
 	if !tracked {
 		if e = s.Store.InitFreshTx(c, sc.Tx, p, rev, at); e != nil {
 			return catalog, e
@@ -208,6 +210,7 @@ func (s Service) observeOwnedTx(c context.Context, sc gen.TimedScope, rev string
 		if root, _, e = s.Store.ReadRootTx(c, sc.Tx, p, true); e != nil {
 			return catalog, e
 		}
+		families = allFamilies()
 	}
 	if root.UpdatedAt.After(at) {
 		return catalog, d.ErrConflict

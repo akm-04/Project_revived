@@ -9,7 +9,6 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	ach "gxb.local/backend/v2/internal/application/achievement"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -176,7 +175,7 @@ func TestI7C4FCSkinsAchievementBackfillsFromSkinCount(t *testing.T) {
 	rev := installed(t, p)
 	a := rankingActor(t, p, rankingServer(t, p), true)
 	skinCollector(t, p, a, rev)
-	counts := ach.OwnerCounts{Roster: characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: contentstore.Store{}}, Kinds: contentstore.Store{}, Skins: countingDisplay(p)}
+	counts := productionOwnerCounts(p, countingDisplay(p))
 	s := catalogAchievements(p, counts)
 	if e := s.Observe(ctx, a, op(), ach.Families["Hero"]); e != nil {
 		t.Fatal(e)

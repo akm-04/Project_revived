@@ -71574,7 +71574,7 @@
    "isolation": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 344,
+     "line": 347,
      "value": "serializable"
     }
    ],
@@ -71582,18 +71582,18 @@
    "read_only": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 344,
+     "line": 347,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/achievement/catalog.go:411",
+    "internal/application/achievement/catalog.go:414",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 344,
+     "line": 347,
      "value": "6"
     }
    ],
@@ -71621,7 +71621,7 @@
      "file": "internal/application/achievement/catalog.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 344,
+     "line": 347,
      "read_only": "false",
      "retry": "6"
     }

@@ -54,7 +54,7 @@ func TestJoinFillsCapacityInSeatOrderAndIsIdempotent(t *testing.T) {
 	if err := room.Join(12, testStart); err != nil {
 		t.Fatalf("free seat join %v", err)
 	}
-	if err := room.Join(11, testStart); !errors.Is(err, ErrFull) {
+	if err := room.Join(11, testStart.Add(JoinThrottle)); !errors.Is(err, ErrFull) {
 		t.Fatalf("a left seat must not exceed capacity %v", err)
 	}
 	if members := room.Members(); len(members) != 2 || members[0] != 10 || members[1] != 12 {
@@ -62,6 +62,26 @@ func TestJoinFillsCapacityInSeatOrderAndIsIdempotent(t *testing.T) {
 	}
 	if room.NoticeVersion <= version {
 		t.Fatalf("notice %d version %d", room.NoticeVersion, version)
+	}
+}
+
+func TestJoinThrottlesSameRoomFor30Seconds(t *testing.T) {
+	room := testRoom(t, 3, time.Hour)
+	if err := room.Join(11, testStart); err != nil {
+		t.Fatal(err)
+	}
+	if err := room.Leave(11, testStart.Add(5*time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	if err := room.Join(11, testStart.Add(JoinThrottle-time.Second)); !errors.Is(err, ErrJoinThrottled) {
+		t.Fatalf("rejoin inside the join throttle %v", err)
+	}
+	other := testRoom(t, 3, time.Hour)
+	if err := other.Join(11, testStart.Add(JoinThrottle-time.Second)); err != nil {
+		t.Fatalf("the throttle must stay per room: %v", err)
+	}
+	if err := room.Join(11, testStart.Add(JoinThrottle)); err != nil || len(room.Members()) != 2 {
+		t.Fatalf("rejoin after the throttle %v %v", err, room.Members())
 	}
 }
 

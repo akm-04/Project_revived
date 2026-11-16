@@ -312,6 +312,7 @@ var occultFailureRows = []failureRow{
 	{match: sr.ErrNotFound, class: failureRefusal, code: occultRoomRefusedCode},
 	{match: room.ErrFull, class: failureRefusal, code: occultRoomRefusedCode},
 	{match: room.ErrKicked, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrJoinThrottled, class: failureRefusal, code: occultRoomRefusedCode},
 	{match: room.ErrExpired, class: failureRefusal, code: occultRoomRefusedCode},
 	{match: room.ErrClosed, class: failureRefusal, code: occultRoomRefusedCode},
 	{match: room.ErrNotOwner, class: failureRefusal, code: occultRoomRefusedCode},
