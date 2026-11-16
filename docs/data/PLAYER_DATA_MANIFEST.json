@@ -97,7 +97,7 @@
     "actor_player_id"
    ],
    "via": null,
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,
@@ -111,7 +111,7 @@
     "player_id"
    ],
    "via": null,
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,
@@ -369,7 +369,7 @@
     "member_player_id"
    ],
    "via": null,
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,
@@ -381,7 +381,7 @@
    "scope": "player",
    "owner": [],
    "via": "combat_attempts",
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,
@@ -395,7 +395,7 @@
     "member_player_id"
    ],
    "via": null,
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,
@@ -407,7 +407,7 @@
    "scope": "player",
    "owner": [],
    "via": "combat_attempts",
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,
@@ -846,7 +846,7 @@
     "player_id"
    ],
    "via": null,
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,
@@ -3169,7 +3169,7 @@
     "player_id"
    ],
    "via": null,
-   "kind": "report",
+   "kind": "ledger",
    "backup": true,
    "references": [],
    "retention": null,

@@ -49,15 +49,20 @@ PRIMARY_KEYS_SQL = """
     FROM pg_constraint c JOIN LATERAL unnest(c.conkey) WITH ORDINALITY k(attnum, n) ON true
     JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = k.attnum
     WHERE c.contype = 'p' GROUP BY 1"""
+# Rows these trigger functions guard can never be deleted or rewritten by a restore.
+IMMUTABLE_TRIGGER_FUNCTIONS = ("combat_append_only", "combat_attempt_guard")
+IMMUTABLE_SQL = ("SELECT DISTINCT t.tgrelid::regclass::text FROM pg_trigger t JOIN pg_proc p ON p.oid = t.tgfoid "
+                 "WHERE NOT t.tgisinternal AND p.proname IN ('" + "','".join(IMMUTABLE_TRIGGER_FUNCTIONS) + "')")
 
 
 class Catalog:
-    def __init__(self, tables, columns, foreign_keys, primary_keys, json_columns):
+    def __init__(self, tables, columns, foreign_keys, primary_keys, json_columns, immutable=()):
         self.tables = sorted(tables)
         self.columns = columns
         self.foreign_keys = foreign_keys
         self.primary_keys = primary_keys
         self.json_columns = json_columns
+        self.immutable = set(immutable)
 
 
 def query(database, sql):
@@ -78,7 +83,8 @@ def load_catalog(database):
     for table, column, target in query(database, FOREIGN_KEYS_SQL):
         foreign_keys.setdefault(table, []).append((column, target))
     primary_keys = {table: keys.split(",") for table, keys in query(database, PRIMARY_KEYS_SQL)}
-    return Catalog(tables, columns, foreign_keys, primary_keys, json_columns)
+    immutable = [row[0] for row in query(database, IMMUTABLE_SQL)]
+    return Catalog(tables, columns, foreign_keys, primary_keys, json_columns, immutable)
 
 
 def load_classes():
@@ -273,6 +279,8 @@ def check(catalog, classes, manifest):
         owned = set(classes[table].get("owner") or [])
         if classes[table].get("owner_where") and not owned:
             problems.append(f"{table}: owner_where without an owner column")
+        if table in catalog.immutable and classes[table].get("scope") == "player" and classes[table].get("kind") != "ledger":
+            problems.append(f"{table}: immutable rows (trigger) must be kind ledger, so restore keeps them")
         referenced = set(classes[table].get("references") or [])
         for column in player_columns(catalog, table):
             if column not in owned and column not in referenced:

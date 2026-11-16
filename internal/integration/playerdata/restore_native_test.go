@@ -593,6 +593,38 @@ func TestRestoreKeepsPurchasesRedemptionsAndClaims(t *testing.T) {
 	}
 }
 
+// TestRestoreKeepsCombatHistory is audit A-076: settled fights are append-only,
+// so a same-player round trip must keep them instead of deleting them.
+func TestRestoreKeepsCombatHistory(t *testing.T) {
+	fixture := newRestoreFixture(t)
+	player := seedPlayer(t, fixture.pool, false)
+	var revision string
+	if err := fixture.pool.QueryRow(context.Background(), `SELECT revision_id FROM gxb_content_revisions LIMIT 1`).Scan(&revision); err != nil {
+		t.Fatal(err)
+	}
+	attempt := newUUID(t).String()
+	now := time.Now().UTC().Add(-time.Hour)
+	execSQL(t, fixture.pool, `INSERT INTO combat_snapshots(snapshot_hash,content_revision,rules_corpus_id,canonical)VALUES(repeat('f',64),$1,repeat('e',64),decode('0000','hex')) ON CONFLICT(snapshot_hash) DO NOTHING`, revision)
+	execSQL(t, fixture.pool, `INSERT INTO combat_locator_roots(domain_kind,authority_scope,domain_locator)VALUES('WORLD_BOSS','a076',$1)`, attempt)
+	execSQL(t, fixture.pool, `INSERT INTO combat_attempts(attempt_id,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id,generation_ref,start_fingerprint,trust_profile_id,trust_profile_version,snapshot_hash,rules_corpus_version,entropy_policy_version,entropy_key_version,resolver_status,state,started_at,result_deadline,state_version,terminal_kind,terminal_at,semantic_receipt_id)
+VALUES($1::uuid,'WORLD_BOSS','a076',$1::text,$2,$3::uuid,'a076',repeat('a',64),'SERVER_REPORT_AUTHORITATIVE_V1',1,repeat('f',64),repeat('b',64),'HMAC_SHA256_COUNTER_LUA_RANDOM_COMPAT_V1','a076-key','PENDING','TERMINAL',$4::timestamptz,$4::timestamptz+interval '1 hour',1,'SETTLED',$4::timestamptz,'a076-receipt')`, attempt, player.id, newUUID(t).String(), now)
+	execSQL(t, fixture.pool, `INSERT INTO worldboss_attempt_settlements(attempt_id,player_id,damage,settled_at)VALUES($1,$2,500,$3)`, attempt, player.id, now)
+	document := fixture.exportPlayer(t, player.id)
+
+	fixture.mustRestore(t, document, player.id)
+
+	var settlements, terminal int
+	if err := fixture.pool.QueryRow(context.Background(), `SELECT count(*) FROM worldboss_attempt_settlements WHERE player_id=$1 AND damage=500`, player.id).Scan(&settlements); err != nil {
+		t.Fatal(err)
+	}
+	if err := fixture.pool.QueryRow(context.Background(), `SELECT count(*) FROM combat_attempts WHERE attempt_id=$1 AND state='TERMINAL'`, attempt).Scan(&terminal); err != nil {
+		t.Fatal(err)
+	}
+	if settlements != 1 || terminal != 1 {
+		t.Fatalf("restore changed the combat history: settlements=%d terminal attempts=%d", settlements, terminal)
+	}
+}
+
 func TestRestoreLeavesFriendRelations(t *testing.T) {
 	fixture := newRestoreFixture(t)
 	player := seedPlayer(t, fixture.pool, false)

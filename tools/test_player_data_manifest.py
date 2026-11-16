@@ -83,6 +83,16 @@ class PlayerDataManifestTests(unittest.TestCase):
         problems = manifest_tool.check(catalog, classes, manifest_tool.build_manifest(catalog, classes))
         self.assertTrue(any("settled_by" in problem for problem in problems))
 
+    def test_immutable_player_table_must_be_kept(self):
+        catalog = fake_catalog()
+        catalog.immutable = {"player_a"}
+        classes = fake_classes()
+        problems = manifest_tool.check(catalog, classes, manifest_tool.build_manifest(catalog, classes))
+        self.assertTrue(any("player_a" in problem and "immutable" in problem for problem in problems))
+        classes["player_a"]["kind"] = "ledger"
+        problems = manifest_tool.check(catalog, classes, manifest_tool.build_manifest(catalog, classes))
+        self.assertFalse(any("immutable" in problem for problem in problems))
+
     def test_child_before_parent_fails(self):
         catalog = fake_catalog()
         classes = fake_classes()

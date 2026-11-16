@@ -6387,10 +6387,11 @@
           "actor_player_id"
         ],
         "via": null,
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "combat_start_packages": {
@@ -6417,10 +6418,11 @@
         "scope": "player",
         "owner": [],
         "via": "combat_attempts",
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "combat_attestations": {
@@ -6447,10 +6449,11 @@
         "scope": "player",
         "owner": [],
         "via": "combat_attempts",
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "combat_attempt_members": {
@@ -6479,10 +6482,11 @@
           "member_player_id"
         ],
         "via": null,
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "combat_member_settlements": {
@@ -6511,10 +6515,11 @@
           "member_player_id"
         ],
         "via": null,
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "content_arena_catalogs": {
@@ -8229,10 +8234,11 @@
           "player_id"
         ],
         "via": null,
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "shared_rooms": {
@@ -8435,10 +8441,11 @@
           "player_id"
         ],
         "via": null,
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "illusion_reports": {
@@ -8713,10 +8720,11 @@
           "player_id"
         ],
         "via": null,
-        "kind": "report",
+        "kind": "ledger",
         "backup": true,
         "references": [],
-        "retention": null
+        "retention": null,
+        "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
     "adventure_reports": {

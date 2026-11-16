@@ -82,6 +82,26 @@
      ]
     },
     {
+     "constraint": "combat_attempt_members_member_player_id_fkey",
+     "table": "combat_attempt_members",
+     "columns": [
+      "member_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
+     "constraint": "combat_attempts_actor_player_id_fkey",
+     "table": "combat_attempts",
+     "columns": [
+      "actor_player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
      "constraint": "commerce_charge_purchases_player_id_fkey",
      "table": "commerce_charge_purchases",
      "columns": [
@@ -920,7 +940,7 @@
   },
   {
    "table": "combat_attempts",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"combat_attempts\" WHERE \"actor_player_id\" = $1::bigint",
    "versioned": {
     "state_version": true,
@@ -962,6 +982,26 @@
      "table": "combat_attempts",
      "columns": [
       "supersedes_attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "combat_attestations_attempt_id_fkey",
+     "table": "combat_attestations",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "combat_start_packages_attempt_id_fkey",
+     "table": "combat_start_packages",
+     "columns": [
+      "attempt_id"
      ],
      "references": [
       "attempt_id"
@@ -1021,7 +1061,7 @@
   },
   {
    "table": "adventure_attempt_settlements",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"adventure_attempt_settlements\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
@@ -1215,17 +1255,30 @@
   },
   {
    "table": "combat_attempt_members",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"combat_attempt_members\" WHERE \"member_player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
     "updated_at": false
    },
-   "inbound": []
+   "inbound": [
+    {
+     "constraint": "combat_member_settlements_attempt_id_member_player_id_fkey",
+     "table": "combat_member_settlements",
+     "columns": [
+      "attempt_id",
+      "member_player_id"
+     ],
+     "references": [
+      "attempt_id",
+      "member_player_id"
+     ]
+    }
+   ]
   },
   {
    "table": "combat_attestations",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"combat_attestations\" c WHERE EXISTS (SELECT 1 FROM \"combat_attempts\" p WHERE p.\"actor_player_id\" = $1::bigint AND c.\"attempt_id\" = p.\"attempt_id\")",
    "versioned": {
     "state_version": false,
@@ -1235,7 +1288,7 @@
   },
   {
    "table": "combat_member_settlements",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"combat_member_settlements\" WHERE \"member_player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
@@ -1245,7 +1298,7 @@
   },
   {
    "table": "combat_start_packages",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"combat_start_packages\" c WHERE EXISTS (SELECT 1 FROM \"combat_attempts\" p WHERE p.\"actor_player_id\" = $1::bigint AND c.\"attempt_id\" = p.\"attempt_id\")",
    "versioned": {
     "state_version": false,
@@ -1581,7 +1634,7 @@
   },
   {
    "table": "illusion_attempt_settlements",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"illusion_attempt_settlements\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
@@ -3416,7 +3469,7 @@
   },
   {
    "table": "worldboss_attempt_settlements",
-   "action": "restore",
+   "action": "keep",
    "select": "SELECT * FROM \"worldboss_attempt_settlements\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
