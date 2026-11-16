@@ -28,15 +28,16 @@ func (Store) HeroRecommendSourceTx(c context.Context, q tx.Queryer, server ident
 		return out, e
 	}
 	var formations []struct {
-		PlayerID int64            `json:"player_id"`
-		Payload  versionedPayload `json:"payload"`
+		PlayerID int64           `json:"player_id"`
+		Payload  json.RawMessage `json:"payload"`
+		Version  int16           `json:"version"`
 	}
 	if e := json.Unmarshal([]byte(defense), &formations); e != nil {
 		return out, e
 	}
 	for _, row := range formations {
 		var player league.Player
-		if e := payload.Decode("league_players", row.Payload.Version, row.Payload.Payload, &player); e != nil {
+		if e := payload.Decode("league_players", row.Version, row.Payload, &player); e != nil {
 			return out, e
 		}
 		out.Formations = append(out.Formations, d.Formation{PlayerID: row.PlayerID, PartnerIDs: player.Defense.Heroes, PetID: player.Defense.Pet, Weight: player.Points})
@@ -50,8 +51,9 @@ func (Store) HeroRecommendSourceTx(c context.Context, q tx.Queryer, server ident
 		return out, e
 	}
 	var observed []struct {
-		Attacker int64            `json:"attacker"`
-		Payload  versionedPayload `json:"payload"`
+		Attacker int64           `json:"attacker"`
+		Payload  json.RawMessage `json:"payload"`
+		Version  int16           `json:"version"`
 	}
 	if e := json.Unmarshal([]byte(matches), &observed); e != nil {
 		return out, e
@@ -60,7 +62,7 @@ func (Store) HeroRecommendSourceTx(c context.Context, q tx.Queryer, server ident
 	exemplars := map[int64]int64{}
 	for _, row := range observed {
 		var match league.Match
-		if e := payload.Decode("league_matches", row.Payload.Version, row.Payload.Payload, &match); e != nil {
+		if e := payload.Decode("league_matches", row.Version, row.Payload, &match); e != nil {
 			return out, e
 		}
 		for _, hero := range match.Attack.Heroes {
