@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -22,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
@@ -31,6 +33,7 @@ import (
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -80,6 +83,18 @@ func twoStepExec(t *testing.T, p *postgres.Pool, statement string, arguments ...
 	if _, err := p.Raw().Exec(context.Background(), statement, arguments...); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// twoStepAllocatePlayerID takes the next id from the logical server counter so a
+// fixture never inserts an id an earlier package already used.
+func twoStepAllocatePlayerID(t *testing.T, p *postgres.Pool, logicalServerID int32) identity.PlayerID {
+	t.Helper()
+	var playerID int64
+	err := p.Raw().QueryRow(context.Background(), `UPDATE logical_servers SET next_player_id=next_player_id+1,state_version=state_version+1 WHERE logical_server_id=$1 AND next_player_id+1<=max_player_id RETURNING next_player_id-1`, logicalServerID).Scan(&playerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return identity.PlayerID(playerID)
 }
 
 func twoStepContentRevision(t *testing.T, p *postgres.Pool) string {
@@ -204,11 +219,47 @@ func seedTwoStepPet(t *testing.T, p *postgres.Pool, playerID identity.PlayerID, 
 	}
 }
 
-func seedTwoStepGuild(t *testing.T, p *postgres.Pool, playerID identity.PlayerID) {
+func seedTwoStepGuild(t *testing.T, p *postgres.Pool, playerID identity.PlayerID) int64 {
 	t.Helper()
-	const guildID = int64(1000001)
-	twoStepExec(t, p, `INSERT INTO guilds(guild_id,logical_server_id,name,icon,icon_frame,des,apply_type,min_allow_level,vitality,policy_revision,state_version,created_at,updated_at)VALUES($1,1,'Nexus',10001,0,'',0,1,0,'guild-v1',1,$2,$2)`, guildID, twoStepAt.Add(-time.Hour))
-	twoStepExec(t, p, `INSERT INTO guild_memberships(player_id,guild_id,role,joined_at,membership_version,state_version,updated_at)VALUES($1,$2,1,$3,1,1,$3)`, int64(playerID), guildID, twoStepAt.Add(-time.Hour))
+	ctx := context.Background()
+	transaction, err := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer transaction.Rollback(ctx)
+	guilds := guildstore.Store{}
+	serial, version, err := guilds.LockAllocatorTx(ctx, transaction, 1, twoStepAt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	guildID := int64(1000000 + serial)
+	record := guild.Guild{ID: guild.ID(guildID), LogicalServerID: 1, Name: "Nexus", Icon: 10001, ApplyType: guild.ApplyByApplication, MinAllowLevel: 1, PolicyRevision: "guild-v1", StateVersion: 1, CreatedAt: twoStepAt.Add(-time.Hour), UpdatedAt: twoStepAt.Add(-time.Hour)}
+	if err := guilds.InsertGuildTx(ctx, transaction, record); err != nil {
+		t.Fatal(err)
+	}
+	if err := guilds.AdvanceAllocatorTx(ctx, transaction, 1, serial, version, twoStepAt); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := transaction.Exec(ctx, `INSERT INTO guild_memberships(player_id,guild_id,role,joined_at,membership_version,state_version,updated_at)VALUES($1,$2,1,$3,1,1,$3)`, int64(playerID), guildID, twoStepAt.Add(-time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if err := transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	return guildID
+}
+
+// twoStepCanonicalGolden rewrites the fixture's allocated ids back to the ids
+// frozen in the golden file so the comparison stays independent of the counter.
+func twoStepCanonicalGolden(raw []byte, playerID identity.PlayerID, guildID int64) []byte {
+	for _, replacement := range []struct{ from, to string }{
+		{fmt.Sprintf(`"player_id": %d`, int64(playerID)), `"player_id": 140001`},
+		{fmt.Sprintf(`"guild_leader": %d`, int64(playerID)), `"guild_leader": 140001`},
+		{fmt.Sprintf(`"guild_id": %d`, guildID), `"guild_id": 1000001`},
+	} {
+		raw = []byte(strings.ReplaceAll(string(raw), replacement.from, replacement.to))
+	}
+	return raw
 }
 
 func seedTwoStepDorm(t *testing.T, p *postgres.Pool, playerID identity.PlayerID) {
@@ -274,18 +325,18 @@ func twoStepEncode(t *testing.T, result appboot.MID1Result) []byte {
 func TestI9C14MID1TwoStepReplyMatchesPreSplitLogin(t *testing.T) {
 	p := twoStepPool(t, 8)
 	revision := twoStepContentRevision(t, p)
-	fixture := seedTwoStepPlayer(t, p, 140001, twoStepUUID(t, "11111111-1111-4111-8111-111111111101"), twoStepUUID(t, "11111111-1111-4111-8111-111111111102"), "11111111-1111-4111-8111-111111111103")
+	fixture := seedTwoStepPlayer(t, p, twoStepAllocatePlayerID(t, p, 1), twoStepUUID(t, "11111111-1111-4111-8111-111111111101"), twoStepUUID(t, "11111111-1111-4111-8111-111111111102"), "11111111-1111-4111-8111-111111111103")
 	seedTwoStepOwnerRoots(t, p, fixture.playerID, revision)
 	seedTwoStepRoster(t, p, fixture.playerID, revision, 60)
 	seedTwoStepPet(t, p, fixture.playerID, revision)
-	seedTwoStepGuild(t, p, fixture.playerID)
+	guildID := seedTwoStepGuild(t, p, fixture.playerID)
 	seedTwoStepDorm(t, p, fixture.playerID)
 	seedTwoStepSavedPreset(t, p, fixture.playerID)
 	result, err := twoStepService(t, p, tx.NopHooks{}).MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: fixture.operation})
 	if err != nil {
 		t.Fatal(err)
 	}
-	got := twoStepEncode(t, result)
+	got := twoStepCanonicalGolden(twoStepEncode(t, result), fixture.playerID, guildID)
 	goldenPath := filepath.Join("testdata", "mid1_two_step_reply_golden.json")
 	if os.Getenv("GXB_MID1_GOLDEN_UPDATE") == "1" {
 		if err := os.MkdirAll(filepath.Dir(goldenPath), 0o755); err != nil {
@@ -343,7 +394,7 @@ func TestI9C14MID1ThirtyConcurrentLoginsNoSerializationFailure(t *testing.T) {
 	revision := twoStepContentRevision(t, p)
 	fixtures := make([]twoStepPlayer, logins)
 	for index := 0; index < logins; index++ {
-		fixtures[index] = seedTwoStepPlayer(t, p, identity.PlayerID(141001+index),
+		fixtures[index] = seedTwoStepPlayer(t, p, twoStepAllocatePlayerID(t, p, 1),
 			twoStepUUID(t, fmt.Sprintf("22222222-2222-4222-8222-%012d", index+1)),
 			twoStepUUID(t, fmt.Sprintf("22222222-2222-4222-8222-%012d", index+101)),
 			fmt.Sprintf("22222222-2222-4222-8222-%012d", index+201))
@@ -386,7 +437,7 @@ func TestI9C14MID1ThirtyConcurrentLoginsNoSerializationFailure(t *testing.T) {
 func TestI9C14MID1ReplayReturnsEqualReplyAndWritesNothing(t *testing.T) {
 	p := twoStepPool(t, 8)
 	revision := twoStepContentRevision(t, p)
-	fixture := seedTwoStepPlayer(t, p, 142001, twoStepUUID(t, "33333333-3333-4333-8333-333333333301"), twoStepUUID(t, "33333333-3333-4333-8333-333333333302"), "33333333-3333-4333-8333-333333333303")
+	fixture := seedTwoStepPlayer(t, p, twoStepAllocatePlayerID(t, p, 1), twoStepUUID(t, "33333333-3333-4333-8333-333333333301"), twoStepUUID(t, "33333333-3333-4333-8333-333333333302"), "33333333-3333-4333-8333-333333333303")
 	seedTwoStepOwnerRoots(t, p, fixture.playerID, revision)
 	seedTwoStepRoster(t, p, fixture.playerID, revision, 60)
 	seedTwoStepPet(t, p, fixture.playerID, revision)
