@@ -50,6 +50,19 @@ type Node struct {
 	Related       int64      `json:"related"`
 	StoryPartners []int64    `json:"story_partners"`
 	SweepReward   [][2]int64 `json:"sweep_reward"`
+	// AssistPartners rows are [partner_id, stone_item_id, stone_count] for the
+	// first-clear assist choice of a Normal node.
+	AssistPartners [][3]int64 `json:"assist_partners,omitempty"`
+}
+
+// AssistStones is the first-clear stone award of the chosen assist partner.
+func (n Node) AssistStones(partnerID int64) (itemID, count int64, ok bool) {
+	for _, row := range n.AssistPartners {
+		if row[0] == partnerID {
+			return row[1], row[2], true
+		}
+	}
+	return 0, 0, false
 }
 
 type Chapter struct {
@@ -157,6 +170,14 @@ func (c *Catalog) Validate() error {
 		}
 		if Cloud(n.Type) && len(n.SelfTeam) != 5 {
 			return fmt.Errorf("%w: Cloud source team", ErrUnavailable)
+		}
+		if len(n.AssistPartners) > 0 && n.Type != Normal {
+			return fmt.Errorf("%w: assist on non-Normal node %d", ErrUnavailable, n.ID)
+		}
+		for _, row := range n.AssistPartners {
+			if row[0] <= 0 || row[1] <= 0 || row[2] <= 0 {
+				return fmt.Errorf("%w: assist row %d", ErrUnavailable, n.ID)
+			}
 		}
 		c.nodes[n.ID] = i
 		c.chains[n.Type] = append(c.chains[n.Type], n.ID)

@@ -172,6 +172,9 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		if old != cmd.ReplaceID || old == cmd.ItemID {
 			return nil, ins.ErrInvalid
 		}
+		if old != 0 {
+			scalarCost("crystal", c.RemoveCost())
+		}
 		stackCost(cmd.ItemID, 1)
 		stackCredit(old, 1)
 		f.Facts.Slots[it.Position-1] = cmd.ItemID

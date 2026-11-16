@@ -812,6 +812,204 @@ func TestI9_9CAwardQueue(t *testing.T) {
 	}
 }
 
+// TestI9_9CRewardApplicationRequiresRegistration covers BUGS #98: only a
+// member registered for the chapter at open or reset may apply for its reward.
+// A late joiner, a leaver and a leaver who rejoined are all refused.
+func TestI9_9CRewardApplicationRequiresRegistration(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, _ := f.copyID(t)
+	info := f.chapter(t)
+	slot := f.nextSlot(f.at)
+	tr := f.openTx(t)
+	if err := f.store().SaveChapterProgressTx(ctx, tr, int64(f.guild), chapterID, 1, 1, true, &f.at); err != nil {
+		t.Fatal("chapter win", err)
+	}
+	seed := app.AwardSeed{AwardID: info.Items[0], Remaining: 3, ExpiresAt: f.at.Add(time.Duration(f.settings.RewardTimeLimitSecond) * time.Second), NextSlot: slot}
+	if err := f.store().InsertAwardsTx(ctx, tr, int64(f.guild), chapterID, 1, []app.AwardSeed{seed}); err != nil {
+		t.Fatal("award seed", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	// The reconciler scans due awards across every guild, so this fixture consumes
+	// its row on exit to keep later tests' due scans exact.
+	t.Cleanup(func() {
+		exec(t, f.pool, `UPDATE guild_campaign_awards SET remaining=0 WHERE guild_id=$1 AND chapter_id=$2 AND run=1`, int64(f.guild), chapterID)
+	})
+	if _, err := f.mode.ApplyReward(ctx, f.second, chapterID, info.Items[0], f.op()); err != nil {
+		t.Fatalf("registered member applied: %v", err)
+	}
+
+	lateJoiner, _ := genuinePlayer(t, f.pool, f.server)
+	tr = f.openTx(t)
+	member := guild.Membership{PlayerID: lateJoiner.PlayerID, GuildID: f.guild, Role: guild.Member, JoinedAt: f.at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: f.at}
+	if err := (guildstore.Store{Queryer: f.pool}).InsertMembershipTx(ctx, tr, member); err != nil {
+		tr.Rollback(ctx)
+		t.Fatal("late join", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, lateJoiner, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("late joiner applied: %v", err)
+	}
+
+	if _, err := f.core(t).Leave(ctx, f.third, op()); err != nil {
+		t.Fatal("leave", err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("leaver applied: %v", err)
+	}
+
+	tr = f.openTx(t)
+	rejoin := guild.Membership{PlayerID: f.third.PlayerID, GuildID: f.guild, Role: guild.Member, JoinedAt: f.at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: f.at}
+	if err := (guildstore.Store{Queryer: f.pool}).InsertMembershipTx(ctx, tr, rejoin); err != nil {
+		tr.Rollback(ctx)
+		t.Fatal("rejoin", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("rejoined member applied before the next reset: %v", err)
+	}
+
+	for _, refused := range []identity.ActorContext{lateJoiner, f.third} {
+		if rows := scalar(t, f.pool, `SELECT count(*) FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND player_id=$3`,
+			int64(f.guild), chapterID, int64(refused.PlayerID)); rows != 0 {
+			t.Fatalf("refused player %d left %d application rows", refused.PlayerID, rows)
+		}
+	}
+}
+
+// TestI9_9CLeaverIsNotAnAwardCandidate covers the BUGS #98 residual: an
+// application recorded while registered must not let a leaver take a later
+// award slot or remain an applicant in the 605 list.
+func TestI9_9CLeaverIsNotAnAwardCandidate(t *testing.T) {
+	t.Run("award goes to the next registered applicant", func(t *testing.T) {
+		f := newCampaignFixture(t)
+		f.seedActivity(t, 40)
+		if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+			t.Fatal("open", err)
+		}
+		chapterID, _ := f.copyID(t)
+		info := f.chapter(t)
+		slot := f.nextSlot(f.at)
+		tr := f.openTx(t)
+		if err := f.store().SaveChapterProgressTx(ctx, tr, int64(f.guild), chapterID, 1, 1, true, &f.at); err != nil {
+			t.Fatal("chapter win", err)
+		}
+		seed := app.AwardSeed{AwardID: info.Items[0], Remaining: 1, ExpiresAt: f.at.Add(time.Duration(f.settings.RewardTimeLimitSecond) * time.Second), NextSlot: slot}
+		if err := f.store().InsertAwardsTx(ctx, tr, int64(f.guild), chapterID, 1, []app.AwardSeed{seed}); err != nil {
+			t.Fatal("award seed", err)
+		}
+		if err := tr.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			exec(t, f.pool, `UPDATE guild_campaign_awards SET remaining=0 WHERE guild_id=$1 AND chapter_id=$2 AND run=1`, int64(f.guild), chapterID)
+		})
+		for _, applicant := range []identity.ActorContext{f.second, f.third} {
+			if _, err := f.mode.ApplyReward(ctx, applicant, chapterID, info.Items[0], f.op()); err != nil {
+				t.Fatalf("apply %d: %v", applicant.PlayerID, err)
+			}
+		}
+		if _, err := f.core(t).Leave(ctx, f.second, op()); err != nil {
+			t.Fatal("leave", err)
+		}
+		body, err := f.mode.AwardRead(ctx, f.third, chapterID, f.op())
+		if err != nil {
+			t.Fatal("award list", err)
+		}
+		if listed := awardMemberIDs(body, info.Items[0]); len(listed) != 1 || listed[0] != f.third.PlayerID {
+			t.Fatalf("605 members after leave %v, want only %d", listed, f.third.PlayerID)
+		}
+
+		decision := slot.Add(time.Second)
+		mode := f.mode
+		mode.Timed = gen.TimedRunner{Binder: gen.Binder{Time: fixedTime{at: decision}}, Runner: tx.Runner{DB: f.pool}}
+		out, err := (app.Reconciler{Mode: mode}).Reconcile(ctx, mustTimed(t, f.opAt(decision), decision), 100)
+		if err != nil || out.Settled != 1 {
+			t.Fatalf("reconcile %+v err=%v", out, err)
+		}
+		if got := f.awardMails(t, f.second); got != 0 {
+			t.Fatalf("leaver award mails %d", got)
+		}
+		if got := f.awardMails(t, f.third); got != 1 {
+			t.Fatalf("next applicant award mails %d", got)
+		}
+		distributed, err := f.mode.DistributeRecord(ctx, f.third, f.op())
+		if err != nil || len(distributed) != 1 {
+			t.Fatalf("615 rows %+v err=%v", distributed, err)
+		}
+	})
+
+	t.Run("only applicant leaving leaves the slot undistributed", func(t *testing.T) {
+		f := newCampaignFixture(t)
+		f.seedActivity(t, 40)
+		if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+			t.Fatal("open", err)
+		}
+		chapterID, _ := f.copyID(t)
+		info := f.chapter(t)
+		slot := f.nextSlot(f.at)
+		tr := f.openTx(t)
+		if err := f.store().SaveChapterProgressTx(ctx, tr, int64(f.guild), chapterID, 1, 1, true, &f.at); err != nil {
+			t.Fatal("chapter win", err)
+		}
+		seed := app.AwardSeed{AwardID: info.Items[0], Remaining: 1, ExpiresAt: f.at.Add(time.Duration(f.settings.RewardTimeLimitSecond) * time.Second), NextSlot: slot}
+		if err := f.store().InsertAwardsTx(ctx, tr, int64(f.guild), chapterID, 1, []app.AwardSeed{seed}); err != nil {
+			t.Fatal("award seed", err)
+		}
+		if err := tr.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			exec(t, f.pool, `UPDATE guild_campaign_awards SET remaining=0 WHERE guild_id=$1 AND chapter_id=$2 AND run=1`, int64(f.guild), chapterID)
+		})
+		if _, err := f.mode.ApplyReward(ctx, f.second, chapterID, info.Items[0], f.op()); err != nil {
+			t.Fatal("apply", err)
+		}
+		if _, err := f.core(t).Leave(ctx, f.second, op()); err != nil {
+			t.Fatal("leave", err)
+		}
+		decision := slot.Add(time.Second)
+		mode := f.mode
+		mode.Timed = gen.TimedRunner{Binder: gen.Binder{Time: fixedTime{at: decision}}, Runner: tx.Runner{DB: f.pool}}
+		out, err := (app.Reconciler{Mode: mode}).Reconcile(ctx, mustTimed(t, f.opAt(decision), decision), 100)
+		if err != nil || out.Settled != 0 || out.Noops < 1 {
+			t.Fatalf("reconcile %+v err=%v", out, err)
+		}
+		if got := f.awardMails(t, f.second); got != 0 {
+			t.Fatalf("leaver award mails %d", got)
+		}
+		if rows := scalar(t, f.pool, `SELECT count(*) FROM guild_campaign_distributions WHERE guild_id=$1`, int64(f.guild)); rows != 0 {
+			t.Fatalf("leaver distribution rows %d", rows)
+		}
+		rows, err := f.store().ListAwardsTx(ctx, f.pool, int64(f.guild), chapterID, 1)
+		if err != nil || len(rows) != 1 || rows[0].Remaining != 1 || !rows[0].NextSlot.After(decision) {
+			t.Fatalf("award after no-op %+v err=%v", rows, err)
+		}
+	})
+}
+
+func awardMemberIDs(body app.AwardBody, awardID int64) []identity.PlayerID {
+	var players []identity.PlayerID
+	for _, award := range body.Awards {
+		if award.AwardID != awardID {
+			continue
+		}
+		for _, member := range award.Members {
+			players = append(players, member.Profile.PlayerID)
+		}
+	}
+	return players
+}
+
 func TestI9_9CRankTieBossDoubleAndRecordReward(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)

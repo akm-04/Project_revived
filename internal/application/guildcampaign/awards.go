@@ -95,6 +95,15 @@ func (m Mode) ApplyReward(c context.Context, a identity.ActorContext, chapterID,
 		if _, err := m.Players.LockPlayerRootsTx(c, sc.Tx, a.LogicalServerID, []identity.PlayerID{a.PlayerID}); err != nil {
 			return err
 		}
+		// C4: the registration list is fixed at open or reset. Leaving deletes
+		// the row and rejoining does not restore it before the next reset.
+		registered, err := m.ModeStore.IsRegisteredTx(c, sc.Tx, guildID, chapterID, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !registered {
+			return d.ErrRefused
+		}
 		chapter, open, err := m.Service.Store.LockChapterTx(c, sc.Tx, guildID, chapterID)
 		if err != nil {
 			return err

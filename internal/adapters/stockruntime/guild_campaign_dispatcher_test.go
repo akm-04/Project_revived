@@ -28,6 +28,14 @@ func TestI9_9CSettleRefusalsAre409AndLateIs30021(t *testing.T) {
 	}
 }
 
+func TestI9_9CApplyRewardRefusalIs409(t *testing.T) {
+	stub := &campaignStub{applyErr: d.ErrRefused}
+	got := campaignDispatch(t, stub, 606, map[string]any{"chapter_id": int64(7), "award_id": int64(20001091)})
+	if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != int64(35028) || got.Body["error_msg"] != "" {
+		t.Fatalf("606 refusal %+v", got)
+	}
+}
+
 func TestI9_9CNoticeRefRoundTrips(t *testing.T) {
 	ref := GuildCampaignNoticeRef(11, 7, 700028, 123)
 	guild, chapter, copy, player, err := decodeGuildCampaignNoticeRef(ref)
@@ -43,6 +51,7 @@ type campaignStub struct {
 	settled         app.Settled
 	detail          app.DetailView
 	award           app.AwardBody
+	applyErr        error
 	ranks           []app.RankRow
 	server          app.ServerView
 	logs            []app.LogRow
@@ -74,7 +83,7 @@ func (s *campaignStub) AwardRead(context.Context, identity.ActorContext, int64, 
 	return s.award, nil
 }
 func (s *campaignStub) ApplyReward(context.Context, identity.ActorContext, int64, int64, operation.Context) (app.AwardBody, error) {
-	return s.award, nil
+	return s.award, s.applyErr
 }
 func (s *campaignStub) DamageRank(context.Context, identity.ActorContext, int64, operation.Context) ([]app.RankRow, error) {
 	return s.ranks, nil

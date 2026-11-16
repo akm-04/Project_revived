@@ -344,6 +344,7 @@
   ],
   "unit": [
    "audit_snapshot_test.go",
+   "awards_registration_test.go",
    "notice_policy_native_test.go"
   ]
  }

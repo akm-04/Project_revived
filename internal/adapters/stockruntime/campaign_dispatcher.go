@@ -209,14 +209,14 @@ func campaignResult(p map[string]any) (app.Result, bool) {
 		formation = nil
 		formationOK = (p["formation"] == nil || p["formation"] == "") && pet == 0
 	}
-	// assist_partner remains the existing unsupported rental input; awakening markers are validated by their owner.
+	assist, assistOK := topFloorInteger(p, "assist_partner", false)
 	awake, awakeOK := topFloorInteger(p, "awake_mission", false)
 	petAwake, petAwakeOK := topFloorInteger(p, "pet_awaken_mission", false)
 	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "star", "formation", "pet_id", "awake_mission", "pet_awaken_mission", "assist_partner")
-	if !allowed || !idOK || !kindOK || !starOK || !petOK || !formationOK || !awakeOK || !petAwakeOK || awake < 0 || petAwake < 0 {
+	if !allowed || !idOK || !kindOK || !starOK || !petOK || !formationOK || !assistOK || !awakeOK || !petAwakeOK || awake < 0 || petAwake < 0 {
 		return app.Result{}, false
 	}
-	return app.Result{AwakeMission: awake, PetAwakeMission: petAwake, CampaignID: id, Type: kind, Star: star, Formation: formation, Pet: pet}, true
+	return app.Result{AwakeMission: awake, PetAwakeMission: petAwake, AssistPartner: assist, CampaignID: id, Type: kind, Star: star, Formation: formation, Pet: pet}, true
 }
 
 var campaignModeFailureRows = []failureRow{

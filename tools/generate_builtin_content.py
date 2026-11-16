@@ -2688,7 +2688,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "memoir_catalog.json":build_memoir(blobs,parse_generated_lua_table,items,hero_artifact),
         "workplace_catalog.json":build_workplace(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
         "march_catalog.json":build_march(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,resources),
-        "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
+        "campaign_catalog.json":build_campaign(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field,items),
         "summon_catalog.json":build_summon(blobs,parse_generated_lua_table,parse_base64_indexed_lua_table,indexed_field),
         "charge_catalog.json":build_charge(blobs,parse_generated_lua_table),
         "top_floor_catalog.json":top_floor_artifact,
