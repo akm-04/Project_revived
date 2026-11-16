@@ -596,8 +596,9 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 }
 
 // clampWaves applies the client's enemy HP to the current wave only. Each row
-// takes one reported enemy, a dead row stays dead, a known HP never rises, and
-// a hero id outside the wave is ignored.
+// takes one reported enemy: health marks a row with a recorded HP (the client
+// applies the HP only when health is 1), a dead row stays dead, a known HP
+// never rises, and a hero id outside the wave is ignored.
 func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, cleared bool) map[int64][]EnemyRow {
 	current := waves[index]
 	taken := make([]bool, len(current))
@@ -610,7 +611,7 @@ func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, 
 			continue
 		}
 		taken[position] = true
-		if current[position].Health != 0 {
+		if current[position].Health != 0 && current[position].HP == 0 {
 			continue
 		}
 		hp := max(enemy.HP, 0)
@@ -619,9 +620,7 @@ func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, 
 		}
 		current[position].HP = hp
 		current[position].Reborn = enemy.IsReborn
-		if hp == 0 {
-			current[position].Health = 1
-		}
+		current[position].Health = 1
 	}
 	if cleared {
 		for position := range current {

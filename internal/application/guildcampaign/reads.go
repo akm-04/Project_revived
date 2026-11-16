@@ -2,10 +2,12 @@ package guildcampaign
 
 import (
 	"context"
+	"encoding/json"
 	"sort"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
 	d "gxb.local/backend/v2/internal/domain/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -13,6 +15,10 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+// serverRankPartnerLimit is the hero1..hero5 slot count of
+// highest_damage_item.csb, which AllServerDamageWindow.lua:217-235 fills.
+const serverRankPartnerLimit = 5
 
 // ChapterRow is one 601 chapter_list entry.
 type ChapterRow struct {
@@ -51,9 +57,23 @@ type RankRow struct {
 
 // ServerRankRow is one 608 rank row.
 type ServerRankRow struct {
-	Rank    int64
-	Damage  int64
-	Profile ProfileView
+	Rank      int64
+	Damage    int64
+	Profile   ProfileView
+	GuildID   int64
+	GuildName string
+	Partners  []Partner
+}
+
+// Partner is one stored formation slot of a 608 record, projected from the
+// Character owner so AllServerDamageWindow.lua:217-235 can draw its avatar.
+type Partner struct {
+	TableID         int64
+	Color           int64
+	Star            int64
+	Level           int64
+	CurrentSkinID   int64
+	TwiceAwakeStage int64
 }
 
 // Killer is 608's boss_killer row.
@@ -68,6 +88,7 @@ type Killer struct {
 type FastKiller struct {
 	GuildID   int64
 	GuildName string
+	GuildIcon int64
 	Seconds   int64
 	At        time.Time
 }
@@ -222,7 +243,7 @@ func (m Mode) DamageRank(c context.Context, a identity.ActorContext, chapterID i
 
 // AllServerRank is 608, scoped to the logical server.
 func (m Mode) AllServerRank(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (ServerView, error) {
-	if !m.ready() {
+	if !m.ready() || m.Roster == nil || m.Awakenings == nil {
 		return ServerView{}, ErrUnavailable
 	}
 	if copyID <= 0 {
@@ -230,6 +251,21 @@ func (m Mode) AllServerRank(c context.Context, a identity.ActorContext, copyID i
 	}
 	var out ServerView
 	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+		guilds := map[int64]guild.Guild{}
+		readGuild := func(id int64) (guild.Guild, bool, error) {
+			if id <= 0 {
+				return guild.Guild{}, false, nil
+			}
+			if known, cached := guilds[id]; cached {
+				return known, true, nil
+			}
+			row, found, err := m.Service.Guilds.ReadGuildTx(c, sc.Tx, guild.ID(id))
+			if err != nil || !found {
+				return guild.Guild{}, false, err
+			}
+			guilds[id] = row
+			return row, true, nil
+		}
 		rows, err := m.ModeStore.ListServerRecordsTx(c, sc.Tx, a.LogicalServerID, copyID, 100)
 		if err != nil {
 			return err
@@ -239,22 +275,102 @@ func (m Mode) AllServerRank(c context.Context, a identity.ActorContext, copyID i
 			if err != nil {
 				continue
 			}
-			out.Ranks = append(out.Ranks, ServerRankRow{Rank: int64(index + 1), Damage: row.Damage, Profile: profile})
+			rank := ServerRankRow{Rank: int64(index + 1), Damage: row.Damage, Profile: profile, GuildID: row.GuildID}
+			memberGuild, found, err := readGuild(row.GuildID)
+			if err != nil {
+				return err
+			}
+			if found {
+				rank.GuildName = memberGuild.Name
+			}
+			rank.Partners, err = m.partnersTx(c, sc.Tx, identity.PlayerID(row.PlayerID), row.Partners)
+			if err != nil {
+				return err
+			}
+			out.Ranks = append(out.Ranks, rank)
 		}
 		kill, found, err := m.ModeStore.ServerKillReadTx(c, sc.Tx, a.LogicalServerID, copyID)
 		if err != nil {
 			return err
 		}
-		if found {
-			profile, err := m.profileTx(c, sc.Tx, identity.PlayerID(kill.FirstPlayerID))
-			if err == nil {
-				out.Boss = &Killer{Profile: profile, GuildID: kill.FirstGuildID, At: kill.FirstAt}
-			}
-			out.Fast = &FastKiller{GuildID: kill.FastestGuild, Seconds: kill.FastestSecond, At: kill.FirstAt}
+		if !found {
+			return nil
 		}
+		profile, err := m.profileTx(c, sc.Tx, identity.PlayerID(kill.FirstPlayerID))
+		if err == nil {
+			boss := &Killer{Profile: profile, GuildID: kill.FirstGuildID, At: kill.FirstAt}
+			firstGuild, known, err := readGuild(kill.FirstGuildID)
+			if err != nil {
+				return err
+			}
+			if known {
+				boss.GuildName = firstGuild.Name
+			}
+			out.Boss = boss
+		}
+		fast := &FastKiller{GuildID: kill.FastestGuild, Seconds: kill.FastestSecond, At: kill.FirstAt}
+		fastGuild, known, err := readGuild(kill.FastestGuild)
+		if err != nil {
+			return err
+		}
+		if known {
+			fast.GuildName = fastGuild.Name
+			fast.GuildIcon = fastGuild.Icon
+		}
+		out.Fast = fast
 		return nil
 	})
 	return out, err
+}
+
+// partnersTx projects the stored formation ids through the Character owner;
+// a released hero has no display row and drops out.
+func (m Mode) partnersTx(c context.Context, q tx.Queryer, player identity.PlayerID, stored []byte) ([]Partner, error) {
+	if len(stored) == 0 {
+		return nil, nil
+	}
+	var ids []int64
+	if err := json.Unmarshal(stored, &ids); err != nil {
+		return nil, err
+	}
+	slots := make([]int64, 0, serverRankPartnerLimit)
+	for _, id := range ids {
+		if id <= 0 {
+			continue
+		}
+		slots = append(slots, id)
+		if len(slots) == serverRankPartnerLimit {
+			break
+		}
+	}
+	if len(slots) == 0 {
+		return nil, nil
+	}
+	heroes, err := m.Roster.ListHeroesTx(c, q, player)
+	if err != nil {
+		return nil, err
+	}
+	owned := make(map[int64]character.Hero, len(heroes))
+	for _, hero := range heroes {
+		owned[hero.PartnerID] = hero
+	}
+	awakenings, err := m.Awakenings.ListRawAwakeningsTx(c, q, player, slots)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Partner, 0, len(slots))
+	for _, id := range slots {
+		hero, found := owned[id]
+		if !found {
+			continue
+		}
+		row := Partner{TableID: hero.TableID, Color: hero.Color, Star: hero.Star, Level: hero.Level, CurrentSkinID: hero.CurrentSkinID}
+		if raw, known := awakenings[id]; known {
+			row.TwiceAwakeStage = raw.RawStage
+		}
+		out = append(out, row)
+	}
+	return out, nil
 }
 
 // GuildLog is 609, newest first and bounded by policy retention days.

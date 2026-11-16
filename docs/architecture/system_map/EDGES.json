@@ -3685,6 +3685,12 @@
     "*SettleGrantTx",
     "DefaultProfile"
    ],
+   "interface:guildcampaign.Roster": [
+    "*ListHeroesTx"
+   ],
+   "store:characterstore": [
+    "*ListRawAwakeningsTx"
+   ],
    "store:contentstore": [
     "*ActiveRevision"
    ],
@@ -3695,6 +3701,7 @@
     "*ListMembershipsTx",
     "*LockGuildTx",
     "*LockMembershipTx",
+    "*ReadGuildTx",
     "*ReadMembership",
     "*ReadMembershipTx",
     "*SaveGuildTx"

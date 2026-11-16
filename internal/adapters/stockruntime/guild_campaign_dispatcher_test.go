@@ -155,6 +155,64 @@ func TestI9_9CDispatcherChapterAndCopyJSON(t *testing.T) {
 	}
 }
 
+func TestI9_9CEnemyStatusCarriesHPForRecordedRows(t *testing.T) {
+	// SelectTeamNewWindow.lua:6795-6799 builds healthStatus from health/hp, and
+	// BattleCreate.lua:1106-1111 applies hp only when health is 1, so a recorded
+	// row owes health 1 with hp numeric; an untouched row keeps health 0 and no hp.
+	waves := map[int64][]app.EnemyRow{1: {
+		{TableID: 80000010, Lev: 60, Star: 5, Color: 6, HP: 77},
+		{TableID: 80000011, Lev: 60, Star: 5, Color: 6, Health: 1},
+		{TableID: 80000012, Lev: 60, Star: 5, Color: 6},
+	}}
+	stub := &campaignStub{started: app.Started{CopyID: 700028, CurrentIndex: 1, Waves: waves},
+		detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, Waves: waves, IsOpen: true}}
+	replies := map[uint16]map[string]any{
+		604: {"copy_id": int64(700028), "chapter_id": int64(7), "campaign_type": int64(7), "formation": "10001001"},
+		613: {"copy_id": int64(700028)},
+	}
+	for mid, params := range replies {
+		got := campaignDispatch(t, stub, mid, params)
+		key := "enemy_status"
+		if mid == 613 {
+			key = "monster_status"
+		}
+		rows := got.Body[key].([]any)[0].([]any)
+		damaged, dead, untouched := rows[0].(map[string]any), rows[1].(map[string]any), rows[2].(map[string]any)
+		if damaged["health"] != int64(1) || damaged["hp"] != int64(77) {
+			t.Fatalf("%d damaged row %+v", mid, damaged)
+		}
+		if dead["health"] != int64(1) || dead["hp"] != int64(0) {
+			t.Fatalf("%d dead row %+v", mid, dead)
+		}
+		if untouched["health"] != int64(0) || untouched["hp"] != nil {
+			t.Fatalf("%d untouched row %+v", mid, untouched)
+		}
+	}
+}
+
+func TestI9_9CDetailCarriesFightInfoForTheLiveHolder(t *testing.T) {
+	// MapWindow.lua:1100,1121-1130 and GuildMapDetailWindow.lua:60-82 index
+	// fight_info whenever current_fight_player>0 and last_fight_time>0, so the
+	// reply owes the shape even when the holder's profile row did not read back.
+	stub := &campaignStub{detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, IsOpen: true,
+		CurrentFight: 9, Stage: 1, LastFight: 1700000000, StartFight: 1700000000}}
+	got := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028)})
+	if got.HTTPStatus != http.StatusOK {
+		t.Fatalf("613 %d %+v", got.HTTPStatus, got.Body)
+	}
+	info, ok := got.Body["fight_info"].(map[string]any)
+	if !ok {
+		t.Fatalf("613 without a holder profile omitted fight_info: %+v", got.Body)
+	}
+	if info["player_name"] != "" || info["lev"] != int64(0) || info["avatar_id"] != int64(0) || info["conquer_lev"] != int64(0) {
+		t.Fatalf("fight_info %+v", info)
+	}
+	stub.detail = app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, IsOpen: true}
+	if free := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028)}); free.Body["fight_info"] != nil {
+		t.Fatalf("613 without a holder carried fight_info: %+v", free.Body)
+	}
+}
+
 func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
 	profile := app.ProfileView{PlayerID: 11, Name: "p", Level: 41, AvatarID: 1, AvatarFrameID: 0, ConquerLevel: 3, ConquerLoopID: 1}
 	stub := &campaignStub{award: app.AwardBody{NextApplyTime: 60, SelfItemID: 20001091, SelfRank: 1, ApplyTimes: 1,
@@ -178,12 +236,18 @@ func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
 	}
 
 	at := time.Unix(1700000000, 0).UTC()
-	stub.server = app.ServerView{Fast: &app.FastKiller{GuildID: 3, GuildName: "g", Seconds: 12},
-		Boss: &app.Killer{Profile: profile, GuildID: 3, GuildName: "g", At: at}, Ranks: []app.ServerRankRow{{Rank: 1, Damage: 5000, Profile: profile}}}
+	stub.server = app.ServerView{Fast: &app.FastKiller{GuildID: 3, GuildName: "g", GuildIcon: 20010001, Seconds: 12},
+		Boss: &app.Killer{Profile: profile, GuildID: 3, GuildName: "g", At: at},
+		Ranks: []app.ServerRankRow{{Rank: 1, Damage: 5000, Profile: profile, GuildID: 3, GuildName: "g",
+			Partners: []app.Partner{{TableID: 10001001, Color: 6, Star: 5, Level: 41, CurrentSkinID: 2, TwiceAwakeStage: 3}}}}}
 	server := campaignDispatch(t, stub, 608, map[string]any{"copy_id": int64(700028)})
 	serverRow := server.Body["rank_list"].([]any)[0].(map[string]any)
-	if server.Body["fast_boss_killer"].(map[string]any)["cost_time"] != int64(12) || server.Body["boss_killer"].(map[string]any)["time"] != at.Unix() ||
-		len(serverRow["partners"].([]any)) != 0 {
+	fast := server.Body["fast_boss_killer"].(map[string]any)
+	partner := serverRow["partners"].([]any)[0].(map[string]any)
+	if fast["cost_time"] != int64(12) || fast["name"] != "g" || fast["icon"] != int64(20010001) ||
+		server.Body["boss_killer"].(map[string]any)["time"] != at.Unix() || server.Body["boss_killer"].(map[string]any)["guild_name"] != "g" ||
+		serverRow["guild_name"] != "g" || partner["table_id"] != int64(10001001) || partner["color"] != int64(6) ||
+		partner["star"] != int64(5) || partner["lev"] != int64(41) || partner["current_skin_id"] != int64(2) || partner["twice_awake_stage"] != int64(3) {
 		t.Fatalf("608 %+v", server.Body)
 	}
 

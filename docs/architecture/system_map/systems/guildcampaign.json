@@ -17,6 +17,10 @@
    "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
   },
   {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
    "count": 4,
    "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
   },
@@ -27,6 +31,10 @@
   {
    "count": 4,
    "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
   },
   {
    "count": 2,
@@ -271,6 +279,7 @@
  "name": "guildcampaign",
  "pushes": [],
  "stores": [
+  "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/guildcampaignstore",
   "internal/adapters/postgres/guildstore",
@@ -314,6 +323,8 @@
    "gxb_content_activation",
    "player_directory_profiles",
    "player_guild_activity_days",
+   "player_hero_raw_awakening",
+   "player_heroes",
    "players"
   ],
   "written": [
@@ -345,6 +356,7 @@
   "unit": [
    "audit_snapshot_test.go",
    "awards_registration_test.go",
+   "commands_test.go",
    "notice_policy_native_test.go"
   ]
  }

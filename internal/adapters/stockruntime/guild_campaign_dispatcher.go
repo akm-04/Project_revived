@@ -349,8 +349,14 @@ func enemyStatus(waves map[int64][]guildcampaign.EnemyRow) []any {
 		enemies := waves[wave]
 		rows := make([]any, 0, len(enemies))
 		for _, enemy := range enemies {
-			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": enemy.Health}
+			// The client applies hp only when health is 1 (BattleCreate.lua:1106-1111),
+			// so health marks every row that carries a stored HP and hp stays numeric.
+			health := enemy.Health
 			if enemy.HP > 0 {
+				health = 1
+			}
+			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": health}
+			if health != 0 {
 				row["hp"] = enemy.HP
 			}
 			if enemy.Reborn != 0 {
@@ -392,7 +398,7 @@ func damageRank(rows []guildcampaign.RankRow) []any {
 func serverRank(view guildcampaign.ServerView) map[string]any {
 	body := map[string]any{}
 	if view.Fast != nil {
-		body["fast_boss_killer"] = map[string]any{"name": view.Fast.GuildName, "guild_id": view.Fast.GuildID, "icon": int64(0), "cost_time": view.Fast.Seconds}
+		body["fast_boss_killer"] = map[string]any{"name": view.Fast.GuildName, "guild_id": view.Fast.GuildID, "icon": view.Fast.GuildIcon, "cost_time": view.Fast.Seconds}
 	}
 	if view.Boss != nil {
 		body["boss_killer"] = map[string]any{"player_name": view.Boss.Profile.Name, "guild_name": view.Boss.GuildName, "lev": view.Boss.Profile.Level,
@@ -401,12 +407,22 @@ func serverRank(view guildcampaign.ServerView) map[string]any {
 	}
 	rows := make([]any, 0, len(view.Ranks))
 	for _, row := range view.Ranks {
-		rows = append(rows, map[string]any{"rank": row.Rank, "damage": row.Damage, "player_name": row.Profile.Name, "guild_name": "",
+		rows = append(rows, map[string]any{"rank": row.Rank, "damage": row.Damage, "player_name": row.Profile.Name, "guild_name": row.GuildName,
 			"lev": row.Profile.Level, "avatar_id": row.Profile.AvatarID, "avatar_frame_id": row.Profile.AvatarFrameID,
-			"conquer_lev": row.Profile.ConquerLevel, "conquer_loop_id": row.Profile.ConquerLoopID, "partners": []any{}})
+			"conquer_lev": row.Profile.ConquerLevel, "conquer_loop_id": row.Profile.ConquerLoopID, "partners": serverRankPartners(row.Partners)})
 	}
 	body["rank_list"] = rows
 	return body
+}
+
+// serverRankPartners is the hero rows AllServerDamageWindow.lua:217-235 draws.
+func serverRankPartners(partners []guildcampaign.Partner) []any {
+	out := make([]any, 0, len(partners))
+	for _, partner := range partners {
+		out = append(out, map[string]any{"table_id": partner.TableID, "color": partner.Color, "star": partner.Star, "lev": partner.Level,
+			"current_skin_id": partner.CurrentSkinID, "twice_awake_stage": partner.TwiceAwakeStage})
+	}
+	return out
 }
 
 func guildLog(rows []guildcampaign.LogRow) []any {
@@ -422,7 +438,9 @@ func detailWire(view guildcampaign.DetailView) map[string]any {
 	body := map[string]any{"current_index": view.CurrentIndex, "monster_status": enemyStatus(view.Waves), "is_open": flag(view.IsOpen),
 		"is_win": flag(view.IsWin), "current_fight_player": view.CurrentFight, "last_fight_time": view.LastFight,
 		"start_fight_time": view.StartFight, "stage": view.Stage}
-	if view.FightInfo.PlayerID.Valid() {
+	// The client indexes fight_info whenever it sees a live holder
+	// (MapWindow.lua:1121-1130), so profile hydration cannot gate the shape.
+	if view.CurrentFight > 0 {
 		body["fight_info"] = map[string]any{"player_name": view.FightInfo.Name, "lev": view.FightInfo.Level,
 			"avatar_id": view.FightInfo.AvatarID, "conquer_lev": view.FightInfo.ConquerLevel}
 	}
