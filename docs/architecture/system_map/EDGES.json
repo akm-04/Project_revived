@@ -465,6 +465,7 @@
    ],
    "worldboss": [
     "*AttestSummaryTx",
+    "*CurrentAttemptTx",
     "*StartTx"
    ]
   },
@@ -5783,6 +5784,7 @@
    ],
    "combat": [
     "*AttestSummaryTx",
+    "*CurrentAttemptTx",
     "*StartTx"
    ],
    "commerceprivilege": [

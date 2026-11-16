@@ -181,7 +181,7 @@ func TestRankOrderAndTies(t *testing.T) {
 	}
 }
 
-func TestStartWindowAndAttemptBinding(t *testing.T) {
+func TestStartWindow(t *testing.T) {
 	zone := time.FixedZone("GMT+8", 8*3600)
 	if !StartAllowed(SecondOfDay(time.Date(2026, 10, 31, 21, 57, 59, 0, zone))) {
 		t.Fatal("21:57:59 should be open")
@@ -194,14 +194,5 @@ func TestStartWindowAndAttemptBinding(t *testing.T) {
 	}
 	if !StartAllowed(SecondOfDay(time.Date(2026, 11, 1, 0, 0, 0, 0, zone))) {
 		t.Fatal("midnight should be open")
-	}
-	occurrence := Occurrence{LogicalServerID: 1, Generation: 2, CurrentBoss: 10012}
-	attempt := Attempt{ID: "a", PlayerID: 1, LogicalServerID: 1, Generation: 2, CampaignID: 10012}
-	if !attempt.Matches(occurrence) {
-		t.Fatal("current occurrence should match")
-	}
-	attempt.Generation = 1
-	if attempt.Matches(occurrence) {
-		t.Fatal("late attempt must not match a newer occurrence")
 	}
 }

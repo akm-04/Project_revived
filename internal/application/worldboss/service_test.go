@@ -1,6 +1,7 @@
 package worldboss
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -40,6 +41,18 @@ func TestRewardLines(t *testing.T) {
 	}
 	if lines = rewardLines(d.RankReward{Range: 100000}, boss); len(lines) != 0 {
 		t.Fatal(lines)
+	}
+}
+
+func TestAttemptBoard(t *testing.T) {
+	board, err := attemptBoard("WORLD_BOSS/7/2/10013")
+	if err != nil || board != (d.Board{LogicalServerID: 7, Generation: 2, BossID: 10013}) {
+		t.Fatal(board, err)
+	}
+	for _, reference := range []string{"", "WORLD_BOSS/7/2", "WORLD_BOSS/0/2/10013", "WORLD_BOSS/7/0/10013", "WORLD_BOSS/7/2/10010", "WORLD_BOSS/7/2/10013/x", "OTHER/7/2/10013"} {
+		if _, err = attemptBoard(reference); err == nil || errors.Is(err, d.ErrUnavailable) {
+			t.Fatalf("%q accepted or classified transient: %v", reference, err)
+		}
 	}
 }
 

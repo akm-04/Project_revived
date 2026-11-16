@@ -5,6 +5,7 @@ package playerdisplay_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -50,6 +51,12 @@ func worldBossSetPlayer(t *testing.T, p *pg.Pool, player identity.PlayerID, day,
 	t.Helper()
 	exec(t, p, `INSERT INTO worldboss_players(player_id,logical_server_id,challenged_day,day,attempts,bought,swept_day,best_hit,best_hit_at,updated_at)SELECT $1,logical_server_id,0,$2,$3,0,0,$4,0,clock_timestamp() FROM players WHERE player_id=$1
 		ON CONFLICT(player_id)DO UPDATE SET day=$2,attempts=$3,bought=0,swept_day=0,best_hit=$4,best_hit_at=0,updated_at=clock_timestamp()`, int64(player), day, attempts, bestHit)
+}
+
+func worldBossOpenCombatAttempts(t *testing.T, p *pg.Pool, a identity.ActorContext) int64 {
+	t.Helper()
+	return scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='WORLD_BOSS' AND authority_scope=$1 AND domain_locator=$2 AND state<>'TERMINAL'`,
+		fmt.Sprintf("server:%d", a.LogicalServerID), fmt.Sprintf("player:%d", a.PlayerID))
 }
 
 func worldBossOccurrence(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (generation, boss, courage, courageDay int64) {
@@ -144,8 +151,11 @@ func TestI9_8AWorldBossStartNative(t *testing.T) {
 	if err != nil || len(body) != 0 {
 		t.Fatalf("start %#v %v", body, err)
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1 AND generation=1 AND campaign_id=$2 AND resolved=false`, int64(a.PlayerID), d.FirstBossID); n != 1 {
-		t.Fatal("attempt row", n)
+	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
+		t.Fatal("mode-local attempt row", n)
+	}
+	if n := worldBossOpenCombatAttempts(t, p, a); n != 1 {
+		t.Fatal("combat attempt row", n)
 	}
 	if scalar(t, p, `SELECT attempts FROM worldboss_players WHERE player_id=$1`, int64(a.PlayerID)) != d.AttemptsPerDay-1 {
 		t.Fatal("start did not consume an attempt")
@@ -186,6 +196,12 @@ func TestI9_8AWorldBossSettleNative(t *testing.T) {
 	if total := scalar(t, p, `SELECT hurt FROM worldboss_player_totals WHERE logical_server_id=$1 AND generation=1 AND player_id=$2`, int64(server), int64(a.PlayerID)); total != 500 {
 		t.Fatal("duplicate settle was applied twice", total)
 	}
+	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempt_settlements WHERE player_id=$1`, int64(a.PlayerID)); n != 1 {
+		t.Fatal("settlement rows", n)
+	}
+	if n := scalar(t, p, `SELECT COALESCE(sum(damage),0) FROM worldboss_attempt_settlements WHERE player_id=$1`, int64(a.PlayerID)); n != 500 {
+		t.Fatal("settled damage", n)
+	}
 
 	// Clamp: courage is three points short of the first boss, so a ten
 	// million report is accepted only as the remaining three.
@@ -201,6 +217,9 @@ func TestI9_8AWorldBossSettleNative(t *testing.T) {
 	generation, boss, courage, _ := worldBossOccurrence(t, p, server)
 	if generation != 1 || boss != d.FirstBossID+1 || courage != d.DamageCap*2 {
 		t.Fatalf("defeat after clamp gen=%d boss=%d courage=%d", generation, boss, courage)
+	}
+	if n := scalar(t, p, `SELECT COALESCE(sum(damage),0) FROM worldboss_attempt_settlements WHERE player_id=$1`, int64(a.PlayerID)); n != 503 {
+		t.Fatal("clamped settled damage", n)
 	}
 }
 
@@ -292,8 +311,11 @@ func TestI9_8AWorldBossAbandonedStartAndPerBossBoardsNative(t *testing.T) {
 			t.Fatal("start after an abandoned attempt", err)
 		}
 	}
-	if open := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1 AND NOT resolved`, int64(a.PlayerID)); open != 1 {
-		t.Fatal("abandoned attempt kept open", open)
+	if open := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1`, int64(a.PlayerID)); open != 0 {
+		t.Fatal("mode-local attempt kept", open)
+	}
+	if open := worldBossOpenCombatAttempts(t, p, a); open != 1 {
+		t.Fatal("abandoned combat attempt kept open", open)
 	}
 	if _, err := s.Settle(ctx, a, app.ResultRequest{CampaignID: d.FirstBossID, Damage: 700, Formation: formation}, op()); err != nil {
 		t.Fatal(err)

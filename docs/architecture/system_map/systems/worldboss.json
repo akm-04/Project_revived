@@ -160,14 +160,14 @@
    "gxb_operation_receipts",
    "player_directory_profiles",
    "players",
-   "worldboss_attempts",
+   "worldboss_attempt_settlements",
    "worldboss_occurrences",
    "worldboss_player_totals",
    "worldboss_players"
   ],
   "written": [
    "gxb_operation_receipts",
-   "worldboss_attempts",
+   "worldboss_attempt_settlements",
    "worldboss_occurrences",
    "worldboss_player_totals",
    "worldboss_players"
