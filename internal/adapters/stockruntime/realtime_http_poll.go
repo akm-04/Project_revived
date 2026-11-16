@@ -576,7 +576,8 @@ func (session *httpPollSession) enqueueLocked(outbound pollOutbound) error {
 	if session.closed {
 		return ErrRealtimeWriterClosed
 	}
-	if len(session.outbound) >= session.server.config.WriterFrames {
+	// A close marker is one small entry per socket and must reach the client, or it keeps a dead socket.
+	if !outbound.closed && len(session.outbound) >= session.server.config.WriterFrames {
 		return wireRT.ErrQueueFull
 	}
 	if !outbound.closed && len(outbound.frame) > session.server.config.WriterBytes-session.outboundBytes {
@@ -602,21 +603,30 @@ func (session *httpPollSession) deliver(ctx context.Context, sequence uint64, re
 		return nil
 	}
 	tags, grouped := groupPollFrames(requestFrames, session.server.config)
-	batches := make([]*pollBatch, 0, len(tags))
+	// Every socket is resolved before the first handoff, so a refusal leaves the sequence unapplied for the retry.
+	sockets := make([]*pollSocketState, 0, len(tags))
 	for _, tag := range tags {
 		socket, ok := session.socketFor(tag)
 		if !ok {
 			return ErrHTTPPollSocketLimit
 		}
+		sockets = append(sockets, socket)
+	}
+	batches := make([]*pollBatch, 0, len(tags))
+	for index, tag := range tags {
+		socket := sockets[index]
 		batch := &pollBatch{frames: grouped[tag], done: make(chan struct{})}
+		// The handoff ignores the request's own cancellation: once a socket loop holds the frames they will be
+		// applied, so the sequence is recorded at once and a retry of an abandoned request cannot apply them again.
 		select {
 		case socket.source.incoming <- batch:
 		case <-socket.done:
 			return errHTTPPollUnknownFrame
-		case <-ctx.Done():
-			return ctx.Err()
 		case <-session.ctx.Done():
 			return session.ctx.Err()
+		}
+		if len(batches) == 0 {
+			session.markApplied(sequence)
 		}
 		batches = append(batches, batch)
 	}
@@ -629,7 +639,6 @@ func (session *httpPollSession) deliver(ctx context.Context, sequence uint64, re
 			return session.ctx.Err()
 		}
 	}
-	session.markApplied(sequence)
 	return nil
 }
 
@@ -697,7 +706,14 @@ func (session *httpPollSession) runSocket(ctx context.Context, socket *pollSocke
 	policy := session.server.policy
 	err := session.server.server.serve(ctx, session.server.config, policy, socket.source, func() (*connWriter, error) {
 		return newFrameWriter(ctx, session.server.config, policy.WriteTimeout, wireRT.EncodeJSONFrame,
-			func(_ context.Context, frame []byte) error { return session.enqueue(socket.tag, frame) },
+			func(_ context.Context, frame []byte) error {
+				err := session.enqueue(socket.tag, frame)
+				if err != nil {
+					// The writer stops at its first failure; end the socket with it so the client reopens.
+					socket.cancel()
+				}
+				return err
+			},
 			func() {})
 	})
 	session.removeSocket(socket, err)
