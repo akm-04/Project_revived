@@ -26,10 +26,10 @@ func adventureBattleLocator(player identity.PlayerID, occurred time.Time) string
 	return fmt.Sprintf("player:%d/%d/%d", int64(player), d.EventBattle, occurred.Unix())
 }
 
-// A saturated worker leaves the PvP attempt unresolved without closing it, so a
-// different START used to conflict until the occurrence expired. It must close
-// the expired attempt and freeze a new one, and an identical START must resume
-// the frozen attempt without settling twice.
+// A saturated worker leaves the PvP attempt unresolved. A same-stage START with
+// another formation replays and resolves the frozen attempt instead of
+// conflicting, and an identical START resumes it without settling twice
+// (I8_PARENT_CONTRACT_V1 generation_supersede).
 func TestI9_5BAdventurePvpUnresolvedNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
@@ -52,28 +52,25 @@ func TestI9_5BAdventurePvpUnresolvedNative(t *testing.T) {
 		t.Fatalf("staged attempts after saturation %d", staged)
 	}
 
-	// Before the attempt's deadline the client gets the same conflict as a busy attempt.
-	busy := opPinned(revision)
-	busy.StartedAt = clock.at
-	if _, err := mode.Fight(ctx, a, appadventure.FightRequest{Formation: []int64{picks[1]}}, busy); !errors.Is(err, cd.ErrStartConflict) {
-		t.Fatalf("not yet closable %v", err)
-	}
-
+	// The unresolved attempt must not block the player: the same stage with
+	// another formation replays the frozen START and resolves it, even after the
+	// attempt's nominal deadline. It never closes the attempt or freezes a second
+	// one (I8_PARENT_CONTRACT_V1 generation_supersede).
 	clock.Set(now.Add(6 * time.Minute))
 	second := opPinned(revision)
 	second.StartedAt = clock.at
 	response, err := mode.Fight(ctx, a, appadventure.FightRequest{Formation: []int64{picks[1]}}, second)
 	if err != nil {
-		t.Fatal("fight after the attempt became closable", err)
+		t.Fatalf("same-stage START after the unresolved attempt: %v", err)
 	}
 	if report, _ := response.Body["battle_report"].(string); report == "" {
-		t.Fatal("fight after the attempt became closable replied no report")
+		t.Fatal("the replay replied no report")
 	}
-	if attempts := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1`, locator); attempts != 2 {
-		t.Fatalf("attempts after the retry %d", attempts)
+	if attempts := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1`, locator); attempts != 1 {
+		t.Fatalf("the replay froze %d attempts", attempts)
 	}
-	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND state='TERMINAL' AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 1 {
-		t.Fatalf("closed attempts after the retry %d", closed)
+	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND state='TERMINAL' AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 0 {
+		t.Fatalf("the replay closed %d attempts", closed)
 	}
 	if resolved := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND state='TERMINAL' AND terminal_kind='ADVENTURE_PVP_RESULT'`, locator); resolved != 1 {
 		t.Fatalf("settled attempts after the retry %d", resolved)
@@ -111,9 +108,9 @@ func TestI9_5BAdventurePvpUnresolvedNative(t *testing.T) {
 	}
 }
 
-// Each replacement closes the attempt it replaces under its own receipt, so a
-// player who returns to an earlier formation after a third stuck attempt in one
-// occurrence still gets a fight instead of a duplicate terminal receipt.
+// Every same-stage START of an unresolved attempt replays the frozen attempt: a
+// later formation neither closes it nor freezes a second one
+// (I8_PARENT_CONTRACT_V1 generation_supersede).
 func TestI9_5BAdventurePvpRepeatedReplacementNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
@@ -146,13 +143,20 @@ func TestI9_5BAdventurePvpRepeatedReplacementNative(t *testing.T) {
 		}
 	}
 	locator := adventureBattleLocator(a.PlayerID, start)
-	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 3 {
-		t.Fatalf("closed attempts %d", closed)
+	if attempts := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1`, locator); attempts != 1 {
+		t.Fatalf("the replays froze %d attempts", attempts)
+	}
+	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 0 {
+		t.Fatalf("the replays closed %d attempts", closed)
+	}
+	if resolved := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_PVP_RESULT'`, locator); resolved != 1 {
+		t.Fatalf("settled attempts %d", resolved)
 	}
 }
 
-// A-058: replaying an earlier replacement operation must not close a later
-// attempt with the receipt that already closed an earlier one.
+// A replayed earlier START operation resumes the same frozen attempt instead of
+// conflicting, so no operation can close a later attempt under a stale receipt
+// (I8_PARENT_CONTRACT_V1 generation_supersede; A-058 class).
 func TestI9_5BAdventurePvpReplayedReplacementNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
@@ -179,14 +183,17 @@ func TestI9_5BAdventurePvpReplayedReplacementNative(t *testing.T) {
 		}
 	}
 	clock.Set(start.Add(18 * time.Minute))
-	if _, err := mode.Fight(ctx, a, appadventure.FightRequest{Formation: formations[1]}, replaced); !errors.Is(err, cd.ErrStartConflict) {
-		t.Fatal("replayed replacement: want the start conflict, got", err)
+	if _, err := mode.Fight(ctx, a, appadventure.FightRequest{Formation: formations[1]}, replaced); err != nil {
+		t.Fatal("replayed START", err)
 	}
 	locator := adventureBattleLocator(a.PlayerID, start)
-	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 2 {
-		t.Fatalf("closed attempts %d", closed)
+	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 0 {
+		t.Fatalf("the replay closed attempts %d", closed)
 	}
-	if open := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND state<>'TERMINAL'`, locator); open != 1 {
-		t.Fatalf("unresolved attempts %d", open)
+	if attempts := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1`, locator); attempts != 1 {
+		t.Fatalf("the replay froze %d attempts", attempts)
+	}
+	if resolved := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND terminal_kind='ADVENTURE_PVP_RESULT'`, locator); resolved != 1 {
+		t.Fatalf("settled attempts %d", resolved)
 	}
 }

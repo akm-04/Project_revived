@@ -436,9 +436,7 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		if err != nil {
 			return err
 		}
-		started, err = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeAdventureCoop, Actor: a, Locator: coopLocator(*room),
-			GenerationRef: coopGeneration(*room), StartFingerprint: coopFingerprint(*room, state),
-			ResultDeadline: at.Add(attemptLimit), Battle: battle, TrustProfile: cd.ServerReport, Members: room.Members()})
+		started, err = s.Combat.StartTx(c, sc.Tx, scope, coopStart(a, *room, battle, at))
 		return err
 	}}, op)
 	if err != nil {
@@ -679,11 +677,16 @@ func coopGeneration(room sharedroom.Room) string {
 	return fmt.Sprintf("ADVENTURE_ILLUSION_TEAM/%d", room.ID)
 }
 
-func coopFingerprint(room sharedroom.Room, state d.RoomState) string {
-	raw, _ := json.Marshal(struct {
-		Room  int64
-		Picks map[string]d.RoomPick
-	}{room.ID, state.Picks})
+// coopStart is the co-op START identity: the room is the stage; the picks are
+// the players' choice, so a same-room START replays the frozen attempt when
+// only they changed (I8_PARENT_CONTRACT_V1 generation_supersede).
+func coopStart(a identity.ActorContext, room sharedroom.Room, battle cb.BattleRequest, at time.Time) cb.StartRequest {
+	return cb.StartRequest{Mode: cd.ModeAdventureCoop, Actor: a, Locator: coopLocator(room), GenerationRef: coopGeneration(room),
+		StartFingerprint: coopFingerprint(room), ResultDeadline: at.Add(attemptLimit), Battle: battle, TrustProfile: cd.ServerReport, Members: room.Members()}
+}
+
+func coopFingerprint(room sharedroom.Room) string {
+	raw, _ := json.Marshal(struct{ Room int64 }{room.ID})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }

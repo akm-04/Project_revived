@@ -301,7 +301,8 @@
    "observer_test.go",
    "reads_test.go",
    "room_service_test.go",
-   "solo_test.go"
+   "solo_test.go",
+   "start_identity_test.go"
   ]
  }
 }
