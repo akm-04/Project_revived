@@ -213,7 +213,7 @@ func (recovery bindRecovery) decode(stored receipt.Receipt) (map[string]any, err
 	if decoder.Decode(&extra) != io.EOF {
 		return nil, ErrProof
 	}
-	if terminal.OperationID != recovery.current.ID.String() || !terminal.StartedAt.Equal(recovery.current.StartedAt) || terminal.Policy != PolicyVersion || terminal.InviterID <= 0 || terminal.InviterID == int64(recovery.actor.PlayerID) || terminal.InviterName == "" {
+	if terminal.OperationID != recovery.current.ID.String() || !terminal.StartedAt.Equal(recovery.current.StartedAt) || terminal.Policy != PolicyVersion || terminal.InviterID <= 0 || terminal.InviterID == int64(recovery.actor.PlayerID) {
 		return nil, ErrProof
 	}
 	return map[string]any{"invitor_id": terminal.InviterID, "invitor_name": terminal.InviterName}, nil

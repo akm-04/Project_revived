@@ -52,7 +52,7 @@ func (projection DoingProjection) DoingRecallTx(ctx context.Context, transaction
 		if err != nil {
 			return nil, err
 		}
-		if !found || profile.PlayerID != task.Target || profile.Validate() != nil || profile.Name == "" || !utf8.ValidString(profile.Name) {
+		if !found || profile.PlayerID != task.Target || profile.Validate() != nil || !utf8.ValidString(profile.Name) {
 			return nil, application.ErrStartFacts
 		}
 		rows = append(rows, application.DoingRecall{PlayerID: task.Target, PlayerName: profile.Name, RecallingTime: task.StartedAt.Unix()})

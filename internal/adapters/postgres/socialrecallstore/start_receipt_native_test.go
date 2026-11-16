@@ -225,9 +225,6 @@ func TestRecallStartProjectionFailureRollsBackTaskAndReply(t *testing.T) {
 		_, _ = pool.Raw().Exec(context.Background(), `DELETE FROM players WHERE player_id=$1`, int64(blockedTarget))
 		_, _ = pool.Raw().Exec(context.Background(), `DELETE FROM accounts WHERE account_id=$1`, blockedAccount.String())
 	})
-	if _, err := pool.Raw().Exec(ctx, `INSERT INTO player_directory_profiles(player_id,name,lev,created_at,updated_at) VALUES($1,'',51,now()-interval '1 hour',now()-interval '1 hour')`, int64(blockedTarget)); err != nil {
-		t.Fatal(err)
-	}
 	blockedOperation, err := ids.NewUUID()
 	if err != nil {
 		t.Fatal(err)

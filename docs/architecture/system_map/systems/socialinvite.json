@@ -155,6 +155,7 @@
    "i9_10e_invite.json"
   ],
   "unit": [
+   "bind_test.go",
    "projection_test.go"
   ]
  }

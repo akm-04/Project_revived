@@ -508,3 +508,17 @@ func numberEquals(value any, want int64) bool {
 		return false
 	}
 }
+
+func TestInviteBindingAcceptsUnnamedInviter(t *testing.T) {
+	pool := openInvitePool(t)
+	inviter := newInvitePlayer(t, 131001, "", 60)
+	invitee := newInvitePlayer(t, 131002, "Invitee131002", 49)
+	world := seedInviteWorld(t, pool, []invitePlayer{inviter, invitee})
+	body, err := world.bind.Bind(context.Background(), inviteActor(t, invitee), inviteCode(t, inviter.PlayerID), inviteOperation(t))
+	if err != nil {
+		t.Fatalf("unnamed inviter refused: %v", err)
+	}
+	if body["invitor_id"] != int64(inviter.PlayerID) || body["invitor_name"] != "" {
+		t.Fatalf("binding reply = %+v", body)
+	}
+}

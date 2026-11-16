@@ -327,3 +327,16 @@ func TestRecallStartServiceNativeComposition(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestRecallStartServiceNativeUnnamedTarget(t *testing.T) {
+	pool := openRecallStartPool(t)
+	world := seedRecallWorld(t, pool, 135001, 135002, [2]string{"Caller135001", ""})
+	body, err := world.service.Start(context.Background(), world.actor, world.target, operationFor(t))
+	if err != nil {
+		t.Fatalf("unnamed recall target refused: %v", err)
+	}
+	rows, ok := body["doing_recall"].([]any)
+	if !ok || len(rows) != 1 || rows[0].(map[string]any)["player_name"] != "" {
+		t.Fatalf("doing_recall = %+v", body)
+	}
+}

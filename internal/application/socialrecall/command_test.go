@@ -29,6 +29,7 @@ type commandFixture struct {
 	stored, pending                     receipt.Receipt
 	contentError, putError, commitError error
 	collision, dropReceipt              bool
+	doingPlayerName                     string
 }
 
 func (fixture *commandFixture) Begin(context.Context, tx.Options) (tx.Tx, error) {
@@ -82,12 +83,12 @@ func (fixture *commandFixture) SocialRecallRulesTx(context.Context, tx.Queryer, 
 }
 func (fixture *commandFixture) DoingRecallTx(context.Context, tx.Tx, identity.PlayerID, string, time.Time, int) ([]DoingRecall, error) {
 	fixture.events = append(fixture.events, "projection")
-	return []DoingRecall{{PlayerID: 100002, PlayerName: "Target", RecallingTime: fixture.at.Unix()}}, nil
+	return []DoingRecall{{PlayerID: 100002, PlayerName: fixture.doingPlayerName, RecallingTime: fixture.at.Unix()}}, nil
 }
 func commandSetup(t *testing.T) (StartService, *commandFixture, identity.ActorContext, operation.Context) {
 	t.Helper()
 	inner, scope, request, at := startSetup(t)
-	fixture := &commandFixture{startFixture: inner, at: at, revision: request.ContentRevision}
+	fixture := &commandFixture{startFixture: inner, at: at, revision: request.ContentRevision, doingPlayerName: "Target"}
 	identifier, err := ids.NewUUID()
 	if err != nil {
 		t.Fatal(err)
@@ -217,5 +218,18 @@ func TestRecallCommandRejectsCorruptOrForeignReceipt(t *testing.T) {
 				t.Fatal("corrupt replay reached current configuration", fixture.events)
 			}
 		})
+	}
+}
+
+func TestRecallCommandAcceptsUnnamedDoingPlayer(t *testing.T) {
+	service, fixture, actor, current := commandSetup(t)
+	fixture.doingPlayerName = ""
+	body, err := service.Start(context.Background(), actor, 100002, current)
+	if err != nil {
+		t.Fatalf("unnamed doing player refused: %v", err)
+	}
+	rows, ok := body["doing_recall"].([]any)
+	if !ok || len(rows) != 1 || rows[0].(map[string]any)["player_name"] != "" {
+		t.Fatalf("doing_recall = %+v", body)
 	}
 }
