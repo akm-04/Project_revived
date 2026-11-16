@@ -18,8 +18,8 @@ var startChoiceConformance = map[ModeKey]struct {
 	rule ChoiceChangeRule
 	test string
 }{
-	ModeAdventureDefense:    {ChoiceSupersedes, "TestClosureE8AdventureDefenseStartChoiceConformance"},
-	ModeAdventureIllusion:   {ChoiceSupersedes, "TestClosureE8AdventureIllusionStartChoiceConformance"},
+	ModeAdventureDefense:    {ChoiceSupersedes, "TestStartChoiceConformanceAdventureDefense"},
+	ModeAdventureIllusion:   {ChoiceSupersedes, "TestStartChoiceConformanceAdventureIllusion"},
 	ModeAdventurePVP:        {ChoiceReplaysFrozen, "TestClosureE6AdventurePvpOpenStartReplaysFrozenFormationNative"},
 	ModeAdventureCoop:       {ChoiceReplaysFrozen, "TestClosureE6AdventureCoopOpenStartReplaysFrozenPicksNative"},
 	ModeArena:               {ChoiceReplaysFrozen, "TestI7C5DArenaChangedFormationReplaysOpenFightNative"},
@@ -33,13 +33,13 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModeEventCentreBoard:    {ChoiceReplaysFrozen, "TestClosureE8EventCentreBoardStartChoiceConformance"},
 	ModeGodsTrial:           {ChoiceSupersedes, "TestClosureE8GodsTrialStartChoiceConformance"},
 	ModeGuildCampaign:       {ChoiceSupersedes, "TestClosureE8GuildCampaignStartChoiceConformance"},
-	ModeIllusionSolo:        {ChoiceSupersedes, "TestClosureE8IllusionSoloStartChoiceConformance"},
-	ModeIllusionTeam:        {ChoiceReplaysFrozen, "TestClosureE8IllusionTeamStartChoiceConformance"},
+	ModeIllusionSolo:        {ChoiceSupersedes, "TestStartChoiceConformanceIllusionSolo"},
+	ModeIllusionTeam:        {ChoiceReplaysFrozen, "TestStartChoiceConformanceIllusionTeam"},
 	ModeMarch:               {ChoiceSupersedes, "TestClosureE8MarchStartChoiceConformance"},
 	ModeMemoirBattle:        {ChoiceReplaysFrozen, "TestClosureE8MemoirBattleStartChoiceConformance"},
 	ModeMemoirPlayer:        {ChoiceReplaysFrozen, "TestClosureE4MemoirPlayerStartReplayIdentityNative"},
-	ModeOccultSolo:          {ChoiceSupersedes, "TestClosureE8OccultSoloStartChoiceConformance"},
-	ModeOccultTeam:          {ChoiceReplaysFrozen, "TestClosureE8OccultTeamStartChoiceConformance"},
+	ModeOccultSolo:          {ChoiceSupersedes, "TestStartChoiceConformanceOccultSolo"},
+	ModeOccultTeam:          {ChoiceReplaysFrozen, "TestStartChoiceConformanceOccultTeam"},
 	ModeOneOnOne:            {ChoiceReplaysFrozen, "TestClosureE4OneOnOneStartReplayIdentityNative"},
 	ModePetCampaign:         {ChoiceSupersedes, "TestClosureE8PetCampaignStartChoiceConformance"},
 	ModePetCampaignPractice: {ChoiceSupersedes, "TestClosureE8PetCampaignPracticeStartChoiceConformance"},

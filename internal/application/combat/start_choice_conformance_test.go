@@ -22,14 +22,6 @@ import (
 // way the mode's builder does: for REPLAYS_FROZEN it stays out of the START
 // fingerprint, for SUPERSEDES it enters it.
 
-func TestClosureE8AdventureDefenseStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeAdventureDefense)
-}
-
-func TestClosureE8AdventureIllusionStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeAdventureIllusion)
-}
-
 func TestClosureE8ArenaPlayoffsStartChoiceConformance(t *testing.T) {
 	assertStartChoiceRule(t, d.ModeArenaPlayoffs)
 }
@@ -54,28 +46,12 @@ func TestClosureE8GuildCampaignStartChoiceConformance(t *testing.T) {
 	assertStartChoiceRule(t, d.ModeGuildCampaign)
 }
 
-func TestClosureE8IllusionSoloStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeIllusionSolo)
-}
-
-func TestClosureE8IllusionTeamStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeIllusionTeam)
-}
-
-func TestClosureE8OccultTeamStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeOccultTeam)
-}
-
 func TestClosureE8MarchStartChoiceConformance(t *testing.T) {
 	assertStartChoiceRule(t, d.ModeMarch)
 }
 
 func TestClosureE8MemoirBattleStartChoiceConformance(t *testing.T) {
 	assertStartChoiceRule(t, d.ModeMemoirBattle)
-}
-
-func TestClosureE8OccultSoloStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeOccultSolo)
 }
 
 func TestClosureE8PetCampaignStartChoiceConformance(t *testing.T) {
