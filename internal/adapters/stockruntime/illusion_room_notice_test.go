@@ -106,6 +106,99 @@ func TestIllusionRoomChatPushesToBothRecipients(t *testing.T) {
 	}
 }
 
+// TestIllusionNoticeReportsOnlyWhenTheSeatHasDamage pins DL-2ffb0688: the
+// client plays a report only when is_report is 1 (Illusion.lua:412), so a seat
+// with no stored damage_result must be told is_report 0 and get no report_id.
+func TestIllusionNoticeReportsOnlyWhenTheSeatHasDamage(t *testing.T) {
+	registry := NewConnectionRegistry()
+	defer registry.CloseAll()
+	events, err := NewIllusionRoomNoticeRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	seats := []identity.PlayerID{100001, 100002}
+	frames := make(chan illusionClientFrame, 4)
+	var readers sync.WaitGroup
+	for index, player := range seats {
+		writer, _, client := newRegistryPipeWriter(t)
+		defer client.Close()
+		admission := registryAdmission(t, []string{"33333333-3333-4333-8333-333333333334", "44444444-4444-4444-8444-444444444445"}[index], player, domainrt.World, 1)
+		if _, err := registry.Replace(admission, writer); err != nil {
+			t.Fatal(err)
+		}
+		readers.Add(1)
+		go func(c net.Conn, player identity.PlayerID) {
+			defer readers.Done()
+			decoder, _ := rt.NewStreamDecoder(limits.Default())
+			buf := make([]byte, 4096)
+			c.SetReadDeadline(time.Now().Add(3 * time.Second))
+			for count := 0; count < 1; {
+				n, e := c.Read(buf)
+				if e != nil {
+					return
+				}
+				out, e := decoder.Feed(buf[:n])
+				if e != nil {
+					return
+				}
+				for _, frame := range out {
+					frames <- illusionClientFrame{player: player, frame: frame}
+					count++
+				}
+			}
+		}(client, player)
+	}
+	view := IllusionRoomNotice{RoomID: 9, Status: 1, Seated: seats, Ready: map[identity.PlayerID]bool{},
+		ReportID: "report-1",
+		DamageResults: map[string]json.RawMessage{
+			"100001": json.RawMessage(`{"rank":1,"now_hurt":900}`),
+		}}
+	handler := IllusionRoomNoticeHandler{Service: illusionChatService{view: view}, Registry: registry,
+		Publisher: RealtimePublisher{Registry: events, Limits: limits.Default()}, Authority: deliveryAuthority{},
+		Time: deliveryClock{}, MaxHandles: 10, Delivered: NewRoomNoticeLedger()}
+	if err := handler.ReloadAndDeliver(context.Background(), "9"); err != nil {
+		t.Fatal(err)
+	}
+	readers.Wait()
+	close(frames)
+	messages := map[identity.PlayerID]map[string]any{}
+	for got := range frames {
+		if got.frame.MID != mids.MIDIllusionNotice {
+			continue
+		}
+		fields, err := got.frame.Params.(*amf3.Object).StrictMap()
+		if err != nil {
+			t.Fatal(err)
+		}
+		message, ok := fields["message"].(*amf3.Object)
+		if !ok {
+			t.Fatalf("notice body %#v", fields["message"])
+		}
+		body, err := message.StrictMap()
+		if err != nil {
+			t.Fatal(err)
+		}
+		messages[got.player] = body
+	}
+	withDamage := messages[seats[0]]
+	if withDamage["is_report"] != float64(1) || withDamage["report_id"] != view.ReportID {
+		t.Fatalf("report seat %#v", withDamage)
+	}
+	if _, ok := withDamage["damage_result"]; !ok {
+		t.Fatalf("report seat lost damage_result %#v", withDamage)
+	}
+	withoutDamage := messages[seats[1]]
+	if withoutDamage["is_report"] != float64(0) {
+		t.Fatalf("a seat with no damage_result was told is_report %#v", withoutDamage["is_report"])
+	}
+	if _, ok := withoutDamage["report_id"]; ok {
+		t.Fatalf("a seat with no damage_result got report_id %#v", withoutDamage["report_id"])
+	}
+	if _, ok := withoutDamage["damage_result"]; ok {
+		t.Fatalf("a seat with no damage_result got one %#v", withoutDamage["damage_result"])
+	}
+}
+
 func TestIllusionMessageFollowsPlayerSeatsAndReady(t *testing.T) {
 	teamInfo, err := json.Marshal(map[string]any{
 		"room_id": int64(9), "status": int64(1),
