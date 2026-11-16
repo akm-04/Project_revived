@@ -2,6 +2,7 @@ package adventure
 
 import (
 	"context"
+	"time"
 
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -50,9 +51,7 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if err != nil {
 			return err
 		}
-		started, err = s.startAttempt(c, sc, scope, cb.StartRequest{Mode: cd.ModeAdventurePVP, Actor: a, Locator: locator(a, occurrence, "ADVENTURE_PVP"),
-			GenerationRef: "ADVENTURE_PVP/" + occurrence.SourceKey, StartFingerprint: startFingerprint(a, request.Formation),
-			ResultDeadline: at.Add(attemptLimit), Battle: pvpBattle(a, request, enemy)})
+		started, err = s.startAttempt(c, sc, scope, pvpStart(a, occurrence, request, enemy, at))
 		return err
 	})
 	if err != nil {
@@ -103,6 +102,20 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		return Response{}, err
 	}
 	return response, nil
+}
+
+// pvpStart is the PVP START identity: the locator and generation name the
+// occurrence (the stage); the formation is the player's choice, so a same-stage
+// START replays the frozen attempt when only it changed
+// (I8_PARENT_CONTRACT_V1 generation_supersede).
+func pvpStart(a identity.ActorContext, occurrence d.Occurrence, request FightRequest, enemy Opponent, at time.Time) cb.StartRequest {
+	return cb.StartRequest{Mode: cd.ModeAdventurePVP, Actor: a, Locator: locator(a, occurrence, "ADVENTURE_PVP"),
+		GenerationRef: "ADVENTURE_PVP/" + occurrence.SourceKey, StartFingerprint: pvpFingerprint(a),
+		ResultDeadline: at.Add(attemptLimit), Battle: pvpBattle(a, request, enemy)}
+}
+
+func pvpFingerprint(a identity.ActorContext) string {
+	return startFingerprint(a, nil)
 }
 
 func pvpBattle(a identity.ActorContext, request FightRequest, enemy Opponent) cb.BattleRequest {
