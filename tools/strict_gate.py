@@ -41,6 +41,17 @@ MACHINE_VARIABLES = {'GXB_LUAJIT', 'GXB_I7B5B_ASSET_ROOT', 'GXB_I7A8_FULL_ROSTER
 SUITE_FIXTURE_VARIABLES = {'GXB_BOOK_COMPILER_PAYLOAD', 'GXB_I9_10A_SCRATCH_JSON', 'GXB_SOCIAL_CATALOG_PATH'}
 OPERATOR_VARIABLES = {'GXB_I8_LATENCY_BOUND', 'GXB_I910C_MIG127_PREDECESSOR_DATABASE', 'GXB_I910C_OLD_EVIDENCE', 'GXB_I9_10B_PRODUCTION_WAKE_PROBE', 'GXB_MENTOR_CATALOG_PATH', 'GXB_MID1_GOLDEN_UPDATE', 'GXB_SOCIAL17_EVIDENCE'}
 OPTIONAL_OUTPUT_VARIABLES = {'GXB_I8_3B_SNAPSHOT_OUT', 'GXB_I910C_UPGRADE_EVIDENCE', 'GXB_SOCIAL17_UPGRADE_EVIDENCE'}
+
+
+def suite_fixtures(source):
+    generated = source / 'internal/content/builtin/generated'
+    return {
+        'GXB_BOOK_COMPILER_PAYLOAD': str(generated / 'book_input_catalog.json'),
+        'GXB_I9_10A_SCRATCH_JSON': str(generated / 'workshop_input_catalog.json'),
+        'GXB_SOCIAL_CATALOG_PATH': str(generated / 'social_input_catalog.json'),
+    }
+
+
 TOOLS = ['go', 'gofmt', 'goose', 'luajit', 'initdb', 'pg_ctl', 'createdb', 'psql', 'pg_dump', 'pg_restore', 'zig-cc', 'zig-c++']
 ACCEPTED35_COMMIT = '52b31f6cb83b89eda2085635b205591ca4a72e7f'
 ACCEPTED35_REVISION = '66dddbab1c548555e244c670bc994e9a17c604ba5462e38eb6610c956943b3af'
@@ -298,11 +309,7 @@ class Gate:
         tag_arguments = ['-tags', tags]
         self.step(f'build:{name}', [self.tool('go'), 'build', '-buildvcs=false', *tag_arguments, './...'])
         self.step(f'vet:{name}', [self.tool('go'), 'vet', *tag_arguments, './...'])
-        extra = {
-            'GXB_BOOK_COMPILER_PAYLOAD': str(self.source / 'internal/content/builtin/generated/book_input_catalog.json'),
-            'GXB_I9_10A_SCRATCH_JSON': str(self.source / 'internal/content/builtin/generated/workshop_input_catalog.json'),
-            'GXB_SOCIAL_CATALOG_PATH': str(self.source / 'internal/content/builtin/generated/social_input_catalog.json'),
-        }
+        extra = suite_fixtures(self.source)
         if name != 'unit':
             for variable in self.census['dsn']:
                 database = f'{name}_' + variable.lower().removeprefix('gxb_').removesuffix('_dsn')

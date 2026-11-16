@@ -74,6 +74,7 @@ def fresh_database(name):
 def test_environment(census_classes, dsn, scratch):
     environment = dict(os.environ)
     environment.update({variable: dsn for variable in census_classes.get('dsn', [])})
+    environment.update(strict_gate.suite_fixtures(REPOSITORY))
     environment.update(GXB_LUAJIT=str(WORKSPACE / '.toolchain/bin/luajit'), GXB_I7B5B_ASSET_ROOT=str(scratch / 'media'),
                        GXB_I7A8_FULL_ROSTER_PROBE='1')
     (scratch / 'media').mkdir(parents=True, exist_ok=True)
