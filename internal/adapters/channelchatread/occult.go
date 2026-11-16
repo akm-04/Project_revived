@@ -34,9 +34,10 @@ func (r OccultRoomReader) ReadOccultTx(c context.Context, t tx.Tx, a ar.Admissio
 	if err != nil || state.CampaignType != d.MultiCampaignType {
 		return channelchat.Owned[channelchat.Occult]{}, channelchat.ErrInvalidStructured
 	}
-	// shortcut: force is 0 because the player directory carries no battle power.
+	// The card carries the sender's frozen best-15 AP, the same value the room
+	// projection shows and the client's own message sends.
 	return channelchat.Owned[channelchat.Occult]{
-		Value:  channelchat.Occult{RoomID: room.ID, ChapterID: state.ChapterID},
+		Value:  channelchat.Occult{RoomID: room.ID, ChapterID: state.ChapterID, Force: state.Force(int64(a.Domain.Actor.PlayerID))},
 		Source: channelchat.SourceObservation{Identity: fmt.Sprintf("occult-room:%d", room.ID), ContentRevisionID: room.NoticeVersion},
 	}, nil
 }

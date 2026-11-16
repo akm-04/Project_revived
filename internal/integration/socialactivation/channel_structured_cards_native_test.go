@@ -68,6 +68,21 @@ func readCard(t *testing.T, c net.Conn, kind float64) map[string]any {
 	return body
 }
 
+func openOccultRoom(t *testing.T, f *fixture, owner identity.PlayerID, force int64) int64 {
+	t.Helper()
+	payload := fmt.Sprintf(`{"chapter_id":7,"campaign_type":1,"forces":{"%d":%d}}`, int64(owner), force)
+	roomID := f.number(`INSERT INTO shared_rooms(logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload,created_at,updated_at)
+VALUES($1,'occult',1,$2,'OPEN',3,clock_timestamp()+interval '1 hour',1,1,$3::jsonb,clock_timestamp(),clock_timestamp()) RETURNING room_id`,
+		int64(owner)/100000, int64(owner), payload)
+	f.sql(`INSERT INTO shared_room_seats(room_id,seat_index,player_id,family,slot,stage,ready,joined_at,updated_at)
+VALUES($1,0,$2,'occult',1,'SEATED',false,clock_timestamp(),clock_timestamp())`, roomID, int64(owner))
+	return roomID
+}
+
+func occultCard(roomID int64) string {
+	return fmt.Sprintf(`{"room_id":%d,"type":4,"chapter_id":1,"force":0}`, roomID)
+}
+
 func joinCardRoom(t *testing.T, f *fixture, player identity.PlayerID, roomID int64, family appsharedroom.Family) {
 	t.Helper()
 	actor, _ := f.live(player)
@@ -135,6 +150,20 @@ func TestChatH2IllusionCardService(t *testing.T) {
 	}
 	if h.report().Outcomes[stockruntime.ChatTransportWriteRecorded] != 3 {
 		t.Fatal("service card recipients")
+	}
+}
+
+func TestChatH2OccultCardService(t *testing.T) {
+	f := fresh(t)
+	f.chatPlayers(100001, 100002)
+	roomID := openOccultRoom(t, f, 100001, 4321)
+	h := chatHarness(t, f, channelHarnessOptions{owners: cardOwners()})
+	a, _, _ := h.login(100001, dr.Service, 99999)
+	b, _, _ := h.login(100002, dr.Service, 99999)
+	sendChat(t, a, occultCard(roomID), 4, amf3.Property{Name: "type", Value: 4.0})
+	body := readCard(t, b, 4)
+	if body["room_id"] != float64(roomID) || body["chapter_id"] != float64(7) || body["force"] != float64(4321) {
+		t.Fatal(body)
 	}
 }
 
