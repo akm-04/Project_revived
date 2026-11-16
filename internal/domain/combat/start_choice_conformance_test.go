@@ -23,14 +23,14 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModeAdventurePVP:        {ChoiceReplaysFrozen, "TestClosureE6AdventurePvpOpenStartReplaysFrozenFormationNative"},
 	ModeAdventureCoop:       {ChoiceReplaysFrozen, "TestClosureE6AdventureCoopOpenStartReplaysFrozenPicksNative"},
 	ModeArena:               {ChoiceReplaysFrozen, "TestI7C5DArenaChangedFormationReplaysOpenFightNative"},
-	ModeArenaPlayoffs:       {ChoiceReplaysFrozen, "TestClosureE8ArenaPlayoffsStartChoiceConformance"},
-	ModeArenaFriendFight:    {ChoiceReplaysFrozen, "TestClosureE8ArenaFriendFightStartChoiceConformance"},
-	ModeAwakeningBlood:      {ChoiceSupersedes, "TestClosureE8AwakeningStartChoiceConformance"},
-	ModeCampaign:            {ChoiceSupersedes, "TestI9_3ACampaignNormalAndSuperNative"},
+	ModeArenaPlayoffs:       {ChoiceReplaysFrozen, "TestI97BEnrollmentUsesImmutableSettlementNative"},
+	ModeArenaFriendFight:    {ChoiceReplaysFrozen, "TestI97CFriendFightLifecycleNative"},
+	ModeAwakeningBlood:      {ChoiceSupersedes, "TestAwakeningWireRoutesAndTrustBoundary"},
+	ModeCampaign:            {ChoiceSupersedes, "TestStartChoiceConformanceCampaign"},
 	ModeChampionsLeague:     {ChoiceReplaysFrozen, "TestI7C5FLeagueChangedLineupReplaysOpenFightNative"},
 	ModeConquerSchool:       {ChoiceSupersedes, "TestI8_5DConquerStartBindsCombatAttemptNative"},
 	ModeDodgeball:           {ChoiceRefusedWhileOpen, "TestI9_6BDodgeballNativeLifecycle"},
-	ModeEventCentreBoard:    {ChoiceReplaysFrozen, "TestClosureE8EventCentreBoardStartChoiceConformance"},
+	ModeEventCentreBoard:    {ChoiceReplaysFrozen, "TestI910ANoticeBoardNative"},
 	ModeGodsTrial:           {ChoiceSupersedes, "TestStartChoiceConformanceGodsTrial"},
 	ModeGuildCampaign:       {ChoiceSupersedes, "TestStartChoiceConformanceGuildCampaign"},
 	ModeIllusionSolo:        {ChoiceSupersedes, "TestStartChoiceConformanceIllusionSolo"},
@@ -45,7 +45,7 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModePetCampaignPractice: {ChoiceSupersedes, "TestStartChoiceConformancePetCampaignPractice"},
 	ModeTopFloor:            {ChoiceReplaysFrozen, "TestClosureE2TopFloorReplayIgnoresPetNative"},
 	ModeTopFloorTask:        {ChoiceReplaysFrozen, "TestClosureE2TopFloorTaskReplayIgnoresLeaderNative"},
-	ModeWorkplace:           {ChoiceReplaysFrozen, "TestI9_5BWorkplaceNativeLifecycle"},
+	ModeWorkplace:           {ChoiceReplaysFrozen, "TestStartChoiceConformanceWorkplace"},
 	ModeWorldBoss:           {ChoiceSupersedes, "TestStartChoiceConformanceWorldBoss"},
 }
 
@@ -73,18 +73,29 @@ func TestEveryModeHasAStartChoiceProof(t *testing.T) {
 	}
 	tests := testFunctions(t)
 	for key, proof := range startChoiceConformance {
-		if !tests[proof.test] {
+		path, ok := tests[proof.test]
+		if !ok {
 			t.Fatalf("mode %s names missing test %s", key, proof.test)
+		}
+		if forbiddenProofPath(path) {
+			t.Fatalf("mode %s names proof %s in %s, where no mode builder lives", key, proof.test, filepath.ToSlash(filepath.Dir(path)))
 		}
 	}
 }
 
-// testFunctions returns every top-level Go test function declared under the
-// module's internal tree.
-func testFunctions(t *testing.T) map[string]bool {
+// forbiddenProofPath is START_REPLAY_GUARD_V1 Amendment 2 ruling 7: a proof in
+// the shared combat packages drives no mode builder.
+func forbiddenProofPath(path string) bool {
+	directory := filepath.ToSlash(filepath.Dir(path))
+	return strings.HasSuffix(directory, "internal/application/combat") || strings.HasSuffix(directory, "internal/domain/combat")
+}
+
+// testFunctions maps every top-level Go test function declared under the
+// module's internal tree to its source file.
+func testFunctions(t *testing.T) map[string]string {
 	t.Helper()
 	root := moduleInternalRoot(t)
-	found := map[string]bool{}
+	found := map[string]string{}
 	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -107,7 +118,7 @@ func testFunctions(t *testing.T) map[string]bool {
 			if !ok || function.Recv != nil || !strings.HasPrefix(function.Name.Name, "Test") {
 				continue
 			}
-			found[function.Name.Name] = true
+			found[function.Name.Name] = path
 		}
 		return nil
 	})
