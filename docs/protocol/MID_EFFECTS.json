@@ -6,7 +6,7 @@
    "mid": 1
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 2
   },
   {
@@ -42,7 +42,7 @@
    "mid": 29
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 30
   },
   {
@@ -142,7 +142,7 @@
    "mid": 72
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 81
   },
   {
@@ -194,7 +194,7 @@
    "mid": 119
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 121
   },
   {
@@ -546,7 +546,7 @@
    "mid": 291
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 292
   },
   {
@@ -638,7 +638,7 @@
    "mid": 354
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 368
   },
   {
@@ -766,7 +766,7 @@
    "mid": 571
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 576
   },
   {
@@ -778,7 +778,7 @@
    "mid": 578
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 579
   },
   {
@@ -786,7 +786,7 @@
    "mid": 580
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 581
   },
   {
@@ -834,15 +834,15 @@
    "mid": 592
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 593
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 594
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 595
   },
   {
@@ -850,7 +850,7 @@
    "mid": 596
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 598
   },
   {
@@ -902,7 +902,7 @@
    "mid": 611
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 612
   },
   {
@@ -918,7 +918,7 @@
    "mid": 615
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 616
   },
   {
@@ -926,19 +926,19 @@
    "mid": 617
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 618
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 619
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 620
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 621
   },
   {
@@ -946,7 +946,7 @@
    "mid": 622
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 623
   },
   {
@@ -1034,11 +1034,11 @@
    "mid": 773
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 774
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 775
   },
   {
@@ -1050,7 +1050,7 @@
    "mid": 777
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 778
   },
   {
@@ -1530,7 +1530,7 @@
    "mid": 1145
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 1152
   },
   {
@@ -3158,7 +3158,7 @@
    "mid": 2564
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 2565
   },
   {
@@ -3542,7 +3542,7 @@
    "mid": 2753
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 2754
   },
   {
@@ -3586,7 +3586,7 @@
    "mid": 2766
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 2768
   },
   {
@@ -3806,7 +3806,7 @@
    "mid": 2853
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 2864
   },
   {
@@ -4434,7 +4434,7 @@
    "mid": 8194
   },
   {
-   "effect": "read",
+   "effect": "unknown",
    "mid": 20480
   },
   {
@@ -4442,6 +4442,6 @@
    "mid": 32000
   }
  ],
- "note": "read = the route trace reached no write; state = it reached a write (a receipt included); unknown = the trace could not decide and counts as state for undelivered-reply replay.",
+ "note": "read = a traced transaction reached no write; state = it reached a write (a receipt included); unknown = the trace could not decide or had no transaction, and counts as state for undelivered-reply replay.",
  "source": "docs/architecture/system_map/MID_CLASSES.json"
 }

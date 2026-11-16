@@ -5,7 +5,8 @@ The source is the system map's per-MID trace class (docs/architecture/system_map
 Its `writes` value is `state` when the route trace reaches write SQL other than the receipt store,
 `receipt` when it records only an operation receipt, `none` when the walk found no write, and
 `UNKNOWN` when a FANOUT, UNRESOLVED or BOUND marker could hide one. `none` is a trace-backed read:
-only a complete walk with no marker yields it. Lock clauses do not raise a MID above its write
+only a complete walk with no marker and at least one traced transaction yields it; an empty trace is
+`unknown`, because a typed service port the map does not follow hides its writes (A-062). Lock clauses do not raise a MID above its write
 class here: route traces show only the shared session FOR SHARE or conditional FOR UPDATE clauses
 whose caller argument decides, so they are not proof of a change.
 
@@ -72,6 +73,8 @@ def load_mid_classes(path=None):
 def mid_effect(row):
     if row.get("state_writes") or row.get("receipt_writes"):
         return "state"
+    if not row.get("transactions"):
+        return "unknown"
     return WRITE_EFFECTS.get(row.get("writes"), "unknown")
 
 
@@ -91,8 +94,9 @@ def effect_document(mid_classes):
     return {
         "generated_by": "tools/mid_effects.py --write",
         "source": "docs/architecture/system_map/MID_CLASSES.json",
-        "note": "read = the route trace reached no write; state = it reached a write (a receipt included); "
-                "unknown = the trace could not decide and counts as state for undelivered-reply replay.",
+        "note": "read = a traced transaction reached no write; state = it reached a write (a receipt "
+                "included); unknown = the trace could not decide or had no transaction, and counts as "
+                "state for undelivered-reply replay.",
         "mids": effects,
     }
 

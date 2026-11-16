@@ -100,7 +100,7 @@ func TestUndeliveredReplayRunsWhenNothingMatches(t *testing.T) {
 		token  string
 		taker  *replayTaker
 	}{
-		{name: "read mid", mid: 2, params: params, token: "bearer", taker: &replayTaker{mark: replayMark(t, actor, 2, params, now), found: true}},
+		{name: "read mid", mid: 7, params: params, token: "bearer", taker: &replayTaker{mark: replayMark(t, actor, 7, params, now), found: true}},
 		{name: "no token", mid: 5, params: params, token: "", taker: &replayTaker{}},
 		{name: "different mid", mid: 5, params: params, token: "bearer", taker: &replayTaker{mark: replayMark(t, actor, 6, params, now), found: true}},
 		{name: "different params", mid: 5, params: params, token: "bearer", taker: &replayTaker{mark: replayMark(t, actor, 5, map[string]any{"token": "bearer", "region": int64(2)}, now), found: true}},

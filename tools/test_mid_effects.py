@@ -29,6 +29,10 @@ class MidEffectTest(unittest.TestCase):
         row = record("none", transactions=[{"function": "Service.List", "read_only": "true"}])
         self.assertEqual(mid_effects.mid_effect(row), "read")
 
+    def test_empty_trace_is_unknown(self):
+        row = record("none", transactions=[])
+        self.assertEqual(mid_effects.mid_effect(row), "unknown")
+
     def test_receipt_write_is_state(self):
         row = record("receipt", receipt_writes=["internal/application/i5/awakening.go:176"])
         self.assertEqual(mid_effects.mid_effect(row), "state")
