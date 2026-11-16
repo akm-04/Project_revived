@@ -17,6 +17,10 @@ import (
 
 var ErrGameplayBearerNotLive = errors.New("gameplay bearer does not resolve to a live context")
 
+// ErrContextSuperseded marks a bearer whose context a later selection ended; a
+// late reply from it must not restart the switched scene (PASS413 CONTEXT_SUPERSEDED).
+var ErrContextSuperseded = errors.New("gameplay bearer belongs to a superseded context")
+
 const selectGameplayAuthority = `
 SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version,
        s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version,
@@ -27,6 +31,18 @@ JOIN gameplay_contexts c ON c.context_id=gc.context_id
 JOIN account_sessions s ON s.session_id=c.session_id
 JOIN accounts a ON a.account_id=c.account_id
 WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL`
+
+// classifySupersededGameplayBearer runs only after the live lookup found
+// nothing. It joins the same three identity rows without a liveness filter so a
+// bearer whose context a later selection ended is told apart from revoked,
+// expired and unknown ones (PASS413 CONTEXT_SUPERSEDED).
+const classifySupersededGameplayBearer = `
+SELECT EXISTS(
+ SELECT 1
+ FROM gameplay_context_credentials gc
+ JOIN gameplay_contexts c ON c.context_id=gc.context_id
+ JOIN account_sessions s ON s.session_id=c.session_id
+ WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL)`
 
 const validateActorLiveness = `
 SELECT EXISTS(
@@ -123,6 +139,13 @@ func (a RealtimeAuthority) resolveGameplayBearer(ctx context.Context, q tx.Query
 	)
 	if err != nil {
 		if errors.Is(err, kernelstore.ErrNoRows) {
+			superseded, classifyErr := contextWasSuperseded(ctx, q, digest[:])
+			if classifyErr != nil {
+				return identity.ActorContext{}, classifyErr
+			}
+			if superseded {
+				return identity.ActorContext{}, ErrContextSuperseded
+			}
 			return identity.ActorContext{}, ErrGameplayBearerNotLive
 		}
 		return identity.ActorContext{}, err
@@ -190,6 +213,17 @@ func (a RealtimeAuthority) resolveGameplayBearer(ctx context.Context, q tx.Query
 	}
 	observability.NoteActor(ctx, observability.RequestActor{AccountUID: string(actor.AccountUID), PlayerID: int64(actor.PlayerID), SessionID: actor.SessionID.UUID().String()})
 	return actor, nil
+}
+
+// contextWasSuperseded classifies a digest whose live lookup found nothing. A
+// revoked session keeps the session-failure answer even when its context had
+// been superseded (user ruling U6).
+func contextWasSuperseded(ctx context.Context, q tx.Queryer, digest []byte) (bool, error) {
+	var superseded bool
+	if err := q.QueryRow(ctx, classifySupersededGameplayBearer, digest).Scan(&superseded); err != nil {
+		return false, err
+	}
+	return superseded, nil
 }
 
 func parseAccountID(s string) (identity.AccountID, error) {
