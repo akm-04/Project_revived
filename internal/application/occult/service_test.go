@@ -164,3 +164,26 @@ func TestTeamRoomBandAndGate(t *testing.T) {
 		}
 	}
 }
+
+func TestTeamFingerprintHoldsOnlyTheStage(t *testing.T) {
+	stage := d.TeamFight{CampaignID: 20002, SubID: 1, Round: 2}
+	picked, other := stage, stage
+	picked.SetHero(1, 1, 101, json.RawMessage(`{"partner_id":101}`))
+	other.SetHero(1, 1, 201, json.RawMessage(`{"partner_id":201}`))
+	if teamFingerprint(9, picked) != teamFingerprint(9, other) {
+		t.Fatal("a changed pick is the same stage: START_REPLAY_IDENTITY_V1 ruling 1")
+	}
+	for name, changed := range map[string]struct {
+		roomID int64
+		team   d.TeamFight
+	}{
+		"room":     {10, stage},
+		"campaign": {9, d.TeamFight{CampaignID: 20003, SubID: 1, Round: 2}},
+		"stage":    {9, d.TeamFight{CampaignID: 20002, SubID: 2, Round: 2}},
+		"round":    {9, d.TeamFight{CampaignID: 20002, SubID: 1, Round: 3}},
+	} {
+		if teamFingerprint(9, stage) == teamFingerprint(changed.roomID, changed.team) {
+			t.Fatalf("%s change must be a different stage", name)
+		}
+	}
+}
