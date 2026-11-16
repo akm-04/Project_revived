@@ -203,9 +203,19 @@ func TestC13BPart2ConquerReports1571Native(t *testing.T) {
 	service := conquerMode(t, database)
 	a, girls := conquerPlayer(t, database, rankingServer(t, database))
 	conquerWin(t, service, a, 10001, 1, girls[:2], 2, 5000)
-	before, err := service.Reports(ctx, 1, 10001, 1, op())
-	if err != nil || len(before) == 0 {
+	all, err := service.Reports(ctx, 1, 10001, 1, op())
+	if err != nil {
 		t.Fatalf("baseline reports %v", err)
+	}
+	// 1571 lists every server's kept reports; other tests in this database add their own.
+	var before []int64
+	for _, row := range all {
+		if row.Owner == a.PlayerID {
+			before = append(before, row.Score)
+		}
+	}
+	if len(before) == 0 {
+		t.Fatal("baseline has no report of the fixture player")
 	}
 	gate := newSnapshotGate(database)
 	service.Timed.Runner.DB = gate
@@ -218,15 +228,17 @@ func TestC13BPart2ConquerReports1571Native(t *testing.T) {
 			rows, readErr := service.Reports(c, 1, 10001, 1, op())
 			reports.rows = make([]int64, 0, len(rows))
 			for _, row := range rows {
-				reports.rows = append(reports.rows, row.Score)
+				if row.Owner == a.PlayerID {
+					reports.rows = append(reports.rows, row.Score)
+				}
 			}
 			return readErr
 		})
 	if err != nil {
 		t.Fatalf("1571 read: %v", err)
 	}
-	if !reflect.DeepEqual(reports.rows, []int64{before[0].Score}) {
-		t.Fatalf("1571 saw the concurrent score write: %v want %d", reports.rows, before[0].Score)
+	if !reflect.DeepEqual(reports.rows, before) {
+		t.Fatalf("1571 saw the concurrent score write: %v want %v", reports.rows, before)
 	}
 }
 
