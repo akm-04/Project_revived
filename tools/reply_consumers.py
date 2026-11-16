@@ -105,6 +105,7 @@ class Function:
 class Taint:
     path: tuple[str, ...] = ()
     wrapper: str | None = None
+    followed: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -380,13 +381,13 @@ def extend_taint(taint: Taint, segments: list[tuple[str, str]]) -> Taint:
                 parts.append("[]")
         else:
             break
-    return Taint(tuple(parts), taint.wrapper)
+    return Taint(tuple(parts), taint.wrapper, taint.followed)
 
 
 def element(taint: Taint) -> Taint:
     if taint.path and taint.path[-1] == "[]":
         return taint
-    return Taint(taint.path + ("[]",), taint.wrapper)
+    return Taint(taint.path + ("[]",), taint.wrapper, taint.followed)
 
 
 def path_parts(taint: Taint, segments: list[tuple[str, str]]) -> list[tuple[str, ...]]:
@@ -434,12 +435,12 @@ class Extractor:
         self.classes = parse_classes(blobs)
         self.file_indexes: dict[str, FunctionIndex] = {}
         self.file_aliases: dict[str, dict[str, str]] = {}
-        self.class_files: dict[str, list[str]] = {}
+        self.class_files: dict[tuple[str, str | None], list[str]] = {}
         self.paths: dict[str, dict[str, dict[tuple[str, int, str, bool], Site]]] = {}
         self.callbacks: dict[str, list[dict]] = {}
-        self.stores: dict[tuple[str, str], dict[Taint, set[int]]] = {}
-        self.file_stores: dict[tuple[str, str], dict[Taint, set[int]]] = {}
-        self.return_methods: dict[tuple[str, str], dict[Taint, set[int]]] = {}
+        self.stores: dict[tuple[str, str | None, tuple[tuple[str, str], ...]], dict[Taint, set[int]]] = {}
+        self.file_stores: dict[tuple[str, tuple[tuple[str, str], ...]], dict[Taint, set[int]]] = {}
+        self.return_methods: dict[tuple[str, str | None, str], dict[Taint, set[int]]] = {}
         self.event_handlers = parse_event_handlers(blobs)
         self.mid_events = parse_mid_events(blobs.get(BACKEND_LUA, ""))
         self.replay: set[tuple] = set()
@@ -460,8 +461,9 @@ class Extractor:
             self.file_aliases[file] = cached
         return cached
 
-    def files_for_class(self, class_name: str) -> list[str]:
-        cached = self.class_files.get(class_name)
+    def files_for_class(self, class_name: str, definition_file: str | None = None) -> list[str]:
+        cache_key = (class_name, definition_file)
+        cached = self.class_files.get(cache_key)
         if cached is not None:
             return cached
         files = []
@@ -470,10 +472,13 @@ class Extractor:
                 continue
             if "loadModel" not in text and "import(" not in text:
                 continue
+            defines = file_class_name(text) == class_name
+            if definition_file is not None and defines and file != definition_file:
+                continue
             aliases = self.aliases(file)
-            if class_name in aliases.values() or file_class_name(text) == class_name:
+            if class_name in aliases.values() or defines:
                 files.append(file)
-        self.class_files[class_name] = files
+        self.class_files[cache_key] = files
         return files
 
     def class_file(self, class_name: str | None) -> str | None:
@@ -686,8 +691,7 @@ class Extractor:
                 position = after
                 continue
             if after < end and tokens[after].value == "=":
-                self.handle_assignment(mid, file, function, root, segments, after, bindings, seeds)
-                position = after + 1
+                position = self.handle_assignment(mid, file, function, root, segments, after, bindings, seeds, via, guards)
                 continue
             if after < end and tokens[after].value == "(":
                 self.handle_call(mid, file, function, position, root, segments, after, bindings, via, guards, seeds)
@@ -727,34 +731,52 @@ class Extractor:
             bindings[names[0]] = found
         return value_start
 
-    def handle_assignment(self, mid, file, function, root, segments, after, bindings, seeds) -> None:
+    def handle_assignment(self, mid, file, function, root, segments, after, bindings, seeds, via, guards) -> int:
         value_start = after + 1
         found = self.expression_taint(file, value_start, bindings, seeds)
-        field_name = next((name for kind, name in segments if kind == "field"), None)
-        if field_name is not None:
+        if any(kind == "field" for kind, _ in segments):
             if found is not None:
-                self.record_store(mid, file, function, root, segments, field_name, found)
-            return
+                self.record_store(mid, file, function, root, segments, found)
+            return value_start
+        previous = bindings.get(root)
         if found is None:
             bindings.pop(root, None)
-            return
+            return value_start
         bindings[root] = found
+        if previous is None:
+            return value_start
+        tokens = self.index(file).tokens
+        if value_start >= len(tokens) or tokens[value_start].kind != "name":
+            return value_start
+        rhs_root, rhs_segments, rhs_end = chain_at(tokens, value_start)
+        if rhs_root != root:
+            return value_start
+        fallback = rhs_end < len(tokens) and tokens[rhs_end].value == "or"
+        self.record_read(file, tokens[value_start].line, previous[0], rhs_segments, via, guards, previous[1], fallback)
+        return rhs_end
 
-    def record_store(self, mid, file, function, receiver_root, segments, field_name, found) -> None:
+    def record_store(self, mid, file, function, receiver_root, segments, found) -> None:
         taint, mids = found
+        store_path = tuple(segments)
         if taint.wrapper is not None:
             return
         owner = None
+        owner_file = None
         if function.params and receiver_root == function.params[0]:
             owner = self.file_class(file)
+            owner_file = file
         if owner is None:
             owner = enclosing_self_class(self.file_class(file), function, receiver_root)
+            if owner is not None:
+                owner_file = file
         if owner is None:
             alias_component = next((name for kind, name in segments if kind == "field"), None)
             owner = self.aliases(file).get(receiver_root) or self.aliases(file).get(alias_component or "")
+            if owner is not None:
+                owner_file = self.class_file(owner) or file
         if owner:
-            self.stores.setdefault((owner, field_name), {}).setdefault(taint, set()).update(mids)
-        self.file_stores.setdefault((file, field_name), {}).setdefault(taint, set()).update(mids)
+            self.stores.setdefault((owner, owner_file, store_path), {}).setdefault(taint, set()).update(mids)
+        self.file_stores.setdefault((file, store_path), {}).setdefault(taint, set()).update(mids)
 
     def handle_insert(self, mid, file, function, position, after, bindings, via, guards, seeds) -> None:
         del position, guards
@@ -769,9 +791,8 @@ class Extractor:
         taint, mids = value
         if container_start < len(tokens) and tokens[container_start].kind == "name":
             root, segments, _ = chain_at(tokens, container_start)
-            field_name = next((name for kind, name in segments if kind == "field"), None)
-            if field_name is not None:
-                self.record_store(mid, file, function, root, segments, field_name, (element(taint), mids))
+            if any(kind == "field" for kind, _ in segments):
+                self.record_store(mid, file, function, root, segments, (element(taint), mids))
             else:
                 bindings[root] = (element(taint), mids)
         del via
@@ -923,17 +944,18 @@ class Extractor:
 
     # ------------------------------------------------------- stored field pass
     def resolve_stored_fields(self) -> None:
-        for (owner, field_name), taints in sorted(self.stores.items()):
-            for file in self.files_for_class(owner):
-                if "." + field_name not in self.blobs[file]:
+        for (owner, owner_file, store_path), taints in sorted(self.stores.items()):
+            for file in self.files_for_class(owner, owner_file):
+                if not _store_field_in_text(self.blobs[file], store_path):
                     continue
-                self.scan_field_accesses(file, "class", owner, field_name, taints)
-        for (owner, field_name), taints in sorted(self.file_stores.items()):
-            if "." + field_name not in self.blobs[owner]:
+                self.scan_field_accesses(file, "class", owner, owner_file, store_path, taints)
+        for (owner, store_path), taints in sorted(self.file_stores.items()):
+            if not _store_field_in_text(self.blobs[owner], store_path):
                 continue
-            self.scan_field_accesses(owner, "file", owner, field_name, taints)
+            self.scan_field_accesses(owner, "file", owner, owner, store_path, taints)
 
-    def scan_field_accesses(self, file, kind, owner, field_name, taints) -> None:
+    def scan_field_accesses(self, file, kind, owner, owner_file, store_path, taints) -> None:
+        binding = _binding_id(owner_file or owner, store_path)
         index = self.index(file)
         tokens = index.tokens
         aliases = self.aliases(file)
@@ -943,20 +965,26 @@ class Extractor:
             if token.kind != "name" or position + 2 >= len(tokens):
                 continue
             root, segments, _ = chain_at(tokens, position)
-            match = _field_match(segments, field_name)
+            match = _segments_match(segments, store_path)
             if match is None:
                 continue
             if kind == "file":
                 function = index.innermost[position]
                 if function is None or not function.params or root != function.params[0]:
                     continue
+                if match != 0:
+                    continue
             else:
                 receiver = self.field_receiver_class(file_class, aliases, index, position, root, segments, match)
                 if receiver != owner:
                     continue
-            remainder = segments[match + 1:]
+            remainder = segments[match + len(store_path):]
             for stored, mids in taints.items():
-                seeds.setdefault(position, []).append((extend_taint(stored, remainder), frozenset(mids), "stored field"))
+                if binding in stored.followed:
+                    continue
+                seed = extend_taint(stored, remainder)
+                followed = seed.followed | {binding}
+                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed), frozenset(mids), "stored field"))
         if not seeds:
             return
         for function in index.functions:
@@ -976,47 +1004,51 @@ class Extractor:
 
     # ------------------------------------------------------ return-value pass
     def resolve_return_methods(self) -> None:
-        for (class_name, field_name), taints in sorted(self.stores.items()):
-            file = self.class_file(class_name)
-            if file is None or field_name not in self.blobs[file]:
+        for (class_name, class_file, store_path), taints in sorted(self.stores.items()):
+            file = class_file
+            if file is None or not _store_field_in_text(self.blobs[file], store_path):
                 continue
             index = self.index(file)
             for function in index.functions:
                 if function.parent is not None or not function.name:
                     continue
                 returned: list[tuple[Taint, frozenset[int]]] = []
-                seeds = self.field_seeds(file, function, class_name, field_name, taints)
+                seeds = self.field_seeds(file, function, class_name, class_file, store_path, taints)
                 if seeds:
                     self.scan(0, file, function, function.body_start, function.end, {}, "return", frozenset(), seeds, returned)
                 for taint, mids in returned:
-                    self.return_methods.setdefault((class_name, function.name), {}).setdefault(taint, set()).update(mids)
-        for (class_name, method), retrieved in sorted(self.return_methods.items()):
-            for file in self.files_for_class(class_name):
+                    self.return_methods.setdefault((class_name, file, function.name), {}).setdefault(taint, set()).update(mids)
+        for (class_name, class_file, method), retrieved in sorted(self.return_methods.items()):
+            for file in self.files_for_class(class_name, class_file):
                 if ":" + method not in self.blobs[file]:
                     continue
-                self.apply_return_call_sites(file, class_name, method, retrieved)
+                self.apply_return_call_sites(file, class_name, class_file, method, retrieved)
 
-    def field_seeds(self, file, function, class_name, field_name, taints) -> dict[int, list[tuple[Taint, frozenset[int], str]]]:
+    def field_seeds(self, file, function, class_name, class_file, store_path, taints) -> dict[int, list[tuple[Taint, frozenset[int], str]]]:
         index = self.index(file)
         tokens = index.tokens
         if not function.params:
             return {}
         self_parameter = function.params[0]
         seeds: dict[int, list[tuple[Taint, frozenset[int], str]]] = {}
+        binding = _binding_id(class_file or class_name, store_path)
         for position in range(function.body_start, function.end):
             if tokens[position].kind != "name" or tokens[position].value != self_parameter:
                 continue
             _, segments, _ = chain_at(tokens, position)
-            match = _field_match(segments, field_name)
-            if match is None:
+            match = _segments_match(segments, store_path)
+            if match != 0:
                 continue
-            remainder = segments[match + 1:]
+            remainder = segments[match + len(store_path):]
             for stored, mids in taints.items():
-                seeds.setdefault(position, []).append((extend_taint(stored, remainder), frozenset(mids), "returned rows"))
-        del class_name
+                if binding in stored.followed:
+                    continue
+                seed = extend_taint(stored, remainder)
+                followed = seed.followed | {binding}
+                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed), frozenset(mids), "returned rows"))
         return seeds
 
-    def apply_return_call_sites(self, file, class_name, method, returned) -> None:
+    def apply_return_call_sites(self, file, class_name, class_file, method, returned) -> None:
         index = self.index(file)
         tokens = index.tokens
         seeds: dict[int, list[tuple[Taint, frozenset[int], str]]] = {}
@@ -1032,8 +1064,12 @@ class Extractor:
             receiver = self.receiver_class(file, function, root, segments[:-1])
             if receiver != class_name:
                 continue
+            binding = f"call:{class_file or class_name}:{method}"
             for taint, mids in returned.items():
-                seeds.setdefault(position, []).append((taint, frozenset(mids), f"{class_name}:{method} return"))
+                if binding in taint.followed:
+                    continue
+                followed = taint.followed | {binding}
+                seeds.setdefault(position, []).append((Taint(taint.path, taint.wrapper, followed), frozenset(mids), f"{class_name}:{method} return"))
         if not seeds:
             return
         for function in index.functions:
@@ -1326,11 +1362,27 @@ def _has_top_level_or(tokens, start, end) -> bool:
     return False
 
 
-def _field_match(segments, field_name) -> int | None:
-    for index, (kind, name) in enumerate(segments):
-        if kind == "field" and name == field_name:
+def _segments_match(segments, store_path) -> int | None:
+    width = len(store_path)
+    if not width:
+        return None
+    for index in range(len(segments) - width + 1):
+        if tuple(segments[index:index + width]) == store_path:
             return index
     return None
+
+
+def _binding_id(owner: str, store_path) -> str:
+    # A storage binding is one location: the class/file that owns it plus the
+    # full field path. Following the same location twice for one taint is a cycle.
+    return f"{owner}:{path_string(_segment_parts(store_path))}"
+
+
+def _store_field_in_text(text: str, store_path) -> bool:
+    for kind, name in store_path:
+        if kind == "field":
+            return "." + name in text
+    return False
 
 
 def mid_set(mid: int) -> frozenset[int]:

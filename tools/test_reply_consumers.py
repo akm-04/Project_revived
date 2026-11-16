@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+import re
 import unittest
 import zipfile
 
@@ -9,6 +10,7 @@ import reply_consumers
 
 ARCHIVE_ENV = "GXB_REPLY_CONSUMERS_SOURCE_ARCHIVE"
 DEFAULT_ARCHIVE = Path(__file__).resolve().parents[1] / "inputs/assets/Older/all-assest-rechecked-1.zip"
+ACCESS_NAME = re.compile(r"\.\s*([A-Za-z_][A-Za-z0-9_]*)|\[\s*[\"']([A-Za-z_][A-Za-z0-9_]*)[\"']\s*\]")
 
 
 def archive_path():
@@ -28,6 +30,65 @@ def obligation_map(payload):
         mid: {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in record["paths"]}
         for mid, record in payload["mids"].items()
     }
+
+
+def repeated_segment_names(path):
+    names = [part for part in path.replace("[]", "").split(".") if part]
+    seen: set[str] = set()
+    repeated: list[str] = []
+    for name in names:
+        if name in seen and name not in repeated:
+            repeated.append(name)
+        seen.add(name)
+    return repeated
+
+
+def normalised_access_names(line):
+    return {
+        (first or second).replace("_", "").lower()
+        for first, second in ACCESS_NAME.findall(line)
+    }
+
+
+def fixture_payload():
+    blobs = {
+        "app/common/network/mid.lua": "xyd.mid.LOOP_FIXTURE = 9001\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/model/LoopFixture.lua": (
+            'local var_0_0 = class("LoopFixture")\n'
+            "\n"
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.LOOP_FIXTURE, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\targ_1_0.info = arg_2_1\n"
+            "\t\targ_1_0.send_gift_count = arg_2_1.send_gift_count\n"
+            "\t\targ_1_0:updateDetail(arg_2_1.detail)\n"
+            "\tend)\n"
+            "end\n"
+            "\n"
+            "function var_0_0.updateDetail(arg_3_0, arg_3_1)\n"
+            "\targ_3_0.team = arg_3_1\n"
+            "end\n"
+            "\n"
+            "function var_0_0.bump(arg_4_0)\n"
+            "\targ_4_0.info.send_gift_count[1] = arg_4_0.info.send_gift_count[1] + 1\n"
+            "\targ_4_0.team.challenge_times[1] = arg_4_0.team.challenge_times[1] + 1\n"
+            "end\n"
+        ),
+    }
+    return reply_consumers.build(blobs, collapse=False)
+
+
+class StorageBindingCycleTests(unittest.TestCase):
+    def test_a_storage_binding_is_followed_at_most_once_per_path(self):
+        payload = fixture_payload()
+        paths = [reply_consumers.path_name(entry) for entry in payload["mids"]["9001"]["paths"]]
+        repeated = [path for path in paths if repeated_segment_names(path)]
+        self.assertEqual([], repeated)
+        self.assertIn("send_gift_count", paths)
+        self.assertIn("send_gift_count[]", paths)
+        self.assertIn("detail.challenge_times[]", paths)
 
 
 class ReplyConsumerTests(unittest.TestCase):
@@ -85,6 +146,27 @@ class ReplyConsumerTests(unittest.TestCase):
             json.dumps(self.payload, sort_keys=True),
             json.dumps(again, sort_keys=True),
         )
+
+    def test_every_repeated_segment_is_read_at_a_cited_site(self):
+        for mid, record in self.payload["mids"].items():
+            for entry in record["paths"]:
+                path = reply_consumers.path_name(entry)
+                repeated = repeated_segment_names(path)
+                if not repeated:
+                    continue
+                lines = [
+                    self.blobs[self.payload["site_files"][site[0]]].splitlines()[site[1] - 1]
+                    for site in entry[2]
+                ]
+                accessed = set()
+                for line in lines:
+                    accessed |= normalised_access_names(line)
+                for name in repeated:
+                    self.assertIn(
+                        name.replace("_", "").lower(),
+                        accessed,
+                        f"MID {mid} path {path} repeats {name} but no site line reads it: {lines}",
+                    )
 
     def test_waiver_needs_reason_and_client_site(self):
         payload = {
