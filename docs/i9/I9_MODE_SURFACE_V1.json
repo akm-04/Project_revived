@@ -19,9 +19,9 @@
  },
  "counts": {
   "by_disposition": {
-   "DELIVERED": 186,
+   "DELIVERED": 189,
    "ACTIVE": 417,
-   "LATER": 501,
+   "LATER": 498,
    "INACTIVE_SUPERSEDED": 59,
    "INACTIVE_D79": 21
   },
@@ -375,8 +375,8 @@
    "mid": 59,
    "name": "STONE_SUMMON_HERO",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -2801,8 +2801,8 @@
    "mid": 768,
    "name": "GET_REARENA_INFO",
    "family": "BEACH",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": null
   },
@@ -2909,8 +2909,8 @@
    "mid": 781,
    "name": "PET_SUMMON",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
