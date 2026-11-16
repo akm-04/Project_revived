@@ -23,6 +23,10 @@ import (
 // three-level minimum gap; the other numbers are client misc facts.
 const MentorPolicyVersion = domain.MinimumLevelGapPolicy
 
+// MentorFunctionID is the client "My Class" function; its unlock is the
+// qualification both parties of an application must hold.
+const MentorFunctionID int64 = 50
+
 // FindingScanLimit and FindingResultLimit bound the find list. The client misc
 // facts give 20 results and a 100 range; PRIVATE_POLICY D508 uses the range as
 // the per-request candidate scan because the stock server's paging is UNKNOWN.
@@ -44,6 +48,7 @@ type Service struct {
 	Cards       CardReader
 	Friendships FriendshipEnsurer
 	Backgrounds BackgroundReader
+	Functions   FunctionReader
 	Grants      GrantOwner
 	Content     ContentReader
 	Receipts    receipt.Store
@@ -60,7 +65,7 @@ func DefaultProfile() tx.Profile {
 }
 
 func (service Service) validForMutation() bool {
-	return service.Timed.Runner.DB != nil && service.Timed.Binder.Time != nil && service.Players != nil && service.Store != nil && service.Directory != nil && service.Cards != nil && service.Friendships != nil && service.Content != nil && service.Receipts != nil
+	return service.Timed.Runner.DB != nil && service.Timed.Binder.Time != nil && service.Players != nil && service.Store != nil && service.Directory != nil && service.Cards != nil && service.Friendships != nil && service.Functions != nil && service.Content != nil && service.Receipts != nil
 }
 
 func (service Service) validForRead() bool {

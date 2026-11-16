@@ -321,6 +321,7 @@ func main() {
 		Cards:       socialpresentation.TransactionReader{Display: displayService},
 		Friendships: socialrelation.FriendshipEnsurer{Players: i4store.PlayerRootLocker{}, Store: socialRelationDB},
 		Backgrounds: librarystore.Store{},
+		Functions:   i5db,
 		Grants:      i5svc,
 		Content:     contentDB,
 		Receipts:    receipts,

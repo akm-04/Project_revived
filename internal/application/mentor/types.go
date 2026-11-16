@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -135,6 +136,11 @@ type FriendshipEnsurer interface {
 
 type BackgroundReader interface {
 	BackgroundCountTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
+}
+
+// FunctionReader answers the durable function unlock fact owned by I5.
+type FunctionReader interface {
+	ReadFunctionUnlockTx(context.Context, tx.Queryer, identity.PlayerID, int64) (player.FunctionUnlock, bool, error)
 }
 
 type GrantOwner interface {
