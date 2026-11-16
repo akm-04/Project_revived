@@ -31,6 +31,7 @@ import (
 	"gxb.local/backend/v2/internal/application/socialrecall"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/socialrecall"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -57,7 +58,6 @@ func recallClaimHarness(world *recallWorld) (socialrecall.ClaimService, socialre
 		Players:       i4store.PlayerRootLocker{},
 		Content:       content,
 		Awarder:       awarder,
-		Values:        progression,
 		Receipts:      kernelstore.Store{},
 		ReceiptReader: kernelstore.Reader{Queryer: world.pool},
 	}
@@ -156,7 +156,7 @@ func itemAmount(t *testing.T, world *recallWorld, itemID int64) int64 {
 
 func TestRecallClaimReceiptReplayCorruptionAndRefusalNative(t *testing.T) {
 	pool := openRecallStartPool(t)
-	ctx := context.Background()
+	ctx, _ := changes.Track(context.Background())
 	world := seedRecallWorld(t, pool, 131001, 131002, [2]string{"Claimer131001", "Target131002"})
 	ensureClaimEconomy(t, world)
 	startRecallTask(t, world)

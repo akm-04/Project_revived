@@ -16,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	asset "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -24,8 +25,10 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	ins "gxb.local/backend/v2/internal/domain/inscription"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"sync"
 	"testing"
 	"time"
@@ -293,6 +296,7 @@ func TestI7C2FConcurrencyReferenceGuardAndNoPartialSpend(t *testing.T) {
 }
 
 func TestI7C2FClosureSeamsBackfillFreshFacetsOverflowAndCurrentResponse(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	p := pool(t)
 	a, rev, s := inscriptionFixture(t, p)
 	owner := inscriptionstore.Store{}
@@ -321,13 +325,22 @@ func TestI7C2FClosureSeamsBackfillFreshFacetsOverflowAndCurrentResponse(t *testi
 		t.Fatal("mutable observation")
 	}
 	exec(t, p, `UPDATE player_currency_balances SET amount=amount+7 WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID))
-	body, e := s.Response(ctx, a, r, op())
+	var body map[string]any
+	response := stockruntime.Decorated{Next: httpedge.DispatcherFunc(func(ctx context.Context, _ httpedge.DispatchRequest) httpedge.Response {
+		body, e = s.Response(ctx, a, r, op())
+		return httpedge.Response{HTTPStatus: 200, Body: body}
+	})}.Dispatch(ctx, httpedge.DispatchRequest{})
 	if e != nil {
 		t.Fatal(e)
 	}
-	bal := body["economy_"].(map[string]any)["crystal"].(int64)
-	if bal != libraryAmount(t, p, a, "crystal") {
-		t.Fatal("stale absolute receipt")
+	body = response.Body
+	economy, ok := body["economy_"].(map[string]any)
+	if !ok {
+		t.Fatalf("inscription reply lacks economy_ %#v", body)
+	}
+	bal, ok := economy["crystal"].(int64)
+	if !ok || bal != libraryAmount(t, p, a, "crystal") {
+		t.Fatal("stale absolute receipt", body["economy_"])
 	}
 	// Fill the return destination, then remove into canonical overflow Mail.
 	exec(t, p, `UPDATE player_item_stacks SET quantity=999 WHERE player_id=$1 AND item_id=160500101`, int64(a.PlayerID))

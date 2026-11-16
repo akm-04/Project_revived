@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"testing"
 	"time"
@@ -69,6 +70,7 @@ func TestI910CGlueOuterSQLFailureRollsBackCounterValueAndReceipts(t *testing.T) 
 }
 
 func TestI910CGlueOuterCommandReceiptAndDailyLimit(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	database := pool(t)
 	revision := installed(t, database)
 	player := bornActor(t, database)
@@ -84,9 +86,9 @@ func TestI910CGlueOuterCommandReceiptAndDailyLimit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	economy := first.Body["economy_"].(map[string]any)
-	if first.Body["buy_glue_times"] != int64(1) || economy["glue"] != int64(150) || economy["crystal"] != int64(950) {
-		t.Fatal(first)
+	economy, ok := first.Body["economy_"].(map[string]int64)
+	if first.Body["buy_glue_times"] != int64(1) || !ok || economy["glue"] != int64(150) || economy["crystal"] != int64(950) {
+		t.Fatalf("buy glue reply %#v", first)
 	}
 	service.Content = unavailableGlueContent{service.Content}
 	service.GluePrivileges = nil

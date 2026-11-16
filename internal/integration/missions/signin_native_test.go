@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/content/builtin"
@@ -20,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"sync"
 	"testing"
 	"time"
@@ -350,10 +352,16 @@ func TestSignInNativeCrystalAwardWireAndCustody(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, award := range month.Awards {
-		body, err := s.ClaimSignIn(ctx, a, runtimeOperation(t, clock.at))
+		var body map[string]any
+		var err error
+		response := stockruntime.Decorated{Next: httpedge.DispatcherFunc(func(ctx context.Context, _ httpedge.DispatchRequest) httpedge.Response {
+			body, err = s.ClaimSignIn(ctx, a, runtimeOperation(t, clock.at))
+			return httpedge.Response{HTTPStatus: 200, Body: body}
+		})}.Dispatch(ctx, httpedge.DispatchRequest{})
 		if err != nil {
 			t.Fatal(err)
 		}
+		body = response.Body
 		if award.Crystal > 0 {
 			wire := body["award"].(map[string]any)
 			if wire["table_id"] != int64(-1) || wire["item_num"] != award.Crystal || wire["to_stone"] != false {
@@ -363,8 +371,8 @@ func TestSignInNativeCrystalAwardWireAndCustody(t *testing.T) {
 			if err = p.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID)).Scan(&after); err != nil || after-before != award.Crystal {
 				t.Fatal("Crystal custody", before, after, err)
 			}
-			if body["economy_"] == nil {
-				t.Fatal("Crystal balance sideband missing", body)
+			if economy, ok := body["economy_"].(map[string]any); !ok || economy["crystal"] != after {
+				t.Fatalf("Crystal balance sideband missing %#v", body)
 			}
 			return
 		}
