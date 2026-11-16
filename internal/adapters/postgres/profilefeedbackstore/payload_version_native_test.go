@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -92,11 +91,6 @@ VALUES(31,'payload-version-comments',NULL,false,false,false,3199999,3199999,1,no
 	if err := pool.Raw().QueryRow(ctx, `SELECT admission_payload::text,payload_version FROM player_profile_comment_operations WHERE operation_id=$1::uuid`, operationID.String()).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	directory := filepath.Join("testdata", "payloads", commentOperationTable+"."+commentAdmissionColumn)
-	if capture := os.Getenv("GXB_R8_2C_BATCH18_CAPTURE"); capture != "" {
-		captureProfileFeedbackGolden(t, filepath.Join(capture, "internal/adapters/postgres/profilefeedbackstore", directory), storedText)
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -145,26 +139,5 @@ func assertSameProfileFeedbackJSON(t *testing.T, got, want any) {
 	}
 	if !bytes.Equal(gotRaw, wantRaw) {
 		t.Fatalf("decoded=%s want=%s", gotRaw, wantRaw)
-	}
-}
-
-func captureProfileFeedbackGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded app.CommentAdmission
-	if err := payload.Decode(commentOperationTable, 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	expected, err := json.MarshalIndent(decoded, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }

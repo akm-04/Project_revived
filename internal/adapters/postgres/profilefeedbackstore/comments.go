@@ -1,7 +1,6 @@
 package profilefeedbackstore
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,9 +8,9 @@ import (
 	app "gxb.local/backend/v2/internal/application/profilefeedback"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/profilefeedback"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	"io"
 	"time"
 )
 
@@ -143,21 +142,16 @@ func admission(c context.Context, q tx.Queryer, sql string, args ...any) (app.Co
 	var out app.CommentAdmission
 	var raw, state, op, account string
 	var actor, target int64
-	e := q.QueryRow(c, sql, args...).Scan(&op, &actor, &target, &account, &raw, &state)
+	var version int16
+	e := q.QueryRow(c, sql, args...).Scan(&op, &actor, &target, &account, &raw, &version, &state)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return out, false, nil
 	}
 	if e != nil {
 		return out, false, e
 	}
-	dec := json.NewDecoder(bytes.NewReader([]byte(raw)))
-	dec.DisallowUnknownFields()
-	if e = dec.Decode(&out); e != nil {
+	if e = payload.Decode("player_profile_comment_operations", version, []byte(raw), &out); e != nil {
 		return out, true, e
-	}
-	var extra any
-	if dec.Decode(&extra) != io.EOF {
-		return out, true, app.ErrConflict
 	}
 	fp, e := receipt.FingerprintRequest(out.Command)
 	if e != nil || fp != out.Fingerprint {
@@ -180,7 +174,7 @@ func admission(c context.Context, q tx.Queryer, sql string, args ...any) (app.Co
 	return out, true, nil
 }
 
-const admissionFields = `operation_id::text,actor_player_id,target_player_id,account_uid,admission_payload::text,state`
+const admissionFields = `operation_id::text,actor_player_id,target_player_id,account_uid,admission_payload::text,payload_version,state`
 
 func (Store) ReadAdmissionTx(c context.Context, q tx.Queryer, id string, lock bool) (app.CommentAdmission, bool, error) {
 	sql := `SELECT ` + admissionFields + ` FROM player_profile_comment_operations WHERE operation_id=$1::uuid`
@@ -196,11 +190,11 @@ func (Store) InsertAdmissionTx(c context.Context, t tx.Tx, a app.CommentAdmissio
 	if t == nil || a.State != "PENDING" || a.Operation.ID.IsZero() || a.DecisionAt.IsZero() || !a.Actor.Valid() || a.Command.Kind != "post" || a.Target != a.Command.Target || a.Account == "" || a.Context == "" || a.Revision == "" {
 		return app.ErrInvalid
 	}
-	raw, e := json.Marshal(a)
+	raw, version, e := payload.Encode(a)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `INSERT INTO player_profile_comment_operations(operation_id,actor_player_id,target_player_id,account_uid,admission_payload,state) VALUES($1::uuid,$2,$3,$4,$5::jsonb,'PENDING')`, a.Operation.ID.String(), int64(a.Actor), int64(a.Target), a.Account, string(raw))
+	tag, e := t.Exec(c, `INSERT INTO player_profile_comment_operations(operation_id,actor_player_id,target_player_id,account_uid,admission_payload,payload_version,state) VALUES($1::uuid,$2,$3,$4,$5::jsonb,$6,'PENDING')`, a.Operation.ID.String(), int64(a.Actor), int64(a.Target), a.Account, string(raw), version)
 	if e == nil && tag.RowsAffected() != 1 {
 		return app.ErrConflict
 	}
