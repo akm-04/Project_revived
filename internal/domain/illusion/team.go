@@ -22,8 +22,8 @@ type Team struct {
 }
 
 // Validate enforces C5: three seats, master one hero and a pet, mates two
-// heroes and no pets, unique hero table ids, power at least force/30, and
-// academy level 65 within five levels of the master.
+// heroes and no pets, unique hero table ids, each hero's own power at least the
+// member's best-15 force/30, and academy level 65 within five levels of the master.
 func (t Team) Validate() error {
 	if len(t.Members) != TeamSeats {
 		return fmt.Errorf("%w: three seats", ErrRefused)
