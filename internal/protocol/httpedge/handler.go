@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/foundation/undelivered"
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	"gxb.local/backend/v2/internal/protocol/observe"
@@ -32,6 +34,9 @@ type Response struct {
 	Cause error
 	// Inactive marks the shared inactive mode answer (I9_MODE_FRAMEWORK_V1 F5); the journal records INACTIVE_MODE.
 	Inactive bool
+	// Raw is an exact encoded reply body (R6 replay). When non-nil it is written
+	// instead of encoding Body/JSON, so the bytes that were committed come back.
+	Raw []byte
 }
 
 type DispatchRequest struct {
@@ -99,6 +104,21 @@ type Handler struct {
 	// QueueWait, when set, refuses before dispatch when a transaction joining the queue now would take longer
 	// than the request's remaining budget (C1-5). Nil leaves only the in-flight cap in force.
 	QueueWait QueueWaitEstimate
+	// Undelivered, when set, keeps the reply of a state-changing success whose write or flush failed (R6).
+	Undelivered undelivered.Marker
+	// Metrics receives the R6 mark counters; nil disables them.
+	Metrics observability.Metrics
+}
+
+// undeliveredMarkWriteTimeout bounds the separate autocommit mark write, which
+// must not be cancelled with the client connection it is recording.
+const undeliveredMarkWriteTimeout = 2 * time.Second
+
+func (h Handler) counter(name string, delta uint64) {
+	if h.Metrics == nil {
+		return
+	}
+	h.Metrics.Counter(name, observability.Labels{}, delta)
 }
 
 func (h Handler) queueBudget() time.Duration {
@@ -117,24 +137,25 @@ const DefaultQueueBudget = 18 * time.Second
 const rawCaptureBytes = 16 << 10
 
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx, note := observability.WithRequestNote(r.Context())
+	r = r.WithContext(ctx)
 	var record observability.RequestRecord
 	if h.Journal == nil {
-		h.serve(w, r, &record)
+		h.serve(w, r, &record, note)
 		return
 	}
 	started := time.Now()
-	ctx, note := observability.WithRequestNote(r.Context())
 	body := &bodyCapture{reader: r.Body}
-	r = r.WithContext(ctx)
 	r.Body = body
 	recorder := &responseRecorder{ResponseWriter: w}
 	record = observability.RequestRecord{ReceivedAt: started, Disposition: observability.RequestRejectedAtEdge}
-	h.serve(recorder, r, &record)
+	h.serve(recorder, r, &record, note)
 	record.Latency = time.Since(started)
 	record.HTTPStatus = recorder.status
 	record.ResponseBytes = recorder.bytes
 	record.RequestBytes = body.count
 	record.Actor = note.Actor()
+	record.Replay = note.Replayed()
 	keepsRaw := record.Disposition == observability.RequestUnknownMID || record.Disposition == observability.RequestUndecodable
 	if keepsRaw && !strings.HasPrefix(strings.ToLower(r.Header.Get("Content-Type")), "multipart/") {
 		record.Raw = body.prefix
@@ -158,7 +179,7 @@ func writeSaturated(w http.ResponseWriter) {
 	edgeFailure(w, wire.ErrSaturated, "edge_saturated")
 }
 
-func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observability.RequestRecord) {
+func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observability.RequestRecord, note *observability.RequestNote) {
 	if r.Method != http.MethodPost {
 		record.Disposition = observability.RequestUndecodable
 		edgeFailure(w, wire.ErrMalformed, "method_not_allowed")
@@ -249,11 +270,59 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	for k, v := range resp.Headers {
 		w.Header().Set(k, v)
 	}
-	payload := any(resp.Body)
-	if resp.JSON != nil {
-		payload = resp.JSON
+	var encoded []byte
+	var writeErr error
+	encodable := true
+	if resp.Raw != nil {
+		encoded = resp.Raw
+		writeErr = writeRaw(w, status, encoded)
+	} else {
+		payload := any(resp.Body)
+		if resp.JSON != nil {
+			payload = resp.JSON
+		}
+		encoded, encodable, writeErr = writeJSONValue(w, status, payload)
 	}
-	writeJSONValue(w, status, payload)
+	flushErr := http.NewResponseController(w).Flush()
+	if errors.Is(flushErr, http.ErrNotSupported) {
+		flushErr = nil
+	}
+	notDelivered := writeErr != nil || flushErr != nil || r.Context().Err() != nil
+	if notDelivered && encodable {
+		h.markUndelivered(r.Context(), note, int64(decoded.MID), status, resp, op.StartedAt, encoded)
+	}
+}
+
+// markUndelivered records the committed success reply only when the edge can
+// see that it did not reach the client (R6 decision 5). A failed mark write is
+// logged and counted; behaviour then stays as today.
+func (h Handler) markUndelivered(ctx context.Context, note *observability.RequestNote, mid int64, status int, resp Response, at time.Time, reply []byte) {
+	if h.Undelivered == nil || note.Replayed() || !successReply(status, resp) {
+		return
+	}
+	fingerprint, hasFingerprint := note.ParamsFingerprint()
+	actor := note.Actor()
+	if !hasFingerprint || actor.PlayerID <= 0 || actor.SessionID == "" || len(reply) == 0 {
+		return
+	}
+	markContext, cancel := context.WithTimeout(context.WithoutCancel(ctx), undeliveredMarkWriteTimeout)
+	defer cancel()
+	err := h.Undelivered.Mark(markContext, undelivered.Mark{
+		PlayerID: actor.PlayerID, SessionID: actor.SessionID, MID: mid, Fingerprint: fingerprint, Reply: reply, MarkedAt: at.UTC(),
+	})
+	if err != nil {
+		h.counter(undelivered.MarkFailuresTotal, 1)
+		log.Printf("undelivered mark: %v", err)
+		return
+	}
+	h.counter(undelivered.MarksTotal, 1)
+}
+
+func successReply(status int, resp Response) bool {
+	if status != http.StatusOK && resp.HTTPStatus != 0 {
+		return false
+	}
+	return stockErrorCode(resp.Body) == 0
 }
 
 // D5 PRIVATE_POLICY tunables; both are message.lua rows (35028 "Not Available",
@@ -352,6 +421,9 @@ func (r *responseRecorder) Write(p []byte) (int, error) {
 	return n, err
 }
 
+// Unwrap lets http.NewResponseController reach the real writer's Flush.
+func (r *responseRecorder) Unwrap() http.ResponseWriter { return r.ResponseWriter }
+
 func credentialClaims(params map[string]any) wire.CredentialClaims {
 	var out wire.CredentialClaims
 	if s, ok := params["token"].(string); ok {
@@ -378,10 +450,13 @@ func remoteLabel(addr string) string {
 }
 
 func writeJSON(w http.ResponseWriter, status int, body map[string]any) {
-	writeJSONValue(w, status, body)
+	_, _, _ = writeJSONValue(w, status, body)
 }
 
-func writeJSONValue(w http.ResponseWriter, status int, body any) {
+// writeJSONValue returns the exact bytes it attempted to write, whether they
+// are the dispatcher's reply (false on an encoding failure), and the write
+// error. The R6 edge keeps only a committed success reply whose delivery failed.
+func writeJSONValue(w http.ResponseWriter, status int, body any) ([]byte, bool, error) {
 	if body == nil {
 		body = map[string]any{}
 	}
@@ -389,14 +464,24 @@ func writeJSONValue(w http.ResponseWriter, status int, body any) {
 	// failure must not leave an already-committed 2xx response, and it must
 	// never cause the dispatcher/gameplay operation to be executed again.
 	payload, err := json.Marshal(body)
+	encodable := true
 	if err != nil {
 		// U8: the action may have committed, so the client relogs and reloads
 		// (message.lua 20003, the same text as stockruntime sessionFailureMessage).
 		status = http.StatusUnauthorized
 		payload = []byte(`{"error_code":20003,"error_msg":"Unstable network,try to relog in!","error":"response_encoding"}`)
+		encodable = false
 	}
 	payload = append(payload, '\n')
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_, _ = w.Write(payload)
+	_, writeErr := w.Write(payload)
+	return payload, encodable, writeErr
+}
+
+func writeRaw(w http.ResponseWriter, status int, payload []byte) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, err := w.Write(payload)
+	return err
 }
