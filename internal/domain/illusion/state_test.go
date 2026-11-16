@@ -262,6 +262,29 @@ func TestRankBestHitAndShorterTimeTies(t *testing.T) {
 	}
 }
 
+func TestOrderRankKillsFirstThenShorterTimeAndHurt(t *testing.T) {
+	entries := []Result{
+		{PlayerID: 1, Hurt: 900, CostTime: 3},
+		{PlayerID: 2, Hurt: 500, CostTime: 7, Killed: true},
+		{PlayerID: 3, Hurt: 800, CostTime: 5, Killed: true},
+		{PlayerID: 4, Hurt: 700, CostTime: 5, Killed: true},
+		{PlayerID: 5, Hurt: 1000, CostTime: 9},
+	}
+	ordered := OrderRank(entries)
+	want := []int64{3, 4, 2, 5, 1}
+	for index, entry := range ordered {
+		if entry.PlayerID != want[index] {
+			t.Fatalf("rank %d = %+v, want player %d; order %+v", index+1, entry, want[index], ordered)
+		}
+	}
+	if rank, hurt := RankOf(entries, 2); rank != 3 || hurt != 500 {
+		t.Fatalf("RankOf kill = (%d,%d), want (3,500)", rank, hurt)
+	}
+	if rank, hurt := RankOf(entries, 5); rank != 4 || hurt != 1000 {
+		t.Fatalf("RankOf loss = (%d,%d), want (4,1000)", rank, hurt)
+	}
+}
+
 func TestTeamRules(t *testing.T) {
 	valid := func() Team {
 		return Team{Members: []TeamMember{

@@ -443,6 +443,11 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 	if err != nil {
 		return d.TeamPick{}, err
 	}
+	best15, err := heroforce.Best15(c, sc, s.Heroes, s.Stats, seats[index], revision, at)
+	if err != nil {
+		return d.TeamPick{}, err
+	}
+	powerFloor := best15 / d.TeamPowerLimit
 	used := map[int64]bool{}
 	for otherIndex, member := range seats {
 		if otherIndex == index {
@@ -456,12 +461,12 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 			used[tableIDOf(otherRoster, id)] = true
 		}
 	}
-	force := int64(0)
 	powers := make([]int64, 0, len(request.Heroes))
 	picked := make([]int64, 0, len(request.Heroes))
 	for _, tableID := range request.Heroes {
 		if tableID == 0 {
 			picked = append(picked, 0)
+			powers = append(powers, 0)
 			continue
 		}
 		id, owned := idOfTable(roster, "partner_id", tableID)
@@ -478,13 +483,10 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 			return d.TeamPick{}, err
 		}
 		power := int64(result.Stats.Force)
-		powers = append(powers, power)
-		force += power
-	}
-	for _, power := range powers {
-		if power < force/d.TeamPowerLimit {
+		if power < powerFloor {
 			return d.TeamPick{}, fmt.Errorf("%w: hero power", d.ErrRefused)
 		}
+		powers = append(powers, power)
 	}
 	petID := int64(0)
 	if request.PetID > 0 {
@@ -497,7 +499,7 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 			return d.TeamPick{}, fmt.Errorf("%w: pet %d not owned", d.ErrRefused, request.PetID)
 		}
 	}
-	return d.TeamPick{Heroes: picked, PetID: petID, Force: force}, nil
+	return d.TeamPick{Heroes: picked, PetID: petID, Force: best15, Powers: powers}, nil
 }
 
 func (s Mode) heroRows(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time) (map[string]map[string]any, error) {

@@ -253,16 +253,19 @@ func (s Mode) teamFromRoom(c context.Context, q tx.Queryer, room sharedroom.Room
 		if len(pick.Heroes) != expected || slices.Contains(pick.Heroes, 0) || pick.PetID < 0 {
 			return d.Team{}, fmt.Errorf("%w: member pick incomplete", d.ErrRefused)
 		}
+		if len(pick.Powers) != len(pick.Heroes) {
+			return d.Team{}, fmt.Errorf("%w: member pick powers", d.ErrRefused)
+		}
 		roster, err := s.heroRows(c, q, player, at)
 		if err != nil {
 			return d.Team{}, err
 		}
 		member := d.TeamMember{PlayerID: int64(player), Level: profile.Level, Force: pick.Force, PetID: pick.PetID}
-		for _, id := range pick.Heroes {
+		for index, id := range pick.Heroes {
 			if _, owned := roster[fmt.Sprint(id)]; !owned {
 				return d.Team{}, fmt.Errorf("%w: hero %d not owned", d.ErrRefused, id)
 			}
-			member.Heroes = append(member.Heroes, d.Hero{TableID: tableIDOf(roster, id), PartnerID: id, Power: pick.Force})
+			member.Heroes = append(member.Heroes, d.Hero{TableID: tableIDOf(roster, id), PartnerID: id, Power: pick.Powers[index]})
 		}
 		team.Members = append(team.Members, member)
 	}

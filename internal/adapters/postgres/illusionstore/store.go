@@ -98,7 +98,7 @@ func (Store) ReadRankTx(ctx context.Context, q tx.Queryer, serverID, openDay, li
 		return nil, d.ErrInvalid
 	}
 	var raw string
-	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'hurt',hurt,'cost_time',cost_time,'killed',killed) ORDER BY killed DESC,CASE WHEN killed THEN 0 ELSE hurt END DESC,cost_time,player_id),'[]'::jsonb)::text FROM (SELECT player_id,hurt,cost_time,killed FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 ORDER BY killed DESC,CASE WHEN killed THEN 0 ELSE hurt END DESC,cost_time,player_id LIMIT $3) ranked`, serverID, openDay, limit).Scan(&raw)
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'hurt',hurt,'cost_time',cost_time,'killed',killed) ORDER BY killed DESC,CASE WHEN killed THEN 0 ELSE hurt END DESC,cost_time,CASE WHEN killed THEN hurt ELSE 0 END DESC,player_id),'[]'::jsonb)::text FROM (SELECT player_id,hurt,cost_time,killed FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=$2 ORDER BY killed DESC,CASE WHEN killed THEN 0 ELSE hurt END DESC,cost_time,CASE WHEN killed THEN hurt ELSE 0 END DESC,player_id LIMIT $3) ranked`, serverID, openDay, limit).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,8 @@ func (Store) RankOfTx(ctx context.Context, q tx.Queryer, serverID, openDay int64
 		AND (r.killed>t.killed
 		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)>(CASE WHEN t.killed THEN 0 ELSE t.hurt END))
 		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)=(CASE WHEN t.killed THEN 0 ELSE t.hurt END) AND r.cost_time<t.cost_time)
-		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)=(CASE WHEN t.killed THEN 0 ELSE t.hurt END) AND r.cost_time=t.cost_time AND r.player_id<$3)))
+		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)=(CASE WHEN t.killed THEN 0 ELSE t.hurt END) AND r.cost_time=t.cost_time AND (CASE WHEN r.killed THEN r.hurt ELSE 0 END)>(CASE WHEN t.killed THEN t.hurt ELSE 0 END))
+		 OR (r.killed=t.killed AND (CASE WHEN r.killed THEN 0 ELSE r.hurt END)=(CASE WHEN t.killed THEN 0 ELSE t.hurt END) AND r.cost_time=t.cost_time AND (CASE WHEN r.killed THEN r.hurt ELSE 0 END)=(CASE WHEN t.killed THEN t.hurt ELSE 0 END) AND r.player_id<$3)))
 	END`, serverID, openDay, int64(playerID)).Scan(&rank)
 	return rank, err
 }

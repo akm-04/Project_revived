@@ -267,14 +267,19 @@ func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference
 			message := cloneMessage(base)
 			message["room_id"] = view.RoomID
 			message["status"] = view.Status
+			// Illusion.lua:412 plays the report only when is_report is 1, so a
+			// seat with no stored damage_result (one seated after the report)
+			// is told 0 and gets no report_id.
 			if view.ReportID != "" {
-				message["is_report"] = int64(1)
-				message["report_id"] = view.ReportID
-				if raw, ok := view.DamageResults[strconv.FormatInt(int64(player), 10)]; ok {
+				message["is_report"] = int64(0)
+				raw, hasResult := view.DamageResults[strconv.FormatInt(int64(player), 10)]
+				if hasResult {
 					value, err := decodeRawNumber(raw)
 					if err != nil {
 						return err
 					}
+					message["is_report"] = int64(1)
+					message["report_id"] = view.ReportID
 					message["damage_result"] = value
 				}
 			}

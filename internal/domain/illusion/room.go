@@ -17,11 +17,13 @@ const (
 )
 
 // TeamPick is one member's chosen partner ids and master pet, in client wire
-// form. Force is the summed public force the team window displays.
+// form. Force is the member's best-15 public force that the C5 power floor is
+// taken from; Powers holds each picked hero's own force, aligned with Heroes.
 type TeamPick struct {
 	Heroes []int64 `json:"heroes,omitempty"`
 	PetID  int64   `json:"pet_id,omitempty"`
 	Force  int64   `json:"force,omitempty"`
+	Powers []int64 `json:"powers,omitempty"`
 }
 
 // ChatMessage is one delivered room-chat line. Message is the canonical

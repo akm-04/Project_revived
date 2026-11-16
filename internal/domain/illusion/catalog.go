@@ -3,6 +3,7 @@
 package illusion
 
 import (
+	"cmp"
 	"errors"
 	"slices"
 )
@@ -253,31 +254,46 @@ func ClampDamage(reported int64) int64 {
 	return reported
 }
 
-// OrderRank sorts by best hurt descending and ties by the shorter cost time.
+// OrderRank applies D428: a kill ranks above any loss, kills rank by the
+// shorter cost time then the higher hurt, and losses rank by the higher hurt
+// then the shorter cost time.
 func OrderRank(entries []Result) []Result {
 	out := slices.Clone(entries)
-	slices.SortFunc(out, func(left, right Result) int {
-		if left.Hurt != right.Hurt {
-			if left.Hurt > right.Hurt {
-				return -1
-			}
-			return 1
-		}
-		if left.CostTime != right.CostTime {
-			if left.CostTime < right.CostTime {
-				return -1
-			}
-			return 1
-		}
-		if left.PlayerID < right.PlayerID {
-			return -1
-		}
-		if left.PlayerID > right.PlayerID {
-			return 1
-		}
-		return 0
-	})
+	slices.SortFunc(out, compareRank)
 	return out
+}
+
+func compareRank(left, right Result) int {
+	if left.Killed && !right.Killed {
+		return -1
+	}
+	if !left.Killed && right.Killed {
+		return 1
+	}
+	if left.Killed {
+		return compareKilled(left, right)
+	}
+	return compareUnkilled(left, right)
+}
+
+func compareKilled(left, right Result) int {
+	if order := cmp.Compare(left.CostTime, right.CostTime); order != 0 {
+		return order
+	}
+	if order := cmp.Compare(right.Hurt, left.Hurt); order != 0 {
+		return order
+	}
+	return cmp.Compare(left.PlayerID, right.PlayerID)
+}
+
+func compareUnkilled(left, right Result) int {
+	if order := cmp.Compare(right.Hurt, left.Hurt); order != 0 {
+		return order
+	}
+	if order := cmp.Compare(left.CostTime, right.CostTime); order != 0 {
+		return order
+	}
+	return cmp.Compare(left.PlayerID, right.PlayerID)
 }
 
 func RankOf(entries []Result, playerID int64) (int64, int64) {
