@@ -674,15 +674,15 @@ func TestI7C2CFinalExpansionAnnouncesDormExpand(t *testing.T) {
 	a, _, c := dormFixture(t, p)
 	s := dormService(p, p)
 	villa := dormOpen(t, s, a, c, 4, 1)
-	announcements := func() int64 {
+	announcements := func(player identity.PlayerID) int64 {
 		t.Helper()
 		var count int64
-		if e := p.QueryRow(ctx, `SELECT count(*) FROM broadcast_outbox WHERE player_id=$1 AND msg_type=$2`, int64(a.PlayerID), broadcast.DormExpand).Scan(&count); e != nil {
+		if e := p.QueryRow(ctx, `SELECT count(*) FROM broadcast_outbox WHERE player_id=$1 AND msg_type=$2`, int64(player), broadcast.DormExpand).Scan(&count); e != nil {
 			t.Fatal(e)
 		}
 		return count
 	}
-	if got := announcements(); got != 0 {
+	if got := announcements(a.PlayerID); got != 0 {
 		t.Fatal("announcement before final expansion", got)
 	}
 	for level := int64(1); level <= 3; level++ {
@@ -697,7 +697,7 @@ func TestI7C2CFinalExpansionAnnouncesDormExpand(t *testing.T) {
 		if level == 3 {
 			want = 1
 		}
-		if got := announcements(); got != want {
+		if got := announcements(a.PlayerID); got != want {
 			t.Fatal(level, "announcement count", got)
 		}
 	}
@@ -708,5 +708,30 @@ func TestI7C2CFinalExpansionAnnouncesDormExpand(t *testing.T) {
 	}
 	if server != int64(a.LogicalServerID) || mid != int64(broadcast.ActivityMID) || msgType != broadcast.DormExpand || player != int64(a.PlayerID) || fields != "{}" {
 		t.Fatal(server, mid, msgType, player, fields)
+	}
+
+	// The client's expansion timer only reads when it runs out; the stock
+	// FINISH_EXPAND_HOUSE command is the paid skip button. A natural deadline
+	// therefore settles through the owner read and must still announce.
+	natural, _, naturalCatalog := dormFixture(t, p)
+	naturalService := dormService(p, p)
+	naturalVilla := dormOpen(t, naturalService, natural, naturalCatalog, 4, 1)
+	for level := int64(1); level <= 3; level++ {
+		dormCommand(t, naturalService, natural, app.Command{Family: app.Start, HouseID: naturalVilla})
+		exec(t, p, `UPDATE player_dorm_rooms SET pending_expansion=jsonb_set(pending_expansion,'{StartedAt}',to_jsonb(date_trunc('second',clock_timestamp()-interval '4 hours'))) WHERE player_id=$1 AND house_id=$2`, int64(natural.PlayerID), naturalVilla)
+		if _, e := naturalService.Read(ctx, natural, op(), 2514, 0, naturalVilla); e != nil {
+			t.Fatal("natural read", level, e)
+		}
+		room, e := naturalService.Owner.ReadRoomTx(ctx, p, natural.PlayerID, naturalVilla)
+		if e != nil || room.Pending != nil || room.ExpansionLevel != level {
+			t.Fatal("natural settlement", level, room, e)
+		}
+		want := int64(0)
+		if level == 3 {
+			want = 1
+		}
+		if got := announcements(natural.PlayerID); got != want {
+			t.Fatal(level, "natural announcement count", got)
+		}
 	}
 }
