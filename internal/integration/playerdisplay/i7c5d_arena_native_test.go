@@ -607,3 +607,60 @@ func TestI7C5DArenaClosedResultRaceNative(t *testing.T) {
 		t.Fatal("the losing RESULT paid a closed fight")
 	}
 }
+
+// I8_PARENT_CONTRACT_V1 generation_supersede rule 2: a FIGHT while the stage's
+// attempt is open replays the frozen START when only the formation changed;
+// after settlement the recorded result still requires the same choices.
+func TestI7C5DArenaChangedFormationReplaysOpenFightNative(t *testing.T) {
+	pool := pool(t)
+	defer pool.Close()
+	s := arenaService(t, pool)
+	a, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	b, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	for _, actor := range []identity.ActorContext{a, b} {
+		if _, err := s.Info(ctx, actor, op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := s.ModifyDefence(ctx, b, arenaGirls(5), 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	exec(t, pool, `UPDATE arena_players SET defense=jsonb_build_object('heroes','[]'::jsonb,'pet',0) WHERE player_id<>$1`, int64(b.PlayerID))
+	if _, err := s.Match(ctx, a, false, op()); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Start(ctx, a, op()); err != nil {
+		t.Fatal(err)
+	}
+
+	frozen := app.FightCommand{Enemy: b.PlayerID, Formation: arenaGirls(5)}
+	admitFighting(t, pool, s, a, frozen)
+	open, found, err := s.Store.LatestMatchTx(ctx, pool, a.PlayerID)
+	if err != nil || !found {
+		t.Fatalf("latest match: %v", err)
+	}
+	attempts := scalar(t, pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ARENA' AND actor_player_id=$1`, int64(a.PlayerID))
+
+	changed := app.FightCommand{Enemy: b.PlayerID, Formation: arenaGirls(4)}
+	view, err := fightSettled(s, a, changed)
+	if err != nil {
+		t.Fatalf("a changed formation must replay the frozen START: %v", err)
+	}
+	if len(view.Report) == 0 {
+		t.Fatal("the replayed frozen battle carries its report")
+	}
+	settled, found, err := s.Store.LatestMatchTx(ctx, pool, a.PlayerID)
+	if err != nil || !found || settled.Status != d.StatusSettled || settled.AttemptID != open.AttemptID ||
+		len(settled.Formation) != len(open.Formation) || settled.Formation[0].TableID != open.Formation[0].TableID {
+		t.Fatalf("the open START was not replayed: %+v %v", settled, err)
+	}
+	if got := scalar(t, pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ARENA' AND actor_player_id=$1`, int64(a.PlayerID)); got != attempts || got != 1 {
+		t.Fatalf("a replay admitted another attempt: %d -> %d", attempts, got)
+	}
+	if _, err = s.Fight(ctx, a, changed, op()); err == nil {
+		t.Fatal("a changed formation after settlement must not replay the recorded result")
+	}
+	if same, err := s.Fight(ctx, a, frozen, op()); err != nil || same.Win != view.Win || string(same.Report) != string(view.Report) {
+		t.Fatalf("the frozen formation must replay the settled result: %v", err)
+	}
+}

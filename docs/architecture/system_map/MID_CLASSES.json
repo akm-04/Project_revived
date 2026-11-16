@@ -43446,12 +43446,12 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 665,
+     "line": 680,
      "value": "repeatable_read"
     },
     {
@@ -43479,12 +43479,12 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "false"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 665,
+     "line": 680,
      "value": "false"
     },
     {
@@ -43516,12 +43516,12 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "6"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 665,
+     "line": 680,
      "value": "6"
     },
     {
@@ -43589,7 +43589,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.settle",
      "isolation": "repeatable_read",
-     "line": 532,
+     "line": 547,
      "read_only": "false",
      "retry": "6"
     },
@@ -43597,7 +43597,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 665,
+     "line": 680,
      "read_only": "false",
      "retry": "6"
     },
@@ -43877,22 +43877,22 @@
    "isolation": [
     {
      "file": "internal/application/arena/fight.go",
-     "line": 299,
+     "line": 307,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 330,
+     "line": 338,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 665,
+     "line": 680,
      "value": "repeatable_read"
     },
     {
@@ -43915,22 +43915,22 @@
    "read_only": [
     {
      "file": "internal/application/arena/fight.go",
-     "line": 299,
+     "line": 307,
      "value": "false"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 330,
+     "line": 338,
      "value": "false"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "false"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 665,
+     "line": 680,
      "value": "false"
     },
     {
@@ -43957,22 +43957,22 @@
    "retry": [
     {
      "file": "internal/application/arena/fight.go",
-     "line": 299,
+     "line": 307,
      "value": "6"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 330,
+     "line": 338,
      "value": "6"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "6"
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 665,
+     "line": 680,
      "value": "6"
     },
     {
@@ -44040,7 +44040,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.beginFightMatch",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 307,
      "read_only": "false",
      "retry": "6"
     },
@@ -44048,7 +44048,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.admitFight",
      "isolation": "repeatable_read",
-     "line": 330,
+     "line": 338,
      "read_only": "false",
      "retry": "6"
     },
@@ -44056,7 +44056,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.settle",
      "isolation": "repeatable_read",
-     "line": 532,
+     "line": 547,
      "read_only": "false",
      "retry": "6"
     },
@@ -44064,7 +44064,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 665,
+     "line": 680,
      "read_only": "false",
      "retry": "6"
     },
@@ -44762,7 +44762,7 @@
    "isolation": [
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "repeatable_read"
     },
     {
@@ -44775,7 +44775,7 @@
    "read_only": [
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "false"
     },
     {
@@ -44792,7 +44792,7 @@
    "retry": [
     {
      "file": "internal/application/arena/fight.go",
-     "line": 532,
+     "line": 547,
      "value": "6"
     },
     {
@@ -44840,7 +44840,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.settle",
      "isolation": "repeatable_read",
-     "line": 532,
+     "line": 547,
      "read_only": "false",
      "retry": "6"
     },
@@ -129827,7 +129827,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -129855,7 +129855,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -129888,7 +129888,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -129960,7 +129960,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -130469,7 +130469,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -130497,7 +130497,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -130530,7 +130530,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -130602,7 +130602,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -131111,7 +131111,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -131139,7 +131139,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -131172,7 +131172,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -131244,7 +131244,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -131753,7 +131753,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -131781,7 +131781,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -131814,7 +131814,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -131886,7 +131886,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -132395,7 +132395,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -132423,7 +132423,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -132456,7 +132456,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -132528,7 +132528,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -133037,7 +133037,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -133065,7 +133065,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -133098,7 +133098,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -133170,7 +133170,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -133679,7 +133679,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -133707,7 +133707,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -133740,7 +133740,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -133812,7 +133812,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -134321,7 +134321,7 @@
    "isolation": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "repeatable_read"
     },
     {
@@ -134349,7 +134349,7 @@
    "read_only": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "false"
     },
     {
@@ -134382,7 +134382,7 @@
    "retry": [
     {
      "file": "internal/application/championsleague/fight.go",
-     "line": 196,
+     "line": 210,
      "value": "6"
     },
     {
@@ -134454,7 +134454,7 @@
      "file": "internal/application/championsleague/fight.go",
      "function": "Service.terminal",
      "isolation": "repeatable_read",
-     "line": 196,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
