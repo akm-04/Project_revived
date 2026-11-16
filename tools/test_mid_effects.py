@@ -47,23 +47,40 @@ class MidEffectTest(unittest.TestCase):
         document = mid_effects.effect_document(mid_effects.load_mid_classes())
         self.assertTrue(mid_effects.OUTPUT.is_file(), "run tools/mid_effects.py --write")
         self.assertEqual(mid_effects.OUTPUT.read_text(encoding="utf-8"), mid_effects.json_text(document))
+        self.assertTrue(mid_effects.OUTPUT_GO.is_file(), "run tools/mid_effects.py --write")
+        self.assertEqual(mid_effects.OUTPUT_GO.read_text(encoding="utf-8"), mid_effects.go_text(document))
+
+    def test_go_text_lists_reads_and_defaults_to_state(self):
+        document = {"mids": [{"mid": 1, "effect": "state"}, {"mid": 2, "effect": "read"}, {"mid": 3, "effect": "unknown"}]}
+        text = mid_effects.go_text(document)
+        self.assertIn("\t2: {},", text)
+        self.assertNotIn("\t1: {},", text)
+        self.assertNotIn("\t3: {},", text)
 
     def test_check_detects_stale_and_accepts_current(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "MID_CLASSES.json"
             output = Path(directory) / "MID_EFFECTS.json"
+            output_go = Path(directory) / "effects_gen.go"
             source.write_text(json.dumps({"mids": [record("state")]}), encoding="utf-8")
             output.write_text("{}\n", encoding="utf-8")
-            with patch.object(mid_effects, "MID_CLASSES", source), patch.object(mid_effects, "OUTPUT", output), \
-                    patch.object(sys, "argv", ["mid_effects.py", "--check"]), redirect_stdout(StringIO()) as captured:
-                self.assertEqual(mid_effects.main(), 1)
-            self.assertIn("stale: %s" % output, captured.getvalue())
-            with patch.object(mid_effects, "MID_CLASSES", source), patch.object(mid_effects, "OUTPUT", output), \
-                    patch.object(sys, "argv", ["mid_effects.py", "--write"]), redirect_stdout(StringIO()):
-                self.assertEqual(mid_effects.main(), 0)
-            with patch.object(mid_effects, "MID_CLASSES", source), patch.object(mid_effects, "OUTPUT", output), \
-                    patch.object(sys, "argv", ["mid_effects.py", "--check"]), redirect_stdout(StringIO()):
-                self.assertEqual(mid_effects.main(), 0)
+            output_go.write_text("stale\n", encoding="utf-8")
+            patches = (patch.object(mid_effects, "MID_CLASSES", source), patch.object(mid_effects, "OUTPUT", output),
+                       patch.object(mid_effects, "OUTPUT_GO", output_go))
+            for active in patches:
+                active.start()
+            try:
+                with patch.object(sys, "argv", ["mid_effects.py", "--check"]), redirect_stdout(StringIO()) as captured:
+                    self.assertEqual(mid_effects.main(), 1)
+                self.assertIn("stale: %s" % output, captured.getvalue())
+                self.assertIn("stale: %s" % output_go, captured.getvalue())
+                with patch.object(sys, "argv", ["mid_effects.py", "--write"]), redirect_stdout(StringIO()):
+                    self.assertEqual(mid_effects.main(), 0)
+                with patch.object(sys, "argv", ["mid_effects.py", "--check"]), redirect_stdout(StringIO()):
+                    self.assertEqual(mid_effects.main(), 0)
+            finally:
+                for active in patches:
+                    active.stop()
 
 
 if __name__ == "__main__":
