@@ -1347,6 +1347,7 @@
    ],
    "oneonone": [
     "*DebitMaterialCostTx",
+    "*DeliverNoticeTx",
     "*DeliverTx",
     "*FenceActorTx",
     "*LockRecipientsTx",
@@ -4717,6 +4718,7 @@
    ],
    "i5": [
     "*DebitMaterialCostTx",
+    "*DeliverNoticeTx",
     "*DeliverTx",
     "*FenceActorTx",
     "*LockRecipientsTx",

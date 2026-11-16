@@ -32,6 +32,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	mrecord "gxb.local/backend/v2/internal/domain/mail"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -92,6 +93,17 @@ type observedFrameMail struct {
 func (mail observedFrameMail) LockRecipientsTx(ctx context.Context, transaction tx.Tx, recipients []identity.PlayerID) error {
 	mail.lockOnce.Do(func() { close(mail.lockAttempted) })
 	return mail.Mail.LockRecipientsTx(ctx, transaction, recipients)
+}
+
+// DeliverNoticeTx lets the wrapper serve the oneonone Mail seam as well.
+func (mail observedFrameMail) DeliverNoticeTx(ctx context.Context, transaction tx.Tx, request i5.SettlementMailRequest) (mrecord.Record, bool, error) {
+	notice, ok := mail.Mail.(interface {
+		DeliverNoticeTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mrecord.Record, bool, error)
+	})
+	if !ok {
+		return mrecord.Record{}, false, errors.New("wrapped mail has no notice seam")
+	}
+	return notice.DeliverNoticeTx(ctx, transaction, request)
 }
 
 // topFloorPlayer is a genuine combat owner with function 4 open and an Achievement root.

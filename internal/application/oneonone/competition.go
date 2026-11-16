@@ -28,6 +28,8 @@ const (
 	rewardMailKind = "ONE_ON_ONE_REWARD"
 	// Private policy: the rank-1 frame (stack cap 1) travels in its own mail, once per player.
 	frameMailKind = "ONE_ON_ONE_FRAME"
+	// LEGEND_KUAFU_MAIL notifies every Sunday title award (C5C "Titles").
+	titleMailKind = "ONE_ON_ONE_TITLE"
 )
 
 func Profile() tx.Profile {
@@ -186,8 +188,9 @@ func (s Service) transitionTx(c context.Context, sc gen.TimedScope, next d.Trans
 	return s.Store.SaveCompetitionTx(c, sc.Tx, root, old)
 }
 
-// settleTx mails legend_reward by server rank, the rank-1 frame once, records
-// Sunday titles by global rank and feeds Achievement 100002 per server.
+// settleTx mails legend_reward by server rank, the rank-1 frame once, notifies
+// every Sunday title by global rank, records the settlements and feeds
+// Achievement 100002 per server.
 func (s Service) settleTx(c context.Context, sc gen.TimedScope, catalog d.Catalog, revision string, root d.Competition, ranked []d.Ranked, next d.Transition) error {
 	at := sc.Operation.DecisionAt()
 	settlement := d.Settlement{Day: next.Key, CutoffAt: next.At, SettledAt: at, CompetitionVersion: root.StateVersion, ContentRevision: revision}
@@ -197,6 +200,9 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, catalog d.Catalo
 	mailRecipients := []identity.PlayerID{}
 	frameRequests := []i5.FrameStackRequest{}
 	for _, award := range awards {
+		if award.Title != nil {
+			mailRecipients = append(mailRecipients, award.Player)
+		}
 		if award.Reward == nil {
 			continue
 		}
@@ -244,6 +250,10 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, catalog d.Catalo
 		}
 		if a.Title != nil {
 			row.TitleEnd = at.Unix() + a.Title.Seconds
+			if _, _, err := s.Mail.DeliverNoticeTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: a.Player, SourceKind: titleMailKind, SourceKey: strconv.FormatInt(next.Key, 10),
+				Title: catalog.Mail["LEGEND_KUAFU_MAIL_TITLE"], Sender: catalog.Mail["LEGEND_KUAFU_MAIL_SENDER"], Body: fmt.Sprintf(catalog.Mail["LEGEND_KUAFU_MAIL_TEXT"], a.Global), PolicyVersion: d.ContractID, At: at}); err != nil {
+				return err
+			}
 		}
 		settlement.Rows = append(settlement.Rows, row)
 		if _, seen := tops[a.Server]; !seen {
