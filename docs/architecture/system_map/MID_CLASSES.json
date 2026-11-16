@@ -106903,6 +106903,21 @@
      "statement": "WITH a AS ("
     },
     {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -107708,7 +107723,7 @@
    "isolation": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "repeatable_read"
     },
     {
@@ -107726,7 +107741,7 @@
    "read_only": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "true"
     },
     {
@@ -107746,7 +107761,7 @@
    "retry": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "8"
     },
     {
@@ -107788,7 +107803,7 @@
      "file": "internal/application/adventure/room_service.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 171,
+     "line": 179,
      "read_only": "true",
      "retry": "8"
     },
@@ -108059,6 +108074,21 @@
      "file": "internal/adapters/postgres/contentstore/super_equipment.go",
      "line": 36,
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -108128,7 +108158,7 @@
    "isolation": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "repeatable_read"
     },
     {
@@ -108146,7 +108176,7 @@
    "read_only": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "true"
     },
     {
@@ -108166,7 +108196,7 @@
    "retry": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "8"
     },
     {
@@ -108208,7 +108238,7 @@
      "file": "internal/application/adventure/room_service.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 171,
+     "line": 179,
      "read_only": "true",
      "retry": "8"
     },
@@ -108479,6 +108509,21 @@
      "file": "internal/adapters/postgres/contentstore/super_equipment.go",
      "line": 36,
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -109087,7 +109132,7 @@
    "isolation": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "repeatable_read"
     },
     {
@@ -109105,7 +109150,7 @@
    "read_only": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "true"
     },
     {
@@ -109125,7 +109170,7 @@
    "retry": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "8"
     },
     {
@@ -109167,7 +109212,7 @@
      "file": "internal/application/adventure/room_service.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 171,
+     "line": 179,
      "read_only": "true",
      "retry": "8"
     },
@@ -109438,6 +109483,21 @@
      "file": "internal/adapters/postgres/contentstore/super_equipment.go",
      "line": 36,
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -110146,7 +110206,7 @@
    "isolation": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "repeatable_read"
     },
     {
@@ -110164,7 +110224,7 @@
    "read_only": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "true"
     },
     {
@@ -110184,7 +110244,7 @@
    "retry": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "8"
     },
     {
@@ -110226,7 +110286,7 @@
      "file": "internal/application/adventure/room_service.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 171,
+     "line": 179,
      "read_only": "true",
      "retry": "8"
     },
@@ -110499,6 +110559,21 @@
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
     },
     {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -110665,7 +110740,7 @@
    "isolation": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "repeatable_read"
     },
     {
@@ -110678,7 +110753,7 @@
    "read_only": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "true"
     },
     {
@@ -110691,7 +110766,7 @@
    "retry": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "8"
     },
     {
@@ -110710,7 +110785,7 @@
      "file": "internal/application/adventure/room_service.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 171,
+     "line": 179,
      "read_only": "true",
      "retry": "8"
     },
@@ -110913,6 +110988,21 @@
      "file": "internal/adapters/postgres/contentstore/super_equipment.go",
      "line": 36,
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -111202,7 +111292,7 @@
    "isolation": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "repeatable_read"
     },
     {
@@ -111220,7 +111310,7 @@
    "read_only": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "true"
     },
     {
@@ -111240,7 +111330,7 @@
    "retry": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "8"
     },
     {
@@ -111282,7 +111372,7 @@
      "file": "internal/application/adventure/room_service.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 171,
+     "line": 179,
      "read_only": "true",
      "retry": "8"
     },
@@ -111553,6 +111643,21 @@
      "file": "internal/adapters/postgres/contentstore/super_equipment.go",
      "line": 36,
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -111725,7 +111830,7 @@
    "isolation": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "repeatable_read"
     },
     {
@@ -111743,7 +111848,7 @@
    "read_only": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "true"
     },
     {
@@ -111763,7 +111868,7 @@
    "retry": [
     {
      "file": "internal/application/adventure/room_service.go",
-     "line": 171,
+     "line": 179,
      "value": "8"
     },
     {
@@ -111805,7 +111910,7 @@
      "file": "internal/application/adventure/room_service.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 171,
+     "line": 179,
      "read_only": "true",
      "retry": "8"
     },
@@ -112076,6 +112181,21 @@
      "file": "internal/adapters/postgres/contentstore/super_equipment.go",
      "line": 36,
      "statement": "SELECT item_id FROM gxb_content_super_equipment_positions WHERE revision_id=$1 AND hero_table_id=$2 AND slot=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",

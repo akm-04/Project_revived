@@ -104,7 +104,7 @@ func (s Mode) admitCoop(c context.Context, q tx.Queryer, a identity.ActorContext
 	return nil
 }
 
-func (s Mode) memberInfo(c context.Context, q tx.Queryer, player identity.PlayerID, force int64) (map[string]any, error) {
+func (s Mode) memberInfo(c context.Context, q tx.Queryer, player identity.PlayerID, force int64, guildName string) (map[string]any, error) {
 	profile, found, err := s.Directory.ProfileTx(c, q, player)
 	if err != nil {
 		return nil, err
@@ -113,15 +113,23 @@ func (s Mode) memberInfo(c context.Context, q tx.Queryer, player identity.Player
 		return nil, d.ErrRefused
 	}
 	return map[string]any{"player_id": int64(profile.PlayerID), "player_name": profile.Name, "avatar_id": profile.AvatarID,
-		"avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "force": force}, nil
+		"avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "force": force, "guild_name": guildName,
+		"conquer_lev": profile.ConquerLevel, "conquer_loop_id": profile.ConquerLoopID}, nil
 }
 
 func (s Mode) roomMembers(c context.Context, q tx.Queryer, room sharedroom.Room, forces map[identity.PlayerID]int64) ([]int64, []any, error) {
+	if s.Guilds == nil {
+		return nil, nil, d.ErrUnavailable
+	}
 	members := room.Members()
+	guildNames, err := s.Guilds.GuildNamesTx(c, q, room.LogicalServerID, members)
+	if err != nil {
+		return nil, nil, err
+	}
 	ids := make([]int64, 0, len(members))
 	infos := make([]any, 0, len(members))
 	for _, member := range members {
-		info, err := s.memberInfo(c, q, member, forces[member])
+		info, err := s.memberInfo(c, q, member, forces[member], guildNames[member])
 		if err != nil {
 			return nil, nil, err
 		}

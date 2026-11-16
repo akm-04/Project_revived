@@ -840,7 +840,7 @@
    "tables": 0
   },
   {
-   "callees": 13,
+   "callees": 14,
    "callers": 1,
    "mids": 20,
    "name": "adventure",

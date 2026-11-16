@@ -17,6 +17,10 @@
    "file": "docs/i9/I9_ADVENTURE_V1.json"
   },
   {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
    "count": 20,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   }
@@ -255,6 +259,7 @@
   "internal/adapters/postgres/adventurestore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/sharedroomstore"
@@ -270,6 +275,8 @@
    "adventure_attempt_settlements",
    "adventure_occurrences",
    "adventure_reports",
+   "guild_memberships",
+   "guilds",
    "gxb_content_activation",
    "gxb_content_revisions",
    "player_directory_profiles",
@@ -293,6 +300,7 @@
   "unit": [
    "observer_test.go",
    "reads_test.go",
+   "room_service_test.go",
    "solo_test.go"
   ]
  }
