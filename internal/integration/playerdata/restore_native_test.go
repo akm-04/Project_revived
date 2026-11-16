@@ -204,6 +204,58 @@ func execSQL(t *testing.T, pool *pg.Pool, statement string, arguments ...any) {
 	}
 }
 
+func countRows(t *testing.T, pool *pg.Pool, statement string, arguments ...any) int {
+	t.Helper()
+	var count int
+	if err := pool.QueryRow(context.Background(), statement, arguments...).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	return count
+}
+
+func appendTableRows(t *testing.T, document *playerdata.Document, table string, rows ...json.RawMessage) {
+	t.Helper()
+	for index := range document.Tables {
+		if document.Tables[index].Table != table {
+			continue
+		}
+		document.Tables[index].Rows = append(document.Tables[index].Rows, rows...)
+		return
+	}
+	t.Fatalf("export has no %s table", table)
+}
+
+func rawRowFor(t *testing.T, document playerdata.Document, table string) json.RawMessage {
+	t.Helper()
+	for _, exported := range document.Tables {
+		if exported.Table != table {
+			continue
+		}
+		if len(exported.Rows) != 1 {
+			t.Fatalf("table %s has %d rows, want 1", table, len(exported.Rows))
+		}
+		return append(json.RawMessage(nil), exported.Rows[0]...)
+	}
+	t.Fatalf("table %s missing from export", table)
+	return nil
+}
+
+func assertSessionUntouched(t *testing.T, pool *pg.Pool, sessionID, contextID ids.UUID) {
+	t.Helper()
+	if countRows(t, pool, `SELECT count(*) FROM account_sessions WHERE session_id=$1 AND revoked_at IS NULL`, sessionID.String()) != 1 {
+		t.Fatal("refused restore revoked the player's session")
+	}
+	if countRows(t, pool, `SELECT count(*) FROM gameplay_contexts WHERE context_id=$1 AND ended_at IS NULL`, contextID.String()) != 1 {
+		t.Fatal("refused restore ended the player's context")
+	}
+}
+
+func seedForeignStack(t *testing.T, pool *pg.Pool, playerID, itemID, quantity int64) {
+	t.Helper()
+	now := time.Now().UTC().Add(-time.Hour)
+	execSQL(t, pool, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,$2,$3,2,$4,$4)`, playerID, itemID, quantity, now)
+}
+
 func newUUID(t *testing.T) ids.UUID {
 	t.Helper()
 	id, err := ids.NewUUID()
@@ -381,6 +433,101 @@ func TestRestoreRefusesInboundRowTheExportLacks(t *testing.T) {
 		t.Fatalf("want inbound refusal naming the table, got %v", err)
 	}
 	assertSnapshotUnchanged(t, before, snapshot(t, fixture, player.id))
+}
+
+// A-071/Amendment 1A: a full valid export of A carrying one B-owned
+// player_item_stacks row is refused; A and B are unchanged and A's session
+// survives, because the refusal rolls the whole transaction back.
+func TestRestoreRefusesAnotherPlayersStackRow(t *testing.T) {
+	fixture := newRestoreFixture(t)
+	player := seedPlayer(t, fixture.pool, false)
+	foreign := seedPlayer(t, fixture.pool, false)
+	const itemID = int64(40001053)
+	seedForeignStack(t, fixture.pool, foreign.id, itemID, 5)
+	foreignDocument := fixture.exportPlayer(t, foreign.id)
+	foreignRow := rawRowFor(t, foreignDocument, "player_item_stacks")
+	execSQL(t, fixture.pool, `DELETE FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, foreign.id, itemID)
+
+	document := fixture.exportPlayer(t, player.id)
+	appendTableRows(t, &document, "player_item_stacks", foreignRow)
+	sessionID, contextID, _ := seedPlayerSession(t, fixture.pool, player)
+	before := snapshot(t, fixture, player.id)
+	foreignBefore := snapshot(t, fixture, foreign.id)
+
+	_, err := fixture.restore(t, document, player.id)
+	if !errors.Is(err, playerdata.ErrRestoreRefused) || !strings.Contains(err.Error(), "player_item_stacks") {
+		t.Fatalf("want cross-player refusal naming the table, got %v", err)
+	}
+	assertSnapshotUnchanged(t, before, snapshot(t, fixture, player.id))
+	assertSnapshotUnchanged(t, foreignBefore, snapshot(t, fixture, foreign.id))
+	if countRows(t, fixture.pool, `SELECT count(*) FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, foreign.id, itemID) != 0 {
+		t.Fatal("refused restore inserted the foreign player's stack")
+	}
+	assertSessionUntouched(t, fixture.pool, sessionID, contextID)
+}
+
+// Parent-owned child from the generated plan: mail_attachments selects through
+// its mail_records parent, so a B-owned attachment is refused even though its
+// table has no player column at all.
+func TestRestoreRefusesAnotherPlayersParentOwnedChildRow(t *testing.T) {
+	fixture := newRestoreFixture(t)
+	player := seedPlayer(t, fixture.pool, false)
+	foreign := seedPlayer(t, fixture.pool, false)
+	mailID := newUUID(t).String()
+	now := time.Now().UTC().Add(-time.Hour)
+	execSQL(t, fixture.pool, `INSERT INTO mail_records(mail_uuid,recipient_player_id,namespace,wire_id,source_kind,source_key,created_at,compatibility_policy_version)VALUES($1::uuid,$2,'NORMAL',900001,'R86C_NATIVE',$1::text,$3,'R8_RESTORE_V1')`, mailID, foreign.id, now)
+	execSQL(t, fixture.pool, `INSERT INTO mail_attachments(mail_uuid,ordinal,grant_line_kind,item_id,amount)VALUES($1,0,'STACK_ITEM',40001053,5)`, mailID)
+	foreignDocument := fixture.exportPlayer(t, foreign.id)
+	attachmentRow := rawRowFor(t, foreignDocument, "mail_attachments")
+	execSQL(t, fixture.pool, `DELETE FROM mail_attachments WHERE mail_uuid=$1`, mailID)
+
+	document := fixture.exportPlayer(t, player.id)
+	appendTableRows(t, &document, "mail_attachments", attachmentRow)
+	sessionID, contextID, _ := seedPlayerSession(t, fixture.pool, player)
+	before := snapshot(t, fixture, player.id)
+	foreignBefore := snapshot(t, fixture, foreign.id)
+
+	_, err := fixture.restore(t, document, player.id)
+	if !errors.Is(err, playerdata.ErrRestoreRefused) || !strings.Contains(err.Error(), "mail_attachments") {
+		t.Fatalf("want parent-owned child refusal naming the table, got %v", err)
+	}
+	assertSnapshotUnchanged(t, before, snapshot(t, fixture, player.id))
+	assertSnapshotUnchanged(t, foreignBefore, snapshot(t, fixture, foreign.id))
+	if countRows(t, fixture.pool, `SELECT count(*) FROM mail_attachments WHERE mail_uuid=$1`, mailID) != 0 {
+		t.Fatal("refused restore inserted the foreign player's attachment")
+	}
+	assertSessionUntouched(t, fixture.pool, sessionID, contextID)
+}
+
+// Owner column that is not player_id: mail_records keys its owner by
+// recipient_player_id, so a B-owned mail record in A's export is refused.
+func TestRestoreRefusesRowUnderAnotherOwnerColumn(t *testing.T) {
+	fixture := newRestoreFixture(t)
+	player := seedPlayer(t, fixture.pool, false)
+	foreign := seedPlayer(t, fixture.pool, false)
+	mailID := newUUID(t).String()
+	now := time.Now().UTC().Add(-time.Hour)
+	execSQL(t, fixture.pool, `INSERT INTO mail_records(mail_uuid,recipient_player_id,namespace,wire_id,source_kind,source_key,created_at,compatibility_policy_version)VALUES($1::uuid,$2,'NORMAL',900002,'R86C_NATIVE',$1::text,$3,'R8_RESTORE_V1')`, mailID, foreign.id, now)
+	foreignDocument := fixture.exportPlayer(t, foreign.id)
+	mailRow := rawRowFor(t, foreignDocument, "mail_records")
+	execSQL(t, fixture.pool, `DELETE FROM mail_records WHERE mail_uuid=$1`, mailID)
+
+	document := fixture.exportPlayer(t, player.id)
+	appendTableRows(t, &document, "mail_records", mailRow)
+	sessionID, contextID, _ := seedPlayerSession(t, fixture.pool, player)
+	before := snapshot(t, fixture, player.id)
+	foreignBefore := snapshot(t, fixture, foreign.id)
+
+	_, err := fixture.restore(t, document, player.id)
+	if !errors.Is(err, playerdata.ErrRestoreRefused) || !strings.Contains(err.Error(), "mail_records") {
+		t.Fatalf("want owner-column refusal naming the table, got %v", err)
+	}
+	assertSnapshotUnchanged(t, before, snapshot(t, fixture, player.id))
+	assertSnapshotUnchanged(t, foreignBefore, snapshot(t, fixture, foreign.id))
+	if countRows(t, fixture.pool, `SELECT count(*) FROM mail_records WHERE mail_uuid=$1`, mailID) != 0 {
+		t.Fatal("refused restore inserted the foreign player's mail record")
+	}
+	assertSessionUntouched(t, fixture.pool, sessionID, contextID)
 }
 
 // insertRedeemedCode writes one issued code and its redemption, the U7 redeem
