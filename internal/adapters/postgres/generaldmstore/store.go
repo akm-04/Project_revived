@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	dm "gxb.local/backend/v2/internal/application/generaldm"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -29,7 +30,7 @@ func (Store) InsertTx(c context.Context, t tx.Tx, i dm.Intent) error {
 	if t == nil || i.Validate() != nil {
 		return dm.ErrInvalid
 	}
-	raw, e := json.Marshal(i)
+	raw, version, e := payload.Encode(i)
 	if e != nil {
 		return e
 	}
@@ -43,7 +44,7 @@ func (Store) InsertTx(c context.Context, t tx.Tx, i dm.Intent) error {
 		}
 		return e
 	}
-	if e = one(c, t, `INSERT INTO personal_dm_payloads(operation_id,payload)VALUES($1::uuid,$2::jsonb)`, i.ID, string(raw)); e != nil {
+	if e = one(c, t, `INSERT INTO personal_dm_payloads(operation_id,payload,payload_version)VALUES($1::uuid,$2::jsonb,$3)`, i.ID, string(raw), version); e != nil {
 		return e
 	}
 	return one(c, t, `INSERT INTO personal_dm_delivery(operation_id,status,state_version,claim_generation,owner_fence,last_observed_at,updated_at)VALUES($1::uuid,'PENDING',1,0,0,$2,$2)`, i.ID, i.LastObservedAt)
@@ -69,11 +70,12 @@ func (Store) UpdateTx(c context.Context, t tx.Tx, i dm.Intent, before int64, at 
 func find(c context.Context, q tx.Queryer, id string, lock bool) (dm.Intent, bool, error) {
 	var i dm.Intent
 	var raw []byte
+	var payloadVersion int16
 	var status string
 	if q == nil || id == "" {
 		return i, false, dm.ErrInvalid
 	}
-	sql := `SELECT i.operation_id::text,i.operation_digest,i.sender_id,i.recipient_id,i.accepted_at,i.expires_at,i.block_version,i.payload_binding_digest,p.payload,d.status,d.state_version,d.claim_generation,d.owner_fence,d.lease_expires_at,d.last_observed_at,d.attempt_committed_at,d.completion_upper_at FROM personal_dm_intents i JOIN personal_dm_delivery d USING(operation_id) LEFT JOIN personal_dm_payloads p USING(operation_id) WHERE i.operation_id=$1::uuid`
+	sql := `SELECT i.operation_id::text,i.operation_digest,i.sender_id,i.recipient_id,i.accepted_at,i.expires_at,i.block_version,i.payload_binding_digest,p.payload,COALESCE(p.payload_version,0),d.status,d.state_version,d.claim_generation,d.owner_fence,d.lease_expires_at,d.last_observed_at,d.attempt_committed_at,d.completion_upper_at FROM personal_dm_intents i JOIN personal_dm_delivery d USING(operation_id) LEFT JOIN personal_dm_payloads p USING(operation_id) WHERE i.operation_id=$1::uuid`
 	if lock {
 		sql += " FOR UPDATE OF d"
 	}
@@ -82,7 +84,7 @@ func find(c context.Context, q tx.Queryer, id string, lock bool) (dm.Intent, boo
 	var accepted, expires, last time.Time
 	var version, claim, fence int64
 	var lease, attempt, upper *time.Time
-	e := q.QueryRow(c, sql, id).Scan(&id0, &digest, &sender, &recipient, &accepted, &expires, &block, &payloadDigest, &raw, &status, &version, &claim, &fence, &lease, &last, &attempt, &upper)
+	e := q.QueryRow(c, sql, id).Scan(&id0, &digest, &sender, &recipient, &accepted, &expires, &block, &payloadDigest, &raw, &payloadVersion, &status, &version, &claim, &fence, &lease, &last, &attempt, &upper)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return i, false, nil
 	}
@@ -90,7 +92,7 @@ func find(c context.Context, q tx.Queryer, id string, lock bool) (dm.Intent, boo
 		return i, false, e
 	}
 	if len(raw) > 0 {
-		if e = json.Unmarshal(raw, &i); e != nil {
+		if e = payload.Decode("personal_dm_payloads", payloadVersion, raw, &i); e != nil {
 			return i, false, e
 		}
 		canonical, e := json.Marshal(i)
