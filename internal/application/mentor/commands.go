@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	domain "gxb.local/backend/v2/internal/domain/mentor"
@@ -159,7 +160,7 @@ func (service Service) Accept(ctx context.Context, actor identity.ActorContext, 
 			return err
 		}
 		if _, err := service.Friendships.EnsureFriendshipTx(ctx, t, actor.PlayerID, from, at); err != nil {
-			return err
+			return friendshipRefusal(err, actor.PlayerID)
 		}
 		actorState, err := service.Store.LockStateTx(ctx, t, actor.PlayerID, actor.LogicalServerID, at)
 		if err != nil {
@@ -441,6 +442,23 @@ func applicationRefusal(err error, studentLevel int64, rules domain.Rules) error
 		return refusal(34009)
 	default:
 		return ErrInvalid
+	}
+}
+
+// friendshipRefusal maps the SocialRelation seam's creation refusals to the
+// mentor relation codes; 34006 is the accept actor's own full list, 34007 the
+// applicant's (message.lua:34006/34007/34014).
+func friendshipRefusal(err error, actor identity.PlayerID) error {
+	var capacity *socialrelation.FriendCapacityError
+	switch {
+	case errors.Is(err, socialrelation.ErrPairBlocked):
+		return refusal(34014)
+	case errors.As(err, &capacity) && capacity.PlayerID == actor:
+		return refusal(34006)
+	case errors.As(err, &capacity):
+		return refusal(34007)
+	default:
+		return err
 	}
 }
 

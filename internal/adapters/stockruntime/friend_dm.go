@@ -99,5 +99,5 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 		return refusalOrTransient(e)
 	}
 	d.Emitter.EmitFriendDM(c, o)
-	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
+	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{"server_time": o.AcceptedAt.Unix()}}
 }

@@ -181,6 +181,48 @@ func TestI9_10FMentorLifeCycleThroughDispatcher(t *testing.T) {
 	expectMentorRefusal(t, mentorCall(t, service, teacher, 1857, map[string]any{"to_player_id": int64(student.PlayerID), "relation_type": int64(2), "msg": ""}), 1857, 34002)
 }
 
+// C3: a filter_str search returns same-server candidates only. The cross-server
+// teacher is otherwise eligible, so only the server filter keeps it out.
+func TestI9_10FMentorFindingFilterStaysOnTheActorServer(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	server := rankingServer(t, p)
+	foreignServer := rankingServer(t, p)
+	for foreignServer == server {
+		foreignServer = rankingServer(t, p)
+	}
+	teacher := mentorActorOn(t, p, server, 60)
+	foreignTeacher := mentorActorOn(t, p, foreignServer, 60)
+	student := mentorActorOn(t, p, server, 20)
+	for _, named := range []struct {
+		actor identity.ActorContext
+		name  string
+	}{{teacher, "LocalTeacher"}, {foreignTeacher, "ForeignTeacher"}, {student, "LocalStudent"}} {
+		exec(t, p, `UPDATE player_profiles SET display_name=$2 WHERE player_id=$1`, int64(named.actor.PlayerID), named.name)
+		exec(t, p, `UPDATE player_directory_profiles SET name=$2 WHERE player_id=$1`, int64(named.actor.PlayerID), named.name)
+	}
+	find := func(filter string) []any {
+		t.Helper()
+		params := map[string]any{"relation_type": int64(1)}
+		if filter != "" {
+			params["filter_str"] = filter
+		}
+		return expectMentorOK(t, mentorCall(t, service, student, 1858, params), 1858)["player_list"].([]any)
+	}
+	if list := find("ForeignTeacher"); len(list) != 0 {
+		t.Fatalf("1858 exact-name search crossed the server: %#v", list)
+	}
+	if list := find(fmt.Sprintf("%d", int64(foreignTeacher.PlayerID))); len(list) != 0 {
+		t.Fatalf("1858 numeric-id search crossed the server: %#v", list)
+	}
+	for filter, want := range map[string]int64{"LocalTeacher": int64(teacher.PlayerID), fmt.Sprintf("%d", int64(teacher.PlayerID)): int64(teacher.PlayerID)} {
+		list := find(filter)
+		if len(list) != 1 || list[0].(map[string]any)["player_id"] != want {
+			t.Fatalf("1858 local search %q = %#v, want teacher %d", filter, list, want)
+		}
+	}
+}
+
 func TestI9_10FMentorDailyApplicationLimit(t *testing.T) {
 	p := pool(t)
 	service := mentorService(p)

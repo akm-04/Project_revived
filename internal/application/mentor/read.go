@@ -252,9 +252,12 @@ func (service Service) Finding(ctx context.Context, actor identity.ActorContext,
 		for _, candidate := range candidates {
 			ids = append(ids, candidate.PlayerID)
 		}
-		states, err := service.Store.CandidateStatesTx(ctx, t, actor.LogicalServerID, ids)
-		if err != nil {
-			return err
+		states := map[identity.PlayerID]CandidateState{}
+		if len(ids) > 0 {
+			states, err = service.Store.CandidateStatesTx(ctx, t, actor.LogicalServerID, ids)
+			if err != nil {
+				return err
+			}
 		}
 		pending, err := service.Store.PendingTargetsTx(ctx, t, actor.PlayerID, actor.LogicalServerID, at)
 		if err != nil {
@@ -315,13 +318,13 @@ func (service Service) findCandidates(ctx context.Context, t tx.Tx, actor identi
 			if !found {
 				return nil, nil
 			}
-			return []playerdirectory.Profile{profile}, nil
+			return appendSameServer(nil, []playerdirectory.Profile{profile}, actor), nil
 		}
 		matches, err := service.Directory.ProfilesByExactNameTx(ctx, t, filter, FindingResultLimit)
 		if err != nil {
 			return nil, err
 		}
-		return matches, nil
+		return appendSameServer(nil, matches, actor), nil
 	}
 	lower, upper, found, err := service.Directory.PlayerIDBoundsTx(ctx, t)
 	if err != nil {
@@ -340,26 +343,28 @@ func (service Service) findCandidates(ctx context.Context, t tx.Tx, actor identi
 	if err != nil {
 		return nil, err
 	}
-	out := make([]playerdirectory.Profile, 0, len(rows))
-	appendRows := func(rows []playerdirectory.Profile) {
-		for _, row := range rows {
-			if row.PlayerID == actor.PlayerID || logicalserver.PlayerRegion(row.PlayerID) != actor.LogicalServerID {
-				continue
-			}
-			out = append(out, row)
-		}
-	}
-	appendRows(rows)
+	out := appendSameServer(nil, rows, actor)
 	if len(out) < FindingScanLimit && start > bandLow {
 		rows, err = service.Directory.ProfilesAfterTx(ctx, t, bandLow-1, FindingScanLimit)
 		if err != nil {
 			return nil, err
 		}
-		appendRows(rows)
+		out = appendSameServer(out, rows, actor)
 	}
 	_ = lower
 	_ = upper
 	return out, nil
+}
+
+// The find list is server-scoped and never offers the actor (contract C3).
+func appendSameServer(out []playerdirectory.Profile, rows []playerdirectory.Profile, actor identity.ActorContext) []playerdirectory.Profile {
+	for _, row := range rows {
+		if row.PlayerID == actor.PlayerID || logicalserver.PlayerRegion(row.PlayerID) != actor.LogicalServerID {
+			continue
+		}
+		out = append(out, row)
+	}
+	return out
 }
 
 func (service Service) readCards(ctx context.Context, t tx.Tx, ids []identity.PlayerID) (map[identity.PlayerID]playerpresentation.Projected, error) {

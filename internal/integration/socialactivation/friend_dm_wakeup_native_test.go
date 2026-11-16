@@ -71,6 +71,9 @@ func TestFriendDMWakeupEmitsThroughProductionEmitter(t *testing.T) {
 	if response.HTTPStatus != 200 {
 		t.Fatalf("private message status=%d body=%+v", response.HTTPStatus, response.Body)
 	}
+	if response.Body["server_time"] != occurrence.AcceptedAt.Unix() {
+		t.Fatalf("private message server_time=%v want %d", response.Body["server_time"], occurrence.AcceptedAt.Unix())
+	}
 	select {
 	case payload := <-payloads:
 		if !strings.Contains(payload, frienddm.WakeupRoute) {

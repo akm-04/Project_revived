@@ -83337,6 +83337,11 @@
      "file": "internal/adapters/postgres/mentorstore/transaction.go",
      "line": 13,
      "statement": "SELECT current_setting('transaction_read_only')::boolean"
+    },
+    {
+     "file": "internal/adapters/postgres/socialrelationstore/store.go",
+     "line": 133,
+     "statement": "SELECT blocker_player_id,blocked_player_id,generation,active,activated_at,removed_at,state_version,updated_at FROM social_blocks WHERE blocker_player_id=$1 AND blocked_player_id=$2 FOR UPDATE"
     }
    ],
    "unknown": [
