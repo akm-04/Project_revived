@@ -800,6 +800,102 @@ func TestI9_10OneOnOneConcurrentAttackersRankChangedNative(t *testing.T) {
 	}
 }
 
+func sameTeams(left, right []d.Team) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index].Pet != right[index].Pet || !slices.Equal(left[index].Heroes, right[index].Heroes) {
+			return false
+		}
+	}
+	return true
+}
+
+// oneOnOneStartStall stalls resolution while stall is true, keeping a match
+// open as a request whose rounds are still resolving does.
+type oneOnOneStartStall struct {
+	app.Combat
+	stall bool
+}
+
+func (rounds *oneOnOneStartStall) ResolveDetached(c context.Context, operationContext operation.Context, attempt ids.UUID) *combat.Flight {
+	if !rounds.stall {
+		return rounds.Combat.ResolveDetached(c, operationContext, attempt)
+	}
+	flight := &combat.Flight{Done: make(chan struct{}), Err: cd.ErrResolverRetryable}
+	close(flight.Done)
+	return flight
+}
+
+// TestClosureE4OneOnOneStartReplayIdentityNative: a START whose only change is
+// the formation replays the open match's frozen START (I8_PARENT_CONTRACT_V1
+// generation_supersede), and only an identical formation replays after settlement.
+func TestClosureE4OneOnOneStartReplayIdentityNative(t *testing.T) {
+	databasePool := pool(t)
+	defer databasePool.Close()
+	service := oneOnOneService(t, databasePool)
+	server := rankingServer(t, databasePool)
+	actor, heroes := oneOnOnePlayer(t, databasePool, server)
+	enemy, enemyHeroes := oneOnOnePlayer(t, databasePool, server)
+	for _, side := range []struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}{{actor, heroes}, {enemy, enemyHeroes}} {
+		if _, err := service.Load(ctx, side.actor, op()); err != nil {
+			t.Fatal(err)
+		}
+		if err := service.ChangeTeams(ctx, side.actor, teamsOf(side.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	exec(t, databasePool, `UPDATE one_on_one_players SET points=4500,state_version=state_version+1 WHERE player_id=$1`, int64(enemy.PlayerID))
+	pinOneOnOneOffer(t, databasePool, actor, enemy.PlayerID)
+	if !oneOnOneCatalog(t, databasePool).Open(time.Now()) {
+		t.Skip("1 on 1 START is closed outside 08:00-22:00 GMT+8")
+	}
+	first := app.StartCommand{Formations: teamsOf(heroes, 3), Enemy: enemy.PlayerID}
+	stall := &oneOnOneStartStall{Combat: service.Combat, stall: true}
+	service.Combat = stall
+	if _, err := service.Start(ctx, actor, first, op()); err == nil {
+		t.Fatal("an unresolved match must not answer a result")
+	}
+	open, found, err := (oneononestore.Store{}).LatestMatchTx(ctx, databasePool, actor.PlayerID)
+	if err != nil || !found || open.Status != d.StatusStarted || !sameTeams(open.AttackTeams, first.Formations) {
+		t.Fatalf("open match %+v found=%v err=%v", open, found, err)
+	}
+	stall.stall = false
+	second := app.StartCommand{Formations: teamsOf(heroes[3:], 3), Enemy: enemy.PlayerID}
+	replay, err := startSettled(service, actor, second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if scalar(t, databasePool, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1`, int64(actor.PlayerID)) != 1 ||
+		scalar(t, databasePool, `SELECT tries_left FROM one_on_one_players WHERE player_id=$1`, int64(actor.PlayerID)) != 9 {
+		t.Fatal("a changed formation must replay the open START: one match, one try")
+	}
+	frozen := map[string]bool{}
+	for _, round := range open.Rounds {
+		frozen[round.AttemptID.String()] = true
+	}
+	if len(replay.ReportKeys) != len(replay.Wins) {
+		t.Fatalf("replay %+v", replay)
+	}
+	for _, key := range replay.ReportKeys {
+		if key != "" && !frozen[key] {
+			t.Fatalf("replayed report %q is not a frozen attempt of the open match", key)
+		}
+	}
+	// The settled-replay window still requires the same formation: a changed choice starts a new match.
+	exec(t, databasePool, `UPDATE one_on_one_players SET last_fight_at=NULL,state_version=state_version+1 WHERE player_id=$1`, int64(actor.PlayerID))
+	pinOneOnOneOffer(t, databasePool, actor, enemy.PlayerID)
+	third, err := startSettled(service, actor, second)
+	if err != nil || len(third.Wins) == 0 ||
+		scalar(t, databasePool, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1`, int64(actor.PlayerID)) != 2 {
+		t.Fatal("a changed formation after settlement must start a new match")
+	}
+}
+
 func oneOnOneGlobalRank(t *testing.T, p *pg.Pool, pid identity.PlayerID) int64 {
 	t.Helper()
 	standings, err := (oneononestore.Store{}).StandingsTx(ctx, p)

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"slices"
 	"time"
 
@@ -39,8 +40,10 @@ type StartCommand struct {
 	Enemy      identity.PlayerID
 }
 
+// The stage is the opponent, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only the formation changed.
 func fingerprint(pid identity.PlayerID, r StartCommand) string {
-	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "formations": r.Formations, "enemy": int64(r.Enemy)})
+	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "enemy": int64(r.Enemy)})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
@@ -91,7 +94,9 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 	if err != nil {
 		return d.MatchView{}, err
 	}
-	if found && latest.Fingerprint == fp && (latest.Status == d.StatusStarted || now.Sub(latest.StartedAt) < replayWindow) {
+	openReplay := found && latest.Fingerprint == fp && latest.Status == d.StatusStarted
+	settledReplay := found && latest.Fingerprint == fp && reflect.DeepEqual(latest.AttackTeams, r.Formations) && now.Sub(latest.StartedAt) < replayWindow
+	if openReplay || settledReplay {
 		return s.finish(c, a, latest, op, deadline)
 	}
 	// Server-authoritative results always apply: an abandoned match settles first.

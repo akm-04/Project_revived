@@ -223,7 +223,8 @@
    "oneonone.json"
   ],
   "unit": [
-   "competition_test.go"
+   "competition_test.go",
+   "match_test.go"
   ]
  }
 }
