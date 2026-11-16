@@ -50,3 +50,5 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00157: I9-10 Hero Recommend per-logical-server weekly derived snapshot.
 - 00158: R3 per-player game-day marker of the last delivered daily reset signal. Empty on upgrade.
 - 00159: R7 stored per-board score row (policy, player, score, score_since, revision, metric) with the board ordering index. Empty on upgrade; the R7 backfill seeds it.
+- 00166: R6 undelivered-reply replay cache: one row per player for the latest committed reply the edge could not deliver. Cache, never restored; cleared by the player's next state-changing request. Empty on upgrade.
+- 00167: R6 request journal replay flag: the edge marks a line answered from an undelivered-reply mark.

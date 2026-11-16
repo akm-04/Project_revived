@@ -2177,6 +2177,20 @@
       "owner": "typed-economy",
       "write_exceptions": []
     },
+    "player_undelivered_replies": {
+      "allowed_query_owners": [
+        "undelivered"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/undeliveredstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/undeliveredstore/"
+      ],
+      "migration": "migrations/00166_r6_undelivered_replies.sql",
+      "owner": "undelivered",
+      "write_exceptions": []
+    },
     "players": {
       "allowed_query_owners": [
         "identity/logicalserver/bootstrap",

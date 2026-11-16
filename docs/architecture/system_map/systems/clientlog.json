@@ -46,10 +46,12 @@
  },
  "tests": {
   "integration": [
-   "clientlog"
+   "clientlog",
+   "undeliveredreplay"
   ],
   "scenarios_naming": [],
   "unit": [
+   "journal_test.go",
    "service_test.go"
   ]
  }

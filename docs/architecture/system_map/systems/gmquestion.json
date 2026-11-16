@@ -257,7 +257,8 @@
  },
  "tests": {
   "integration": [
-   "playerdisplay"
+   "playerdisplay",
+   "undeliveredreplay"
   ],
   "scenarios_naming": [
    "i9_10_gm_question.json"
