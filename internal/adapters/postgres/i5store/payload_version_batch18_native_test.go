@@ -8,7 +8,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -119,13 +118,6 @@ VALUES(30,'payload-version-i5-batch18',NULL,false,false,false,3099999,3099999,1,
 	if err := pool.Raw().QueryRow(ctx, `SELECT grant_plan::text,payload_version FROM redeem_reward_bundle_revisions WHERE reward_bundle_revision_id=$1::uuid`, bundleID.String()).Scan(&planText, &planVersion); err != nil {
 		t.Fatal(err)
 	}
-	if capture := os.Getenv("GXB_R8_2C_BATCH18_CAPTURE"); capture != "" {
-		root := filepath.Join(capture, "internal/adapters/postgres/i5store/testdata/payloads")
-		captureDisplayGolden(t, filepath.Join(root, "player_display_admissions.payload"), displayText)
-		captureAudienceGolden(t, filepath.Join(root, "redeem_campaigns.audience_policy"), audienceText)
-		capturePlanGolden(t, filepath.Join(root, "redeem_reward_bundle_revisions.grant_plan"), planText)
-		return
-	}
 	if displayVersion != payload.Current {
 		t.Fatalf("player_display_admissions payload_version=%d want=%d", displayVersion, payload.Current)
 	}
@@ -221,53 +213,6 @@ func newBatch18UUIDs() (ids.UUID, ids.UUID, ids.UUID, error) {
 		return ids.UUID{}, ids.UUID{}, ids.UUID{}, err
 	}
 	return bundle, campaign, code, nil
-}
-
-func captureDisplayGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded app.Admission
-	if err := payload.Decode("player_display_admissions", 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	if err := writeI5Batch18Golden(directory, stored, decoded); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func captureAudienceGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded audienceJSON
-	if err := payload.Decode("redeem_campaigns", 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	if err := writeI5Batch18Golden(directory, stored, decoded); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func capturePlanGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded grant.Plan
-	if err := payload.Decode("redeem_reward_bundle_revisions", 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	if err := writeI5Batch18Golden(directory, stored, decoded); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func writeI5Batch18Golden(directory, stored string, value any) error {
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		return err
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		return err
-	}
-	return os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644)
 }
 
 func assertSameI5Batch18JSON(t *testing.T, got, want any) {
