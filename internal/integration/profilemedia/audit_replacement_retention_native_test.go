@@ -16,6 +16,11 @@ func TestAuditA069RecentlyReplacedOldAvatarKeepsItsURLWindow(t *testing.T) {
 	actor := actor(t, pool)
 	service := mediaService(pool, pool, blobs(t))
 	first := upload(t, service, actor, pngBytes(t, 21), op())
+	// The aged publication is a time-travel fixture; restore it so later tests
+	// in the shared native database can still verify the joint media proof.
+	t.Cleanup(func() {
+		sqlExec(t, pool, `UPDATE player_public_profile_media_history SET decision_at=$2 WHERE operation_id=$1`, first.History.Operation.String(), first.History.DecisionAt)
+	})
 	sqlExec(t, pool, `UPDATE player_public_profile_media_history SET decision_at=clock_timestamp()-interval '20 days' WHERE operation_id=$1`, first.History.Operation.String())
 	second := upload(t, service, actor, pngBytes(t, 41), op())
 	if second.History.Operation == first.History.Operation {

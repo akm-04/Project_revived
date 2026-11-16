@@ -76,7 +76,10 @@ func (Store) DeleteExpiredMediaHistory(c context.Context, t tx.Tx, replacedBefor
 	}
 	query := `WITH doomed AS (
 SELECT h.operation_id FROM player_public_profile_media_history h
-WHERE h.decision_at < $1
+WHERE EXISTS (SELECT 1 FROM player_public_profile_media_history n
+              WHERE n.player_id = h.player_id
+                AND (n.decision_at, n.operation_id) > (h.decision_at, h.operation_id)
+                AND n.decision_at < $1)
   AND NOT EXISTS (SELECT 1 FROM player_public_profile_media_current c
                   WHERE c.player_id = h.player_id AND c.operation_id = h.operation_id)
   AND NOT EXISTS (SELECT 1 FROM player_public_profile_media_history child
