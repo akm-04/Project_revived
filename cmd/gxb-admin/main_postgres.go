@@ -118,10 +118,6 @@ func run(ctx context.Context, arguments []string, dsn string) error {
 		emitRefusal(ctx, pool, command, target, operationContext)
 		return fmt.Errorf("revoke-session refused: %w", err)
 	}
-	if !result.Changed {
-		emitRefusal(ctx, pool, command, target, operationContext)
-		return errors.New("revoke-session refused: session is already revoked")
-	}
 	fmt.Printf("revoked session %s for %s %s by %s\n", result.SessionID, target.kind(), target.key(), command.Operator)
 	return nil
 }

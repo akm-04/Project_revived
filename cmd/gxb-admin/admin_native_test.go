@@ -14,9 +14,11 @@ import (
 
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/bootstrap"
+	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -57,7 +59,7 @@ func adminExecute(t *testing.T, pool *postgres.Pool, statement string, arguments
 	}
 }
 
-func adminLivePlayer(t *testing.T, pool *postgres.Pool, at time.Time, secret []byte) (identity.PlayerID, string) {
+func adminLivePlayer(t *testing.T, pool *postgres.Pool, at time.Time, secret []byte) (identity.PlayerID, ids.UUID, string) {
 	t.Helper()
 	account, session := adminIdentifier(t), adminIdentifier(t)
 	credentials := bootstrap.AccountCredentials{SID: "l3b-admin-sid-" + session.String(), LoginToken: "l3b-admin-login-" + session.String()}
@@ -85,7 +87,7 @@ func adminLivePlayer(t *testing.T, pool *postgres.Pool, at time.Time, secret []b
 	if err != nil {
 		t.Fatal(err)
 	}
-	return result.ContextPlan.Selected.PlayerID, result.Token
+	return result.ContextPlan.Selected.PlayerID, session, result.Token
 }
 
 func adminRequest(token string, at time.Time) httpedge.DispatchRequest {
@@ -119,7 +121,7 @@ func TestOperatorRevokeByPlayerEndsBearerAndAudits(t *testing.T) {
 	pool := adminPool(t, dsn)
 	at := time.Date(2026, 11, 16, 0, 0, 0, 0, time.UTC)
 	secret := []byte("l3b-admin-native-secret")
-	player, token := adminLivePlayer(t, pool, at, secret)
+	player, _, token := adminLivePlayer(t, pool, at, secret)
 
 	if err := run(ctx, []string{"-player", fmt.Sprint(int64(player)), "-operator", "operator-7", "-reason", "support"}, dsn); err != nil {
 		t.Fatalf("revoke-session: %v", err)
@@ -175,6 +177,75 @@ func TestOperatorRevokeRefusalsAreAudited(t *testing.T) {
 	_, _, targetKind, targetKey, outcome, _ = adminAuditRow(t, pool, "operator-9")
 	if targetKind != "session" || targetKey != unknown.String() || outcome != "REFUSED" {
 		t.Fatalf("unknown-session audit target=%s/%s outcome=%s", targetKind, targetKey, outcome)
+	}
+}
+
+func adminAuditOutcomes(t *testing.T, pool *postgres.Pool, targetKey string) (int64, int64) {
+	t.Helper()
+	var succeeded, refused int64
+	if err := pool.QueryRow(context.Background(), `SELECT count(*) FILTER (WHERE outcome='SUCCEEDED'), count(*) FILTER (WHERE outcome='REFUSED') FROM operator_audit_events WHERE target_key=$1`, targetKey).Scan(&succeeded, &refused); err != nil {
+		t.Fatalf("audit outcomes for %s: %v", targetKey, err)
+	}
+	return succeeded, refused
+}
+
+// A second audited revocation of the same session with the same reason refuses
+// and leaves exactly one SUCCEEDED and one REFUSED row.
+func TestOperatorRevokeSecondRunRefusedKeepsOneOutcomeEach(t *testing.T) {
+	dsn := os.Getenv("GXB_L3B_ADMIN_DSN")
+	if dsn == "" {
+		t.Fatal("GXB_L3B_ADMIN_DSN is required")
+	}
+	ctx := context.Background()
+	pool := adminPool(t, dsn)
+	at := time.Date(2026, 11, 16, 0, 0, 0, 0, time.UTC)
+	secret := []byte("l3b-admin-native-secret")
+	_, session, _ := adminLivePlayer(t, pool, at, secret)
+	arguments := []string{"-session", session.String(), "-operator", "operator-10", "-reason", "support"}
+	if err := run(ctx, arguments, dsn); err != nil {
+		t.Fatalf("first revoke: %v", err)
+	}
+	if err := run(ctx, arguments, dsn); err == nil {
+		t.Fatal("second revoke of the same session was accepted")
+	}
+	succeeded, refused := adminAuditOutcomes(t, pool, session.String())
+	if succeeded != 1 || refused != 1 {
+		t.Fatalf("audit outcomes succeeded=%d refused=%d, want 1/1", succeeded, refused)
+	}
+}
+
+// A session revoked without audit and then revoked through gxb-admin records
+// only the REFUSED row.
+func TestOperatorRevokeAfterUnauditedRevocationRecordsOnlyRefusal(t *testing.T) {
+	dsn := os.Getenv("GXB_L3B_ADMIN_DSN")
+	if dsn == "" {
+		t.Fatal("GXB_L3B_ADMIN_DSN is required")
+	}
+	ctx := context.Background()
+	pool := adminPool(t, dsn)
+	at := time.Date(2026, 11, 16, 0, 0, 0, 0, time.UTC)
+	secret := []byte("l3b-admin-native-secret")
+	_, session, _ := adminLivePlayer(t, pool, at, secret)
+	sessionID, err := identity.SessionIDFrom(session)
+	if err != nil {
+		t.Fatal(err)
+	}
+	service := appidentity.Service{
+		Runner:      tx.Runner{DB: pool},
+		Store:       identitystore.Store{},
+		Receipts:    kernelstore.Store{},
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+	}
+	operationContext := operation.Context{ID: adminIdentifier(t), StartedAt: at}
+	if _, err := service.RevokeSession(ctx, appidentity.RevokeSessionCommand{SessionID: sessionID, Reason: "support"}, operationContext); err != nil {
+		t.Fatalf("unaudited revoke: %v", err)
+	}
+	if err := run(ctx, []string{"-session", session.String(), "-operator", "operator-11", "-reason", "support"}, dsn); err == nil {
+		t.Fatal("gxb-admin accepted an already revoked session")
+	}
+	succeeded, refused := adminAuditOutcomes(t, pool, session.String())
+	if succeeded != 0 || refused != 1 {
+		t.Fatalf("audit outcomes succeeded=%d refused=%d, want 0/1", succeeded, refused)
 	}
 }
 
