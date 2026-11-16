@@ -7,16 +7,22 @@ import (
 	"errors"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	ach "gxb.local/backend/v2/internal/application/achievement"
+	appbook "gxb.local/backend/v2/internal/application/bookskill"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	appconquer "gxb.local/backend/v2/internal/application/conquerschool"
 	appcourse "gxb.local/backend/v2/internal/application/course"
+	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
@@ -51,6 +57,23 @@ func catalogAchievements(p *pg.Pool, counts ach.Counter) ach.Service {
 	grants := i5.Service{Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c4fa-achievement-native-fixture-secret")}
 	runtime := &ach.Runtime{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Active: content, Counts: counts, Fence: values, Grants: grants, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Servers: i4store.ServerNames{}}
 	return ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p), Runtime: runtime}
+}
+
+// productionOwnerCounts mirrors the production owner ports, which a first
+// observation reads for every owned-state family.
+func productionOwnerCounts(p *pg.Pool, skins ach.Skins) ach.OwnerCounts {
+	content := contentstore.Store{Queryer: p}
+	heroes := characterstore.Store{Queryer: p}
+	return ach.OwnerCounts{
+		Roster:       characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: content},
+		Kinds:        content,
+		Books:        appbook.Service{Owner: bookstore.Store{}, Content: content, Heroes: characterstore.LibraryHeroPort{Store: heroes}},
+		Conquer:      appconquer.Service{Owner: conquerstore.Store{}, Content: content, Heroes: heroes, Kinds: content, Players: i4store.PlayerRootLocker{}},
+		Courses:      appcourse.Service{Owner: coursestore.Store{}, Content: content, Heroes: heroes},
+		Inscriptions: appinscription.Service{Owner: inscriptionstore.Store{}, Content: content, Heroes: heroes},
+		Dorm:         appdorm.Service{Heroes: characterstore.LibraryHeroPort{Store: heroes}, Owner: dormstore.Store{}, Content: content},
+		Skins:        skins,
+	}
 }
 
 func entry(v ach.View, id int64) ach.Entry {
@@ -137,6 +160,33 @@ func TestI7C4FALegacyBackfillPointsClaimsRankAndNotices(t *testing.T) {
 	}
 	if position[b.PlayerID] != richer.Rank || position[a.PlayerID] != again.Rank {
 		t.Fatal("trophy board order", position)
+	}
+}
+
+// R3_LEGACY_BACKFILL: the first observation that creates the root evaluates
+// every owned-state family and 100014, even when an owner command triggers it
+// for one family only.
+func TestI7C4FALegacyFirstSingleFamilyObservationBackfillsAllFamilies(t *testing.T) {
+	p := pool(t)
+	a, _ := libraryFixture(t, p, true)
+	s := catalogAchievements(p, fixedCounts{d.PetsID: 9, d.NormalHeroesID: 10})
+	if e := s.Observe(ctx, a, op(), ach.Families["Pet"]); e != nil {
+		t.Fatal(e)
+	}
+	root, tracked, e := (achievementstore.Store{}).ReadRootTx(ctx, p, a.PlayerID, false)
+	if e != nil || !tracked || root.CompleteTimes[0] == nil {
+		t.Fatal("100014 must be evaluated at the first observation", tracked, root.CompleteTimes, e)
+	}
+	progress := map[int64]int64{}
+	streaks, e := (achievementstore.Store{}).ReadStreaksTx(ctx, p, a.PlayerID)
+	if e != nil {
+		t.Fatal(e)
+	}
+	for _, streak := range streaks {
+		progress[streak.AchievementID] = streak.Current
+	}
+	if progress[d.PetsID] != 9 || progress[d.NormalHeroesID] != 10 {
+		t.Fatal("every owned-state family must be evaluated at the first observation", progress)
 	}
 }
 
