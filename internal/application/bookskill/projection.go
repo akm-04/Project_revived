@@ -116,7 +116,14 @@ func (s Service) BookshelfInputsTx(ctx context.Context, q tx.Queryer, scope Inpu
 	return s.BookInputsTx(ctx, q, scope)
 }
 func (s Service) buildingsWire(ctx context.Context, q tx.Queryer, scope InputScope) (map[string]any, error) {
+	if s.MakeInfo == nil {
+		return nil, ErrUnavailable
+	}
 	v, e := s.BookInputsTx(ctx, q, scope)
+	if e != nil {
+		return nil, e
+	}
+	desk, pet, e := s.MakeInfo.MakeInfoTx(ctx, q, scope.Player, scope.ObservedAt)
 	if e != nil {
 		return nil, e
 	}
@@ -129,7 +136,7 @@ func (s Service) buildingsWire(ctx context.Context, q tx.Queryer, scope InputSco
 			bs[strconv.FormatInt(t, 10)] = map[string]any{"lev": int64(1), "need_time": int64(0), "start_time": int64(0), "new_evolve": int64(0)}
 		}
 	}
-	body := map[string]any{"building_list": bs, "cabinet_info": book.CabinetWire(v.Applied), "desk_info": map[string]any{"is_making": 0, "make_need_time": 0, "make_start_time": 0, "make_item": 0}, "pet_cabin_info": map[string]any{"is_making": 0, "make_need_time": 0, "make_start_time": 0, "make_item": 0, "pet_id": 0}}
+	body := map[string]any{"building_list": bs, "cabinet_info": book.CabinetWire(v.Applied), "desk_info": desk, "pet_cabin_info": pet}
 	wallet, e := s.wallet(ctx, q, scope.Player)
 	if e != nil {
 		return nil, e

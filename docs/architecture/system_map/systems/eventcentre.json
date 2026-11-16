@@ -267,6 +267,8 @@
   "scenarios_naming": [
    "i9_10a_event_centre.json"
   ],
-  "unit": []
+  "unit": [
+   "makeinfo_test.go"
+  ]
  }
 }

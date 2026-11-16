@@ -585,7 +585,11 @@
     "*CoherentHeroInputsTx"
    ]
   },
-  "eventcentre": {},
+  "eventcentre": {
+   "bookskill": [
+    "*MakeInfoTx"
+   ]
+  },
   "frienddm": {
    "realtimewakeup": [
     "*ReloadAndDeliver"
@@ -2365,6 +2369,9 @@
    ]
   },
   "bookskill": {
+   "eventcentre": [
+    "*MakeInfoTx"
+   ],
    "generation": [
     "Bind",
     "DecisionAt",

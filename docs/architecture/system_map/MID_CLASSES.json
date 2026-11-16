@@ -4804,27 +4804,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -4832,58 +4832,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -4913,7 +4913,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -4921,7 +4921,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -4929,7 +4929,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -4937,7 +4937,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -4945,7 +4945,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -55388,27 +55388,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -55416,58 +55416,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -55497,7 +55497,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -55505,7 +55505,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -55513,7 +55513,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -55521,7 +55521,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -55529,7 +55529,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -55693,27 +55693,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -55721,58 +55721,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -55802,7 +55802,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -55810,7 +55810,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -55818,7 +55818,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -55826,7 +55826,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -55834,7 +55834,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -55998,27 +55998,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -56026,58 +56026,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -56107,7 +56107,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -56115,7 +56115,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -56123,7 +56123,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -56131,7 +56131,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -56139,7 +56139,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -56303,27 +56303,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -56331,58 +56331,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -56412,7 +56412,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -56420,7 +56420,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -56428,7 +56428,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -56436,7 +56436,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -56444,7 +56444,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -56608,27 +56608,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -56636,58 +56636,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -56717,7 +56717,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -56725,7 +56725,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -56733,7 +56733,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -56741,7 +56741,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -56749,7 +56749,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -56913,27 +56913,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -56941,58 +56941,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -57022,7 +57022,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -57030,7 +57030,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -57038,7 +57038,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -57046,7 +57046,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -57054,7 +57054,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -60438,27 +60438,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -60466,58 +60466,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -60547,7 +60547,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -60555,7 +60555,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -60563,7 +60563,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -60571,7 +60571,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -60579,7 +60579,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -60743,27 +60743,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -60771,58 +60771,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -60852,7 +60852,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -60860,7 +60860,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -60868,7 +60868,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -60876,7 +60876,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -60884,7 +60884,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -61048,27 +61048,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -61076,58 +61076,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -61157,7 +61157,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -61165,7 +61165,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -61173,7 +61173,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -61181,7 +61181,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -61189,7 +61189,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
@@ -61353,27 +61353,27 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "serializable"
     }
    ],
@@ -61381,58 +61381,58 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:707"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 161,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 273,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 332,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 407,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 448,
      "value": "8"
     }
    ],
@@ -61462,7 +61462,7 @@
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
      "isolation": "serializable",
-     "line": 154,
+     "line": 161,
      "read_only": "false",
      "retry": "8"
     },
@@ -61470,7 +61470,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 273,
      "read_only": "false",
      "retry": "1"
     },
@@ -61478,7 +61478,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 332,
      "read_only": "false",
      "retry": "8"
     },
@@ -61486,7 +61486,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 407,
      "read_only": "false",
      "retry": "8"
     },
@@ -61494,7 +61494,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 448,
      "read_only": "false",
      "retry": "8"
     }
