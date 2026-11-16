@@ -37,6 +37,7 @@ type RestoreStore interface {
 	UpdateRow(context.Context, tx.Tx, string, []string, []string, json.RawMessage) error
 	SetRowVersion(context.Context, tx.Tx, string, []string, json.RawMessage, int64, time.Time) error
 	EndPlayerSessions(context.Context, tx.Tx, int64, time.Time) (int, error)
+	LiveSessionIDsForPlayerTx(context.Context, tx.Queryer, int64) ([]identity.SessionID, error)
 }
 
 // PlayerRoots is the shared player root lock seam every player command takes.
@@ -92,9 +93,10 @@ func Decode(reader io.Reader) (Document, error) {
 }
 
 // Restore replaces the target player's restorable rows with the export, in one
-// transaction: refusals first, the player root lock, deletes in reverse plan
-// order, verbatim inserts in plan order, the version bump, then the player's
-// sessions end.
+// transaction: refusals first, the player's sessions end, the player root lock,
+// deletes in reverse plan order, verbatim inserts in plan order, the version
+// bump, then a live-session recheck. Sessions end before the root so the order
+// matches gameplay (identity fence, then root) and cannot deadlock with it.
 func (service RestoreService) Restore(ctx context.Context, plan Plan, planDigest string, targetPlayerID int64, document Document, at time.Time) (RestoreResult, error) {
 	if service.Database == nil || service.Store == nil || service.Roots == nil {
 		return RestoreResult{}, errors.New("player restore requires a database, store and root locker")
@@ -135,6 +137,10 @@ func (service RestoreService) Restore(ctx context.Context, plan Plan, planDigest
 	if int32(exportedServer) != targetServer {
 		return RestoreResult{}, refused("export is for server %d, player %d is on server %d", exportedServer, targetPlayerID, targetServer)
 	}
+	ended, err := service.Store.EndPlayerSessions(ctx, transaction, targetPlayerID, at)
+	if err != nil {
+		return RestoreResult{}, err
+	}
 	roots, err := service.Roots.LockPlayerRootsTx(ctx, transaction, identity.LogicalServerID(targetServer), []identity.PlayerID{identity.PlayerID(targetPlayerID)})
 	if err != nil {
 		return RestoreResult{}, err
@@ -158,9 +164,12 @@ func (service RestoreService) Restore(ctx context.Context, plan Plan, planDigest
 	if err := service.verifyExportedOwnership(ctx, transaction, exported, tables, targetPlayerID); err != nil {
 		return RestoreResult{}, err
 	}
-	ended, err := service.Store.EndPlayerSessions(ctx, transaction, targetPlayerID, at)
+	liveSessions, err := service.Store.LiveSessionIDsForPlayerTx(ctx, transaction, targetPlayerID)
 	if err != nil {
 		return RestoreResult{}, err
+	}
+	if len(liveSessions) != 0 {
+		return RestoreResult{}, refused("player logged in during the restore; retry")
 	}
 	if err := transaction.Commit(ctx); err != nil {
 		return RestoreResult{}, err

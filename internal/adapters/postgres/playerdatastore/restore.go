@@ -202,6 +202,12 @@ func (Store) SetRowVersion(ctx context.Context, transaction tx.Tx, table string,
 	return err
 }
 
+// LiveSessionIDsForPlayerTx lists the player's live sessions through the
+// identity owner, so the restore can recheck for a login it did not revoke.
+func (Store) LiveSessionIDsForPlayerTx(ctx context.Context, query tx.Queryer, playerID int64) ([]identity.SessionID, error) {
+	return (identitystore.Store{}).LiveSessionIDsForPlayerTx(ctx, query, identity.PlayerID(playerID))
+}
+
 // EndPlayerSessions ends every live session and context of the player through
 // the identity lifecycle operations, so later bearer lookups fail like a
 // revoked session (U6).

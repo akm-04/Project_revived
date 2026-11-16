@@ -811,3 +811,69 @@ func TestRestoreFenceOrderEndsSessionsBeforeRoot(t *testing.T) {
 		t.Fatalf("the held command's bearer still resolves after the restore: %v", err)
 	}
 }
+
+// restoreLoginGateStore pauses Restore after it revokes sessions and before it
+// takes the player root, so a test can commit a login in that window.
+type restoreLoginGateStore struct {
+	playerdata.RestoreStore
+	revoked chan struct{}
+	proceed chan struct{}
+}
+
+func (store restoreLoginGateStore) EndPlayerSessions(ctx context.Context, transaction tx.Tx, playerID int64, at time.Time) (int, error) {
+	ended, err := store.RestoreStore.EndPlayerSessions(ctx, transaction, playerID, at)
+	if err != nil {
+		return 0, err
+	}
+	close(store.revoked)
+	select {
+	case <-store.proceed:
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	}
+	return ended, nil
+}
+
+// A-072/Amendment 1B: a login committed after the restore revoked sessions but
+// before it took the player root leaves a live session the restore never saw;
+// the post-write recheck refuses and the transaction rolls back.
+func TestRestoreRefusesLoginBetweenRevocationAndRoot(t *testing.T) {
+	fixture := newRestoreFixture(t)
+	player := seedPlayer(t, fixture.pool, false)
+	firstSessionID, firstContextID, _ := seedPlayerSession(t, fixture.pool, player)
+	document := fixture.exportPlayer(t, player.id)
+	before := snapshot(t, fixture, player.id)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	revoked := make(chan struct{})
+	proceed := make(chan struct{})
+	service := fixture.service()
+	service.Store = restoreLoginGateStore{RestoreStore: service.Store, revoked: revoked, proceed: proceed}
+	outcome := make(chan error, 1)
+	go func() {
+		_, err := service.Restore(ctx, fixture.plan, fixture.digest, player.id, document, time.Now().UTC())
+		outcome <- err
+	}()
+
+	select {
+	case <-revoked:
+	case <-ctx.Done():
+		t.Fatalf("restore did not revoke sessions: %v", ctx.Err())
+	}
+	secondSessionID, secondContextID, _ := seedPlayerSession(t, fixture.pool, player)
+	close(proceed)
+	var restoreErr error
+	select {
+	case restoreErr = <-outcome:
+	case <-ctx.Done():
+		t.Fatalf("restore did not finish: %v", ctx.Err())
+	}
+
+	if !errors.Is(restoreErr, playerdata.ErrRestoreRefused) || !strings.Contains(restoreErr.Error(), "logged in during the restore") {
+		t.Fatalf("want the logged-in-during-restore refusal, got %v", restoreErr)
+	}
+	assertSnapshotUnchanged(t, before, snapshot(t, fixture, player.id))
+	assertSessionUntouched(t, fixture.pool, firstSessionID, firstContextID)
+	assertSessionUntouched(t, fixture.pool, secondSessionID, secondContextID)
+}
