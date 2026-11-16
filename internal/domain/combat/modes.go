@@ -90,7 +90,7 @@ var modeRegistrations = []ModeRegistration{
 	{Key: ModeGuildCampaign, Family: "GUILD_CAMPAIGN", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
 	{Key: ModeIllusionSolo, Family: "ILLUSION", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
 	{Key: ModeIllusionTeam, Family: "ILLUSION", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
-	{Key: ModeMarch, Family: "CHAMPION_MARCH", Trust: ClientFullReportAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Producer: ProducerProfileID},
+	{Key: ModeMarch, Family: "CHAMPION_MARCH", Trust: ClientFullReportAttested, OnChoiceChange: ChoiceRefusedWhileOpen, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Producer: ProducerProfileID},
 	{Key: ModeMemoirBattle, Family: "MEMOIR", Trust: ClientFullReportAttested, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
 	{Key: ModeMemoirPlayer, Family: "MEMOIR", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
 	{Key: ModeOccultSolo, Family: "OCCULT", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},

@@ -204,7 +204,8 @@
    "i9_5c_petcampaign.json"
   ],
   "unit": [
-   "rank_test.go"
+   "rank_test.go",
+   "start_choice_conformance_test.go"
   ]
  }
 }
