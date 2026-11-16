@@ -6,6 +6,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -413,5 +415,195 @@ func TestI7C5DArenaReconcileUnresolvedFightNative(t *testing.T) {
 		scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id=$1`, int64(a.PlayerID)) != 1 ||
 		scalar(t, pool, `SELECT total_fight FROM arena_players WHERE player_id=$1`, int64(a.PlayerID)) != 1 {
 		t.Fatal("unresolved fight not settled once")
+	}
+}
+
+// fightBarrier holds both duplicate FIGHT answers until each request has read
+// the fighting match, so both reach settle with the one shared battle result.
+type fightBarrier struct {
+	app.Combat
+	once   sync.Once
+	flight *combat.Flight
+	calls  atomic.Int32
+	both   chan struct{}
+}
+
+func (b *fightBarrier) ResolveDetached(c context.Context, op operation.Context, attempt ids.UUID) *combat.Flight {
+	b.once.Do(func() { b.flight = b.Combat.ResolveDetached(c, op, attempt) })
+	if b.calls.Add(1) == 2 {
+		close(b.both)
+	}
+	held := &combat.Flight{Done: make(chan struct{})}
+	go func() {
+		<-b.flight.Done
+		<-b.both
+		held.Resolved, held.Err = b.flight.Resolved, b.flight.Err
+		close(held.Done)
+	}()
+	return held
+}
+
+// deferredResult keeps a FIGHT inside conclude until the match is closed; it
+// models a battle that resolved just before a close won the row lock.
+type deferredResult struct {
+	app.Combat
+	entered chan struct{}
+	release chan struct{}
+	once    sync.Once
+}
+
+func (d *deferredResult) ResolveDetached(context.Context, operation.Context, ids.UUID) *combat.Flight {
+	d.once.Do(func() { close(d.entered) })
+	<-d.release
+	flight := &combat.Flight{Done: make(chan struct{})}
+	close(flight.Done)
+	return flight
+}
+
+// admitFighting binds the offered match's battle and leaves the staged attempt
+// for the RESULT, as a request whose resolution vanished.
+func admitFighting(t *testing.T, p *pg.Pool, s app.Service, a identity.ActorContext, command app.FightCommand) {
+	t.Helper()
+	stalled := s
+	stalled.Combat = stalledArena{s.Combat}
+	if _, err := stalled.Fight(ctx, a, command, op()); err == nil {
+		t.Fatal("a vanished resolution answered a result")
+	}
+	if scalar(t, p, `SELECT count(*) FROM arena_matches WHERE attacker_id=$1 AND status='FIGHTING' AND attempt_id IS NOT NULL`, int64(a.PlayerID)) != 1 {
+		t.Fatal("the match is not fighting with a staged attempt")
+	}
+}
+
+// resolveBattle waits for the staged attempt's detached resolution, which can
+// outlast one FIGHT request's budget.
+func resolveBattle(t *testing.T, s app.Service, p *pg.Pool, a identity.ActorContext) {
+	t.Helper()
+	m, found, err := s.Store.LatestMatchTx(ctx, p, a.PlayerID)
+	if err != nil || !found {
+		t.Fatalf("latest match: %v", err)
+	}
+	flight := s.Combat.ResolveDetached(ctx, op(), m.AttemptID)
+	select {
+	case <-flight.Done:
+	case <-time.After(2 * time.Minute):
+		t.Fatal("the battle did not resolve")
+	}
+	if flight.Err != nil {
+		t.Fatal(flight.Err)
+	}
+}
+
+// H-52 at the Arena owner: a losing RESULT serves the stored terminal (the
+// recorded result of a duplicate FIGHT, or the closed match) instead of an
+// internal conflict, and the winner is the only settlement.
+func TestI7C5DArenaDuplicateResultRaceNative(t *testing.T) {
+	pool := pool(t)
+	defer pool.Close()
+	s := arenaService(t, pool)
+	a, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	b, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	for _, actor := range []identity.ActorContext{a, b} {
+		if _, err := s.Info(ctx, actor, op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := s.ModifyDefence(ctx, b, arenaGirls(5), 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	exec(t, pool, `UPDATE arena_players SET defense=jsonb_build_object('heroes','[]'::jsonb,'pet',0) WHERE player_id<>$1`, int64(b.PlayerID))
+	if _, err := s.Match(ctx, a, false, op()); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Start(ctx, a, op()); err != nil {
+		t.Fatal(err)
+	}
+	command := app.FightCommand{Enemy: b.PlayerID, Formation: arenaGirls(5)}
+	admitFighting(t, pool, s, a, command)
+	resolveBattle(t, s, pool, a)
+	raced := s
+	raced.Combat = &fightBarrier{Combat: s.Combat, both: make(chan struct{})}
+	views, errs := make([]d.FightView, 2), make([]error, 2)
+	var group sync.WaitGroup
+	for i := range 2 {
+		group.Add(1)
+		go func(i int) {
+			defer group.Done()
+			views[i], errs[i] = raced.Fight(ctx, a, command, op())
+		}(i)
+	}
+	group.Wait()
+	for i := range 2 {
+		if errs[i] != nil {
+			t.Fatalf("duplicate FIGHT %d: %v", i, errs[i])
+		}
+	}
+	if views[0].Win != views[1].Win || string(views[0].Report) != string(views[1].Report) || views[0].Player.Star != views[1].Player.Star {
+		t.Fatalf("both answers must serve the recorded result: %+v %+v", views[0].Player, views[1].Player)
+	}
+	if scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID)) != 2 {
+		t.Fatal("a duplicate FIGHT settled twice")
+	}
+}
+
+func TestI7C5DArenaClosedResultRaceNative(t *testing.T) {
+	pool := pool(t)
+	defer pool.Close()
+	s := arenaService(t, pool)
+	a, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	b, _ := oneOnOnePlayer(t, pool, rankingServer(t, pool))
+	for _, actor := range []identity.ActorContext{a, b} {
+		if _, err := s.Info(ctx, actor, op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := s.ModifyDefence(ctx, b, arenaGirls(5), 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	exec(t, pool, `UPDATE arena_players SET defense=jsonb_build_object('heroes','[]'::jsonb,'pet',0) WHERE player_id<>$1`, int64(b.PlayerID))
+	if _, err := s.Match(ctx, a, false, op()); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Start(ctx, a, op()); err != nil {
+		t.Fatal(err)
+	}
+	command := app.FightCommand{Enemy: b.PlayerID, Formation: arenaGirls(5)}
+	admitFighting(t, pool, s, a, command)
+	// The reconciler decides past the result deadline, so the close is allowed
+	// while this RESULT is still in flight.
+	m, found, err := s.Store.LatestMatchTx(ctx, pool, a.PlayerID)
+	if err != nil || !found {
+		t.Fatalf("latest match: %v", err)
+	}
+	attempt, found, err := s.Combat.AttemptTx(ctx, pool, m.AttemptID)
+	if err != nil || !found {
+		t.Fatalf("attempt: %v", err)
+	}
+	closable := s
+	closable.Timed.Binder = gen.Binder{Time: fixedTime{at: attempt.ResultDeadline.Add(time.Second)}}
+	raced := s
+	deferred := &deferredResult{Combat: s.Combat, entered: make(chan struct{}), release: make(chan struct{})}
+	raced.Combat = deferred
+	answered := make(chan error, 1)
+	go func() {
+		_, err := raced.Fight(ctx, a, command, op())
+		answered <- err
+	}()
+	<-deferred.entered
+	timed, err := closable.Timed.Binder.Bind(ctx, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = (app.Reconciler{Service: closable}).Reconcile(ctx, timed, 50); err != nil {
+		t.Fatal(err)
+	}
+	close(deferred.release)
+	if err = <-answered; !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("the losing RESULT must serve the closed terminal as the stock refusal, got %v", err)
+	}
+	if scalar(t, pool, `SELECT count(*) FROM arena_matches WHERE attacker_id=$1 AND status='CLOSED'`, int64(a.PlayerID)) != 1 {
+		t.Fatal("the close did not win the terminal")
+	}
+	if scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID)) != 0 {
+		t.Fatal("the losing RESULT paid a closed fight")
 	}
 }

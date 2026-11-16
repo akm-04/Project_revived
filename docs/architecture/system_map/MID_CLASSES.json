@@ -41494,7 +41494,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 656,
+     "line": 665,
      "value": "repeatable_read"
     },
     {
@@ -41527,7 +41527,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 656,
+     "line": 665,
      "value": "false"
     },
     {
@@ -41564,7 +41564,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 656,
+     "line": 665,
      "value": "6"
     },
     {
@@ -41640,7 +41640,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 656,
+     "line": 665,
      "read_only": "false",
      "retry": "6"
     },
@@ -41925,7 +41925,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 656,
+     "line": 665,
      "value": "repeatable_read"
     },
     {
@@ -41963,7 +41963,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 656,
+     "line": 665,
      "value": "false"
     },
     {
@@ -42005,7 +42005,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 656,
+     "line": 665,
      "value": "6"
     },
     {
@@ -42097,7 +42097,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 656,
+     "line": 665,
      "read_only": "false",
      "retry": "6"
     },
