@@ -378,9 +378,7 @@ func TestI9_8BIllusionMemberTeamNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, openDay, _ := illusionOccurrence(t, p, server)
-	exec(t, p, `INSERT INTO illusion_attempts(attempt_id,player_id,logical_server_id,open_day,campaign_id,room_id,formation,frozen_at,resolved,damage)
-		VALUES('stale-illusion-attempt',$1,$2,$3,$4,NULL,$5,$6,true,0)`,
-		int64(member.PlayerID), int64(server), openDay-2, int64(di.FirstCampaignID), fmt.Sprint(picks[1]), clock.at.Unix())
+	staleIllusionAttempt(t, p, member, openDay-2, clock.at)
 
 	body, err := s.MemberTeam(ctx, member, member.PlayerID, op())
 	if err != nil {
@@ -426,5 +424,24 @@ func TestI9_8BIllusionMemberTeamFrozenBoardNative(t *testing.T) {
 	heroes, ok := body["heros"].([]map[string]any)
 	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != partner {
 		t.Fatalf("1364 lost the frozen team on the rest day %#v", body)
+	}
+}
+
+// staleIllusionAttempt stores an older terminal Combat attempt for the same
+// player and locator, so 1364 must answer from the current attempt of the board
+// day, not from an older stored attempt.
+func staleIllusionAttempt(t *testing.T, p *pg.Pool, member identity.ActorContext, openDay int64, at time.Time) {
+	t.Helper()
+	var sourceID string
+	if err := p.Raw().QueryRow(ctx, `SELECT attempt_id::text FROM combat_attempts WHERE domain_kind='ILLUSION' AND actor_player_id=$1 AND state='TERMINAL' ORDER BY terminal_at DESC LIMIT 1`, int64(member.PlayerID)).Scan(&sourceID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.Raw().Exec(ctx, `INSERT INTO combat_attempts SELECT (jsonb_populate_record(NULL::combat_attempts,to_jsonb(a)||jsonb_build_object(
+		'attempt_id',gen_random_uuid(),'generation_ref',$2::text,
+		'started_at',$3::timestamptz,'result_deadline',$4::timestamptz,'terminal_at',$5::timestamptz,'semantic_receipt_id',$6::text))).*
+		FROM combat_attempts a WHERE attempt_id=$1`,
+		sourceID, fmt.Sprintf("ILLUSION/%d/%d/%d", member.LogicalServerID, openDay, di.FirstCampaignID),
+		at.Add(-48*time.Hour), at.Add(-47*time.Hour), at.Add(-48*time.Hour), "stale-illusion-native"); err != nil {
+		t.Fatal(err)
 	}
 }

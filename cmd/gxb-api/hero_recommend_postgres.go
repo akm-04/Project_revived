@@ -6,6 +6,7 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/arenastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/combatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
@@ -28,7 +29,7 @@ func canonicalHeroRecommend(p *pg.Pool, runner tx.Runner, content contentstore.S
 		Timed:     appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
 		Fresh:     p,
 		Store:     herorecommendstore.Store{},
-		Sources:   appherorecommend.Sources{TopFloor: topfloorstore.Store{}, OneOnOne: oneononestore.Store{}, Arena: arenastore.Store{}, Fantasy: illusionstore.Store{}, GuildEvent: guildcampaignstore.Store{}, Champion: leaguestore.Store{}},
+		Sources:   appherorecommend.Sources{TopFloor: topfloorstore.Store{}, OneOnOne: oneononestore.Store{}, Arena: arenastore.Store{}, Fantasy: illusionstore.Store{Combat: combatstore.Store{}}, GuildEvent: guildcampaignstore.Store{}, Champion: leaguestore.Store{}},
 		Content:   content,
 		Directory: i4store.PlayerDirectoryReader{},
 		Guilds:    guildstore.Store{},

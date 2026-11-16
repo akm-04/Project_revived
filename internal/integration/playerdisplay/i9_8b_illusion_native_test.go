@@ -174,8 +174,8 @@ func TestI9_8BIllusionStartSettleDuplicateNative(t *testing.T) {
 	if _, err := s.Start(ctx, a, il.StartRequest{Formation: formation}, op()); err != nil {
 		t.Fatal(err)
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts WHERE player_id=$1 AND NOT resolved`, int64(a.PlayerID)); n != 1 {
-		t.Fatal("attempt row", n)
+	if n := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ILLUSION' AND actor_player_id=$1 AND state<>'TERMINAL'`, int64(a.PlayerID)); n != 1 {
+		t.Fatal("open combat attempt", n)
 	}
 	if n := scalar(t, p, `SELECT chances FROM illusion_players WHERE player_id=$1`, int64(a.PlayerID)); n != d.FreeChances-1 {
 		t.Fatal("chance not consumed", n)
@@ -191,6 +191,12 @@ func TestI9_8BIllusionStartSettleDuplicateNative(t *testing.T) {
 	if n := scalar(t, p, `SELECT best_hit FROM illusion_players WHERE player_id=$1`, int64(a.PlayerID)); n != 500 {
 		t.Fatal("duplicate settlement changed the best hit", n)
 	}
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempt_settlements WHERE player_id=$1 AND damage=500`, int64(a.PlayerID)); n != 1 {
+		t.Fatal("settlement rows", n)
+	}
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
+		t.Fatal("mode-local attempt row", n)
+	}
 }
 
 func TestI9_8BIllusionAbandonedStartNative(t *testing.T) {
@@ -205,7 +211,7 @@ func TestI9_8BIllusionAbandonedStartNative(t *testing.T) {
 			t.Fatal("start after an abandoned attempt", err)
 		}
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts WHERE player_id=$1 AND NOT resolved`, int64(a.PlayerID)); n != 1 {
+	if n := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ILLUSION' AND actor_player_id=$1 AND state<>'TERMINAL'`, int64(a.PlayerID)); n != 1 {
 		t.Fatal("abandoned attempt kept open", n)
 	}
 	if n := scalar(t, p, `SELECT chances FROM illusion_players WHERE player_id=$1`, int64(a.PlayerID)); n != d.FreeChances-2 {

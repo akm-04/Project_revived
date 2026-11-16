@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -168,13 +167,17 @@ func (s Mode) eligible(c context.Context, q tx.Queryer, a identity.ActorContext,
 	return nil
 }
 
+func playerLocator(server identity.LogicalServerID, playerID identity.PlayerID) cd.Locator {
+	return cd.Locator{DomainKind: "ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", server), DomainLocator: fmt.Sprintf("player:%d", playerID)}
+}
+
 func locator(a identity.ActorContext) cd.Locator {
-	return cd.Locator{DomainKind: "ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", a.LogicalServerID), DomainLocator: fmt.Sprintf("player:%d", a.PlayerID)}
+	return playerLocator(a.LogicalServerID, a.PlayerID)
 }
 
 // generationRef binds the Combat attempt to the occurrence it started against.
 func generationRef(occurrence d.Occurrence) string {
-	return fmt.Sprintf("ILLUSION/%d/%d/%d", occurrence.LogicalServerID, occurrence.OpenDay, occurrence.CampaignID)
+	return d.AttemptGeneration{LogicalServerID: occurrence.LogicalServerID, OpenDay: occurrence.OpenDay, CampaignID: occurrence.CampaignID}.Reference()
 }
 
 func startFingerprint(a identity.ActorContext, request StartRequest, op operation.Context) string {
@@ -274,29 +277,6 @@ func (s Mode) preInfo(c context.Context, q tx.Queryer, ranks []d.Result, playerI
 	return map[string]any{"player_name": profile.Name, "avatar_id": profile.AvatarID, "avatar_frame_id": profile.AvatarFrameID,
 		"lev": profile.Level, "hurt": ahead.Hurt, "pre_rank": int64(position), "conquer_lev": profile.ConquerLevel,
 		"conquer_loop_id": profile.ConquerLoopID}, nil
-}
-
-func formationText(formation []int64) string {
-	parts := make([]string, 0, len(formation))
-	for _, id := range formation {
-		parts = append(parts, strconv.FormatInt(id, 10))
-	}
-	return strings.Join(parts, "|")
-}
-
-func parseFormationText(text string) []int64 {
-	if text == "" {
-		return nil
-	}
-	out := make([]int64, 0)
-	for _, part := range strings.Split(text, "|") {
-		id, err := strconv.ParseInt(part, 10, 64)
-		if err != nil {
-			return nil
-		}
-		out = append(out, id)
-	}
-	return out
 }
 
 func numeric(raw any) (int64, bool) {

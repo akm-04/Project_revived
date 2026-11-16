@@ -406,6 +406,7 @@
    "illusion": [
     "*AttestSummaryTx",
     "*CloseTx",
+    "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
@@ -4214,6 +4215,7 @@
    "combat": [
     "*AttestSummaryTx",
     "*CloseTx",
+    "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
