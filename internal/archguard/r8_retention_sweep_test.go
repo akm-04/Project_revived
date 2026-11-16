@@ -8,6 +8,32 @@ import (
 	"testing"
 )
 
+// TestCanonicalMigrationsAreForwardOnly is the PASS628 preventive rule: every
+// canonical migration starts with the literal -- +goose Up and has no Down section.
+func TestCanonicalMigrationsAreForwardOnly(t *testing.T) {
+	root := repoRoot(t)
+	entries, err := os.ReadDir(filepath.Join(root, "migrations"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".sql") {
+			continue
+		}
+		content, err := os.ReadFile(filepath.Join(root, "migrations", entry.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		text := string(content)
+		if !strings.HasPrefix(text, "-- +goose Up\n") {
+			t.Errorf("migrations/%s does not begin with -- +goose Up", entry.Name())
+		}
+		if strings.Contains(text, "-- +goose Down") {
+			t.Errorf("migrations/%s contains a Down section", entry.Name())
+		}
+	}
+}
+
 // TestRetentionSweepSettingOnlyInRetentionstoreAndMigration keeps the combat
 // append-only bypass inside the retention sweep: the setting is written by
 // retentionstore rules and accepted by migration 00165, nowhere else.
