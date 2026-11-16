@@ -44,6 +44,17 @@ BINARY_COMMANDS = {'API': ('gxb-api', 'postgres,river'), 'REALTIME': ('gxb-realt
 # Variables the gate itself provides to every run, and test outputs that are only written when a freeze tool asks for them.
 MACHINE_VARIABLES = {'GXB_LUAJIT', 'GXB_I7B5B_ASSET_ROOT', 'GXB_I7A8_FULL_ROSTER_PROBE'}
 SUITE_FIXTURE_VARIABLES = {'GXB_BOOK_COMPILER_PAYLOAD', 'GXB_I9_10A_SCRATCH_JSON', 'GXB_SOCIAL_CATALOG_PATH'}
+
+
+def suite_fixtures(source):
+    generated = source / 'internal/content/builtin/generated'
+    return {
+        'GXB_BOOK_COMPILER_PAYLOAD': str(generated / 'book_input_catalog.json'),
+        'GXB_I9_10A_SCRATCH_JSON': str(generated / 'workshop_input_catalog.json'),
+        'GXB_SOCIAL_CATALOG_PATH': str(generated / 'social_input_catalog.json'),
+    }
+
+
 # Parallel units clone these DSN variables from the publication-prepared template; all others from the plain template.
 PREPARED_VARIABLES = {'GXB_I7A9_DSN'}
 OPERATOR_VARIABLES = {'GXB_I8_LATENCY_BOUND', 'GXB_I910C_MIG127_PREDECESSOR_DATABASE', 'GXB_I910C_OLD_EVIDENCE', 'GXB_I9_10B_PRODUCTION_WAKE_PROBE', 'GXB_MENTOR_CATALOG_PATH', 'GXB_MID1_GOLDEN_UPDATE', 'GXB_SOCIAL17_EVIDENCE'}
