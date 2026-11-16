@@ -63,6 +63,9 @@
   "bootstrap": {},
   "broadcast": {},
   "campaign": {
+   "achievement": [
+    "*StarTotalTx"
+   ],
    "missioninputs": [
     "*ReadTx"
    ],
@@ -911,6 +914,9 @@
    ]
   },
   "guildcampaign": {
+   "achievement": [
+    "*PlayerBestDamageTx"
+   ],
    "guildcore": [
     "*CloseGuildTx",
     "*RemoveMemberTx"
@@ -1527,8 +1533,15 @@
    ]
   },
   "march": {},
-  "memoir": {},
+  "memoir": {
+   "achievement": [
+    "*TenthHighestFloorTx"
+   ]
+  },
   "mentor": {
+   "achievement": [
+    "*GraduatedCountTx"
+   ],
    "socialgift": [
     "*AddDailyBondTx"
    ]
@@ -1539,7 +1552,11 @@
     "*ObserveMissionTx"
    ]
   },
-  "occult": {},
+  "occult": {
+   "achievement": [
+    "*ClearedChapterCountTx"
+   ]
+  },
   "oneonone": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
@@ -1551,7 +1568,11 @@
     "*PublicHistoryTx"
    ]
   },
-  "petcampaign": {},
+  "petcampaign": {
+   "achievement": [
+    "*MaxFloorTx"
+   ]
+  },
   "playerdirectory": {
    "dormhouse": [
     "Validate"
@@ -2136,6 +2157,9 @@
    "bookskill": [
     "*BookInputsTx"
    ],
+   "campaign": [
+    "*StarTotalTx"
+   ],
    "characterasset": [
     "NewCoherentReadScope",
     "Queryer",
@@ -2155,6 +2179,9 @@
     "Operation",
     "Run"
    ],
+   "guildcampaign": [
+    "*PlayerBestDamageTx"
+   ],
    "i5": [
     "*FenceActorTx",
     "*SettleGrantTx"
@@ -2165,6 +2192,18 @@
    "librarylocal": [
     "*HeroLibraryInputsTx",
     "*MarriedHeroCountTx"
+   ],
+   "memoir": [
+    "*TenthHighestFloorTx"
+   ],
+   "mentor": [
+    "*GraduatedCountTx"
+   ],
+   "occult": [
+    "*ClearedChapterCountTx"
+   ],
+   "petcampaign": [
+    "*MaxFloorTx"
    ],
    "playerdisplay": [
     "*SkinCollectionTx"
@@ -2188,6 +2227,9 @@
     "*Find",
     "*FindTx",
     "*PutTx"
+   ],
+   "store:librarystore": [
+    "*TalkClaimCountTx"
    ]
   },
   "activitydirectory": {

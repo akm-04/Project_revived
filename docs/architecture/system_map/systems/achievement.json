@@ -101,10 +101,16 @@
   "internal/adapters/postgres/achievementstore",
   "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildcampaignstore",
   "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
-  "internal/adapters/postgres/kernelstore"
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/librarystore",
+  "internal/adapters/postgres/memoirstore",
+  "internal/adapters/postgres/mentorstore",
+  "internal/adapters/postgres/occultstore",
+  "internal/adapters/postgres/petcampaignstore"
  ],
  "tables": {
   "owned": [
@@ -126,13 +132,19 @@
    "content_player_display_catalogs",
    "content_public_profile_policies",
    "gameplay_contexts",
+   "guild_campaign_damage",
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
    "logical_servers",
+   "memoir_players",
+   "mentor_mission_progress",
+   "occult_players",
+   "petcampaign_players",
    "player_directory_profiles",
    "player_hero_roots",
    "player_heroes",
+   "player_library_talk_claims",
    "player_pet_roots",
    "player_pets"
   ],
@@ -153,6 +165,8 @@
    "achievement.json",
    "display.json"
   ],
-  "unit": []
+  "unit": [
+   "counts_test.go"
+  ]
  }
 }

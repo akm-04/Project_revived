@@ -57,7 +57,9 @@
    "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
- "decorated_by": [],
+ "decorated_by": [
+  "observing"
+ ],
  "dispatcher_files": [
   "internal/adapters/stockruntime/library_dispatcher.go"
  ],

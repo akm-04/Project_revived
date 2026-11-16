@@ -7,19 +7,31 @@ import "time"
 // stage C adds 100016 over the 1003 skin collection (C4F_SKINS_ACHIEVEMENT_V1).
 const OwnedStatePolicy = "C4F_OWNED_STATE_COUNT_V1"
 const (
-	NormalHeroesID   int64 = 100013
-	AwakenedHeroesID int64 = 100015
-	PetsID           int64 = 100017
-	SkinsID          int64 = 100016
-	TextbooksID      int64 = 100019
-	RegionsID        int64 = 100021
-	SubjectsID       int64 = 100023
-	SuitsID          int64 = 100025
-	RoomsID          int64 = 100029
-	ExpandedRoomsID  int64 = 100030
+	NormalHeroesID            int64 = 100013
+	AwakenedHeroesID          int64 = 100015
+	PetsID                    int64 = 100017
+	SkinsID                   int64 = 100016
+	TextbooksID               int64 = 100019
+	RegionsID                 int64 = 100021
+	SubjectsID                int64 = 100023
+	SuitsID                   int64 = 100025
+	RoomsID                   int64 = 100029
+	ExpandedRoomsID           int64 = 100030
+	GuildDamageID             int64 = 100004
+	SkyTowerID                int64 = 100005
+	CampaignStarsID           int64 = 100010
+	SchoolStoriesID           int64 = 100020
+	GraduatedStudentsID       int64 = 100022
+	MemoirFloorsID            int64 = 100024
+	OccultChaptersID          int64 = 100027
+	TitanID                   int64 = 100031
+	GuildDamagePerTenThousand int64 = 10000
 )
 
-var OwnedStateIDs = []int64{NormalHeroesID, AwakenedHeroesID, SkinsID, PetsID, TextbooksID, RegionsID, SubjectsID, SuitsID, RoomsID, ExpandedRoomsID}
+// OwnedStateIDs lists every high-water tier over a current owner value; Load
+// observes all of them and each producer observes its own family.
+var OwnedStateIDs = []int64{NormalHeroesID, AwakenedHeroesID, SkinsID, PetsID, TextbooksID, RegionsID, SubjectsID, SuitsID, RoomsID, ExpandedRoomsID,
+	GuildDamageID, SkyTowerID, CampaignStarsID, SchoolStoriesID, GraduatedStudentsID, MemoirFloorsID, OccultChaptersID, TitanID}
 
 type Status string
 
@@ -30,10 +42,8 @@ const (
 )
 
 var unavailable = map[int64]Status{
-	100004: ModeNotLive, 100005: ModeNotLive, 100006: ModeNotLive, 100007: ModeNotLive, 100008: ModeNotLive,
-	100009: ModeNotLive, 100010: ModeNotLive, 100011: ModeNotLive, 100012: ModeNotLive, 100018: ModeNotLive,
-	100020: ModeNotLive, 100022: ModeNotLive, 100024: ModeNotLive, 100026: ModeNotLive, 100027: ModeNotLive,
-	100031: OwnerUnknown, 100033: OwnerUnknown,
+	100006: ModeNotLive, 100007: ModeNotLive, 100008: ModeNotLive, 100009: ModeNotLive, 100011: ModeNotLive,
+	100012: ModeNotLive, 100018: ModeNotLive, 100026: ModeNotLive, 100033: OwnerUnknown,
 }
 
 // StatusOf is the explicit per-definition producer coverage; it is never

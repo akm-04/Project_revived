@@ -50,8 +50,21 @@ func TestPointsLevelsAndClaims(t *testing.T) {
 }
 
 func TestStatusAndOwnedStateCounts(t *testing.T) {
-	if StatusOf(100014) != Qualified || StatusOf(PetsID) != Qualified || StatusOf(100005) != ModeNotLive || StatusOf(100031) != OwnerUnknown || StatusOf(SkinsID) != Qualified {
+	if StatusOf(100014) != Qualified || StatusOf(PetsID) != Qualified || StatusOf(SkyTowerID) != Qualified || StatusOf(TitanID) != Qualified || StatusOf(SkinsID) != Qualified {
 		t.Fatal("status")
+	}
+	for _, id := range []int64{100004, 100005, 100010, 100020, 100022, 100024, 100027, 100031} {
+		if StatusOf(id) != Qualified {
+			t.Fatalf("new owned-state id %d not qualified", id)
+		}
+	}
+	for _, id := range []int64{100006, 100007, 100008, 100009, 100011, 100012, 100018, 100026} {
+		if StatusOf(id) != ModeNotLive {
+			t.Fatalf("unavailable id %d status %s", id, StatusOf(id))
+		}
+	}
+	if StatusOf(100033) != OwnerUnknown {
+		t.Fatal("100033 owner")
 	}
 	qualified := 0
 	for id := int64(100001); id <= 100033; id++ {
@@ -59,7 +72,7 @@ func TestStatusAndOwnedStateCounts(t *testing.T) {
 			qualified++
 		}
 	}
-	if qualified != 16 {
+	if qualified != 24 {
 		t.Fatal(qualified)
 	}
 	c := catalog()
