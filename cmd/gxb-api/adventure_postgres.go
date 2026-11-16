@@ -10,6 +10,7 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
@@ -30,7 +31,7 @@ func canonicalAdventure(p *pg.Pool, r tx.Runner, content contentstore.Store, val
 	return appadventure.Mode{
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r},
 		Fresh: p, Store: adventurestore.Store{}, Content: content,
-		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Combat: fight,
+		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner,
 		Opponents: opponents, Wake: adventureWakeup{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Invites: invites, Mail: i5.SettlementMail{Store: values},

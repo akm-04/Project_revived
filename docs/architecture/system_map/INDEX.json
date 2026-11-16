@@ -840,7 +840,7 @@
    "tables": 0
   },
   {
-   "callees": 13,
+   "callees": 14,
    "callers": 1,
    "mids": 20,
    "name": "adventure",
@@ -1614,7 +1614,7 @@
    "tables": 1
   },
   {
-   "callees": 10,
+   "callees": 11,
    "callers": 1,
    "mids": 5,
    "name": "worldboss",

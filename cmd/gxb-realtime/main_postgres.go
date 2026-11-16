@@ -333,7 +333,7 @@ func run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	adventureRooms := stockruntime.AdventureRoomNoticeHandler{Service: appadventure.Mode{Fresh: pool, RoomStore: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}},
+	adventureRooms := stockruntime.AdventureRoomNoticeHandler{Service: appadventure.Mode{Fresh: pool, RoomStore: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}},
 		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: adventureRoomEvents, Limits: limits.Default()},
 			Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
 			OnDeliveryError: func(err error) { log.Printf("adventure room notice degraded: %v", err) }},

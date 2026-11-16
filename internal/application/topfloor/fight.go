@@ -55,8 +55,10 @@ func (r StartCommand) Validate() error {
 	return nil
 }
 
+// The stage is the opponent, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only the formation changed.
 func fingerprint(pid identity.PlayerID, r StartCommand) string {
-	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "formation": r.Formation, "pet": r.PetID, "enemy": r.Enemy, "avenge": r.Avenge})
+	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "pet": r.PetID, "enemy": r.Enemy, "avenge": r.Avenge})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
@@ -103,8 +105,9 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 	if err != nil {
 		return FightView{}, err
 	}
-	repeat := found && latest.Fingerprint == fp && (latest.Status == d.StatusStarted || now.Sub(latest.StartedAt) < replayWindow)
-	if repeat {
+	openReplay := found && latest.Fingerprint == fp && latest.Status == d.StatusStarted
+	settledReplay := found && latest.Fingerprint == fp && slices.Equal(latest.Formation, r.Formation) && now.Sub(latest.StartedAt) < replayWindow
+	if openReplay || settledReplay {
 		return s.finish(c, latest, op)
 	}
 	// Server-authoritative results always apply: an abandoned fight settles first.

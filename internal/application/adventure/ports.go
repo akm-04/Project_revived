@@ -58,6 +58,11 @@ type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
 
+// Guilds is the I6C owner's typed guild identity read for room member rows.
+type Guilds interface {
+	GuildNamesTx(context.Context, tx.Queryer, identity.LogicalServerID, []identity.PlayerID) (map[identity.PlayerID]string, error)
+}
+
 // Roster is the existing stock roster composer (MID1 key 49 Heroes, 780 Pets).
 type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
@@ -124,6 +129,7 @@ type Mode struct {
 	Content   Content
 	Functions Functions
 	Directory Directory
+	Guilds    Guilds
 	Heroes    Roster
 	Pets      Roster
 	Stats     Stats
@@ -145,7 +151,7 @@ type Mode struct {
 
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Fresh != nil && s.Store != nil && s.Content != nil &&
-		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Costs != nil && s.Grants != nil && s.Opponents != nil && s.Wake != nil &&
+		s.Functions != nil && s.Directory != nil && s.Guilds != nil && s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Costs != nil && s.Grants != nil && s.Opponents != nil && s.Wake != nil &&
 		s.Rooms.Store != nil && s.RoomStore != nil && s.Mail != nil && s.Partners != nil && s.HeroWire != nil
 }
 
