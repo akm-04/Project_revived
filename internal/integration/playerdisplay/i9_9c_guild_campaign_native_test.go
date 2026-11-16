@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"testing"
 	"time"
@@ -22,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/guildcampaign"
@@ -37,6 +39,8 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 type campaignFixture struct {
@@ -96,6 +100,7 @@ func newCampaignFixture(t *testing.T) campaignFixture {
 		ModeStore: store, Content: catalog, Tables: f.tables, Settings: f.settings,
 		Combat: combatService, Grants: genuineGrants(p), Facts: appi5.ObjectiveFacts{Owner: missionOwner, Open: i5store.Store{Queryer: p}},
 		Directory: i4store.PlayerDirectoryReader{}, Mail: mail,
+		Roster: characterstore.Store{Queryer: p}, Awakenings: characterstore.RawAwakeningStore{},
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p,
 	}
 	f.leaderHero = bornHero(t, p, f.leader, f.rev, genuineHeroTable, 1).PartnerID
@@ -1070,6 +1075,59 @@ func TestI9_9CBorrowedGirlThroughARealOffer(t *testing.T) {
 	}
 }
 
+func TestI9_9CServerRankCarriesGuildNameIconAndPartners(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.prepareChapterClear(t)
+	f.fight(t, f.leader, chapterID, copyID, f.leaderHero, 4000, 3, 0, f.at)
+
+	request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{
+		Operation: f.op(), MID: 608,
+		Params:     map[string]any{"copy_id": copyID, "token": "bearer", "region": int64(f.server)},
+		Claims:     wire.CredentialClaims{Token: "bearer", Region: int64(f.server)},
+		ReceivedAt: f.at,
+	}}
+	response := stockruntime.GuildCampaignDispatcher{Authority: fixedSocialAuthority{actor: f.leader}, Service: f.mode}.Dispatch(ctx, request)
+	if response.HTTPStatus != http.StatusOK {
+		t.Fatalf("608 %d %+v", response.HTTPStatus, response.Body)
+	}
+
+	var guildName string
+	var guildIcon int64
+	if err := f.pool.QueryRow(ctx, `SELECT name,icon FROM guilds WHERE guild_id=$1`, int64(f.guild)).Scan(&guildName, &guildIcon); err != nil {
+		t.Fatal(err)
+	}
+	fast, ok := response.Body["fast_boss_killer"].(map[string]any)
+	if !ok || fast["name"] != guildName || fast["guild_id"] != int64(f.guild) || fast["icon"] != guildIcon {
+		t.Fatalf("fast_boss_killer %+v", response.Body["fast_boss_killer"])
+	}
+	boss, ok := response.Body["boss_killer"].(map[string]any)
+	if !ok || boss["guild_name"] != guildName || boss["player_name"] != "" || boss["lev"] != int64(1) {
+		t.Fatalf("boss_killer %+v", response.Body["boss_killer"])
+	}
+	rows, ok := response.Body["rank_list"].([]any)
+	if !ok || len(rows) != 1 {
+		t.Fatalf("rank_list %+v", response.Body["rank_list"])
+	}
+	row := rows[0].(map[string]any)
+	if row["guild_name"] != guildName || row["damage"] != int64(4000) {
+		t.Fatalf("rank row %+v", row)
+	}
+	partners, ok := row["partners"].([]any)
+	if !ok || len(partners) != 1 {
+		t.Fatalf("rank partners %+v", row["partners"])
+	}
+	partner := partners[0].(map[string]any)
+	if partner["table_id"] != int64(genuineHeroTable) || partner["star"] != int64(5) || partner["lev"] != int64(1) ||
+		partner["color"] != int64(1) || partner["current_skin_id"] != int64(0) || partner["twice_awake_stage"] != int64(0) {
+		t.Fatalf("rank partner %+v", partner)
+	}
+}
+
+// TestI9_9CChallengeFactsAndMemberRow
 func TestI9_9CChallengeFactsAndMemberRow(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)
