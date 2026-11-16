@@ -33,7 +33,7 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModeChampionsLeague:     {rule: ChoiceReplaysFrozen, test: "TestI7C5FLeagueChangedLineupReplaysOpenFightNative"},
 	ModeConquerSchool:       {rule: ChoiceSupersedes, test: "TestI8_5DConquerStartBindsCombatAttemptNative"},
 	ModeDodgeball:           {rule: ChoiceRefusedWhileOpen, test: "TestI9_6BDodgeballNativeLifecycle"},
-	ModeEventCentreBoard:    {rule: ChoiceReplaysFrozen, test: "TestI910ANoticeBoardNative", reason: "the leader and partners are frozen at receive (eventcentre/board.go:205) and START reads the stored mission (eventcentre/board.go:455-457)"},
+	ModeEventCentreBoard:    {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceEventCentreBoard", reason: "the leader and partners are frozen at receive (eventcentre/board.go:205) and START reads the stored mission (eventcentre/board.go:455-457)"},
 	ModeGodsTrial:           {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceGodsTrial"},
 	ModeGuildCampaign:       {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceGuildCampaign"},
 	ModeIllusionSolo:        {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceIllusionSolo"},
