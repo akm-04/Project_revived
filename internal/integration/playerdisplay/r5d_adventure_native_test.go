@@ -49,7 +49,7 @@ func TestR5DAdventureDuplicateSettlementNative(t *testing.T) {
 	if open := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_ILLUSION' AND actor_player_id=$1 AND state<>'TERMINAL'`, int64(a.PlayerID)); open != 1 {
 		t.Fatal("replacement attempts", open)
 	}
-	if rows := scalar(t, p, `SELECT count(*) FROM adventure_single_attempts WHERE player_id=$1`, int64(a.PlayerID)); rows != 0 {
+	if rows := scalar(t, p, `SELECT count(*) FROM adventure_single_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); rows != 0 {
 		t.Fatal("START wrote a mode-local attempt row", rows)
 	}
 	clock.Set(clock.at.Add(time.Minute))
@@ -164,7 +164,7 @@ func TestR5DAdventureStaleModeRowNative(t *testing.T) {
 		resolved  bool
 		damage    int64
 	}{{fmt.Sprintf("placeholder-%d", a.PlayerID), false, 0}, {fmt.Sprintf("stale-resolved-%d", a.PlayerID), true, 999}} {
-		exec(t, p, `INSERT INTO adventure_single_attempts(attempt_id,player_id,event_type,occurred_at,created_at,resolved,damage)
+		exec(t, p, `INSERT INTO adventure_single_attempts_retired_r5d(attempt_id,player_id,event_type,occurred_at,created_at,resolved,damage)
 			VALUES($1,$2,$3,$4,$4,$5,$6)`, row.attemptID, int64(a.PlayerID), da.EventIllusion, clock.at.UTC(), row.resolved, row.damage)
 	}
 
@@ -183,7 +183,7 @@ func TestR5DAdventureStaleModeRowNative(t *testing.T) {
 	if _, err := mode.SettleSingle(ctx, a, appadventure.ResultRequest{Star: 0, Damage: 500, Formation: formation}, opContext); err != nil {
 		t.Fatal("settle after START", err)
 	}
-	if rows := scalar(t, p, `SELECT count(*) FROM adventure_single_attempts WHERE player_id=$1`, int64(a.PlayerID)); rows != 2 {
+	if rows := scalar(t, p, `SELECT count(*) FROM adventure_single_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); rows != 2 {
 		t.Fatal("the stale rows were read or written", rows)
 	}
 }

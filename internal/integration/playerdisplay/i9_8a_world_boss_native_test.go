@@ -151,7 +151,7 @@ func TestI9_8AWorldBossStartNative(t *testing.T) {
 	if err != nil || len(body) != 0 {
 		t.Fatalf("start %#v %v", body, err)
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
+	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
 		t.Fatal("mode-local attempt row", n)
 	}
 	if n := worldBossOpenCombatAttempts(t, p, a); n != 1 {
@@ -311,7 +311,7 @@ func TestI9_8AWorldBossAbandonedStartAndPerBossBoardsNative(t *testing.T) {
 			t.Fatal("start after an abandoned attempt", err)
 		}
 	}
-	if open := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1`, int64(a.PlayerID)); open != 0 {
+	if open := scalar(t, p, `SELECT count(*) FROM worldboss_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); open != 0 {
 		t.Fatal("mode-local attempt kept", open)
 	}
 	if open := worldBossOpenCombatAttempts(t, p, a); open != 1 {

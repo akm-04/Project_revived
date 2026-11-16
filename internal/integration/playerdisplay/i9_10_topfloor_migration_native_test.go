@@ -18,7 +18,7 @@ func TestI9_10TopFloorOfferSnapshotMigrationNative(t *testing.T) {
 	if base == "" {
 		t.Fatal("native DSN required")
 	}
-	migrations := forumMigrationsRoot(t)
+	migrations := migrationsRoot(t)
 	for _, testCase := range []struct {
 		name string
 		upTo string
@@ -26,14 +26,14 @@ func TestI9_10TopFloorOfferSnapshotMigrationNative(t *testing.T) {
 		dsn, cleanup := disposableTopFloorDatabase(t, base, testCase.name)
 		if testCase.upTo != "" {
 			runTool(t, "goose", "-dir", migrations, "postgres", dsn, "up-to", testCase.upTo)
-			connection := openForumPool(t, dsn)
+			connection := openNativePool(t, dsn)
 			if tableExists(t, connection) {
 				t.Fatal("00117 table exists before the migration")
 			}
 			connection.Close()
 		}
 		runTool(t, "goose", "-dir", migrations, "postgres", dsn, "up")
-		connection := openForumPool(t, dsn)
+		connection := openNativePool(t, dsn)
 		if !tableExists(t, connection) {
 			t.Fatal("00117 table missing after the migration")
 		}

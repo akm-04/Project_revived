@@ -24,6 +24,7 @@ AUTHORITY = "R8 player data manifest (generated from CANONICAL_TABLE_OWNERSHIP.j
 
 PLAYER_NAMED = re.compile(r"(^|_)player_id$|^(challenger|attacker|defender|student|lender|holder|mentor|apprentice|owner|"
                           r"inviter|invitee|sender|recipient|viewer|author|subject|actor|member|leader|target|blocked)_id$")
+RENAME_TABLE_RE = re.compile(r"\bALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?([A-Za-z_][A-Za-z0-9_]*)\s+RENAME\s+TO\s+([A-Za-z_][A-Za-z0-9_]*)", re.IGNORECASE)
 
 # References that intentionally have no key to players: journals, allocators, polymorphic text.
 UNKEYED_PLAYER_REFERENCES = {
@@ -86,6 +87,20 @@ def load_classes():
         if isinstance(entry.get("data"), dict):
             classes[table] = entry["data"]
     return classes
+
+
+def retired_tables():
+    """Old and kept names of tables a migration renamed to *_retired_*.
+
+    Such tables are pre-migration leftovers awaiting a later drop, not canonical
+    player data, so neither the catalog check nor the restore manifest covers them.
+    """
+    retired = set()
+    for path in sorted((ROOT / "migrations").glob("*.sql")):
+        for old, new in RENAME_TABLE_RE.findall(path.read_text(errors="replace")):
+            if "_retired_" in new:
+                retired.update((old, new))
+    return retired
 
 
 def player_columns(catalog, table):
@@ -281,6 +296,10 @@ def main():
     arguments = parse_arguments()
     catalog = load_catalog(arguments.database)
     classes = load_classes()
+    retired = retired_tables()
+    catalog.tables = [table for table in catalog.tables if table not in retired]
+    for table in retired:
+        classes.pop(table, None)
     if not arguments.check:
         MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
         MANIFEST_PATH.write_text(json.dumps(build_manifest(catalog, classes), indent=1, ensure_ascii=False) + "\n")

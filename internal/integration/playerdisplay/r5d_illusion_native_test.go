@@ -43,7 +43,7 @@ func TestR5DIllusionDuplicateSettlementNative(t *testing.T) {
 	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempt_settlements WHERE player_id=$1 AND damage=500`, int64(a.PlayerID)); n != 1 {
 		t.Fatal("settlement rows", n)
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
 		t.Fatal("mode-local attempt row", n)
 	}
 }
@@ -126,7 +126,7 @@ func TestR5DIllusionRecommendationUsesFrozenStartNative(t *testing.T) {
 	if len(source.Popularity) != 1 || source.Popularity[0].PartnerID != partner || source.Popularity[0].Score != 500 || source.Popularity[0].PlayerID != int64(a.PlayerID) {
 		t.Fatalf("recommendation popularity %+v", source.Popularity)
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
 		t.Fatal("mode-local attempt row", n)
 	}
 }

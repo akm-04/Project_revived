@@ -67,7 +67,7 @@ func TestR5DWorldBossFrozenGenerationNative(t *testing.T) {
 	if generation, boss, courage, _ := worldBossOccurrence(t, p, server); generation != 2 || boss != d.FirstBossID || courage != 0 {
 		t.Fatalf("late result changed the successor generation=%d boss=%d courage=%d", generation, boss, courage)
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempts WHERE player_id=$1`, int64(late.PlayerID)); n != 0 {
+	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempts_retired_r5d WHERE player_id=$1`, int64(late.PlayerID)); n != 0 {
 		t.Fatal("mode-local attempt row", n)
 	}
 

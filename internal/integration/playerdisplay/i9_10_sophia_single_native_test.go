@@ -50,7 +50,7 @@ func TestI9_10SophiaSingleSettleReplyShape(t *testing.T) {
 	if damage := scalar(t, p, `SELECT damage FROM adventure_attempt_settlements WHERE player_id=$1`, int64(winner.PlayerID)); damage != da.IllusionTotalDamage {
 		t.Fatalf("the win was clamped to %d, want the Adventure pool %d", damage, da.IllusionTotalDamage)
 	}
-	if rows := scalar(t, p, `SELECT count(*) FROM adventure_single_attempts WHERE player_id=$1`, int64(winner.PlayerID)); rows != 0 {
+	if rows := scalar(t, p, `SELECT count(*) FROM adventure_single_attempts_retired_r5d WHERE player_id=$1`, int64(winner.PlayerID)); rows != 0 {
 		t.Fatal("mode-local attempt row", rows)
 	}
 }
