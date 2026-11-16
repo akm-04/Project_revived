@@ -214,7 +214,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 39,
    "name": "SET_ALL_SKILL_LEVEL"
@@ -222,7 +222,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 49,
    "name": "LOAD_HEROS"
@@ -230,7 +230,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 51,
    "name": "POWERUP_HERO"
@@ -238,7 +238,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 52,
    "name": "EVOLVE_HERO"
@@ -246,7 +246,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 53,
    "name": "SET_SKILL_LEVEL"
@@ -254,7 +254,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 54,
    "name": "SET_HERO_EQUIP"
@@ -262,7 +262,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 55,
    "name": "USE_EXP_ITEM"
@@ -270,7 +270,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 57,
    "name": "ONE_CLICK_JINJIE"
@@ -278,7 +278,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 58,
    "name": "FUMO"
@@ -286,7 +286,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 59,
    "name": "STONE_SUMMON_HERO"
@@ -294,7 +294,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 60,
    "name": "SKIN_ON"
@@ -302,7 +302,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 61,
    "name": "SKIN_CANCEL"
@@ -310,7 +310,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 62,
    "name": "ONE_CLICK_EQUIP"
@@ -318,7 +318,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 63,
    "name": "USE_EXP_ITEMS"
@@ -326,7 +326,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 67,
    "name": "LOAD_HERO_PIECES"
@@ -334,7 +334,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 68,
    "name": "UNLOCK_DYNAMIC_CARD"
@@ -342,7 +342,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 69,
    "name": "SHOW_DYNAMIC_CARD"
@@ -350,7 +350,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 89,
    "name": "SAVA_SORT_TYPE"
@@ -358,7 +358,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 304,
    "name": "UPGRADE_SUPER_EQUIP"
@@ -366,7 +366,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 305,
    "name": "SUMMON_SUPER_HERO"
@@ -374,7 +374,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 2144,
    "name": "CHANGE_PARTNER_SKILL"
@@ -382,7 +382,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 2979,
    "name": "USE_ILLUSION_SKIN_ITEM"
@@ -390,7 +390,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-    "line": 81
+    "line": 82
    },
    "mid": 3116,
    "name": "HERO_COLLOCATION"

@@ -253,7 +253,11 @@ func TestPetDispatcherMID782ProjectsAbsoluteCurrentCrystal(t *testing.T) {
 	d := PetDispatcher{Authority: httpAuthority{actor}, Service: svc, Economy: economy}
 	req := env(782, nil, now)
 	req.Envelope.Params = map[string]any{"pet_id": int64(77)}
-	resp := d.Dispatch(context.Background(), req)
+	direct := d.Dispatch(context.Background(), req)
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	resp := Decorated{Next: d}.Dispatch(context.Background(), req)
 	if resp.HTTPStatus != 200 {
 		t.Fatalf("status=%d body=%#v", resp.HTTPStatus, resp.Body)
 	}

@@ -14838,7 +14838,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -15432,7 +15432,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -16026,7 +16026,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -16620,7 +16620,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -17214,7 +17214,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -17808,7 +17808,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -18402,7 +18402,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -18996,7 +18996,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -19590,7 +19590,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -20184,7 +20184,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -20778,7 +20778,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -21372,7 +21372,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -21966,7 +21966,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -22560,7 +22560,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -23154,7 +23154,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"

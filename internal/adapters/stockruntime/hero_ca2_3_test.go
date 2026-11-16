@@ -80,7 +80,11 @@ func heroReq(t *testing.T, mid uint16, params map[string]any) httpedge.DispatchR
 func TestCA23MID59StrictRequestAndDirectHeroResponse(t *testing.T) {
 	svc := &ca23HeroService{}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: &ca42HeroEconomy{amount: 777}}
-	r := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
+	direct := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
 	if r.HTTPStatus != 200 || r.Body["table_id"] != int64(1001) || r.Body["partner_id"] != int64(7) {
 		t.Fatalf("response=%+v", r)
 	}

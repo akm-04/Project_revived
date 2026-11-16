@@ -49,7 +49,11 @@ func TestCA74MID68StockWireAlwaysProjectsAlignedLIVEAndCurrentCrystal(t *testing
 	}}
 	economy := &ca74HeroEconomy{amount: 12345}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, LIVE: live, Economy: economy}
-	r := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
+	direct := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
 	if r.HTTPStatus != 200 || live.unlockPartner != 7 || live.unlockModel != 40001074 || economy.key != "crystal" {
 		t.Fatalf("response=%+v service=%d/%d economy=%q", r, live.unlockPartner, live.unlockModel, economy.key)
 	}

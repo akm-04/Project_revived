@@ -78,11 +78,15 @@ func TestI7C5DArenaWireShapes(t *testing.T) {
 	n := func(v string) json.Number { return json.Number(v) }
 	call := func(mid uint16, p map[string]any) map[string]any {
 		t.Helper()
-		r := dispatcher.Dispatch(context.Background(), heroReq(t, mid, p))
+		r := Decorated{Next: dispatcher}.Dispatch(context.Background(), heroReq(t, mid, p))
 		if r.HTTPStatus != 200 {
 			t.Fatal(mid, r)
 		}
 		return r.Body
+	}
+	direct := dispatcher.Dispatch(context.Background(), heroReq(t, 849, map[string]any{"mission_id": n("1004")}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
 	}
 	info := call(768, map[string]any{})
 	if info["star"] != int64(12) || info["my_rank"] != int64(7) || info["count"] != int64(33) || info["day_count"] != int64(3) || info["king_coin"] != int64(640) || info["is_close"] != int64(0) ||

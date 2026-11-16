@@ -85,7 +85,13 @@ func TestSocialGiftClaimReplyShape(t *testing.T) {
 	t.Run("gift settlement keeps awards and scalar", func(t *testing.T) {
 		gifts := &giftClaimProbe{result: socialgift.Result{NoticeIDs: []socialinbox.NoticeID{notice}, Amount: 5}}
 		scalar := &scalarProbe{amount: 5}
-		response := giftClaimDispatcher(t, gifts, scalar).Dispatch(context.Background(), request)
+		d := giftClaimDispatcher(t, gifts, scalar)
+		direct := d.Dispatch(context.Background(), request)
+		if _, written := direct.Body["economy_"]; written {
+			t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+		}
+		scalar.calls = 0
+		response := Decorated{Next: d}.Dispatch(context.Background(), request)
 		if response.HTTPStatus != 200 {
 			t.Fatalf("claim response %+v", response)
 		}

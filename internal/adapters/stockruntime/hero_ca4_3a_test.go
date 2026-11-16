@@ -15,7 +15,12 @@ func TestCA43AMID58StrictShapeAndProjection(t *testing.T) {
 	economy := &ca42HeroEconomy{amount: 9400}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: economy}
 	params := map[string]any{"partner_id": int64(41), "equip_index": int64(5), "materials": []any{int64(20001038), int64(20001047)}}
-	r := d.Dispatch(context.Background(), heroReq(t, 58, params))
+	direct := d.Dispatch(context.Background(), heroReq(t, 58, params))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	economy.calls = 0
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 58, params))
 	if r.HTTPStatus != 200 || svc.fumoPartner != 41 || svc.fumoIndex != 5 || !reflect.DeepEqual(svc.fumoMaterials, []int64{20001038, 20001047}) {
 		t.Fatalf("response=%+v svc=%+v", r, svc)
 	}

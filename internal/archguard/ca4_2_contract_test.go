@@ -15,7 +15,7 @@ func TestCA45SharedEquipmentWiresAreProductionRegistered(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := string(dispatcher)
-	for _, need := range []string{"case 54:", "case 62:", "error_code", "30001", `CurrentScalar(ctx, actor.PlayerID, "mana"`, `"equips": equips`, `"economy_"`} {
+	for _, need := range []string{"case 54:", "case 62:", "error_code", "30001", `CurrentScalar(ctx, actor.PlayerID, "mana"`, `"equips": equips`, `changes.Balance(ctx, "mana", mana)`} {
 		if !strings.Contains(d, need) {
 			t.Errorf("CA4-5 shared dispatcher missing %q", need)
 		}

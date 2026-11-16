@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	backpackproj "gxb.local/backend/v2/internal/projection/backpack"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -172,7 +173,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			return failI5(err)
 		}
 		body := map[string]any{"changed": got.Changed, "is_new": got.IsNew, "is_shown": got.IsShown, "rewards": appi5.StockMID369Rewards(got.Rewards)}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	case 370: // MAIL_ONEKEY
 		normal := stringParam(req.Envelope.Params, "normal_ids")
@@ -191,7 +192,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			return failI5(err)
 		}
 		body := map[string]any{"awards": awards, "mail_list": map[string]any{"mail_list": wire, "total": got.Mail.Total, "new_mail_total": got.Mail.NewMailTotal}}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	case 169, 170:
 		if d.Missions == nil {
@@ -295,7 +296,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		awards := appi5.StockRepresentableBulkAwards(got.Awards)
 		body := map[string]any{"awards": awards}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	case 230: // REDEEM_CODE
 		code, _ := req.Envelope.Params["code"].(string)
@@ -309,7 +310,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		awards := appi5.StockRepresentableBulkAwards(got.Awards)
 		body := map[string]any{"awards": awards}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	default:
 		return failureReply(refusal(unprovenRefusalCode))
@@ -402,9 +403,12 @@ func stockMissionList(f objective.StockFamily, in []objective.Instance) any {
 	}
 	return group
 }
-func applySettlementProjection(body map[string]any, p appi5.SettlementProjection) {
-	if len(p.Economy) > 0 {
-		body["economy_"] = p.Economy
+func applySettlementProjection(ctx context.Context, body map[string]any, p appi5.SettlementProjection) {
+	for key, amount := range p.Economy {
+		changes.Balance(ctx, key, amount)
+	}
+	for _, id := range p.NewFunctionIDs {
+		changes.FunctionOpened(ctx, id)
 	}
 	if len(p.ExtraDrops) > 0 {
 		drops := make([]any, 0, len(p.ExtraDrops))
@@ -416,9 +420,6 @@ func applySettlementProjection(body map[string]any, p appi5.SettlementProjection
 		if len(drops) > 0 {
 			body["extra_drops_"] = drops
 		}
-	}
-	if len(p.NewFunctionIDs) > 0 {
-		body["new_funcs_"] = append([]int64(nil), p.NewFunctionIDs...)
 	}
 }
 

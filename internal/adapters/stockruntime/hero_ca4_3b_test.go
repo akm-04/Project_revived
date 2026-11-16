@@ -51,7 +51,11 @@ func TestCA43BMID57UsesReceiptManaAndDoesNotPostReadEconomy(t *testing.T) {
 	svc := &ca42HeroService{oneClickResult: apphero.HeroPromotionResult{PartnerID: 55, Branch: apphero.HeroPromotionMID57Collect, ManaAfter: &mana}}
 	economy := &ca42HeroEconomy{amount: 123}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: economy}
-	r := d.Dispatch(context.Background(), heroReq(t, 57, map[string]any{"partner_id": int64(55)}))
+	direct := d.Dispatch(context.Background(), heroReq(t, 57, map[string]any{"partner_id": int64(55)}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 57, map[string]any{"partner_id": int64(55)}))
 	if r.HTTPStatus != 200 || svc.oneClickPartner != 55 {
 		t.Fatalf("response=%+v partner=%d", r, svc.oneClickPartner)
 	}
