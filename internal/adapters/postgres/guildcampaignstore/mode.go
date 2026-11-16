@@ -338,7 +338,9 @@ func (Store) ApplicationTx(ctx context.Context, q tx.Queryer, guildID, chapterID
 func (Store) ApplicationsByAwardTx(ctx context.Context, q tx.Queryer, guildID, chapterID, run int64) ([]app.ApplicationRow, error) {
 	var raw string
 	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'award_id',award_id,'applied',EXTRACT(EPOCH FROM applied_at)::bigint) ORDER BY applied_at,player_id),'[]'::jsonb)::text
-		FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND run=$3`, guildID, chapterID, run).Scan(&raw)
+		FROM guild_campaign_applications a WHERE a.guild_id=$1 AND a.chapter_id=$2 AND a.run=$3
+		AND EXISTS (SELECT 1 FROM guild_campaign_registrations r
+			WHERE r.guild_id=a.guild_id AND r.chapter_id=a.chapter_id AND r.player_id=a.player_id)`, guildID, chapterID, run).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}

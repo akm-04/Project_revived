@@ -37413,11 +37413,6 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('award_id',award_id,'remaining',remaining,'expires',EXTRACT(EPOCH FROM expires_at)::bigint,'next',EXTRACT(EPOCH FROM next_slot)::bigint) ORDER BY award_id),'[]'::jsonb)::text FROM guild_campaign_awards WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
-     "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 338,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'award_id',award_id,'applied',EXTRACT(EPOCH FROM applied_at)::bigint) ORDER BY applied_at,player_id),'[]'::jsonb)::text FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
-    },
-    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 99,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -37451,8 +37446,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildcampaignstore/mode.go:360",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:376"
+    "internal/adapters/postgres/guildcampaignstore/mode.go:362",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:378"
    ],
    "system": "guildcampaign",
    "transactions": [
@@ -37490,11 +37485,6 @@
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
      "line": 273,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('award_id',award_id,'remaining',remaining,'expires',EXTRACT(EPOCH FROM expires_at)::bigint,'next',EXTRACT(EPOCH FROM next_slot)::bigint) ORDER BY award_id),'[]'::jsonb)::text FROM guild_campaign_awards WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
-    },
-    {
-     "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 338,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'award_id',award_id,'applied',EXTRACT(EPOCH FROM applied_at)::bigint) ORDER BY applied_at,player_id),'[]'::jsonb)::text FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/store.go",
