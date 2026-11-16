@@ -26,11 +26,29 @@ func RedactFields(in map[string]any) map[string]any {
 		if sensitiveKey(n) {
 			out[k] = Redacted
 		} else {
-			out[k] = v
+			out[k] = redactValue(v)
 		}
 	}
 	return out
 }
+
+func redactValue(value any) any {
+	switch typed := value.(type) {
+	case string:
+		return RedactText(typed)
+	case map[string]any:
+		return RedactFields(typed)
+	case []any:
+		out := make([]any, len(typed))
+		for index, item := range typed {
+			out[index] = redactValue(item)
+		}
+		return out
+	default:
+		return value
+	}
+}
+
 func sensitiveKey(k string) bool {
 	for _, x := range secretFragments {
 		if k == x || strings.Contains(k, x) {
