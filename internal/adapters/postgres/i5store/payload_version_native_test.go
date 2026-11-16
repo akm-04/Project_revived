@@ -20,7 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func TestPayloadVersionRoundTripI5Store(t *testing.T) {
+func TestPayloadVersionRoundTripI5StoreMail(t *testing.T) {
 	dsn := os.Getenv("GXB_R8_2C_BATCH15_DSN")
 	if dsn == "" {
 		t.Fatal("required GXB_R8_2C_BATCH15_DSN for a migrated test database is missing")
