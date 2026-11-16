@@ -70,6 +70,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/summonstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/undeliveredstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/worldbossstore"
 	"gxb.local/backend/v2/internal/adapters/publicpresentation"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
@@ -424,8 +425,13 @@ func main() {
 	mustRegister(18, boot)
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner})
-	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys.
-	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher { return stockruntime.Decorated{Next: d} }
+	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys
+	// and the R6 undelivered-reply guard: one decorator, resolved before the MID handler runs.
+	undeliveredMarks := undeliveredstore.Store{Pool: pool.Raw()}
+	replayWindow := envDurationWithin("GXB_UNDELIVERED_REPLAY_WINDOW", 10*time.Minute, time.Minute, 30*time.Minute)
+	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher {
+		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics}
+	}
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
 	heroRecommend := canonicalHeroRecommend(pool, runner, contentDB, owners, publicStats)
@@ -827,6 +833,7 @@ func main() {
 	h := httpedge.Handler{
 		Limits: limits.Default(), Admission: admission, Decoding: decoding,
 		Operations: operation.Factory{Clock: clock.System{}}, Router: router, Journal: journal,
+		Undelivered: undeliveredMarks, Metrics: txMetrics,
 		QueueBudget: time.Duration(envPositiveInt("GXB_HTTP_QUEUE_BUDGET_SECONDS", int(httpedge.DefaultQueueBudget/time.Second))) * time.Second,
 		QueueWait:   transactionAdmission,
 	}

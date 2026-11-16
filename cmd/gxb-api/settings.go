@@ -54,3 +54,17 @@ func envPositiveDuration(name string, fallback time.Duration) time.Duration {
 	}
 	return value
 }
+
+// envDurationWithin reads an optional bounded duration setting. Absence keeps
+// the fallback; a present but out-of-range value is fatal at startup.
+func envDurationWithin(name string, fallback, minimum, maximum time.Duration) time.Duration {
+	raw := os.Getenv(name)
+	if raw == "" {
+		return fallback
+	}
+	value, err := time.ParseDuration(raw)
+	if err != nil || value < minimum || value > maximum {
+		log.Fatalf("%s must be a duration between %s and %s, got %q", name, minimum, maximum, raw)
+	}
+	return value
+}

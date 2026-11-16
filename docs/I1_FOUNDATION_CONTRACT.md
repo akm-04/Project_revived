@@ -25,6 +25,35 @@ Pool configuration must provide a positive finite maximum, valid min/max bounds,
 
 River is available only behind `internal/adapters/river` and `obligation.Queue`. A durable obligation is inserted with the same canonical PostgreSQL transaction. River job IDs, leases and worker identities are execution mechanics, never gameplay/domain identities or idempotency authority.
 
+## R6 undelivered-reply replay
+
+Amends this contract with the operation/receipt-adjacent edge cache approved by the user on 2026-11-11
+(`work/i9/stages/I9-11/contract_recovery/D2_PROPOSAL.md` sections 4 and 6; design
+`work/i9/stages/I9-11/contract_recovery/R6_UNDELIVERED_REPLAY_DESIGN.md`). The transactions and receipts themselves
+do not change; the cache only lets the edge answer a resend with a reply that already committed.
+
+> 1. **Marking.** When a state-changing operation commits but its reply is not delivered, the edge marks that operation's receipt UNDELIVERED. Not delivered means the request context was cancelled before the write finished, or the write returned an error. The mark is a separate small write after the commit. If it fails, behaviour falls back to today's.
+> 2. **Replay.** The next request from the same player and session token is answered with the stored reply, and no new operation runs, when:
+>    - it has the same mid and the identical canonical params fingerprint;
+>    - it arrives within `UNDELIVERED_REPLAY_WINDOW` (a tunable, default 10 minutes);
+>    - no other state-changing request from that player came in between.
+>
+>    The replay consumes the mark.
+> 3. **Otherwise the request runs as a new operation,** exactly as today. A deliberate repeat after a delivered reply never finds a mark, so it is never swallowed.
+> 4. **No change to transactions or receipts:** they are written in the committing transaction as now, and natural-key replays stay. The replay only ever answers with a reply that was already committed.
+> 5. **Counters:** replays and marks are counted, and a replay is journalled with its mid.
+>
+> **Limits:**
+> - A reply lost after the server's write succeeded, for example dropped in transit with no disconnect seen by the server, is not detected. It falls back to today's behaviour.
+> - The signal depends on the deployment passing a client disconnect through to the backend. zrok, and any reverse proxy, must be tested for this. If it does not pass through, the mark is never set, and behaviour stays as today.
+> - **Original server: UNKNOWN.** The client gives no evidence that it deduplicated. This proposal adds safety on top of stock behaviour and changes nothing the client can observe on the success path.
+
+Policy `UNDELIVERED_REPLAY_WINDOW_V1` is a PRIVATE_POLICY (`GXB_UNDELIVERED_REPLAY_WINDOW`, default 10m, refused
+outside 1m..30m at startup). The mark stores the exact encoded reply bytes, keyed by player, with the resolved
+session, the MID, a sha256 of the canonical JSON of the decoded params, and the mark time (migration 00166). The
+single check runs before every gameplay MID handler through the one dispatcher decorator; `read` MIDs never touch it
+and an `unknown` MID counts as state-changing.
+
 ## Proof boundary
 
 Normal-chat I1 proves Go-level semantics, architecture, deterministic SQL ownership and offline tests. It does **not** prove PostgreSQL lock/commit behavior, goose/sqlc execution, River visibility/redelivery or failover semantics. Those remain W1 after I4 using real PostgreSQL/River and the stock client.
