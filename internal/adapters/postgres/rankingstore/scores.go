@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/ranking"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -181,7 +182,8 @@ func (Store) ReadBoardRootRunsTx(c context.Context, q tx.Queryer, b d.Board, ser
 		return out, d.ErrSnapshot
 	}
 	var raw string
-	e := q.QueryRow(c, `SELECT payload::text FROM ranking_girls_roots WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), b.Policy).Scan(&raw)
+	var version int16
+	e := q.QueryRow(c, `SELECT payload::text,payload_version FROM ranking_girls_roots WHERE logical_server_id=$1 AND policy_id=$2`, int64(server), b.Policy).Scan(&raw, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return out, nil
 	}
@@ -189,7 +191,7 @@ func (Store) ReadBoardRootRunsTx(c context.Context, q tx.Queryer, b d.Board, ser
 		return nil, e
 	}
 	var root d.BoardRoot
-	if e = json.Unmarshal([]byte(raw), &root); e != nil {
+	if e = payload.Decode("ranking_girls_roots", version, []byte(raw), &root); e != nil {
 		return nil, e
 	}
 	if root.Validate() != nil || root.Server != server || root.Policy != b.Policy {
