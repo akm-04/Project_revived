@@ -41,8 +41,8 @@ func (f lineupFixture) request(t *testing.T, scope string, fight int64) combat.S
 	t.Helper()
 	waves := must(combat.MonsterWaves(f.service.Rules, fight))(t, "monster waves")
 	trial := must(combat.AssistTrial(f.service.Rules, assistFight, 1))(t, "assist trial")
-	locator := d.Locator{DomainKind: "i8-6b-fixture-mode", AuthorityScope: scope, DomainLocator: fmt.Sprint(f.owner.PlayerID)}
-	return combat.StartRequest{Actor: f.owner, Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: scope, DomainLocator: fmt.Sprint(f.owner.PlayerID)}
+	return combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.owner, Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
 		Battle: combat.BattleRequest{CampaignType: 1, BattleID: fight,
 			TeamA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.owner.PlayerID, Identity: f.hero.PartnerID}, trial},
 			WavesB: waves}}
@@ -55,7 +55,7 @@ func (f lineupFixture) snapshot(t *testing.T, attempt d.Attempt) d.Snapshot {
 }
 
 func (f lineupFixture) attempts(t *testing.T) int64 {
-	return scalar(t, f.pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='i8-6b-fixture-mode' AND domain_locator=$1`, fmt.Sprint(f.owner.PlayerID))
+	return scalar(t, f.pool, `SELECT count(*) FROM combat_attempts WHERE domain_kind='EVENT_CENTRE_BOARD' AND domain_locator=$1`, fmt.Sprint(f.owner.PlayerID))
 }
 
 func (f lineupFixture) ownerState(t *testing.T) [2]int64 {

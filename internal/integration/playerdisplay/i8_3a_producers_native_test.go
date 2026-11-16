@@ -49,8 +49,8 @@ func (r injectedRoster) OverlayMID1(c context.Context, q tx.Queryer, a identity.
 }
 
 func ownedRequest(a identity.ActorContext, ref character.HeroRef, scope, name string) combat.StartRequest {
-	locator := d.Locator{DomainKind: "i8-3a-fixture-mode", AuthorityScope: scope, DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
-	return combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(scope + name), Battle: combat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: scope, DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
+	return combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(scope + name), Battle: combat.BattleRequest{CampaignType: 1,
 		TeamA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}},
 		WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 }
