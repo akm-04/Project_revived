@@ -1,0 +1,309 @@
+{
+  "ID": "3e4b23ef-5e51-4fa0-bc94-4fc58c536547",
+  "WireID": 1,
+  "Attacker": 3991325001,
+  "Defender": 5647325001,
+  "Intent": 1,
+  "Season": 82,
+  "Group": 3,
+  "Fingerprint": "5d556b57d37efb638b2d1d1ca94417a657e2b0e1a8a623395f9f8b573f855eb3",
+  "Revision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+  "Status": "SETTLED",
+  "Attempt": "226274a3-2922-4a24-8b35-06ff4faef0a3",
+  "Attack": {
+    "Heroes": [
+      1
+    ],
+    "Pet": 0
+  },
+  "Defense": {
+    "Heroes": [
+      1
+    ],
+    "Pet": 0
+  },
+  "SelfRows": [
+    {
+      "board_card": 1,
+      "board_model_id": 0,
+      "book_shelf_lev": 1,
+      "collect_quality_stage": 0,
+      "collect_star_stage": 0,
+      "color": 1,
+      "courses": [],
+      "courses_exp": [],
+      "courses_progress": [],
+      "courses_quality": [],
+      "courses_skill": [],
+      "current_skin_id": 0,
+      "dynamic_card_state": "",
+      "element_bak_equips": [],
+      "element_bak_levels": [],
+      "element_equips": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "element_levels": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "equips": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "evo_attr_points": {},
+      "evo_stage": 1,
+      "exp": 0,
+      "favor_degree": 0,
+      "feed_attrs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fumo_levels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fumos": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "house_comfort": 0,
+      "house_equips": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "house_expand_lev": 0,
+      "house_id": 0,
+      "house_table_id": 0,
+      "illusion_skin_id": 0,
+      "inscript_items": [],
+      "is_board": 0,
+      "is_like": 0,
+      "is_married": 0,
+      "lev": 1,
+      "partner_id": 1,
+      "practice_attr": [
+        0,
+        0,
+        0
+      ],
+      "skill_book_info": {},
+      "skill_ids": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "skills": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "skin_ids": {},
+      "spirit_equip": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "spirit_item": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+      ],
+      "star": 1,
+      "table_id": 10001001,
+      "unlocked_dynamic_card": ""
+    }
+  ],
+  "EnemyRows": [
+    {
+      "board_card": 1,
+      "board_model_id": 0,
+      "book_shelf_lev": 1,
+      "collect_quality_stage": 0,
+      "collect_star_stage": 0,
+      "color": 1,
+      "courses": [],
+      "courses_exp": [],
+      "courses_progress": [],
+      "courses_quality": [],
+      "courses_skill": [],
+      "current_skin_id": 0,
+      "dynamic_card_state": "",
+      "element_bak_equips": [],
+      "element_bak_levels": [],
+      "element_equips": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "element_levels": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "equips": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "evo_attr_points": {},
+      "evo_stage": 1,
+      "exp": 0,
+      "favor_degree": 0,
+      "feed_attrs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fumo_levels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fumos": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "house_comfort": 0,
+      "house_equips": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "house_expand_lev": 0,
+      "house_id": 0,
+      "house_table_id": 0,
+      "illusion_skin_id": 0,
+      "inscript_items": [],
+      "is_board": 0,
+      "is_like": 0,
+      "is_married": 0,
+      "lev": 1,
+      "partner_id": 1,
+      "practice_attr": [
+        0,
+        0,
+        0
+      ],
+      "skill_book_info": {},
+      "skill_ids": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "skills": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "skin_ids": {},
+      "spirit_equip": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "spirit_item": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+      ],
+      "star": 1,
+      "table_id": 10001001,
+      "unlocked_dynamic_card": ""
+    }
+  ],
+  "EnemyPet": null,
+  "SelfFace": {
+    "ID": 3991325001,
+    "Name": "Ranker",
+    "Level": 100,
+    "Avatar": 110001001,
+    "Frame": 0,
+    "Conquer": 0,
+    "Loop": 1,
+    "GuildID": 0,
+    "GuildName": ""
+  },
+  "EnemyFace": {
+    "ID": 5647325001,
+    "Name": "Ranker",
+    "Level": 100,
+    "Avatar": 110001001,
+    "Frame": 0,
+    "Conquer": 0,
+    "Loop": 1,
+    "GuildID": 0,
+    "GuildName": ""
+  },
+  "PreviousAttack": "0001-01-01T00:00:00Z",
+  "PreviousProtectedBy": "00000000-0000-0000-0000-000000000000",
+  "StartedAt": "2027-02-04T02:00:00Z",
+  "SettledAt": "2027-02-04T02:00:00Z",
+  "Win": true,
+  "Delta": 18,
+  "Version": 2
+}

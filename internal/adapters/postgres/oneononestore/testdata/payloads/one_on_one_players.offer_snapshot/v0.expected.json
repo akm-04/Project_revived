@@ -1,0 +1,13 @@
+{
+  "challenger": {
+    "global": 5002,
+    "in_group": 2
+  },
+  "targets": [
+    {
+      "player": 4049225001,
+      "global": 5001,
+      "in_group": 1
+    }
+  ]
+}
