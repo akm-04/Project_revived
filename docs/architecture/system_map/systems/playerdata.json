@@ -1,0 +1,40 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "playerdata",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/playerdatastore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "playerdata"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "plan_test.go"
+  ]
+ }
+}

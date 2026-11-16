@@ -1547,6 +1547,7 @@
    ]
   },
   "petcampaign": {},
+  "playerdata": {},
   "playerdirectory": {
    "dormhouse": [
     "Validate"
@@ -4789,6 +4790,7 @@
     "*PutTx"
    ]
   },
+  "playerdata": {},
   "playerdirectory": {},
   "playerdisplay": {
    "arena": [
@@ -5955,6 +5957,7 @@
   "petcampaign": [
    "cmd/gxb-api/petcampaign_postgres.go"
   ],
+  "playerdata": [],
   "playerdirectory": [],
   "playerdisplay": [
    "cmd/gxb-api/player_display_postgres.go"

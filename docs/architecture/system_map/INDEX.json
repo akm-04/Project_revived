@@ -1324,6 +1324,15 @@
   },
   {
    "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "playerdata",
+   "path": "internal/application/playerdata",
+   "purpose": "is the I11A operator capability that exports one player's rows",
+   "tables": 0
+  },
+  {
+   "callees": 0,
    "callers": 7,
    "mids": 0,
    "name": "playerdirectory",
