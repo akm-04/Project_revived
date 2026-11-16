@@ -50,6 +50,8 @@ run python3 tools/check_schema_query_ownership.py
 run python3 tools/test_system_map.py
 run go test ./tools/system_map_mids
 run python3 tools/system_map.py --check
+run python3 tools/mid_effects.py --check
+run python3 tools/generate_inactive_mids.py --check
 run python3 tools/validate_foundation_trace.py
 
 # Never rewrite canonical source during a check. Formatting drift is a failure.
