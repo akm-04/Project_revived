@@ -99,7 +99,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		if err := dispatcher.Service.SaveTaskDefense(requestContext, actor, domain.TaskModeDefense{Heroes: heroes, Pet: pet, Leader: leader}, op); err != nil {
 			return failTopFloorTask(err)
 		}
-		return okI5(map[string]any{})
+		return okI5(map[string]any{"pet_id": pet})
 	case 285:
 		enemy, valid := topFloorInteger(parameters, "enemy_id", false)
 		if !valid || !onlyStockGameplayParams(parameters, "enemy_id") {
