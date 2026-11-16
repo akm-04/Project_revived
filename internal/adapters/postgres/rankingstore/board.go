@@ -112,7 +112,21 @@ func (Store) BindBoardPeriodTx(c context.Context, t tx.Tx, s d.BoardSnapshot) er
 	if t == nil || s.Validate() != nil {
 		return d.ErrSnapshot
 	}
-	w, e := d.BoardWeek(s.ObservedAt)
+	unsettled := false
+	legacy, legacyErr := d.LegacyBoardWeek(s.ObservedAt)
+	if legacyErr != nil {
+		return legacyErr
+	}
+	canonical, canonicalErr := d.BoardWeek(s.ObservedAt)
+	if canonicalErr != nil {
+		return canonicalErr
+	}
+	if !legacy.Equal(canonical) {
+		if e := t.QueryRow(c, `SELECT EXISTS(SELECT 1 FROM ranking_girls_periods WHERE logical_server_id=$1 AND policy_id=$2 AND week_start=$3 AND settled_at IS NULL)`, int64(s.Server), s.Policy, legacy.UTC()).Scan(&unsettled); e != nil {
+			return e
+		}
+	}
+	w, e := d.BindWeek(s.ObservedAt, unsettled)
 	if e != nil {
 		return e
 	}

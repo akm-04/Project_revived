@@ -1555,6 +1555,20 @@
       "owner": "typed-economy",
       "write_exceptions": []
     },
+    "player_daily_reset_marks": {
+      "owner": "player-core",
+      "allowed_query_owners": [
+        "player-core"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/dailyresetstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/dailyresetstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00158_r3_player_daily_reset_marks.sql"
+    },
     "player_directory_profiles": {
       "allowed_query_owners": [
         "identity/logicalserver/bootstrap",

@@ -34,7 +34,7 @@ func (service Service) AddDailyBondTx(ctx context.Context, t tx.Tx, first, secon
 		if relation.Mentor != second && relation.Student != second {
 			continue
 		}
-		today := dayKey(at)
+		today := gameDate(at)
 		next, changed := domain.ApplyIntimacy(relation.Intimacy, rules.IntimacyDaily, rules.IntimacyCap, relation.LastIntimacyDay, today)
 		if !changed {
 			return nil

@@ -8,12 +8,14 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/arenastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/dailyresetstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appawakeningbattle "gxb.local/backend/v2/internal/application/awakeningbattle"
 	appleague "gxb.local/backend/v2/internal/application/championsleague"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	"gxb.local/backend/v2/internal/application/dailyconsume"
+	"gxb.local/backend/v2/internal/application/dailyreset"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
@@ -417,12 +419,15 @@ func main() {
 	}
 	mux := http.NewServeMux()
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
-	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs}
+	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: dailyreset.ZeroCounters{}}
+	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
 	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner})
 	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys.
-	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher { return stockruntime.Decorated{Next: d} }
+	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher {
+		return stockruntime.Decorated{Next: d, DailyReset: dailyReset}
+	}
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
 	heroRecommend := canonicalHeroRecommend(pool, runner, contentDB, owners, publicStats)

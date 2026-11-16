@@ -558,6 +558,7 @@
     "Pipe"
    ]
   },
+  "dailyreset": {},
   "directorysync": {
    "playerdisplay": [
     "ReconcileDirectoryTx"
@@ -1805,7 +1806,8 @@
    "socialprojection": [
     "*GiftNoticeValidityTx",
     "*GiftSnapshotTx",
-    "Day"
+    "Day",
+    "LegacyDay"
    ],
    "socialreload": [
     "*ValidateReloadTx"
@@ -3201,6 +3203,7 @@
     "*DebitMaterialCostTx"
    ]
   },
+  "dailyreset": {},
   "directorysync": {
    "i5": [
     "*ReadCanonicalDirectoryTx"
@@ -5431,7 +5434,8 @@
    "socialgift": [
     "*GiftNoticeValidityTx",
     "*GiftSnapshotTx",
-    "Day"
+    "Day",
+    "LegacyDay"
    ],
    "socialinbox": [
     "*NoticePageTx",
@@ -5867,6 +5871,7 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "dailyconsume": [],
+  "dailyreset": [],
   "directorysync": [],
   "dodgeball": [
    "cmd/gxb-api/dodgeball_postgres.go"

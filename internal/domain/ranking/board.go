@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/ids"
 )
 
@@ -365,9 +366,17 @@ func FreezeBoardSnapshot(root BoardRoot, at time.Time, rev string, op ids.UUID, 
 	return finishBoardSnapshot(root, out, byID, at)
 }
 
-// BoardWeek is an explicit private UTC calendar. It does not reuse another
-// mode's 05:00 reset or imply a recovered original leaderboard timetable.
+// BoardWeek is the canonical Monday 05:00 GMT+8 game week (I9_MODE_FRAMEWORK_V1 F7).
 func BoardWeek(at time.Time) (time.Time, error) {
+	if at.Unix() <= 0 {
+		return time.Time{}, ErrSnapshot
+	}
+	return modes.DayBegins(modes.WeekStart(at)), nil
+}
+
+// LegacyBoardWeek is the pre-R3 Monday 00:00 UTC week. It exists only to bind
+// and settle a period written under the old calendar that still covers at.
+func LegacyBoardWeek(at time.Time) (time.Time, error) {
 	if at.Unix() <= 0 {
 		return time.Time{}, ErrSnapshot
 	}
@@ -375,6 +384,20 @@ func BoardWeek(at time.Time) (time.Time, error) {
 	day := time.Date(u.Year(), u.Month(), u.Day(), 0, 0, 0, 0, time.UTC)
 	offset := (int(u.Weekday()) + 6) % 7
 	return day.AddDate(0, 0, -offset), nil
+}
+
+// BindWeek keeps the switch week on an unsettled old UTC period that still
+// covers the snapshot, so that period is neither duplicated nor skipped.
+func BindWeek(at time.Time, legacyUnsettled bool) (time.Time, error) {
+	week, err := BoardWeek(at)
+	if err != nil || !legacyUnsettled {
+		return week, err
+	}
+	legacy, err := LegacyBoardWeek(at)
+	if err != nil || legacy.Equal(week) {
+		return week, err
+	}
+	return legacy, nil
 }
 
 type BoardAward struct {

@@ -556,23 +556,49 @@ func TestCounterOverflowIsAtomic(t *testing.T) {
 		t.Fatal("overflow applied command", e)
 	}
 }
+func TestLegacyEpochSwitchKeepsTheCoveringRow(t *testing.T) {
+	f := fresh(t)
+	for _, p := range []identity.PlayerID{100001, 200001, 200002} {
+		f.player(p)
+	}
+	f.root(100001)
+	at := time.Date(2026, 10, 7, 16, 30, 0, 0, time.UTC) // 00:30 GMT+8 on 10/8
+	day, anchor, e := sr.LegacyRequestDay(at)
+	if e != nil {
+		t.Fatal(e)
+	}
+	f.sql(`UPDATE accounts SET created_at=$1`, anchor.Add(-time.Hour))
+	f.sql(`UPDATE player_social_roots SET created_at=$1,updated_at=$1 WHERE player_id=$2`, anchor.Add(-time.Hour), 100001)
+	f.sql(`INSERT INTO social_request_epochs(player_id,policy_id,epoch_generation,epoch_started_at,successful_new_requests,state_version,updated_at)VALUES($1,'SOCIAL_REQUEST_DAY_V1',$2,$3,1,1,$3)`, 100001, day, anchor)
+	f.s.Timed.Binder.Time = fixedTime{at}
+	f.ok(100001, sr.RequestFriend, 200001)
+	if f.number(`SELECT epoch_generation FROM social_request_epochs`) != day || f.number(`SELECT successful_new_requests FROM social_request_epochs`) != 2 {
+		t.Fatal("a covering old-calendar epoch was not today's row")
+	}
+	f.s.Timed.Binder.Time = fixedTime{time.Date(2026, 10, 7, 21, 0, 0, 0, time.UTC)} // 05:00 GMT+8
+	f.ok(100001, sr.RequestFriend, 200002)
+	if f.number(`SELECT epoch_generation FROM social_request_epochs`) != day || f.number(`SELECT successful_new_requests FROM social_request_epochs`) != 3 {
+		t.Fatal("05:00 boundary reset the legacy covering row")
+	}
+}
+
 func TestEpochBoundaryQuotaAndRegression(t *testing.T) {
 	f := fresh(t)
 	for _, p := range []identity.PlayerID{100001, 200001, 200002, 200003} {
 		f.player(p)
 	}
-	beforeMidnight := time.Date(2026, 10, 6, 15, 59, 59, 0, time.UTC)
-	f.sql(`UPDATE accounts SET created_at=$1`, beforeMidnight.Add(-time.Hour))
-	f.s.Timed.Binder.Time = fixedTime{beforeMidnight}
+	beforeBoundary := time.Date(2026, 10, 6, 20, 59, 59, 0, time.UTC) // 04:59:59 GMT+8 on 10/7
+	f.sql(`UPDATE accounts SET created_at=$1`, beforeBoundary.Add(-time.Hour))
+	f.s.Timed.Binder.Time = fixedTime{beforeBoundary}
 	f.ok(100001, sr.RequestFriend, 200001)
 	day := f.number(`SELECT epoch_generation FROM social_request_epochs`)
-	f.s.Timed.Binder.Time = fixedTime{beforeMidnight.Add(time.Second)}
+	f.s.Timed.Binder.Time = fixedTime{beforeBoundary.Add(time.Second)} // 05:00:00 GMT+8
 	f.ok(100001, sr.RequestFriend, 200002)
 	if f.number(`SELECT epoch_generation FROM social_request_epochs`) != day+1 || f.number(`SELECT successful_new_requests FROM social_request_epochs`) != 1 {
-		t.Fatal("GMT+8 midnight did not roll quota")
+		t.Fatal("05:00 GMT+8 did not roll quota")
 	}
 	before := f.snapshot()
-	f.s.Timed.Binder.Time = fixedTime{beforeMidnight}
+	f.s.Timed.Binder.Time = fixedTime{beforeBoundary}
 	_, e := f.runAs(100001, sr.RequestFriend, 200003)
 	if !errors.Is(e, sr.ErrStaleDecisionTime) || f.snapshot() != before {
 		t.Fatal("clock regression reopened quota", e)

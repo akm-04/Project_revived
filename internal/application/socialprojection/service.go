@@ -327,7 +327,8 @@ func (s Service) loadTx(c context.Context, t tx.Tx, a identity.ActorContext, k L
 			return Result{}, e
 		}
 		day, e := socialgift.Day(b.ObservedAt)
-		if e != nil || gift.Day != day || gift.Policy != socialgift.DayPolicy || gift.Sent < 0 || gift.Sent > 10 || gift.Claimed < 0 || gift.Claimed > 10 || int64(len(gift.SentRecipients)) != gift.Sent {
+		legacy, legacyErr := socialgift.LegacyDay(b.ObservedAt)
+		if e != nil || legacyErr != nil || gift.Day != day && gift.Day != legacy || gift.Policy != socialgift.DayPolicy || gift.Sent < 0 || gift.Sent > 10 || gift.Claimed < 0 || gift.Claimed > 10 || int64(len(gift.SentRecipients)) != gift.Sent {
 			return Result{}, ErrInvalidRead
 		}
 		out.SendCount = int(gift.Sent)

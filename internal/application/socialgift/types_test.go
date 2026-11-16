@@ -11,11 +11,15 @@ import (
 )
 
 func TestPolicyIdentityAndPureNormalization(t *testing.T) {
-	before := time.Date(2026, 10, 8, 15, 59, 59, 0, time.UTC)
+	before := time.Date(2026, 10, 8, 20, 59, 59, 0, time.UTC) // 04:59:59 GMT+8 on 10/9
 	a, _ := Day(before)
-	b, _ := Day(before.Add(time.Second))
+	b, _ := Day(before.Add(time.Second)) // 05:00:00 GMT+8 on 10/9
 	if a != "2026-10-08" || b != "2026-10-09" {
 		t.Fatal(a, b)
+	}
+	midnight, _ := Day(time.Date(2026, 10, 8, 16, 0, 0, 0, time.UTC)) // 00:00 GMT+8 on 10/9
+	if midnight != "2026-10-08" {
+		t.Fatalf("old midnight still rolls the day: %s", midnight)
 	}
 	u, _ := ids.NewUUID()
 	op := operation.Context{ID: u, StartedAt: before, EntropySeed: [32]byte{7}}

@@ -105,7 +105,7 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 			return refusal(34008)
 		}
 		updated := state
-		updated.ApplyDay = at.UTC()
+		updated.ApplyDay = gameDayStart(at)
 		updated.CountMentor = state.CountMentor
 		updated.CountStudent = state.CountStudent
 		if !sameDay(state.ApplyDay, at) {

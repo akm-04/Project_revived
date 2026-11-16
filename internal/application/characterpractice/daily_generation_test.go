@@ -159,14 +159,47 @@ func practiceTestService(store *practiceTestStore, db *practiceTestDB, rev strin
 	}
 }
 
-func TestAlchemyEpochStartV1UsesGMTPlus8Midnight(t *testing.T) {
-	got, err := AlchemyEpochStartV1(time.Date(2026, 9, 18, 17, 30, 0, 0, time.UTC)) // 01:30 next day GMT+8
+func TestAlchemyEpochStartV1UsesTheGameDayBoundary(t *testing.T) {
+	before, err := AlchemyEpochStartV1(time.Date(2026, 9, 18, 20, 59, 59, 0, time.UTC)) // 04:59:59 GMT+8 on 9/19
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := time.Date(2026, 9, 18, 16, 0, 0, 0, time.UTC)
-	if !got.Equal(want) {
-		t.Fatalf("epoch=%s want=%s", got, want)
+	if want := time.Date(2026, 9, 17, 21, 0, 0, 0, time.UTC); !before.Equal(want) {
+		t.Fatalf("epoch=%s want=%s", before, want)
+	}
+	after, err := AlchemyEpochStartV1(time.Date(2026, 9, 18, 21, 0, 0, 0, time.UTC)) // 05:00:00 GMT+8 on 9/19
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := time.Date(2026, 9, 18, 21, 0, 0, 0, time.UTC); !after.Equal(want) {
+		t.Fatalf("epoch=%s want=%s", after, want)
+	}
+}
+
+// A generation written at the old GMT+8 midnight still covers the instant, so
+// it stays today's generation until the next 05:00 game-day boundary.
+func TestLegacyMidnightEpochStaysCurrentUntilTheGameDayBoundary(t *testing.T) {
+	created := time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC)
+	legacy := time.Date(2026, 9, 18, 16, 0, 0, 0, time.UTC) // 00:00 GMT+8 on 9/19
+	vip := int64(0)
+	root := practiceNeutralRoot(created)
+	root.DailyEpochStartAt = &legacy
+	root.DailyEpochPolicyVersion = DailyEpochPolicyV1
+	root.BlessRemaining, root.BlessCapacityAtEpoch = 30, 30
+	root.BlessVIPLevelAtEpoch = &vip
+	root.BlessPrivilegeProviderRevision = "vip-test/v1"
+	root.BlessContentRevision = strings.Repeat("a", 64)
+	store := &practiceTestStore{root: root}
+	svc := practiceTestService(store, &practiceTestDB{}, root.BlessContentRevision, 100, 1)
+
+	kept, err := svc.EnsureDailyGeneration(context.Background(), identity.PlayerID(7), practiceTestOperation(t, time.Date(2026, 9, 18, 17, 30, 0, 0, time.UTC)))
+	if err != nil || kept.DailyEpochStartAt == nil || !kept.DailyEpochStartAt.Equal(legacy) {
+		t.Fatalf("prior %v err %v", kept.DailyEpochStartAt, err)
+	}
+	next, err := svc.EnsureDailyGeneration(context.Background(), identity.PlayerID(7), practiceTestOperation(t, time.Date(2026, 9, 18, 21, 0, 0, 0, time.UTC)))
+	want := time.Date(2026, 9, 18, 21, 0, 0, 0, time.UTC)
+	if err != nil || next.DailyEpochStartAt == nil || !next.DailyEpochStartAt.Equal(want) {
+		t.Fatalf("boundary %v err %v", next.DailyEpochStartAt, err)
 	}
 }
 
@@ -182,7 +215,7 @@ func TestEnsureDailyGenerationMaterializesOnceAndFreezesProvenance(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	wantEpoch := time.Date(2026, 9, 17, 16, 0, 0, 0, time.UTC)
+	wantEpoch := time.Date(2026, 9, 17, 21, 0, 0, 0, time.UTC)
 	if got.DailyEpochStartAt == nil || !got.DailyEpochStartAt.Equal(wantEpoch) {
 		t.Fatalf("epoch=%v want=%v", got.DailyEpochStartAt, wantEpoch)
 	}

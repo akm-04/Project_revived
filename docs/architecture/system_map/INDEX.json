@@ -1017,6 +1017,15 @@
    "tables": 0
   },
   {
+   "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "dailyreset",
+   "path": "internal/application/dailyreset",
+   "purpose": "owns the game-day reset signal: the first successful reply of a new game day carries economy_.daily_updates with the client's daily counters, so the stock client clears its reset-sensitive caches",
+   "tables": 0
+  },
+  {
    "callees": 2,
    "callers": 1,
    "mids": 0,

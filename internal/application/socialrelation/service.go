@@ -8,6 +8,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -530,7 +531,17 @@ func (st commandState) plan(c Command, at time.Time) (commandPlan, error) {
 		if st.epoch.exists {
 			v := st.epoch.value
 			oldEpoch = &v
-			if v.EpochGeneration > (math.MaxInt64-28800)/86400 || !v.EpochStartedAt.Equal(time.Unix(v.EpochGeneration*86400-28800, 0).UTC()) || v.SuccessfulNewRequests > RequestQuota {
+			legacyDay, legacyAnchor, legacyErr := LegacyRequestDay(at)
+			if legacyErr != nil {
+				return p, legacyErr
+			}
+			if legacyDay != day && v.EpochGeneration == legacyDay {
+				day, anchor = legacyDay, legacyAnchor
+				epoch.EpochGeneration, epoch.EpochStartedAt = day, anchor
+			}
+			storedLegacy, legacyAnchorErr := LegacyDayAnchor(v.EpochGeneration)
+			canonicalAnchor := v.EpochGeneration <= (math.MaxInt64+10800)/86400 && v.EpochStartedAt.Equal(modes.DayBegins(v.EpochGeneration))
+			if legacyAnchorErr != nil || !(canonicalAnchor || v.EpochStartedAt.Equal(storedLegacy)) || v.SuccessfulNewRequests > RequestQuota {
 				return p, ErrStateConflict
 			}
 			if day < v.EpochGeneration {

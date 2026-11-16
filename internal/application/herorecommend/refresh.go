@@ -18,6 +18,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/herorecommend"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -31,10 +32,16 @@ func retry() tx.RetryPolicy {
 	return tx.RetryPolicy{MaxAttempts: 4, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 100 * time.Millisecond}
 }
 
-// WeekStart is the source rule's Monday 04:00 UTC generation boundary. The
-// refresh window itself is PRIVATE_POLICY: the snapshot is built by the first
-// read or reconcile tick after the boundary.
+// WeekStart is the canonical Monday 05:00 GMT+8 game week
+// (I9_MODE_FRAMEWORK_V1 F7). The snapshot is built by the first read or
+// reconcile tick after the boundary.
 func WeekStart(at time.Time) time.Time {
+	return modes.DayBegins(modes.WeekStart(at))
+}
+
+// LegacyWeekStart is the pre-R3 Monday 04:00 UTC generation boundary. A stored
+// snapshot of that generation that still covers at is served as this week's.
+func LegacyWeekStart(at time.Time) time.Time {
 	u := at.UTC()
 	days := (int(u.Weekday()) + 6) % 7
 	start := time.Date(u.Year(), u.Month(), u.Day(), 4, 0, 0, 0, time.UTC).AddDate(0, 0, -days)
@@ -76,6 +83,10 @@ func (s Service) ensureSnapshot(ctx context.Context, o operation.Context, server
 			return err
 		}
 		if ok && latest.Generation == generation {
+			out = latest
+			return nil
+		}
+		if ok && latest.Generation == LegacyWeekStart(at).Unix() {
 			out = latest
 			return nil
 		}
