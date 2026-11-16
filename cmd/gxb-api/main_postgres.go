@@ -698,7 +698,7 @@ func main() {
 	recallService := socialrecall.StartService{Timed: socialTimed, Fence: i5db, Content: contentDB, Starter: socialrecall.Starter{Players: i4store.PlayerRootLocker{}, Owner: socialrecallstore.Store{}, Targets: recallTargets}, Projection: socialrecallstore.DoingProjection{Directory: i4store.TransactionDiscoveryReader{}}, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
 	mustRegister(193, stockruntime.SocialRecallStartDispatcher{Authority: authority, Service: recallService})
 	recallAwarder := socialrecall.Awarder{Players: i4store.PlayerRootLocker{}, Owner: socialrecallstore.Store{}, Content: contentDB, Current: recallTargets, Grants: i5svc}
-	recallClaim := socialrecall.ClaimService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Awarder: recallAwarder, Values: i5db, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	recallClaim := socialrecall.ClaimService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Awarder: recallAwarder, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
 	mustRegister(194, stockruntime.SocialRecallAwardDispatcher{Authority: authority, Service: recallClaim})
 	inviteStore := socialinvitestore.Store{}
 	inviteFacts := socialinvitestore.FactsReader{Directory: i4store.TransactionDiscoveryReader{}, Accounts: i4store.PlayerAccounts{}, Progression: i5db, Heroes: characterstore.HeroLevelReader{Store: heroDB}, Privilege: privileges, Servers: i4store.ServerNames{}}

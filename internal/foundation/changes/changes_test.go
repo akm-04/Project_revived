@@ -54,6 +54,35 @@ func TestMissionFieldsFollowCommitAndDiscardRules(t *testing.T) {
 	}
 }
 
+func TestWriteFunctionsOmitsEmptyChanges(t *testing.T) {
+	body := map[string]any{}
+	WriteFunctions(body, nil)
+	if _, present := body["new_funcs_"]; present {
+		t.Fatal("an empty change set wrote new_funcs_")
+	}
+	WriteFunctions(body, []int64{7, 12})
+	opened, ok := body["new_funcs_"].([]int64)
+	if !ok || !slices.Equal(opened, []int64{7, 12}) {
+		t.Fatalf("new_funcs_ %v", body["new_funcs_"])
+	}
+}
+
+func TestReadEconomyReturnsStoredAndLiveShapes(t *testing.T) {
+	if _, present := ReadEconomy(map[string]any{}); present {
+		t.Fatal("absent economy_ read as present")
+	}
+	if _, present := ReadEconomy(map[string]any{"economy_": "broken"}); present {
+		t.Fatal("non-map economy_ read as present")
+	}
+	if _, present := ReadEconomy(map[string]any{"economy_": map[string]any{}}); !present {
+		t.Fatal("stored economy_ read as absent")
+	}
+	read, present := ReadEconomy(map[string]any{"economy_": map[string]int64{"crystal": 7}})
+	if !present || read["crystal"] != int64(7) {
+		t.Fatalf("live economy_ %#v %v", read, present)
+	}
+}
+
 func TestWriteEconomyOmitsEmptyBalances(t *testing.T) {
 	body := map[string]any{}
 	WriteEconomy(body, map[string]int64{})

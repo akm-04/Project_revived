@@ -171,12 +171,19 @@ func TestI5R5SettlementSidebandsAreGlobalAndDoNotInventNumericAwards(t *testing.
 	} {
 		svc := &i5WireFake{projection: proj}
 		d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
-		got := d.Dispatch(context.Background(), i5Req(tc.mid, tc.params, now))
+		direct := d.Dispatch(context.Background(), i5Req(tc.mid, tc.params, now))
+		if _, written := direct.Body["economy_"]; written {
+			t.Fatalf("mid %d dispatcher assembled economy_: %#v", tc.mid, direct.Body)
+		}
+		if _, written := direct.Body["new_funcs_"]; written {
+			t.Fatalf("mid %d dispatcher assembled new_funcs_: %#v", tc.mid, direct.Body)
+		}
+		got := Decorated{Next: d}.Dispatch(context.Background(), i5Req(tc.mid, tc.params, now))
 		if got.HTTPStatus != 200 {
 			t.Fatalf("mid %d: %+v", tc.mid, got)
 		}
-		economy, ok := got.Body["economy_"].(map[string]int64)
-		if !ok || economy["exp"] != 123 || economy["lev"] != 7 || economy["energy"] != 88 {
+		economy, ok := got.Body["economy_"].(map[string]any)
+		if !ok || economy["exp"] != int64(123) || economy["lev"] != int64(7) || economy["energy"] != int64(88) {
 			t.Fatalf("mid %d economy_=%#v", tc.mid, got.Body["economy_"])
 		}
 		funcs, ok := got.Body["new_funcs_"].([]int64)
@@ -221,7 +228,11 @@ func TestI5MID369GlobalSidebandsPreserveNamedReward(t *testing.T) {
 	now := time.Unix(703, 0).UTC()
 	svc := &i5WireFake{projection: appi5.SettlementProjection{Economy: map[string]int64{"gold": 9}}}
 	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
-	got := d.Dispatch(context.Background(), i5Req(369, map[string]any{"id": int64(7), "is_region": false}, now))
+	direct := d.Dispatch(context.Background(), i5Req(369, map[string]any{"id": int64(7), "is_region": false}, now))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	got := Decorated{Next: d}.Dispatch(context.Background(), i5Req(369, map[string]any{"id": int64(7), "is_region": false}, now))
 	if got.HTTPStatus != 200 || got.Body["economy_"] == nil {
 		t.Fatalf("response=%+v", got)
 	}

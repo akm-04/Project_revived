@@ -133,12 +133,8 @@ func (mode Mode) run(ctx context.Context, actor identity.ActorContext, name stri
 			return err
 		}
 		balances, functions := changes.Recorded(ctx)
-		if len(balances) > 0 {
-			response["economy_"] = balances
-		}
-		if len(functions) > 0 {
-			response["new_funcs_"] = functions
-		}
+		changes.WriteEconomy(response, balances)
+		changes.WriteFunctions(response, functions)
 		for _, player := range participants {
 			if err = mode.Store.SaveTx(ctx, timed.Tx, player, *states[player], at); err != nil {
 				return err

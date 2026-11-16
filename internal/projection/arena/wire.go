@@ -53,9 +53,10 @@ func Info(v d.InfoView) map[string]any {
 }
 
 // Missions answers 666/848/849 with the mission list, mission time and the
-// exchange award or claimed coins; economy_ refreshes SelfPlayer.kingCoin.
+// exchange award or claimed coins; the dispatcher reports king_coin so the
+// decorator refreshes SelfPlayer.kingCoin.
 func Missions(v d.MissionsView) map[string]any {
-	body := map[string]any{"missions": missions(v.Player), "mission_time": v.Player.MissionTime.Unix(), "economy_": map[string]any{"king_coin": v.KingCoin}}
+	body := map[string]any{"missions": missions(v.Player), "mission_time": v.Player.MissionTime.Unix()}
 	if v.Coins > 0 {
 		// AlertAwardWindow shows a named currency as table_id -1 with its eco_type key.
 		body["awards"] = []map[string]any{{"table_id": int64(-1), "item_num": v.Coins, "king_coin": v.Coins}}
@@ -99,7 +100,7 @@ func Fight(v d.FightView) map[string]any {
 	}
 	return map[string]any{"battle_report": []map[string]any{{"content": string(v.Report)}}, "is_win": flag(v.Win),
 		"arena_info": map[string]any{"star": v.Player.Star, "point": v.Player.Point, "win_times": v.Player.WinTimes, "total_fight": v.Player.TotalFight, "keep_win_times": v.Player.KeepWin},
-		"award":      []map[string]any{}, "economy_": map[string]any{"region_coin": v.RegionCoin}}
+		"award":      []map[string]any{}}
 }
 
 // Records is REARENA_FIGHT_RECORDS for RegionBattleScoresWindow.

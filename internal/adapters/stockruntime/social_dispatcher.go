@@ -13,6 +13,7 @@ import (
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -285,7 +286,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 				if e != nil || amount < 0 || amount > 9007199254740991 {
 					return giftFailure(e)
 				}
-				body["economy_"] = map[string]any{"friendship_coin": amount}
+				changes.Balance(ctx, "friendship_coin", amount)
 			}
 			return httpedge.Response{HTTPStatus: 200, Body: body}
 		}

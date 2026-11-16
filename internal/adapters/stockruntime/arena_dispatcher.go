@@ -9,6 +9,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	projection "gxb.local/backend/v2/internal/projection/arena"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -114,6 +115,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if err != nil {
 			return failArenaFight(err)
 		}
+		changes.Balance(ctx, "region_coin", v.RegionCoin)
 		return okI5(projection.Fight(v))
 	case 776:
 		if !onlyStockGameplayParams(p) {
@@ -161,6 +163,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if err != nil {
 			return failArena(err)
 		}
+		changes.Balance(ctx, "king_coin", v.KingCoin)
 		return okI5(projection.Missions(v))
 	case 848:
 		exchange, exchangeOK := topFloorInteger(p, "exchange_type", true)
@@ -172,6 +175,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if err != nil {
 			return failArena(err)
 		}
+		changes.Balance(ctx, "king_coin", v.KingCoin)
 		return okI5(projection.Missions(v))
 	}
 	return badHero("unsupported_arena_mid")

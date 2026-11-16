@@ -247,12 +247,7 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 		if err != nil {
 			return nil, err
 		}
-		if len(projected.Economy) > 0 {
-			body["economy_"] = projected.Economy
-		}
-		if len(projected.NewFunctionIDs) > 0 {
-			body["new_funcs_"] = projected.NewFunctionIDs
-		}
+		projected.RecordChanges(ctx)
 	}
 	return body, nil
 }

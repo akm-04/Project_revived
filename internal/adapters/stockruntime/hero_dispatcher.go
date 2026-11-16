@@ -14,6 +14,7 @@ import (
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -233,10 +234,10 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if err != nil {
 			return failHero(err)
 		}
+		changes.Balance(ctx, "crystal", crystal)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
 			"unlocked_dynamic_card": models,
 			"dynamic_card_state":    states,
-			"economy_":              map[string]any{"crystal": crystal},
 		}}
 	case 69: // SHOW_DYNAMIC_CARD — CA7-4 explicit desired show-state assignment
 		if d.LIVE == nil {
@@ -338,7 +339,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if err != nil {
 			return failHero(err)
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(got)}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(ctx, got)}
 	case 57: // ONE_CLICK_JINJIE / one-click promotion-or-collect (CA4-3B)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
 			return badHero("invalid_hero_one_click_jinjie")
@@ -351,7 +352,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if err != nil {
 			return failHero(err)
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(got)}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(ctx, got)}
 	case 52: // EVOLVE_HERO
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
 			return badHero("invalid_hero_evolve")
@@ -408,7 +409,8 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		for i, v := range got.Equipment {
 			equips[i] = v
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"equips": equips, "economy_": map[string]any{"mana": mana}}}
+		changes.Balance(ctx, "mana", mana)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"equips": equips}}
 	case 58: // FUMO_EQUIP / Hero Fumo (CA4-3A)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "equip_index", "materials") {
 			return badHero("invalid_hero_fumo")
@@ -434,7 +436,8 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		for i, v := range got.Levels {
 			levels[i] = v
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"fumo": got.Fumo, "fumo_lev": levels, "economy_": map[string]any{"mana": mana}}}
+		changes.Balance(ctx, "mana", mana)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"fumo": got.Fumo, "fumo_lev": levels}}
 	case 55: // USE_EXP_ITEM
 		if !onlyStockGameplayParams(req.Envelope.Params, "item_id", "partner_id", "item_num", "total_num") {
 			return badHero("invalid_hero_exp_item")
@@ -492,7 +495,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if err != nil {
 			return failureFromRows(nil, err)
 		}
-		body["economy_"] = map[string]any{"mana": mana}
+		changes.Balance(ctx, "mana", mana)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 304: // UPGRADE_SUPER_EQUIP (CA4-5)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "equip_index", "enhance_times") {
@@ -626,7 +629,7 @@ func decodeHeroExpItems(raw any) ([]appi5.HeroExpItemDebit, error) {
 	return out, nil
 }
 
-func heroPromotionResponse(got apphero.HeroPromotionResult) map[string]any {
+func heroPromotionResponse(ctx context.Context, got apphero.HeroPromotionResult) map[string]any {
 	body := map[string]any{}
 	if len(got.RestoreItems) > 0 {
 		rows := make([]any, 0, len(got.RestoreItems))
@@ -636,7 +639,7 @@ func heroPromotionResponse(got apphero.HeroPromotionResult) map[string]any {
 		body["restore_items"] = rows
 	}
 	if got.ManaAfter != nil {
-		body["economy_"] = map[string]any{"mana": *got.ManaAfter}
+		changes.Balance(ctx, "mana", *got.ManaAfter)
 	}
 	return body
 }

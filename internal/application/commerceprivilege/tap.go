@@ -267,9 +267,7 @@ func (s Charge) settle(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	balances, functions := changes.Recorded(c)
 	body := map[string]any{"recharge_event": map[string]any{"mid": rechargeEventMID, "params": tapParams(q, decided, next, nextCards, total, balances, now)}}
 	changes.WriteEconomy(body, balances)
-	if len(functions) > 0 {
-		body["new_funcs_"] = functions
-	}
+	changes.WriteFunctions(body, functions)
 	return body, nil
 }
 

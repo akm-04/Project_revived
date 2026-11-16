@@ -13,7 +13,7 @@ func TestCA43AMID58WiringAndStageBoundary(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := string(dispatcher)
-	for _, need := range []string{"case 58:", "FeedFumo(ctx, actor", `"fumo": got.Fumo`, `"fumo_lev": levels`, `"economy_": map[string]any{"mana": mana}`} {
+	for _, need := range []string{"case 58:", "FeedFumo(ctx, actor", `"fumo": got.Fumo`, `"fumo_lev": levels`, `changes.Balance(ctx, "mana", mana)`} {
 		if !strings.Contains(d, need) {
 			t.Fatalf("MID58 dispatcher missing %q", need)
 		}

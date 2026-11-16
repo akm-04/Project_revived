@@ -16,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	petproj "gxb.local/backend/v2/internal/projection/pet"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -110,7 +111,8 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		if err != nil {
 			return failureFromRows(nil, err)
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"economy_": map[string]any{"crystal": crystal}}}
+		changes.Balance(ctx, "crystal", crystal)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 789:
 		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id") {
 			return petBad("invalid_pet_set_show")

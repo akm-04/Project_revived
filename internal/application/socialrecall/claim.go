@@ -12,9 +12,9 @@ import (
 	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerroot"
-	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -30,12 +30,7 @@ var (
 	ErrAwardProof       = errors.New("social recall: invalid award receipt proof")
 )
 
-// AwardScalarReader reads one owner scalar inside the caller transaction. It
-// freezes the stock economy_ value with the same transaction that paid it.
-type AwardScalarReader interface {
-	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
-}
-
+// ContentRevisionReader reads the active content revision inside the caller transaction.
 type ContentRevisionReader interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 }
@@ -49,7 +44,6 @@ type ClaimService struct {
 	Players       playerroot.TxLocker
 	Content       ContentRevisionReader
 	Awarder       Awarder
-	Values        AwardScalarReader
 	Receipts      receipt.Store
 	ReceiptReader receipt.Reader
 }
@@ -84,7 +78,7 @@ type operationPolicies struct {
 }
 
 func (service ClaimService) Claim(ctx context.Context, actor identity.ActorContext, awardID int64, current operation.Context) (map[string]any, error) {
-	if service.Timed.Runner.DB == nil || service.Timed.Binder.Time == nil || service.Fence == nil || service.Players == nil || service.Content == nil || service.Awarder.Players == nil || service.Awarder.Owner == nil || service.Awarder.Content == nil || service.Awarder.Current == nil || service.Awarder.Grants == nil || service.Values == nil || service.Receipts == nil || service.ReceiptReader == nil {
+	if service.Timed.Runner.DB == nil || service.Timed.Binder.Time == nil || service.Fence == nil || service.Players == nil || service.Content == nil || service.Awarder.Players == nil || service.Awarder.Owner == nil || service.Awarder.Content == nil || service.Awarder.Current == nil || service.Awarder.Grants == nil || service.Receipts == nil || service.ReceiptReader == nil {
 		return nil, ErrAwardUnavailable
 	}
 	if !actor.PlayerID.Valid() || !actor.LogicalServerID.Valid() || logicalserver.PlayerRegion(actor.PlayerID) != actor.LogicalServerID || actor.AccountUID == "" || actor.ContextID.UUID().IsZero() || current.ID.IsZero() || current.StartedAt.IsZero() || awardID <= 0 {
@@ -150,7 +144,7 @@ func (service ClaimService) Claim(ctx context.Context, actor identity.ActorConte
 		if err != nil {
 			return err
 		}
-		body, err := service.stockBody(ctx, scope.Tx, actor, awarded)
+		body, err := stockBody(ctx, awarded)
 		if err != nil {
 			return err
 		}
@@ -192,10 +186,9 @@ func (service ClaimService) Claim(ctx context.Context, actor identity.ActorConte
 	return output, nil
 }
 
-func (service ClaimService) stockBody(ctx context.Context, queryer tx.Queryer, actor identity.ActorContext, awarded AwardResult) (json.RawMessage, error) {
+func stockBody(ctx context.Context, awarded AwardResult) (json.RawMessage, error) {
 	awards := awarded.Grant.Awards
 	rows := make([]any, 0, len(awards))
-	scalars := map[string]bool{}
 	for _, award := range awards {
 		if award.ItemNum <= 0 {
 			return nil, ErrAwardProof
@@ -203,7 +196,6 @@ func (service ClaimService) stockBody(ctx context.Context, queryer tx.Queryer, a
 		if award.ResourceKey != "" {
 			row := map[string]any{"table_id": int64(-1), "item_num": award.ItemNum, award.ResourceKey: award.ItemNum}
 			rows = append(rows, row)
-			scalars[award.ResourceKey] = true
 			continue
 		}
 		if award.TableID <= 0 {
@@ -212,20 +204,8 @@ func (service ClaimService) stockBody(ctx context.Context, queryer tx.Queryer, a
 		rows = append(rows, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum})
 	}
 	body := map[string]any{"recall_awarded": awarded.Awarded, "awards": rows}
-	if len(scalars) > 0 {
-		values := map[string]any{}
-		for key := range scalars {
-			balance, found, err := service.Values.ReadScalarTx(ctx, queryer, actor.PlayerID, key)
-			if err != nil {
-				return nil, err
-			}
-			if !found || balance.Validate() != nil || balance.PlayerID != actor.PlayerID || balance.ResourceKey != key || balance.Amount > 9007199254740991 {
-				return nil, ErrAwardProof
-			}
-			values[key] = balance.Amount
-		}
-		body["economy_"] = values
-	}
+	balances, _ := changes.Recorded(ctx)
+	changes.WriteEconomy(body, balances)
 	return json.Marshal(body)
 }
 
@@ -333,13 +313,13 @@ func decodeAwardBody(raw json.RawMessage, awarded []int64) (map[string]any, erro
 	if decoder.Decode(&extra) != io.EOF || body == nil {
 		return nil, ErrAwardProof
 	}
-	if len(body) != 2 && len(body) != 3 {
-		return nil, ErrAwardProof
+	economy, hasEconomy := changes.ReadEconomy(body)
+	expectedKeys := 2
+	if hasEconomy {
+		expectedKeys = 3
 	}
-	for key := range body {
-		if key != "recall_awarded" && key != "awards" && key != "economy_" {
-			return nil, ErrAwardProof
-		}
+	if len(body) != expectedKeys {
+		return nil, ErrAwardProof
 	}
 	listed, ok := body["recall_awarded"].([]any)
 	if !ok || len(listed) != len(awarded) {
@@ -408,12 +388,11 @@ func decodeAwardBody(raw json.RawMessage, awarded []int64) (map[string]any, erro
 			return nil, ErrAwardProof
 		}
 	}
-	if economy, present := body["economy_"]; present {
-		values, ok := economy.(map[string]any)
-		if !ok || len(values) == 0 {
+	if hasEconomy {
+		if len(economy) == 0 {
 			return nil, ErrAwardProof
 		}
-		for key, value := range values {
+		for key, value := range economy {
 			number, ok := value.(json.Number)
 			if !ok || key == "" {
 				return nil, ErrAwardProof

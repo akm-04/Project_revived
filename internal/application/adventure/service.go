@@ -136,12 +136,8 @@ func piggyback(c context.Context, body map[string]any) {
 		return
 	}
 	balance, functions := changes.Recorded(c)
-	if len(balance) > 0 {
-		body["economy_"] = balance
-	}
-	if len(functions) > 0 {
-		body["new_funcs_"] = functions
-	}
+	changes.WriteEconomy(body, balance)
+	changes.WriteFunctions(body, functions)
 	for key, value := range changes.RecordedMissions(c) {
 		body[key] = value
 	}

@@ -27,6 +27,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/statrules"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -148,12 +149,16 @@ func TestI9_8BIllusionInfoBuyNative(t *testing.T) {
 	}
 	exec(t, p, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'crystal',1000,1,clock_timestamp())
 		ON CONFLICT(player_id,resource_key)DO UPDATE SET amount=1000,state_version=player_currency_balances.state_version+1`, int64(a.PlayerID))
-	bought, err := s.Buy(ctx, a, op())
+	tracked, _ := changes.Track(ctx)
+	bought, err := s.Buy(tracked, a, op())
 	if err != nil || bought["challenge_times"] != int64(d.FreeChances+d.ChancesPerBuy) || bought["buy_times"] != int64(1) {
 		t.Fatalf("buy %#v %v", bought, err)
 	}
 	if scalar(t, p, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID)) != 950 {
 		t.Fatal("buy did not debit refresh_cost entry 1")
+	}
+	if balances, ok := bought["economy_"].(map[string]int64); !ok || balances["crystal"] != 950 {
+		t.Fatalf("buy reply reports the debited crystal balance %#v", bought["economy_"])
 	}
 	if _, err = s.Buy(ctx, a, op()); err == nil {
 		t.Fatal("buy past the VIP cap succeeded")

@@ -7,6 +7,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	ins "gxb.local/backend/v2/internal/domain/inscription"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"strconv"
@@ -236,26 +237,24 @@ func (s Service) Response(ctx context.Context, a identity.ActorContext, r Result
 		if e := s.Fence.FenceActorTx(ctx, sc.Tx, a, bound.DecisionAt()); e != nil {
 			return e
 		}
-		values := map[string]any{}
 		for _, key := range []string{"mana", "crystal", "degree_cer", "graduate_cer", "patent_cer"} {
 			b, ok, e := s.Values.ReadScalarTx(ctx, sc.Tx, a.PlayerID, key)
 			if e != nil {
 				return e
 			}
-			if !ok {
-				if key == "mana" || key == "crystal" {
-					continue
-				}
-				// SelfPlayer.lua:201-203 defaults an absent certificate field to 0.
-				values[key] = int64(0)
+			amount := int64(0)
+			switch {
+			case !ok && (key == "mana" || key == "crystal"):
 				continue
+			case ok:
+				if e = b.Validate(); e != nil {
+					return e
+				}
+				amount = b.Amount
 			}
-			if e = b.Validate(); e != nil {
-				return e
-			}
-			values[key] = b.Amount
+			// SelfPlayer.lua:201-203 defaults an absent certificate field to 0.
+			changes.Balance(ctx, key, amount)
 		}
-		out["economy_"] = values
 		if r.Command.Family == Insert || r.Command.Family == Remove {
 			f, e := s.Owner.ReadHeroTx(ctx, sc.Tx, a.PlayerID, r.Command.PartnerID)
 			if e != nil {

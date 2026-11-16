@@ -865,7 +865,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:237"
+    "internal/application/campaign/sweep.go:235"
    ],
    "retry": [
     {
@@ -1397,7 +1397,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/summon/mode.go:552"
+    "internal/application/summon/mode.go:550"
    ],
    "retry": [
     {
@@ -4293,7 +4293,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/summon/mode.go:552"
+    "internal/application/summon/mode.go:550"
    ],
    "retry": [
     {
@@ -4546,7 +4546,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/summon/mode.go:552"
+    "internal/application/summon/mode.go:550"
    ],
    "retry": [
     {
@@ -7071,7 +7071,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:237"
+    "internal/application/campaign/sweep.go:235"
    ],
    "retry": [
     {
@@ -7251,7 +7251,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:237",
+    "internal/application/campaign/sweep.go:235",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -7504,7 +7504,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:237",
+    "internal/application/campaign/sweep.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -11410,7 +11410,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -11433,12 +11433,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/mission_runtime.go:356",
     "internal/application/i5/service.go:1306",
     "internal/application/i5/service.go:717"
@@ -11461,7 +11461,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -11522,7 +11522,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -11762,7 +11762,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -11780,12 +11780,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -11801,7 +11801,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -11849,7 +11849,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12044,7 +12044,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12062,12 +12062,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12083,7 +12083,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12131,7 +12131,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12326,7 +12326,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12344,12 +12344,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12365,7 +12365,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12413,7 +12413,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12608,7 +12608,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12626,12 +12626,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12647,7 +12647,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12695,7 +12695,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12890,7 +12890,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12908,12 +12908,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12929,7 +12929,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12977,7 +12977,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13172,7 +13172,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -13190,12 +13190,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -13211,7 +13211,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -13259,7 +13259,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13454,7 +13454,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -13472,7 +13472,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -13493,7 +13493,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -13541,7 +13541,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13719,7 +13719,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -13737,7 +13737,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -13758,7 +13758,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -13806,7 +13806,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13984,7 +13984,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -14002,12 +14002,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -14023,7 +14023,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -14071,7 +14071,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -14838,7 +14838,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -15432,7 +15432,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -16026,7 +16026,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -16620,7 +16620,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -17214,7 +17214,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -17808,7 +17808,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -18402,7 +18402,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -18996,7 +18996,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -19590,7 +19590,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -20184,7 +20184,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -20778,7 +20778,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -21372,7 +21372,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -21966,7 +21966,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -22560,7 +22560,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -23154,7 +23154,7 @@
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:147",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
@@ -23166,7 +23166,7 @@
    "isolation": [
     {
      "file": "internal/application/socialexchange/service.go",
-     "line": 91,
+     "line": 92,
      "value": "serializable"
     }
    ],
@@ -23174,18 +23174,18 @@
    "read_only": [
     {
      "file": "internal/application/socialexchange/service.go",
-     "line": 91,
+     "line": 92,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/socialexchange/service.go:190"
+    "internal/application/socialexchange/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/socialexchange/service.go",
-     "line": 91,
+     "line": 92,
      "value": "8"
     }
    ],
@@ -23213,7 +23213,7 @@
      "file": "internal/application/socialexchange/service.go",
      "function": "Service.Exchange",
      "isolation": "serializable",
-     "line": 91,
+     "line": 92,
      "read_only": "false",
      "retry": "8"
     }
@@ -23592,7 +23592,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "serializable"
     },
     {
@@ -23630,7 +23630,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "false"
     },
     {
@@ -23648,8 +23648,8 @@
     "internal/application/i5/service.go:717",
     "internal/application/mentor/service.go:194",
     "internal/application/socialinvite/claim.go:192",
-    "internal/application/socialrecall/claim.go:173",
-    "internal/application/workplace/mode.go:229"
+    "internal/application/socialrecall/claim.go:167",
+    "internal/application/workplace/mode.go:225"
    ],
    "retry": [
     {
@@ -23674,7 +23674,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "8"
     },
     {
@@ -23752,7 +23752,7 @@
      "file": "internal/application/socialrecall/claim.go",
      "function": "ClaimService.Claim",
      "isolation": "serializable",
-     "line": 106,
+     "line": 100,
      "read_only": "false",
      "retry": "8"
     },
@@ -24098,7 +24098,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -24111,7 +24111,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -24127,7 +24127,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -24164,7 +24164,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -30132,7 +30132,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -30887,7 +30887,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/summon/mode.go:552"
+    "internal/application/summon/mode.go:550"
    ],
    "retry": [
     {
@@ -31124,7 +31124,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/march/mode.go:182"
+    "internal/application/march/mode.go:178"
    ],
    "retry": [
     {
@@ -31445,7 +31445,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/march/mode.go:182"
+    "internal/application/march/mode.go:178"
    ],
    "retry": [
     {
@@ -31768,7 +31768,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/march/mode.go:182"
+    "internal/application/march/mode.go:178"
    ],
    "retry": [
     {
@@ -32150,7 +32150,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/march/mode.go:182"
+    "internal/application/march/mode.go:178"
    ],
    "retry": [
     {
@@ -32574,7 +32574,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/march/mode.go:182"
+    "internal/application/march/mode.go:178"
    ],
    "retry": [
     {
@@ -33024,7 +33024,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/march/mode.go:182"
+    "internal/application/march/mode.go:178"
    ],
    "retry": [
     {
@@ -33450,7 +33450,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/march/mode.go:182"
+    "internal/application/march/mode.go:178"
    ],
    "retry": [
     {
@@ -33944,7 +33944,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     },
     {
@@ -33957,7 +33957,7 @@
    "read_only": [
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     },
     {
@@ -33973,7 +33973,7 @@
    "retry": [
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     },
     {
@@ -34007,7 +34007,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     },
@@ -34308,7 +34308,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -34321,7 +34321,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -34337,7 +34337,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -34373,7 +34373,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -34531,7 +34531,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -34544,7 +34544,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -34560,7 +34560,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -34596,7 +34596,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -34883,7 +34883,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "serializable"
     },
     {
@@ -34921,7 +34921,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "false"
     },
     {
@@ -34939,8 +34939,8 @@
     "internal/application/i5/service.go:717",
     "internal/application/mentor/service.go:194",
     "internal/application/socialinvite/claim.go:192",
-    "internal/application/socialrecall/claim.go:173",
-    "internal/application/workplace/mode.go:229"
+    "internal/application/socialrecall/claim.go:167",
+    "internal/application/workplace/mode.go:225"
    ],
    "retry": [
     {
@@ -34965,7 +34965,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "8"
     },
     {
@@ -35043,7 +35043,7 @@
      "file": "internal/application/socialrecall/claim.go",
      "function": "ClaimService.Claim",
      "isolation": "serializable",
-     "line": 106,
+     "line": 100,
      "read_only": "false",
      "retry": "8"
     },
@@ -35650,7 +35650,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/workplace/mode.go:229"
+    "internal/application/workplace/mode.go:225"
    ],
    "retry": [
     {
@@ -35803,7 +35803,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/workplace/mode.go:229"
+    "internal/application/workplace/mode.go:225"
    ],
    "retry": [
     {
@@ -35943,7 +35943,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/workplace/mode.go:229"
+    "internal/application/workplace/mode.go:225"
    ],
    "retry": [
     {
@@ -36393,7 +36393,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/workplace/mode.go:229"
+    "internal/application/workplace/mode.go:225"
    ],
    "retry": [
     {
@@ -36677,7 +36677,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/workplace/mode.go:229"
+    "internal/application/workplace/mode.go:225"
    ],
    "retry": [
     {
@@ -41198,7 +41198,7 @@
    "isolation": [
     {
      "file": "internal/application/worldboss/service.go",
-     "line": 161,
+     "line": 156,
      "value": "repeatable_read"
     }
    ],
@@ -41206,7 +41206,7 @@
    "read_only": [
     {
      "file": "internal/application/worldboss/service.go",
-     "line": 161,
+     "line": 156,
      "value": "true"
     }
    ],
@@ -41214,7 +41214,7 @@
    "retry": [
     {
      "file": "internal/application/worldboss/service.go",
-     "line": 161,
+     "line": 156,
      "value": "1"
     }
    ],
@@ -41225,7 +41225,7 @@
      "file": "internal/application/worldboss/service.go",
      "function": "Mode.Info",
      "isolation": "repeatable_read",
-     "line": 161,
+     "line": 156,
      "read_only": "true",
      "retry": "1"
     }
@@ -41272,7 +41272,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/worldboss/service.go:105"
+    "internal/application/worldboss/service.go:100"
    ],
    "retry": [
     {
@@ -41419,7 +41419,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/worldboss/service.go:105"
+    "internal/application/worldboss/service.go:100"
    ],
    "retry": [
     {
@@ -41803,7 +41803,7 @@
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/worldboss/service.go:275",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/worldboss/service.go:270",
     "UNRESOLVED apply at internal/application/worldboss/service.go:78",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -41831,7 +41831,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/worldboss/service.go:105"
+    "internal/application/worldboss/service.go:100"
    ],
    "retry": [
     {
@@ -41981,7 +41981,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/worldboss/service.go:105"
+    "internal/application/worldboss/service.go:100"
    ],
    "retry": [
     {
@@ -46959,7 +46959,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -47073,7 +47073,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -47312,7 +47312,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -47430,7 +47430,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -47839,7 +47839,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -48105,7 +48105,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -48216,7 +48216,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -48330,7 +48330,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -48577,7 +48577,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -48816,7 +48816,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -48991,7 +48991,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -49104,7 +49104,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/petcampaign/run.go:183"
+    "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
     {
@@ -75576,7 +75576,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/illusion/service.go:111"
+    "internal/application/illusion/service.go:106"
    ],
    "retry": [
     {
@@ -75723,7 +75723,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/illusion/service.go:111"
+    "internal/application/illusion/service.go:106"
    ],
    "retry": [
     {
@@ -76107,7 +76107,7 @@
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/service.go:218",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/service.go:213",
     "UNRESOLVED apply at internal/application/illusion/service.go:84",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -76137,7 +76137,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/illusion/service.go:111"
+    "internal/application/illusion/service.go:106"
    ],
    "retry": [
     {
@@ -78571,7 +78571,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -78599,7 +78599,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -78630,7 +78630,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -78681,7 +78681,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -78893,7 +78893,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -78921,7 +78921,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -78952,7 +78952,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -79003,7 +79003,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -79215,7 +79215,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -79243,7 +79243,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -79274,7 +79274,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -79325,7 +79325,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -79537,7 +79537,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -79565,7 +79565,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -79596,7 +79596,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -79647,7 +79647,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -79859,7 +79859,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -79887,7 +79887,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -79918,7 +79918,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -79969,7 +79969,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -80181,7 +80181,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -80209,7 +80209,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -80240,7 +80240,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -80291,7 +80291,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -80503,7 +80503,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -80531,7 +80531,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -80562,7 +80562,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -80613,7 +80613,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -80825,7 +80825,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -80853,7 +80853,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -80884,7 +80884,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -80935,7 +80935,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -89622,7 +89622,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:237"
+    "internal/application/campaign/sweep.go:235"
    ],
    "retry": [
     {
@@ -96474,7 +96474,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -96712,8 +96712,8 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction retry policy not statically decidable at internal/application/memoir/run.go:68"
@@ -96738,7 +96738,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -97031,8 +97031,8 @@
    ],
    "unknown": [
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:481",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
@@ -97061,7 +97061,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -97139,8 +97139,8 @@
    ],
    "unknown": [
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction retry policy not statically decidable at internal/application/memoir/run.go:68"
@@ -97166,7 +97166,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -97341,8 +97341,8 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
@@ -97368,7 +97368,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -97661,8 +97661,8 @@
    ],
    "unknown": [
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:481",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/topfloor/arena.go:497",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
@@ -97691,7 +97691,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -97769,8 +97769,8 @@
    ],
    "unknown": [
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction retry policy not statically decidable at internal/application/memoir/run.go:68"
@@ -97796,7 +97796,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -97998,8 +97998,8 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED frozen at internal/domain/combat/report.go:145",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
@@ -98048,7 +98048,7 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -98518,8 +98518,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -98569,7 +98569,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -98807,8 +98807,8 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction retry policy not statically decidable at internal/application/memoir/run.go:68"
@@ -98834,7 +98834,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -99008,8 +99008,8 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction retry policy not statically decidable at internal/application/memoir/run.go:68"
@@ -99036,7 +99036,7 @@
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -99427,8 +99427,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -99457,7 +99457,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/memoir/run.go:145"
+    "internal/application/memoir/run.go:141"
    ],
    "retry": [
     {
@@ -99564,8 +99564,8 @@
    ],
    "unknown": [
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/memoir/run.go:101",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:159",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:179",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:155",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/memoir/run.go:175",
     "UNRESOLVED apply at internal/application/memoir/run.go:122",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction retry policy not statically decidable at internal/application/memoir/run.go:68"
@@ -100510,7 +100510,7 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -100820,7 +100820,7 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -100937,7 +100937,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED command at internal/application/occult/service.go:223"
+    "UNRESOLVED command at internal/application/occult/service.go:219"
    ],
    "writes": "state"
   },
@@ -101245,7 +101245,7 @@
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED cancel at internal/application/roominvite/service.go:157",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -101556,7 +101556,7 @@
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED cancel at internal/application/roominvite/service.go:157",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -102104,7 +102104,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED change at internal/domain/occult/events.go:78",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -102584,7 +102584,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -103133,7 +103133,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED change at internal/domain/occult/events.go:78",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -103682,7 +103682,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED change at internal/domain/occult/events.go:78",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -103789,7 +103789,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED command at internal/application/occult/service.go:223"
+    "UNRESOLVED command at internal/application/occult/service.go:219"
    ],
    "writes": "state"
   },
@@ -104334,7 +104334,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED change at internal/domain/occult/events.go:78",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -104883,7 +104883,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED change at internal/domain/occult/events.go:78",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -105432,7 +105432,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED change at internal/domain/occult/events.go:78",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -105981,7 +105981,7 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED change at internal/domain/occult/events.go:78",
-    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED command at internal/application/occult/service.go:219",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
@@ -106322,7 +106322,7 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/occult/teamfight.go:260",
-    "UNRESOLVED command at internal/application/occult/service.go:223"
+    "UNRESOLVED command at internal/application/occult/service.go:219"
    ],
    "writes": "state"
   },
@@ -106425,7 +106425,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED command at internal/application/occult/service.go:223"
+    "UNRESOLVED command at internal/application/occult/service.go:219"
    ],
    "writes": "state"
   },
@@ -109116,7 +109116,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/service.go:152",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/service.go:148",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
@@ -109960,7 +109960,7 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/service.go:152",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/service.go:148",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED apply at internal/application/adventure/service.go:121",
@@ -112665,7 +112665,7 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/service.go:152",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/service.go:148",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
@@ -123939,7 +123939,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -123957,12 +123957,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -123978,7 +123978,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -124026,7 +124026,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -124805,7 +124805,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:237",
+    "internal/application/campaign/sweep.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -127967,7 +127967,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -127985,12 +127985,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -128006,7 +128006,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -128054,7 +128054,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -128249,7 +128249,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -128267,12 +128267,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -128288,7 +128288,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -128336,7 +128336,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -138039,7 +138039,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dodgeball/run.go:156"
+    "internal/application/dodgeball/run.go:152"
    ],
    "retry": [
     {
@@ -138145,7 +138145,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dodgeball/run.go:156"
+    "internal/application/dodgeball/run.go:152"
    ],
    "retry": [
     {
@@ -138280,7 +138280,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dodgeball/run.go:156",
+    "internal/application/dodgeball/run.go:152",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396"
    ],
@@ -138693,7 +138693,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dodgeball/run.go:156",
+    "internal/application/dodgeball/run.go:152",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -138924,7 +138924,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dodgeball/run.go:156"
+    "internal/application/dodgeball/run.go:152"
    ],
    "retry": [
     {
@@ -140876,7 +140876,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/godstrial/run.go:174",
+    "internal/application/godstrial/run.go:170",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396"
    ],
@@ -141289,7 +141289,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/godstrial/run.go:174",
+    "internal/application/godstrial/run.go:170",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -142078,7 +142078,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/godstrial/run.go:174"
+    "internal/application/godstrial/run.go:170"
    ],
    "retry": [
     {
@@ -142193,7 +142193,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/godstrial/run.go:174"
+    "internal/application/godstrial/run.go:170"
    ],
    "retry": [
     {
@@ -142322,7 +142322,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/godstrial/run.go:174",
+    "internal/application/godstrial/run.go:170",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -142563,7 +142563,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/godstrial/run.go:174"
+    "internal/application/godstrial/run.go:170"
    ],
    "retry": [
     {

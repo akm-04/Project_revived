@@ -1444,7 +1444,6 @@
    ],
    "socialrecall": [
     "*FenceActorTx",
-    "*ReadScalarTx",
     "*SettleGrantTx"
    ],
    "spirit": [
@@ -5610,7 +5609,6 @@
    ],
    "i5": [
     "*FenceActorTx",
-    "*ReadScalarTx",
     "*SettleGrantTx"
    ],
    "playerroot": [

@@ -394,12 +394,7 @@ func (s Service) ChangeAwakening(ctx context.Context, actor identity.ActorContex
 		if e != nil {
 			return nil, e
 		}
-		if len(p.Economy) > 0 {
-			out.Body["economy_"] = p.Economy
-		}
-		if len(p.NewFunctionIDs) > 0 {
-			out.Body["new_funcs_"] = p.NewFunctionIDs
-		}
+		p.RecordChanges(ctx)
 	}
 	return out.Body, nil
 }

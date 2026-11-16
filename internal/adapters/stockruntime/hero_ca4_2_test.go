@@ -139,7 +139,12 @@ func TestCA42MID62ProjectsCanonicalEquipsAndCurrentManaForNoWork(t *testing.T) {
 	economy := &ca42HeroEconomy{amount: 987654}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: economy}
 
-	r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(77)}))
+	direct := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(77)}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	economy.calls = 0
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(77)}))
 	if r.HTTPStatus != 200 || svc.onePartner != 77 || economy.calls != 1 || economy.key != "mana" {
 		t.Fatalf("response=%+v partner=%d economy=%+v", r, svc.onePartner, economy)
 	}

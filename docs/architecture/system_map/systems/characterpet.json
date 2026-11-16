@@ -85,7 +85,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 134,
    "name": "PET_USE_EXP_ITEMS"
@@ -93,7 +93,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 780,
    "name": "PETS_GET"
@@ -101,7 +101,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 781,
    "name": "PET_SUMMON"
@@ -109,7 +109,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 782,
    "name": "PET_CLEAN_CD"
@@ -117,7 +117,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 783,
    "name": "PET_EQUIP"
@@ -125,7 +125,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 785,
    "name": "PET_ADVANCE"
@@ -133,7 +133,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 786,
    "name": "PET_EVOLVE"
@@ -141,7 +141,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 787,
    "name": "PET_FEED"
@@ -149,7 +149,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 789,
    "name": "PET_SET_SHOW"
@@ -157,7 +157,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 790,
    "name": "PET_ONE_KEY_UP"
@@ -165,7 +165,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 791,
    "name": "PET_UPGRADE_ALL_SKILL"
@@ -173,7 +173,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 792,
    "name": "PET_ONE_KEY_EQUIP"
@@ -181,7 +181,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 1893,
    "name": "GET_PET_STYLE_FORM_ITEM"
@@ -189,7 +189,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 1894,
    "name": "USE_PET_STYLE"
@@ -197,7 +197,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/pet_dispatcher.go",
-    "line": 52
+    "line": 53
    },
    "mid": 1895,
    "name": "CANCEL_PET_STYLE"

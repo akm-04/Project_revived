@@ -23,6 +23,7 @@ import (
 	exchange "gxb.local/backend/v2/internal/application/socialexchange"
 	"gxb.local/backend/v2/internal/domain/economy"
 	socialdomain "gxb.local/backend/v2/internal/domain/socialexchange"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -35,6 +36,7 @@ func exchangeService(database *pg.Pool) exchange.Service {
 	return exchange.Service{Timed: generation.TimedRunner{Binder: generation.Binder{Time: pg.AuthoritativeTime{Queryer: database}}, Runner: tx.Runner{DB: database}}, Fence: store, Players: i4store.PlayerRootLocker{}, Content: content, Settings: socialexchangestore.Store{}, Materials: materials, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: database}}
 }
 func TestI910EExchangeAtomicReplayAndConcurrentPurchases(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	database := pool(t)
 	revision := installed(t, database)
 	player := actor(t, database)
@@ -52,6 +54,13 @@ func TestI910EExchangeAtomicReplayAndConcurrentPurchases(t *testing.T) {
 	first, err := service.Exchange(ctx, player, request, operation)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if economy, ok := first["economy_"].(map[string]any); !ok {
+		t.Fatalf("exchange reply lacks the debited balance %#v", first)
+	} else if number, ok := economy[socialdomain.PriceCurrency].(json.Number); !ok {
+		t.Fatalf("exchange economy shape %#v", economy)
+	} else if remaining, err := number.Int64(); err != nil || remaining != price {
+		t.Fatalf("exchange reply reports %v, want %d", economy, price)
 	}
 	exec(t, database, `INSERT INTO social_exchange_tuning(payload,updated_at)VALUES($1::jsonb,clock_timestamp())`, `{"version":1,"revision":"off","products":[{"id":1,"off":true}]}`)
 	again, err := service.Exchange(ctx, player, request, operation)
@@ -108,6 +117,7 @@ func (rejectedExchangeReceipt) PutTx(context.Context, tx.Tx, receipt.Receipt) (r
 	return receipt.PutResult{}, receiptFailure
 }
 func TestI910EExchangeRollbackAndConcurrentSameOperation(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	database := pool(t)
 	revision := installed(t, database)
 	player := actor(t, database)
@@ -186,6 +196,7 @@ func (database *exchangeCommitDatabase) Begin(ctx context.Context, options tx.Op
 	return faultTx{Tx: transaction, commit: database.commit}, nil
 }
 func TestI910EExchangeRealUnknownCommitPresenceAndAbsence(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	database := pool(t)
 	revision := installed(t, database)
 	exec(t, database, `DELETE FROM social_exchange_tuning`)
@@ -317,6 +328,7 @@ func (failingExchangeSettings) TuningTx(ctx context.Context, query tx.Queryer) (
 }
 
 func TestI910EExchangeAllSourceProductsDebitGrantReplayAndReload(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	database := pool(t)
 	revision := installed(t, database)
 	exec(t, database, `DELETE FROM social_exchange_tuning`)
@@ -373,6 +385,7 @@ func TestI910EExchangeAllSourceProductsDebitGrantReplayAndReload(t *testing.T) {
 }
 
 func TestI910EExchangeSourceMismatchOffAndTuningQualification(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	database := pool(t)
 	revision := installed(t, database)
 	exec(t, database, `DELETE FROM social_exchange_tuning`)
@@ -483,6 +496,7 @@ func TestI910EExchangeSourceMismatchOffAndTuningQualification(t *testing.T) {
 }
 
 func TestI910EExchangeOverflowMailReportsOnlyDirectAwards(t *testing.T) {
+	ctx, _ := changes.Track(ctx)
 	database := pool(t)
 	revision := installed(t, database)
 	exec(t, database, `DELETE FROM social_exchange_tuning`)

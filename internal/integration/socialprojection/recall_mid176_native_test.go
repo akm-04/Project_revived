@@ -126,7 +126,6 @@ func TestSocialRecallMID176ProductionPresentationReloadNative(t *testing.T) {
 		Players:       i4store.PlayerRootLocker{},
 		Content:       content,
 		Awarder:       socialrecall.Awarder{Players: i4store.PlayerRootLocker{}, Owner: recallOwner, Content: content, Current: recallTargets, Grants: i5Service},
-		Values:        progression,
 		Receipts:      kernelstore.Store{},
 		ReceiptReader: kernelstore.Reader{Queryer: fixture.p},
 	}

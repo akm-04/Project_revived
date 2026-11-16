@@ -70,8 +70,10 @@ func (f *fixture) scalar() i5.CurrentScalarProjectionPort {
 }
 func (f *fixture) giftHTTP(d stockruntime.SocialDispatcher) *httptest.Server {
 	router := httpedge.NewRouter()
-	if e := stockruntime.RegisterSocialRoutes(router, d); e != nil {
-		f.t.Fatal(e)
+	for _, mid := range stockruntime.SocialHTTPMIDs {
+		if e := router.Register(mid, stockruntime.Decorated{Next: d}); e != nil {
+			f.t.Fatal(e)
+		}
 	}
 	a, _ := httpedge.NewAdmission(8)
 	return httptest.NewServer(httpedge.Handler{Router: router, Admission: a, Limits: limits.Default(), Operations: operation.Factory{Clock: clock.System{}}})
@@ -197,12 +199,12 @@ func Test7B_PostCommitScalarFailureAndKnownFreshProjection(t *testing.T) {
 	req.Envelope.Claims.Token = token
 	req.Envelope.Claims.Region = 2
 	req.Envelope.Params = map[string]any{"notice_ids": []any{int64(r.NoticeIDs[0])}}
-	first := d.Dispatch(ctx, req)
+	first := stockruntime.Decorated{Next: d}.Dispatch(ctx, req)
 	if first.HTTPStatus != 200 {
 		t.Fatal(first)
 	}
 	f.sql(`UPDATE player_currency_balances SET amount=amount+7,state_version=state_version+1 WHERE player_id=200001 AND resource_key='friendship_coin'`)
-	again := d.Dispatch(ctx, req)
+	again := stockruntime.Decorated{Next: d}.Dispatch(ctx, req)
 	if again.HTTPStatus != 200 || again.Body["economy_"].(map[string]any)["friendship_coin"] != int64(12) {
 		t.Fatal(again)
 	}
