@@ -41,56 +41,68 @@ const (
 	ModeWorldBoss           ModeKey = "WORLD_BOSS"
 )
 
+// ChoiceChangeRule is a mode's registered answer to a same-stage START whose
+// player choices differ from the open attempt's (I8 generation_supersede rule 2).
+type ChoiceChangeRule string
+
+const (
+	ChoiceReplaysFrozen ChoiceChangeRule = "REPLAYS_FROZEN"
+	ChoiceSupersedes    ChoiceChangeRule = "SUPERSEDES"
+)
+
 // ModeRegistration is the frozen tuple an I8-4 mode registers: its Locator
-// family, trust profile, duplicate-terminal answer, resolver transform,
-// snapshot producer profile and replay retention (nil = no replay read).
+// family, trust profile, choice-change rule, duplicate-terminal answer, resolver
+// transform, snapshot producer profile and replay retention (nil = no replay read).
 type ModeRegistration struct {
-	Key       ModeKey
-	Family    string
-	Trust     TrustProfile
-	Replay    ReplaySpec
-	Transform string
-	Producer  string
-	Retention *Retention
+	Key            ModeKey
+	Family         string
+	Trust          TrustProfile
+	OnChoiceChange ChoiceChangeRule
+	Replay         ReplaySpec
+	Transform      string
+	Producer       string
+	Retention      *Retention
 }
 
+// A server-resolved mode replays the frozen START whatever the chosen team; a
+// client-attested result supersedes. Dodgeball and memoir battle choose no team.
 var modeRegistrations = []ModeRegistration{
-	{Key: ModeAdventureDefense, Family: "ADVENTURE_DEFENSE", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeAdventureIllusion, Family: "ADVENTURE_ILLUSION", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeAdventurePVP, Family: "ADVENTURE_PVP", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_SEASON_AWARDS_V1", Producer: ProducerProfileID},
-	{Key: ModeAdventureCoop, Family: "ADVENTURE_ILLUSION", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
-	{Key: ModeArena, Family: "ARENA", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_SEASON_AWARDS_V1", Producer: ProducerProfileID,
+	{Key: ModeAdventureDefense, Family: "ADVENTURE_DEFENSE", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeAdventureIllusion, Family: "ADVENTURE_ILLUSION", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeAdventurePVP, Family: "ADVENTURE_PVP", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_SEASON_AWARDS_V1", Producer: ProducerProfileID},
+	{Key: ModeAdventureCoop, Family: "ADVENTURE_ILLUSION", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
+	{Key: ModeArena, Family: "ARENA", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_SEASON_AWARDS_V1", Producer: ProducerProfileID,
 		Retention: &Retention{ID: "C5D_ARENA_REPORT_RETENTION_V1", Version: 1, Window: RetentionCeiling}},
-	{Key: ModeArenaPlayoffs, Family: "ARENA_PLAYOFFS", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_PLAYOFFS_AWAKE_V1", Producer: ProducerProfileID,
+	{Key: ModeArenaPlayoffs, Family: "ARENA_PLAYOFFS", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_PLAYOFFS_AWAKE_V1", Producer: ProducerProfileID,
 		Retention: &Retention{ID: "I9_ARENA_TOURNAMENT_REPORT_RETENTION_V1", Version: 1, Window: RetentionCeiling}},
-	{Key: ModeArenaFriendFight, Family: "FRIEND_FIGHT", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_PLAYOFFS_AWAKE_V1", Producer: ProducerProfileID,
+	{Key: ModeArenaFriendFight, Family: "FRIEND_FIGHT", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "REGION_ARENA_PLAYOFFS_AWAKE_V1", Producer: ProducerProfileID,
 		Retention: &Retention{ID: "I9_ARENA_TOURNAMENT_REPORT_RETENTION_V1", Version: 1, Window: RetentionCeiling}},
-	{Key: ModeAwakeningBlood, Family: "AWAKENING_BLOOD", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeCampaign, Family: "CAMPAIGN", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeChampionsLeague, Family: "ACADEMY_LEAGUE", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID,
+	{Key: ModeAwakeningBlood, Family: "AWAKENING_BLOOD", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeCampaign, Family: "CAMPAIGN", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeChampionsLeague, Family: "ACADEMY_LEAGUE", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID,
 		Retention: &Retention{ID: "C5F_LEAGUE_REPORT_RETENTION_V1", Version: 1, Window: 5 * 24 * time.Hour}},
-	{Key: ModeConquerSchool, Family: "CONQUER_SCHOOL", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeDodgeball, Family: "dodgeball", Trust: ServerEntropyClientDerived, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}},
-	{Key: ModeEventCentreBoard, Family: "EVENT_CENTRE_BOARD", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
-	{Key: ModeGodsTrial, Family: "godstrial", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Producer: ProducerProfileID},
-	{Key: ModeGuildCampaign, Family: "GUILD_CAMPAIGN", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeIllusionSolo, Family: "ILLUSION", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeIllusionTeam, Family: "ILLUSION", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
-	{Key: ModeMarch, Family: "CHAMPION_MARCH", Trust: ClientFullReportAttested, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Producer: ProducerProfileID},
-	{Key: ModeMemoirBattle, Family: "MEMOIR", Trust: ClientFullReportAttested, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
-	{Key: ModeMemoirPlayer, Family: "MEMOIR", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
-	{Key: ModeOccultSolo, Family: "OCCULT", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeOccultTeam, Family: "OCCULT", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
-	{Key: ModeOneOnOne, Family: "ONE_ON_ONE", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "SUPER_ARENA_ROUND_V1", Producer: ProducerProfileID,
+	{Key: ModeConquerSchool, Family: "CONQUER_SCHOOL", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeDodgeball, Family: "dodgeball", Trust: ServerEntropyClientDerived, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}},
+	{Key: ModeEventCentreBoard, Family: "EVENT_CENTRE_BOARD", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
+	{Key: ModeGodsTrial, Family: "godstrial", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Producer: ProducerProfileID},
+	{Key: ModeGuildCampaign, Family: "GUILD_CAMPAIGN", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeIllusionSolo, Family: "ILLUSION", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeIllusionTeam, Family: "ILLUSION", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
+	{Key: ModeMarch, Family: "CHAMPION_MARCH", Trust: ClientFullReportAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Producer: ProducerProfileID},
+	{Key: ModeMemoirBattle, Family: "MEMOIR", Trust: ClientFullReportAttested, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
+	{Key: ModeMemoirPlayer, Family: "MEMOIR", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
+	{Key: ModeOccultSolo, Family: "OCCULT", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeOccultTeam, Family: "OCCULT", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "MEMOIR_CARRY_V1", Producer: ProducerProfileID},
+	{Key: ModeOneOnOne, Family: "ONE_ON_ONE", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "SUPER_ARENA_ROUND_V1", Producer: ProducerProfileID,
 		Retention: &Retention{ID: "C5C_ONE_ON_ONE_REPORT_RETENTION_V1", Version: 1, Window: RetentionCeiling}},
-	{Key: ModePetCampaign, Family: "petcampaign", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModePetCampaignPractice, Family: "petcampaign-practice", Trust: PracticeNoValue, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeTopFloor, Family: "TOP_FLOOR", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID,
+	{Key: ModePetCampaign, Family: "petcampaign", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModePetCampaignPractice, Family: "petcampaign-practice", Trust: PracticeNoValue, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeTopFloor, Family: "TOP_FLOOR", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID,
 		Retention: &Retention{ID: "C5B_TOP_FLOOR_REPORT_RETENTION_V1", Version: 1, Window: RetentionCeiling}},
-	{Key: ModeTopFloorTask, Family: "TOP_FLOOR_TASK", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "TOP_FLOOR_TASK_V1", Producer: ProducerProfileID,
+	{Key: ModeTopFloorTask, Family: "TOP_FLOOR_TASK", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Transform: "TOP_FLOOR_TASK_V1", Producer: ProducerProfileID,
 		Retention: &Retention{ID: "C5B_TOP_FLOOR_REPORT_RETENTION_V1", Version: 1, Window: RetentionCeiling}},
-	{Key: ModeWorkplace, Family: "WORKPLACE_JOB_RIVAL", Trust: ServerReport, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
-	{Key: ModeWorldBoss, Family: "WORLD_BOSS", Trust: ClientSummaryAttested, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
+	{Key: ModeWorkplace, Family: "WORKPLACE_JOB_RIVAL", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
+	{Key: ModeWorldBoss, Family: "WORLD_BOSS", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
 }
 
 var modes = func() map[ModeKey]ModeRegistration {
@@ -118,6 +130,15 @@ func validateModeRegistrations(rows []ModeRegistration) error {
 		seen[registration.Key] = true
 		if !registration.Trust.Registered() {
 			return fmt.Errorf("combat: mode %s names an unregistered trust profile", registration.Key)
+		}
+		if registration.OnChoiceChange != ChoiceReplaysFrozen && registration.OnChoiceChange != ChoiceSupersedes {
+			return fmt.Errorf("combat: mode %s names an unregistered choice-change rule %q", registration.Key, registration.OnChoiceChange)
+		}
+		if registration.Trust == ServerReport && registration.OnChoiceChange != ChoiceReplaysFrozen {
+			return fmt.Errorf("combat: server-report mode %s must replay the frozen START on a choice change", registration.Key)
+		}
+		if registration.Trust == ClientSummaryAttested && registration.OnChoiceChange != ChoiceSupersedes {
+			return fmt.Errorf("combat: client-attested mode %s must supersede on a choice change", registration.Key)
 		}
 		if registration.Producer != ProducerProfileID && registration.Producer != "" {
 			return fmt.Errorf("combat: mode %s names an unregistered producer profile %q", registration.Key, registration.Producer)
