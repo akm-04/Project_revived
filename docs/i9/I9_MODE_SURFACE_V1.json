@@ -19,9 +19,9 @@
  },
  "counts": {
   "by_disposition": {
-   "DELIVERED": 189,
+   "DELIVERED": 192,
    "ACTIVE": 417,
-   "LATER": 498,
+   "LATER": 495,
    "INACTIVE_SUPERSEDED": 59,
    "INACTIVE_D79": 21
   },
@@ -1304,8 +1304,8 @@
    "mid": 229,
    "name": "ACTIVITIES",
    "family": "ACTIVITY_LONG_TAIL",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -1349,8 +1349,8 @@
    "mid": 234,
    "name": "LOAD_SINGLE_ACTIVITY",
    "family": "SINGLE_DAY",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -5141,8 +5141,8 @@
    "mid": 1537,
    "name": "GET_BOARD_INFO",
    "family": "ACTIVITY_LONG_TAIL",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },

@@ -37,3 +37,14 @@ func TestServedSummonAndArenaMIDsAreNotInactive(t *testing.T) {
 		}
 	}
 }
+
+// TestServedActivityAndPublicationMIDsAreNotInactive guards I9_MODE_SURFACE_V1 F3/F5:
+// 229 (activities), 234 (single activity) and 1537 (board info) have production
+// dispatchers, so the shared inactive dispatcher must not claim them.
+func TestServedActivityAndPublicationMIDsAreNotInactive(t *testing.T) {
+	for _, mid := range []uint16{229, 234, 1537} {
+		if slices.Contains(InactiveModeMIDs, mid) {
+			t.Fatalf("MID %d has a live owner and must not answer through the inactive dispatcher", mid)
+		}
+	}
+}
