@@ -1,0 +1,38 @@
+{
+  "ID": "6674f5ae-5ab4-4ecc-a358-e50d4fa01214",
+  "Digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "Sender": 725001,
+  "Recipient": 725003,
+  "Message": "hello",
+  "SenderName": "",
+  "SenderType": 0,
+  "SenderAvatarID": 0,
+  "SenderAvatarFrameID": 0,
+  "SenderLevel": 0,
+  "SenderConquerLevel": 0,
+  "SenderConquerLoopID": 0,
+  "AcceptedAt": "2026-11-16T00:00:00Z",
+  "ExpiresAt": "2026-11-16T00:00:08Z",
+  "BlockVersion": 0,
+  "Bindings": [
+    {
+      "context_id": "ctx",
+      "context_generation": 1,
+      "session_id": "sess",
+      "session_liveness": 1,
+      "context_liveness": 1,
+      "realtime_instance_id": "rt",
+      "connection_generation": 1,
+      "owner_fence": 1,
+      "logical_server_id": 1
+    }
+  ],
+  "Status": "PENDING",
+  "StateVersion": 1,
+  "ClaimGeneration": 0,
+  "OwnerFence": 0,
+  "LeaseExpiresAt": null,
+  "LastObservedAt": "2026-11-16T00:00:00Z",
+  "AttemptCommittedAt": null,
+  "CompletionUpper": null
+}
