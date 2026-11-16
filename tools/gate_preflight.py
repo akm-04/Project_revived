@@ -26,7 +26,14 @@ import strict_gate  # noqa: E402
 
 REPOSITORY = strict_gate.REPOSITORY
 WORKSPACE = Path('/home/akm/Chatgpt/EOL_Game')
-DATABASE_HOST = WORKSPACE / 'tmp/test-databases/i853_dev'
+DEFAULT_DATABASE_HOST = WORKSPACE / 'tmp/test-databases/i853_dev'
+DEFAULT_DATABASE_PORT = '55853'
+
+
+def database_dsn(name):
+    host = os.environ.get('GXB_TEST_PGHOST') or DEFAULT_DATABASE_HOST
+    port = os.environ.get('GXB_TEST_PGPORT') or DEFAULT_DATABASE_PORT
+    return f'postgres://postgres@/{name}?host={host}&port={port}'
 
 
 def orchestration_variables():
@@ -68,7 +75,7 @@ def unformatted(files):
 
 def fresh_database(name):
     subprocess.run(['bash', str(WORKSPACE / 'ops/testing/fresh_db.sh'), name], cwd=REPOSITORY, check=True, stdout=subprocess.DEVNULL)
-    return f'postgres://postgres@/{name}?host={DATABASE_HOST}&port=55853'
+    return database_dsn(name)
 
 
 def test_environment(census_classes, dsn, scratch):

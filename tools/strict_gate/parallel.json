@@ -1,0 +1,6 @@
+{"serial": ["./internal/integration/socialactivation", "./internal/integration/profilemedia"],
+ "shards": {"./internal/integration/playerdisplay": 6},
+ "serial_tests": ["internal/integration/playerdisplay.TestI9_10MarchNativeLatencyBudget",
+                  "internal/integration/playerdisplay.TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore",
+                  "internal/integration/playerdisplay.TestI7C5FLeagueGenuineFightReplayAndClockNative"],
+ "known_flaky": []}
