@@ -82,13 +82,20 @@ func (r *Runtime) ready() bool {
 
 // Families selects the owned-state achievements an owner's command can change.
 var Families = map[string][]int64{
-	"Hero":        {d.NormalHeroesID, d.AwakenedHeroesID, d.SkinsID},
-	"Pet":         {d.PetsID},
-	"Book":        {d.TextbooksID},
-	"Conquer":     {d.RegionsID},
-	"Course":      {d.SubjectsID},
-	"Inscription": {d.SuitsID},
-	"Dorm":        {d.RoomsID, d.ExpandedRoomsID},
+	"Hero":          {d.NormalHeroesID, d.AwakenedHeroesID, d.SkinsID, d.TitanID},
+	"Pet":           {d.PetsID},
+	"Book":          {d.TextbooksID},
+	"Conquer":       {d.RegionsID},
+	"Course":        {d.SubjectsID},
+	"Inscription":   {d.SuitsID},
+	"Dorm":          {d.RoomsID, d.ExpandedRoomsID},
+	"GuildCampaign": {d.GuildDamageID},
+	"PetCampaign":   {d.SkyTowerID},
+	"Campaign":      {d.CampaignStarsID},
+	"SchoolStory":   {d.SchoolStoriesID},
+	"Mentor":        {d.GraduatedStudentsID},
+	"Memoir":        {d.MemoirFloorsID},
+	"Occult":        {d.OccultChaptersID},
 }
 
 func allFamilies() []int64 { return append(append([]int64{}, d.OwnedStateIDs...), d.SelectedID) }

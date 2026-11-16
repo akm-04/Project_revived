@@ -37,19 +37,47 @@ type Skins interface {
 type Dorm interface {
 	VillaCountTx(context.Context, tx.Queryer, dorm.InputScope) (dorm.VillaInputs, error)
 }
+type GuildCampaign interface {
+	BestDamageTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
+}
+type PetCampaign interface {
+	MaxFloorTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
+}
+type Campaign interface {
+	NormalStarsTx(context.Context, tx.Queryer, identity.PlayerID, string) (int64, error)
+}
+type SchoolStory interface {
+	SchoolStoryCountTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
+}
+type Mentor interface {
+	GraduatedCountTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
+}
+type Memoir interface {
+	TenthFloorTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
+}
+type Occult interface {
+	ClearedChapterCountTx(context.Context, tx.Queryer, identity.PlayerID, string) (int64, error)
+}
 
 // OwnerCounts reads C4F_OWNED_STATE_COUNT_V1 values through each owner's typed
 // read port in one coherent scope. An unavailable owner read leaves that
 // achievement unobserved (never zero-filled); the next observation catches up.
 type OwnerCounts struct {
-	Roster       ca.RosterMetricReader
-	Kinds        HeroKinds
-	Books        Books
-	Conquer      Conquer
-	Courses      Courses
-	Inscriptions Inscriptions
-	Dorm         Dorm
-	Skins        Skins
+	Roster        ca.RosterMetricReader
+	Kinds         HeroKinds
+	Books         Books
+	Conquer       Conquer
+	Courses       Courses
+	Inscriptions  Inscriptions
+	Dorm          Dorm
+	Skins         Skins
+	GuildCampaign GuildCampaign
+	PetCampaign   PetCampaign
+	Campaign      Campaign
+	SchoolStories SchoolStory
+	Mentor        Mentor
+	Memoir        Memoir
+	Occult        Occult
 }
 
 func (o OwnerCounts) OwnedStateCountsTx(c context.Context, sc ca.CoherentReadScope, p identity.PlayerID, families []int64) map[int64]int64 {
@@ -105,6 +133,50 @@ func (o OwnerCounts) OwnedStateCountsTx(c context.Context, sc ca.CoherentReadSco
 	if wanted[d.RoomsID] || wanted[d.ExpandedRoomsID] {
 		if v, e := o.Dorm.VillaCountTx(c, q, dorm.InputScope{Player: p, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt}); e == nil {
 			out[d.RoomsID], out[d.ExpandedRoomsID] = v.Rooms, v.Expanded
+		}
+	}
+	if heroesKnown && wanted[d.TitanID] {
+		titans := int64(0)
+		for _, h := range heroes.Rows {
+			if kinds[h.TableID] == string(character.SuperHero) {
+				titans++
+			}
+		}
+		out[d.TitanID] = titans
+	}
+	if wanted[d.GuildDamageID] && o.GuildCampaign != nil {
+		if damage, e := o.GuildCampaign.BestDamageTx(c, q, p); e == nil {
+			out[d.GuildDamageID] = damage / d.GuildDamagePerTenThousand
+		}
+	}
+	if wanted[d.SkyTowerID] && o.PetCampaign != nil {
+		if floor, e := o.PetCampaign.MaxFloorTx(c, q, p); e == nil {
+			out[d.SkyTowerID] = floor
+		}
+	}
+	if wanted[d.CampaignStarsID] && o.Campaign != nil {
+		if stars, e := o.Campaign.NormalStarsTx(c, q, p, sc.ContentRevision); e == nil {
+			out[d.CampaignStarsID] = stars
+		}
+	}
+	if wanted[d.SchoolStoriesID] && o.SchoolStories != nil {
+		if n, e := o.SchoolStories.SchoolStoryCountTx(c, q, p); e == nil {
+			out[d.SchoolStoriesID] = n
+		}
+	}
+	if wanted[d.GraduatedStudentsID] && o.Mentor != nil {
+		if n, e := o.Mentor.GraduatedCountTx(c, q, p); e == nil {
+			out[d.GraduatedStudentsID] = n
+		}
+	}
+	if wanted[d.MemoirFloorsID] && o.Memoir != nil {
+		if floor, e := o.Memoir.TenthFloorTx(c, q, p); e == nil {
+			out[d.MemoirFloorsID] = floor
+		}
+	}
+	if wanted[d.OccultChaptersID] && o.Occult != nil {
+		if n, e := o.Occult.ClearedChapterCountTx(c, q, p, sc.ContentRevision); e == nil {
+			out[d.OccultChaptersID] = n
 		}
 	}
 	if !heroesKnown {
