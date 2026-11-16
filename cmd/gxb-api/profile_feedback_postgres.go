@@ -40,7 +40,7 @@ func registerProfileFeedback(c context.Context, p *postgres.Pool, r tx.Runner, a
 		return e
 	}
 	basic := publicprofile.BasicReader{Roots: publicprofile.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, PlayerBasis: i5store.Store{}, Relations: socialrelationstore.Store{}, Content: content}
-	s := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Roots: app.RootService{Store: profilefeedbackstore.Store{}}, Basic: basic, Content: content, Receipts: receipts, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Display: publicpresentation.Display()}
+	s := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Reads: r, Fresh: p, Roots: app.RootService{Store: profilefeedbackstore.Store{}}, Basic: basic, Content: content, Receipts: receipts, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Display: publicpresentation.Display(), Directory: i4store.PlayerDirectoryReader{}}
 	d := stockruntime.ProfileFeedbackDispatcher{Authority: a, Service: s}
 	for _, mid := range []uint16{1830, 1842} {
 		if e = router.Register(mid, d); e != nil {

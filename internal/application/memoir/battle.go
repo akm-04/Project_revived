@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -65,17 +66,30 @@ func (mode Mode) EnemyInfo(ctx context.Context, actor identity.ActorContext, pos
 			if !found {
 				return nil, memoir.ErrUnavailable
 			}
-			raw, err := json.Marshal(opponent)
+			enemy, err = enemyInfoForPlayer(opponent, carry)
 			if err != nil {
 				return nil, err
 			}
-			if err = json.Unmarshal(raw, &enemy); err != nil {
-				return nil, err
-			}
-			enemy["enemy_status"], enemy["round"] = enemyStatusProjection(carry.Statuses), carry.Round
 		}
 		return map[string]any{"enemy_info": enemy}, nil
 	})
+}
+
+// enemyInfoForPlayer projects one frozen opponent for the stock team window:
+// MemoriesOfSchoolTeamInfoWindow reads player_name and the pet row, while
+// march's own window reads name, so both keys stay.
+func enemyInfoForPlayer(opponent march.Enemy, carry memoir.EnemyCarry) (map[string]any, error) {
+	raw, err := json.Marshal(opponent)
+	if err != nil {
+		return nil, err
+	}
+	enemy := map[string]any{}
+	if err = json.Unmarshal(raw, &enemy); err != nil {
+		return nil, err
+	}
+	enemy["player_name"] = opponent.Name
+	enemy["enemy_status"], enemy["round"] = enemyStatusProjection(carry.Statuses), carry.Round
+	return enemy, nil
 }
 func (mode Mode) StartFight(ctx context.Context, actor identity.ActorContext, position int, operationContext operation.Context) (map[string]any, error) {
 	return mode.run(ctx, actor, "start_fight", position, operationContext, func(ctx context.Context, current scope, state *memoir.State) (map[string]any, error) {

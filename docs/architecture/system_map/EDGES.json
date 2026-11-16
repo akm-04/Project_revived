@@ -1572,6 +1572,12 @@
    "mentor": [
     "Validate"
    ],
+   "profilefeedback": [
+    "Validate"
+   ],
+   "publicprofile": [
+    "Validate"
+   ],
    "ranking": [
     "Validate"
    ],
@@ -2733,8 +2739,7 @@
     "*SaveSortTypeTx"
    ],
    "store:characterstore": [
-    "*FindRawAwakeningTx",
-    "*ReadRawAwakeningBirthTx"
+    "*FindRawAwakeningTx"
    ],
    "store:contentstore": [
     "*AppearanceActive",
@@ -4941,6 +4946,9 @@
     "DefaultProfile",
     "Validate"
    ],
+   "playerdirectory": [
+    "Validate"
+   ],
    "playerdisplay": [
     "*ReadEffectivePlayerDisplayTx"
    ],
@@ -4959,8 +4967,12 @@
     "*ActiveRevision",
     "*ReadPublicProfilePolicy"
    ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
    "store:i4store": [
     "*LockPlayerRootsTx",
+    "*ProfileTx",
     "*ReadBoundRecipientTx"
    ],
    "store:kernelstore": [
@@ -5049,6 +5061,9 @@
    "oneonone": [
     "*PublicHistoryTx"
    ],
+   "playerdirectory": [
+    "Validate"
+   ],
    "playerdisplay": [
     "*CosmeticCountTx",
     "*ReadEffectivePlayerDisplayTx",
@@ -5084,8 +5099,12 @@
     "*ReadPublicProfilePolicy",
     "*ReadPublicShowcasePolicy"
    ],
+   "store:guildrentalread": [
+    "*ProfileTx"
+   ],
    "store:i4store": [
-    "*LockPlayerRootsTx"
+    "*LockPlayerRootsTx",
+    "*ProfileTx"
    ],
    "store:kernelstore": [
     "*FindTx",

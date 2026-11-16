@@ -510,7 +510,7 @@ func (s Mode) settleAttempt(c context.Context, sc gen.TimedScope, a identity.Act
 		return nil, err
 	}
 	reportKey := attempt.String()
-	if err = s.storeReport(c, sc.Tx, view, reportKey, report, awards); err != nil {
+	if err = s.storeReport(c, sc.Tx, view, reportKey, report, awards, awardDetailOf(view, result.Score)); err != nil {
 		return nil, err
 	}
 	entry := logEntry(view.at, battleLogType, team.CampaignID, view.room.Members()...)
@@ -614,10 +614,11 @@ func withStar(report []byte, star int64) ([]byte, error) {
 type storedContent struct {
 	BattleReport string                      `json:"battle_report"`
 	Awards       map[string][]map[string]any `json:"awards"`
+	AwardDetail  *awardDetail                `json:"award_detail,omitempty"`
 }
 
-func (s Mode) storeReport(c context.Context, t tx.Tx, view *roomView, reportKey string, report []byte, awards map[identity.PlayerID][]d.Reward) error {
-	content := storedContent{BattleReport: string(report), Awards: map[string][]map[string]any{}}
+func (s Mode) storeReport(c context.Context, t tx.Tx, view *roomView, reportKey string, report []byte, awards map[identity.PlayerID][]d.Reward, detail awardDetail) error {
+	content := storedContent{BattleReport: string(report), Awards: map[string][]map[string]any{}, AwardDetail: &detail}
 	for member, rewards := range awards {
 		content.Awards[numberKey(int64(member))] = rewardRows(rewards)
 	}
@@ -645,7 +646,11 @@ func (s Mode) storedReport(c context.Context, q tx.Queryer, a identity.ActorCont
 	if awards == nil {
 		awards = []map[string]any{}
 	}
-	return map[string]any{"battle_report": content.BattleReport, "award_info": map[string]any{"awards": awards}}, nil
+	info := map[string]any{"awards": awards}
+	if content.AwardDetail != nil {
+		info["award_detail"] = content.AwardDetail.fields()
+	}
+	return map[string]any{"battle_report": content.BattleReport, "award_info": info}, nil
 }
 
 // TeamReport answers 2382: the stored report of a fight the caller was in, in the

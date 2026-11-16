@@ -79922,7 +79922,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "repeatable_read"
     }
    ],
@@ -79930,7 +79930,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "false"
     }
    ],
@@ -79938,7 +79938,7 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "1"
     }
    ],
@@ -79949,7 +79949,7 @@
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 102,
+     "line": 111,
      "read_only": "false",
      "retry": "1"
     }
@@ -80321,7 +80321,7 @@
    "isolation": [
     {
      "file": "internal/application/profilefeedback/service.go",
-     "line": 243,
+     "line": 251,
      "value": "serializable"
     }
    ],
@@ -80329,17 +80329,17 @@
    "read_only": [
     {
      "file": "internal/application/profilefeedback/service.go",
-     "line": 243,
+     "line": 251,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/profilefeedback/service.go:287"
+    "internal/application/profilefeedback/service.go:295"
    ],
    "retry": [
     {
      "file": "internal/application/profilefeedback/service.go",
-     "line": 243,
+     "line": 251,
      "value": "24"
     }
    ],
@@ -80354,7 +80354,7 @@
      "file": "internal/application/profilefeedback/service.go",
      "function": "Service.Execute",
      "isolation": "serializable",
-     "line": 243,
+     "line": 251,
      "read_only": "false",
      "retry": "24"
     }
@@ -82010,7 +82010,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "repeatable_read"
     }
    ],
@@ -82018,7 +82018,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "false"
     }
    ],
@@ -82026,7 +82026,7 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "1"
     }
    ],
@@ -82037,7 +82037,7 @@
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 102,
+     "line": 111,
      "read_only": "false",
      "retry": "1"
     }
@@ -82573,7 +82573,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "repeatable_read"
     }
    ],
@@ -82581,7 +82581,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "false"
     }
    ],
@@ -82589,7 +82589,7 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 111,
      "value": "1"
     }
    ],
@@ -82600,7 +82600,7 @@
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 102,
+     "line": 111,
      "read_only": "false",
      "retry": "1"
     }
@@ -83207,7 +83207,7 @@
    "isolation": [
     {
      "file": "internal/application/profilefeedback/service.go",
-     "line": 353,
+     "line": 361,
      "value": "repeatable_read"
     }
    ],
@@ -83215,7 +83215,7 @@
    "read_only": [
     {
      "file": "internal/application/profilefeedback/service.go",
-     "line": 353,
+     "line": 361,
      "value": "false"
     }
    ],
@@ -83223,7 +83223,7 @@
    "retry": [
     {
      "file": "internal/application/profilefeedback/service.go",
-     "line": 353,
+     "line": 361,
      "value": "1"
     }
    ],
@@ -83234,7 +83234,7 @@
      "file": "internal/application/profilefeedback/service.go",
      "function": "Service.List",
      "isolation": "repeatable_read",
-     "line": 353,
+     "line": 361,
      "read_only": "false",
      "retry": "1"
     }
@@ -101727,7 +101727,7 @@
    "isolation": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 658,
+     "line": 663,
      "value": "repeatable_read"
     }
    ],
@@ -101735,7 +101735,7 @@
    "read_only": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 658,
+     "line": 663,
      "value": "true"
     }
    ],
@@ -101743,7 +101743,7 @@
    "retry": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 658,
+     "line": 663,
      "value": "1"
     }
    ],
@@ -101754,7 +101754,7 @@
      "file": "internal/application/occult/teamfight.go",
      "function": "Mode.TeamReport",
      "isolation": "repeatable_read",
-     "line": 658,
+     "line": 663,
      "read_only": "true",
      "retry": "1"
     }

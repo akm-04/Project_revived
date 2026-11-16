@@ -185,6 +185,7 @@
    "i9_6c_memoir_map.json"
   ],
   "unit": [
+   "battle_test.go",
    "player_test.go"
   ]
  }

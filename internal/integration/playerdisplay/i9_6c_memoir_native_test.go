@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gxb.local/backend/v2/internal/adapters/postgres"
@@ -19,6 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -459,6 +461,75 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	right, _ = combat.CanonicalJSON(repeated)
 	if err != nil || string(left) != string(right) {
 		t.Fatal("old operation lost after abandon", err)
+	}
+}
+
+// TestI9_6CMemoirNativeEnemyInfoCarriesStockPlayerTeam covers MID 2309 for a
+// PLAYER cell: MemoriesOfSchoolTeamInfoWindow.lua:328 reads team.player_name
+// and :127-130 reads team.pet from enemy_info.
+func TestI9_6CMemoirNativeEnemyInfoCarriesStockPlayerTeam(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	compositeLevel(t, pool, actor, revision, 100)
+	bornHero(t, pool, actor, revision, 10001001, 1)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = mode.Start(ctx, actor, catalog.Selected[0], op()); err != nil {
+		t.Fatal(err)
+	}
+	state := memoirRecord(t, pool, actor)
+	grid := 0
+	for index, kind := range state.Board.Cells {
+		if kind == memoir.Player {
+			grid = index + 1
+			break
+		}
+	}
+	if grid == 0 {
+		t.Fatal("no player encounter")
+	}
+	key := int(state.Board.Enemies[grid])
+	opponent := state.Opponents[key]
+	raw, err := json.Marshal(state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var payload map[string]any
+	if err = json.Unmarshal(raw, &payload); err != nil {
+		t.Fatal(err)
+	}
+	opponents, present := payload["opponents"].(map[string]any)
+	if !present {
+		t.Fatal(payload["opponents"])
+	}
+	object, present := opponents[strconv.Itoa(key)].(map[string]any)
+	if !present {
+		t.Fatal(opponents)
+	}
+	object["pet"] = map[string]any{"pet_id": int64(1), "table_id": int64(10010001), "star": int64(1), "lev": int64(10)}
+	raw, err = json.Marshal(payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exec(t, pool, `UPDATE memoir_players SET payload=$2::jsonb WHERE player_id=$1`, int64(actor.PlayerID), string(raw))
+	info, err := mode.EnemyInfo(ctx, actor, grid, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	enemy, present := info["enemy_info"].(map[string]any)
+	if !present {
+		t.Fatal(info)
+	}
+	if opponent.Name == "" || enemy["player_name"] != opponent.Name {
+		t.Fatalf("stock team window name: enemy_info.player_name=%v want %q", enemy["player_name"], opponent.Name)
+	}
+	pet, present := enemy["pet"].(map[string]any)
+	if !present || pet["table_id"] != float64(10010001) {
+		t.Fatalf("stock team window pet: enemy_info.pet=%v", enemy["pet"])
 	}
 }
 

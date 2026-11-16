@@ -8,6 +8,8 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -39,6 +41,12 @@ type HistoryObservation struct {
 type HistoryReader interface {
 	ReadPublicHistoryTx(context.Context, tx.Scope, identity.PlayerID, int16, string, time.Time) (HistoryObservation, error)
 }
+
+// DirectoryReader is the I4-owned directory projection the 1829 basic cell
+// already derives its display facts from.
+type DirectoryReader interface {
+	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
+}
 type ReadRequest struct {
 	MID     uint16
 	Target  identity.PlayerID
@@ -61,6 +69,7 @@ type ReadService struct {
 	Characters ShowcaseCharacterReader
 	Records    ShowcaseRecordBuilder
 	History    HistoryReader
+	Directory  DirectoryReader
 }
 
 // Pin one instant/revision before entering one caller transaction. Providers
@@ -120,18 +129,9 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 		if _, e := s.Basic.ReadBasicTx(c, sc, a, a.PlayerID, rev, at); e != nil {
 			return nil, e
 		}
-		values := map[string]int64{}
-		for id := int64(1001); id <= 1011; id++ {
-			// C4F_SHOW_TYPES_FULL11_V1: a field whose basis is UNKNOWN for this
-			// player (e.g. 1007 over legacy heroes without a raw birth) is omitted,
-			// never zeroed; SQL failures still abort the read transaction.
-			v, e := s.metrics(c, sc, a.PlayerID, []int64{id}, rev, at)
-			if e != nil {
-				continue
-			}
-			for k, n := range v {
-				values[k] = n
-			}
+		values, e := s.allShowTypes(c, sc, a.PlayerID, rev, at)
+		if e != nil {
+			return nil, e
 		}
 		return map[string]any{"all_show_types": values}, nil
 	}
@@ -223,8 +223,18 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 	if display.ContentRevision != rev || !display.ObservedAt.Equal(at) || display.ProfileVersion != basic.PlayerProfileVersion || display.ProgressionVersion != basic.ProgressionVersion || display.AvatarID <= 0 || display.AvatarFrameID < 0 {
 		return nil, ErrProfileProvider
 	}
+	if s.Directory == nil {
+		return nil, ErrProfileProvider
+	}
+	directory, found, e := s.Directory.ProfileTx(c, sc.Tx, q.Target)
+	if e != nil {
+		return nil, e
+	}
+	if !found || directory.PlayerID != q.Target || directory.Validate() != nil {
+		return nil, ErrProfileProvider
+	}
 	id := basic.Identity
-	info := map[string]any{"player_id": int64(id.PlayerID), "region": int32(id.Server), "player_name": id.Name, "avatar_id": display.AvatarID, "avatar_frame_id": display.AvatarFrameID, "player_type": id.PlayerType, "lev": id.Level, "exp": id.Exp}
+	info := map[string]any{"player_id": int64(id.PlayerID), "region": int32(id.Server), "player_name": id.Name, "avatar_id": display.AvatarID, "avatar_frame_id": display.AvatarFrameID, "player_type": id.PlayerType, "lev": id.Level, "exp": id.Exp, "conquer_lev": directory.ConquerLevel, "conquer_loop_id": directory.ConquerLoopID}
 	out := map[string]any{"player_info": info, "is_in_blacklist": basic.ActorBlocked}
 	if sub == 1 && !basic.Eligible[1] {
 		return out, nil
@@ -296,6 +306,26 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 		return nil, e
 	}
 	return out, nil
+}
+func (s ReadService) allShowTypes(c context.Context, sc tx.Scope, pid identity.PlayerID, rev string, at time.Time) (map[string]int64, error) {
+	values := map[string]int64{}
+	for id := int64(1001); id <= 1011; id++ {
+		// C4F_SHOW_TYPES_FULL11_V1: only the owner's explicit UNKNOWN-basis
+		// sentinel (a legacy hero without a raw birth) omits that one field,
+		// never zeroed. Any other owner error fails the read instead of
+		// returning a silently short map.
+		v, e := s.metrics(c, sc, pid, []int64{id}, rev, at)
+		if e != nil {
+			if !errors.Is(e, character.ErrRawAwakeningUnavailable) {
+				return nil, e
+			}
+			continue
+		}
+		for k, n := range v {
+			values[k] = n
+		}
+	}
+	return values, nil
 }
 func (s ReadService) metrics(c context.Context, sc tx.Scope, pid identity.PlayerID, ids []int64, rev string, at time.Time) (map[string]int64, error) {
 	if s.Metrics == nil {

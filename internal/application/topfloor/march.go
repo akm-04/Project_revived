@@ -35,7 +35,7 @@ func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.A
 		if len(view.Heroes) == 0 {
 			return nil
 		}
-		enemy := march.Enemy{TableID: view.Occupant.TableID(), AvatarFrame: view.FrameID, ConquerLevel: view.ConquerLevel, ConquerLoop: view.ConquerLoop, Player: int64(view.Occupant.Player), Name: view.Name, Level: view.Level, Avatar: view.AvatarID, Heroes: map[string]map[string]any{}, Force: view.Force}
+		enemy := march.Enemy{TableID: view.Occupant.TableID(), AvatarFrame: view.FrameID, ConquerLevel: view.ConquerLevel, ConquerLoop: view.ConquerLoop, Player: int64(view.Occupant.Player), Name: view.Name, Level: view.Level, Avatar: view.AvatarID, Heroes: map[string]map[string]any{}, Pet: view.Pet, Force: view.Force}
 		// JSON copies prevent health updates from mutating shared catalog/roster rows.
 		for i, row := range view.Heroes {
 			raw, err := json.Marshal(row)

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/publicprofile"
 	"gxb.local/backend/v2/internal/application/socialrelation"
@@ -65,6 +66,12 @@ func (r CommandResult) Wire() map[string]any {
 	return map[string]any{"praise_num": r.Current.Count, "is_has_praise": bit}
 }
 
+// Directory reads the I4-owned projection that carries the conquer facts the
+// stock comment and praise author cells require.
+type DirectoryReader interface {
+	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
+}
+
 type Service struct {
 	Timed      gen.TimedRunner
 	Reads      tx.Runner
@@ -76,6 +83,7 @@ type Service struct {
 	Recipients playerroot.RecipientReader
 	Authors    i5.PublicPlayerBasisReader
 	Display    i5.TxEffectivePlayerDisplayReader
+	Directory  DirectoryReader
 }
 
 func receiptIdentity(a identity.ActorContext, o operation.Context) receipt.Identity {
