@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -28,6 +29,7 @@ type Service struct {
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
 	Notifier    RevocationNotifier
+	Audit       AuditWriter
 
 	Profile tx.Profile
 
@@ -79,6 +81,9 @@ type IssueSessionResult struct {
 type RevokeSessionCommand struct {
 	SessionID identity.SessionID
 	Reason    string
+	// Audit, when set, is inserted in the revocation transaction; an audited
+	// command without an AuditWriter refuses rather than run unattributed.
+	Audit *audit.Event
 }
 type RevokeSessionResult struct {
 	SessionID       string `json:"session_id"`
@@ -238,6 +243,14 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 	if cmd.SessionID.UUID().IsZero() || cmd.Reason == "" {
 		return RevokeSessionResult{}, errors.New("session id and revocation reason required")
 	}
+	if cmd.Audit != nil {
+		if s.Audit == nil {
+			return RevokeSessionResult{}, errors.New("audited revocation requires an audit writer")
+		}
+		if err := cmd.Audit.Validate(); err != nil {
+			return RevokeSessionResult{}, err
+		}
+	}
 	rid := sessionRevokeReceiptIdentity(cmd.SessionID)
 	fp, err := receipt.FingerprintRequest(struct {
 		SessionID string `json:"session_id"`
@@ -297,7 +310,13 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 		if plan.Context != nil {
 			out.ContextVersion = plan.Context.LivenessVersion
 		}
-		return putReceipt(txctx, scope.Tx, s.Receipts, op, rid, fp, "IDENTITY_SESSION_REVOKE", "gxb.identity.session-revoke.v1", out)
+		if err = putReceipt(txctx, scope.Tx, s.Receipts, op, rid, fp, "IDENTITY_SESSION_REVOKE", "gxb.identity.session-revoke.v1", out); err != nil {
+			return err
+		}
+		if cmd.Audit != nil {
+			return s.Audit.InsertTx(txctx, scope.Tx, *cmd.Audit)
+		}
+		return nil
 	})
 	if err != nil {
 		return RevokeSessionResult{}, err

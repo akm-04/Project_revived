@@ -115,6 +115,7 @@
  "name": "commerceprivilege",
  "pushes": [],
  "stores": [
+  "internal/adapters/postgres/auditstore",
   "internal/adapters/postgres/commerceprivilegestore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",

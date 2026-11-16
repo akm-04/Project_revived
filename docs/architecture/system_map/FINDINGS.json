@@ -9348,6 +9348,7 @@
     "guildtea",
     "heroevolution",
     "i5",
+    "identitylifecycle",
     "illusion",
     "inscription",
     "libraryforum",
@@ -9403,6 +9404,7 @@
     "guildtea",
     "heroevolution",
     "i5",
+    "identitylifecycle",
     "illusion",
     "inscription",
     "libraryforum",
@@ -9458,6 +9460,7 @@
     "guildtea",
     "heroevolution",
     "i5",
+    "identitylifecycle",
     "illusion",
     "inscription",
     "libraryforum",
@@ -9658,7 +9661,14 @@
    "declared": true
   }
  ],
- "tables_without_owner_row": [],
+ "tables_without_owner_row": [
+  {
+   "table": "operator_audit_events",
+   "migrations": [
+    "migrations/00170_l3b_operator_audit_events.sql"
+   ]
+  }
+ ],
  "unattributed_mids": [
   {
    "mid": 2,

@@ -3055,6 +3055,9 @@
    "playerroot": [
     "Validate"
    ],
+   "store:auditstore": [
+    "*Emit"
+   ],
    "store:contentstore": [
     "*ActiveRevision",
     "*ChargeCatalogTx",
@@ -4174,6 +4177,9 @@
     "*ProviderRevision",
     "*ValidateSpiritBatchLockedTx"
    ],
+   "store:auditstore": [
+    "*Emit"
+   ],
    "store:characterstore": [
     "*ReadCharacterFunctionPrerequisitesTx"
    ],
@@ -4204,6 +4210,23 @@
    ]
   },
   "identitylifecycle": {
+   "store:auditstore": [
+    "*InsertTx"
+   ],
+   "store:identitystore": [
+    "*FindProviderBindingTx",
+    "*InsertProviderBindingTx",
+    "*InsertSessionCredentialTx",
+    "*InsertSessionTx",
+    "*LockAccountTx",
+    "*LockLiveContextTx",
+    "*LockSessionTx",
+    "*RevokeGameplayCredentialsTx",
+    "*RevokeSessionCredentialsTx",
+    "*SaveEndedContextTx",
+    "*SaveRevokedSessionTx",
+    "*TouchSessionActivityTx"
+   ],
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"

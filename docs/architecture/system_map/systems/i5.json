@@ -488,6 +488,7 @@
  "name": "i5",
  "pushes": [],
  "stores": [
+  "internal/adapters/postgres/auditstore",
   "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",

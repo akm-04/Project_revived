@@ -50,3 +50,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00157: I9-10 Hero Recommend per-logical-server weekly derived snapshot.
 - 00158: R3 per-player game-day marker of the last delivered daily reset signal. Empty on upgrade.
 - 00159: R7 stored per-board score row (policy, player, score, score_since, revision, metric) with the board ordering index. Empty on upgrade; the R7 backfill seeds it.
+- 00170: L3 D8 operator audit trail (AC397-25): append-only operator_audit_events for privileged operator commands. OPERATIONAL data, not a player table; the R8 retention sweep owns its retention rule. Empty on upgrade.

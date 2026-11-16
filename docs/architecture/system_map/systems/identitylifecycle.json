@@ -17,8 +17,26 @@
    }
   ],
   "ranks": [],
-  "row_lock_methods": {},
-  "row_locks": [],
+  "row_lock_methods": {
+   "account_provider_bindings": [
+    "identitystore.FindProviderBindingTx"
+   ],
+   "account_sessions": [
+    "identitystore.LockSessionTx"
+   ],
+   "accounts": [
+    "identitystore.LockAccountTx"
+   ],
+   "gameplay_contexts": [
+    "identitystore.LockLiveContextTx"
+   ]
+  },
+  "row_locks": [
+   "account_provider_bindings",
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts"
+  ],
   "unresolved_methods": []
  },
  "login": [],
@@ -26,14 +44,25 @@
  "name": "identitylifecycle",
  "pushes": [],
  "stores": [
+  "internal/adapters/postgres/auditstore",
+  "internal/adapters/postgres/identitystore",
   "internal/adapters/postgres/kernelstore"
  ],
  "tables": {
   "owned": [],
   "read": [
+   "account_provider_bindings",
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
    "gxb_operation_receipts"
   ],
   "written": [
+   "account_provider_bindings",
+   "account_session_credentials",
+   "account_sessions",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
    "gxb_operation_receipts"
   ]
  },

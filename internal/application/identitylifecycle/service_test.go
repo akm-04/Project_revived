@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -480,5 +481,115 @@ func TestKeyringBearerKeyResolverSupportsRetainedVerifyOnlyKeys(t *testing.T) {
 	}
 	if _, err := r.ResolveBearerKey(context.Background(), "revoked"); err == nil {
 		t.Fatal("unknown/revoked key must fail closed")
+	}
+}
+
+type testAuditWriter struct {
+	txs    []tx.Tx
+	events []audit.Event
+	err    error
+}
+
+func (a *testAuditWriter) InsertTx(_ context.Context, transaction tx.Tx, event audit.Event) error {
+	a.txs = append(a.txs, transaction)
+	a.events = append(a.events, event)
+	return a.err
+}
+
+func revokeAuditEvent(operationContext operation.Context, session identity.SessionID) audit.Event {
+	return audit.Event{
+		OccurredAt:    operationContext.StartedAt.UTC(),
+		ActorKind:     "AdminOperator",
+		ActorID:       "operator-7",
+		Action:        "identity.session.revoke",
+		TargetKind:    "session",
+		TargetKey:     session.UUID().String(),
+		Outcome:       "SUCCEEDED",
+		ReasonCode:    "support",
+		CorrelationID: operationContext.ID.String(),
+		PolicyVersion: "gxb.identity.session-revoke.v1",
+	}
+}
+
+func revocableSession(t *testing.T) (*testStore, *testBeginner, identity.Session) {
+	t.Helper()
+	a := liveAccount(t)
+	now := op(6).StartedAt
+	s := identity.Session{ID: sid(t, 2), AccountID: a.ID, AuthProfile: identity.AuthProductionPair, IssuedAt: now.Add(-time.Hour), LastActivityAt: now, LivenessVersion: 3}
+	c := identity.GameplayContext{ID: cid(t, 5), SessionID: s.ID, AccountID: a.ID, LogicalServerID: 1, PlayerID: 100001, ContextGeneration: 2, CreatedAt: now.Add(-time.Minute), LivenessVersion: 4}
+	return &testStore{account: a, sessions: map[string]identity.Session{s.ID.UUID().String(): s}, context: &c}, &testBeginner{}, s
+}
+
+func TestRevokeSessionWritesAuditInTheCommittedTransaction(t *testing.T) {
+	st, db, s := revocableSession(t)
+	svc := service(st, db, newMemReceipts())
+	writer := &testAuditWriter{}
+	svc.Audit = writer
+	event := revokeAuditEvent(op(6), s.ID)
+	result, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(6))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Changed {
+		t.Fatalf("revocation did not change the session: %#v", result)
+	}
+	if len(writer.txs) != 1 || len(writer.events) != 1 {
+		t.Fatalf("audit writes=%d events=%d want 1/1", len(writer.txs), len(writer.events))
+	}
+	if writer.txs[0] != db.txs[0] {
+		t.Fatal("audit event was not written through the revocation transaction")
+	}
+	if db.txs[0].rolled {
+		t.Fatal("audit was written in a rolled-back transaction")
+	}
+	if writer.events[0].Outcome != "SUCCEEDED" || writer.events[0].TargetKey != s.ID.UUID().String() {
+		t.Fatalf("audit event=%#v", writer.events[0])
+	}
+}
+
+func TestRevokeSessionReplayDoesNotWriteAuditTwice(t *testing.T) {
+	st, db, s := revocableSession(t)
+	receipts := newMemReceipts()
+	svc := service(st, db, receipts)
+	writer := &testAuditWriter{}
+	svc.Audit = writer
+	event := revokeAuditEvent(op(6), s.ID)
+	if _, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(6)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(7)); err != nil {
+		t.Fatalf("replay failed: %v", err)
+	}
+	if len(writer.events) != 1 {
+		t.Fatalf("replay wrote %d audit events, want 1", len(writer.events))
+	}
+}
+
+func TestRevokeSessionAuditFailureRollsBackRevocation(t *testing.T) {
+	st, db, s := revocableSession(t)
+	svc := service(st, db, newMemReceipts())
+	writer := &testAuditWriter{err: errors.New("audit unavailable")}
+	svc.Audit = writer
+	event := revokeAuditEvent(op(6), s.ID)
+	if _, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(6)); err == nil {
+		t.Fatal("audit failure did not fail the revocation")
+	}
+	if !db.txs[0].rolled {
+		t.Fatal("audit failure did not roll back the revocation transaction")
+	}
+	if st.sessions[s.ID.UUID().String()].RevokedAt != nil {
+		t.Fatal("revocation committed although its audit failed")
+	}
+}
+
+func TestRevokeSessionRefusesAuditCommandWithoutAuditWriter(t *testing.T) {
+	st, db, s := revocableSession(t)
+	svc := service(st, db, newMemReceipts())
+	event := revokeAuditEvent(op(6), s.ID)
+	if _, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(6)); err == nil {
+		t.Fatal("audited revocation ran without an audit writer")
+	}
+	if db.count != 0 {
+		t.Fatalf("audit-less command began %d transactions", db.count)
 	}
 }
