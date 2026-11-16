@@ -62,6 +62,7 @@ func PlayoffsInfo(view d.TournamentView) map[string]any {
 	// Zero is a display-only BYE; it is never enrolled, supported or paid.
 	players["0"] = map[string]any{"player_id": int64(0), "player_name": "-", "lev": int64(0), "avatar_id": int64(110001001), "avatar_frame_id": int64(0), "region": int64(0), "region_name": "", "guild_name": "", "conquer_lev": int64(0), "conquer_loop_id": int64(0), "fans": int64(0), "sign_up_times": int64(0), "win_times": int64(0), "dec": ""}
 	signed := false
+	declared := false
 	for _, entrant := range view.Period.Entrants {
 		row := tournamentFace(view.Faces[entrant.PlayerID])
 		fans := int64(0)
@@ -72,7 +73,10 @@ func PlayoffsInfo(view d.TournamentView) map[string]any {
 		}
 		row["fans"], row["sign_up_times"], row["win_times"], row["dec"] = fans, entrant.RegistrationSequence, entrant.GroupWins, entrant.Declaration
 		players[strconv.FormatInt(int64(entrant.PlayerID), 10)] = row
-		signed = signed || entrant.PlayerID == view.Viewer
+		if entrant.PlayerID == view.Viewer {
+			signed = true
+			declared = entrant.Declaration != ""
+		}
 	}
 	status := map[string]any{"2": []int64{}, "3": []int64{}, "4": []int64{}, "5": []int64{}, "6": []int64{}, "7": []int64{}}
 	if view.Period.RosterLocked && !view.Period.Cancelled {
@@ -98,7 +102,8 @@ func PlayoffsInfo(view d.TournamentView) map[string]any {
 			status["7"] = []int64{int64(entrant.PlayerID)}
 		}
 	}
-	return map[string]any{"battle_status": status, "players_info": players, "player_info": map[string]any{"is_signed": flag(signed)}, "playoff_info": PlayoffsPhase(view), "support_info": TournamentSupport(view)}
+	// The stock schedule window auto-opens the declaration form only while have_dec_flag is 0.
+	return map[string]any{"battle_status": status, "players_info": players, "player_info": map[string]any{"is_signed": flag(signed), "have_dec_flag": flag(declared)}, "playoff_info": PlayoffsPhase(view), "support_info": TournamentSupport(view)}
 }
 
 func PlayoffsSignList(view d.TournamentView) map[string]any {
