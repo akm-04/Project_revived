@@ -28,7 +28,9 @@ func (c *coalescedBookRead) Command(ctx context.Context, actor identity.ActorCon
 }
 
 func (c *coalescedBookRead) Read(ctx context.Context, actor identity.ActorContext, mid uint16, op operation.Context) (map[string]any, error) {
-	key := fmt.Sprintf("%d:%d", int64(actor.PlayerID), mid)
+	// The flight fences only its leader, so callers share it only with the same fence inputs.
+	key := fmt.Sprintf("%d:%d:%s:%s:%d:%d:%d", int64(actor.PlayerID), mid, actor.ContextID.UUID(), actor.SessionID.UUID(),
+		actor.ContextGeneration, actor.ContextLivenessVersion, actor.SessionLivenessVersion)
 	value, flightErr, _ := c.flights.Do(key, func() (any, error) {
 		return c.Service.Read(context.WithoutCancel(ctx), actor, mid, op)
 	})

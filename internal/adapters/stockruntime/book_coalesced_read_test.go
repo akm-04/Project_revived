@@ -217,3 +217,32 @@ func TestBookCoalescedReadSeparatesPlayers(t *testing.T) {
 		t.Fatalf("distinct players shared a flight: %v", service.calls)
 	}
 }
+
+// A-075: the flight fences only its leader's context, so a caller with another
+// context or liveness version of the same player must not join it.
+func TestBookCoalescedReadSeparatesActorContexts(t *testing.T) {
+	leader := actorForHTTP(t)
+	stale := leader
+	stale.ContextLivenessVersion++
+	service := &countingBookRead{calls: map[identity.PlayerID]int{}, started: make(chan struct{}), release: make(chan struct{})}
+	port := NewCoalescedBookRead(service)
+
+	var wait sync.WaitGroup
+	wait.Add(2)
+	go func() {
+		defer wait.Done()
+		_, _ = port.Read(context.Background(), leader, 1056, operation.Context{})
+	}()
+	<-service.started
+	go func() {
+		defer wait.Done()
+		_, _ = port.Read(context.Background(), stale, 1056, operation.Context{})
+	}()
+	time.Sleep(50 * time.Millisecond)
+	close(service.release)
+	wait.Wait()
+
+	if got := service.count(leader.PlayerID); got != 2 {
+		t.Fatalf("service reads=%d, want 2: a second actor context joined the first one's fenced flight", got)
+	}
+}
