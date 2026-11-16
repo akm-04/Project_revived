@@ -49,11 +49,24 @@ func (t revokeTarget) key() string {
 }
 
 func main() {
-	if len(os.Args) < 2 || os.Args[1] != "revoke-session" {
+	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "usage: gxb-admin revoke-session (-player ID | -session UUID) -operator NAME -reason CODE")
+		fmt.Fprintln(os.Stderr, "       gxb-admin restore-epoch begin -backup LABEL -operator NAME")
+		fmt.Fprintln(os.Stderr, "       gxb-admin restore-epoch reconcile -epoch N -operator NAME -note TEXT")
 		os.Exit(2)
 	}
-	if err := run(context.Background(), os.Args[2:], os.Getenv("GXB_POSTGRES_DSN")); err != nil {
+	dsn := os.Getenv("GXB_POSTGRES_DSN")
+	var err error
+	switch os.Args[1] {
+	case "revoke-session":
+		err = run(context.Background(), os.Args[2:], dsn)
+	case "restore-epoch":
+		err = runRestoreEpoch(context.Background(), os.Args[2:], dsn)
+	default:
+		fmt.Fprintf(os.Stderr, "gxb-admin: unknown command %q\n", os.Args[1])
+		os.Exit(2)
+	}
+	if err != nil {
 		fmt.Fprintln(os.Stderr, "gxb-admin:", err)
 		os.Exit(1)
 	}

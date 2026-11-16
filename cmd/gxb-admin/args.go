@@ -10,6 +10,67 @@ import (
 	"gxb.local/backend/v2/internal/foundation/ids"
 )
 
+type restoreEpochArgs struct {
+	Action   string
+	Backup   string
+	Epoch    int64
+	Operator string
+	Note     string
+}
+
+func parseRestoreEpochArgs(arguments []string) (restoreEpochArgs, error) {
+	if len(arguments) == 0 {
+		return restoreEpochArgs{}, fmt.Errorf("restore-epoch requires an action: begin or reconcile")
+	}
+	switch arguments[0] {
+	case "begin":
+		return parseRestoreEpochBeginArgs(arguments[1:])
+	case "reconcile":
+		return parseRestoreEpochReconcileArgs(arguments[1:])
+	default:
+		return restoreEpochArgs{}, fmt.Errorf("unknown restore-epoch action %q: use begin or reconcile", arguments[0])
+	}
+}
+
+func parseRestoreEpochBeginArgs(arguments []string) (restoreEpochArgs, error) {
+	flags := flag.NewFlagSet("restore-epoch begin", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	backup := flags.String("backup", "", "backup label")
+	operator := flags.String("operator", "", "operator name")
+	if err := flags.Parse(arguments); err != nil {
+		return restoreEpochArgs{}, err
+	}
+	if flags.NArg() != 0 {
+		return restoreEpochArgs{}, fmt.Errorf("unexpected arguments: %s", strings.Join(flags.Args(), " "))
+	}
+	trimmedBackup := strings.TrimSpace(*backup)
+	trimmedOperator := strings.TrimSpace(*operator)
+	if trimmedBackup == "" || trimmedOperator == "" {
+		return restoreEpochArgs{}, fmt.Errorf("-backup and -operator are required")
+	}
+	return restoreEpochArgs{Action: "begin", Backup: trimmedBackup, Operator: trimmedOperator}, nil
+}
+
+func parseRestoreEpochReconcileArgs(arguments []string) (restoreEpochArgs, error) {
+	flags := flag.NewFlagSet("restore-epoch reconcile", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	epoch := flags.Int64("epoch", 0, "restore epoch")
+	operator := flags.String("operator", "", "operator name")
+	note := flags.String("note", "", "reconciliation attestation")
+	if err := flags.Parse(arguments); err != nil {
+		return restoreEpochArgs{}, err
+	}
+	if flags.NArg() != 0 {
+		return restoreEpochArgs{}, fmt.Errorf("unexpected arguments: %s", strings.Join(flags.Args(), " "))
+	}
+	trimmedOperator := strings.TrimSpace(*operator)
+	trimmedNote := strings.TrimSpace(*note)
+	if *epoch <= 0 || trimmedOperator == "" || trimmedNote == "" {
+		return restoreEpochArgs{}, fmt.Errorf("-epoch, -operator and -note are required")
+	}
+	return restoreEpochArgs{Action: "reconcile", Epoch: *epoch, Operator: trimmedOperator, Note: trimmedNote}, nil
+}
+
 type revokeSessionArgs struct {
 	Player   identity.PlayerID
 	Session  identity.SessionID
