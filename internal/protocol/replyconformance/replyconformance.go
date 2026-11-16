@@ -18,13 +18,15 @@ var generated []byte
 const requiredCode = 1
 
 type step struct {
-	key  string
-	list bool
+	key    string
+	list   bool
+	parent string
 }
 
 type obligation struct {
-	paths []string
-	steps [][]step
+	paths        []string
+	steps        [][]step
+	requirements map[string]int
 }
 
 var (
@@ -45,7 +47,7 @@ func (Checker) Check(mid uint16, reply any) []string {
 	}
 	var violations []string
 	for index, steps := range record.steps {
-		walk(steps, reply, record.paths[index], &violations)
+		walk(steps, reply, record.paths[index], record.requirements, &violations)
 	}
 	return violations
 }
@@ -80,7 +82,8 @@ func load() {
 		if err != nil {
 			continue
 		}
-		var current obligation
+		current := obligation{requirements: map[string]int{}}
+		var required []string
 		for _, raw := range record.Paths {
 			var entry []json.RawMessage
 			if err := json.Unmarshal(raw, &entry); err != nil || len(entry) < 2 {
@@ -91,9 +94,12 @@ func load() {
 			if json.Unmarshal(entry[0], &path) != nil || json.Unmarshal(entry[1], &requirement) != nil {
 				continue
 			}
-			if requirement != requiredCode {
-				continue
+			current.requirements[path] = requirement
+			if requirement == requiredCode {
+				required = append(required, path)
 			}
+		}
+		for _, path := range required {
 			current.paths = append(current.paths, path)
 			current.steps = append(current.steps, parsePath(path))
 		}
@@ -106,17 +112,33 @@ func load() {
 func parsePath(path string) []step {
 	segments := strings.Split(path, ".")
 	steps := make([]step, 0, len(segments))
+	prefix := ""
 	for _, segment := range segments {
 		list := strings.HasSuffix(segment, "[]")
-		steps = append(steps, step{key: strings.TrimSuffix(segment, "[]"), list: list})
+		key := strings.TrimSuffix(segment, "[]")
+		own := key
+		if prefix != "" {
+			own = prefix + "." + key
+		}
+		steps = append(steps, step{key: key, list: list, parent: own})
+		if prefix != "" {
+			prefix += "."
+		}
+		prefix += segment
 	}
 	return steps
 }
 
-func walk(steps []step, current any, path string, violations *[]string) {
+// walk checks one path. When a list this path descends into is absent, the
+// list's own requirement decides (REPLY_CONFORMANCE_EDGE_V1 ruling 4): an
+// optional parent makes the leaf inapplicable, a required parent reports.
+func walk(steps []step, current any, path string, requirements map[string]int, violations *[]string) {
 	first := steps[0]
 	value, present := member(current, first.key)
 	if !present || isNil(value) {
+		if first.list && len(steps) > 1 && !requiredParent(requirements, first.parent) {
+			return
+		}
 		*violations = append(*violations, path)
 		return
 	}
@@ -125,11 +147,22 @@ func walk(steps []step, current any, path string, violations *[]string) {
 	}
 	if first.list {
 		for _, element := range elements(value) {
-			walk(steps[1:], element, path, violations)
+			walk(steps[1:], element, path, requirements, violations)
 		}
 		return
 	}
-	walk(steps[1:], value, path, violations)
+	walk(steps[1:], value, path, requirements, violations)
+}
+
+func requiredParent(requirements map[string]int, parent string) bool {
+	if parent == "" {
+		return false
+	}
+	if code, present := requirements[parent]; present {
+		return code == requiredCode
+	}
+	code, present := requirements[parent+"[]"]
+	return present && code == requiredCode
 }
 
 func member(container any, key string) (any, bool) {

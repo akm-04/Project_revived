@@ -38,6 +38,23 @@ func TestCheckerFlagsMissingAndNullRequiredPaths(t *testing.T) {
 	}
 }
 
+func TestCheckerFollowsAnAbsentListParentsRequirement(t *testing.T) {
+	base := map[string]any{
+		"sub_type":          int64(1),
+		"newyear_boss_rank": map[string]any{"infos": []any{}, "my_hurt": int64(0)},
+	}
+	if violations := (Checker{}).Check(276, base); len(violations) != 0 {
+		t.Fatalf("optional absent boss_rank produced %#v", violations)
+	}
+	base["boss_rank"] = []any{map[string]any{}}
+	got := (Checker{}).Check(276, base)
+	sort.Strings(got)
+	want := []string{"boss_rank[].infos", "boss_rank[].my_hurt"}
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("violations %#v, want %#v", got, want)
+	}
+}
+
 func TestCheckerIgnoresMIDsWithoutObligations(t *testing.T) {
 	if violations := (Checker{}).Check(20480, nil); len(violations) != 0 {
 		t.Fatalf("violations %#v", violations)
