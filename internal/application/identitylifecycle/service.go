@@ -21,6 +21,7 @@ var (
 	ErrServicePortsIncomplete = errors.New("identity lifecycle service ports incomplete")
 	ErrAccountNotLive         = errors.New("identity lifecycle account not live")
 	ErrSessionAccountMismatch = errors.New("session/account mismatch")
+	ErrSessionAlreadyRevoked  = errors.New("identity lifecycle session already revoked")
 )
 
 type Service struct {
@@ -267,6 +268,9 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 			if !bytes.Equal(prior.RequestFingerprint[:], fp[:]) {
 				return &receipt.ConflictError{Identity: rid}
 			}
+			if cmd.Audit != nil {
+				return ErrSessionAlreadyRevoked
+			}
 			return json.Unmarshal(prior.ResultPayload, &out)
 		}
 		sess, err := s.Store.LockSessionTx(txctx, scope.Tx, cmd.SessionID)
@@ -287,6 +291,9 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 			return err
 		}
 		changed := plan.Session.LivenessVersion != beforeSessionVersion
+		if cmd.Audit != nil && !changed {
+			return ErrSessionAlreadyRevoked
+		}
 		if changed {
 			if err = s.Store.SaveRevokedSessionTx(txctx, scope.Tx, plan.Session, beforeSessionVersion); err != nil {
 				return err

@@ -547,7 +547,7 @@ func TestRevokeSessionWritesAuditInTheCommittedTransaction(t *testing.T) {
 	}
 }
 
-func TestRevokeSessionReplayDoesNotWriteAuditTwice(t *testing.T) {
+func TestRevokeSessionAuditedReplayRefusesWithoutSecondAudit(t *testing.T) {
 	st, db, s := revocableSession(t)
 	receipts := newMemReceipts()
 	svc := service(st, db, receipts)
@@ -557,11 +557,59 @@ func TestRevokeSessionReplayDoesNotWriteAuditTwice(t *testing.T) {
 	if _, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(6)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(7)); err != nil {
-		t.Fatalf("replay failed: %v", err)
+	if _, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(7)); !errors.Is(err, ErrSessionAlreadyRevoked) {
+		t.Fatalf("audited replay err = %v, want ErrSessionAlreadyRevoked", err)
 	}
 	if len(writer.events) != 1 {
 		t.Fatalf("replay wrote %d audit events, want 1", len(writer.events))
+	}
+	if !db.txs[1].rolled {
+		t.Fatal("audited replay committed")
+	}
+}
+
+func TestRevokeSessionAuditedAlreadyRevokedRefusesBeforeWrites(t *testing.T) {
+	a := liveAccount(t)
+	now := op(7).StartedAt
+	revokedAt := now.Add(-time.Minute)
+	s := identity.Session{ID: sid(t, 2), AccountID: a.ID, AuthProfile: identity.AuthProductionPair, IssuedAt: now.Add(-time.Hour), LastActivityAt: now.Add(-time.Hour), RevokedAt: &revokedAt, RevocationReason: "support", LivenessVersion: 4}
+	st := &testStore{account: a, sessions: map[string]identity.Session{s.ID.UUID().String(): s}}
+	db := &testBeginner{}
+	svc := service(st, db, newMemReceipts())
+	writer := &testAuditWriter{}
+	svc.Audit = writer
+	event := revokeAuditEvent(op(7), s.ID)
+	_, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support", Audit: &event}, op(7))
+	if !errors.Is(err, ErrSessionAlreadyRevoked) {
+		t.Fatalf("already-revoked audited command err = %v, want ErrSessionAlreadyRevoked", err)
+	}
+	if len(writer.txs) != 0 || len(writer.events) != 0 {
+		t.Fatalf("refused audit writes=%d events=%d, want none", len(writer.txs), len(writer.events))
+	}
+	if !db.txs[0].rolled {
+		t.Fatal("refused command committed")
+	}
+	if st.revokeSessionCreds != 0 || st.revokeGameplayCreds != 0 {
+		t.Fatalf("refused command ran credential updates: session=%d gameplay=%d", st.revokeSessionCreds, st.revokeGameplayCreds)
+	}
+}
+
+func TestRevokeSessionUnauditedReplayReturnsStoredResult(t *testing.T) {
+	st, db, s := revocableSession(t)
+	svc := service(st, db, newMemReceipts())
+	first, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support"}, op(6))
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := svc.RevokeSession(context.Background(), RevokeSessionCommand{SessionID: s.ID, Reason: "support"}, op(7))
+	if err != nil {
+		t.Fatalf("unaudited replay failed: %v", err)
+	}
+	if !first.Changed || !second.Changed || first.SessionVersion != second.SessionVersion {
+		t.Fatalf("unaudited replay result changed: first=%#v second=%#v", first, second)
+	}
+	if st.revokeSessionCreds != 1 || st.revokeGameplayCreds != 1 {
+		t.Fatalf("unaudited replay reran credential updates: session=%d gameplay=%d", st.revokeSessionCreds, st.revokeGameplayCreds)
 	}
 }
 
