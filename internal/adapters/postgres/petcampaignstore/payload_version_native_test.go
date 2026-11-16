@@ -28,7 +28,7 @@ func TestPayloadVersionRoundTripPetcampaignStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	for _, statement := range []string{
 		`INSERT INTO logical_servers(logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at)
 VALUES(27,'payload-version-petcampaign',NULL,false,false,false,2799999,2799999,1,now()) ON CONFLICT DO NOTHING`,
@@ -39,6 +39,18 @@ VALUES(27,'payload-version-petcampaign',NULL,false,false,false,2799999,2799999,1
 			t.Fatal(err)
 		}
 	}
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM petcampaign_players WHERE player_id=2700001`,
+			`DELETE FROM players WHERE player_id=2700001`,
+			`DELETE FROM accounts WHERE account_id='77777777-7777-4777-8777-777777777718'`,
+			`DELETE FROM logical_servers WHERE logical_server_id=27`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	at := time.Date(2026, 11, 16, 5, 0, 0, 123456000, time.UTC)
 	player := identity.PlayerID(2700001)
 	server := identity.LogicalServerID(27)

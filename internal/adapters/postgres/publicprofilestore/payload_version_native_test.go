@@ -31,7 +31,7 @@ func TestPayloadVersionRoundTripPublicProfileStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	at := time.Date(2026, 11, 16, 5, 30, 0, 777888000, time.UTC)
 	player := identity.PlayerID(2900001)
 	server := identity.LogicalServerID(29)
@@ -53,6 +53,20 @@ VALUES(29,'payload-version-media',NULL,false,false,false,2999999,2999999,1,now()
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM player_public_profile_media_current WHERE player_id=2900001`,
+			`DELETE FROM player_public_profile_media_history WHERE player_id=2900001`,
+			`DELETE FROM player_public_profile_roots WHERE player_id=2900001`,
+			`DELETE FROM players WHERE player_id=2900001`,
+			`DELETE FROM accounts WHERE account_id='77777777-7777-4777-8777-777777777729'`,
+			`DELETE FROM logical_servers WHERE logical_server_id=29`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	origin, err := app.NewMediaURL("http://media.payload.test")
 	if err != nil {
 		t.Fatal(err)

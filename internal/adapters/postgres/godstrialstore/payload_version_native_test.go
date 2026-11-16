@@ -30,7 +30,7 @@ func TestPayloadVersionRoundTripGodstrialStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	exec := func(statement string, arguments ...any) {
 		t.Helper()
 		if _, err := pool.Raw().Exec(ctx, statement, arguments...); err != nil {
@@ -41,6 +41,18 @@ func TestPayloadVersionRoundTripGodstrialStore(t *testing.T) {
 VALUES(22,'payload-version-godstrial',NULL,false,false,false,2225001,2299999,1,now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES('77777777-7777-4777-8777-777777777722','payload-version-godstrial','ACTIVE',now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES(2200001,'77777777-7777-4777-8777-777777777722',22,now(),'payload-version-godstrial') ON CONFLICT DO NOTHING`)
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM godstrial_players WHERE player_id=2200001`,
+			`DELETE FROM players WHERE player_id=2200001`,
+			`DELETE FROM accounts WHERE account_id='77777777-7777-4777-8777-777777777722'`,
+			`DELETE FROM logical_servers WHERE logical_server_id=22`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	at := time.Date(2026, 11, 16, 4, 0, 0, 123456000, time.UTC)
 	player := identity.PlayerID(2200001)
 	line := grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "gold", ItemID: 1, Amount: 100, Domain: "i5", Metadata: map[string]string{"source": "godstrial"}}

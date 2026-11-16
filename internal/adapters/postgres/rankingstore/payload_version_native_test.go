@@ -30,7 +30,7 @@ func TestPayloadVersionRoundTripRankingStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	if _, err := pool.Raw().Exec(ctx, `INSERT INTO logical_servers(logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at)
 VALUES(11,'payload-version-ranking',NULL,false,false,false,1125001,1199999,1,now()) ON CONFLICT DO NOTHING`); err != nil {
 		t.Fatal(err)
@@ -39,6 +39,18 @@ VALUES(11,'payload-version-ranking',NULL,false,false,false,1125001,1199999,1,now
 VALUES($1,decode($1,'hex'),1,'probe','probe',jsonb_build_object('revision_id',$1,'schema_version',1,'compiler_version','probe','parser_version','probe')) ON CONFLICT DO NOTHING`, strings.Repeat("a", 64)); err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM ranking_girls_snapshots WHERE logical_server_id=11`,
+			`DELETE FROM ranking_girls_roots WHERE logical_server_id=11`,
+			`DELETE FROM gxb_content_revisions WHERE revision_id='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'`,
+			`DELETE FROM logical_servers WHERE logical_server_id=11`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	server := identity.LogicalServerID(11)
 	at := time.Date(2026, 11, 16, 3, 0, 0, 123456000, time.UTC)
 	observedAt := at.Add(time.Minute)

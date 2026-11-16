@@ -29,11 +29,21 @@ func TestPayloadVersionRoundTripHeroRecommendStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	if _, err := pool.Raw().Exec(ctx, `INSERT INTO logical_servers(logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at)
 VALUES(10,'payload-version-herorecommend',NULL,false,false,false,1025001,1099999,1,now()) ON CONFLICT DO NOTHING`); err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM hero_recommend_snapshots WHERE logical_server_id=10`,
+			`DELETE FROM logical_servers WHERE logical_server_id=10`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	observedAt := time.Date(2026, 11, 16, 1, 2, 3, 123456000, time.UTC)
 	written := d.Snapshot{
 		Schema:     d.Schema,

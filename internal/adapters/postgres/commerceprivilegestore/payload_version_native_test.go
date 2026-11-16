@@ -26,7 +26,7 @@ func TestPayloadVersionRoundTripCommercePrivilegeStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	at := time.Date(2026, 11, 16, 4, 0, 0, 123456000, time.UTC)
 	crystal, vipXP := int64(120), int64(30)
 	final := d.ChargeTuning{Version: 1, Mode: d.TuningGrant, Products: map[string]d.ChargeOverride{"80001007": {Crystal: &crystal, VIPXP: &vipXP, Off: true}}}
@@ -37,6 +37,11 @@ func TestPayloadVersionRoundTripCommercePrivilegeStore(t *testing.T) {
 	if _, err := pool.Raw().Exec(ctx, `INSERT INTO commerce_recharge_tuning(singleton,payload,updated_at)VALUES(true,$1::jsonb,$2) ON CONFLICT(singleton)DO UPDATE SET payload=excluded.payload,updated_at=excluded.updated_at`, string(payloadText), at); err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		if _, err := pool.Raw().Exec(context.Background(), `DELETE FROM commerce_recharge_tuning`); err != nil {
+			t.Errorf("cleanup commerce_recharge_tuning: %v", err)
+		}
+	})
 	var storedText string
 	var version int16
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM commerce_recharge_tuning`).Scan(&storedText, &version); err != nil {

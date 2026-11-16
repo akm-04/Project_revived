@@ -32,7 +32,7 @@ func TestPayloadVersionRoundTripMemoirStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	exec := func(statement string, arguments ...any) {
 		t.Helper()
 		if _, err := pool.Raw().Exec(ctx, statement, arguments...); err != nil {
@@ -43,6 +43,18 @@ func TestPayloadVersionRoundTripMemoirStore(t *testing.T) {
 VALUES(24,'payload-version-memoir',NULL,false,false,false,2425001,2499999,1,now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES('77777777-7777-4777-8777-777777777724','payload-version-memoir','ACTIVE',now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES(2400001,'77777777-7777-4777-8777-777777777724',24,now(),'payload-version-memoir') ON CONFLICT DO NOTHING`)
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM memoir_players WHERE player_id=2400001`,
+			`DELETE FROM players WHERE player_id=2400001`,
+			`DELETE FROM accounts WHERE account_id='77777777-7777-4777-8777-777777777724'`,
+			`DELETE FROM logical_servers WHERE logical_server_id=24`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	at := time.Date(2026, 11, 16, 4, 0, 0, 123456000, time.UTC)
 	player := identity.PlayerID(2400001)
 	board := d.Board{Cells: make([]int64, d.BoardCells), Open: map[int]int64{1: 1}, Enemies: map[int]int64{d.GuardianPosition: 9}, Position: 1}

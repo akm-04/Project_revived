@@ -31,7 +31,7 @@ func TestPayloadVersionRoundTripI5StoreBatch18(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	at := time.Date(2026, 11, 16, 5, 40, 0, 123123000, time.UTC)
 	player := identity.PlayerID(3000001)
 	for _, statement := range []string{
@@ -104,6 +104,25 @@ VALUES(30,'payload-version-i5-batch18',NULL,false,false,false,3099999,3099999,1,
 	if err := transaction.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM player_display_admissions WHERE operation_id=$1::uuid`, []any{displayOperationID.String()}},
+			{`DELETE FROM redeem_codes WHERE code_id=$1::uuid`, []any{codeID.String()}},
+			{`DELETE FROM redeem_campaigns WHERE campaign_id=$1::uuid`, []any{campaignID.String()}},
+			{`DELETE FROM redeem_reward_bundle_revisions WHERE reward_bundle_revision_id=$1::uuid`, []any{bundleID.String()}},
+			{`DELETE FROM player_profiles WHERE player_id=3000001`, nil},
+			{`DELETE FROM players WHERE player_id=3000001`, nil},
+			{`DELETE FROM accounts WHERE account_id='77777777-7777-4777-8777-777777777730'`, nil},
+			{`DELETE FROM logical_servers WHERE logical_server_id=30`, nil},
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 
 	var displayText string
 	var displayVersion int16

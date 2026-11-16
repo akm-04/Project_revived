@@ -28,7 +28,7 @@ func TestPayloadVersionRoundTripPublicationStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	setID, err := ids.NewUUID()
 	if err != nil {
 		t.Fatal(err)
@@ -55,6 +55,19 @@ func TestPayloadVersionRoundTripPublicationStore(t *testing.T) {
 	if err := transaction.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM publication_items WHERE set_id=$1::uuid`, []any{setID.String()}},
+			{`DELETE FROM publication_sets WHERE set_id=$1::uuid`, []any{setID.String()}},
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	var storedText string
 	var version int16
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM publication_items WHERE set_id=$1 ORDER BY position LIMIT 1`, setID.String()).Scan(&storedText, &version); err != nil {

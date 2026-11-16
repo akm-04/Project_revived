@@ -30,7 +30,7 @@ func TestPayloadVersionRoundTripDodgeballStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	exec := func(statement string, arguments ...any) {
 		t.Helper()
 		if _, err := pool.Raw().Exec(ctx, statement, arguments...); err != nil {
@@ -41,6 +41,18 @@ func TestPayloadVersionRoundTripDodgeballStore(t *testing.T) {
 VALUES(21,'payload-version-dodgeball',NULL,false,false,false,2125001,2199999,1,now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES('77777777-7777-4777-8777-777777777721','payload-version-dodgeball','ACTIVE',now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES(2100001,'77777777-7777-4777-8777-777777777721',21,now(),'payload-version-dodgeball') ON CONFLICT DO NOTHING`)
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM dodgeball_players WHERE player_id=2100001`,
+			`DELETE FROM players WHERE player_id=2100001`,
+			`DELETE FROM accounts WHERE account_id='77777777-7777-4777-8777-777777777721'`,
+			`DELETE FROM logical_servers WHERE logical_server_id=21`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	at := time.Date(2026, 11, 16, 4, 0, 0, 123456000, time.UTC)
 	player := identity.PlayerID(2100001)
 	final := dodgeball.State{

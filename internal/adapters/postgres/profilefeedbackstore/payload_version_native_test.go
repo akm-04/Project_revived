@@ -33,7 +33,7 @@ func TestPayloadVersionRoundTripProfileFeedbackStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	for _, statement := range []string{
 		`INSERT INTO logical_servers(logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at)
 VALUES(31,'payload-version-comments',NULL,false,false,false,3199999,3199999,1,now()) ON CONFLICT DO NOTHING`,
@@ -48,6 +48,21 @@ VALUES(31,'payload-version-comments',NULL,false,false,false,3199999,3199999,1,no
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM player_profile_comment_operations WHERE operation_id=$1::uuid`, []any{operationID.String()}},
+			{`DELETE FROM players WHERE player_id IN (3100001,3100002)`, nil},
+			{`DELETE FROM accounts WHERE account_id IN ('77777777-7777-4777-8777-777777777731','77777777-7777-4777-8777-777777777732')`, nil},
+			{`DELETE FROM logical_servers WHERE logical_server_id=31`, nil},
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	at := time.Date(2026, 11, 16, 5, 20, 0, 111222000, time.UTC)
 	policies, err := policy.NewSet(
 		policy.Ref{Name: "content", Version: "content-rev-1"},

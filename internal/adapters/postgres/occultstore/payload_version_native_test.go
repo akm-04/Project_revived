@@ -28,7 +28,7 @@ func TestPayloadVersionRoundTripOccultStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	exec := func(statement string, arguments ...any) {
 		t.Helper()
 		if _, err := pool.Raw().Exec(ctx, statement, arguments...); err != nil {
@@ -39,6 +39,18 @@ func TestPayloadVersionRoundTripOccultStore(t *testing.T) {
 VALUES(25,'payload-version-occult',NULL,false,false,false,2525001,2599999,1,now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES('77777777-7777-4777-8777-777777777725','payload-version-occult','ACTIVE',now()) ON CONFLICT DO NOTHING`)
 	exec(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES(2500001,'77777777-7777-4777-8777-777777777725',25,now(),'payload-version-occult') ON CONFLICT DO NOTHING`)
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM occult_players WHERE player_id=2500001`,
+			`DELETE FROM players WHERE player_id=2500001`,
+			`DELETE FROM accounts WHERE account_id='77777777-7777-4777-8777-777777777725'`,
+			`DELETE FROM logical_servers WHERE logical_server_id=25`,
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	at := time.Date(2026, 11, 16, 4, 0, 0, 123456000, time.UTC)
 	player := identity.PlayerID(2500001)
 	final := d.Scores{"1": 1000, "2": 1480}
