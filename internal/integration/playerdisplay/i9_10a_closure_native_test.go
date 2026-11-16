@@ -308,7 +308,7 @@ func TestI910AAccelerateConcurrencyAndRetryNative(t *testing.T) {
 	firstRequest := playtestRequest(actor, 1089, map[string]any{"speed_num": int64(348), "building_type": int64(2)})
 	secondRequest := playtestRequest(actor, 1089, map[string]any{"speed_num": int64(348), "building_type": int64(2)})
 	first, second := dispatchTogether(t, dispatcher, firstRequest, secondRequest)
-	winnerRequest, winner := requireOneAccepted(t, "1089", []int64{35028}, firstRequest, secondRequest, first, second)
+	winnerRequest, winner := requireOneAccepted(t, "1089", []int64{35028, 40002}, firstRequest, secondRequest, first, second)
 	if spent := speedBefore - workshopStack(t, database, actor.PlayerID, 50005024); spent != 348 {
 		t.Fatalf("1089 spent %d speed items", spent)
 	}

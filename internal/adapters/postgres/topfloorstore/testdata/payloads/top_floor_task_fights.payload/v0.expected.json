@@ -46,7 +46,9 @@
     "GuildName": "",
     "Wins": 0,
     "Force": 0,
+    "Leader": 0,
     "Heroes": null,
-    "Pet": null
+    "Pet": null,
+    "TitleInfo": null
   }
 }
