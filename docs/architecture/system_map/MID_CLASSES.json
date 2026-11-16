@@ -74340,22 +74340,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -74368,28 +74368,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -74399,22 +74399,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -74453,7 +74453,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -74461,7 +74461,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -74469,7 +74469,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -74477,7 +74477,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -74636,8 +74636,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -74652,22 +74652,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -74680,28 +74680,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -74711,22 +74711,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -74765,7 +74765,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -74773,7 +74773,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -74781,7 +74781,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -74789,7 +74789,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -74948,8 +74948,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -74964,22 +74964,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -74992,28 +74992,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -75023,22 +75023,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -75077,7 +75077,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -75085,7 +75085,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -75093,7 +75093,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -75101,7 +75101,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -75260,8 +75260,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -75276,22 +75276,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -75304,28 +75304,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -75335,22 +75335,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -75389,7 +75389,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -75397,7 +75397,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -75405,7 +75405,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -75413,7 +75413,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -75572,8 +75572,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -75588,22 +75588,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -75616,28 +75616,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -75647,22 +75647,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -75701,7 +75701,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -75709,7 +75709,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -75717,7 +75717,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -75725,7 +75725,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -75884,8 +75884,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -75900,22 +75900,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -75928,28 +75928,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -75959,22 +75959,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -76013,7 +76013,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -76021,7 +76021,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -76029,7 +76029,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -76037,7 +76037,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -76196,8 +76196,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -76212,22 +76212,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -76240,28 +76240,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -76271,22 +76271,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -76325,7 +76325,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -76333,7 +76333,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -76341,7 +76341,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -76349,7 +76349,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -76508,8 +76508,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -76524,22 +76524,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "serializable"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "serializable"
     }
    ],
@@ -76552,28 +76552,28 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "false"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:707",
-    "internal/application/inscription/service.go:257"
+    "internal/application/inscription/service.go:258"
    ],
    "retry": [
     {
@@ -76583,22 +76583,22 @@
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 320,
+     "line": 321,
      "value": "1"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 379,
+     "line": 380,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 470,
+     "line": 478,
      "value": "16"
     },
     {
      "file": "internal/application/inscription/service.go",
-     "line": 520,
+     "line": 528,
      "value": "16"
     }
    ],
@@ -76637,7 +76637,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 320,
+     "line": 321,
      "read_only": "false",
      "retry": "1"
     },
@@ -76645,7 +76645,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 379,
+     "line": 380,
      "read_only": "false",
      "retry": "16"
     },
@@ -76653,7 +76653,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 470,
+     "line": 478,
      "read_only": "false",
      "retry": "16"
     },
@@ -76661,7 +76661,7 @@
      "file": "internal/application/inscription/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 520,
+     "line": 528,
      "read_only": "false",
      "retry": "16"
     }
@@ -76820,8 +76820,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:286",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:297",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:287",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/inscription/service.go:298",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"

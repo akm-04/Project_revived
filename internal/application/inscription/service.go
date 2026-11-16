@@ -21,6 +21,7 @@ import (
 	"io"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -433,11 +434,18 @@ func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command
 	}
 	return Result{}, ErrUnavailable
 }
+
+// finishResult recovers the domain cause from the persisted rejection text so
+// the first attempt and its replay classify identically. A definite abort
+// records e.Error(), which names the resource the player could not pay.
 func finishResult(out Result) (Result, error) {
-	if out.Rejected != "" {
-		return out, fmt.Errorf("%w: %s", ErrRejected, out.Rejected)
+	if out.Rejected == "" {
+		return out, nil
 	}
-	return out, nil
+	if strings.Contains(out.Rejected, economy.InsufficientBalance("crystal").Error()) {
+		return out, fmt.Errorf("%w: %w", ErrRejected, economy.InsufficientBalance("crystal"))
+	}
+	return out, fmt.Errorf("%w: %s", ErrRejected, out.Rejected)
 }
 
 type resolver struct {

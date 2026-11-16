@@ -108,9 +108,9 @@ func (d InscriptionDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 }
 
 var inscriptionFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 	{match: ins.ErrInvalid, class: failureMalformed, detail: "inscription_command_rejected"},
-	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func failInscription(e error) httpedge.Response {

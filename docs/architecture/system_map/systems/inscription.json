@@ -246,6 +246,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "finish_result_test.go"
+  ]
  }
 }
