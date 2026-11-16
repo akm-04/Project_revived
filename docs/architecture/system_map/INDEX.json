@@ -581,6 +581,7 @@
    "achievement_notices": "achievement",
    "achievement_roots": "achievement",
    "achievement_streaks": "achievement",
+   "adventure_attempt_settlements": "adventure",
    "adventure_occurrences": "adventure",
    "adventure_reports": "adventure",
    "adventure_single_attempts": "adventure",
@@ -657,6 +658,7 @@
    "guild_tea_wishes": "guildcore",
    "guilds": "guildcore",
    "hero_recommend_snapshots": "herorecommend",
+   "illusion_attempt_settlements": "illusion",
    "illusion_attempts": "illusion",
    "illusion_occurrence_results": "illusion",
    "illusion_occurrences": "illusion",
@@ -811,6 +813,7 @@
    "top_floor_task_ranks": "topfloor",
    "top_floor_task_records": "topfloor",
    "workplace_players": "workplace",
+   "worldboss_attempt_settlements": "worldboss",
    "worldboss_attempts": "worldboss",
    "worldboss_occurrences": "worldboss",
    "worldboss_player_totals": "worldboss",
@@ -843,7 +846,7 @@
    "name": "adventure",
    "path": "internal/application/adventure",
    "purpose": "converts objective facts into Adventure event occurrences",
-   "tables": 3
+   "tables": 4
   },
   {
    "callees": 15,
@@ -1239,7 +1242,7 @@
    "name": "illusion",
    "path": "internal/application/illusion",
    "purpose": "",
-   "tables": 6
+   "tables": 7
   },
   {
    "callees": 12,
@@ -1617,7 +1620,7 @@
    "name": "worldboss",
    "path": "internal/application/worldboss",
    "purpose": "",
-   "tables": 4
+   "tables": 5
   }
  ]
 }

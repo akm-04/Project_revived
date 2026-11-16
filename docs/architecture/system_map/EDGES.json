@@ -344,6 +344,7 @@
    "adventure": [
     "*AttestSummaryTx",
     "*CloseTx",
+    "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
     "*StartTx",
@@ -406,6 +407,7 @@
    "illusion": [
     "*AttestSummaryTx",
     "*CloseTx",
+    "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
@@ -465,6 +467,7 @@
    ],
    "worldboss": [
     "*AttestSummaryTx",
+    "*CurrentAttemptTx",
     "*StartTx"
    ]
   },
@@ -2209,6 +2212,7 @@
    "combat": [
     "*AttestSummaryTx",
     "*CloseTx",
+    "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
     "*StartTx",
@@ -4231,6 +4235,7 @@
    "combat": [
     "*AttestSummaryTx",
     "*CloseTx",
+    "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
@@ -5809,6 +5814,7 @@
    ],
    "combat": [
     "*AttestSummaryTx",
+    "*CurrentAttemptTx",
     "*StartTx"
    ],
    "commerceprivilege": [

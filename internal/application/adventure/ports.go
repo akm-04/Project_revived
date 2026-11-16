@@ -16,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/character"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/illusion"
@@ -32,12 +33,10 @@ import (
 type Store interface {
 	ListOccurrencesTx(context.Context, tx.Queryer, identity.LogicalServerID, identity.PlayerID, time.Time, int64) ([]d.Occurrence, error)
 	ReadOccurrenceTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.Occurrence, bool, error)
+	ReadOccurrenceBySourceKeyTx(context.Context, tx.Queryer, identity.PlayerID, int64, string) (d.Occurrence, bool, error)
 	FinishOccurrenceTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time, time.Time) (bool, error)
-	InsertAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error
-	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.SingleAttempt, bool, error)
-	SaveAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error
-	RenameAttemptTx(context.Context, tx.Tx, string, string, identity.PlayerID) error
-	DeleteAttemptTx(context.Context, tx.Tx, string, identity.PlayerID) error
+	InsertSettlementTx(context.Context, tx.Tx, ids.UUID, identity.PlayerID, int64, time.Time) error
+	ReadSettlementTx(context.Context, tx.Queryer, ids.UUID) (int64, bool, error)
 	InsertReportTx(context.Context, tx.Tx, string, int64, int64, []int64, string, time.Time) error
 	ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error)
 	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error)
@@ -71,6 +70,7 @@ type Stats interface {
 
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
+	CurrentAttemptTx(context.Context, tx.Queryer, cd.Locator) (cb.CurrentAttempt, bool, error)
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)

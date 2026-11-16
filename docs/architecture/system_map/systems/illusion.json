@@ -265,6 +265,7 @@
  ],
  "tables": {
   "owned": [
+   "illusion_attempt_settlements",
    "illusion_attempts",
    "illusion_occurrence_results",
    "illusion_occurrences",
@@ -279,7 +280,7 @@
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
-   "illusion_attempts",
+   "illusion_attempt_settlements",
    "illusion_occurrence_results",
    "illusion_occurrences",
    "illusion_players",
@@ -293,7 +294,7 @@
   "written": [
    "guild_activity_awards",
    "gxb_operation_receipts",
-   "illusion_attempts",
+   "illusion_attempt_settlements",
    "illusion_occurrence_results",
    "illusion_occurrences",
    "illusion_players",

@@ -122,13 +122,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 		if err = st.player.ConsumeChance(); err != nil {
 			return Response{}, err
 		}
-		started, err := s.bind(c, sc, a, st.occurrence, campaign, request)
-		if err != nil {
-			return Response{}, err
-		}
-		attempt := d.Attempt{ID: started.Attempt.ID.String(), PlayerID: int64(a.PlayerID), LogicalServerID: int64(a.LogicalServerID),
-			OpenDay: st.occurrence.OpenDay, CampaignID: st.occurrence.CampaignID, Formation: formationText(request.Formation), FrozenAt: at.Unix()}
-		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
+		if _, err = s.bind(c, sc, a, st.occurrence, campaign, request); err != nil {
 			return Response{}, err
 		}
 		if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
@@ -180,18 +174,29 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		// shortcut: 1347 carries no attempt token, so a result delayed past a new
 		// 1346 cannot be told from that fresh START; add a client attempt id if the
 		// stock wire ever gains one.
-		attempt, found, err := s.Store.FindLatestAttemptTx(c, sc.Tx, a.PlayerID)
+		current, found, err := s.Combat.CurrentAttemptTx(c, sc.Tx, locator(a))
 		if err != nil {
 			return Response{}, err
-		}
-		if found && attempt.Resolved {
-			body, err := s.terminalBody(c, sc.Tx, attempt, identity.PlayerID(st.player.PlayerID), attempt.Damage)
-			return Response{Body: body, Duplicate: err == nil}, err
 		}
 		if !found {
 			return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
 		}
-		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: generationRefForAttempt(attempt), TerminalKind: "ILLUSION_RESULT", At: at, Policy: summaryPolicy,
+		generation, ok := d.ParseAttemptGeneration(current.Attempt.GenerationRef)
+		if !ok {
+			return Response{}, fmt.Errorf("illusion: malformed attempt generation %q", current.Attempt.GenerationRef)
+		}
+		if current.Attempt.State == cd.Terminal {
+			damage, settled, err := s.Store.ReadSettlementTx(c, sc.Tx, current.Attempt.ID)
+			if err != nil {
+				return Response{}, err
+			}
+			if !settled {
+				return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
+			}
+			body, err := s.terminalBody(c, sc.Tx, generation, identity.PlayerID(st.player.PlayerID), damage)
+			return Response{Body: body, Duplicate: err == nil}, err
+		}
+		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: current.Attempt.GenerationRef, TerminalKind: "ILLUSION_RESULT", At: at, Policy: summaryPolicy,
 			Summary: cd.Summary{Star: request.Star, Win: request.Star > 0 || request.Damage > 0, Damage: request.Damage, Formation: request.Formation, Pet: request.PetID}})
 		if err != nil {
 			return Response{}, err
@@ -199,25 +204,24 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		if attested.Drained || attested.Attestation.Verdict == cd.VerdictRejected {
 			return Response{}, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
 		}
-		current := attempt.Matches(st.occurrence)
+		currentOccurrence := generation.Matches(st.occurrence)
 		accepted := d.ClampDamage(request.Damage)
-		if err = s.creditResult(c, sc, attempt, accepted, request.CostTime, request.Star > 0, at); err != nil {
+		if err = s.creditResult(c, sc, generation, a.PlayerID, accepted, request.CostTime, request.Star > 0, at); err != nil {
 			return Response{}, err
 		}
-		attempt.Resolved, attempt.Damage = true, accepted
-		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
+		if err = s.Store.InsertSettlementTx(c, sc.Tx, current.Attempt.ID, a.PlayerID, accepted, at); err != nil {
 			return Response{}, err
 		}
-		if current {
+		if currentOccurrence {
 			st.player.RecordHit(accepted, request.CostTime)
 			if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 				return Response{}, err
 			}
 		}
-		if err = s.recordFantasy(c, sc, a, attempt.ID); err != nil {
+		if err = s.recordFantasy(c, sc, a, current.Attempt.ID.String()); err != nil {
 			return Response{}, err
 		}
-		body, err := s.terminalBody(c, sc.Tx, attempt, a.PlayerID, accepted)
+		body, err := s.terminalBody(c, sc.Tx, generation, a.PlayerID, accepted)
 		if err != nil {
 			return Response{}, err
 		}
@@ -225,17 +229,13 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 	})
 }
 
-func generationRefForAttempt(attempt d.Attempt) string {
-	return fmt.Sprintf("ILLUSION/%d/%d/%d", attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID)
-}
-
-func (s Mode) creditResult(c context.Context, sc gen.TimedScope, attempt d.Attempt, accepted, costTime int64, killed bool, at time.Time) error {
-	result, err := s.Store.LockResultTx(c, sc.Tx, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, identity.PlayerID(attempt.PlayerID), at)
+func (s Mode) creditResult(c context.Context, sc gen.TimedScope, generation d.AttemptGeneration, playerID identity.PlayerID, accepted, costTime int64, killed bool, at time.Time) error {
+	result, err := s.Store.LockResultTx(c, sc.Tx, generation.LogicalServerID, generation.OpenDay, generation.CampaignID, playerID, at)
 	if err != nil {
 		return err
 	}
 	result.Record(accepted, costTime, killed)
-	return s.Store.SaveResultTx(c, sc.Tx, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, result, at)
+	return s.Store.SaveResultTx(c, sc.Tx, generation.LogicalServerID, generation.OpenDay, generation.CampaignID, result, at)
 }
 
 func (s Mode) recordFantasy(c context.Context, sc gen.TimedScope, a identity.ActorContext, attemptID string) error {
@@ -248,13 +248,13 @@ func (s Mode) recordFantasy(c context.Context, sc gen.TimedScope, a identity.Act
 }
 
 // terminalBody is the 1347 reply for the occurrence the attempt was frozen to.
-func (s Mode) terminalBody(c context.Context, q tx.Queryer, attempt d.Attempt, playerID identity.PlayerID, damage int64) (map[string]any, error) {
-	ranks, err := s.Store.ReadRankTx(c, q, attempt.LogicalServerID, attempt.OpenDay, rankLimit)
+func (s Mode) terminalBody(c context.Context, q tx.Queryer, generation d.AttemptGeneration, playerID identity.PlayerID, damage int64) (map[string]any, error) {
+	ranks, err := s.Store.ReadRankTx(c, q, generation.LogicalServerID, generation.OpenDay, rankLimit)
 	if err != nil {
 		return nil, err
 	}
 	rank, _ := d.RankOf(ranks, int64(playerID))
-	best, found, err := s.Store.ReadResultTx(c, q, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, playerID)
+	best, found, err := s.Store.ReadResultTx(c, q, generation.LogicalServerID, generation.OpenDay, generation.CampaignID, playerID)
 	if err != nil {
 		return nil, err
 	}
@@ -314,19 +314,15 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 		return out, err
 	}
 	boardDay := occurrence.BoardDay(at)
-	attempt, found, err := s.Store.FindAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), boardDay, occurrence.CampaignID)
-	if err != nil {
-		return nil, err
-	}
-	// Advance moves the occurrence's open day and campaign past the frozen board,
-	// so an attempt of the day the board shows is found by its day alone.
-	if !found {
-		attempt, found, err = s.Store.FindDayAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), boardDay)
-	}
+	current, found, err := s.Combat.CurrentAttemptTx(c, s.Fresh, playerLocator(a.LogicalServerID, memberID))
 	if err != nil || !found {
 		return out, err
 	}
-	formation := parseFormationText(attempt.Formation)
+	generation, ok := d.ParseAttemptGeneration(current.Attempt.GenerationRef)
+	if !ok || generation.OpenDay != boardDay {
+		return out, nil
+	}
+	formation := current.Formation
 	if len(formation) == 0 {
 		return out, nil
 	}
@@ -348,7 +344,7 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 		}
 	}
 	out["heros"] = heroes
-	pet, err := s.frozenPet(c, attempt, memberID, at)
+	pet, err := s.frozenPet(c, current.Attempt.ID, memberID, at)
 	if err != nil {
 		return nil, err
 	}
@@ -360,12 +356,8 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 
 // frozenPet re-projects the pet the attempt froze into its combat snapshot.
 // shortcut: an unreadable snapshot omits the pet; the rank detail still renders.
-func (s Mode) frozenPet(c context.Context, attempt d.Attempt, memberID identity.PlayerID, at time.Time) (map[string]any, error) {
+func (s Mode) frozenPet(c context.Context, attemptID ids.UUID, memberID identity.PlayerID, at time.Time) (map[string]any, error) {
 	if s.Pets == nil {
-		return nil, nil
-	}
-	attemptID, err := ids.ParseUUID(attempt.ID)
-	if err != nil {
 		return nil, nil
 	}
 	snapshot, err := s.Combat.SnapshotTx(c, s.Fresh, attemptID)

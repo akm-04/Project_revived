@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -34,6 +33,17 @@ func locator(a identity.ActorContext) cd.Locator {
 // late result attests against that board and never touches the successor.
 func generationRef(board d.Board) string {
 	return fmt.Sprintf("WORLD_BOSS/%d/%d/%d", board.LogicalServerID, board.Generation, board.BossID)
+}
+
+// attemptBoard reads the board a RESULT must credit from the frozen attempt,
+// never from the occurrence that has moved on since START.
+func attemptBoard(reference string) (d.Board, error) {
+	var board d.Board
+	read, err := fmt.Sscanf(reference, "WORLD_BOSS/%d/%d/%d", &board.LogicalServerID, &board.Generation, &board.BossID)
+	if err != nil || read != 3 || board.LogicalServerID <= 0 || board.Generation <= 0 || board.BossID < d.FirstBossID || board.BossID > d.LastBossID || generationRef(board) != reference {
+		return d.Board{}, fmt.Errorf("worldboss: malformed attempt generation %q", reference)
+	}
+	return board, nil
 }
 
 func startFingerprint(a identity.ActorContext, request StartRequest, op operation.Context) string {
@@ -115,13 +125,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 		if err = s.purpleHeroes(c, sc.Tx, a, at, request.Formation); err != nil {
 			return Response{}, err
 		}
-		started, err := s.bind(c, sc, a, st.occurrence, boss, request)
-		if err != nil {
-			return Response{}, err
-		}
-		attempt := d.Attempt{ID: started.Attempt.ID.String(), PlayerID: int64(a.PlayerID), LogicalServerID: int64(a.LogicalServerID), Generation: st.occurrence.Generation,
-			CampaignID: request.CampaignID, Formation: formationText(request.Formation), FrozenAt: at.Unix()}
-		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
+		if _, err = s.bind(c, sc, a, st.occurrence, boss, request); err != nil {
 			return Response{}, err
 		}
 		st.player.Attempts--
@@ -169,21 +173,35 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		if err != nil {
 			return Response{}, err
 		}
-		attempt, found, err := s.Store.FindAttemptTx(c, sc.Tx, a.PlayerID, int64(a.LogicalServerID), request.CampaignID)
+		attempt, found, err := s.Combat.CurrentAttemptTx(c, sc.Tx, locator(a))
 		if err != nil {
 			return Response{}, err
-		}
-		// shortcut: 627 carries no attempt token, so a result delayed across a full
-		// five-boss cycle cannot be told from a fresh START of the same campaign;
-		// add a client attempt id if the stock wire ever gains one.
-		if found && attempt.Resolved {
-			body, err := s.terminalBody(c, sc, attempt.Board(), identity.PlayerID(st.player.PlayerID), attempt.Damage)
-			return Response{Body: body, Duplicate: err == nil}, err
 		}
 		if !found {
 			return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
 		}
-		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: generationRef(attempt.Board()), TerminalKind: resultKind, At: at, Policy: summaryPolicy,
+		board, err := attemptBoard(attempt.Attempt.GenerationRef)
+		if err != nil {
+			return Response{}, err
+		}
+		if board.BossID != request.CampaignID {
+			return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
+		}
+		// shortcut: 627 carries no attempt token, so a result delayed across a full
+		// five-boss cycle cannot be told from a fresh START of the same campaign;
+		// add a client attempt id if the stock wire ever gains one.
+		if attempt.Attempt.State == cd.Terminal {
+			damage, settled, err := s.Store.ReadSettlementTx(c, sc.Tx, attempt.Attempt.ID)
+			if err != nil {
+				return Response{}, err
+			}
+			if !settled {
+				return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
+			}
+			body, err := s.terminalBody(c, sc, board, a.PlayerID, damage)
+			return Response{Body: body, Duplicate: err == nil}, err
+		}
+		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: attempt.Attempt.GenerationRef, TerminalKind: resultKind, At: at, Policy: summaryPolicy,
 			Summary: cd.Summary{Win: request.Damage > 0, Damage: request.Damage, Formation: request.Formation}})
 		if err != nil {
 			return Response{}, err
@@ -191,25 +209,24 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		if attested.Drained || attested.Attestation.Verdict == cd.VerdictRejected {
 			return Response{}, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
 		}
-		current := attempt.Matches(st.occurrence)
+		current := board == st.occurrence.Board()
 		accepted := request.Damage
 		if current {
 			if accepted, err = st.occurrence.Accept(catalog, request.Damage); err != nil {
 				return Response{}, err
 			}
 		}
-		if err = s.creditBoard(c, sc, attempt.Board(), a.PlayerID, accepted, at); err != nil {
+		if err = s.creditBoard(c, sc, board, a.PlayerID, accepted, at); err != nil {
 			return Response{}, err
 		}
-		attempt.Resolved, attempt.Damage = true, accepted
-		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
+		if err = s.Store.InsertSettlementTx(c, sc.Tx, attempt.Attempt.ID, a.PlayerID, accepted, at); err != nil {
 			return Response{}, err
 		}
 		st.player.RecordHit(accepted, at.Unix())
 		if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 			return Response{}, err
 		}
-		body, err := s.terminalBody(c, sc, attempt.Board(), a.PlayerID, accepted)
+		body, err := s.terminalBody(c, sc, board, a.PlayerID, accepted)
 		if err != nil || !current {
 			return Response{Body: body}, err
 		}
@@ -353,12 +370,4 @@ func (s Mode) terminalBody(c context.Context, sc gen.TimedScope, board d.Board, 
 		body["pre_info"] = pre
 	}
 	return body, nil
-}
-
-func formationText(formation []int64) string {
-	parts := make([]string, 0, len(formation))
-	for _, id := range formation {
-		parts = append(parts, strconv.FormatInt(id, 10))
-	}
-	return strings.Join(parts, "|")
 }

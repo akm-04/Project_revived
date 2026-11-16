@@ -6,16 +6,20 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-type Store struct{}
+type Store struct {
+	Combat Combat
+}
 
 func (Store) ReadOccurrenceTx(ctx context.Context, q tx.Queryer, serverID int64) (d.Occurrence, bool, error) {
 	return readOccurrence(q.QueryRow(ctx, `SELECT logical_server_id,campaign_id,open_day,settled_open_day FROM illusion_occurrences WHERE logical_server_id=$1`, serverID))
@@ -142,56 +146,34 @@ func (Store) ListOccurrencesTx(ctx context.Context, q tx.Queryer, limit int64) (
 	return occurrences, nil
 }
 
-// InsertAttemptTx replaces the player's abandoned open attempt: a new start
-// supersedes it and it can no longer receive a result.
-func (Store) InsertAttemptTx(ctx context.Context, t tx.Tx, attempt d.Attempt) error {
-	if err := attempt.Validate(); err != nil {
-		return err
+// InsertSettlementTx records the damage the RESULT credited to one terminal
+// Combat attempt; the transaction is Combat's attest transaction.
+func (Store) InsertSettlementTx(ctx context.Context, t tx.Tx, attemptID ids.UUID, playerID identity.PlayerID, damage int64, settledAt time.Time) error {
+	if t == nil || attemptID.IsZero() || playerID <= 0 || damage < 0 || damage > d.DamageCap || settledAt.IsZero() {
+		return d.ErrInvalid
 	}
-	if _, err := t.Exec(ctx, `DELETE FROM illusion_attempts WHERE player_id=$1 AND NOT resolved`, attempt.PlayerID); err != nil {
-		return err
-	}
-	_, err := t.Exec(ctx, `INSERT INTO illusion_attempts(attempt_id,player_id,logical_server_id,open_day,campaign_id,room_id,formation,frozen_at,resolved,damage)VALUES($1,$2,$3,$4,$5,NULLIF($6,0),$7,$8,$9,$10)`, attempt.ID, attempt.PlayerID, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, attempt.RoomID, attempt.Formation, attempt.FrozenAt, attempt.Resolved, attempt.Damage)
+	_, err := t.Exec(ctx, `INSERT INTO illusion_attempt_settlements(attempt_id,player_id,damage,settled_at)VALUES($1,$2,$3,$4)`, attemptID.String(), int64(playerID), damage, settledAt.UTC())
 	return err
 }
 
-func (Store) FindAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, serverID, openDay, campaignID int64) (d.Attempt, bool, error) {
-	var attempt d.Attempt
-	err := q.QueryRow(ctx, `SELECT attempt_id,player_id,logical_server_id,open_day,campaign_id,COALESCE(room_id,0),formation,frozen_at,resolved,damage FROM illusion_attempts WHERE player_id=$1 AND logical_server_id=$2 AND open_day=$3 AND campaign_id=$4 ORDER BY resolved,attempt_sequence DESC LIMIT 1`, int64(playerID), serverID, openDay, campaignID).Scan(&attempt.ID, &attempt.PlayerID, &attempt.LogicalServerID, &attempt.OpenDay, &attempt.CampaignID, &attempt.RoomID, &attempt.Formation, &attempt.FrozenAt, &attempt.Resolved, &attempt.Damage)
+// ReadSettlementTx answers a duplicate RESULT from the settlement row, not
+// from the occurrence that may have advanced since the attempt.
+func (Store) ReadSettlementTx(ctx context.Context, q tx.Queryer, attemptID ids.UUID) (int64, bool, error) {
+	if q == nil || attemptID.IsZero() {
+		return 0, false, d.ErrInvalid
+	}
+	var damage int64
+	err := q.QueryRow(ctx, `SELECT damage FROM illusion_attempt_settlements WHERE attempt_id=$1`, attemptID.String()).Scan(&damage)
 	if errors.Is(err, kernelstore.ErrNoRows) {
-		return d.Attempt{}, false, nil
+		return 0, false, nil
 	}
-	return attempt, err == nil, err
-}
-
-// FindDayAttemptTx reads the player's latest attempt of one open day. A settled
-// board outlives the occurrence row's campaign, so the day is its only key.
-func (Store) FindDayAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, serverID, openDay int64) (d.Attempt, bool, error) {
-	var attempt d.Attempt
-	err := q.QueryRow(ctx, `SELECT attempt_id,player_id,logical_server_id,open_day,campaign_id,COALESCE(room_id,0),formation,frozen_at,resolved,damage FROM illusion_attempts WHERE player_id=$1 AND logical_server_id=$2 AND open_day=$3 ORDER BY resolved,attempt_sequence DESC LIMIT 1`, int64(playerID), serverID, openDay).Scan(&attempt.ID, &attempt.PlayerID, &attempt.LogicalServerID, &attempt.OpenDay, &attempt.CampaignID, &attempt.RoomID, &attempt.Formation, &attempt.FrozenAt, &attempt.Resolved, &attempt.Damage)
-	if errors.Is(err, kernelstore.ErrNoRows) {
-		return d.Attempt{}, false, nil
+	if err != nil {
+		return 0, false, err
 	}
-	return attempt, err == nil, err
-}
-
-// FindLatestAttemptTx returns the player's open attempt first, otherwise the
-// newest resolved one, so a late result can still credit its frozen occurrence.
-func (Store) FindLatestAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) (d.Attempt, bool, error) {
-	var attempt d.Attempt
-	err := q.QueryRow(ctx, `SELECT attempt_id,player_id,logical_server_id,open_day,campaign_id,COALESCE(room_id,0),formation,frozen_at,resolved,damage FROM illusion_attempts WHERE player_id=$1 ORDER BY resolved,attempt_sequence DESC LIMIT 1`, int64(playerID)).Scan(&attempt.ID, &attempt.PlayerID, &attempt.LogicalServerID, &attempt.OpenDay, &attempt.CampaignID, &attempt.RoomID, &attempt.Formation, &attempt.FrozenAt, &attempt.Resolved, &attempt.Damage)
-	if errors.Is(err, kernelstore.ErrNoRows) {
-		return d.Attempt{}, false, nil
+	if damage < 0 || damage > d.DamageCap {
+		return 0, true, fmt.Errorf("illusion: settlement damage %d out of range", damage)
 	}
-	return attempt, err == nil, err
-}
-
-func (Store) SaveAttemptTx(ctx context.Context, t tx.Tx, attempt d.Attempt) error {
-	tag, err := t.Exec(ctx, `UPDATE illusion_attempts SET resolved=$2,damage=$3 WHERE attempt_id=$1`, attempt.ID, attempt.Resolved, attempt.Damage)
-	if err == nil && tag.RowsAffected() != 1 {
-		return d.ErrUnavailable
-	}
-	return err
+	return damage, true, nil
 }
 
 func (Store) InsertReportTx(ctx context.Context, t tx.Tx, reportID string, serverID, openDay, campaignID int64, content string, at time.Time) error {

@@ -296,3 +296,23 @@ func TestTeamRules(t *testing.T) {
 		}
 	}
 }
+
+func TestAttemptGenerationRoundTrip(t *testing.T) {
+	generation := AttemptGeneration{LogicalServerID: 7, OpenDay: 49000, CampaignID: FirstCampaignID + 1}
+	parsed, ok := ParseAttemptGeneration(generation.Reference())
+	if !ok || parsed != generation {
+		t.Fatalf("round trip %+v %v", parsed, ok)
+	}
+	if !generation.Matches(Occurrence{LogicalServerID: 7, OpenDay: 49000, CampaignID: FirstCampaignID + 1}) {
+		t.Fatal("same occurrence did not match")
+	}
+	next := Occurrence{LogicalServerID: 7, OpenDay: 49000 + CycleDays, CampaignID: FirstCampaignID + 1}
+	if generation.Matches(next) {
+		t.Fatal("advanced occurrence matched")
+	}
+	for _, reference := range []string{"", "ILLUSION/7/49000", "ILLUSION/0/49000/100001", "ILLUSION/7/-1/100001", "ILLUSION/7/49000/100013", "ILLUSION_TEAM/1/49000/100001", "ILLUSION/7/49000/100001/x"} {
+		if _, ok := ParseAttemptGeneration(reference); ok {
+			t.Fatalf("%q parsed", reference)
+		}
+	}
+}

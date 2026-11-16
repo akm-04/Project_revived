@@ -867,3 +867,30 @@ func (s Service) ReplayTx(ctx context.Context, q tx.Queryer, id ids.UUID, retent
 func (s Service) AttemptTx(ctx context.Context, q tx.Queryer, id ids.UUID) (d.Attempt, bool, error) {
 	return s.Store.ReadAttemptTx(ctx, q, id)
 }
+
+// CurrentAttempt is a locator's attempt with the frozen START facts its mode
+// credits at RESULT: the formation the START froze and, on Attempt, the
+// generation the board was frozen under and the start time.
+type CurrentAttempt struct {
+	Attempt   d.Attempt
+	Formation []int64
+}
+
+// CurrentAttemptTx returns the locator's open attempt, else its newest terminal
+// one, for a mode's START/RESULT bookkeeping. found is false when the locator
+// never had an attempt.
+func (s Service) CurrentAttemptTx(ctx context.Context, q tx.Queryer, locator d.Locator) (CurrentAttempt, bool, error) {
+	attempt, found, err := s.Store.CurrentAttemptTx(ctx, q, locator)
+	if err != nil || !found {
+		return CurrentAttempt{}, false, err
+	}
+	raw, err := s.Store.ReadSnapshotTx(ctx, q, attempt.SnapshotHash)
+	if err != nil {
+		return CurrentAttempt{}, false, err
+	}
+	snapshot, err := d.DecodeSnapshot(raw, attempt.SnapshotHash)
+	if err != nil {
+		return CurrentAttempt{}, false, err
+	}
+	return CurrentAttempt{Attempt: attempt, Formation: snapshot.Battle.Formation}, true, nil
+}

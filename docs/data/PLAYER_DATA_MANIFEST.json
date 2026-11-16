@@ -91,6 +91,34 @@
    ]
   },
   {
+   "table": "combat_attempts",
+   "scope": "player",
+   "owner": [
+    "actor_player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 17,
+   "payload_columns": []
+  },
+  {
+   "table": "adventure_attempt_settlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 18,
+   "payload_columns": []
+  },
+  {
    "table": "adventure_occurrences",
    "scope": "player",
    "owner": [
@@ -101,21 +129,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 13,
-   "payload_columns": []
-  },
-  {
-   "table": "adventure_single_attempts",
-   "scope": "player",
-   "owner": [
-    "player_id"
-   ],
-   "via": null,
-   "kind": "report",
-   "backup": true,
-   "references": [],
-   "retention": null,
-   "restore_order": 15,
+   "restore_order": 19,
    "payload_columns": []
   },
   {
@@ -130,7 +144,7 @@
     "recipient_player"
    ],
    "retention": null,
-   "restore_order": 19,
+   "restore_order": 24,
    "payload_columns": [
     "payload"
    ]
@@ -147,7 +161,7 @@
     "second_player"
    ],
    "retention": null,
-   "restore_order": 20,
+   "restore_order": 25,
    "payload_columns": [
     "payload"
    ]
@@ -163,7 +177,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 21,
+   "restore_order": 26,
    "payload_columns": [
     "payload"
    ]
@@ -179,7 +193,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 22,
+   "restore_order": 27,
    "payload_columns": []
   },
   {
@@ -195,27 +209,13 @@
     "opponent"
    ],
    "retention": null,
-   "restore_order": 24,
+   "restore_order": 29,
    "payload_columns": [
     "defense",
     "missions",
     "awards",
     "recent_offers"
    ]
-  },
-  {
-   "table": "combat_attempts",
-   "scope": "player",
-   "owner": [
-    "actor_player_id"
-   ],
-   "via": null,
-   "kind": "report",
-   "backup": true,
-   "references": [],
-   "retention": null,
-   "restore_order": 29,
-   "payload_columns": []
   },
   {
    "table": "arena_matches",
@@ -840,7 +840,7 @@
    "payload_columns": []
   },
   {
-   "table": "illusion_attempts",
+   "table": "illusion_attempt_settlements",
    "scope": "player",
    "owner": [
     "player_id"
@@ -3135,7 +3135,7 @@
    ]
   },
   {
-   "table": "worldboss_attempts",
+   "table": "worldboss_attempt_settlements",
    "scope": "player",
    "owner": [
     "player_id"

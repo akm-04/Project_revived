@@ -23,18 +23,6 @@ func TestValidateFormation(t *testing.T) {
 	}
 }
 
-func TestParseFormationText(t *testing.T) {
-	if got := parseFormationText("7|8|9"); len(got) != 3 || got[2] != 9 {
-		t.Fatalf("got %#v", got)
-	}
-	if parseFormationText("7|x") != nil {
-		t.Fatal("malformed text accepted")
-	}
-	if parseFormationText("") != nil {
-		t.Fatal("empty text")
-	}
-}
-
 func TestGuildScoresSumCurrentMemberBestHits(t *testing.T) {
 	guilds := []GuildSummary{
 		{ID: 2, Name: "second", Members: []identity.PlayerID{11, 12}},

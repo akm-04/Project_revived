@@ -59,6 +59,7 @@ type Worker interface {
 type Store interface {
 	LockLocatorTx(context.Context, tx.Tx, d.Locator) error
 	FindUnresolvedTx(context.Context, tx.Queryer, d.Locator) (d.Attempt, bool, error)
+	CurrentAttemptTx(context.Context, tx.Queryer, d.Locator) (d.Attempt, bool, error)
 	FindTerminalTx(context.Context, tx.Queryer, d.Locator, string) (d.Attempt, bool, error)
 	InsertSnapshotTx(context.Context, tx.Tx, string, []byte) error
 	ReadSnapshotTx(context.Context, tx.Queryer, string) ([]byte, error)

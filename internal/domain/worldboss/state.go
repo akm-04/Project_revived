@@ -125,36 +125,6 @@ type RankEntry struct {
 	FirstHurtAt int64
 }
 
-type Attempt struct {
-	ID              string `json:"attempt_id"`
-	PlayerID        int64  `json:"player_id"`
-	LogicalServerID int64  `json:"logical_server_id"`
-	Generation      int64  `json:"generation"`
-	CampaignID      int64  `json:"campaign_id"`
-	Formation       string `json:"formation"`
-	FrozenAt        int64  `json:"frozen_at"`
-	Resolved        bool   `json:"resolved"`
-	Damage          int64  `json:"damage"`
-}
-
-// Board is the ranking this attempt was frozen to, whatever the boss is now.
-func (a Attempt) Board() Board {
-	return Board{LogicalServerID: a.LogicalServerID, Generation: a.Generation, BossID: a.CampaignID}
-}
-
-func (a Attempt) Validate() error {
-	if a.ID == "" || a.PlayerID <= 0 || a.LogicalServerID <= 0 || a.Generation <= 0 || a.CampaignID < FirstBossID || a.CampaignID > LastBossID {
-		return ErrInvalid
-	}
-	return nil
-}
-
-// Matches reports whether the attempt still fights the current boss; otherwise
-// its result is late and may only reach its own frozen board.
-func (a Attempt) Matches(o Occurrence) bool {
-	return a.Board() == o.Board()
-}
-
 // CourageDayFor is the most recent 22:00 GMT+8 update in modes.Day terms; a
 // fresh occurrence starts caught up instead of receiving an owed older update.
 func CourageDayFor(at time.Time) int64 {

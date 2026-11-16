@@ -40,10 +40,10 @@ func TestI9_10BForumLegacy111To118Upgrade(t *testing.T) {
 	if base == "" {
 		t.Fatal("native DSN required")
 	}
-	dsn, cleanup := disposableForumDatabase(t, base, "upgrade")
+	dsn, cleanup := disposableNativeDatabase(t, base, "upgrade")
 	defer cleanup()
 	runTool(t, "goose", "-dir", legacy, "postgres", dsn, "up")
-	p := openForumPool(t, dsn)
+	p := openNativePool(t, dsn)
 	defer p.Close()
 
 	tableID := int64(4242)
@@ -83,7 +83,7 @@ func TestI9_10BForumLegacy111To118Upgrade(t *testing.T) {
 	receiptCountBefore := forumReceiptCount(t, p)
 	commentsBefore, reactionsBefore := forumRawCounts(t, p)
 
-	runTool(t, "goose", "-dir", forumMigrationsRoot(t), "postgres", dsn, "up")
+	runTool(t, "goose", "-dir", migrationsRoot(t), "postgres", dsn, "up")
 
 	if got := forumCommentHash(t, p, tableID); got != commentHashBefore {
 		t.Fatalf("legacy comment text/time changed %s want %s", got, commentHashBefore)
@@ -156,17 +156,17 @@ func TestI9_10BForumLegacyMismatchAborts(t *testing.T) {
 	if base == "" {
 		t.Fatal("native DSN required")
 	}
-	dsn, cleanup := disposableForumDatabase(t, base, "mismatch")
+	dsn, cleanup := disposableNativeDatabase(t, base, "mismatch")
 	defer cleanup()
 	runTool(t, "goose", "-dir", legacy, "postgres", dsn, "up")
-	p := openForumPool(t, dsn)
+	p := openNativePool(t, dsn)
 	defer p.Close()
 
 	author := forumLegacyActor(t, p, 1)
 	if _, e := p.Raw().Exec(ctx, `INSERT INTO library_forum_comments(logical_server_id,forum_type,table_id,author_player_id,comment,created_at,updated_at) VALUES(2,1,7777,$1,'bad',now(),now())`, int64(author.PlayerID)); e != nil {
 		t.Fatal(e)
 	}
-	command := osexec.Command("goose", "-dir", forumMigrationsRoot(t), "postgres", dsn, "up")
+	command := osexec.Command("goose", "-dir", migrationsRoot(t), "postgres", dsn, "up")
 	if output, e := command.CombinedOutput(); e == nil {
 		t.Fatalf("mismatched legacy author must abort migration: %s", output)
 	}
@@ -296,7 +296,7 @@ func forumRawCounts(t *testing.T, p *pg.Pool) (comments, reactions int64) {
 	return comments, reactions
 }
 
-func disposableForumDatabase(t *testing.T, baseDSN, suffix string) (string, func()) {
+func disposableNativeDatabase(t *testing.T, baseDSN, suffix string) (string, func()) {
 	t.Helper()
 	base, e := url.Parse(baseDSN)
 	if e != nil {
@@ -311,7 +311,7 @@ func disposableForumDatabase(t *testing.T, baseDSN, suffix string) (string, func
 	}
 }
 
-func openForumPool(t *testing.T, dsn string) *pg.Pool {
+func openNativePool(t *testing.T, dsn string) *pg.Pool {
 	t.Helper()
 	p, e := pg.Open(ctx, dsn, pg.PoolSettings{MaxConns: 8, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
 	if e != nil {
@@ -329,7 +329,7 @@ func runTool(t *testing.T, name string, args ...string) string {
 	return string(out)
 }
 
-func forumMigrationsRoot(t *testing.T) string {
+func migrationsRoot(t *testing.T) string {
 	t.Helper()
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {

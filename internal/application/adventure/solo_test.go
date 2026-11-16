@@ -12,6 +12,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -26,19 +27,17 @@ func (s *noticeStore) ListOccurrencesTx(context.Context, tx.Queryer, identity.Lo
 func (s *noticeStore) ReadOccurrenceTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.Occurrence, bool, error) {
 	return d.Occurrence{}, false, nil
 }
+func (s *noticeStore) ReadOccurrenceBySourceKeyTx(context.Context, tx.Queryer, identity.PlayerID, int64, string) (d.Occurrence, bool, error) {
+	return d.Occurrence{}, false, nil
+}
 func (s *noticeStore) FinishOccurrenceTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time, time.Time) (bool, error) {
 	return false, nil
 }
-func (s *noticeStore) InsertAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error { return nil }
-func (s *noticeStore) FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.SingleAttempt, bool, error) {
-	return d.SingleAttempt{}, false, nil
-}
-func (s *noticeStore) SaveAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error { return nil }
-func (s *noticeStore) RenameAttemptTx(context.Context, tx.Tx, string, string, identity.PlayerID) error {
+func (s *noticeStore) InsertSettlementTx(context.Context, tx.Tx, ids.UUID, identity.PlayerID, int64, time.Time) error {
 	return nil
 }
-func (s *noticeStore) DeleteAttemptTx(context.Context, tx.Tx, string, identity.PlayerID) error {
-	return nil
+func (s *noticeStore) ReadSettlementTx(context.Context, tx.Queryer, ids.UUID) (int64, bool, error) {
+	return 0, false, nil
 }
 func (s *noticeStore) InsertReportTx(context.Context, tx.Tx, string, int64, int64, []int64, string, time.Time) error {
 	return nil

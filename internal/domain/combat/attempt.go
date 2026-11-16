@@ -192,3 +192,10 @@ func (a Attempt) finish(kind, semanticReceiptID string, at time.Time) (Attempt, 
 	a.StateVersion++
 	return a, a.Validate()
 }
+
+// FrozenAttempt is a stored attempt with the formation its START froze, for a
+// mode's read-only projections. It never carries live roster state.
+type FrozenAttempt struct {
+	Attempt   Attempt
+	Formation []int64
+}

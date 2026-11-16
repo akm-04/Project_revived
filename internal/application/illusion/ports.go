@@ -40,11 +40,8 @@ type Store interface {
 	ReadRankTx(context.Context, tx.Queryer, int64, int64, int64) ([]d.Result, error)
 	RankOfTx(context.Context, tx.Queryer, int64, int64, identity.PlayerID) (int64, error)
 	ListOccurrencesTx(context.Context, tx.Queryer, int64) ([]d.Occurrence, error)
-	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
-	FindAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64, int64) (d.Attempt, bool, error)
-	FindDayAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (d.Attempt, bool, error)
-	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID) (d.Attempt, bool, error)
-	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
+	InsertSettlementTx(context.Context, tx.Tx, ids.UUID, identity.PlayerID, int64, time.Time) error
+	ReadSettlementTx(context.Context, tx.Queryer, ids.UUID) (int64, bool, error)
 	InsertReportTx(context.Context, tx.Tx, string, int64, int64, int64, string, time.Time) error
 	ReadReportTx(context.Context, tx.Queryer, string, int64, time.Time) (string, bool, error)
 	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error)
@@ -80,6 +77,7 @@ type Heroes interface {
 
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
+	CurrentAttemptTx(context.Context, tx.Queryer, cd.Locator) (cb.CurrentAttempt, bool, error)
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)

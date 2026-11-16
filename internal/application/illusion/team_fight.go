@@ -170,9 +170,9 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 			}
 			state.ReportID = attemptID
 			state.DamageResults = map[string]json.RawMessage{}
+			generation := d.AttemptGeneration{LogicalServerID: int64(room.LogicalServerID), OpenDay: occurrence.OpenDay, CampaignID: occurrence.CampaignID}
 			for _, member := range members {
-				attempt := d.Attempt{ID: attemptID, PlayerID: int64(member), LogicalServerID: int64(room.LogicalServerID), OpenDay: occurrence.OpenDay, CampaignID: occurrence.CampaignID}
-				body, err := s.terminalBody(c, sc.Tx, attempt, member, accepted)
+				body, err := s.terminalBody(c, sc.Tx, generation, member, accepted)
 				if err != nil {
 					return err
 				}
