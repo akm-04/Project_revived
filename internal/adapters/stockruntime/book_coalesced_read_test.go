@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -74,6 +75,115 @@ func TestBookCoalescedReadSharesOnePlayerFlight(t *testing.T) {
 
 	if got := service.count(actor.PlayerID); got != 1 {
 		t.Fatalf("one player ran the service %d times, want 1", got)
+	}
+}
+
+type sharedBodyBookRead struct {
+	mu      sync.Mutex
+	calls   int
+	started chan struct{}
+	release chan struct{}
+	once    sync.Once
+	body    map[string]any
+}
+
+func (s *sharedBodyBookRead) Command(context.Context, identity.ActorContext, app.Command, operation.Context) (app.Result, error) {
+	return app.Result{}, app.ErrUnavailable
+}
+
+func (s *sharedBodyBookRead) Read(ctx context.Context, _ identity.ActorContext, _ uint16, _ operation.Context) (map[string]any, error) {
+	s.mu.Lock()
+	s.calls++
+	s.mu.Unlock()
+	s.once.Do(func() { close(s.started) })
+	select {
+	case <-s.release:
+		return s.body, nil
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+func TestBookCoalescedReadReturnsIndependentBodies(t *testing.T) {
+	actor := actorForHTTP(t)
+	service := &sharedBodyBookRead{
+		started: make(chan struct{}),
+		release: make(chan struct{}),
+		body:    map[string]any{"building_list": map[string]any{"desk_info": map[string]any{"is_making": int64(0)}}},
+	}
+	port := NewCoalescedBookRead(service)
+
+	const readers = 20
+	bodies := make([]map[string]any, readers)
+	errs := make([]error, readers)
+	var wait sync.WaitGroup
+	for i := 0; i < readers; i++ {
+		wait.Add(1)
+		go func(i int) {
+			defer wait.Done()
+			bodies[i], errs[i] = port.Read(context.Background(), actor, 1056, operation.Context{})
+		}(i)
+	}
+	<-service.started
+	time.Sleep(50 * time.Millisecond)
+	close(service.release)
+	wait.Wait()
+
+	for i, body := range bodies {
+		if errs[i] != nil {
+			t.Fatalf("reader %d error=%v", i, errs[i])
+		}
+		body["caller"] = i
+		nested, ok := body["building_list"].(map[string]any)
+		if !ok {
+			t.Fatalf("reader %d body=%#v", i, body)
+		}
+		nested["caller"] = i
+	}
+	for i, body := range bodies {
+		if body["caller"] != i {
+			t.Fatalf("reader %d saw caller=%#v", i, body["caller"])
+		}
+		if nested := body["building_list"].(map[string]any); nested["caller"] != i {
+			t.Fatalf("reader %d saw nested caller=%#v", i, nested["caller"])
+		}
+	}
+}
+
+func TestBookCoalescedReadSurvivesLeaderCancellation(t *testing.T) {
+	actor := actorForHTTP(t)
+	service := &sharedBodyBookRead{
+		started: make(chan struct{}),
+		release: make(chan struct{}),
+		body:    map[string]any{"building_list": map[string]any{}},
+	}
+	port := NewCoalescedBookRead(service)
+	leaderContext, cancelLeader := context.WithCancel(context.Background())
+	leaderDone := make(chan error, 1)
+	go func() {
+		_, err := port.Read(leaderContext, actor, 1056, operation.Context{})
+		leaderDone <- err
+	}()
+	<-service.started
+	const followers = 4
+	followerDone := make(chan error, followers)
+	for i := 0; i < followers; i++ {
+		go func() {
+			_, err := port.Read(context.Background(), actor, 1056, operation.Context{})
+			followerDone <- err
+		}()
+	}
+	time.Sleep(50 * time.Millisecond)
+	cancelLeader()
+	close(service.release)
+
+	if err := <-leaderDone; !errors.Is(err, context.Canceled) {
+		t.Fatalf("leader error=%v, want context.Canceled", err)
+	}
+	for i := 0; i < followers; i++ {
+		if err := <-followerDone; err != nil {
+			t.Fatalf("follower %d error=%v", i, err)
+		}
 	}
 }
 

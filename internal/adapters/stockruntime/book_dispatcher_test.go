@@ -8,6 +8,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/bookskill"
 	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/domain/economy"
+	ec "gxb.local/backend/v2/internal/domain/eventcentre"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
@@ -44,6 +45,10 @@ func TestBookFailureRowTable(t *testing.T) {
 		{"rejected", app.ErrRejected, http.StatusConflict, unprovenRefusalCode},
 		{"invalid", book.ErrInvalid, http.StatusBadRequest, 0},
 		{"insufficient", economy.ErrInsufficientBalance, http.StatusConflict, unprovenRefusalCode},
+		{"book unqualified", book.ErrUnqualified, http.StatusConflict, unprovenRefusalCode},
+		{"book stale time", book.ErrStaleTime, http.StatusConflict, staleConflictCode},
+		{"event centre unqualified", ec.ErrUnqualified, http.StatusConflict, unprovenRefusalCode},
+		{"event centre stale time", ec.ErrStaleTime, http.StatusConflict, staleConflictCode},
 	}
 	for _, row := range rows {
 		t.Run(row.name, func(t *testing.T) {
