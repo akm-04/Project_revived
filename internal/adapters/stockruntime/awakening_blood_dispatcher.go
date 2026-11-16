@@ -29,7 +29,7 @@ func (d AwakeningBloodDispatcher) Dispatch(ctx context.Context, r httpedge.Dispa
 	id, a := topFloorInteger(p, "twice_awake_mission", true)
 	incubus, b := topFloorInteger(p, "incubus_id", true)
 	if !a || !b || id <= 0 || id != incubus {
-		return badI5("invalid_blood_mission")
+		return badI5()
 	}
 	if d.Service == nil {
 		return failureReply(defect(nil))
@@ -39,7 +39,7 @@ func (d AwakeningBloodDispatcher) Dispatch(ctx context.Context, r httpedge.Dispa
 	switch r.Envelope.MID {
 	case 866:
 		if !onlyStockGameplayParams(p, "twice_awake_mission", "incubus_id") {
-			return badI5("invalid_blood_start")
+			return badI5()
 		}
 		body, e = d.Service.Start(ctx, actor, id, r.Envelope.Operation)
 	case 867:
@@ -52,11 +52,11 @@ func (d AwakeningBloodDispatcher) Dispatch(ctx context.Context, r httpedge.Dispa
 			empty = len(ids) == 0
 		}
 		if !ok || n != 20 || !empty || !onlyStockGameplayParams(p, "twice_awake_mission", "incubus_id", "num", "npc_ids") {
-			return badI5("invalid_blood_result")
+			return badI5()
 		}
 		body, e = d.Service.Result(ctx, actor, id, n, r.Envelope.Operation)
 	default:
-		return badI5("invalid_blood_mid")
+		return badI5()
 	}
 	if e != nil {
 		return failI5(e)

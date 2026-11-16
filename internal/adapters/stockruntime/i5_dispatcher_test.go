@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"testing"
 	"time"
 
@@ -189,6 +190,30 @@ func TestI5R5SettlementSidebandsAreGlobalAndDoNotInventNumericAwards(t *testing.
 		if _, nested := got.Body["result"]; nested {
 			t.Fatalf("mid %d sidebands nested unexpectedly: %#v", tc.mid, got.Body)
 		}
+	}
+}
+
+func TestI5MalformedRepliesCarryFamilyToken(t *testing.T) {
+	now := time.Unix(703, 0).UTC()
+	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &i5WireFake{}}
+	cases := []struct {
+		name string
+		got  httpedge.Response
+	}{
+		{"story missing", d.Dispatch(context.Background(), i5Req(26, map[string]any{}, now))},
+		{"mail limit", d.Dispatch(context.Background(), i5Req(368, map[string]any{"load_num": json.Number("0")}, now))},
+		{"mail id", d.Dispatch(context.Background(), i5Req(369, map[string]any{"id": json.Number("-1")}, now))},
+		{"mission type", d.Dispatch(context.Background(), i5Req(2736, map[string]any{"mission_type": json.Number("99")}, now))},
+	}
+	for _, tc := range cases {
+		if tc.got.HTTPStatus != http.StatusBadRequest || tc.got.Body["error"] != "i5_invalid_parameter" || tc.got.Body["error_code"] != int64(35028) || tc.got.Body["error_msg"] != "" {
+			t.Fatalf("%s: %+v", tc.name, tc.got)
+		}
+	}
+	blood := AwakeningBloodDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &bloodWireFake{}}
+	got := blood.Dispatch(context.Background(), i5Req(866, map[string]any{"twice_awake_mission": json.Number("0")}, now))
+	if got.HTTPStatus != http.StatusBadRequest || got.Body["error"] != "i5_invalid_parameter" {
+		t.Fatalf("blood: %+v", got)
 	}
 }
 
