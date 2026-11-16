@@ -141,6 +141,21 @@ func WriteFunctions(body map[string]any, functions []int64) {
 	body["new_funcs_"] = functions
 }
 
+// ReadEconomy returns the F17 economy_ map of a stored reply body; false when the key is absent or holds another type.
+func ReadEconomy(body map[string]any) (map[string]any, bool) {
+	switch written := body["economy_"].(type) {
+	case map[string]int64:
+		read := make(map[string]any, len(written))
+		for key, amount := range written {
+			read[key] = amount
+		}
+		return read, true
+	case map[string]any:
+		return written, true
+	}
+	return nil, false
+}
+
 func Missions(ctx context.Context, fields map[string]any) {
 	set, _ := ctx.Value(contextKey{}).(*Set)
 	if set == nil {

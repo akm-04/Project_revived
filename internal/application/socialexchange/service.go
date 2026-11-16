@@ -16,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/socialexchange"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -155,21 +156,24 @@ func (service Service) Exchange(ctx context.Context, actor identity.ActorContext
 		if err != nil {
 			return err
 		}
-		balances := map[string]int64{}
 		for _, balance := range applied.Debit.Scalars {
 			if balance.PlayerID != actor.PlayerID || balance.ResourceKey != domain.PriceCurrency || balance.Amount < 0 {
 				return ErrProof
 			}
-			balances[balance.ResourceKey] = balance.Amount
 		}
-		if len(balances) != 1 {
+		if len(applied.Debit.Scalars) != 1 {
+			return ErrProof
+		}
+		balances, _ := changes.Recorded(ctx)
+		if len(balances) != 1 || balances[domain.PriceCurrency] < 0 {
 			return ErrProof
 		}
 		awards := applied.Restoration.Awards
 		if awards == nil {
 			awards = []i5.Award{}
 		}
-		body := map[string]any{"awards": awards, "economy_": balances}
+		body := map[string]any{"awards": awards}
+		changes.WriteEconomy(body, balances)
 		settingsBytes, err := json.Marshal(catalog)
 		if err != nil {
 			return err
@@ -265,7 +269,7 @@ func (recovery resolver) decode(stored receipt.Receipt) (map[string]any, error) 
 		seenItems[item.ItemID] = true
 	}
 	awards, awardsValid := terminal.Body["awards"].([]any)
-	balances, balancesValid := terminal.Body["economy_"].(map[string]any)
+	balances, balancesValid := changes.ReadEconomy(terminal.Body)
 	balance, balanceValid := balances[domain.PriceCurrency].(json.Number)
 	if !awardsValid || !balancesValid || !balanceValid || len(balances) != 1 || len(terminal.Body) != 2 {
 		return nil, ErrProof

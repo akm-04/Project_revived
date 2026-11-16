@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/privilege"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -60,12 +61,14 @@ func (service Service) buyGlueTx(ctx context.Context, transaction tx.Tx, actor i
 	if err != nil {
 		return nil, err
 	}
-	applied, err := service.GlueValues.ApplyGluePurchaseTx(ctx, transaction, prepared)
-	if err != nil {
+	if _, err = service.GlueValues.ApplyGluePurchaseTx(ctx, transaction, prepared); err != nil {
 		return nil, err
 	}
 	if err = service.GluePurchases.SaveGluePurchasesTx(ctx, transaction, planned, stored.StateVersion); err != nil {
 		return nil, err
 	}
-	return map[string]any{"buy_glue_times": planned.Count, "economy_": map[string]any{"glue": applied.Glue.Amount, "crystal": applied.Crystal.Amount}}, nil
+	balances, _ := changes.Recorded(ctx)
+	body := map[string]any{"buy_glue_times": planned.Count}
+	changes.WriteEconomy(body, balances)
+	return body, nil
 }

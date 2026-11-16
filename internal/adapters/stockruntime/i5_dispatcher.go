@@ -17,7 +17,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
-	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	backpackproj "gxb.local/backend/v2/internal/projection/backpack"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -404,12 +403,7 @@ func stockMissionList(f objective.StockFamily, in []objective.Instance) any {
 	return group
 }
 func applySettlementProjection(ctx context.Context, body map[string]any, p appi5.SettlementProjection) {
-	for key, amount := range p.Economy {
-		changes.Balance(ctx, key, amount)
-	}
-	for _, id := range p.NewFunctionIDs {
-		changes.FunctionOpened(ctx, id)
-	}
+	p.RecordChanges(ctx)
 	if len(p.ExtraDrops) > 0 {
 		drops := make([]any, 0, len(p.ExtraDrops))
 		for _, a := range p.ExtraDrops {

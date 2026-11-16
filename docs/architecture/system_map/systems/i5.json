@@ -287,7 +287,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 26,
    "name": "SAVE_STORY"
@@ -295,7 +295,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 81,
    "name": "LOAD_BACKPACK"
@@ -303,7 +303,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 160,
    "name": "LOAD_MISSION"
@@ -311,7 +311,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 161,
    "name": "TAKE_MISSION_AWARD"
@@ -319,7 +319,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 163,
    "name": "OPEN_AWAKE_MISSION"
@@ -327,7 +327,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 164,
    "name": "GIVE_UP_AWAKE_MISSION"
@@ -335,7 +335,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 165,
    "name": "OPEN_PET_AWAKE_MISSION"
@@ -343,7 +343,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 166,
    "name": "GIVE_UP_PET_AWAKE_MISSION"
@@ -351,7 +351,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 167,
    "name": "OPEN_AWAKE_TWICE_MISSION"
@@ -359,7 +359,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 168,
    "name": "GIVE_UP_AWAKE_TWICE_MISSION"
@@ -367,7 +367,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 169,
    "name": "GET_DAY_HUOYUE_AWARD"
@@ -375,7 +375,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 170,
    "name": "GET_WEEK_HUOYUE_AWARD"
@@ -383,7 +383,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 171,
    "name": "GET_AWAKE_ITEM"
@@ -391,7 +391,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 230,
    "name": "REDEEM_CODE"
@@ -399,7 +399,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 352,
    "name": "LOAD_SIGN_INFO"
@@ -407,7 +407,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 353,
    "name": "SIGN"
@@ -415,7 +415,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 368,
    "name": "LOAD_MAIL_LIST"
@@ -423,7 +423,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 369,
    "name": "SET_MAIL_READ"
@@ -431,7 +431,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 370,
    "name": "MAIL_ONEKEY"
@@ -439,7 +439,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 2561,
    "name": "AWAKE_MISSION_LIST"
@@ -447,7 +447,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 2736,
    "name": "TASK_LOAD_BY_TYPE"
@@ -455,7 +455,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 2737,
    "name": "TASK_AWAKE_GIVE_UP"
@@ -463,7 +463,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 2738,
    "name": "TASK_AWAKE_OPEN"
@@ -471,7 +471,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 2865,
    "name": "SET_PLAYER_GUIDE_FUNCTION"
@@ -479,7 +479,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/i5_dispatcher.go",
-    "line": 67
+    "line": 66
    },
    "mid": 2866,
    "name": "SET_PLAYER_RETURN_ID"
@@ -624,6 +624,7 @@
    "promotion_restoration_test.go",
    "scalar_daily_floor_test.go",
    "service_test.go",
+   "settlement_projection_changes_test.go",
    "startup_test.go",
    "temporal_repin_test.go",
    "workplace_sp_test.go"

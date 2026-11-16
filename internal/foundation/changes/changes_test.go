@@ -67,6 +67,22 @@ func TestWriteFunctionsOmitsEmptyChanges(t *testing.T) {
 	}
 }
 
+func TestReadEconomyReturnsStoredAndLiveShapes(t *testing.T) {
+	if _, present := ReadEconomy(map[string]any{}); present {
+		t.Fatal("absent economy_ read as present")
+	}
+	if _, present := ReadEconomy(map[string]any{"economy_": "broken"}); present {
+		t.Fatal("non-map economy_ read as present")
+	}
+	if _, present := ReadEconomy(map[string]any{"economy_": map[string]any{}}); !present {
+		t.Fatal("stored economy_ read as absent")
+	}
+	read, present := ReadEconomy(map[string]any{"economy_": map[string]int64{"crystal": 7}})
+	if !present || read["crystal"] != int64(7) {
+		t.Fatalf("live economy_ %#v %v", read, present)
+	}
+}
+
 func TestWriteEconomyOmitsEmptyBalances(t *testing.T) {
 	body := map[string]any{}
 	WriteEconomy(body, map[string]int64{})

@@ -11410,7 +11410,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -11433,12 +11433,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/mission_runtime.go:356",
     "internal/application/i5/service.go:1306",
     "internal/application/i5/service.go:717"
@@ -11461,7 +11461,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -11522,7 +11522,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -11762,7 +11762,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -11780,12 +11780,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -11801,7 +11801,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -11849,7 +11849,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12044,7 +12044,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12062,12 +12062,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12083,7 +12083,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12131,7 +12131,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12326,7 +12326,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12344,12 +12344,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12365,7 +12365,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12413,7 +12413,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12608,7 +12608,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12626,12 +12626,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12647,7 +12647,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12695,7 +12695,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -12890,7 +12890,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -12908,12 +12908,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -12929,7 +12929,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -12977,7 +12977,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13172,7 +13172,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -13190,12 +13190,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -13211,7 +13211,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -13259,7 +13259,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13454,7 +13454,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -13472,7 +13472,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -13493,7 +13493,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -13541,7 +13541,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13719,7 +13719,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -13737,7 +13737,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -13758,7 +13758,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -13806,7 +13806,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -13984,7 +13984,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -14002,12 +14002,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -14023,7 +14023,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -14071,7 +14071,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -23166,7 +23166,7 @@
    "isolation": [
     {
      "file": "internal/application/socialexchange/service.go",
-     "line": 91,
+     "line": 92,
      "value": "serializable"
     }
    ],
@@ -23174,18 +23174,18 @@
    "read_only": [
     {
      "file": "internal/application/socialexchange/service.go",
-     "line": 91,
+     "line": 92,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/socialexchange/service.go:190"
+    "internal/application/socialexchange/service.go:194"
    ],
    "retry": [
     {
      "file": "internal/application/socialexchange/service.go",
-     "line": 91,
+     "line": 92,
      "value": "8"
     }
    ],
@@ -23213,7 +23213,7 @@
      "file": "internal/application/socialexchange/service.go",
      "function": "Service.Exchange",
      "isolation": "serializable",
-     "line": 91,
+     "line": 92,
      "read_only": "false",
      "retry": "8"
     }
@@ -23592,7 +23592,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "serializable"
     },
     {
@@ -23630,7 +23630,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "false"
     },
     {
@@ -23648,7 +23648,7 @@
     "internal/application/i5/service.go:717",
     "internal/application/mentor/service.go:194",
     "internal/application/socialinvite/claim.go:192",
-    "internal/application/socialrecall/claim.go:173",
+    "internal/application/socialrecall/claim.go:167",
     "internal/application/workplace/mode.go:225"
    ],
    "retry": [
@@ -23674,7 +23674,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "8"
     },
     {
@@ -23752,7 +23752,7 @@
      "file": "internal/application/socialrecall/claim.go",
      "function": "ClaimService.Claim",
      "isolation": "serializable",
-     "line": 106,
+     "line": 100,
      "read_only": "false",
      "retry": "8"
     },
@@ -24098,7 +24098,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -24111,7 +24111,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -24127,7 +24127,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -24164,7 +24164,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -33929,7 +33929,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     },
     {
@@ -33942,7 +33942,7 @@
    "read_only": [
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     },
     {
@@ -33958,7 +33958,7 @@
    "retry": [
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     },
     {
@@ -33992,7 +33992,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     },
@@ -34293,7 +34293,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -34306,7 +34306,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -34322,7 +34322,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -34358,7 +34358,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -34516,7 +34516,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -34529,7 +34529,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
@@ -34545,7 +34545,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -34581,7 +34581,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -34868,7 +34868,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "serializable"
     },
     {
@@ -34906,7 +34906,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "false"
     },
     {
@@ -34924,7 +34924,7 @@
     "internal/application/i5/service.go:717",
     "internal/application/mentor/service.go:194",
     "internal/application/socialinvite/claim.go:192",
-    "internal/application/socialrecall/claim.go:173",
+    "internal/application/socialrecall/claim.go:167",
     "internal/application/workplace/mode.go:225"
    ],
    "retry": [
@@ -34950,7 +34950,7 @@
     },
     {
      "file": "internal/application/socialrecall/claim.go",
-     "line": 106,
+     "line": 100,
      "value": "8"
     },
     {
@@ -35028,7 +35028,7 @@
      "file": "internal/application/socialrecall/claim.go",
      "function": "ClaimService.Claim",
      "isolation": "serializable",
-     "line": 106,
+     "line": 100,
      "read_only": "false",
      "retry": "8"
     },
@@ -78556,7 +78556,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -78584,7 +78584,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -78615,7 +78615,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -78666,7 +78666,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -78878,7 +78878,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -78906,7 +78906,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -78937,7 +78937,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -78988,7 +78988,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -79200,7 +79200,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -79228,7 +79228,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -79259,7 +79259,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -79310,7 +79310,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -79522,7 +79522,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -79550,7 +79550,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -79581,7 +79581,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -79632,7 +79632,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -79844,7 +79844,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -79872,7 +79872,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -79903,7 +79903,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -79954,7 +79954,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -80166,7 +80166,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -80194,7 +80194,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -80225,7 +80225,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -80276,7 +80276,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -80488,7 +80488,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -80516,7 +80516,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -80547,7 +80547,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -80598,7 +80598,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -80810,7 +80810,7 @@
    "isolation": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "repeatable_read"
     },
     {
@@ -80838,7 +80838,7 @@
    "read_only": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "false"
     },
     {
@@ -80869,7 +80869,7 @@
    "retry": [
     {
      "file": "internal/application/inscription/projection.go",
-     "line": 235,
+     "line": 236,
      "value": "1"
     },
     {
@@ -80920,7 +80920,7 @@
      "file": "internal/application/inscription/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 235,
+     "line": 236,
      "read_only": "false",
      "retry": "1"
     },
@@ -123804,7 +123804,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -123822,12 +123822,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -123843,7 +123843,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -123891,7 +123891,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -127832,7 +127832,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -127850,12 +127850,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -127871,7 +127871,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -127919,7 +127919,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
@@ -128114,7 +128114,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "repeatable_read"
     }
    ],
@@ -128132,12 +128132,12 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/awakening.go:424",
+    "internal/application/i5/awakening.go:419",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -128153,7 +128153,7 @@
     },
     {
      "file": "internal/application/i5/settlement_projection.go",
-     "line": 88,
+     "line": 100,
      "value": "1"
     }
    ],
@@ -128201,7 +128201,7 @@
      "file": "internal/application/i5/settlement_projection.go",
      "function": "Service.projectSettlement",
      "isolation": "repeatable_read",
-     "line": 88,
+     "line": 100,
      "read_only": "true",
      "retry": "1"
     }
