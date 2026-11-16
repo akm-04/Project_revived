@@ -266,7 +266,8 @@
    "i9_10a_event_centre.json"
   ],
   "unit": [
-   "makeinfo_test.go"
+   "makeinfo_test.go",
+   "start_choice_conformance_test.go"
   ]
  }
 }

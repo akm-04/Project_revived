@@ -14,39 +14,42 @@ import (
 // startChoiceConformance names the test that STARTs each registered mode twice
 // for the same stage with different choices and asserts its registered rule
 // (START_REPLAY_GUARD_V1 ruling 2). A new mode cannot register without a proof.
+// reason cites the source that fixes a mode whose choice is not
+// player-changeable (START_REPLAY_GUARD_V1 ruling 9a).
 var startChoiceConformance = map[ModeKey]struct {
-	rule ChoiceChangeRule
-	test string
+	rule   ChoiceChangeRule
+	test   string
+	reason string
 }{
-	ModeAdventureDefense:    {ChoiceSupersedes, "TestStartChoiceConformanceAdventureDefense"},
-	ModeAdventureIllusion:   {ChoiceSupersedes, "TestStartChoiceConformanceAdventureIllusion"},
-	ModeAdventurePVP:        {ChoiceReplaysFrozen, "TestClosureE6AdventurePvpOpenStartReplaysFrozenFormationNative"},
-	ModeAdventureCoop:       {ChoiceReplaysFrozen, "TestClosureE6AdventureCoopOpenStartReplaysFrozenPicksNative"},
-	ModeArena:               {ChoiceReplaysFrozen, "TestI7C5DArenaChangedFormationReplaysOpenFightNative"},
-	ModeArenaPlayoffs:       {ChoiceReplaysFrozen, "TestI97BEnrollmentUsesImmutableSettlementNative"},
-	ModeArenaFriendFight:    {ChoiceReplaysFrozen, "TestI97CFriendFightLifecycleNative"},
-	ModeAwakeningBlood:      {ChoiceSupersedes, "TestAwakeningWireRoutesAndTrustBoundary"},
-	ModeCampaign:            {ChoiceSupersedes, "TestStartChoiceConformanceCampaign"},
-	ModeChampionsLeague:     {ChoiceReplaysFrozen, "TestI7C5FLeagueChangedLineupReplaysOpenFightNative"},
-	ModeConquerSchool:       {ChoiceSupersedes, "TestI8_5DConquerStartBindsCombatAttemptNative"},
-	ModeDodgeball:           {ChoiceRefusedWhileOpen, "TestI9_6BDodgeballNativeLifecycle"},
-	ModeEventCentreBoard:    {ChoiceReplaysFrozen, "TestI910ANoticeBoardNative"},
-	ModeGodsTrial:           {ChoiceSupersedes, "TestStartChoiceConformanceGodsTrial"},
-	ModeGuildCampaign:       {ChoiceSupersedes, "TestStartChoiceConformanceGuildCampaign"},
-	ModeIllusionSolo:        {ChoiceSupersedes, "TestStartChoiceConformanceIllusionSolo"},
-	ModeIllusionTeam:        {ChoiceReplaysFrozen, "TestStartChoiceConformanceIllusionTeam"},
-	ModeMarch:               {ChoiceRefusedWhileOpen, "TestStartChoiceConformanceMarch"},
-	ModeMemoirBattle:        {ChoiceReplaysFrozen, "TestStartChoiceConformanceMemoirBattle"},
-	ModeMemoirPlayer:        {ChoiceReplaysFrozen, "TestClosureE4MemoirPlayerStartReplayIdentityNative"},
-	ModeOccultSolo:          {ChoiceSupersedes, "TestStartChoiceConformanceOccultSolo"},
-	ModeOccultTeam:          {ChoiceReplaysFrozen, "TestStartChoiceConformanceOccultTeam"},
-	ModeOneOnOne:            {ChoiceReplaysFrozen, "TestClosureE4OneOnOneStartReplayIdentityNative"},
-	ModePetCampaign:         {ChoiceSupersedes, "TestStartChoiceConformancePetCampaign"},
-	ModePetCampaignPractice: {ChoiceSupersedes, "TestStartChoiceConformancePetCampaignPractice"},
-	ModeTopFloor:            {ChoiceReplaysFrozen, "TestClosureE2TopFloorReplayIgnoresPetNative"},
-	ModeTopFloorTask:        {ChoiceReplaysFrozen, "TestClosureE2TopFloorTaskReplayIgnoresLeaderNative"},
-	ModeWorkplace:           {ChoiceReplaysFrozen, "TestStartChoiceConformanceWorkplace"},
-	ModeWorldBoss:           {ChoiceSupersedes, "TestStartChoiceConformanceWorldBoss"},
+	ModeAdventureDefense:    {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceAdventureDefense"},
+	ModeAdventureIllusion:   {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceAdventureIllusion"},
+	ModeAdventurePVP:        {rule: ChoiceReplaysFrozen, test: "TestClosureE6AdventurePvpOpenStartReplaysFrozenFormationNative"},
+	ModeAdventureCoop:       {rule: ChoiceReplaysFrozen, test: "TestClosureE6AdventureCoopOpenStartReplaysFrozenPicksNative"},
+	ModeArena:               {rule: ChoiceReplaysFrozen, test: "TestI7C5DArenaChangedFormationReplaysOpenFightNative"},
+	ModeArenaPlayoffs:       {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceArenaTournament", reason: "the team is the room selection, frozen before START (arena/selection.go:66,83-85; arena/tournament_combat.go:78)"},
+	ModeArenaFriendFight:    {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceArenaTournament", reason: "the team is the room selection, frozen before START (arena/selection.go:66,83-85; arena/tournament_combat.go:78)"},
+	ModeAwakeningBlood:      {rule: ChoiceSupersedes, test: "TestAwakeningWireRoutesAndTrustBoundary", reason: "MID 866 carries no team; the team is the frozen occurrence owner (awakeningbattle/mode.go:83,98; stockruntime/awakening_blood_dispatcher.go:41-44)"},
+	ModeCampaign:            {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceCampaign"},
+	ModeChampionsLeague:     {rule: ChoiceReplaysFrozen, test: "TestI7C5FLeagueChangedLineupReplaysOpenFightNative"},
+	ModeConquerSchool:       {rule: ChoiceSupersedes, test: "TestI8_5DConquerStartBindsCombatAttemptNative"},
+	ModeDodgeball:           {rule: ChoiceRefusedWhileOpen, test: "TestI9_6BDodgeballNativeLifecycle"},
+	ModeEventCentreBoard:    {rule: ChoiceReplaysFrozen, test: "TestI910ANoticeBoardNative", reason: "the leader and partners are frozen at receive (eventcentre/board.go:205) and START reads the stored mission (eventcentre/board.go:455-457)"},
+	ModeGodsTrial:           {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceGodsTrial"},
+	ModeGuildCampaign:       {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceGuildCampaign"},
+	ModeIllusionSolo:        {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceIllusionSolo"},
+	ModeIllusionTeam:        {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceIllusionTeam"},
+	ModeMarch:               {rule: ChoiceRefusedWhileOpen, test: "TestStartChoiceConformanceMarch"},
+	ModeMemoirBattle:        {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceMemoirBattle"},
+	ModeMemoirPlayer:        {rule: ChoiceReplaysFrozen, test: "TestClosureE4MemoirPlayerStartReplayIdentityNative"},
+	ModeOccultSolo:          {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceOccultSolo"},
+	ModeOccultTeam:          {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceOccultTeam"},
+	ModeOneOnOne:            {rule: ChoiceReplaysFrozen, test: "TestClosureE4OneOnOneStartReplayIdentityNative"},
+	ModePetCampaign:         {rule: ChoiceSupersedes, test: "TestStartChoiceConformancePetCampaign"},
+	ModePetCampaignPractice: {rule: ChoiceSupersedes, test: "TestStartChoiceConformancePetCampaignPractice"},
+	ModeTopFloor:            {rule: ChoiceReplaysFrozen, test: "TestClosureE2TopFloorReplayIgnoresPetNative"},
+	ModeTopFloorTask:        {rule: ChoiceReplaysFrozen, test: "TestClosureE2TopFloorTaskReplayIgnoresLeaderNative"},
+	ModeWorkplace:           {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceWorkplace"},
+	ModeWorldBoss:           {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceWorldBoss"},
 }
 
 func TestEveryModeHasAStartChoiceProof(t *testing.T) {
