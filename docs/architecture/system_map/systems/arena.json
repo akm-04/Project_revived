@@ -12,6 +12,10 @@
  ],
  "contracts": [
   {
+   "count": 40,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
    "count": 2,
    "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
   },

@@ -11,6 +11,14 @@
    "file": "docs/architecture/CUMULATIVE_MIGRATION_LOCK.json"
   },
   {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
    "count": 1,
    "file": "docs/i9/GUILD_NAME_LENGTH_POLICY_V1.json"
   },

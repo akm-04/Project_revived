@@ -3,6 +3,10 @@
  "content": [],
  "contracts": [
   {
+   "count": 6,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
    "count": 5,
    "file": "docs/i9/I9_GODS_TRIAL_V1.json"
   },
