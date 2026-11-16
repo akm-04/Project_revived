@@ -812,6 +812,80 @@ func TestI9_9CAwardQueue(t *testing.T) {
 	}
 }
 
+// TestI9_9CRewardApplicationRequiresRegistration covers BUGS #98: only a
+// member registered for the chapter at open or reset may apply for its reward.
+// A late joiner, a leaver and a leaver who rejoined are all refused.
+func TestI9_9CRewardApplicationRequiresRegistration(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, _ := f.copyID(t)
+	info := f.chapter(t)
+	slot := f.nextSlot(f.at)
+	tr := f.openTx(t)
+	if err := f.store().SaveChapterProgressTx(ctx, tr, int64(f.guild), chapterID, 1, 1, true, &f.at); err != nil {
+		t.Fatal("chapter win", err)
+	}
+	seed := app.AwardSeed{AwardID: info.Items[0], Remaining: 3, ExpiresAt: f.at.Add(time.Duration(f.settings.RewardTimeLimitSecond) * time.Second), NextSlot: slot}
+	if err := f.store().InsertAwardsTx(ctx, tr, int64(f.guild), chapterID, 1, []app.AwardSeed{seed}); err != nil {
+		t.Fatal("award seed", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	// The reconciler scans due awards across every guild, so this fixture consumes
+	// its row on exit to keep later tests' due scans exact.
+	t.Cleanup(func() {
+		exec(t, f.pool, `UPDATE guild_campaign_awards SET remaining=0 WHERE guild_id=$1 AND chapter_id=$2 AND run=1`, int64(f.guild), chapterID)
+	})
+	if _, err := f.mode.ApplyReward(ctx, f.second, chapterID, info.Items[0], f.op()); err != nil {
+		t.Fatalf("registered member applied: %v", err)
+	}
+
+	lateJoiner, _ := genuinePlayer(t, f.pool, f.server)
+	tr = f.openTx(t)
+	member := guild.Membership{PlayerID: lateJoiner.PlayerID, GuildID: f.guild, Role: guild.Member, JoinedAt: f.at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: f.at}
+	if err := (guildstore.Store{Queryer: f.pool}).InsertMembershipTx(ctx, tr, member); err != nil {
+		tr.Rollback(ctx)
+		t.Fatal("late join", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, lateJoiner, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("late joiner applied: %v", err)
+	}
+
+	if _, err := f.core(t).Leave(ctx, f.third, op()); err != nil {
+		t.Fatal("leave", err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("leaver applied: %v", err)
+	}
+
+	tr = f.openTx(t)
+	rejoin := guild.Membership{PlayerID: f.third.PlayerID, GuildID: f.guild, Role: guild.Member, JoinedAt: f.at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: f.at}
+	if err := (guildstore.Store{Queryer: f.pool}).InsertMembershipTx(ctx, tr, rejoin); err != nil {
+		tr.Rollback(ctx)
+		t.Fatal("rejoin", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("rejoined member applied before the next reset: %v", err)
+	}
+
+	for _, refused := range []identity.ActorContext{lateJoiner, f.third} {
+		if rows := scalar(t, f.pool, `SELECT count(*) FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND player_id=$3`,
+			int64(f.guild), chapterID, int64(refused.PlayerID)); rows != 0 {
+			t.Fatalf("refused player %d left %d application rows", refused.PlayerID, rows)
+		}
+	}
+}
+
 func TestI9_9CRankTieBossDoubleAndRecordReward(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)

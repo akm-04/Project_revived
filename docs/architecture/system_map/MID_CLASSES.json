@@ -38326,7 +38326,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 213,
+     "line": 222,
      "value": "repeatable_read"
     }
    ],
@@ -38334,7 +38334,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 213,
+     "line": 222,
      "value": "true"
     }
    ],
@@ -38342,7 +38342,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 213,
+     "line": 222,
      "value": "1"
     }
    ],
@@ -38353,7 +38353,7 @@
      "file": "internal/application/guildcampaign/awards.go",
      "function": "Mode.DistributeRecord",
      "isolation": "repeatable_read",
-     "line": 213,
+     "line": 222,
      "read_only": "true",
      "retry": "1"
     }
