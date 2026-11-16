@@ -488,6 +488,7 @@
  "name": "i5",
  "pushes": [],
  "stores": [
+  "internal/adapters/postgres/auditstore",
   "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
@@ -548,6 +549,7 @@
    "mail_attachments",
    "mail_namespace_counters",
    "mail_records",
+   "operator_audit_events",
    "player_awakening_roots",
    "player_crystal_spend_days",
    "player_currency_balances",

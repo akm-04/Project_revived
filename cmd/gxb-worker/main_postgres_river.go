@@ -5,8 +5,10 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"gxb.local/backend/v2/internal/adapters/guildbroadcastworker"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/restorestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/retentionstore"
 	"gxb.local/backend/v2/internal/adapters/river/retentionworker"
 	"log"
@@ -37,6 +39,9 @@ func run() error {
 		return e
 	}
 	defer p.Close()
+	if e = (restorestore.Store{}).CheckWritable(c, p); e != nil {
+		return fmt.Errorf("refusing to start: %w", e)
+	}
 	ready, cancel := context.WithTimeout(c, 30*time.Second)
 	v, e := guildbroadcastworker.New(ready, p)
 	cancel()

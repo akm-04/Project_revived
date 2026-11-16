@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -40,4 +41,10 @@ type Store interface {
 // remains canonical even when this hint is lost.
 type RevocationNotifier interface {
 	SessionRevoked(context.Context, identity.SessionID, string) error
+}
+
+// AuditWriter persists an operator audit event in the caller's transaction, so
+// an audited revocation and its attribution commit or roll back together.
+type AuditWriter interface {
+	InsertTx(context.Context, tx.Tx, audit.Event) error
 }

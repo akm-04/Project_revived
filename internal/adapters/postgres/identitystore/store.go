@@ -29,6 +29,7 @@ const (
 	revokeGameplayCredentials = `UPDATE gameplay_context_credentials SET revoked_at=$2 WHERE session_id=$1 AND revoked_at IS NULL`
 	touchSessionActivity      = `UPDATE account_sessions SET last_activity_at=$3 WHERE session_id=$1 AND revoked_at IS NULL AND idle_timeout_seconds IS NOT NULL AND last_activity_at <= $2`
 	listLivePlayerSessions    = `SELECT COALESCE(jsonb_agg(session_id::text ORDER BY session_id),'[]'::jsonb)::text FROM (SELECT DISTINCT c.session_id FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id WHERE c.player_id=$1 AND s.revoked_at IS NULL AND c.ended_at IS NULL) live`
+	findLivePlayerSessions    = `SELECT COALESCE(array_agg(session_id::text ORDER BY created_at DESC), '{}'::text[]) FROM gameplay_contexts WHERE player_id=$1 AND ended_at IS NULL`
 )
 
 type Store struct{}
@@ -240,6 +241,28 @@ func (Store) TouchSessionActivityTx(ctx context.Context, t tx.Tx, sid identity.S
 		return false, err
 	}
 	return tag.RowsAffected() == 1, nil
+}
+
+// FindLiveSessionsByPlayer lists the sessions that still hold a live gameplay
+// context for one player. An operator command that names a player resolves the
+// revocation target through the identities owner, never by guessing a session.
+func (Store) FindLiveSessionsByPlayer(ctx context.Context, q tx.Queryer, player identity.PlayerID) ([]identity.SessionID, error) {
+	if q == nil || !player.Valid() {
+		return nil, errors.New("player id required")
+	}
+	var raw []string
+	if err := q.QueryRow(ctx, findLivePlayerSessions, int64(player)).Scan(&raw); err != nil {
+		return nil, err
+	}
+	out := make([]identity.SessionID, 0, len(raw))
+	for _, value := range raw {
+		sessionID, err := parseSessionID(value)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, sessionID)
+	}
+	return out, nil
 }
 
 func parseAccountID(s string) (identity.AccountID, error) {

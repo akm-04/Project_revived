@@ -119,7 +119,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/http_dispatchers.go",
-    "line": 37
+    "line": 38
    },
    "mid": 192,
    "name": "LOAD_CHAT_ROOM_INFO"

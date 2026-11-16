@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -20,6 +21,7 @@ var (
 	ErrServicePortsIncomplete = errors.New("identity lifecycle service ports incomplete")
 	ErrAccountNotLive         = errors.New("identity lifecycle account not live")
 	ErrSessionAccountMismatch = errors.New("session/account mismatch")
+	ErrSessionAlreadyRevoked  = errors.New("identity lifecycle session already revoked")
 )
 
 type Service struct {
@@ -28,6 +30,7 @@ type Service struct {
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
 	Notifier    RevocationNotifier
+	Audit       AuditWriter
 
 	Profile tx.Profile
 
@@ -79,6 +82,9 @@ type IssueSessionResult struct {
 type RevokeSessionCommand struct {
 	SessionID identity.SessionID
 	Reason    string
+	// Audit, when set, is inserted in the revocation transaction; an audited
+	// command without an AuditWriter refuses rather than run unattributed.
+	Audit *audit.Event
 }
 type RevokeSessionResult struct {
 	SessionID       string `json:"session_id"`
@@ -238,6 +244,14 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 	if cmd.SessionID.UUID().IsZero() || cmd.Reason == "" {
 		return RevokeSessionResult{}, errors.New("session id and revocation reason required")
 	}
+	if cmd.Audit != nil {
+		if s.Audit == nil {
+			return RevokeSessionResult{}, errors.New("audited revocation requires an audit writer")
+		}
+		if err := cmd.Audit.Validate(); err != nil {
+			return RevokeSessionResult{}, err
+		}
+	}
 	rid := sessionRevokeReceiptIdentity(cmd.SessionID)
 	fp, err := receipt.FingerprintRequest(struct {
 		SessionID string `json:"session_id"`
@@ -253,6 +267,9 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 		} else if ok {
 			if !bytes.Equal(prior.RequestFingerprint[:], fp[:]) {
 				return &receipt.ConflictError{Identity: rid}
+			}
+			if cmd.Audit != nil {
+				return ErrSessionAlreadyRevoked
 			}
 			return json.Unmarshal(prior.ResultPayload, &out)
 		}
@@ -274,6 +291,9 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 			return err
 		}
 		changed := plan.Session.LivenessVersion != beforeSessionVersion
+		if cmd.Audit != nil && !changed {
+			return ErrSessionAlreadyRevoked
+		}
 		if changed {
 			if err = s.Store.SaveRevokedSessionTx(txctx, scope.Tx, plan.Session, beforeSessionVersion); err != nil {
 				return err
@@ -297,7 +317,13 @@ func (s Service) RevokeSession(ctx context.Context, cmd RevokeSessionCommand, op
 		if plan.Context != nil {
 			out.ContextVersion = plan.Context.LivenessVersion
 		}
-		return putReceipt(txctx, scope.Tx, s.Receipts, op, rid, fp, "IDENTITY_SESSION_REVOKE", "gxb.identity.session-revoke.v1", out)
+		if err = putReceipt(txctx, scope.Tx, s.Receipts, op, rid, fp, "IDENTITY_SESSION_REVOKE", "gxb.identity.session-revoke.v1", out); err != nil {
+			return err
+		}
+		if cmd.Audit != nil {
+			return s.Audit.InsertTx(txctx, scope.Tx, *cmd.Audit)
+		}
+		return nil
 	})
 	if err != nil {
 		return RevokeSessionResult{}, err

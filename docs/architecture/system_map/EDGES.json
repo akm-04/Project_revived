@@ -3077,6 +3077,9 @@
    "playerroot": [
     "Validate"
    ],
+   "store:auditstore": [
+    "*Emit"
+   ],
    "store:contentstore": [
     "*ActiveRevision",
     "*ChargeCatalogTx",
@@ -4203,6 +4206,9 @@
     "*ProviderRevision",
     "*ValidateSpiritBatchLockedTx"
    ],
+   "store:auditstore": [
+    "*Emit"
+   ],
    "store:characterstore": [
     "*ReadCharacterFunctionPrerequisitesTx"
    ],
@@ -4233,6 +4239,9 @@
    ]
   },
   "identitylifecycle": {
+   "store:auditstore": [
+    "*InsertTx"
+   ],
    "store:identitystore": [
     "*FindProviderBindingTx",
     "*InsertProviderBindingTx",
