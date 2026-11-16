@@ -32,3 +32,20 @@ func TestRedactTextMasksSecretValues(t *testing.T) {
 		}
 	}
 }
+
+func TestRedactMasksCapabilityAndLogURL(t *testing.T) {
+	capability := "AbCdEf0123456789_-abcdefghijklmnopqrstuvwxyzAB"
+	cases := map[string]string{
+		`post failed: log_url=https://api.test/client-log/` + capability: `post failed: log_url=[REDACTED]`,
+		`{"capability":"` + capability + `","note":"kept"}`:              `{"capability":"[REDACTED]","note":"kept"}`,
+	}
+	for in, want := range cases {
+		if got := RedactText(in); got != want {
+			t.Errorf("RedactText(%q) = %q, want %q", in, got, want)
+		}
+	}
+	fields := RedactFields(map[string]any{"capability": capability, "log_url": "https://api.test/client-log/" + capability, "note": "kept"})
+	if fields["capability"] != Redacted || fields["log_url"] != Redacted || fields["note"] != "kept" {
+		t.Fatalf("redaction=%v", fields)
+	}
+}

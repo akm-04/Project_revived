@@ -1,8 +1,10 @@
 package httpedge
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -89,6 +91,59 @@ func TestJournalKeepsRawEnvelopeOfUnknownAndUndecodableRequests(t *testing.T) {
 	}
 	if undecodable.Disposition != observability.RequestUndecodable || undecodable.HasMID || len(undecodable.Raw) == 0 {
 		t.Fatalf("undecodable=%+v", undecodable)
+	}
+}
+
+func multipartPost(t *testing.T, handler http.Handler, fields [][2]string, fileBody []byte) *httptest.ResponseRecorder {
+	t.Helper()
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	part, err := writer.CreateFormFile("avatar", "avatar.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := part.Write(fileBody); err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range fields {
+		if err := writer.WriteField(field[0], field[1]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	request := httptest.NewRequest(http.MethodPost, "/", &body)
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	return response
+}
+
+func TestJournalKeepsRedactedMultipartEnvelopeOfUndecodableRequest(t *testing.T) {
+	journal := &capturedJournal{}
+	handler := journalHandler(t, journal, func(context.Context, DispatchRequest) Response { return Response{} })
+	const fileBody = "FILE-BODY-MARKER-must-not-be-stored"
+	response := multipartPost(t, handler, [][2]string{{"mid", "65000"}, {"token", "multipart-secret"}, {"form_name", "avatar"}}, []byte(fileBody))
+	if response.Code != http.StatusBadRequest {
+		t.Fatalf("code=%d body=%s", response.Code, response.Body)
+	}
+	record := journal.records[0]
+	raw := string(record.Raw)
+	if record.Disposition != observability.RequestUndecodable || len(record.Raw) == 0 {
+		t.Fatalf("record=%+v", record)
+	}
+	if !strings.Contains(raw, `name="mid"`) || !strings.Contains(raw, "65000") {
+		t.Fatalf("envelope lost field names or values: %q", raw)
+	}
+	if strings.Contains(raw, fileBody) {
+		t.Fatalf("file body stored: %q", raw)
+	}
+	if strings.Contains(raw, "multipart-secret") {
+		t.Fatalf("token value stored: %q", raw)
+	}
+	if len(record.Raw) > rawCaptureBytes {
+		t.Fatalf("envelope is not bounded: %d", len(record.Raw))
 	}
 }
 

@@ -1,11 +1,14 @@
 package httpedge
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"log"
+	"mime"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
@@ -165,8 +168,8 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	record.Actor = note.Actor()
 	record.Replay = note.Replayed()
 	keepsRaw := record.Disposition == observability.RequestUnknownMID || record.Disposition == observability.RequestUndecodable
-	if keepsRaw && !strings.HasPrefix(strings.ToLower(r.Header.Get("Content-Type")), "multipart/") {
-		record.Raw = body.prefix
+	if keepsRaw {
+		record.Raw = rawEnvelope(r.Header.Get("Content-Type"), body.prefix)
 	}
 	h.Journal.Record(record)
 }
@@ -394,6 +397,53 @@ func stockErrorCode(body map[string]any) int64 {
 	default:
 		return 0
 	}
+}
+
+// rawEnvelope keeps the request prefix for R3. A multipart prefix is reduced to
+// its part headers and redacted text fields, so an upload file body is never
+// stored while the field names and diagnostic values stay.
+func rawEnvelope(contentType string, prefix []byte) []byte {
+	if !strings.HasPrefix(strings.ToLower(contentType), "multipart/") {
+		return prefix
+	}
+	_, parameters, err := mime.ParseMediaType(contentType)
+	boundary := parameters["boundary"]
+	if err != nil || boundary == "" || len(prefix) == 0 {
+		return nil
+	}
+	reader := multipart.NewReader(bytes.NewReader(prefix), boundary)
+	var envelope bytes.Buffer
+	for envelope.Len() < rawCaptureBytes {
+		part, err := reader.NextPart()
+		if err != nil {
+			break
+		}
+		envelope.WriteString("--" + boundary + "\r\n")
+		if disposition := part.Header.Get("Content-Disposition"); disposition != "" {
+			envelope.WriteString("Content-Disposition: " + disposition + "\r\n")
+		}
+		if partType := part.Header.Get("Content-Type"); partType != "" {
+			envelope.WriteString("Content-Type: " + partType + "\r\n")
+		}
+		envelope.WriteString("\r\n")
+		if part.FileName() != "" {
+			envelope.WriteString("[file body omitted]\r\n")
+			continue
+		}
+		value, _ := io.ReadAll(io.LimitReader(part, int64(rawCaptureBytes-envelope.Len())))
+		envelope.Write(redactedFieldValue(part.FormName(), value))
+		envelope.WriteString("\r\n")
+	}
+	if envelope.Len() > rawCaptureBytes {
+		envelope.Truncate(rawCaptureBytes)
+	}
+	return envelope.Bytes()
+}
+
+// redactedFieldValue masks a text field whose name carries a secret.
+func redactedFieldValue(name string, value []byte) []byte {
+	redacted, _ := observability.RedactFields(map[string]any{name: string(value)})[name].(string)
+	return []byte(redacted)
 }
 
 // bodyCapture counts request bytes and keeps the first rawCaptureBytes.

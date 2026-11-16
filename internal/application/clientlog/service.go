@@ -161,6 +161,7 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 		upload.Attachment, upload.AttachmentTruncated = boundedCopy(request.Payload, domain.MaxErrorLogBodyBytes)
 	}
 	upload.Class = uploadClass(upload)
+	domain.ClassifyUploadRows(upload.Rows, upload.Owner != nil, upload.QuarantineReason != "")
 	if err := s.Store.SaveUpload(ctx, upload); err != nil {
 		return http.StatusServiceUnavailable
 	}
@@ -188,19 +189,61 @@ func parseUpload(request UploadRequest) (string, []domain.Row) {
 	if err != nil {
 		return QuarantineBadRows, nil
 	}
-	return "", redactRows(rows)
+	return "", redactRows(rows, presentedCapability(request.Capability))
 }
 
-// redactRows masks secrets in client text before persistence (I85_CLIENT_LOG_INGEST_V1 R8).
-func redactRows(rows []domain.Row) []domain.Row {
+// presentedCapability returns a path segment only when it has the issued
+// capability shape; a malformed segment is not a secret and must not mangle text.
+func presentedCapability(segment string) string {
+	if _, valid := domain.CapabilityDigest(segment); !valid {
+		return ""
+	}
+	return segment
+}
+
+// redactRows masks secrets in client text before persistence (I85_CLIENT_LOG_INGEST_V1 R8). The
+// presented capability is a bare URL path segment, so its value is masked as well as keyed pairs.
+func redactRows(rows []domain.Row, capability string) []domain.Row {
 	for index := range rows {
-		rows[index].Log = observability.RedactText(rows[index].Log)
-		rows[index].Dump = observability.RedactText(rows[index].Dump)
+		rows[index].Log = redactCapability(observability.RedactText(rows[index].Log), capability)
+		rows[index].Dump = redactCapability(observability.RedactText(rows[index].Dump), capability)
 		if rows[index].Extras != nil {
 			rows[index].Extras = observability.RedactFields(rows[index].Extras)
+			for key, value := range rows[index].Extras {
+				rows[index].Extras[key] = redactCapabilityValue(value, capability)
+			}
 		}
 	}
 	return rows
+}
+
+func redactCapability(text, capability string) string {
+	if capability == "" {
+		return text
+	}
+	return strings.ReplaceAll(text, capability, observability.Redacted)
+}
+
+func redactCapabilityValue(value any, capability string) any {
+	if capability == "" {
+		return value
+	}
+	switch typed := value.(type) {
+	case string:
+		return redactCapability(typed, capability)
+	case map[string]any:
+		for key, inner := range typed {
+			typed[key] = redactCapabilityValue(inner, capability)
+		}
+		return typed
+	case []any:
+		for index, inner := range typed {
+			typed[index] = redactCapabilityValue(inner, capability)
+		}
+		return typed
+	default:
+		return value
+	}
 }
 
 func uploadClass(upload Upload) domain.RetentionClass {
