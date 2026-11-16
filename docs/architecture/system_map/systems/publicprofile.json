@@ -223,6 +223,7 @@
    "r1_profile_comment.json"
   ],
   "unit": [
+   "composition_test.go",
    "media_test.go",
    "rich_records_test.go",
    "roster_metrics_test.go",

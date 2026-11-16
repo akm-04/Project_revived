@@ -120,18 +120,9 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 		if _, e := s.Basic.ReadBasicTx(c, sc, a, a.PlayerID, rev, at); e != nil {
 			return nil, e
 		}
-		values := map[string]int64{}
-		for id := int64(1001); id <= 1011; id++ {
-			// C4F_SHOW_TYPES_FULL11_V1: a field whose basis is UNKNOWN for this
-			// player (e.g. 1007 over legacy heroes without a raw birth) is omitted,
-			// never zeroed; SQL failures still abort the read transaction.
-			v, e := s.metrics(c, sc, a.PlayerID, []int64{id}, rev, at)
-			if e != nil {
-				continue
-			}
-			for k, n := range v {
-				values[k] = n
-			}
+		values, e := s.allShowTypes(c, sc, a.PlayerID, rev, at)
+		if e != nil {
+			return nil, e
 		}
 		return map[string]any{"all_show_types": values}, nil
 	}
@@ -296,6 +287,22 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 		return nil, e
 	}
 	return out, nil
+}
+func (s ReadService) allShowTypes(c context.Context, sc tx.Scope, pid identity.PlayerID, rev string, at time.Time) (map[string]int64, error) {
+	values := map[string]int64{}
+	for id := int64(1001); id <= 1011; id++ {
+		// C4F_SHOW_TYPES_FULL11_V1: a field whose basis is UNKNOWN for this
+		// player (e.g. 1007 over legacy heroes without a raw birth) is omitted,
+		// never zeroed; SQL failures still abort the read transaction.
+		v, e := s.metrics(c, sc, pid, []int64{id}, rev, at)
+		if e != nil {
+			continue
+		}
+		for k, n := range v {
+			values[k] = n
+		}
+	}
+	return values, nil
 }
 func (s ReadService) metrics(c context.Context, sc tx.Scope, pid identity.PlayerID, ids []int64, rev string, at time.Time) (map[string]int64, error) {
 	if s.Metrics == nil {
