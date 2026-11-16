@@ -139,7 +139,7 @@ func Test7B_HTTP183184RawScalarAndHints(t *testing.T) {
 		t.Fatal("alreadyclaimed Gift must fail entire batch")
 	}
 	status, v = httpRequest(t, server, bt, 2, 184, map[string]any{"notice_ids": []any{}})
-	if status != 200 || v.(map[string]any)["economy_"] != nil {
+	if status != 200 || v.(map[string]any)["economy_"] != nil || v.(map[string]any)["awards"] != nil {
 		t.Fatal(status, v)
 	}
 }

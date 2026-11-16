@@ -278,8 +278,9 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 			if out == nil {
 				out = []socialinbox.NoticeID{}
 			}
-			body := map[string]any{"ids": out, "awards": []any{}}
+			body := map[string]any{"ids": out}
 			if result.Amount > 0 {
+				body["awards"] = []any{}
 				amount, e := d.Scalar.CurrentScalar(ctx, a.PlayerID, "friendship_coin", op)
 				if e != nil || amount < 0 || amount > 9007199254740991 {
 					return giftFailure(e)
