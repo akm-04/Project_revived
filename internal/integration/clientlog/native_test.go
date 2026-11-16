@@ -169,6 +169,28 @@ func TestStockErrorLogUploadIsStoredPerUID(t *testing.T) {
 	}
 }
 
+// I85_CLIENT_LOG_INGEST_V1 R8: no persisted row may keep the capability the
+// upload presented, whether it is logged as a bare URL or a key=value pair.
+func TestStockErrorLogRedactsThePresentedCapability(t *testing.T) {
+	f := newFixture(t)
+	logURL := f.logURL(t)
+	capability := strings.TrimPrefix(logURL, f.server.URL+"/client-log/")
+	payload := deflated(t, `[{"rowid":1,"log":"post failed `+logURL+`","dump":"log_url=`+logURL+`","note":"`+logURL+`"}]`)
+	if status := stockPost(t, logURL, map[string][]byte{"payload": payload}, "", nil); status != http.StatusOK {
+		t.Fatalf("status=%d", status)
+	}
+	var logText, dumpText, extras string
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT log, dump, coalesce(extras::text,'') FROM client_log_rows WHERE account_uid=$1`, f.uid).Scan(&logText, &dumpText, &extras); err != nil {
+		t.Fatal(err)
+	}
+	if stored := logText + dumpText + extras; strings.Contains(stored, capability) {
+		t.Fatalf("capability stored: %q", stored)
+	}
+	if logText != "post failed "+strings.TrimSuffix(logURL, capability)+observability.Redacted || !strings.Contains(dumpText, observability.Redacted) || !strings.Contains(extras, observability.Redacted) {
+		t.Fatalf("log=%q dump=%q extras=%q", logText, dumpText, extras)
+	}
+}
+
 func TestStockCrashUploadKeepsTheDumpAndPrefersTheToken(t *testing.T) {
 	f := newFixture(t)
 	fields := map[string][]byte{"app_v": []byte("1.0.4"), "v": []byte("2.3"), "token": []byte("live-" + f.uid)}

@@ -104,6 +104,31 @@ func TestIngestRedactsSecretsInClientRows(t *testing.T) {
 	}
 }
 
+// I85_CLIENT_LOG_INGEST_V1 R8: the capability the upload presented is a secret;
+// it never reaches persisted row text, even as a bare URL path segment.
+func TestIngestRedactsThePresentedCapability(t *testing.T) {
+	service, store, _ := newService()
+	capability := issue(t, service)
+	logURL := "http://api.test/client-log/" + capability
+	payload := deflate(t, `[{"log":"post failed `+logURL+`","dump":"log_url=`+logURL+`","note":"`+logURL+`","keep":"value"}]`)
+	service.Ingest(context.Background(), UploadRequest{Capability: capability, Kind: domain.KindErrorLog, Payload: payload})
+	row := store.uploads[0].Rows[0]
+	if row.Log != "post failed http://api.test/client-log/"+observability.Redacted {
+		t.Fatalf("log=%q", row.Log)
+	}
+	if row.Dump != "log_url="+observability.Redacted || row.Extras["keep"] != "value" {
+		t.Fatalf("dump=%q extras=%v", row.Dump, row.Extras)
+	}
+	if note, _ := row.Extras["note"].(string); note != "http://api.test/client-log/"+observability.Redacted {
+		t.Fatalf("extras=%v", row.Extras)
+	}
+	other, otherStore, _ := newService()
+	other.Ingest(context.Background(), UploadRequest{Capability: "x", Kind: domain.KindErrorLog, Payload: deflate(t, `[{"log":"x marks the spot"}]`)})
+	if got := otherStore.uploads[0].Rows[0].Log; got != "x marks the spot" {
+		t.Fatalf("malformed segment mangled text: %q", got)
+	}
+}
+
 func TestIngestNeverGuessesAnOwner(t *testing.T) {
 	service, store, clock := newService()
 	capability := issue(t, service)
