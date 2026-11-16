@@ -2120,7 +2120,8 @@
       "allowed_read_paths": [
         "sql/kernel/receipts.sql",
         "internal/adapters/postgres/kernelqueries/",
-        "internal/adapters/postgres/kernelstore/"
+        "internal/adapters/postgres/kernelstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "sql/kernel/receipts.sql",
@@ -2128,7 +2129,13 @@
       ],
       "migration": "migrations/00001_kernel_receipts.sql",
       "owner": "kernel/idempotency",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention sweep (A-039/A-050): deletes replay-only receipts only after every operation-id and receipt-id reference column releases them."
+        }
+      ],
       "data": {
         "scope": "player",
         "owner": [
@@ -3215,7 +3222,8 @@
         "public-profile"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/publicprofilestore/"
+        "internal/adapters/postgres/publicprofilestore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/publicprofilestore/"
@@ -3240,14 +3248,21 @@
         "public-profile"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/publicprofilestore/"
+        "internal/adapters/postgres/publicprofilestore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/publicprofilestore/"
       ],
       "migration": "migrations/00046_i7b5b_profile_media.sql",
       "owner": "public-profile",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention sweep (A-051): deletes a replaced avatar history row and its receipt together after the media window, while the current avatar and origin references keep their rows."
+        }
+      ],
       "data": {
         "scope": "player",
         "owner": [
@@ -5962,14 +5977,21 @@
         "Ranking"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/rankingstore/"
+        "internal/adapters/postgres/rankingstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/rankingstore/"
       ],
       "migration": "migrations/00062_i7c4c_girls_ranking.sql",
       "owner": "Ranking",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention sweep (A-039, P1): deletes snapshot generations older than the cache window while the latest generation and period bindings keep theirs."
+        }
+      ],
       "data": {
         "scope": "server",
         "owner": [
@@ -5987,7 +6009,8 @@
         "Ranking"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/rankingstore/"
+        "internal/adapters/postgres/rankingstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/rankingstore/"
@@ -9656,12 +9679,19 @@
         "HeroRecommend"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/herorecommendstore/"
+        "internal/adapters/postgres/herorecommendstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/herorecommendstore/"
       ],
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention sweep (A-039, P1): deletes snapshot generations older than the cache window while the latest generation and period bindings keep theirs."
+        }
+      ],
       "migration": "migrations/00157_i9_10_hero_recommend.sql",
       "data": {
         "scope": "server",
