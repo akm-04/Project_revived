@@ -39,7 +39,7 @@ func TestDormNativeStockRetentionAndReferencePorts(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer p.Close()
+	t.Cleanup(p.Close)
 	bundle, e := registry.LoadBuiltinBundle()
 	if e != nil {
 		t.Fatal(e)
@@ -191,7 +191,7 @@ func TestDormNativeOldSnapshotStockReservation(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer p.Close()
+	t.Cleanup(p.Close)
 	bundle, e := registry.LoadBuiltinBundle()
 	if e != nil {
 		t.Fatal(e)
@@ -393,5 +393,19 @@ func ownPlayer(t *testing.T, ctx context.Context, p *pg.Pool, revision string) c
 	if e = tr.Commit(ctx); e != nil {
 		t.Fatal(e)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM player_hero_roots WHERE player_id=$1`,
+			`DELETE FROM player_economy_owners WHERE player_id=$1`,
+			`DELETE FROM players WHERE player_id=$1`,
+		} {
+			if _, err := p.Raw().Exec(context.Background(), statement, pid); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+		if _, err := p.Raw().Exec(context.Background(), `DELETE FROM accounts WHERE account_id=$1`, account.String()); err != nil {
+			t.Errorf("cleanup account: %v", err)
+		}
+	})
 	return h.Ref()
 }

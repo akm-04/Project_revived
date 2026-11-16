@@ -32,7 +32,7 @@ func TestPayloadVersionRoundTripGuildInviteStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	exec := func(statement string, arguments ...any) {
 		t.Helper()
 		if _, err := pool.Raw().Exec(ctx, statement, arguments...); err != nil {
@@ -132,6 +132,24 @@ VALUES($1,$2,$3,'guild',$4,'I6C_GUILD',$5,decode(repeat('ab',32),'hex'),'gxb.i6c
 		t.Fatalf("cursor proof fixture invalid: %v", err)
 	}
 	progress := gi.MarkerProgress{MarkerID: markerOperationID, MaxIssueSerial: marker.MaxIssueSerial, CursorSerial: 0, LastEnqueueAt: marker.DecisionAt, NextWakeupAt: marker.DecisionAt.Add(time.Minute)}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM guild_invite_projection_deliveries WHERE source_id=$1::uuid`, []any{operationID.String()}},
+			{`DELETE FROM guild_invite_projection_sources WHERE source_id=$1::uuid`, []any{operationID.String()}},
+			{`DELETE FROM guild_invite_projection_markers WHERE marker_id=$1::uuid`, []any{markerOperationID.String()}},
+			{`DELETE FROM guild_invite_projection_cursors WHERE guild_id=1000001 AND recipient_player_id=100002`, nil},
+			{`DELETE FROM gxb_operation_receipts WHERE receipt_id IN ($1::uuid,$2::uuid,$3::uuid)`, []any{sourceReceiptID.String(), markerReceiptID.String(), cursorReceiptID.String()}},
+			{`DELETE FROM players WHERE player_id IN (100001,100002)`, nil},
+			{`DELETE FROM accounts WHERE account_id IN ('77777777-7777-4777-8777-777777772001','77777777-7777-4777-8777-777777772002')`, nil},
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 
 	transaction, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
 	if err != nil {

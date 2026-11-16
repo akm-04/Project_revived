@@ -31,7 +31,7 @@ func TestRealPostgresSourceRoundtripAndRestoreHole(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer p.Close()
+	t.Cleanup(p.Close)
 	at := time.Date(2026, 10, 9, 9, 0, 0, 123456789, time.UTC)
 	op, e := (operation.Factory{Clock: clock.Fixed{T: at}}).New(policy.Set{})
 	if e != nil {
@@ -98,6 +98,22 @@ func TestRealPostgresSourceRoundtripAndRestoreHole(t *testing.T) {
 	if e = x.Commit(c); e != nil {
 		t.Fatal(e)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM guild_broadcast_recipients WHERE source_id=$1::uuid`, []any{op.ID.String()}},
+			{`DELETE FROM guild_broadcast_sources WHERE source_id=$1::uuid`, []any{op.ID.String()}},
+			{`DELETE FROM gxb_operation_receipts WHERE receipt_id=$1::uuid`, []any{rr.ID.String()}},
+			{`DELETE FROM players WHERE player_id IN (100001,100002)`, nil},
+			{`DELETE FROM accounts WHERE account_uid LIKE 'guild-broadcast-source-native-%'`, nil},
+		} {
+			if _, err := p.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	got, ok, e := (Store{}).ReadSourceTx(c, p, op.ID)
 	if e != nil || !ok {
 		t.Fatal(ok, e)

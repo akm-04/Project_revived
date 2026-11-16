@@ -36,7 +36,7 @@ func TestRealPendingReconciliationBoundsAndBackwardsClock(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer p.Close()
+	t.Cleanup(p.Close)
 	// A source of its own under a fresh occurrence, so no prior guild broadcast must exist. It deliberately has no job rows.
 	bundle, e := registry.LoadBuiltinBundle()
 	if e != nil {
@@ -108,6 +108,23 @@ func TestRealPendingReconciliationBoundsAndBackwardsClock(t *testing.T) {
 	if e = x.Commit(c); e != nil {
 		t.Fatal(e)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM river_job WHERE args->>'semantic_key' LIKE $1`, []any{source.Operation.ID.String() + ":%"}},
+			{`DELETE FROM guild_broadcast_recipients WHERE source_id=$1::uuid`, []any{source.Operation.ID.String()}},
+			{`DELETE FROM guild_broadcast_sources WHERE source_id=$1::uuid`, []any{source.Operation.ID.String()}},
+			{`DELETE FROM gxb_operation_receipts WHERE receipt_id=$1::uuid`, []any{rr.ID.String()}},
+			{`DELETE FROM players WHERE player_id IN (100001,100002)`, nil},
+			{`DELETE FROM accounts WHERE account_uid LIKE 'guild-broadcast-reconcile-native-%'`, nil},
+		} {
+			if _, err := p.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	queue, e := NewGuildInsertOnly(p.Raw())
 	if e != nil {
 		t.Fatal(e)

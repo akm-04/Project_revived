@@ -31,7 +31,7 @@ func TestPayloadVersionRoundTripGuildBroadcastStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	exec := func(statement string, arguments ...any) {
 		t.Helper()
 		if _, err := pool.Raw().Exec(ctx, statement, arguments...); err != nil {
@@ -59,6 +59,23 @@ VALUES($1,decode($1,'hex'),1,'probe','probe',jsonb_build_object('revision_id',$1
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM guild_broadcast_recipients WHERE source_id=$1::uuid`, []any{operationID.String()}},
+			{`DELETE FROM guild_broadcast_sources WHERE source_id=$1::uuid`, []any{operationID.String()}},
+			{`DELETE FROM gxb_operation_receipts WHERE receipt_id=$1::uuid`, []any{receiptID.String()}},
+			{`DELETE FROM players WHERE player_id IN (100001,100002)`, nil},
+			{`DELETE FROM accounts WHERE account_id IN ('77777777-7777-4777-8777-777777771001','77777777-7777-4777-8777-777777771002')`, nil},
+			{`DELETE FROM gxb_content_revisions WHERE revision_id=$1`, []any{revision}},
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	exec(`INSERT INTO gxb_operation_receipts(receipt_id,owner_kind,owner_key,domain,operation,operation_class,semantic_key,request_fingerprint,result_schema,result_payload,operation_started_at,recorded_at)
 VALUES($1,'player','100001','guild-broadcast','submit','I7A8A_GUILD_SOURCE','payload-version-guildbroadcast',decode(repeat('ab',32),'hex'),'gxb.guild-broadcast.submit.v1','{}'::jsonb,$2,$2)`, receiptID.String(), at)
 	references, err := policy.NewSet(
