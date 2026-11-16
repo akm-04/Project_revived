@@ -1112,6 +1112,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-10f-occult-score" {
 		expectedSources, expectedArtifacts = 566, 58
 	}
+	if manifest.CompilerVersion == "repair-l1-campaign-assist" {
+		expectedSources, expectedArtifacts = 566, 58
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}

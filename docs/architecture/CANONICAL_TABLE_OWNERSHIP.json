@@ -3577,7 +3577,8 @@
       "allowed_read_paths": [
         "sql/i3/identity_bootstrap.sql",
         "internal/adapters/postgres/i4store/",
-        "internal/adapters/postgres/i5store/"
+        "internal/adapters/postgres/i5store/",
+        "internal/adapters/postgres/playerdatastore/restore.go"
       ],
       "allowed_write_paths": [
         "sql/i3/identity_bootstrap.sql",

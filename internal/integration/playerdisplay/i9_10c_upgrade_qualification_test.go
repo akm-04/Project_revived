@@ -36,7 +36,7 @@ import (
 
 const (
 	i910cAcceptedRevision  = "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b"
-	i910cCandidateRevision = "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356"
+	i910cCandidateRevision = "6dae1539f42d3c6d26bb550be2d6d8fd68a03f4bbc024b696f6d42dc7216d838"
 	i910cStackItem         = int64(100001001)
 )
 

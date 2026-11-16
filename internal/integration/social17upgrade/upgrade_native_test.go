@@ -261,7 +261,7 @@ func TestSocial17HistoricalUpgradeAndReceiptReplay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if bundle.RevisionID() == acceptedRevision || bundle.RevisionID() != "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356" {
+	if bundle.RevisionID() == acceptedRevision || bundle.RevisionID() != "6dae1539f42d3c6d26bb550be2d6d8fd68a03f4bbc024b696f6d42dc7216d838" {
 		t.Fatalf("candidate bundle revision=%s", bundle.RevisionID())
 	}
 	var gooseVersion int64

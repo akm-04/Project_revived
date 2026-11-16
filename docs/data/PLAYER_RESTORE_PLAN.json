@@ -12,6 +12,16 @@
    },
    "inbound": [
     {
+     "constraint": "adventure_single_attempts_player_id_fkey",
+     "table": "adventure_single_attempts_retired_r5d",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
      "constraint": "arena_friend_invitations_inviter_player_fkey",
      "table": "arena_friend_invitations",
      "columns": [
@@ -426,6 +436,16 @@
      ]
     },
     {
+     "constraint": "illusion_attempts_player_id_fkey",
+     "table": "illusion_attempts_retired_r5d",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
      "constraint": "mentor_applications_applicant_id_fkey",
      "table": "mentor_applications",
      "columns": [
@@ -646,6 +666,16 @@
      ]
     },
     {
+     "constraint": "player_undelivered_replies_player_id_fkey",
+     "table": "player_undelivered_replies",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
      "constraint": "publication_picture_reads_player_id_fkey",
      "table": "publication_picture_reads",
      "columns": [
@@ -814,6 +844,16 @@
      "references": [
       "player_id"
      ]
+    },
+    {
+     "constraint": "worldboss_attempts_player_id_fkey",
+     "table": "worldboss_attempts_retired_r5d",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
     }
    ]
   },
@@ -879,9 +919,110 @@
    "inbound": []
   },
   {
-   "table": "adventure_occurrences",
+   "table": "combat_attempts",
    "action": "restore",
-   "select": "SELECT * FROM \"adventure_occurrences\" WHERE \"player_id\" = $1::bigint",
+   "select": "SELECT * FROM \"combat_attempts\" WHERE \"actor_player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": false
+   },
+   "inbound": [
+    {
+     "constraint": "adventure_attempt_settlements_attempt_id_fkey",
+     "table": "adventure_attempt_settlements",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "arena_matches_attempt_id_fkey",
+     "table": "arena_matches",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "combat_attempt_members_attempt_id_fkey",
+     "table": "combat_attempt_members",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "combat_attempts_supersedes_attempt_id_fkey",
+     "table": "combat_attempts",
+     "columns": [
+      "supersedes_attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "illusion_attempt_settlements_attempt_id_fkey",
+     "table": "illusion_attempt_settlements",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "league_matches_attempt_id_fkey",
+     "table": "league_matches",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "top_floor_fights_attempt_id_fkey",
+     "table": "top_floor_fights",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "top_floor_task_fights_attempt_id_fkey",
+     "table": "top_floor_task_fights",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    },
+    {
+     "constraint": "worldboss_attempt_settlements_attempt_id_fkey",
+     "table": "worldboss_attempt_settlements",
+     "columns": [
+      "attempt_id"
+     ],
+     "references": [
+      "attempt_id"
+     ]
+    }
+   ]
+  },
+  {
+   "table": "adventure_attempt_settlements",
+   "action": "restore",
+   "select": "SELECT * FROM \"adventure_attempt_settlements\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
     "updated_at": false
@@ -889,9 +1030,9 @@
    "inbound": []
   },
   {
-   "table": "adventure_single_attempts",
+   "table": "adventure_occurrences",
    "action": "restore",
-   "select": "SELECT * FROM \"adventure_single_attempts\" WHERE \"player_id\" = $1::bigint",
+   "select": "SELECT * FROM \"adventure_occurrences\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
     "updated_at": false
@@ -987,77 +1128,6 @@
      ],
      "references": [
       "player_id"
-     ]
-    }
-   ]
-  },
-  {
-   "table": "combat_attempts",
-   "action": "restore",
-   "select": "SELECT * FROM \"combat_attempts\" WHERE \"actor_player_id\" = $1::bigint",
-   "versioned": {
-    "state_version": true,
-    "updated_at": false
-   },
-   "inbound": [
-    {
-     "constraint": "arena_matches_attempt_id_fkey",
-     "table": "arena_matches",
-     "columns": [
-      "attempt_id"
-     ],
-     "references": [
-      "attempt_id"
-     ]
-    },
-    {
-     "constraint": "combat_attempt_members_attempt_id_fkey",
-     "table": "combat_attempt_members",
-     "columns": [
-      "attempt_id"
-     ],
-     "references": [
-      "attempt_id"
-     ]
-    },
-    {
-     "constraint": "combat_attempts_supersedes_attempt_id_fkey",
-     "table": "combat_attempts",
-     "columns": [
-      "supersedes_attempt_id"
-     ],
-     "references": [
-      "attempt_id"
-     ]
-    },
-    {
-     "constraint": "league_matches_attempt_id_fkey",
-     "table": "league_matches",
-     "columns": [
-      "attempt_id"
-     ],
-     "references": [
-      "attempt_id"
-     ]
-    },
-    {
-     "constraint": "top_floor_fights_attempt_id_fkey",
-     "table": "top_floor_fights",
-     "columns": [
-      "attempt_id"
-     ],
-     "references": [
-      "attempt_id"
-     ]
-    },
-    {
-     "constraint": "top_floor_task_fights_attempt_id_fkey",
-     "table": "top_floor_task_fights",
-     "columns": [
-      "attempt_id"
-     ],
-     "references": [
-      "attempt_id"
      ]
     }
    ]
@@ -1510,9 +1580,9 @@
    "inbound": []
   },
   {
-   "table": "illusion_attempts",
+   "table": "illusion_attempt_settlements",
    "action": "restore",
-   "select": "SELECT * FROM \"illusion_attempts\" WHERE \"player_id\" = $1::bigint",
+   "select": "SELECT * FROM \"illusion_attempt_settlements\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
     "updated_at": false
@@ -1997,6 +2067,16 @@
    "select": "SELECT * FROM \"player_currency_balances\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": true,
+    "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_daily_reset_marks",
+   "action": "restore",
+   "select": "SELECT * FROM \"player_daily_reset_marks\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
     "updated_at": true
    },
    "inbound": []
@@ -3335,9 +3415,9 @@
    "inbound": []
   },
   {
-   "table": "worldboss_attempts",
+   "table": "worldboss_attempt_settlements",
    "action": "restore",
-   "select": "SELECT * FROM \"worldboss_attempts\" WHERE \"player_id\" = $1::bigint",
+   "select": "SELECT * FROM \"worldboss_attempt_settlements\" WHERE \"player_id\" = $1::bigint",
    "versioned": {
     "state_version": false,
     "updated_at": false
