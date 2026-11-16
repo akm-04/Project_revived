@@ -106,8 +106,9 @@ func TestCanonicalActivityAndRecallThroughFreshRetainedMID1(t *testing.T) {
 	if err != nil || !known || !observed.LastLoginAt.Equal(clock.at) || observed.StateVersion != 1 {
 		t.Fatal("fresh MID1 missed canonical activity", observed, known, err)
 	}
-	execute(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES(125801,$1,1,$2,'activity-native')`, callerAccount.String(), at)
-	task, err := domain.NewTask(125801, first.Player.PlayerID, 1, identifier(), at.Add(time.Minute), 72*time.Hour, domain.Baseline{AcademyLevel: 51, OwnedHeroCount: 3})
+	caller := allocateActivityPlayerID(t, pool, 1)
+	execute(`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2,1,$3,'activity-native')`, int64(caller), callerAccount.String(), at)
+	task, err := domain.NewTask(caller, first.Player.PlayerID, 1, identifier(), at.Add(time.Minute), 72*time.Hour, domain.Baseline{AcademyLevel: 51, OwnedHeroCount: 3})
 	if err != nil {
 		t.Fatal(err)
 	}
