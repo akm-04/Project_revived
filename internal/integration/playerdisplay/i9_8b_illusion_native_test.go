@@ -529,3 +529,52 @@ func TestI9_8BIllusionReportRetentionNative(t *testing.T) {
 		t.Fatal("retained illusion report purged", n)
 	}
 }
+
+// TestI9_8BIllusionRankKillsFirstNative pins the D428 board order on the store
+// paths: kills rank above every loss, kills by shorter time then higher hurt,
+// losses by higher hurt. RankOfTx must count the same order ReadRankTx serves.
+func TestI9_8BIllusionRankKillsFirstNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	lossLeader := rankingActor(t, p, server, false)
+	slowKill := rankingActor(t, p, server, false)
+	lowerHurtKill := rankingActor(t, p, server, false)
+	higherHurtKill := rankingActor(t, p, server, false)
+	openDay := int64(1)
+	fixtures := []struct {
+		player   identity.ActorContext
+		hurt     int64
+		costTime int64
+		killed   bool
+	}{
+		{lossLeader, 900, 3, false},
+		{slowKill, 500, 7, true},
+		{lowerHurtKill, 700, 5, true},
+		{higherHurtKill, 800, 5, true},
+	}
+	for _, fixture := range fixtures {
+		exec(t, p, `INSERT INTO illusion_occurrence_results(logical_server_id,open_day,campaign_id,player_id,hurt,cost_time,updated_at,killed)VALUES($1,$2,100001,$3,$4,$5,clock_timestamp(),$6)`,
+			int64(server), openDay, int64(fixture.player.PlayerID), fixture.hurt, fixture.costTime, fixture.killed)
+	}
+	store := illusionstore.Store{}
+	ranks, err := store.ReadRankTx(ctx, p, int64(server), openDay, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []identity.ActorContext{higherHurtKill, lowerHurtKill, slowKill, lossLeader}
+	if len(ranks) != len(want) {
+		t.Fatalf("rank count = %d, want %d: %+v", len(ranks), len(want), ranks)
+	}
+	for index, player := range want {
+		if ranks[index].PlayerID != int64(player.PlayerID) {
+			t.Fatalf("rank %d = %+v, want player %d (order %+v)", index+1, ranks[index], player.PlayerID, ranks)
+		}
+		rank, err := store.RankOfTx(ctx, p, int64(server), openDay, player.PlayerID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if rank != int64(index+1) {
+			t.Fatalf("RankOfTx(player %d) = %d, want %d", player.PlayerID, rank, index+1)
+		}
+	}
+}

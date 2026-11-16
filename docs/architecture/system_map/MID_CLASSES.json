@@ -76141,7 +76141,7 @@
     "internal/adapters/postgres/i5store/missions.go:57",
     "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/store.go:736",
-    "internal/adapters/postgres/illusionstore/store.go:151",
+    "internal/adapters/postgres/illusionstore/store.go:152",
     "internal/adapters/postgres/illusionstore/store.go:28",
     "internal/adapters/postgres/illusionstore/store.go:51",
     "internal/adapters/postgres/illusionstore/store.go:59",
@@ -76277,7 +76277,7 @@
     },
     {
      "file": "internal/adapters/postgres/illusionstore/store.go",
-     "line": 161,
+     "line": 162,
      "statement": "SELECT damage FROM illusion_attempt_settlements WHERE attempt_id=$1"
     },
     {
@@ -77532,7 +77532,7 @@
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
     "internal/adapters/postgres/i5store/store.go:736",
-    "internal/adapters/postgres/illusionstore/store.go:179",
+    "internal/adapters/postgres/illusionstore/store.go:180",
     "internal/adapters/postgres/illusionstore/store.go:28",
     "internal/adapters/postgres/illusionstore/store.go:51",
     "internal/adapters/postgres/illusionstore/store.go:59",
@@ -77906,7 +77906,7 @@
     },
     {
      "file": "internal/adapters/postgres/illusionstore/store.go",
-     "line": 186,
+     "line": 187,
      "statement": "SELECT content::text FROM illusion_reports WHERE report_id=$1 AND logical_server_id=$2 AND expires_at>$3"
     },
     {
@@ -78123,7 +78123,7 @@
     },
     {
      "file": "internal/adapters/postgres/illusionstore/store.go",
-     "line": 186,
+     "line": 187,
      "statement": "SELECT content::text FROM illusion_reports WHERE report_id=$1 AND logical_server_id=$2 AND expires_at>$3"
     }
    ],
