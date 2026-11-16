@@ -24,6 +24,9 @@ import (
 	domain "gxb.local/backend/v2/internal/domain/clientlog"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/observability"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/limits"
 )
 
 var ctx = context.Background()
@@ -203,6 +206,67 @@ func TestBadUploadsAreQuarantinedUnattributedWhenNoOwnerIsProven(t *testing.T) {
 	var rowExpiresIn time.Duration
 	if err := f.pool.Raw().QueryRow(ctx, `SELECT retention_class, expires_at-received_at FROM client_log_rows WHERE account_uid IS NULL AND log=$1`, marker).Scan(&rowRetention, &rowExpiresIn); err != nil || rowRetention != "ANOMALY" || rowExpiresIn != lifetime(domain.Anomaly) {
 		t.Fatalf("unattributed row retention=%s expiresIn=%s err=%v", rowRetention, rowExpiresIn, err)
+	}
+}
+
+// TestRequestJournalKeepsRedactedMultipartEnvelope drives the production edge,
+// journal and store: an undecodable multipart upload must persist an envelope
+// with its field names but no file body and no token value (I85_REQUEST_JOURNAL_V1 R3).
+func TestRequestJournalKeepsRedactedMultipartEnvelope(t *testing.T) {
+	f := newFixture(t)
+	journal := app.NewJournal(f.store, nil)
+	admission, err := httpedge.NewAdmission(4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler := httpedge.Handler{Limits: limits.Default(), Admission: admission, Operations: operation.Factory{Clock: f.clock}, Router: httpedge.NewRouter(), Journal: journal}
+	server := httptest.NewServer(handler)
+	t.Cleanup(server.Close)
+
+	const fileBody = "FILE-BODY-MARKER-must-not-be-stored"
+	marker := "journal-probe-" + f.uid
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	part, err := writer.CreateFormFile("avatar", "avatar.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := part.Write([]byte(fileBody)); err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range [][2]string{{"mid", "65000"}, {"token", "multipart-secret"}, {"note", marker}} {
+		if err := writer.WriteField(field[0], field[1]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	response, err := http.Post(server.URL, writer.FormDataContentType(), &body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusBadRequest {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	stopped, stop := context.WithCancel(ctx)
+	stop()
+	journal.Run(stopped)
+
+	var raw, retention string
+	err = f.pool.Raw().QueryRow(ctx, `SELECT encode(raw_envelope,'escape'), retention_class FROM request_journal WHERE encode(raw_envelope,'escape') LIKE $1`, "%"+marker+"%").Scan(&raw, &retention)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(raw, `name="mid"`) || !strings.Contains(raw, "65000") || retention != "ANOMALY" {
+		t.Fatalf("raw=%q retention=%s", raw, retention)
+	}
+	if strings.Contains(raw, fileBody) {
+		t.Fatalf("file body stored: %q", raw)
+	}
+	if strings.Contains(raw, "multipart-secret") {
+		t.Fatalf("token value stored: %q", raw)
 	}
 }
 

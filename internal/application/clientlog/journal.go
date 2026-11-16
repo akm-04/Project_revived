@@ -1,6 +1,7 @@
 package clientlog
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -131,8 +132,12 @@ func journalRow(record observability.RequestRecord) JournalRow {
 		row.Cause, _ = domain.Truncate(observability.RedactText(record.Cause.Error()), domain.MaxCauseBytes)
 	}
 	if outcome.KeepsRawEnvelope() && len(record.Raw) > 0 {
-		raw, _ := domain.Truncate(observability.RedactText(unescapeForm(record.Raw)), domain.MaxRawEnvelopeBytes)
-		row.RawEnvelope = []byte(raw)
+		raw := record.Raw
+		if bytes.HasPrefix(raw, []byte("payload=")) {
+			raw = []byte(unescapeForm(raw))
+		}
+		text, _ := domain.Truncate(observability.RedactText(string(raw)), domain.MaxRawEnvelopeBytes)
+		row.RawEnvelope = []byte(text)
 	}
 	return row
 }

@@ -207,6 +207,19 @@ func TestJournalRowsRedactAndClassify(t *testing.T) {
 	}
 }
 
+func TestJournalKeepsMultipartEnvelopeWithoutFormUnescaping(t *testing.T) {
+	store := &memoryStore{}
+	journal := NewJournal(store, nil)
+	const envelope = "--x\r\nContent-Disposition: form-data; name=\"file_path\"\r\n\r\n/a+b%2Fc\r\n"
+	journal.Record(observability.RequestRecord{Disposition: observability.RequestUndecodable, Raw: []byte(envelope)})
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	journal.Run(ctx)
+	if got := string(store.journal[0].RawEnvelope); got != envelope {
+		t.Fatalf("raw=%q", got)
+	}
+}
+
 // A-048: uploads that resolve to no grant share one bucket, so a poster without
 // a capability cannot store without bound.
 func TestIngestRateLimitsUnattributedUploads(t *testing.T) {
