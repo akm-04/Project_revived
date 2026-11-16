@@ -17,37 +17,41 @@ TOOLS = ROOT / "tools"
 CHECK = TOOLS / "check.sh"
 SELF = "tools/test_tool_coverage.py"
 
-FAILS_TODAY = "FAILS TODAY, lead triage"
+# Lead triage 2026-11-16: these validators assert one frozen stage's exact tree
+# (its migration high-water, toolchain pin, content revision and that stage's
+# text markers). Later stages moved all of those by design, so each fails on
+# the current tree without a live defect; the cited line is the validator's
+# own frozen pin, and the stage's acceptance is recorded in its sealed PassMap.
+HISTORICAL = "historical stage snapshot; fails on any later tree by design"
 
-# Unwired members. Reason first; a retired member also cites the replacement
-# guard as path:line. Entries with FAILS_TODAY stay unwired until the lead
-# triages the validator's failed output.
+# Unwired members. Reason first, then the path:line that justifies leaving it
+# unwired: the replacement guard, or for HISTORICAL the validator's own pin.
 UNWIRED = {
-    "tools/validate_ca1.py": (FAILS_TODAY, ""),
-    "tools/validate_ca2_1.py": (FAILS_TODAY, ""),
-    "tools/validate_ca2_2.py": (FAILS_TODAY, ""),
-    "tools/validate_ca2_3.py": (FAILS_TODAY, ""),
-    "tools/validate_ca3_1.py": (FAILS_TODAY, ""),
-    "tools/validate_ca3_2.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_2a.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_2b.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_2c.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_2d.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_3a_a.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_3a_b.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_3b.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_3b_stage_c.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_3b_stage_d.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_4a.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_4a_i1.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_4a_i2.py": (FAILS_TODAY, ""),
-    "tools/validate_ca4_5.py": (FAILS_TODAY, ""),
-    "tools/validate_ca5_2.py": (FAILS_TODAY, ""),
-    "tools/validate_ca5_3.py": (FAILS_TODAY, ""),
-    "tools/validate_ca5_4.py": (FAILS_TODAY, ""),
-    "tools/validate_i7a4a.py": (FAILS_TODAY, ""),
-    "tools/validate_i7a4b.py": (FAILS_TODAY, ""),
-    "tools/validate_r6.py": (FAILS_TODAY, ""),
+    "tools/validate_ca1.py": (HISTORICAL, "tools/validate_ca1.py:26"),
+    "tools/validate_ca2_1.py": (HISTORICAL, "tools/validate_ca2_1.py:10"),
+    "tools/validate_ca2_2.py": (HISTORICAL, "tools/validate_ca2_2.py:8"),
+    "tools/validate_ca2_3.py": (HISTORICAL, "tools/validate_ca2_3.py:8"),
+    "tools/validate_ca3_1.py": (HISTORICAL, "tools/validate_ca3_1.py:43"),
+    "tools/validate_ca3_2.py": (HISTORICAL, "tools/validate_ca3_2.py:74"),
+    "tools/validate_ca4_2a.py": (HISTORICAL, "tools/validate_ca4_2a.py:17"),
+    "tools/validate_ca4_2b.py": (HISTORICAL, "tools/validate_ca4_2b.py:43"),
+    "tools/validate_ca4_2c.py": (HISTORICAL, "tools/validate_ca4_2c.py:38"),
+    "tools/validate_ca4_2d.py": (HISTORICAL, "tools/validate_ca4_2d.py:46"),
+    "tools/validate_ca4_3a_a.py": (HISTORICAL, "tools/validate_ca4_3a_a.py:21"),
+    "tools/validate_ca4_3a_b.py": (HISTORICAL, "tools/validate_ca4_3a_b.py:55"),
+    "tools/validate_ca4_3b.py": (HISTORICAL, "tools/validate_ca4_3b.py:18"),
+    "tools/validate_ca4_3b_stage_c.py": (HISTORICAL, "tools/validate_ca4_3b_stage_c.py:18"),
+    "tools/validate_ca4_3b_stage_d.py": (HISTORICAL, "tools/validate_ca4_3b_stage_d.py:34"),
+    "tools/validate_ca4_4a.py": (HISTORICAL, "tools/validate_ca4_4a.py:13"),
+    "tools/validate_ca4_4a_i1.py": (HISTORICAL, "tools/validate_ca4_4a_i1.py:16"),
+    "tools/validate_ca4_4a_i2.py": (HISTORICAL, "tools/validate_ca4_4a_i2.py:16"),
+    "tools/validate_ca4_5.py": (HISTORICAL, "tools/validate_ca4_5.py:13"),
+    "tools/validate_ca5_2.py": (HISTORICAL, "tools/validate_ca5_2.py:16"),
+    "tools/validate_ca5_3.py": (HISTORICAL, "tools/validate_ca5_3.py:29"),
+    "tools/validate_ca5_4.py": (HISTORICAL, "tools/validate_ca5_4.py:33"),
+    "tools/validate_i7a4a.py": (HISTORICAL, "tools/validate_i7a4a.py:9"),
+    "tools/validate_i7a4b.py": (HISTORICAL, "tools/validate_i7a4b.py:9"),
+    "tools/validate_r6.py": (HISTORICAL, "tools/validate_r6.py:32"),
     "tools/build_i6c_guild_policy.py": (
         "needs the pinned oracle archive; the embedded policy is validated at load",
         "internal/content/guildpolicy/policy_test.go:5",
@@ -146,8 +150,6 @@ class ToolCoverageTest(unittest.TestCase):
             reason, citation = UNWIRED[member]
             if not reason:
                 problems.append("%s has an empty UNWIRED reason" % member)
-            if reason == FAILS_TODAY or not citation:
-                continue
             problem = citation_problem(citation)
             if problem:
                 problems.append("%s: %s" % (member, problem))
