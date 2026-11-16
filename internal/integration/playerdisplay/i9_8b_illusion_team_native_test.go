@@ -204,6 +204,28 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 	if _, err = s.GetReport(ctx, other, state.ReportID, op()); !errors.Is(err, di.ErrRefused) {
 		t.Fatalf("1362 crossed a logical server: %v", err)
 	}
+	// DL-2ffb0688: a member seated after the report stores no damage_result,
+	// so the 518 projection must tell that seat is_report 0.
+	late, _ := illusionTeamOwner(t, p, server)
+	if _, err = s.RemovePlayer(ctx, a, c.PlayerID, op()); err != nil {
+		t.Fatal("kick for late seat", err)
+	}
+	if _, err = s.EnterRoom(ctx, late, roomID, op()); err != nil {
+		t.Fatal("late join", err)
+	}
+	state = illusionRoomState(t, p, roomID)
+	if _, ok := state.DamageResults[fmt.Sprint(int64(late.PlayerID))]; ok {
+		t.Fatalf("late seat has a damage_result %+v", state.DamageResults)
+	}
+	reader := stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{},
+		Directory: i4store.PlayerDirectoryReader{}, Queryer: p}
+	notice, found, err := reader.ReadRoomNotice(ctx, fmt.Sprint(roomID))
+	if err != nil || !found || notice.ReportID != state.ReportID {
+		t.Fatalf("late seat notice %v %v %+v", found, err, notice)
+	}
+	if _, ok := notice.DamageResults[fmt.Sprint(int64(late.PlayerID))]; ok {
+		t.Fatalf("late seat notice has a damage_result %+v", notice.DamageResults)
+	}
 }
 
 // TestI9_8BIllusionTeamPowerFloorNative pins C5 through the production pick
