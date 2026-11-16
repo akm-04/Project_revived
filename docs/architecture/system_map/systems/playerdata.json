@@ -63,6 +63,7 @@
   ],
   "scenarios_naming": [],
   "unit": [
+   "audit_row_owner_test.go",
    "plan_test.go"
   ]
  }
