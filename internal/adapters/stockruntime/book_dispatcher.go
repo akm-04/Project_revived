@@ -6,6 +6,7 @@ import (
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/domain/economy"
+	ec "gxb.local/backend/v2/internal/domain/eventcentre"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/projection/lobby"
@@ -88,9 +89,15 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	return okI5(r.Body)
 }
 
+// The EventCentre rows below carry the same class and code as
+// eventcentre_dispatcher.go:182,184 so MID 1056/1059 agree with MID 1074.
 var bookFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
 	{match: book.ErrInvalid, class: failureMalformed, detail: "book_command_rejected"},
+	{match: book.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: book.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
+	{match: ec.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: ec.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
