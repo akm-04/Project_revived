@@ -24,7 +24,7 @@
   }
  ],
  "decorated_by": [
-  "observingMentorGraduation"
+  "observing"
  ],
  "dispatcher_files": [
   "internal/adapters/stockruntime/mentor_dispatcher.go"

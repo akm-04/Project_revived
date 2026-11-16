@@ -64,7 +64,7 @@
   "broadcast": {},
   "campaign": {
    "achievement": [
-    "*StarTotalTx"
+    "*NormalStarsTx"
    ],
    "missioninputs": [
     "*ReadTx"
@@ -915,7 +915,7 @@
   },
   "guildcampaign": {
    "achievement": [
-    "*PlayerBestDamageTx"
+    "*BestDamageTx"
    ],
    "guildcore": [
     "*CloseGuildTx",
@@ -1516,7 +1516,8 @@
   "librarylocal": {
    "achievement": [
     "*HeroLibraryInputsTx",
-    "*MarriedHeroCountTx"
+    "*MarriedHeroCountTx",
+    "*SchoolStoryCountTx"
    ],
    "combat": [
     "*PlayerCollectionInputsTx"
@@ -1535,7 +1536,7 @@
   "march": {},
   "memoir": {
    "achievement": [
-    "*TenthHighestFloorTx"
+    "*TenthFloorTx"
    ]
   },
   "mentor": {
@@ -2158,7 +2159,7 @@
     "*BookInputsTx"
    ],
    "campaign": [
-    "*StarTotalTx"
+    "*NormalStarsTx"
    ],
    "characterasset": [
     "NewCoherentReadScope",
@@ -2180,7 +2181,7 @@
     "Run"
    ],
    "guildcampaign": [
-    "*PlayerBestDamageTx"
+    "*BestDamageTx"
    ],
    "i5": [
     "*FenceActorTx",
@@ -2191,10 +2192,11 @@
    ],
    "librarylocal": [
     "*HeroLibraryInputsTx",
-    "*MarriedHeroCountTx"
+    "*MarriedHeroCountTx",
+    "*SchoolStoryCountTx"
    ],
    "memoir": [
-    "*TenthHighestFloorTx"
+    "*TenthFloorTx"
    ],
    "mentor": [
     "*GraduatedCountTx"
@@ -2227,9 +2229,6 @@
     "*Find",
     "*FindTx",
     "*PutTx"
-   ],
-   "store:librarystore": [
-    "*TalkClaimCountTx"
    ]
   },
   "activitydirectory": {

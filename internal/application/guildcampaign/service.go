@@ -66,6 +66,7 @@ type Guilds interface {
 }
 
 type Store interface {
+	BestDamageTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
 	LockChapterTx(context.Context, tx.Tx, int64, int64) (d.Chapter, bool, error)
 	ChapterWonTx(context.Context, tx.Queryer, int64, int64) (bool, error)
 	LockGuildChaptersTx(context.Context, tx.Tx, int64) ([]int64, error)

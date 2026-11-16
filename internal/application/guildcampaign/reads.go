@@ -104,6 +104,14 @@ type DetailView struct {
 	FightInfo    ProfileView
 }
 
+// BestDamageTx is 100004's owner fact: the player's best guild campaign hit.
+func (m Mode) BestDamageTx(c context.Context, q tx.Queryer, p identity.PlayerID) (int64, error) {
+	if m.Store == nil {
+		return 0, ErrUnavailable
+	}
+	return m.Store.BestDamageTx(c, q, p)
+}
+
 // CampaignLists is 601: every catalog chapter with this guild's state.
 func (m Mode) CampaignLists(c context.Context, a identity.ActorContext, op operation.Context) (Lists, error) {
 	return m.lists(c, a, op, false)

@@ -4515,11 +4515,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -5818,7 +5818,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 300,
+     "line": 281,
      "value": "repeatable_read"
     }
    ],
@@ -5826,7 +5826,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 300,
+     "line": 281,
      "value": "true"
     }
    ],
@@ -5834,7 +5834,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 300,
+     "line": 281,
      "value": "6"
     }
    ],
@@ -5845,7 +5845,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Load",
      "isolation": "repeatable_read",
-     "line": 300,
+     "line": 281,
      "read_only": "true",
      "retry": "6"
     }
@@ -5889,7 +5889,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 407,
+     "line": 388,
      "value": "repeatable_read"
     }
    ],
@@ -5897,7 +5897,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 407,
+     "line": 388,
      "value": "false"
     }
    ],
@@ -5908,7 +5908,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 407,
+     "line": 388,
      "value": "6"
     }
    ],
@@ -5941,7 +5941,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Fight",
      "isolation": "repeatable_read",
-     "line": 407,
+     "line": 388,
      "read_only": "false",
      "retry": "6"
     }
@@ -6279,7 +6279,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:316",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:297",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
@@ -6295,7 +6295,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 608,
+     "line": 589,
      "value": "repeatable_read"
     }
    ],
@@ -6303,12 +6303,12 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 608,
+     "line": 589,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/mode.go:623",
+    "internal/application/campaign/mode.go:604",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1386",
     "internal/application/i5/service.go:707"
@@ -6316,7 +6316,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 608,
+     "line": 589,
      "value": "6"
     }
    ],
@@ -6359,7 +6359,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Result",
      "isolation": "repeatable_read",
-     "line": 608,
+     "line": 589,
      "read_only": "false",
      "retry": "6"
     }
@@ -6573,7 +6573,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:316",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:297",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
@@ -13737,7 +13737,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -14321,7 +14321,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -14905,7 +14905,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -15489,7 +15489,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -16073,7 +16073,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -16657,7 +16657,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -17241,7 +17241,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -17825,7 +17825,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -18409,7 +18409,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -18993,7 +18993,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -19577,7 +19577,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -20161,7 +20161,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -20745,7 +20745,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -21329,7 +21329,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -21913,7 +21913,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:142",
     "internal/adapters/postgres/socialgiftstore/store.go:184",
     "internal/adapters/postgres/socialgiftstore/store.go:203",
@@ -22833,7 +22833,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:124",
     "internal/adapters/postgres/socialinvitestore/store.go:110",
     "internal/adapters/postgres/socialrecallstore/award.go:88",
@@ -23093,7 +23093,7 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/missions.go",
-     "line": 129,
+     "line": 113,
      "statement": "SELECT jsonb_build_object('relation_id',relation_id::text,'won_at',won_at,'items',items,'state_version',state_version)::text FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2"
     },
     {
@@ -28380,8 +28380,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48",
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38",
     "internal/adapters/postgres/rankingstore/scores.go:65",
     "internal/adapters/postgres/rankingstore/scores.go:83"
    ],
@@ -32815,7 +32815,7 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:124",
     "internal/adapters/postgres/socialinvitestore/store.go:110",
     "internal/adapters/postgres/socialrecallstore/award.go:88",
@@ -33075,7 +33075,7 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/missions.go",
-     "line": 129,
+     "line": 113,
      "statement": "SELECT jsonb_build_object('relation_id',relation_id::text,'won_at',won_at,'items',items,'state_version',state_version)::text FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2"
     },
     {
@@ -36664,7 +36664,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "repeatable_read"
     }
    ],
@@ -36672,7 +36672,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "true"
     }
    ],
@@ -36680,7 +36680,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "1"
     }
    ],
@@ -36691,7 +36691,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 122,
+     "line": 130,
      "read_only": "true",
      "retry": "1"
     }
@@ -36714,12 +36714,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 72,
+     "line": 64,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -36735,12 +36735,12 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 139,
+     "line": 140,
      "value": "serializable"
     }
    ],
@@ -36748,12 +36748,12 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "true"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 139,
+     "line": 140,
      "value": "false"
     }
    ],
@@ -36761,12 +36761,12 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "1"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 139,
+     "line": 140,
      "value": "3"
     }
    ],
@@ -36786,7 +36786,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 122,
+     "line": 130,
      "read_only": "true",
      "retry": "1"
     },
@@ -36794,7 +36794,7 @@
      "file": "internal/application/guildcampaign/service.go",
      "function": "Service.beginRun",
      "isolation": "serializable",
-     "line": 139,
+     "line": 140,
      "read_only": "false",
      "retry": "3"
     }
@@ -36817,12 +36817,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 72,
+     "line": 64,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -36878,7 +36878,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "repeatable_read"
     }
    ],
@@ -36886,7 +36886,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "true"
     }
    ],
@@ -36894,7 +36894,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "1"
     }
    ],
@@ -36905,7 +36905,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 122,
+     "line": 130,
      "read_only": "true",
      "retry": "1"
     }
@@ -36928,12 +36928,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 72,
+     "line": 64,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -36980,8 +36980,8 @@
     "internal/adapters/postgres/combatstore/store.go:206",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:260",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:131",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:62",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:123",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:54",
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
@@ -37294,7 +37294,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 45,
+     "line": 37,
      "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
@@ -37404,17 +37404,17 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 281,
+     "line": 280,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('award_id',award_id,'remaining',remaining,'expires',EXTRACT(EPOCH FROM expires_at)::bigint,'next',EXTRACT(EPOCH FROM next_slot)::bigint) ORDER BY award_id),'[]'::jsonb)::text FROM guild_campaign_awards WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 346,
+     "line": 345,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'award_id',award_id,'applied',EXTRACT(EPOCH FROM applied_at)::bigint) ORDER BY applied_at,player_id),'[]'::jsonb)::text FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
@@ -37451,8 +37451,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildcampaignstore/mode.go:368",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:384"
+    "internal/adapters/postgres/guildcampaignstore/mode.go:367",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:383"
    ],
    "system": "guildcampaign",
    "transactions": [
@@ -37483,17 +37483,17 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 281,
+     "line": 280,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('award_id',award_id,'remaining',remaining,'expires',EXTRACT(EPOCH FROM expires_at)::bigint,'next',EXTRACT(EPOCH FROM next_slot)::bigint) ORDER BY award_id),'[]'::jsonb)::text FROM guild_campaign_awards WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 346,
+     "line": 345,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'award_id',award_id,'applied',EXTRACT(EPOCH FROM applied_at)::bigint) ORDER BY applied_at,player_id),'[]'::jsonb)::text FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
@@ -37514,7 +37514,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 191,
+     "line": 199,
      "value": "repeatable_read"
     }
    ],
@@ -37522,7 +37522,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 191,
+     "line": 199,
      "value": "true"
     }
    ],
@@ -37530,7 +37530,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 191,
+     "line": 199,
      "value": "1"
     }
    ],
@@ -37541,7 +37541,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.DamageRank",
      "isolation": "repeatable_read",
-     "line": 191,
+     "line": 199,
      "read_only": "true",
      "retry": "1"
     }
@@ -37564,7 +37564,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -37580,7 +37580,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 232,
+     "line": 240,
      "value": "repeatable_read"
     }
    ],
@@ -37588,7 +37588,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 232,
+     "line": 240,
      "value": "true"
     }
    ],
@@ -37596,7 +37596,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 232,
+     "line": 240,
      "value": "1"
     }
    ],
@@ -37607,7 +37607,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.AllServerRank",
      "isolation": "repeatable_read",
-     "line": 232,
+     "line": 240,
      "read_only": "true",
      "retry": "1"
     }
@@ -37630,7 +37630,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 237,
+     "line": 236,
      "statement": "SELECT first_player_id,first_guild_id,first_at,fastest_guild_id,fastest_seconds FROM guild_campaign_server_kills WHERE logical_server_id=$1 AND copy_id=$2"
     },
     {
@@ -37646,7 +37646,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 266,
+     "line": 274,
      "value": "repeatable_read"
     }
    ],
@@ -37654,7 +37654,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 266,
+     "line": 274,
      "value": "true"
     }
    ],
@@ -37662,7 +37662,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 266,
+     "line": 274,
      "value": "1"
     }
    ],
@@ -37673,7 +37673,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.GuildLog",
      "isolation": "repeatable_read",
-     "line": 266,
+     "line": 274,
      "read_only": "true",
      "retry": "1"
     }
@@ -37738,14 +37738,14 @@
     "internal/adapters/postgres/combatstore/store.go:126",
     "internal/adapters/postgres/combatstore/store.go:235",
     "internal/adapters/postgres/combatstore/store.go:26",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:131",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:143",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:149",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:155",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:186",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:225",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:270",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:62",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:123",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:135",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:141",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:147",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:185",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:224",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:269",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:54",
     "internal/adapters/postgres/guildcampaignstore/store.go:121",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
@@ -37925,22 +37925,22 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 45,
+     "line": 37,
      "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 72,
+     "line": 64,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 195,
+     "line": 194,
      "statement": "SELECT COALESCE(MAX(damage),0) FROM guild_campaign_server_records WHERE logical_server_id=$1 AND copy_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 237,
+     "line": 236,
      "statement": "SELECT first_player_id,first_guild_id,first_at,fastest_guild_id,fastest_seconds FROM guild_campaign_server_kills WHERE logical_server_id=$1 AND copy_id=$2"
     },
     {
@@ -38000,12 +38000,12 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 139,
+     "line": 140,
      "value": "serializable"
     }
    ],
@@ -38013,12 +38013,12 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "true"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 139,
+     "line": 140,
      "value": "false"
     }
    ],
@@ -38026,12 +38026,12 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 122,
+     "line": 130,
      "value": "1"
     },
     {
      "file": "internal/application/guildcampaign/service.go",
-     "line": 139,
+     "line": 140,
      "value": "3"
     }
    ],
@@ -38051,7 +38051,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.lists",
      "isolation": "repeatable_read",
-     "line": 122,
+     "line": 130,
      "read_only": "true",
      "retry": "1"
     },
@@ -38059,7 +38059,7 @@
      "file": "internal/application/guildcampaign/service.go",
      "function": "Service.beginRun",
      "isolation": "serializable",
-     "line": 139,
+     "line": 140,
      "read_only": "false",
      "retry": "3"
     }
@@ -38082,12 +38082,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 72,
+     "line": 64,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -38182,7 +38182,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 369,
+     "line": 377,
      "value": "repeatable_read"
     }
    ],
@@ -38190,7 +38190,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 369,
+     "line": 377,
      "value": "true"
     }
    ],
@@ -38198,7 +38198,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/reads.go",
-     "line": 369,
+     "line": 377,
      "value": "1"
     }
    ],
@@ -38209,7 +38209,7 @@
      "file": "internal/application/guildcampaign/reads.go",
      "function": "Mode.MapDetail",
      "isolation": "repeatable_read",
-     "line": 369,
+     "line": 377,
      "read_only": "true",
      "retry": "1"
     }
@@ -38232,12 +38232,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 27,
+     "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 45,
+     "line": 37,
      "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
@@ -38274,7 +38274,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildcampaignstore/mode.go:62"
+    "internal/adapters/postgres/guildcampaignstore/mode.go:54"
    ],
    "system": "guildcampaign",
    "transactions": [
@@ -38305,7 +38305,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 45,
+     "line": 37,
      "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
@@ -43988,8 +43988,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -44113,8 +44113,8 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48",
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "petcampaign",
@@ -44321,8 +44321,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -44448,8 +44448,8 @@
     "internal/adapters/postgres/i5store/store.go:383",
     "internal/adapters/postgres/i5store/store.go:414",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -44851,8 +44851,8 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48",
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "petcampaign",
@@ -45084,8 +45084,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -45185,8 +45185,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -45310,8 +45310,8 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48",
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "petcampaign",
@@ -45547,8 +45547,8 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48",
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "petcampaign",
@@ -45764,8 +45764,8 @@
     "internal/adapters/postgres/i5store/store.go:383",
     "internal/adapters/postgres/i5store/store.go:414",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -45920,8 +45920,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -46042,8 +46042,8 @@
     "internal/adapters/postgres/i5store/store.go:383",
     "internal/adapters/postgres/i5store/store.go:414",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/petcampaignstore/store.go:41",
-    "internal/adapters/postgres/petcampaignstore/store.go:48"
+    "internal/adapters/postgres/petcampaignstore/store.go:31",
+    "internal/adapters/postgres/petcampaignstore/store.go:38"
    ],
    "system": "petcampaign",
    "transactions": [
@@ -46739,11 +46739,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -47121,11 +47121,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -47503,11 +47503,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -47885,11 +47885,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -48267,11 +48267,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -48649,11 +48649,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -49031,11 +49031,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -49413,11 +49413,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -49795,11 +49795,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -50177,11 +50177,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -50559,11 +50559,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -50941,11 +50941,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -51323,11 +51323,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -52095,11 +52095,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -52477,11 +52477,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -52859,11 +52859,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -53241,11 +53241,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -53623,11 +53623,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -54005,11 +54005,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -54387,11 +54387,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -70731,6 +70731,7 @@
     }
    ],
    "unknown": [
+    "FANOUT Validate has 129 implementers, not followed: achievement.Event.Validate, achievement.Notice.Validate, activitydirectory.ProjectionContext.Validate, bookskill.Command.Validate, bootstrap.PlayerActivityObservation.Validate, broadcast.Message.Validate, characterasset.ActorOrigin.Validate, characterasset.AppearanceLIVEDefinition.Validate, characterasset.AppearancePetStyleDefinition.Validate, characterasset.AppearanceSkinDefinition.Validate, characterasset.AppearanceSkinItemDefinition.Validate, characterasset.BattleCharacterScopeWitness.Validate, characterasset.BorrowedCapabilityProvenance.Validate, characterasset.BorrowedHeroBattleContribution.Validate, characterasset.BorrowedHeroComposite.Validate, characterasset.BorrowedPetBattleContribution.Validate, characterasset.BorrowedPetComposite.Validate, characterasset.CoherentReadScope.Validate, characterasset.EffectiveHeroAppearance.Validate, characterasset.EffectivePetAppearance.Validate, characterasset.HeroAppearanceContribution.Validate, characterasset.HeroBaseObservation.Validate, characterasset.OwnedHeroBattleContribution.Validate, characterasset.OwnedHeroComposite.Validate, characterasset.OwnedPetBattleContribution.Validate, characterasset.OwnedPetComposite.Validate, characterasset.PetAppearanceContribution.Validate, characterasset.PetBaseObservation.Validate, characterasset.PracticeContribution.Validate, characterasset.ProviderDisposition.Validate, characterasset.QualifiedBorrowedHeroReference.Validate, characterasset.QualifiedBorrowedPetReference.Validate, characterasset.RawEquipmentState.Validate, characterasset.RestorationOwner.Validate, characterasset.SavedPresetReferenceState.Validate, characterasset.SyntheticActorIdentity.Validate, characterasset.SyntheticFeaturePayload.Validate, characterasset.SyntheticHeroBase.Validate, characterasset.SyntheticHeroBattleContribution.Validate, characterasset.SyntheticHeroProjection.Validate, characterasset.SyntheticHeroSourceLineage.Validate, characterasset.SyntheticPetBase.Validate, characterasset.SyntheticPetBattleContribution.Validate, characterasset.SyntheticPetProjection.Validate, characterasset.SyntheticPetSourceLineage.Validate, characterasset.SyntheticProfileProvenance.Validate, characterhero.HeroSkillLevelResult.Validate, characterpet.AcquisitionPolicy.Validate, characterpet.AcquisitionTemplate.Validate, characterpet.PetUniqueEquipmentCommittedFact.Validate, characterpet.ProgressionPolicy.Validate, characterpet.ProgressionTemplate.Validate, characterpet.SkillSlotDefinition.Validate, characterpractice.HeroPracticeSnapshot.Validate, characterpractice.PetPracticeSnapshot.Validate, characterpractice.PolicyFacts.Validate, characterpractice.PracticeDelta.Validate, characterpractice.Proposal.Validate, characterpractice.Root.Validate, commerceprivilege.Authority.Validate, commerceprivilege.Import.Validate, course.Command.Validate, directorysync.CanonicalSnapshot.Validate, directorysync.ProjectionSnapshot.Validate, dormhouse.Command.Validate, elementequipment.Command.Validate, eventcentre.Command.Validate, frienddm.Delivery.Validate, frienddm.Manifest.Validate, frienddm.Occurrence.Validate, frienddm.Projection.Validate, generaldm.Intent.Validate, generation.TimedOperation.Validate, guildbroadcast.ContentPolicy.Validate, guildcore.Policy.Validate, guildcore.PolicyBinding.Validate, guildinvite.ContentPolicy.Validate, guildrental.Policy.Validate, guildtea.Policy.Validate, heroevolution.Command.Validate, i5.AdminOperator.Validate, i5.PartnerEntityLineIdentity.Validate, i5.PublicPlayerBasis.Validate, i5.SpiritLineIdentity.Validate, identitylifecycle.BearerDerivationKey.Validate, inscription.Command.Validate, libraryforum.Command.Validate, libraryforum.PageQuery.Validate, librarylocal.Command.Validate, playerdirectory.Profile.Validate, playerdisplay.Command.Validate, playerdisplay.Origin.Validate, playerdisplay.State.Validate, playerpresentation.Minimal.Validate, playerroot.NameSnapshot.Validate, playerroot.Root.Validate, profilefeedback.PageRequest.Validate, publicprofile.ContentPolicy.Validate, publicprofile.MediaHistory.Validate, publicprofile.MediaReference.Validate, publicprofile.Root.Validate, publicprofile.Selection.Validate, publicprofile.ShowcaseContentPolicy.Validate, realtimewakeup.Envelope.Validate, socialgift.Content.Validate, socialgift.Epoch.Validate, socialgift.Transfer.Validate, socialinbox.Notice.Validate, socialinbox.RoomInvite.Validate, socialinbox.SourceKey.Validate, socialinvite.BindingRecord.Validate, socialinvite.ClaimRecord.Validate, socialinvite.InviteeFacts.Validate, socialinvite.Mission.Validate, socialinvite.MissionCatalog.Validate, socialpresence.LeaseRef.Validate, socialpresence.Observation.Validate, socialprojection.SearchQuery.Validate, socialrecall.AwardCatalog.Validate, socialrecall.AwardRecord.Validate, socialrecall.AwardSpec.Validate, socialrelation.Block.Validate, socialrelation.FriendRequest.Validate, socialrelation.Friendship.Validate, socialrelation.RequestEpoch.Validate, socialrelation.Root.Validate, socialreloadref.ReloadReference.Validate, spirit.Command.Validate, topfloor.StartCommand.Validate at internal/adapters/postgres/librarystore/facets.go:29",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:328"
    ],
@@ -83266,7 +83267,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/mentorstore/applications.go:60",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:106",
     "internal/adapters/postgres/mentorstore/states.go:15",
     "internal/adapters/postgres/socialrelationstore/mutations.go:64",
@@ -83458,7 +83459,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:124",
     "internal/adapters/postgres/mentorstore/states.go:15",
     "internal/adapters/postgres/mentorstore/states.go:53"
@@ -83562,8 +83563,223 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/mentorstore/relationships.go:124",
+    "internal/adapters/postgres/spiritstore/store.go:41"
+   ],
+   "system": "mentor",
+   "transactions": [
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 123,
+     "read_only": "UNKNOWN",
+     "retry": "3"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 502,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 557,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 557,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 557,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 637,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 637,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 708,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 738,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 99,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 219,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 500,
+     "statement": "SELECT payload::text FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 24,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 60,
+     "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/missions.go",
+     "line": 113,
+     "statement": "SELECT jsonb_build_object('relation_id',relation_id::text,'won_at',won_at,'items',items,'state_version',state_version)::text FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 93,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/transaction.go",
+     "line": 13,
+     "statement": "SELECT current_setting('transaction_isolation')"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/transaction.go",
+     "line": 13,
+     "statement": "SELECT current_setting('transaction_read_only')::boolean"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED apply at internal/application/mentor/service.go:176",
+    "UNRESOLVED body at internal/application/mentor/service.go:124",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
+   ],
+   "writes": "state"
+  },
+  {
+   "handler": "internal/adapters/stockruntime/mentor_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 123,
+     "value": "UNKNOWN"
+    }
+   ],
+   "mid": 1863,
+   "read_only": [
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 123,
+     "value": "UNKNOWN"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/service.go:707",
+    "internal/application/mentor/service.go:189"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 123,
+     "value": "3"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:63",
+    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:248",
+    "internal/adapters/postgres/i5store/store.go:269",
+    "internal/adapters/postgres/i5store/store.go:326",
+    "internal/adapters/postgres/i5store/store.go:383",
+    "internal/adapters/postgres/i5store/store.go:430",
+    "internal/adapters/postgres/i5store/store.go:449",
+    "internal/adapters/postgres/i5store/store.go:464",
+    "internal/adapters/postgres/i5store/store.go:482",
+    "internal/adapters/postgres/i5store/store.go:493",
+    "internal/adapters/postgres/i5store/store.go:526",
+    "internal/adapters/postgres/mentorstore/missions.go:145",
+    "internal/adapters/postgres/mentorstore/missions.go:67",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "mentor",
@@ -83701,221 +83917,6 @@
     {
      "file": "internal/adapters/postgres/mentorstore/missions.go",
      "line": 129,
-     "statement": "SELECT jsonb_build_object('relation_id',relation_id::text,'won_at',won_at,'items',items,'state_version',state_version)::text FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2"
-    },
-    {
-     "file": "internal/adapters/postgres/mentorstore/relationships.go",
-     "line": 82,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
-    },
-    {
-     "file": "internal/adapters/postgres/mentorstore/relationships.go",
-     "line": 93,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
-    },
-    {
-     "file": "internal/adapters/postgres/mentorstore/transaction.go",
-     "line": 13,
-     "statement": "SELECT current_setting('transaction_isolation')"
-    },
-    {
-     "file": "internal/adapters/postgres/mentorstore/transaction.go",
-     "line": 13,
-     "statement": "SELECT current_setting('transaction_read_only')::boolean"
-    }
-   ],
-   "unknown": [
-    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/mentor/service.go:176",
-    "UNRESOLVED body at internal/application/mentor/service.go:124",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:123",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:123"
-   ],
-   "writes": "state"
-  },
-  {
-   "handler": "internal/adapters/stockruntime/mentor_dispatcher.go",
-   "isolation": [
-    {
-     "file": "internal/application/mentor/service.go",
-     "line": 123,
-     "value": "UNKNOWN"
-    }
-   ],
-   "mid": 1863,
-   "read_only": [
-    {
-     "file": "internal/application/mentor/service.go",
-     "line": 123,
-     "value": "UNKNOWN"
-    }
-   ],
-   "receipt_writes": [
-    "internal/application/i5/service.go:707",
-    "internal/application/mentor/service.go:189"
-   ],
-   "retry": [
-    {
-     "file": "internal/application/mentor/service.go",
-     "line": 123,
-     "value": "3"
-    }
-   ],
-   "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
-    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
-    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
-    "internal/adapters/postgres/i5store/store.go:248",
-    "internal/adapters/postgres/i5store/store.go:269",
-    "internal/adapters/postgres/i5store/store.go:326",
-    "internal/adapters/postgres/i5store/store.go:383",
-    "internal/adapters/postgres/i5store/store.go:430",
-    "internal/adapters/postgres/i5store/store.go:449",
-    "internal/adapters/postgres/i5store/store.go:464",
-    "internal/adapters/postgres/i5store/store.go:482",
-    "internal/adapters/postgres/i5store/store.go:493",
-    "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/mentorstore/missions.go:161",
-    "internal/adapters/postgres/mentorstore/missions.go:83",
-    "internal/adapters/postgres/spiritstore/store.go:41"
-   ],
-   "system": "mentor",
-   "transactions": [
-    {
-     "file": "internal/application/mentor/service.go",
-     "function": "Service.run",
-     "isolation": "UNKNOWN",
-     "line": 123,
-     "read_only": "UNKNOWN",
-     "retry": "3"
-    }
-   ],
-   "unbounded_read": [
-    {
-     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 25,
-     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 25,
-     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
-     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
-     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
-     "line": 21,
-     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
-     "line": 21,
-     "statement": "SELECT payload::text FROM"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
-     "line": 69,
-     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/privilege.go",
-     "line": 25,
-     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/privilege.go",
-     "line": 25,
-     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
-     "line": 25,
-     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
-     "line": 25,
-     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 502,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 557,
-     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 557,
-     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 557,
-     "statement": "WITH a AS ("
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 637,
-     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 637,
-     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 708,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 738,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
-    },
-    {
-     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
-     "line": 99,
-     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 219,
-     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 500,
-     "statement": "SELECT payload::text FROM mail_tuning"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 24,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 60,
-     "statement": "SELECT receipt_id::text, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
-    },
-    {
-     "file": "internal/adapters/postgres/mentorstore/missions.go",
-     "line": 145,
      "statement": "SELECT jsonb_build_object('relation_id',relation_id::text,'won_at',won_at,'items',items,'state_version',state_version)::text FROM mentor_exam_receipts WHERE student_id=$1 AND mission_id=$2 FOR UPDATE"
     },
     {
@@ -91580,8 +91581,8 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63",
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "memoir",
@@ -91807,8 +91808,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63"
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40"
    ],
    "system": "memoir",
    "transactions": [
@@ -92080,8 +92081,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63"
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40"
    ],
    "system": "memoir",
    "transactions": [
@@ -92190,8 +92191,8 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63",
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "memoir",
@@ -92367,8 +92368,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63"
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40"
    ],
    "system": "memoir",
    "transactions": [
@@ -92640,8 +92641,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63"
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40"
    ],
    "system": "memoir",
    "transactions": [
@@ -92752,8 +92753,8 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63",
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "memoir",
@@ -93019,8 +93020,8 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63",
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "memoir",
@@ -93515,8 +93516,8 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63",
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "memoir",
@@ -93757,8 +93758,8 @@
     "internal/adapters/postgres/i5store/store.go:482",
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63",
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40",
     "internal/adapters/postgres/spiritstore/store.go:41"
    ],
    "system": "memoir",
@@ -93956,8 +93957,8 @@
     "internal/adapters/postgres/i5store/store.go:383",
     "internal/adapters/postgres/i5store/store.go:414",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63"
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40"
    ],
    "system": "memoir",
    "transactions": [
@@ -94350,8 +94351,8 @@
     "internal/adapters/postgres/i5store/store.go:269",
     "internal/adapters/postgres/i5store/store.go:383",
     "internal/adapters/postgres/i5store/store.go:414",
-    "internal/adapters/postgres/memoirstore/store.go:56",
-    "internal/adapters/postgres/memoirstore/store.go:63"
+    "internal/adapters/postgres/memoirstore/store.go:33",
+    "internal/adapters/postgres/memoirstore/store.go:40"
    ],
    "system": "memoir",
    "transactions": [
@@ -94724,7 +94725,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:269",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:74",
+    "internal/adapters/postgres/occultstore/store.go:58",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -94831,7 +94832,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:269",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:74",
+    "internal/adapters/postgres/occultstore/store.go:58",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -95081,7 +95082,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:269",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:74",
+    "internal/adapters/postgres/occultstore/store.go:58",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:71",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
@@ -95663,7 +95664,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:63",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -96434,11 +96435,11 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
-    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:68",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -96838,7 +96839,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -96942,10 +96943,10 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -97443,11 +97444,11 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
-    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:68",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -97847,7 +97848,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -97982,11 +97983,11 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
-    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:68",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -98386,7 +98387,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -98614,11 +98615,11 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
-    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:68",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -99018,7 +99019,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -99153,11 +99154,11 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
-    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:68",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -99557,7 +99558,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -99692,11 +99693,11 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
-    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:68",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -100096,7 +100097,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -100231,11 +100232,11 @@
     "internal/adapters/postgres/i5store/store.go:493",
     "internal/adapters/postgres/i5store/store.go:526",
     "internal/adapters/postgres/i5store/store.go:734",
-    "internal/adapters/postgres/occultstore/store.go:110",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:60",
-    "internal/adapters/postgres/occultstore/store.go:79",
-    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:44",
+    "internal/adapters/postgres/occultstore/store.go:63",
+    "internal/adapters/postgres/occultstore/store.go:68",
+    "internal/adapters/postgres/occultstore/store.go:94",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:41"
@@ -100635,7 +100636,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -100706,7 +100707,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:269",
     "internal/adapters/postgres/occultstore/store.go:21",
-    "internal/adapters/postgres/occultstore/store.go:74",
+    "internal/adapters/postgres/occultstore/store.go:58",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -100870,7 +100871,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 91,
+     "line": 75,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -122732,11 +122733,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
@@ -123114,11 +123115,11 @@
     "internal/adapters/postgres/i5store/store.go:734",
     "internal/adapters/postgres/librarystore/acts.go:11",
     "internal/adapters/postgres/librarystore/admissions.go:52",
-    "internal/adapters/postgres/librarystore/facets.go:106",
-    "internal/adapters/postgres/librarystore/facets.go:118",
-    "internal/adapters/postgres/librarystore/facets.go:130",
+    "internal/adapters/postgres/librarystore/facets.go:107",
+    "internal/adapters/postgres/librarystore/facets.go:119",
     "internal/adapters/postgres/librarystore/facets.go:78",
     "internal/adapters/postgres/librarystore/facets.go:86",
+    "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:28",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:228",
