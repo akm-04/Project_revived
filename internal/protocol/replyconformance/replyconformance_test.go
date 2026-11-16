@@ -1,6 +1,7 @@
 package replyconformance
 
 import (
+	"encoding/json"
 	"sort"
 	"strings"
 	"testing"
@@ -58,6 +59,72 @@ func TestCheckerFollowsAnAbsentListParentsRequirement(t *testing.T) {
 func TestCheckerIgnoresMIDsWithoutObligations(t *testing.T) {
 	if violations := (Checker{}).Check(20480, nil); len(violations) != 0 {
 		t.Fatalf("violations %#v", violations)
+	}
+}
+
+// provenRepeatedPaths are the only generated paths allowed to repeat a segment;
+// each is read as a nested key at the client line cited in the extractor test.
+var provenRepeatedPaths = map[string]bool{
+	"301:rank_list[].rank_info.rank_info":      true,
+	"1362:report.report":                       true,
+	"2411:hero_stat[].hero_stat.stay_pos":      true,
+	"2411:info.hero_stat[].hero_stat":          true,
+	"2411:info.hero_stat[].hero_stat.stay_pos": true,
+}
+
+func repeatedSegment(path string) string {
+	seen := map[string]bool{}
+	for _, part := range strings.Split(strings.ReplaceAll(path, "[]", ""), ".") {
+		if part == "" {
+			continue
+		}
+		if seen[part] {
+			return part
+		}
+		seen[part] = true
+	}
+	return ""
+}
+
+// TestGeneratedObligationsHaveNoUnprovenRepeatedPath is the completeness check
+// for the extractor's storage-binding repair: it fails when the live embedded
+// population grows a repeated path outside the proven table, or when a proven
+// entry disappears.
+func TestGeneratedObligationsHaveNoUnprovenRepeatedPath(t *testing.T) {
+	var document struct {
+		MIDs map[string]struct {
+			Paths []json.RawMessage `json:"paths"`
+		} `json:"mids"`
+	}
+	if err := json.Unmarshal(generated, &document); err != nil {
+		t.Fatalf("embedded obligations: %v", err)
+	}
+	found := map[string]bool{}
+	for mid, record := range document.MIDs {
+		for _, raw := range record.Paths {
+			var entry []json.RawMessage
+			if err := json.Unmarshal(raw, &entry); err != nil || len(entry) < 2 {
+				continue
+			}
+			var path string
+			if json.Unmarshal(entry[0], &path) != nil {
+				continue
+			}
+			if repeatedSegment(path) == "" {
+				continue
+			}
+			found[mid+":"+path] = true
+		}
+	}
+	for key := range found {
+		if !provenRepeatedPaths[key] {
+			t.Fatalf("MID/path %s repeats a segment without client proof", key)
+		}
+	}
+	for key := range provenRepeatedPaths {
+		if !found[key] {
+			t.Fatalf("proven repeated path %s is no longer generated; update the table", key)
+		}
 	}
 }
 
