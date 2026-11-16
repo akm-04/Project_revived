@@ -72,7 +72,9 @@ func TestModeChoiceChangeRules(t *testing.T) {
 				t.Fatalf("%s: client-attested mode does not supersede on a choice change", registration.Key)
 			}
 		}
-		if registration.OnChoiceChange != ChoiceReplaysFrozen && registration.OnChoiceChange != ChoiceSupersedes {
+		switch registration.OnChoiceChange {
+		case ChoiceReplaysFrozen, ChoiceSupersedes, ChoiceRefusedWhileOpen:
+		default:
 			t.Fatalf("%s does not state a choice-change rule", registration.Key)
 		}
 	}
@@ -111,6 +113,30 @@ func TestModeRegistrationGuards(t *testing.T) {
 	unstated.OnChoiceChange = ""
 	if err := validateModeRegistrations([]ModeRegistration{unstated}); err == nil {
 		t.Fatal("mode without a choice-change rule accepted")
+	}
+	unknown := MustMode(ModeCampaign)
+	unknown.Key = ModeKey("FIXTURE_MODE")
+	unknown.OnChoiceChange = ChoiceChangeRule("NO_SUCH_RULE")
+	if err := validateModeRegistrations([]ModeRegistration{unknown}); err == nil {
+		t.Fatal("unknown choice-change rule accepted")
+	}
+	refusedPractice := MustMode(ModePetCampaignPractice)
+	refusedPractice.Key = ModeKey("FIXTURE_MODE")
+	refusedPractice.OnChoiceChange = ChoiceRefusedWhileOpen
+	if err := validateModeRegistrations([]ModeRegistration{refusedPractice}); err != nil {
+		t.Fatalf("an unpinned profile may name the refusal rule: %v", err)
+	}
+	refusedServer := MustMode(ModeArena)
+	refusedServer.Key = ModeKey("FIXTURE_MODE")
+	refusedServer.OnChoiceChange = ChoiceRefusedWhileOpen
+	if err := validateModeRegistrations([]ModeRegistration{refusedServer}); err == nil {
+		t.Fatal("server-report mode accepted the refusal rule")
+	}
+	refusedClient := MustMode(ModeCampaign)
+	refusedClient.Key = ModeKey("FIXTURE_MODE")
+	refusedClient.OnChoiceChange = ChoiceRefusedWhileOpen
+	if err := validateModeRegistrations([]ModeRegistration{refusedClient}); err == nil {
+		t.Fatal("client-attested mode accepted the refusal rule")
 	}
 	if _, ok := LookupMode("NO_SUCH_MODE"); ok {
 		t.Fatal("unknown mode looked up")

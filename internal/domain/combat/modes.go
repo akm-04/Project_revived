@@ -46,8 +46,9 @@ const (
 type ChoiceChangeRule string
 
 const (
-	ChoiceReplaysFrozen ChoiceChangeRule = "REPLAYS_FROZEN"
-	ChoiceSupersedes    ChoiceChangeRule = "SUPERSEDES"
+	ChoiceReplaysFrozen    ChoiceChangeRule = "REPLAYS_FROZEN"
+	ChoiceSupersedes       ChoiceChangeRule = "SUPERSEDES"
+	ChoiceRefusedWhileOpen ChoiceChangeRule = "REFUSED_WHILE_OPEN"
 )
 
 // ModeRegistration is the frozen tuple an I8-4 mode registers: its Locator
@@ -65,7 +66,8 @@ type ModeRegistration struct {
 }
 
 // A server-resolved mode replays the frozen START whatever the chosen team; a
-// client-attested result supersedes. Dodgeball and memoir battle choose no team.
+// client-attested result supersedes. Dodgeball refuses a changed mark while its
+// occurrence is open; memoir battle sends no team choice.
 var modeRegistrations = []ModeRegistration{
 	{Key: ModeAdventureDefense, Family: "ADVENTURE_DEFENSE", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
 	{Key: ModeAdventureIllusion, Family: "ADVENTURE_ILLUSION", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
@@ -82,7 +84,7 @@ var modeRegistrations = []ModeRegistration{
 	{Key: ModeChampionsLeague, Family: "ACADEMY_LEAGUE", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID,
 		Retention: &Retention{ID: "C5F_LEAGUE_REPORT_RETENTION_V1", Version: 1, Window: 5 * 24 * time.Hour}},
 	{Key: ModeConquerSchool, Family: "CONQUER_SCHOOL", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
-	{Key: ModeDodgeball, Family: "dodgeball", Trust: ServerEntropyClientDerived, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}},
+	{Key: ModeDodgeball, Family: "dodgeball", Trust: ServerEntropyClientDerived, OnChoiceChange: ChoiceRefusedWhileOpen, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}},
 	{Key: ModeEventCentreBoard, Family: "EVENT_CENTRE_BOARD", Trust: ServerReport, OnChoiceChange: ChoiceReplaysFrozen, Replay: ReplaySpec{Response: ReplayStoredReport}, Producer: ProducerProfileID},
 	{Key: ModeGodsTrial, Family: "godstrial", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayFightExist, ErrorCode: FightExistCode}, Producer: ProducerProfileID},
 	{Key: ModeGuildCampaign, Family: "GUILD_CAMPAIGN", Trust: ClientSummaryAttested, OnChoiceChange: ChoiceSupersedes, Replay: ReplaySpec{Response: ReplayOK}, Producer: ProducerProfileID},
@@ -131,7 +133,7 @@ func validateModeRegistrations(rows []ModeRegistration) error {
 		if !registration.Trust.Registered() {
 			return fmt.Errorf("combat: mode %s names an unregistered trust profile", registration.Key)
 		}
-		if registration.OnChoiceChange != ChoiceReplaysFrozen && registration.OnChoiceChange != ChoiceSupersedes {
+		if registration.OnChoiceChange != ChoiceReplaysFrozen && registration.OnChoiceChange != ChoiceSupersedes && registration.OnChoiceChange != ChoiceRefusedWhileOpen {
 			return fmt.Errorf("combat: mode %s names an unregistered choice-change rule %q", registration.Key, registration.OnChoiceChange)
 		}
 		if registration.Trust == ServerReport && registration.OnChoiceChange != ChoiceReplaysFrozen {

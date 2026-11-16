@@ -84,7 +84,8 @@
   ],
   "scenarios_naming": [],
   "unit": [
-   "service_modes_test.go"
+   "service_modes_test.go",
+   "start_choice_conformance_test.go"
   ]
  }
 }
