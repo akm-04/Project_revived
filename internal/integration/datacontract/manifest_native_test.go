@@ -28,16 +28,25 @@ func repositoryRoot(t *testing.T) string {
 }
 
 func TestPlayerDataManifestMatchesCatalog(t *testing.T) {
+	runPythonCheck(t, "player_data_manifest.py", "player data manifest")
+}
+
+func TestPlayerRestorePlanMatchesCatalog(t *testing.T) {
+	runPythonCheck(t, "player_restore_plan.py", "player restore plan")
+}
+
+func runPythonCheck(t *testing.T, tool, label string) {
+	t.Helper()
 	dsn := os.Getenv("GXB_R8_MANIFEST_DSN")
 	if dsn == "" {
 		t.Fatal("required GXB_R8_MANIFEST_DSN for a migrated test database is missing")
 	}
 	root := repositoryRoot(t)
-	command := exec.Command("python3", filepath.Join(root, "tools", "player_data_manifest.py"), "--check", "--database", dsn)
+	command := exec.Command("python3", filepath.Join(root, "tools", tool), "--check", "--database", dsn)
 	command.Dir = root
 	output, err := command.CombinedOutput()
 	if err != nil {
-		t.Fatalf("player data manifest check failed: %v\n%s", err, output)
+		t.Fatalf("%s check failed: %v\n%s", label, err, output)
 	}
-	t.Logf("player data manifest matches the catalog")
+	t.Logf("%s matches the catalog", label)
 }
