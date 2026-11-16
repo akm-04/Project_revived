@@ -57,6 +57,9 @@ func (m MissionBootstrap) OverlayMID1(ctx context.Context, q tx.Queryer, actor i
 		}
 		view.AwakeningReady = awakeningReady(a)
 	}
-	detail["160"] = MissionProjection(view, at, 0)
+	projection := MissionProjection(view, at, 0)
+	detail["160"] = projection
+	// The stock Redmark model hydrates only from MID1's 2560 entry, as function-keyed rows.
+	detail["2560"] = projection["redmarks_"]
 	return nil
 }

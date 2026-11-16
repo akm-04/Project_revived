@@ -37,7 +37,9 @@ func bookService(p *pg.Pool, db tx.Beginner) app.Service {
 	values := i5store.Store{Queryer: p, StackUsage: dorm.FurnitureUsage{Owner: dormstore.Store{}, Content: cs}}
 	runner := tx.Runner{DB: db}
 	iv := i5.Service{Runner: runner, Store: values, Content: cs, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c2d-native-fixture-only-secret-000")}
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Owner: bookstore.Store{}, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, Grants: iv, Exchange: iv, Receipts: kernelstore.Store{}}
+	service := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Owner: bookstore.Store{}, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, Grants: iv, Exchange: iv, Receipts: kernelstore.Store{}}
+	service.MakeInfo = eventCentreService(p, service)
+	return service
 }
 func bookFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, app.Service) {
 	t.Helper()

@@ -4804,27 +4804,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -4832,58 +4837,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -4912,8 +4927,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -4921,7 +4944,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -4929,7 +4952,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -4937,7 +4960,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -4945,7 +4968,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -56221,27 +56244,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -56249,58 +56277,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -56329,8 +56367,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -56338,7 +56384,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -56346,7 +56392,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -56354,7 +56400,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -56362,7 +56408,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -56526,27 +56572,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -56554,58 +56605,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -56634,8 +56695,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -56643,7 +56712,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -56651,7 +56720,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -56659,7 +56728,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -56667,7 +56736,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -56831,27 +56900,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -56859,58 +56933,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -56939,8 +57023,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -56948,7 +57040,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -56956,7 +57048,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -56964,7 +57056,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -56972,7 +57064,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -57136,27 +57228,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -57164,58 +57261,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -57244,8 +57351,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -57253,7 +57368,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -57261,7 +57376,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -57269,7 +57384,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -57277,7 +57392,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -57441,27 +57556,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -57469,58 +57589,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -57549,8 +57679,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -57558,7 +57696,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -57566,7 +57704,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -57574,7 +57712,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -57582,7 +57720,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -57746,27 +57884,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -57774,58 +57917,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -57854,8 +58007,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -57863,7 +58024,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -57871,7 +58032,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -57879,7 +58040,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -57887,7 +58048,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -61271,27 +61432,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -61299,58 +61465,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -61379,8 +61555,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -61388,7 +61572,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -61396,7 +61580,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -61404,7 +61588,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -61412,7 +61596,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -61576,27 +61760,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -61604,58 +61793,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -61684,8 +61883,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -61693,7 +61900,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -61701,7 +61908,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -61709,7 +61916,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -61717,7 +61924,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -61881,27 +62088,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -61909,58 +62121,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -61989,8 +62211,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -61998,7 +62228,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -62006,7 +62236,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -62014,7 +62244,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -62022,7 +62252,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -62186,27 +62416,32 @@
    "isolation": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "serializable"
     }
    ],
@@ -62214,58 +62449,68 @@
    "read_only": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "true"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:231",
+    "internal/application/bookskill/service.go:235",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/bookskill/projection.go",
-     "line": 154,
+     "line": 173,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "line": 221,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 269,
+     "line": 280,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 328,
+     "line": 339,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 403,
+     "line": 414,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 444,
+     "line": 455,
      "value": "8"
     }
    ],
@@ -62294,8 +62539,16 @@
     {
      "file": "internal/application/bookskill/projection.go",
      "function": "Service.Read",
+     "isolation": "repeatable_read",
+     "line": 173,
+     "read_only": "true",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/bookskill/projection.go",
+     "function": "Service.settledRead",
      "isolation": "serializable",
-     "line": 154,
+     "line": 221,
      "read_only": "false",
      "retry": "8"
     },
@@ -62303,7 +62556,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 269,
+     "line": 280,
      "read_only": "false",
      "retry": "1"
     },
@@ -62311,7 +62564,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 328,
+     "line": 339,
      "read_only": "false",
      "retry": "8"
     },
@@ -62319,7 +62572,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 403,
+     "line": 414,
      "read_only": "false",
      "retry": "8"
     },
@@ -62327,7 +62580,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 444,
+     "line": 455,
      "read_only": "false",
      "retry": "8"
     }
@@ -108357,12 +108610,12 @@
    "isolation": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 375,
+     "line": 385,
      "value": "repeatable_read"
     }
    ],
@@ -108370,12 +108623,12 @@
    "read_only": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "false"
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 375,
+     "line": 385,
      "value": "false"
     }
    ],
@@ -108383,12 +108636,12 @@
    "retry": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "6"
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 375,
+     "line": 385,
      "value": "6"
     }
    ],
@@ -108410,7 +108663,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.Due",
      "isolation": "UNKNOWN",
-     "line": 141,
+     "line": 143,
      "read_only": "false",
      "retry": "6"
     },
@@ -108418,7 +108671,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.Load",
      "isolation": "repeatable_read",
-     "line": 375,
+     "line": 385,
      "read_only": "false",
      "retry": "6"
     }
@@ -108491,12 +108744,12 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:573",
-    "UNRESOLVED change at internal/application/oneonone/competition.go:351",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:583",
+    "UNRESOLVED change at internal/application/oneonone/competition.go:361",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:328",
-    "UNRESOLVED run at internal/application/oneonone/competition.go:76",
-    "transaction isolation not statically decidable at internal/application/oneonone/competition.go:141"
+    "UNRESOLVED run at internal/application/oneonone/competition.go:78",
+    "transaction isolation not statically decidable at internal/application/oneonone/competition.go:143"
    ],
    "writes": "state"
   },
@@ -108505,7 +108758,7 @@
    "isolation": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 460,
+     "line": 470,
      "value": "repeatable_read"
     }
    ],
@@ -108513,7 +108766,7 @@
    "read_only": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 460,
+     "line": 470,
      "value": "false"
     }
    ],
@@ -108521,7 +108774,7 @@
    "retry": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 460,
+     "line": 470,
      "value": "6"
     }
    ],
@@ -108534,7 +108787,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.ChangeTeams",
      "isolation": "repeatable_read",
-     "line": 460,
+     "line": 470,
      "read_only": "false",
      "retry": "6"
     }
@@ -108572,8 +108825,8 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:573",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:601"
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:583",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:611"
    ],
    "writes": "state"
   },
@@ -108582,12 +108835,12 @@
    "isolation": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 492,
+     "line": 502,
      "value": "repeatable_read"
     }
    ],
@@ -108595,12 +108848,12 @@
    "read_only": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "false"
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 492,
+     "line": 502,
      "value": "false"
     }
    ],
@@ -108608,12 +108861,12 @@
    "retry": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "6"
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 492,
+     "line": 502,
      "value": "6"
     }
    ],
@@ -108633,7 +108886,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.Due",
      "isolation": "UNKNOWN",
-     "line": 141,
+     "line": 143,
      "read_only": "false",
      "retry": "6"
     },
@@ -108641,7 +108894,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.Match",
      "isolation": "repeatable_read",
-     "line": 492,
+     "line": 502,
      "read_only": "false",
      "retry": "6"
     }
@@ -108714,11 +108967,11 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED change at internal/application/oneonone/competition.go:351",
+    "UNRESOLVED change at internal/application/oneonone/competition.go:361",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:328",
-    "UNRESOLVED run at internal/application/oneonone/competition.go:76",
-    "transaction isolation not statically decidable at internal/application/oneonone/competition.go:141"
+    "UNRESOLVED run at internal/application/oneonone/competition.go:78",
+    "transaction isolation not statically decidable at internal/application/oneonone/competition.go:143"
    ],
    "writes": "state"
   },
@@ -108765,8 +109018,8 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:573",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:601"
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:583",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:611"
    ],
    "writes": "UNKNOWN"
   },
@@ -108785,7 +109038,7 @@
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "UNKNOWN"
     },
     {
@@ -108818,7 +109071,7 @@
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "false"
     },
     {
@@ -108854,7 +109107,7 @@
     },
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 141,
+     "line": 143,
      "value": "6"
     },
     {
@@ -108929,7 +109182,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.Due",
      "isolation": "UNKNOWN",
-     "line": 141,
+     "line": 143,
      "read_only": "false",
      "retry": "6"
     },
@@ -109339,14 +109592,14 @@
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:213",
-    "UNRESOLVED change at internal/application/oneonone/competition.go:351",
+    "UNRESOLVED change at internal/application/oneonone/competition.go:361",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:328",
-    "UNRESOLVED run at internal/application/oneonone/competition.go:76",
+    "UNRESOLVED run at internal/application/oneonone/competition.go:78",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
     "UNRESOLVED styleDef at internal/application/characterasset/appearance_projection.go:248",
-    "transaction isolation not statically decidable at internal/application/oneonone/competition.go:141"
+    "transaction isolation not statically decidable at internal/application/oneonone/competition.go:143"
    ],
    "writes": "state"
   },
@@ -109444,7 +109697,7 @@
    "isolation": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 682,
+     "line": 692,
      "value": "repeatable_read"
     }
    ],
@@ -109452,17 +109705,17 @@
    "read_only": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 682,
+     "line": 692,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/oneonone/competition.go:720"
+    "internal/application/oneonone/competition.go:730"
    ],
    "retry": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 682,
+     "line": 692,
      "value": "6"
     }
    ],
@@ -109479,7 +109732,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.purchase",
      "isolation": "repeatable_read",
-     "line": 682,
+     "line": 692,
      "read_only": "false",
      "retry": "6"
     }
@@ -109562,7 +109815,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED change at internal/application/oneonone/competition.go:699",
+    "UNRESOLVED change at internal/application/oneonone/competition.go:709",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -109623,7 +109876,7 @@
    "isolation": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 682,
+     "line": 692,
      "value": "repeatable_read"
     }
    ],
@@ -109631,17 +109884,17 @@
    "read_only": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 682,
+     "line": 692,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/oneonone/competition.go:720"
+    "internal/application/oneonone/competition.go:730"
    ],
    "retry": [
     {
      "file": "internal/application/oneonone/competition.go",
-     "line": 682,
+     "line": 692,
      "value": "6"
     }
    ],
@@ -109658,7 +109911,7 @@
      "file": "internal/application/oneonone/competition.go",
      "function": "Service.purchase",
      "isolation": "repeatable_read",
-     "line": 682,
+     "line": 692,
      "read_only": "false",
      "retry": "6"
     }
@@ -109741,7 +109994,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED change at internal/application/oneonone/competition.go:699",
+    "UNRESOLVED change at internal/application/oneonone/competition.go:709",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -109774,8 +110027,8 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:573",
-    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:601"
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:583",
+    "FANOUT OverlayMID1 has 24 implementers, not followed: activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/oneonone/competition.go:611"
    ],
    "writes": "UNKNOWN"
   },

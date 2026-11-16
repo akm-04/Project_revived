@@ -298,6 +298,7 @@ func main() {
 	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts, GluePurchases: dormstore.Store{}, GlueValues: i5svc, GluePrivileges: privileges, Social: dormstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Moderation: contentDB, Broadcast: broadcastEmitter}
 	bookSvc := appbook.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: bookstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
 	eventCentreSvc := appeventcentre.Service{Timed: heroSvc.Timed, Reads: runner, Owner: eventcentrestore.Store{}, Book: bookSvc, Content: contentDB, Pets: characterstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Grants: i5svc, Receipts: receipts}
+	bookSvc.MakeInfo = eventCentreSvc
 	courseSvc := appcourse.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.CourseHeroPort{Store: heroDB}, Owner: coursestore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts, Privileges: privileges}
 	inscriptionSvc := appinscription.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.InscriptionHeroPort{Store: heroDB, Content: contentDB}, Owner: inscriptionstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, ValuePlans: i5svc, Eligibility: characterstore.InscriptionHeroPort{Store: heroDB, Content: contentDB}, Receipts: receipts}
 	elementSvc := appelement.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.ElementHeroPort{Store: heroDB}, Owner: elementstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
@@ -762,7 +763,7 @@ func main() {
 	for _, mid := range []uint16{2128, 2129, 2130, 2131, 2132, 2133, 2134, 2135, 2136, 2137, 2138, 2139, 2140, 2141, 2142, 2500} {
 		mustRegister(mid, observing(authority, achievements, "Course", courseD))
 	}
-	bookD := stockruntime.BookDispatcher{Authority: authority, Service: bookSvc}
+	bookD := stockruntime.BookDispatcher{Authority: authority, Service: stockruntime.NewCoalescedBookRead(bookSvc), Tracker: tracker}
 	for _, mid := range []uint16{83, 1056, 1057, 1058, 1059, 1060, 1061, 1077, 1078, 1079, 1080} {
 		mustRegister(mid, observing(authority, achievements, "Book", bookD))
 	}

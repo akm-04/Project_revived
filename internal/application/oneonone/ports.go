@@ -64,6 +64,7 @@ type Fence interface {
 type Mail interface {
 	LockRecipientsTx(context.Context, tx.Tx, []identity.PlayerID) error
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
+	DeliverNoticeTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
 // Facts is the objective fact port (I9_MODE_FOUNDATION_V1 MF3); a settled fight is a PVP_FIGHT (task_req 106, D92).

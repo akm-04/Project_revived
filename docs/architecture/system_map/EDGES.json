@@ -588,7 +588,11 @@
     "*CoherentHeroInputsTx"
    ]
   },
-  "eventcentre": {},
+  "eventcentre": {
+   "bookskill": [
+    "*MakeInfoTx"
+   ]
+  },
   "frienddm": {
    "realtimewakeup": [
     "*ReloadAndDeliver"
@@ -1351,6 +1355,7 @@
    ],
    "oneonone": [
     "*DebitMaterialCostTx",
+    "*DeliverNoticeTx",
     "*DeliverTx",
     "*FenceActorTx",
     "*LockRecipientsTx",
@@ -2379,6 +2384,9 @@
    ]
   },
   "bookskill": {
+   "eventcentre": [
+    "*MakeInfoTx"
+   ],
    "generation": [
     "Bind",
     "DecisionAt",
@@ -4754,6 +4762,7 @@
    ],
    "i5": [
     "*DebitMaterialCostTx",
+    "*DeliverNoticeTx",
     "*DeliverTx",
     "*FenceActorTx",
     "*LockRecipientsTx",
@@ -5902,7 +5911,7 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "bookskill": [
-   "cmd/gxb-api/main_postgres.go"
+   "internal/adapters/stockruntime/book_coalesced_read.go"
   ],
   "bootstrap": [
    "cmd/gxb-api/main_postgres.go"

@@ -222,6 +222,8 @@
    "i9_7a_oneonone_purchase.json",
    "oneonone.json"
   ],
-  "unit": []
+  "unit": [
+   "competition_test.go"
+  ]
  }
 }
