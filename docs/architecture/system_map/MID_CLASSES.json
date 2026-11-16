@@ -25232,7 +25232,7 @@
    "isolation": [
     {
      "file": "internal/application/topfloor/arena.go",
-     "line": 619,
+     "line": 625,
      "value": "repeatable_read"
     }
    ],
@@ -25240,17 +25240,17 @@
    "read_only": [
     {
      "file": "internal/application/topfloor/arena.go",
-     "line": 619,
+     "line": 625,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/topfloor/arena.go:657"
+    "internal/application/topfloor/arena.go:663"
    ],
    "retry": [
     {
      "file": "internal/application/topfloor/arena.go",
-     "line": 619,
+     "line": 625,
      "value": "6"
     }
    ],
@@ -25267,7 +25267,7 @@
      "file": "internal/application/topfloor/arena.go",
      "function": "Service.purchase",
      "isolation": "repeatable_read",
-     "line": 619,
+     "line": 625,
      "read_only": "false",
      "retry": "6"
     }
@@ -25350,7 +25350,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED change at internal/application/topfloor/arena.go:636",
+    "UNRESOLVED change at internal/application/topfloor/arena.go:642",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -26702,7 +26702,7 @@
    "isolation": [
     {
      "file": "internal/application/topfloor/arena.go",
-     "line": 619,
+     "line": 625,
      "value": "repeatable_read"
     }
    ],
@@ -26710,17 +26710,17 @@
    "read_only": [
     {
      "file": "internal/application/topfloor/arena.go",
-     "line": 619,
+     "line": 625,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/topfloor/arena.go:657"
+    "internal/application/topfloor/arena.go:663"
    ],
    "retry": [
     {
      "file": "internal/application/topfloor/arena.go",
-     "line": 619,
+     "line": 625,
      "value": "6"
     }
    ],
@@ -26737,7 +26737,7 @@
      "file": "internal/application/topfloor/arena.go",
      "function": "Service.purchase",
      "isolation": "repeatable_read",
-     "line": 619,
+     "line": 625,
      "read_only": "false",
      "retry": "6"
     }
@@ -26820,7 +26820,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED change at internal/application/topfloor/arena.go:636",
+    "UNRESOLVED change at internal/application/topfloor/arena.go:642",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"

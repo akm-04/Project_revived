@@ -570,12 +570,18 @@ func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int6
 			return d.ErrRefused
 		}
 		rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
-		if err != nil || !ok {
-			return errors.Join(err, d.ErrRefused)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return d.ErrOfferStale
 		}
 		targetRank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, occupant)
-		if err != nil || !ok {
-			return errors.Join(err, d.ErrRefused)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return d.ErrOfferStale
 		}
 		snapshot, found, err := s.Store.ReadOfferSnapshotTx(c, sc.Tx, a.PlayerID, d.OfferScopeNormal, false)
 		if err != nil {
