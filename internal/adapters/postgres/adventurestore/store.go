@@ -1,17 +1,20 @@
-// Package adventurestore owns the adventure_occurrences and
-// adventure_single_attempts tables. Occurrences are insert-only and take the
-// late rank 750 above every I5 rank (D369); attempts are player-scoped 605 rows.
+// Package adventurestore owns the adventure_occurrences, adventure_reports and
+// adventure_attempt_settlements tables. Occurrences are insert-only and take the
+// late rank 750 above every I5 rank (D369); the settlement is keyed by the
+// Combat attempt the mode's RESULT settled.
 package adventurestore
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -84,6 +87,11 @@ func (Store) ReadOccurrenceTx(ctx context.Context, q tx.Queryer, playerID identi
 	return readOccurrence(q.QueryRow(ctx, `SELECT `+occurrenceColumns+` FROM adventure_occurrences WHERE player_id=$1 AND event_type=$2 ORDER BY occurred_at DESC LIMIT 1`, int64(playerID), eventType))
 }
 
+// ReadOccurrenceBySourceKeyTx reads the occurrence a START's generation froze.
+func (Store) ReadOccurrenceBySourceKeyTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, eventType int64, sourceKey string) (d.Occurrence, bool, error) {
+	return readOccurrence(q.QueryRow(ctx, `SELECT `+occurrenceColumns+` FROM adventure_occurrences WHERE player_id=$1 AND event_type=$2 AND source_key=$3`, int64(playerID), eventType, sourceKey))
+}
+
 // FinishOccurrenceTx closes one occurrence once. A second attempt reports no
 // change, so a repeated terminal never pays twice.
 func (Store) FinishOccurrenceTx(ctx context.Context, t tx.Tx, playerID identity.PlayerID, eventType int64, occurredAt, at time.Time) (bool, error) {
@@ -94,56 +102,34 @@ func (Store) FinishOccurrenceTx(ctx context.Context, t tx.Tx, playerID identity.
 	return tag.RowsAffected() == 1, nil
 }
 
-func (Store) InsertAttemptTx(ctx context.Context, t tx.Tx, attempt d.SingleAttempt) error {
-	if err := attempt.Validate(); err != nil {
-		return err
+// InsertSettlementTx records the damage the RESULT credited to one terminal
+// Combat attempt; the transaction is Combat's attest transaction.
+func (Store) InsertSettlementTx(ctx context.Context, t tx.Tx, attemptID ids.UUID, playerID identity.PlayerID, damage int64, settledAt time.Time) error {
+	if t == nil || attemptID.IsZero() || playerID <= 0 || damage < 0 || damage > d.IllusionTotalDamage || settledAt.IsZero() {
+		return d.ErrInvalid
 	}
-	_, err := t.Exec(ctx, `INSERT INTO adventure_single_attempts(attempt_id,player_id,event_type,occurred_at,created_at,resolved,damage)VALUES($1,$2,$3,$4,$5,$6,$7)`, attempt.ID, int64(attempt.PlayerID), attempt.EventType, attempt.OccurredAt.UTC(), attempt.CreatedAt.UTC(), attempt.Resolved, attempt.Damage)
+	_, err := t.Exec(ctx, `INSERT INTO adventure_attempt_settlements(attempt_id,player_id,damage,settled_at)VALUES($1,$2,$3,$4)`, attemptID.String(), int64(playerID), damage, settledAt.UTC())
 	return err
 }
 
-func readAttempt(row tx.Row) (d.SingleAttempt, bool, error) {
-	var out d.SingleAttempt
-	err := row.Scan(&out.ID, &out.PlayerID, &out.EventType, &out.OccurredAt, &out.CreatedAt, &out.Resolved, &out.Damage)
+// ReadSettlementTx answers a duplicate RESULT from the settlement row, not
+// from the occurrence that may have advanced since the attempt.
+func (Store) ReadSettlementTx(ctx context.Context, q tx.Queryer, attemptID ids.UUID) (int64, bool, error) {
+	if q == nil || attemptID.IsZero() {
+		return 0, false, d.ErrInvalid
+	}
+	var damage int64
+	err := q.QueryRow(ctx, `SELECT damage FROM adventure_attempt_settlements WHERE attempt_id=$1`, attemptID.String()).Scan(&damage)
 	if errors.Is(err, kernelstore.ErrNoRows) {
-		return d.SingleAttempt{}, false, nil
+		return 0, false, nil
 	}
-	return out, err == nil, err
-}
-
-// FindLatestAttemptTx reads the player's newest 10006 attempt.
-func (Store) FindLatestAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, eventType int64) (d.SingleAttempt, bool, error) {
-	return readAttempt(q.QueryRow(ctx, `SELECT attempt_id,player_id,event_type,occurred_at,created_at,resolved,damage FROM adventure_single_attempts WHERE player_id=$1 AND event_type=$2 ORDER BY created_at DESC LIMIT 1`, int64(playerID), eventType))
-}
-
-func (Store) SaveAttemptTx(ctx context.Context, t tx.Tx, attempt d.SingleAttempt) error {
-	if err := attempt.Validate(); err != nil {
-		return err
+	if err != nil {
+		return 0, false, err
 	}
-	tag, err := t.Exec(ctx, `UPDATE adventure_single_attempts SET resolved=$3,damage=$4 WHERE attempt_id=$1 AND player_id=$2`, attempt.ID, int64(attempt.PlayerID), attempt.Resolved, attempt.Damage)
-	if err == nil && tag.RowsAffected() != 1 {
-		return d.ErrUnavailable
+	if damage < 0 || damage > d.IllusionTotalDamage {
+		return 0, true, fmt.Errorf("adventure: settlement damage %d out of range", damage)
 	}
-	return err
-}
-
-// RenameAttemptTx moves the pre-inserted 605 placeholder to the Combat attempt
-// id the caller obtained after START, keeping the 605 lock before Combat's 609.
-func (Store) RenameAttemptTx(ctx context.Context, t tx.Tx, from, to string, playerID identity.PlayerID) error {
-	tag, err := t.Exec(ctx, `UPDATE adventure_single_attempts SET attempt_id=$3 WHERE attempt_id=$1 AND player_id=$2`, from, int64(playerID), to)
-	if err == nil && tag.RowsAffected() != 1 {
-		return d.ErrUnavailable
-	}
-	return err
-}
-
-// DeleteAttemptTx removes a placeholder when START replayed an existing attempt.
-func (Store) DeleteAttemptTx(ctx context.Context, t tx.Tx, attemptID string, playerID identity.PlayerID) error {
-	tag, err := t.Exec(ctx, `DELETE FROM adventure_single_attempts WHERE attempt_id=$1 AND player_id=$2`, attemptID, int64(playerID))
-	if err == nil && tag.RowsAffected() != 1 {
-		return d.ErrUnavailable
-	}
-	return err
+	return damage, true, nil
 }
 
 func (Store) InsertReportTx(ctx context.Context, t tx.Tx, reportID string, serverID, roomID int64, memberIDs []int64, content string, at time.Time) error {

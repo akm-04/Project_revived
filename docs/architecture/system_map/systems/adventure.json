@@ -267,9 +267,9 @@
    "adventure_single_attempts"
   ],
   "read": [
+   "adventure_attempt_settlements",
    "adventure_occurrences",
    "adventure_reports",
-   "adventure_single_attempts",
    "gxb_content_activation",
    "gxb_content_revisions",
    "player_directory_profiles",
@@ -278,9 +278,9 @@
    "shared_rooms"
   ],
   "written": [
+   "adventure_attempt_settlements",
    "adventure_occurrences",
-   "adventure_reports",
-   "adventure_single_attempts"
+   "adventure_reports"
   ]
  },
  "tests": {

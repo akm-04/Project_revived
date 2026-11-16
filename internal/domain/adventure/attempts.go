@@ -1,28 +1,21 @@
 package adventure
 
-import (
-	"strings"
-	"time"
+import "strings"
 
-	"gxb.local/backend/v2/internal/domain/identity"
-)
+const fantasyGenerationKind = "ADVENTURE_ILLUSION"
 
-// SingleAttempt is one frozen Fantasy-single start (2421) and its attested
-// 2422 result. The Combat attempt is the battle owner; this row is the
-// Adventure-side replay identity.
-type SingleAttempt struct {
-	ID         string            `json:"attempt_id"`
-	PlayerID   identity.PlayerID `json:"player_id"`
-	EventType  int64             `json:"event_type"`
-	OccurredAt time.Time         `json:"occurred_at"`
-	CreatedAt  time.Time         `json:"created_at"`
-	Resolved   bool              `json:"resolved"`
-	Damage     int64             `json:"damage"`
+// FantasyGeneration is the Combat generation_ref a 2421 START freezes: the
+// occurrence's source key, the stable name of the occurrence a late 2422 result
+// may credit. Combat owns the attempt; Adventure owns only its settlement.
+func FantasyGeneration(occurrence Occurrence) string {
+	return fantasyGenerationKind + "/" + occurrence.SourceKey
 }
 
-func (a SingleAttempt) Validate() error {
-	if strings.TrimSpace(a.ID) == "" || !a.PlayerID.Valid() || a.EventType != EventIllusion || a.OccurredAt.IsZero() || a.CreatedAt.IsZero() || a.Damage < 0 {
-		return ErrInvalid
+// ParseFantasyGeneration reads a frozen START's occurrence source key.
+func ParseFantasyGeneration(reference string) (string, bool) {
+	sourceKey, found := strings.CutPrefix(reference, fantasyGenerationKind+"/")
+	if !found || strings.TrimSpace(sourceKey) == "" {
+		return "", false
 	}
-	return nil
+	return sourceKey, true
 }
