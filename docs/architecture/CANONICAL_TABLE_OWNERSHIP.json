@@ -6139,14 +6139,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "server",
         "owner": [],
@@ -6162,14 +6169,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "server",
         "owner": [],
@@ -6186,14 +6200,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "server",
         "owner": [],
@@ -6210,14 +6231,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "server",
         "owner": [],
@@ -6233,14 +6261,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00064_i7c5a_combat_foundation.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "player",
         "owner": [
@@ -6258,14 +6293,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00073_i8_4_combat_attempt_kinds.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "player",
         "owner": [],
@@ -6281,14 +6323,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00073_i8_4_combat_attempt_kinds.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "player",
         "owner": [],
@@ -6304,14 +6353,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00075_i8_6c_attempt_members.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "player",
         "owner": [
@@ -6329,14 +6385,21 @@
         "Combat"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/combatstore/"
+        "internal/adapters/postgres/combatstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/combatstore/"
       ],
       "migration": "migrations/00075_i8_6c_attempt_members.sql",
       "owner": "Combat",
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R8 retention Amendment 1 A: the sweep deletes a terminal attempt's chain only after every attempt-id reference column releases it; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "data": {
         "scope": "player",
         "owner": [

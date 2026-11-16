@@ -9610,6 +9610,70 @@
  ],
  "tables_with_several_writers": [
   {
+   "table": "combat_attempt_members",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_attempts",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_attestations",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_member_settlements",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_report_blobs",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_resolutions",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_snapshots",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "combat_start_packages",
+   "packages": [
+    "internal/adapters/postgres/combatstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
    "table": "gameplay_context_credentials",
    "packages": [
     "internal/adapters/postgres/i4store",

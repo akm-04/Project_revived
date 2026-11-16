@@ -11,12 +11,15 @@ import (
 // Store owns the R8 retention rules. Each rule deletes at most BatchSize rows
 // in one statement inside the caller's READ COMMITTED transaction.
 //
-// The R8 design's combat-chain and combat-blob rules are absent: every combat
-// table carries a BEFORE DELETE append-only trigger (C5A), so a DELETE there is
-// refused; that conflict needs a lead decision. The "existing purges" row stays
-// with its adventure, occult, illusion and client-log owners, which already run
-// it in production.
+// The combat rules set gxb.retention_sweep on for their transaction: migration
+// 00165 lets the append-only triggers accept a DELETE only there. The "existing
+// purges" row stays with its adventure, occult, illusion and client-log owners,
+// which already run it in production.
 type Store struct{}
+
+// retentionSweepStatement opens the only window in which the combat
+// append-only triggers accept a DELETE (migration 00165).
+const retentionSweepStatement = "SET LOCAL gxb.retention_sweep = 'on'"
 
 // DeleteReplayOnlyReceipts removes receipts whose semantic key is their own
 // operation id and that no reference column still holds. Every other receipt
@@ -92,6 +95,81 @@ DELETE FROM player_public_profile_media_history h USING doomed d
 WHERE h.operation_id = d.operation_id`
 	tag, err := t.Exec(c, query, replacedBefore.UTC(), BatchSize)
 	return tag.RowsAffected(), err
+}
+
+// DeleteExpiredCombatChain removes terminal attempts whose terminal time has
+// passed and that no generated attempt-id column still holds, together with
+// their children in child-first order. A shared resolution is kept while a
+// surviving attempt references it.
+func (Store) DeleteExpiredCombatChain(c context.Context, t tx.Tx, terminalBefore time.Time) (int64, error) {
+	if t == nil {
+		return 0, errors.New("retention combat chain rule requires a transaction")
+	}
+	if _, err := t.Exec(c, retentionSweepStatement); err != nil {
+		return 0, err
+	}
+	query := `WITH doomed AS (
+SELECT a.attempt_id FROM combat_attempts a
+WHERE a.state = 'TERMINAL'
+  AND a.terminal_at < $1
+  AND ` + combatKeptWhileSQL() + `
+ORDER BY a.terminal_at, a.attempt_id
+LIMIT $2
+FOR UPDATE SKIP LOCKED
+), settlements AS (
+DELETE FROM combat_member_settlements s USING doomed d WHERE s.attempt_id = d.attempt_id RETURNING 1
+), members AS (
+DELETE FROM combat_attempt_members m USING doomed d WHERE m.attempt_id = d.attempt_id RETURNING 1
+), attestations AS (
+DELETE FROM combat_attestations x USING doomed d WHERE x.attempt_id = d.attempt_id RETURNING 1
+), packages AS (
+DELETE FROM combat_start_packages p USING doomed d WHERE p.attempt_id = d.attempt_id RETURNING 1
+), resolutions AS (
+DELETE FROM combat_resolutions r USING doomed d
+WHERE r.attempt_id = d.attempt_id
+  AND NOT EXISTS (SELECT 1 FROM combat_attempts other
+                  WHERE other.resolution_hash = r.resolution_hash AND other.attempt_id <> r.attempt_id)
+RETURNING 1
+)
+DELETE FROM combat_attempts a USING doomed d WHERE a.attempt_id = d.attempt_id`
+	tag, err := t.Exec(c, query, terminalBefore.UTC(), BatchSize)
+	return tag.RowsAffected(), err
+}
+
+// DeleteUnreferencedCombatBlobs removes report blobs and snapshots that no
+// surviving resolution or attempt references; it runs after the chain rule.
+func (Store) DeleteUnreferencedCombatBlobs(c context.Context, t tx.Tx) (int64, error) {
+	if t == nil {
+		return 0, errors.New("retention combat blob rule requires a transaction")
+	}
+	if _, err := t.Exec(c, retentionSweepStatement); err != nil {
+		return 0, err
+	}
+	query := `WITH blobs AS (
+DELETE FROM combat_report_blobs b USING (
+SELECT report_sha256 FROM combat_report_blobs orphan
+WHERE NOT EXISTS (SELECT 1 FROM combat_resolutions r WHERE r.report_sha256 = orphan.report_sha256)
+ORDER BY report_sha256
+LIMIT $1
+FOR UPDATE SKIP LOCKED) doomed
+WHERE b.report_sha256 = doomed.report_sha256
+RETURNING 1
+), snapshots AS (
+DELETE FROM combat_snapshots s USING (
+SELECT snapshot_hash FROM combat_snapshots orphan
+WHERE NOT EXISTS (SELECT 1 FROM combat_attempts a WHERE a.snapshot_hash = orphan.snapshot_hash)
+ORDER BY snapshot_hash
+LIMIT $1
+FOR UPDATE SKIP LOCKED) doomed
+WHERE s.snapshot_hash = doomed.snapshot_hash
+RETURNING 1
+)
+SELECT (SELECT count(*) FROM blobs) + (SELECT count(*) FROM snapshots)`
+	var deleted int64
+	if err := t.QueryRow(c, query, BatchSize).Scan(&deleted); err != nil {
+		return 0, err
+	}
+	return deleted, nil
 }
 
 // DeleteStaleHeroRecommendSnapshots removes hero-recommend generations older

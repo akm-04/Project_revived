@@ -19,8 +19,8 @@ var RuleReferenceColumns = map[string][]string{
 	"receipts":     append(append([]string{}, receiptIdReferences...), operationIdReferences...),
 }
 
-// The combat chain's kept-while list. Its delete rule is blocked: every combat
-// table carries a BEFORE DELETE append-only trigger (see the R8-4c report).
+// The combat chain's kept-while list. An attempt is kept while any generated
+// attempt-id column still holds it or another attempt supersedes it.
 var attemptReferences = []string{
 	"adventure_single_attempts.attempt_id",
 	"arena_matches.attempt_id",
@@ -98,6 +98,14 @@ func receiptKeptWhileSQL() string {
 			continue
 		}
 		clauses = append(clauses, heldClause(reference, "r.receipt_id"))
+	}
+	return strings.Join(clauses, "\n\tAND ")
+}
+
+func combatKeptWhileSQL() string {
+	clauses := make([]string, 0, len(attemptReferences))
+	for _, reference := range attemptReferences {
+		clauses = append(clauses, heldClause(reference, "a.attempt_id"))
 	}
 	return strings.Join(clauses, "\n\tAND ")
 }
