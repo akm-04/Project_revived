@@ -8,6 +8,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/privilege"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -182,7 +183,8 @@ func (Store) ReadBoundedChargesTx(c context.Context, q tx.Queryer, server identi
 // ChargeTuningTx reads the operator overlay; found=false keeps the source policy.
 func (Store) ChargeTuningTx(c context.Context, q tx.Queryer) (d.ChargeTuning, bool, error) {
 	var raw string
-	e := q.QueryRow(c, `SELECT payload::text FROM commerce_recharge_tuning`).Scan(&raw)
+	var version int16
+	e := q.QueryRow(c, `SELECT payload::text,payload_version FROM commerce_recharge_tuning`).Scan(&raw, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return d.ChargeTuning{}, false, nil
 	}
@@ -190,7 +192,7 @@ func (Store) ChargeTuningTx(c context.Context, q tx.Queryer) (d.ChargeTuning, bo
 		return d.ChargeTuning{}, false, e
 	}
 	var out d.ChargeTuning
-	if json.Unmarshal([]byte(raw), &out) != nil || out.Validate() != nil {
+	if payload.Decode("commerce_recharge_tuning", version, []byte(raw), &out) != nil || out.Validate() != nil {
 		return d.ChargeTuning{}, false, nil
 	}
 	return out, true, nil

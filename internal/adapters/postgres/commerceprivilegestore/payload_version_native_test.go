@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -43,10 +42,6 @@ func TestPayloadVersionRoundTripCommercePrivilegeStore(t *testing.T) {
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM commerce_recharge_tuning`).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH17_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/commerceprivilegestore/testdata/payloads/commerce_recharge_tuning.payload"), storedText)
-		return
-	}
 	if version != 0 {
 		t.Fatalf("payload_version=%d want=0 (operator SQL writer)", version)
 	}
@@ -74,26 +69,5 @@ func assertSameJSON(t *testing.T, got, want any) {
 	}
 	if !bytes.Equal(gotRaw, wantRaw) {
 		t.Fatalf("decoded=%s want=%s", gotRaw, wantRaw)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded d.ChargeTuning
-	if err := payload.Decode("commerce_recharge_tuning", 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	expected, err := json.MarshalIndent(decoded, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
