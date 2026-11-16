@@ -38,7 +38,7 @@ func assertPayloadGolden[T any](t *testing.T, table, column string) {
 
 func TestPayloadGoldenDormStore(t *testing.T) {
 	assertPayloadGolden[app.Admission](t, "player_dorm_admissions", "operation_context")
-	assertPayloadGolden[[5]int64](t, "player_dorm_heroes", "equipment")
+	assertPayloadGolden[[]int64](t, "player_dorm_heroes", "equipment")
 	assertPayloadGolden[map[string]string](t, "player_dorm_rooms", "furniture_record")
 	assertPayloadGolden[dorm.Expansion](t, "player_dorm_rooms", "pending_expansion")
 }
