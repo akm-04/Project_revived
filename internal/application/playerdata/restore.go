@@ -147,11 +147,15 @@ func (service RestoreService) Restore(ctx context.Context, plan Plan, planDigest
 	for index, table := range plan.Tables {
 		tables[index] = restoreTable{table: table}
 	}
-	if err := service.deleteRestorableRows(ctx, transaction, tableRowsByPlan(plan, document), targetPlayerID, tables); err != nil {
+	exported := tableRowsByPlan(plan, document)
+	if err := service.deleteRestorableRows(ctx, transaction, exported, targetPlayerID, tables); err != nil {
 		return RestoreResult{}, err
 	}
-	result, err := service.insertExportedRows(ctx, transaction, tableRowsByPlan(plan, document), tables, at)
+	result, err := service.insertExportedRows(ctx, transaction, exported, tables, at)
 	if err != nil {
+		return RestoreResult{}, err
+	}
+	if err := service.verifyExportedOwnership(ctx, transaction, exported, tables, targetPlayerID); err != nil {
 		return RestoreResult{}, err
 	}
 	ended, err := service.Store.EndPlayerSessions(ctx, transaction, targetPlayerID, at)
@@ -377,6 +381,41 @@ func (service RestoreService) insertExportedRows(ctx context.Context, transactio
 		}
 	}
 	return result, nil
+}
+
+// verifyExportedOwnership refuses when an exported restore row is not selected
+// for the target player by the plan's own predicate. It runs after the writes,
+// so a foreign row is refused before the transaction commits, and a subset
+// test, so rows kept by the inbound guard need not be exported.
+func (service RestoreService) verifyExportedOwnership(ctx context.Context, transaction tx.Queryer, exported map[string][]json.RawMessage, tables []restoreTable, playerID int64) error {
+	for index := range tables {
+		current := &tables[index]
+		if current.table.Action != ActionRestore {
+			continue
+		}
+		rows := exported[current.table.Table]
+		if len(rows) == 0 {
+			continue
+		}
+		selected, err := service.Store.SelectRows(ctx, transaction, current.table.Select, playerID)
+		if err != nil {
+			return fmt.Errorf("%s restored rows: %w", current.table.Table, err)
+		}
+		owned, err := rowKeys(selected, current.primaryKey, current.table.Table)
+		if err != nil {
+			return err
+		}
+		for _, row := range rows {
+			key, err := rowKey(row, current.primaryKey)
+			if err != nil {
+				return fmt.Errorf("%s: %w", current.table.Table, err)
+			}
+			if !owned[key] {
+				return refused("%s row %s does not belong to player %d", current.table.Table, keyLabel(key, current.primaryKey), playerID)
+			}
+		}
+	}
+	return nil
 }
 
 func tableRowsByPlan(plan Plan, document Document) map[string][]json.RawMessage {
