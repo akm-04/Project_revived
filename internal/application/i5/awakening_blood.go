@@ -77,7 +77,13 @@ func (s Service) CompleteAwakeningBloodTx(ctx context.Context, t tx.Tx, pid iden
 			return nil, e
 		}
 	}
-	body := map[string]any{objective.AwakeChannel(2): []map[string]any{root.Active[1].Wire(true)}}
+	// The stock win window indexes these (BattleUnlimit.lua:1585-1589); the Blood terminal grants no exp or record.
+	body := map[string]any{
+		objective.AwakeChannel(2): []map[string]any{root.Active[1].Wire(true)},
+		"exps":                    []any{},
+		"old_num":                 int64(0),
+		"add_exp":                 int64(0),
+	}
 	if err := s.awakeningRedmarksTx(ctx, t, pid, a.Revision, body); err != nil {
 		return nil, err
 	}

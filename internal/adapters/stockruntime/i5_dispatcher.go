@@ -79,7 +79,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params) {
-			return badI5("invalid_sign_in")
+			return badI5()
 		}
 		var body map[string]any
 		var err error
@@ -97,7 +97,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		storyState, e2 := requiredInt64(req.Envelope.Params, "story_state")
 		guideID, e3 := storyGuideID(req.Envelope.Params)
 		if e1 != nil || e2 != nil || e3 != nil || storyID < 0 || storyState < 0 || guideID < 0 {
-			return badI5("invalid_story")
+			return badI5()
 		}
 		if err := d.Service.SaveStory(ctx, actor, storyID, storyState, guideID, req.Envelope.Operation); err != nil {
 			return failI5(err)
@@ -106,7 +106,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 2865: // SET_PLAYER_GUIDE_FUNCTION
 		functionID, err := requiredInt64(req.Envelope.Params, "guide_function_id")
 		if err != nil || functionID <= 0 {
-			return badI5("invalid_guide_function")
+			return badI5()
 		}
 		guide, err := d.Service.SaveGuideFunction(ctx, actor, functionID, req.Envelope.Operation)
 		if err != nil {
@@ -116,7 +116,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 2866: // SET_PLAYER_RETURN_ID
 		returnID, err := requiredInt64(req.Envelope.Params, "guide_return_id")
 		if err != nil || returnID < 0 {
-			return badI5("invalid_guide_return")
+			return badI5()
 		}
 		guide, err := d.Service.SaveGuideReturn(ctx, actor, returnID, req.Envelope.Operation)
 		if err != nil {
@@ -145,7 +145,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		if _, ok := req.Envelope.Params["load_num"]; ok {
 			v, err := requiredInt64(req.Envelope.Params, "load_num")
 			if err != nil || v <= 0 || v > 200 {
-				return badI5("invalid_mail_limit")
+				return badI5()
 			}
 			limit = v
 		}
@@ -161,11 +161,11 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 369: // SET_MAIL_READ / claim attachment
 		id, err := requiredInt64(req.Envelope.Params, "id")
 		if err != nil || id <= 0 {
-			return badI5("invalid_mail_id")
+			return badI5()
 		}
 		ns, err := stockMailNamespace(req.Envelope.Params["is_region"])
 		if err != nil {
-			return badI5("invalid_mail_namespace")
+			return badI5()
 		}
 		got, err := d.Service.ClaimMail(ctx, actor, mail.Address{Namespace: ns, WireID: id}, req.Envelope.Operation)
 		if err != nil {
@@ -179,7 +179,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		region := stringParam(req.Envelope.Params, "region_ids")
 		addrs, err := mail.ParseMID370(normal, region, 200)
 		if err != nil || len(addrs) == 0 {
-			return badI5("invalid_mail_batch")
+			return badI5()
 		}
 		got, err := d.Service.ClaimMailBatch(ctx, actor, addrs, req.Envelope.Operation)
 		if err != nil {
@@ -199,7 +199,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		index, err := requiredInt64(req.Envelope.Params, "index")
 		if err != nil {
-			return badI5("invalid_activity_index")
+			return badI5()
 		}
 		period := "DAY"
 		if req.Envelope.MID == 170 {
@@ -239,7 +239,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			familyRaw, err = int64(objective.Daily), nil
 		}
 		if err != nil || familyRaw < int64(objective.Daily) || familyRaw > int64(objective.Challenge) {
-			return badI5("invalid_mission_type")
+			return badI5()
 		}
 		if familyRaw == 5 && d.Awakening != nil {
 			body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
@@ -263,7 +263,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 161: // TAKE_MISSION_AWARD
 		tableID, err := requiredInt64(req.Envelope.Params, "table_id")
 		if err != nil || tableID <= 0 {
-			return badI5("invalid_mission_id")
+			return badI5()
 		}
 		if d.Awakening != nil {
 			body, handled, e := d.Awakening.ClaimAwakening(ctx, actor, tableID, req.Envelope.Operation)
@@ -278,7 +278,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		if raw, ok := req.Envelope.Params["hero_table_id"]; ok {
 			h, err := numericValue(raw)
 			if err != nil || h <= 0 {
-				return badI5("invalid_hero_table_id")
+				return badI5()
 			}
 			generation = "hero:" + strconv.FormatInt(h, 10)
 		}
@@ -300,7 +300,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 230: // REDEEM_CODE
 		code, _ := req.Envelope.Params["code"].(string)
 		if code == "" {
-			return badI5("invalid_redeem")
+			return badI5()
 		}
 		platform := fmt.Sprint(req.Envelope.Params["platform"])
 		got, err := d.Service.Redeem(ctx, actor, code, platform, req.Envelope.Operation)
@@ -425,8 +425,11 @@ func applySettlementProjection(body map[string]any, p appi5.SettlementProjection
 func okI5(body map[string]any) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 }
-func badI5(code string) httpedge.Response {
-	return failureReply(malformed(code))
+
+// F4(c): malformed stock params answer 400 with the family token, never a
+// per-MID detail.
+func badI5() httpedge.Response {
+	return failureReply(malformed("i5_invalid_parameter"))
 }
 
 var i5FailureRows = []failureRow{
@@ -465,7 +468,7 @@ func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.Acto
 	mid, p := req.Envelope.MID, req.Envelope.Params
 	if mid == 2561 {
 		if !onlyStockGameplayParams(p) {
-			return badI5("invalid_awakening_read")
+			return badI5()
 		}
 		body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
 		if e != nil {
@@ -478,7 +481,7 @@ func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.Acto
 	if mid == 171 {
 		n, e := requiredInt64(p, "item_num")
 		if e != nil || n != 1 || !onlyStockGameplayParams(p, "item_num") {
-			return badI5("invalid_awakening_wish")
+			return badI5()
 		}
 		action = "wish"
 	} else if mid == 2737 || mid == 2738 {
@@ -486,7 +489,7 @@ func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.Acto
 		id, e1 = requiredInt64(p, "mission_id")
 		kind, e2 = requiredInt64(p, "awake_type")
 		if e1 != nil || e2 != nil || id <= 0 || kind < 1 || kind > 3 || !onlyStockGameplayParams(p, "mission_id", "awake_type") {
-			return badI5("invalid_awakening_mission")
+			return badI5()
 		}
 		if mid == 2737 {
 			action = "cancel"
@@ -495,7 +498,7 @@ func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.Acto
 		var e error
 		id, e = requiredInt64(p, "table_id")
 		if e != nil || id <= 0 || !onlyStockGameplayParams(p, "table_id") {
-			return badI5("invalid_awakening_mission")
+			return badI5()
 		}
 		switch mid {
 		case 163, 164:

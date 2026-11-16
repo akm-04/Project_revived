@@ -596,6 +596,7 @@
    "i9_tutorial_switches.json"
   ],
   "unit": [
+   "awakening_blood_test.go",
    "awakening_occult_material_test.go",
    "ca1_test.go",
    "character_functions_test.go",
@@ -620,6 +621,7 @@
    "promotion_restoration_test.go",
    "scalar_daily_floor_test.go",
    "service_test.go",
+   "startup_test.go",
    "temporal_repin_test.go",
    "workplace_sp_test.go"
   ]

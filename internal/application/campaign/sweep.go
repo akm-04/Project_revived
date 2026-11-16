@@ -221,7 +221,7 @@ func (s Mode) purchase(c context.Context, a identity.ActorContext, name string, 
 		for key, value := range changes.RecordedMissions(c) {
 			out[key] = value
 		}
-		out["economy_"] = balances
+		changes.WriteEconomy(out, balances)
 		if len(functions) > 0 {
 			out["new_funcs_"] = functions
 		}

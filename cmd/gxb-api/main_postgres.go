@@ -247,6 +247,9 @@ func main() {
 	contentDB := contentstore.Store{Queryer: pool}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: contentDB}
 	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
+	if e := i5svc.ValidateStartup(); e != nil {
+		log.Fatalf("I5 startup: %v", e)
+	}
 	i5svc.CharacterFunctions = characterstore.FunctionPrerequisites{Store: characterstore.Store{Queryer: pool}, Content: contentDB}
 	i5svc.ServerLevels = i5db
 	i5svc.Awakening = &appi5.AwakeningRuntime{Store: i5db, Content: contentDB, Stacks: i5db, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: contentDB}}

@@ -212,6 +212,16 @@ func (s Service) validate() error {
 	return nil
 }
 
+// ValidateStartup rejects a composition without its privilege provider. The
+// active builtin content enables the VIP-capped Skill temporal policy, so the
+// missing port is a startup error, not a per-operation one.
+func (s Service) ValidateStartup() error {
+	if s.Privileges == nil {
+		return errors.New("I5 privilege snapshot provider missing")
+	}
+	return nil
+}
+
 func (s Service) SettleGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context) (GrantResult, error) {
 	if plan.PlayerID != actor.PlayerID {
 		return GrantResult{}, errors.New("grant actor/player mismatch")

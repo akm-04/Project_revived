@@ -53,3 +53,16 @@ func TestMissionFieldsFollowCommitAndDiscardRules(t *testing.T) {
 		t.Fatalf("mission attempt leak: %v", got)
 	}
 }
+
+func TestWriteEconomyOmitsEmptyBalances(t *testing.T) {
+	body := map[string]any{}
+	WriteEconomy(body, map[string]int64{})
+	if _, present := body["economy_"]; present {
+		t.Fatal("an empty change set wrote economy_")
+	}
+	WriteEconomy(body, map[string]int64{"crystal": 7})
+	balances, ok := body["economy_"].(map[string]int64)
+	if !ok || balances["crystal"] != 7 {
+		t.Fatalf("economy_ %v", body["economy_"])
+	}
+}

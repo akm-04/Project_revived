@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/privilege"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -42,7 +43,8 @@ func chargeService(p *pg.Pool) cp.Charge {
 
 func chargeTap(t *testing.T, p *pg.Pool, rev string, a identity.ActorContext, chargeID int64, intent string) map[string]any {
 	t.Helper()
-	body, e := chargeService(p).Tap(ctx, a, cp.TapRequest{ChargeID: chargeID, IntentID: intent}, opPinned(rev))
+	tracked, _ := changes.Track(ctx)
+	body, e := chargeService(p).Tap(tracked, a, cp.TapRequest{ChargeID: chargeID, IntentID: intent}, opPinned(rev))
 	if e != nil {
 		t.Fatal("tap", chargeID, intent, e)
 	}
@@ -181,8 +183,8 @@ func TestI910GChargeCardsStackAndBootstrap(t *testing.T) {
 	}
 	body := chargeTap(t, p, rev, a, 80001007, uuid().String())
 	now := time.Now().UTC()
-	if body["economy_"] == nil {
-		t.Fatal("economy_ missing")
+	if balances, ok := body["economy_"].(map[string]int64); !ok || balances["crystal"] <= 0 {
+		t.Fatal("charge did not report its crystal grant", body["economy_"])
 	}
 	detail := map[string]any{"17": map[string]any{}}
 	if e = (cp.BootstrapProjection{Provider: privilegeProvider(p)}).OverlayMID1(ctx, p, a, false, now, detail); e != nil {
