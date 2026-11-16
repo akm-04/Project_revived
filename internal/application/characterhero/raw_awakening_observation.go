@@ -11,7 +11,7 @@ import (
 )
 
 type RawAwakeningBirthStore interface {
-	ReadRawAwakeningBirthTx(context.Context, tx.Queryer, character.HeroRef) (character.RawAwakeningBirth, error)
+	FindRawAwakeningTx(context.Context, tx.Queryer, character.HeroRef) (character.RawAwakeningBirth, bool, error)
 }
 type RawAwakeningObservationReader struct {
 	Heroes BaseObservationStore
@@ -31,9 +31,12 @@ func (r RawAwakeningObservationReader) RawAwakeningTx(c context.Context, sc ca.C
 	if h.Ref() != ref || h.ValidatePersistent() != nil || h.UpdatedAt.Before(h.CreatedAt) || sc.ObservedAt.Before(h.UpdatedAt) {
 		return out, character.ErrRawAwakeningUnavailable
 	}
-	f, e := r.Births.ReadRawAwakeningBirthTx(c, sc.Queryer(), ref)
+	f, found, e := r.Births.FindRawAwakeningTx(c, sc.Queryer(), ref)
 	if e != nil {
 		return out, e
+	}
+	if !found {
+		return out, character.ErrRawAwakeningUnavailable
 	}
 	if f.Validate() != nil || f.Ref != ref || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || sc.ObservedAt.Before(f.UpdatedAt) {
 		return out, character.ErrRawAwakeningUnavailable

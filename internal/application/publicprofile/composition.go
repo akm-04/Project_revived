@@ -8,6 +8,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -291,11 +292,15 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 func (s ReadService) allShowTypes(c context.Context, sc tx.Scope, pid identity.PlayerID, rev string, at time.Time) (map[string]int64, error) {
 	values := map[string]int64{}
 	for id := int64(1001); id <= 1011; id++ {
-		// C4F_SHOW_TYPES_FULL11_V1: a field whose basis is UNKNOWN for this
-		// player (e.g. 1007 over legacy heroes without a raw birth) is omitted,
-		// never zeroed; SQL failures still abort the read transaction.
+		// C4F_SHOW_TYPES_FULL11_V1: only the owner's explicit UNKNOWN-basis
+		// sentinel (a legacy hero without a raw birth) omits that one field,
+		// never zeroed. Any other owner error fails the read instead of
+		// returning a silently short map.
 		v, e := s.metrics(c, sc, pid, []int64{id}, rev, at)
 		if e != nil {
+			if !errors.Is(e, character.ErrRawAwakeningUnavailable) {
+				return nil, e
+			}
 			continue
 		}
 		for k, n := range v {

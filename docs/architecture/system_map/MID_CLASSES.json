@@ -79085,7 +79085,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "repeatable_read"
     }
    ],
@@ -79093,7 +79093,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "false"
     }
    ],
@@ -79101,7 +79101,7 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "1"
     }
    ],
@@ -79112,7 +79112,7 @@
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 102,
+     "line": 103,
      "read_only": "false",
      "retry": "1"
     }
@@ -81173,7 +81173,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "repeatable_read"
     }
    ],
@@ -81181,7 +81181,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "false"
     }
    ],
@@ -81189,7 +81189,7 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "1"
     }
    ],
@@ -81200,7 +81200,7 @@
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 102,
+     "line": 103,
      "read_only": "false",
      "retry": "1"
     }
@@ -81736,7 +81736,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "repeatable_read"
     }
    ],
@@ -81744,7 +81744,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "false"
     }
    ],
@@ -81752,7 +81752,7 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 102,
+     "line": 103,
      "value": "1"
     }
    ],
@@ -81763,7 +81763,7 @@
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 102,
+     "line": 103,
      "read_only": "false",
      "retry": "1"
     }

@@ -2728,8 +2728,7 @@
     "*SaveSortTypeTx"
    ],
    "store:characterstore": [
-    "*FindRawAwakeningTx",
-    "*ReadRawAwakeningBirthTx"
+    "*FindRawAwakeningTx"
    ],
    "store:contentstore": [
     "*AppearanceActive",
