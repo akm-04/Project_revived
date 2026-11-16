@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
+	arena "gxb.local/backend/v2/internal/domain/arena"
 	d "gxb.local/backend/v2/internal/domain/herorecommend"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -31,25 +33,26 @@ func (Store) HeroRecommendSourceTx(c context.Context, q tx.Queryer, server ident
 		return out, e
 	}
 	var formations string
-	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'defense',defense,'weight',weight) ORDER BY star DESC,point DESC,player_id),'[]'::jsonb)::text FROM(
-		SELECT player_id,defense,star*1000+point weight,star,point FROM arena_players
+	if e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'defense',jsonb_build_object('payload',defense,'version',payload_version),'weight',weight) ORDER BY star DESC,point DESC,player_id),'[]'::jsonb)::text FROM(
+		SELECT player_id,defense,payload_version,star*1000+point weight,star,point FROM arena_players
 		WHERE logical_server_id=$1 AND jsonb_array_length(defense->'heroes')>0
 		ORDER BY star DESC,point DESC,player_id LIMIT $2)x`, int64(server), limit).Scan(&formations); e != nil {
 		return out, e
 	}
 	var rows []struct {
-		PlayerID int64 `json:"player_id"`
-		Defense  struct {
-			Heroes []int64 `json:"heroes"`
-			Pet    int64   `json:"pet"`
-		} `json:"defense"`
-		Weight int64 `json:"weight"`
+		PlayerID int64            `json:"player_id"`
+		Defense  versionedPayload `json:"defense"`
+		Weight   int64            `json:"weight"`
 	}
 	if e := json.Unmarshal([]byte(formations), &rows); e != nil {
 		return out, e
 	}
 	for _, row := range rows {
-		out.Formations = append(out.Formations, d.Formation{PlayerID: row.PlayerID, TableIDs: row.Defense.Heroes, PetID: row.Defense.Pet, Weight: row.Weight})
+		var lineup arena.Lineup
+		if e := payload.Decode("arena_players", row.Defense.Version, row.Defense.Payload, &lineup); e != nil {
+			return out, e
+		}
+		out.Formations = append(out.Formations, d.Formation{PlayerID: row.PlayerID, TableIDs: lineup.Heroes, PetID: lineup.Pet, Weight: row.Weight})
 	}
 	return out, nil
 }

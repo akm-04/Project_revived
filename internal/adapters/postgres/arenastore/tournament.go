@@ -20,12 +20,12 @@ func (Store) PreviousSeasonRanksTx(requestContext context.Context, query tx.Quer
 }
 
 func (Store) ReadTournamentTx(requestContext context.Context, query tx.Queryer, season int64, lock bool) (d.TournamentPeriod, bool, error) {
-	statement := `SELECT payload::text FROM arena_tournament_periods WHERE season=$1`
+	statement := `SELECT payload::text,payload_version FROM arena_tournament_periods WHERE season=$1`
 	if lock {
 		statement += ` FOR UPDATE`
 	}
 	var period d.TournamentPeriod
-	found, err := readJSON(requestContext, query, statement, &period, season)
+	found, err := readPayload(requestContext, query, "arena_tournament_periods", statement, &period, season)
 	if err != nil || !found {
 		return period, found, err
 	}
@@ -36,23 +36,23 @@ func (Store) SaveTournamentTx(requestContext context.Context, transaction tx.Tx,
 	if transaction == nil || period.Validate() != nil || period.StateVersion != previousVersion+1 {
 		return d.ErrConflict
 	}
-	payload, err := encode(period)
+	payload, version, err := encode(period)
 	if err != nil {
 		return err
 	}
 	if previousVersion == 0 {
-		return one(transaction.Exec(requestContext, `INSERT INTO arena_tournament_periods(season,content_revision,payload,state_version) VALUES($1,$2,$3::jsonb,1)`, period.Season, period.ContentRevision, payload))
+		return one(transaction.Exec(requestContext, `INSERT INTO arena_tournament_periods(season,content_revision,payload,state_version,payload_version) VALUES($1,$2,$3::jsonb,1,$4)`, period.Season, period.ContentRevision, payload, version))
 	}
-	return one(transaction.Exec(requestContext, `UPDATE arena_tournament_periods SET payload=$3::jsonb,state_version=$4 WHERE season=$1 AND state_version=$2 AND content_revision=$5`, period.Season, previousVersion, payload, period.StateVersion, period.ContentRevision))
+	return one(transaction.Exec(requestContext, `UPDATE arena_tournament_periods SET payload=$3::jsonb,state_version=$4,payload_version=$6 WHERE season=$1 AND state_version=$2 AND content_revision=$5`, period.Season, previousVersion, payload, period.StateVersion, period.ContentRevision, version))
 }
 
 func (Store) ReadTournamentRoomTx(requestContext context.Context, query tx.Queryer, identifier ids.UUID, lock bool) (d.TournamentRoom, bool, error) {
-	statement := `SELECT payload::text FROM arena_tournament_rooms WHERE room_id=$1`
+	statement := `SELECT payload::text,payload_version FROM arena_tournament_rooms WHERE room_id=$1`
 	if lock {
 		statement += ` FOR UPDATE`
 	}
 	var room d.TournamentRoom
-	found, err := readJSON(requestContext, query, statement, &room, identifier.String())
+	found, err := readPayload(requestContext, query, "arena_tournament_rooms", statement, &room, identifier.String())
 	if err != nil || !found {
 		return room, found, err
 	}
@@ -76,7 +76,7 @@ func (Store) SaveTournamentRoomTx(requestContext context.Context, transaction tx
 			return err
 		}
 	}
-	payload, err := encode(room)
+	payload, version, err := encode(room)
 	if err != nil {
 		return err
 	}
@@ -89,14 +89,18 @@ func (Store) SaveTournamentRoomTx(requestContext context.Context, transaction tx
 		} else {
 			season = room.Season
 		}
-		return one(transaction.Exec(requestContext, `INSERT INTO arena_tournament_rooms(room_id,season,casual_week_day,friend_invitation_id,first_player,second_player,status,starts_at,state_version,payload) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9::jsonb)`, room.Identifier.String(), season, weekDay, friendInvitation, int64(room.Selection.Players[0]), int64(room.Selection.Players[1]), room.Status, room.StartsAt, payload))
+		return one(transaction.Exec(requestContext, `INSERT INTO arena_tournament_rooms(room_id,season,casual_week_day,friend_invitation_id,first_player,second_player,status,starts_at,state_version,payload,payload_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9::jsonb,$10)`, room.Identifier.String(), season, weekDay, friendInvitation, int64(room.Selection.Players[0]), int64(room.Selection.Players[1]), room.Status, room.StartsAt, payload, version))
 	}
-	return one(transaction.Exec(requestContext, `UPDATE arena_tournament_rooms SET payload=$3::jsonb,state_version=$4,status=$5 WHERE room_id=$1 AND state_version=$2 AND first_player=$6 AND second_player=$7 AND starts_at=$8`, room.Identifier.String(), previousVersion, payload, room.StateVersion, room.Status, int64(room.Selection.Players[0]), int64(room.Selection.Players[1]), room.StartsAt))
+	return one(transaction.Exec(requestContext, `UPDATE arena_tournament_rooms SET payload=$3::jsonb,state_version=$4,status=$5,payload_version=$9 WHERE room_id=$1 AND state_version=$2 AND first_player=$6 AND second_player=$7 AND starts_at=$8`, room.Identifier.String(), previousVersion, payload, room.StateVersion, room.Status, int64(room.Selection.Players[0]), int64(room.Selection.Players[1]), room.StartsAt, version))
 }
 
 func (Store) TournamentRoomsTx(requestContext context.Context, query tx.Queryer, season int64, player identity.PlayerID, casual bool) ([]d.TournamentRoom, error) {
-	var rooms []d.TournamentRoom
-	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(payload ORDER BY starts_at,room_id),'[]'::jsonb)::text FROM arena_tournament_rooms WHERE (($1::boolean AND casual_week_day=$2) OR (NOT $1::boolean AND season=$2)) AND ($3::bigint=0 OR first_player=$3 OR second_player=$3)`, &rooms, casual, season, int64(player))
+	var rows []versionedPayload
+	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',payload,'version',payload_version) ORDER BY starts_at,room_id),'[]'::jsonb)::text FROM arena_tournament_rooms WHERE (($1::boolean AND casual_week_day=$2) OR (NOT $1::boolean AND season=$2)) AND ($3::bigint=0 OR first_player=$3 OR second_player=$3)`, &rows, casual, season, int64(player))
+	if err != nil {
+		return nil, err
+	}
+	rooms, err := decodePayloads[d.TournamentRoom]("arena_tournament_rooms", rows)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +120,7 @@ func (Store) DueTournamentRoomsTx(requestContext context.Context, query tx.Query
 
 func (Store) ActiveCasualEntryTx(requestContext context.Context, query tx.Queryer, player identity.PlayerID) (d.CasualEntry, bool, error) {
 	var entry d.CasualEntry
-	found, err := readJSON(requestContext, query, `SELECT payload::text FROM arena_casual_entries WHERE player_id=$1 AND status IN ('WAITING','MATCHED')`, &entry, int64(player))
+	found, err := readPayload(requestContext, query, "arena_casual_entries", `SELECT payload::text,payload_version FROM arena_casual_entries WHERE player_id=$1 AND status IN ('WAITING','MATCHED')`, &entry, int64(player))
 	if err != nil || !found {
 		return entry, found, err
 	}
@@ -124,8 +128,12 @@ func (Store) ActiveCasualEntryTx(requestContext context.Context, query tx.Querye
 }
 
 func (Store) WaitingCasualEntriesTx(requestContext context.Context, query tx.Queryer, weekDay int64) ([]d.CasualEntry, error) {
-	var entries []d.CasualEntry
-	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(payload ORDER BY admitted_at,entry_id),'[]'::jsonb)::text FROM arena_casual_entries WHERE week_day=$1 AND status='WAITING'`, &entries, weekDay)
+	var rows []versionedPayload
+	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',payload,'version',payload_version) ORDER BY admitted_at,entry_id),'[]'::jsonb)::text FROM arena_casual_entries WHERE week_day=$1 AND status='WAITING'`, &rows, weekDay)
+	if err != nil {
+		return nil, err
+	}
+	entries, err := decodePayloads[d.CasualEntry]("arena_casual_entries", rows)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +149,7 @@ func (Store) SaveCasualEntryTx(requestContext context.Context, transaction tx.Tx
 	if transaction == nil || entry.Validate() != nil || entry.StateVersion != previousVersion+1 {
 		return d.ErrConflict
 	}
-	payload, err := encode(entry)
+	payload, version, err := encode(entry)
 	if err != nil {
 		return err
 	}
@@ -150,9 +158,9 @@ func (Store) SaveCasualEntryTx(requestContext context.Context, transaction tx.Tx
 		room = entry.Room.String()
 	}
 	if previousVersion == 0 {
-		return one(transaction.Exec(requestContext, `INSERT INTO arena_casual_entries(entry_id,player_id,week_day,status,room_id,admitted_at,expires_at,state_version,payload) VALUES($1,$2,$3,$4,$5,$6,$7,1,$8::jsonb)`, entry.Identifier.String(), int64(entry.Actor.PlayerID), entry.WeekDay, entry.Status, room, entry.AdmittedAt, entry.ExpiresAt, payload))
+		return one(transaction.Exec(requestContext, `INSERT INTO arena_casual_entries(entry_id,player_id,week_day,status,room_id,admitted_at,expires_at,state_version,payload,payload_version) VALUES($1,$2,$3,$4,$5,$6,$7,1,$8::jsonb,$9)`, entry.Identifier.String(), int64(entry.Actor.PlayerID), entry.WeekDay, entry.Status, room, entry.AdmittedAt, entry.ExpiresAt, payload, version))
 	}
-	return one(transaction.Exec(requestContext, `UPDATE arena_casual_entries SET status=$3,room_id=$4,payload=$5::jsonb,state_version=$6 WHERE entry_id=$1 AND state_version=$2 AND player_id=$7 AND week_day=$8 AND admitted_at=$9 AND expires_at=$10`, entry.Identifier.String(), previousVersion, entry.Status, room, payload, entry.StateVersion, int64(entry.Actor.PlayerID), entry.WeekDay, entry.AdmittedAt, entry.ExpiresAt))
+	return one(transaction.Exec(requestContext, `UPDATE arena_casual_entries SET status=$3,room_id=$4,payload=$5::jsonb,state_version=$6,payload_version=$11 WHERE entry_id=$1 AND state_version=$2 AND player_id=$7 AND week_day=$8 AND admitted_at=$9 AND expires_at=$10`, entry.Identifier.String(), previousVersion, entry.Status, room, payload, entry.StateVersion, int64(entry.Actor.PlayerID), entry.WeekDay, entry.AdmittedAt, entry.ExpiresAt, version))
 }
 
 func (Store) CasualStandingsTx(requestContext context.Context, query tx.Queryer, weekDay int64) ([]d.CasualStanding, error) {
@@ -173,12 +181,12 @@ func (Store) AddCasualResultTx(requestContext context.Context, transaction tx.Tx
 }
 
 func (Store) ReadCasualSessionTx(requestContext context.Context, query tx.Queryer, weekDay int64, lock bool) (d.CasualSession, bool, error) {
-	statement := `SELECT payload::text FROM arena_casual_sessions WHERE week_day=$1`
+	statement := `SELECT payload::text,payload_version FROM arena_casual_sessions WHERE week_day=$1`
 	if lock {
 		statement += ` FOR UPDATE`
 	}
 	var session d.CasualSession
-	found, err := readJSON(requestContext, query, statement, &session, weekDay)
+	found, err := readPayload(requestContext, query, "arena_casual_sessions", statement, &session, weekDay)
 	if err != nil || !found {
 		return session, found, err
 	}
@@ -189,14 +197,14 @@ func (Store) SaveCasualSessionTx(requestContext context.Context, transaction tx.
 	if transaction == nil || session.Validate() != nil || session.StateVersion != previousVersion+1 {
 		return d.ErrConflict
 	}
-	payload, err := encode(session)
+	payload, version, err := encode(session)
 	if err != nil {
 		return err
 	}
 	if previousVersion == 0 {
-		return one(transaction.Exec(requestContext, `INSERT INTO arena_casual_sessions(week_day,closes_at,content_revision,settled,state_version,payload)VALUES($1,$2,$3,$4,1,$5::jsonb)`, session.Period.WeekDay, session.Period.ClosesAt, session.ContentRevision, session.Settled, payload))
+		return one(transaction.Exec(requestContext, `INSERT INTO arena_casual_sessions(week_day,closes_at,content_revision,settled,state_version,payload,payload_version)VALUES($1,$2,$3,$4,1,$5::jsonb,$6)`, session.Period.WeekDay, session.Period.ClosesAt, session.ContentRevision, session.Settled, payload, version))
 	}
-	return one(transaction.Exec(requestContext, `UPDATE arena_casual_sessions SET settled=$3,state_version=$4,payload=$5::jsonb WHERE week_day=$1 AND state_version=$2 AND content_revision=$6 AND closes_at=$7`, session.Period.WeekDay, previousVersion, session.Settled, session.StateVersion, payload, session.ContentRevision, session.Period.ClosesAt))
+	return one(transaction.Exec(requestContext, `UPDATE arena_casual_sessions SET settled=$3,state_version=$4,payload=$5::jsonb,payload_version=$8 WHERE week_day=$1 AND state_version=$2 AND content_revision=$6 AND closes_at=$7`, session.Period.WeekDay, previousVersion, session.Settled, session.StateVersion, payload, session.ContentRevision, session.Period.ClosesAt, version))
 }
 
 func (Store) PendingCasualSessionsTx(requestContext context.Context, query tx.Queryer, at time.Time, limit int) ([]int64, error) {
@@ -216,8 +224,12 @@ func (Store) WakeTournamentRoomTx(requestContext context.Context, transaction tx
 }
 
 func (Store) SettledTournamentsTx(requestContext context.Context, query tx.Queryer, player identity.PlayerID) ([]d.TournamentPeriod, error) {
-	var periods []d.TournamentPeriod
-	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(payload ORDER BY season),'[]'::jsonb)::text FROM arena_tournament_periods WHERE payload->>'settled'='true' AND payload->>'cancelled'='false' AND EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'entrants') entrant WHERE (entrant->>'player_id')::bigint=$1 AND entrant->>'placement'='1')`, &periods, int64(player))
+	var rows []versionedPayload
+	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',payload,'version',payload_version) ORDER BY season),'[]'::jsonb)::text FROM arena_tournament_periods WHERE payload->>'settled'='true' AND payload->>'cancelled'='false' AND EXISTS (SELECT 1 FROM jsonb_array_elements(payload->'entrants') entrant WHERE (entrant->>'player_id')::bigint=$1 AND entrant->>'placement'='1')`, &rows, int64(player))
+	if err != nil {
+		return nil, err
+	}
+	periods, err := decodePayloads[d.TournamentPeriod]("arena_tournament_periods", rows)
 	if err != nil {
 		return nil, err
 	}
