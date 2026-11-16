@@ -172,7 +172,7 @@ func TestMentorOverlappingPairWaitsOnCanonicalPlayerRoot(t *testing.T) {
 	observed := false
 	deadline := time.Now().Add(3 * time.Second)
 	for time.Now().Before(deadline) {
-		if err = database.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=$1 AND wait_event_type='Lock' AND query ILIKE '%FROM players%FOR UPDATE%')", backendProcess).Scan(&observed); err != nil {
+		if err = database.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=$1 AND wait_event_type='Lock' AND query ILIKE '%FROM players%FOR NO KEY UPDATE%')", backendProcess).Scan(&observed); err != nil {
 			t.Fatal(err)
 		}
 		if observed {
