@@ -1,0 +1,15 @@
+{
+  "Record": {
+    "ID": 0,
+    "Owner": 100001,
+    "AttemptID": "e954b8c1-1d46-4079-8baa-836687c28e93",
+    "Attack": true,
+    "Win": true,
+    "Opponent": {
+      "robot": 10325
+    },
+    "At": "2026-11-16T02:17:56Z"
+  },
+  "PeriodNumber": 1,
+  "Mode": 1
+}
