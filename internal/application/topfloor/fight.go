@@ -516,8 +516,18 @@ type fightSide struct {
 	opponent d.Occupant
 }
 
-// close ends a fight whose combat attempt can no longer produce a result; the
-// consumed ticket is not restored (private policy).
+// forfeited applies the challenger's state after a server-side close. A close
+// is a forfeit: a fight without a win and a reset attack streak, the loss
+// arena's settle(forfeit) records. The consumed ticket is not restored.
+func forfeited(p d.Player, at time.Time) d.Player {
+	p.Fights++
+	p.WinStreak = nextWinStreak(p.WinStreak, true, false)
+	p.StateVersion, p.UpdatedAt = p.StateVersion+1, at
+	return p
+}
+
+// close ends a fight whose combat attempt can no longer produce a result. A
+// close is a forfeit for the challenger, recorded in the same transaction.
 func (s Service) close(c context.Context, f d.Fight, parent operation.Context) error {
 	op, err := child(parent, "close:"+f.AttemptID.String())
 	if err != nil {
@@ -529,7 +539,21 @@ func (s Service) close(c context.Context, f d.Fight, parent operation.Context) e
 		if err != nil || !found || current.Status != d.StatusStarted {
 			return err
 		}
+		_, catalog, err := s.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		challenger, found, err := s.Store.ReadPlayerTx(c, sc.Tx, current.Challenger, true)
+		if err != nil || !found {
+			return errors.Join(err, d.ErrConflict)
+		}
 		if _, err = s.Combat.CloseTx(c, sc.Tx, combat.TerminalRequest{Locator: locator(f.Server, f.Challenger), GenerationRef: d.ContractID, TerminalKind: closedKind, SemanticReceiptID: semanticReceipt(f.AttemptID), At: at}); err != nil {
+			return err
+		}
+		if err = s.Store.SavePlayerTx(c, sc.Tx, forfeited(challenger, at), challenger.StateVersion); err != nil {
+			return err
+		}
+		if err = s.Store.InsertRecordTx(c, sc.Tx, d.Record{Owner: current.Challenger, AttemptID: current.AttemptID, Attack: true, Win: false, Opponent: current.Defender, At: at}, catalog.RecordsMax); err != nil {
 			return err
 		}
 		done := current

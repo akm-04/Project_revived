@@ -366,6 +366,29 @@ func TestForceRankPayload(t *testing.T) {
 	}
 }
 
+func TestForceRankEmptyBoardRanksOwningViewerFirst(t *testing.T) {
+	service, _, _ := testService(t)
+	viewer := int64(testActor().PlayerID)
+	roster := service.Heroes.(fakeRoster)
+	roster.heroes[viewer] = append(roster.heroes[viewer], map[string]any{"partner_id": int64(59), "table_id": int64(10001004), "lev": int64(10)})
+	service.Heroes = roster
+	power := service.HeroPower.(fakePower)
+	power.force[[2]int64{viewer, 59}] = 250
+	service.HeroPower = power
+	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	body, err := service.ForceRank(context.Background(), testActor(), testOperation(at), 10001004)
+	if err != nil {
+		t.Fatal(err)
+	}
+	myRank := body["my_rank"].(map[string]any)
+	if myRank["rank"] != int64(1) || myRank["force"] != int64(250) {
+		t.Fatalf("empty board my_rank %+v", myRank)
+	}
+	if rows := body["rank_list"].([]map[string]any); len(rows) != 0 {
+		t.Fatalf("empty board rank_list %+v", rows)
+	}
+}
+
 func TestMissingRecordAndRefusalAreContractSafe(t *testing.T) {
 	service, _, _ := testService(t)
 	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)

@@ -464,6 +464,57 @@ func TestI7C5BTopFloorReconcileAbandonedNative(t *testing.T) {
 	}
 }
 
+// N5 (user ruling 2026-11-16): a server-side close of an open Top Floor
+// attempt is a forfeit: the challenger records a loss and the win streak
+// resets inside the close transaction, while the consumed ticket stays spent.
+func TestN5TopFloorCloseForfeitsNative(t *testing.T) {
+	pool := pool(t)
+	defer pool.Close()
+	s := topFloorService(t, pool)
+	fights := combatService(t, pool)
+	fights.Worker = permanentWorker{}
+	s.Combat = fights
+	server := rankingServer(t, pool)
+	a, _, ref := topFloorPlayer(t, pool, server)
+	view, err := s.Load(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.SaveDefense(ctx, a, []int64{ref.PartnerID}, 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	exec(t, pool, `UPDATE top_floor_players SET fights=3,wins=3,win_streak=3,state_version=state_version+1 WHERE player_id=$1`, int64(a.PlayerID))
+	command := app.StartCommand{Formation: []int64{ref.PartnerID}, Enemy: view.Enemies[0].Occupant.TableID()}
+	if _, err = s.Start(ctx, a, command, op()); !errors.Is(err, cd.ErrResolverPermanent) {
+		t.Fatalf("permanent resolver must close the attempt: %v", err)
+	}
+	if scalar(t, pool, `SELECT count(*) FROM top_floor_fights WHERE challenger_id=$1 AND status='CLOSED'`, int64(a.PlayerID)) != 1 {
+		t.Fatal("fight not closed")
+	}
+	var fightsNow, winsNow, streakNow int64
+	if err = pool.QueryRow(ctx, `SELECT fights,wins,win_streak FROM top_floor_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&fightsNow, &winsNow, &streakNow); err != nil {
+		t.Fatal(err)
+	}
+	if fightsNow != 4 || winsNow != 3 || streakNow != 0 {
+		t.Fatalf("close must record the loss: fights=%d wins=%d streak=%d", fightsNow, winsNow, streakNow)
+	}
+	if scalar(t, pool, `SELECT tickets_left FROM top_floor_players WHERE player_id=$1`, int64(a.PlayerID)) != 4 {
+		t.Fatal("close must keep the consumed ticket")
+	}
+	if scalar(t, pool, `SELECT count(*) FROM top_floor_records WHERE owner_player_id=$1 AND is_attack AND NOT win`, int64(a.PlayerID)) != 1 {
+		t.Fatal("forfeit record missing")
+	}
+	if scalar(t, pool, `SELECT count(*) FROM top_floor_records r JOIN top_floor_fights f ON f.attempt_id=r.attempt_id WHERE r.owner_player_id=$1 AND f.status='CLOSED'`, int64(a.PlayerID)) != 1 {
+		t.Fatal("forfeit record must name the closed attempt")
+	}
+	if _, err = s.Start(ctx, a, command, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("closed attempt must refuse a replay: %v", err)
+	}
+	if scalar(t, pool, `SELECT count(*) FROM top_floor_records WHERE owner_player_id=$1`, int64(a.PlayerID)) != 1 || scalar(t, pool, `SELECT fights FROM top_floor_players WHERE player_id=$1`, int64(a.PlayerID)) != 4 {
+		t.Fatal("close must record the loss once")
+	}
+}
+
 // A retried START while the resolver withholds the result replays the original
 // admission: same attempt, one ticket, then one settlement when it resolves.
 func TestI9_10TopFloorPendingStartReplayNative(t *testing.T) {

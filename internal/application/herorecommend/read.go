@@ -74,13 +74,10 @@ func (s Service) ForceRank(ctx context.Context, a identity.ActorContext, o opera
 		return nil, err
 	}
 	if owned {
-		rank := int64(0)
-		if len(rows) > 0 {
-			rank = 1
-			for _, row := range rows {
-				if row.Force > force {
-					rank++
-				}
+		rank := int64(1)
+		for _, row := range rows {
+			if row.Force > force {
+				rank++
 			}
 		}
 		myRank = map[string]any{"rank": rank, "force": force}

@@ -24751,7 +24751,7 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 526,
+     "line": 536,
      "value": "repeatable_read"
     },
     {
@@ -24784,7 +24784,7 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 526,
+     "line": 536,
      "value": "false"
     },
     {
@@ -24820,7 +24820,7 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 526,
+     "line": 536,
      "value": "6"
     },
     {
@@ -24902,7 +24902,7 @@
      "file": "internal/application/topfloor/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 526,
+     "line": 536,
      "read_only": "false",
      "retry": "6"
     },
@@ -111052,7 +111052,7 @@
    "isolation": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "repeatable_read"
     },
     {
@@ -111065,7 +111065,7 @@
    "read_only": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "false"
     },
     {
@@ -111078,7 +111078,7 @@
    "retry": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "4"
     },
     {
@@ -111096,7 +111096,7 @@
      "file": "internal/application/herorecommend/read.go",
      "function": "Service.viewerForce",
      "isolation": "repeatable_read",
-     "line": 94,
+     "line": 91,
      "read_only": "false",
      "retry": "4"
     },
@@ -111413,7 +111413,7 @@
    "isolation": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "repeatable_read"
     },
     {
@@ -111426,7 +111426,7 @@
    "read_only": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "false"
     },
     {
@@ -111439,7 +111439,7 @@
    "retry": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "4"
     },
     {
@@ -111457,7 +111457,7 @@
      "file": "internal/application/herorecommend/read.go",
      "function": "Service.viewerForce",
      "isolation": "repeatable_read",
-     "line": 94,
+     "line": 91,
      "read_only": "false",
      "retry": "4"
     },
@@ -111774,7 +111774,7 @@
    "isolation": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "repeatable_read"
     },
     {
@@ -111787,7 +111787,7 @@
    "read_only": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "false"
     },
     {
@@ -111800,7 +111800,7 @@
    "retry": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "4"
     },
     {
@@ -111818,7 +111818,7 @@
      "file": "internal/application/herorecommend/read.go",
      "function": "Service.viewerForce",
      "isolation": "repeatable_read",
-     "line": 94,
+     "line": 91,
      "read_only": "false",
      "retry": "4"
     },
@@ -112135,7 +112135,7 @@
    "isolation": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "repeatable_read"
     },
     {
@@ -112148,7 +112148,7 @@
    "read_only": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "false"
     },
     {
@@ -112161,7 +112161,7 @@
    "retry": [
     {
      "file": "internal/application/herorecommend/read.go",
-     "line": 94,
+     "line": 91,
      "value": "4"
     },
     {
@@ -112179,7 +112179,7 @@
      "file": "internal/application/herorecommend/read.go",
      "function": "Service.viewerForce",
      "isolation": "repeatable_read",
-     "line": 94,
+     "line": 91,
      "read_only": "false",
      "retry": "4"
     },
