@@ -46,9 +46,9 @@ func (s Mode) StartSingle(c context.Context, a identity.ActorContext, request Fi
 		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
 			return nil, err
 		}
-		started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a, occurrence, "ADVENTURE_ILLUSION"),
+		started, err := s.startAttempt(c, sc, scope, cb.StartRequest{Actor: a, Locator: locator(a, occurrence, "ADVENTURE_ILLUSION"),
 			GenerationRef:    "ADVENTURE_ILLUSION/" + occurrence.SourceKey,
-			StartFingerprint: startFingerprint(a, sc.Operation.Operation().ID.String(), request.Formation),
+			StartFingerprint: startFingerprint(a, request.Formation),
 			ResultDeadline:   at.Add(attemptLimit), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},
 			Battle: cb.BattleRequest{CampaignType: campaign.CampaignType, BattleID: campaign.FightID,
 				TeamA: ownedTeam(a.PlayerID, request.Formation), Formation: request.Formation}})

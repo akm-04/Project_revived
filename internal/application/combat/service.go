@@ -498,6 +498,14 @@ func (s Service) CloseTx(ctx context.Context, t tx.Tx, request TerminalRequest) 
 	if open.GenerationRef != request.GenerationRef {
 		return Closed{}, d.ErrStale
 	}
+	// A replayed close whose receipt already closed an earlier attempt must not close this successor (A-058).
+	_, used, err := s.Store.FindTerminalTx(ctx, t, request.Locator, request.SemanticReceiptID)
+	if err != nil {
+		return Closed{}, err
+	}
+	if used {
+		return Closed{}, d.ErrStale
+	}
 	current, err := s.Store.LockAttemptTx(ctx, t, open.ID)
 	if err != nil {
 		return Closed{}, err

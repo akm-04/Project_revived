@@ -33,6 +33,8 @@ const (
 	RoomNoticeRoute = "illusion.room.notice.v1"
 	// TeamTerminalKind names the one terminal of a team fight.
 	TeamTerminalKind = "ILLUSION_TEAM_RESULT"
+	// TeamClosedKind names a team attempt the resolver can never finish.
+	TeamClosedKind = "ILLUSION_TEAM_CLOSED"
 
 	roomLease = 3000 * time.Second
 )

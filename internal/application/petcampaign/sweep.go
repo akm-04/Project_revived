@@ -49,6 +49,11 @@ func (s Mode) BeginSweep(c context.Context, a identity.ActorContext, op operatio
 		return r.Normal(), nil
 	})
 }
+
+// sweepFinishGraceSeconds is PET_SWEEP_FINISH_GRACE_V1: a client clock this far
+// ahead of the server may claim a due sweep without the early-finish price.
+const sweepFinishGraceSeconds int64 = 2
+
 func (s Mode) FinishSweep(c context.Context, a identity.ActorContext, finish int64, op operation.Context) (map[string]any, error) {
 	if finish < 0 {
 		return nil, d.ErrInvalid
@@ -65,7 +70,11 @@ func (s Mode) FinishSweep(c context.Context, a identity.ActorContext, finish int
 		if e != nil {
 			return nil, e
 		}
-		price := job.Cost(frozen, sc.Operation.DecisionAt().Unix())
+		now := sc.Operation.DecisionAt().Unix()
+		price := job.Cost(frozen, now)
+		if finish >= job.Due && now < job.Due && job.Due-now <= sweepFinishGraceSeconds {
+			price = 0
+		}
 		// Objective preparation must precede the crystal material lock.
 		c, e = s.Facts.PrepareTx(c, sc.Tx, a.PlayerID, sc.Operation)
 		if e != nil {

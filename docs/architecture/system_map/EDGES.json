@@ -343,6 +343,7 @@
   "combat": {
    "adventure": [
     "*AttestSummaryTx",
+    "*CloseTx",
     "*MonsterWaves",
     "*Resolve",
     "*StartTx",
@@ -404,6 +405,7 @@
    ],
    "illusion": [
     "*AttestSummaryTx",
+    "*CloseTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
@@ -424,6 +426,7 @@
    ],
    "occult": [
     "*AttestSummaryTx",
+    "*CloseTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
@@ -455,6 +458,7 @@
     "*TerminalTx"
    ],
    "workplace": [
+    "*CloseTx",
     "*Resolve",
     "*StartTx",
     "*TerminalTx"
@@ -2204,6 +2208,7 @@
    ],
    "combat": [
     "*AttestSummaryTx",
+    "*CloseTx",
     "*MonsterWaves",
     "*Resolve",
     "*StartTx",
@@ -4207,6 +4212,7 @@
    ],
    "combat": [
     "*AttestSummaryTx",
+    "*CloseTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
@@ -4615,6 +4621,7 @@
    ],
    "combat": [
     "*AttestSummaryTx",
+    "*CloseTx",
     "*MonsterWaves",
     "*Resolve",
     "*SettleMemberTx",
@@ -5719,6 +5726,7 @@
     "*LockStoryRosterTx"
    ],
    "combat": [
+    "*CloseTx",
     "*Resolve",
     "*StartTx",
     "*TerminalTx"
