@@ -83,6 +83,7 @@ type Combat interface {
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	CloseTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Closed, error)
 	SettleMemberTx(context.Context, tx.Tx, cb.MemberSettleRequest) (cb.MemberSettled, error)
 	SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error)
 	MonsterWaves(int64) ([][]cb.Participant, error)

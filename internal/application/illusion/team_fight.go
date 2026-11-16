@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -110,7 +111,10 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 		return nil, d.ErrInvalid
 	}
 	if _, err = s.Combat.Resolve(c, op, attemptUUID); err != nil {
-		return nil, err
+		if !errors.Is(err, cd.ErrResolverPermanent) {
+			return nil, err
+		}
+		return nil, errors.Join(err, s.closeUnresolvedTeam(c, a, op, occurrence, attemptUUID))
 	}
 	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(),
 		Before: func(c context.Context, t tx.Tx, room sharedroom.Room, at time.Time) error {
@@ -325,6 +329,28 @@ func (s Mode) creditMember(c context.Context, sc gen.TimedScope, room sharedroom
 	return s.recordFantasy(c, sc, identity.ActorContext{PlayerID: member, LogicalServerID: room.LogicalServerID}, fmt.Sprintf("%s:%d", attemptID, member))
 }
 
+// closeUnresolvedTeam ends a team attempt the resolver can never finish and
+// clears the room's pointer, so the next start freezes a new attempt.
+func (s Mode) closeUnresolvedTeam(c context.Context, a identity.ActorContext, op operation.Context, occurrence d.Occurrence, attempt ids.UUID) error {
+	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		state, err := d.LoadRoomState(room.Payload)
+		if err != nil {
+			return err
+		}
+		if _, err = s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: teamLocator(*room), GenerationRef: teamGeneration(*room, occurrence),
+			TerminalKind: TeamClosedKind, SemanticReceiptID: teamClosedReceipt(attempt.String()), At: sc.Operation.DecisionAt()}); err != nil {
+			return err
+		}
+		state.AttemptID = ""
+		payload, err := state.Encode()
+		if err != nil {
+			return err
+		}
+		return room.SetPayload(payload, sc.Operation.DecisionAt())
+	}}, op)
+	return err
+}
+
 func allReady(room sharedroom.Room) bool {
 	for _, seat := range room.Seats {
 		if seat.Stage == sharedroom.SeatSeated && !seat.Ready {
@@ -348,6 +374,10 @@ func teamGeneration(room sharedroom.Room, occurrence d.Occurrence) string {
 
 func teamReceipt(attemptID string) string {
 	return "illusion-team:" + attemptID
+}
+
+func teamClosedReceipt(attemptID string) string {
+	return "illusion-team-closed:" + attemptID
 }
 
 func teamMemberReceipt(attemptID string, member identity.PlayerID) string {

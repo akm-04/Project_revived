@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -21,11 +22,16 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const coopCampaignType = 61
+const (
+	coopCampaignType = 61
+	// coopClosedKind names a co-op attempt the resolver can never finish.
+	coopClosedKind = "ADVENTURE_ILLUSION_TEAM_CLOSED"
+)
 
 // CreateCoop answers 2423: the master's 10006 room bound to the occurrence.
 func (s Mode) CreateCoop(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
@@ -439,7 +445,10 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		return nil, err
 	}
 	if _, err = s.Combat.Resolve(c, op, started.Attempt.ID); err != nil {
-		return nil, err
+		if !errors.Is(err, cd.ErrResolverPermanent) {
+			return nil, err
+		}
+		return nil, errors.Join(err, s.closeUnresolvedCoop(c, a, op, started.Attempt.ID))
 	}
 	var report []byte
 	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: IllusionFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
@@ -649,6 +658,17 @@ func (s Mode) pickBody(c context.Context, q tx.Queryer, player identity.PlayerID
 		}
 	}
 	return info, nil
+}
+
+// closeUnresolvedCoop ends a co-op attempt the resolver can never finish, so the
+// next start freezes a new attempt instead of replaying the dead one.
+func (s Mode) closeUnresolvedCoop(c context.Context, a identity.ActorContext, op operation.Context, attempt ids.UUID) error {
+	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: IllusionFamily(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		_, err := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: coopLocator(*room), GenerationRef: coopGeneration(*room),
+			TerminalKind: coopClosedKind, SemanticReceiptID: "adventure-illusion-team-closed:" + attempt.String(), At: sc.Operation.DecisionAt()})
+		return err
+	}}, op)
+	return err
 }
 
 func coopLocator(room sharedroom.Room) cd.Locator {

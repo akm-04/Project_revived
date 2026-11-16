@@ -3,11 +3,13 @@ package workplace
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gxb.local/backend/v2/internal/application/broadcast"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/workplace"
@@ -17,6 +19,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
+
+const closedKind = "WORKPLACE_JOB_CLOSED"
 
 func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op operation.Context) (map[string]any, error) {
 	if teamID < 1 || teamID > 6 {
@@ -68,13 +72,17 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 	if replay != nil {
 		return replay, nil
 	}
+	resolverFailed := false
 	if pending != nil && pending.Attempt != "" {
 		id, err := ids.ParseUUID(pending.Attempt)
 		if err != nil {
 			return nil, d.ErrUnavailable
 		}
 		if _, err = s.Combat.Resolve(c, op, id); err != nil {
-			return nil, err
+			if !errors.Is(err, cd.ErrResolverPermanent) {
+				return nil, err
+			}
+			resolverFailed = true
 		}
 	}
 	generation := ""
@@ -101,15 +109,24 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 		}
 		won := false
 		if o.Attempt != "" {
-			settled, err := s.Combat.TerminalTx(c, sc.Tx, cb.TerminalRequest{Locator: locator(a, teamID), GenerationRef: o.ID, TerminalKind: "WORKPLACE_JOB", SemanticReceiptID: "workplace:" + o.ID, At: sc.Operation.DecisionAt()})
-			if err != nil {
-				return nil, err
-			}
-			won = settled.Resolution.Outcome.Star > 0
-			if won {
-				reward := o.RivalReward
-				o.Award["battle_award"] = map[string]any{"item_id": reward[0], "item_num": reward[1], "award_time": sc.Operation.DecisionAt().Unix()}
-				o.Lines = append(o.Lines, grant.Line{Kind: grant.StackItem, ItemID: reward[0], Amount: reward[1]})
+			if resolverFailed {
+				// PRIVATE_POLICY WORKPLACE_UNRESOLVED_RIVAL_V1: a permanently
+				// unresolvable rival fight is closed without a result; the job
+				// still pays its frozen base lines and skips the rival bonus.
+				if _, err := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: locator(a, teamID), GenerationRef: o.ID, TerminalKind: closedKind, SemanticReceiptID: "workplace:" + o.ID, At: sc.Operation.DecisionAt()}); err != nil {
+					return nil, err
+				}
+			} else {
+				settled, err := s.Combat.TerminalTx(c, sc.Tx, cb.TerminalRequest{Locator: locator(a, teamID), GenerationRef: o.ID, TerminalKind: "WORKPLACE_JOB", SemanticReceiptID: "workplace:" + o.ID, At: sc.Operation.DecisionAt()})
+				if err != nil {
+					return nil, err
+				}
+				won = settled.Resolution.Outcome.Star > 0
+				if won {
+					reward := o.RivalReward
+					o.Award["battle_award"] = map[string]any{"item_id": reward[0], "item_num": reward[1], "award_time": sc.Operation.DecisionAt().Unix()}
+					o.Lines = append(o.Lines, grant.Line{Kind: grant.StackItem, ItemID: reward[0], Amount: reward[1]})
+				}
 			}
 		}
 		if len(o.Lines) > 0 {

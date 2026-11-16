@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -27,6 +28,7 @@ const (
 	// teamCombatCampaignType is the stock CampaignType.OCCULT_COOPERATION.
 	teamCombatCampaignType = 56
 	teamTerminalKind       = "OCCULT_TEAM_RESULT"
+	teamClosedKind         = "OCCULT_TEAM_CLOSED"
 )
 
 // FormationRequest is a 2383 pick: one hero at a position, or the member's pet.
@@ -339,7 +341,10 @@ func (s Mode) StartTeamFight(c context.Context, a identity.ActorContext, campaig
 		return nil, d.ErrInvalid
 	}
 	if _, err = s.Combat.Resolve(c, op, attempt); err != nil {
-		return nil, err
+		if !errors.Is(err, cd.ErrResolverPermanent) {
+			return nil, err
+		}
+		return nil, errors.Join(err, s.closeUnresolvedTeam(c, a, op, attempt))
 	}
 	return s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		stored, err := s.storedFight(c, sc.Tx, a, view, campaignID, subID)
@@ -348,6 +353,25 @@ func (s Mode) StartTeamFight(c context.Context, a identity.ActorContext, campaig
 		}
 		return s.settleAttempt(c, sc, a, view, attempt)
 	})
+}
+
+// closeUnresolvedTeam ends a team fight the resolver can never finish and
+// returns the stage to selection, so the next start freezes a new attempt.
+func (s Mode) closeUnresolvedTeam(c context.Context, a identity.ActorContext, op operation.Context, attempt ids.UUID) error {
+	_, err := s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
+		team := view.state.Team
+		if team == nil || team.AttemptID != attempt.String() {
+			return nil, fmt.Errorf("%w: the team fight is gone", d.ErrRefused)
+		}
+		if _, err := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: teamLocator(view.room.ID, view.room.LogicalServerID),
+			GenerationRef: teamGeneration(view.room.ID, *team), TerminalKind: teamClosedKind,
+			SemanticReceiptID: teamClosedReceipt(attempt.String()), At: view.at}); err != nil {
+			return nil, err
+		}
+		team.AttemptID, team.FightStartedAt = "", 0
+		return map[string]any{}, nil
+	})
+	return err
 }
 
 // storedFight answers a repeated 2377 of a settled stage from its stored report.
@@ -661,6 +685,8 @@ func teamGeneration(roomID int64, team d.TeamFight) string {
 }
 
 func teamReceipt(attemptID string) string { return "occult-team:" + attemptID }
+
+func teamClosedReceipt(attemptID string) string { return "occult-team-closed:" + attemptID }
 
 func teamMemberReceipt(attemptID string, member identity.PlayerID) string {
 	return fmt.Sprintf("occult-team:%s:%d", attemptID, member)
