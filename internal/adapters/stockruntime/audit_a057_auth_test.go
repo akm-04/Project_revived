@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
@@ -21,19 +22,21 @@ func (authority auditUnavailableAuthority) ResolveGameplayBearer(context.Context
 
 func TestAuditA057AuthPolicyControls(t *testing.T) {
 	for _, test := range []struct {
-		name   string
-		cause  error
-		status int
-		code   int64
+		name    string
+		cause   error
+		status  int
+		code    int64
+		message string
 	}{
-		{"session", errors.New("bearer not live"), http.StatusUnauthorized, sessionFailureCode},
-		{"region", apprealtime.ErrRegionMismatch, http.StatusConflict, unprovenRefusalCode},
-		{"room", domainrt.ErrRoomNotAuthorized, http.StatusConflict, unprovenRefusalCode},
-		{"endpoint", apprealtime.ErrNoEndpoint, http.StatusInternalServerError, unprovenRefusalCode},
+		{"session", errors.New("bearer not live"), http.StatusUnauthorized, sessionFailureCode, sessionFailureMessage},
+		{"superseded", i4store.ErrContextSuperseded, http.StatusConflict, unprovenRefusalCode, ""},
+		{"region", apprealtime.ErrRegionMismatch, http.StatusConflict, unprovenRefusalCode, ""},
+		{"room", domainrt.ErrRoomNotAuthorized, http.StatusConflict, unprovenRefusalCode, ""},
+		{"endpoint", apprealtime.ErrNoEndpoint, http.StatusInternalServerError, unprovenRefusalCode, ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			response := authFailure(test.cause)
-			if response.HTTPStatus != test.status || response.Body["error_code"] != test.code {
+			if response.HTTPStatus != test.status || response.Body["error_code"] != test.code || response.Body["error_msg"] != test.message {
 				t.Fatalf("status=%d body=%v", response.HTTPStatus, response.Body)
 			}
 		})

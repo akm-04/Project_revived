@@ -20,6 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/tx"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -116,16 +117,17 @@ func (d LobbyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 }
 
 // authFailure classifies a rejected gameplay bearer by meaning: a region or room
-// claim that does not match the canonical actor is a permanent refusal, an
-// transient lookup fault remains retryable, an endpoint configuration fault is
-// a server fault, and everything else is an expired,
-// replaced or invalid session. Credential and canonical actor details are never
-// reflected to stock callers.
+// claim that does not match the canonical actor, or a bearer whose context a
+// later selection superseded, is a permanent refusal whose empty error_msg does
+// not restart the switched scene; a transient lookup fault remains retryable, an
+// endpoint configuration fault is a server fault, and everything else is an
+// expired, replaced or invalid session. Credential and canonical actor details
+// are never reflected to stock callers.
 func authFailure(err error) httpedge.Response {
 	if isTransient(err) {
 		return failureReply(unavailable(err))
 	}
-	if errors.Is(err, apprealtime.ErrRegionMismatch) || errors.Is(err, domainrt.ErrRoomNotAuthorized) {
+	if errors.Is(err, apprealtime.ErrRegionMismatch) || errors.Is(err, domainrt.ErrRoomNotAuthorized) || errors.Is(err, i4store.ErrContextSuperseded) {
 		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if errors.Is(err, apprealtime.ErrNoEndpoint) {
