@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "overflow_after_login_seconds": 3600,
+  "ordinary_seconds": 604800
+}

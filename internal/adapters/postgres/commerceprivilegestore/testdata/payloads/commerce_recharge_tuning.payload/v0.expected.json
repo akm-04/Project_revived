@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "mode": "GRANT",
+  "products": {
+    "80001007": {
+      "crystal": 120,
+      "vip_xp": 30,
+      "off": true
+    }
+  }
+}

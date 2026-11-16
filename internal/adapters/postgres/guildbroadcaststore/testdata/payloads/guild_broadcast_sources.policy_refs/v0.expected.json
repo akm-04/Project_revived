@@ -1,0 +1,14 @@
+[
+  {
+    "name": "content",
+    "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "name": "guild-broadcast",
+    "version": "GUILD_BROADCAST_STOCK_TEXTLEN_V1"
+  },
+  {
+    "name": "guild-core",
+    "version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+]

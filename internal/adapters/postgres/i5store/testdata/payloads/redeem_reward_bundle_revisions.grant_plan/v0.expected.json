@@ -1,0 +1,20 @@
+{
+  "PlayerID": 0,
+  "Source": {
+    "Domain": "redeem",
+    "Operation": "grant",
+    "BusinessKey": "bundle-1",
+    "Occurrence": "",
+    "PolicyVersion": "content-rev-1"
+  },
+  "Lines": [
+    {
+      "Kind": "SCALAR_CURRENCY",
+      "ResourceKey": "coin",
+      "ItemID": 0,
+      "Amount": 5,
+      "Domain": "",
+      "Metadata": null
+    }
+  ]
+}

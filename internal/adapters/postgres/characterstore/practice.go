@@ -13,7 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/foundation/ids"
-	"gxb.local/backend/v2/internal/foundation/policy"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -147,12 +147,13 @@ func (Store) SaveAccountingTx(ctx context.Context, t tx.Tx, next apppractice.Roo
 	return nil
 }
 
-func parseProposal(row tx.Row) (apppractice.Proposal, error) {
+func parseProposal(row tx.Row, table string) (apppractice.Proposal, error) {
 	var p apppractice.Proposal
 	var pid int64
+	var version int16
 	var sid, opid, cid, rawPolicies string
 	var kind string
-	if err := row.Scan(&pid, &sid, &p.ActorID, &p.ActorStateVersion, &p.Proposed[0], &p.Proposed[1], &p.Proposed[2], &opid, &cid, &kind, &p.GenerationContentRevision, &rawPolicies, &p.CreatedAt, &p.UpdatedAt); err != nil {
+	if err := row.Scan(&pid, &sid, &p.ActorID, &p.ActorStateVersion, &p.Proposed[0], &p.Proposed[1], &p.Proposed[2], &opid, &cid, &kind, &p.GenerationContentRevision, &rawPolicies, &version, &p.CreatedAt, &p.UpdatedAt); err != nil {
 		if errors.Is(err, kernelstore.ErrNoRows) || errors.Is(err, sql.ErrNoRows) {
 			return p, apppractice.ErrCandidateMissing
 		}
@@ -178,8 +179,7 @@ func parseProposal(row tx.Row) (apppractice.Proposal, error) {
 	if err != nil {
 		return p, err
 	}
-	p.GenerationPolicyRefs, err = policy.ParseCanonicalJSON([]byte(rawPolicies))
-	if err != nil {
+	if err := payload.Decode(table, version, []byte(rawPolicies), &p.GenerationPolicyRefs); err != nil {
 		return p, err
 	}
 	p.PlayerID = identity.PlayerID(pid)
@@ -195,24 +195,24 @@ func proposalArgs(p apppractice.Proposal) ([]any, error) {
 	if err := p.Validate(); err != nil {
 		return nil, err
 	}
-	raw, err := policy.MarshalCanonicalJSON(p.GenerationPolicyRefs)
+	raw, version, err := payload.Encode(p.GenerationPolicyRefs)
 	if err != nil {
 		return nil, err
 	}
-	return []any{int64(p.PlayerID), p.SessionID.UUID().String(), p.ActorID, p.ActorStateVersion, p.Proposed[0], p.Proposed[1], p.Proposed[2], p.GenerationOperationID.String(), p.GenerationContextID.UUID().String(), string(p.GenerationKind), p.GenerationContentRevision, string(raw), p.CreatedAt.UTC(), p.UpdatedAt.UTC()}, nil
+	return []any{int64(p.PlayerID), p.SessionID.UUID().String(), p.ActorID, p.ActorStateVersion, p.Proposed[0], p.Proposed[1], p.Proposed[2], p.GenerationOperationID.String(), p.GenerationContextID.UUID().String(), string(p.GenerationKind), p.GenerationContentRevision, string(raw), version, p.CreatedAt.UTC(), p.UpdatedAt.UTC()}, nil
 }
 
 func (Store) ReadHeroProposalTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, sid identity.SessionID, actorID int64) (apppractice.Proposal, error) {
 	if q == nil || !pid.Valid() || sid.UUID().IsZero() || actorID <= 0 {
 		return apppractice.Proposal{}, errors.New("character practice store: invalid Hero proposal read")
 	}
-	return parseProposal(q.QueryRow(ctx, characterqueries.ReadHeroPracticeCandidate, int64(pid), sid.UUID().String(), actorID))
+	return parseProposal(q.QueryRow(ctx, characterqueries.ReadHeroPracticeCandidate, int64(pid), sid.UUID().String(), actorID), "player_hero_practice_candidates")
 }
 func (Store) LockHeroProposalTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, sid identity.SessionID, actorID int64) (apppractice.Proposal, error) {
 	if t == nil {
 		return apppractice.Proposal{}, errors.New("character practice store: nil Hero proposal tx")
 	}
-	return parseProposal(t.QueryRow(ctx, characterqueries.LockHeroPracticeCandidate, int64(pid), sid.UUID().String(), actorID))
+	return parseProposal(t.QueryRow(ctx, characterqueries.LockHeroPracticeCandidate, int64(pid), sid.UUID().String(), actorID), "player_hero_practice_candidates")
 }
 func (Store) UpsertHeroProposalTx(ctx context.Context, t tx.Tx, p apppractice.Proposal) error {
 	if t == nil {
@@ -248,13 +248,13 @@ func (Store) ReadPetProposalTx(ctx context.Context, q tx.Queryer, pid identity.P
 	if q == nil || !pid.Valid() || sid.UUID().IsZero() || actorID <= 0 {
 		return apppractice.Proposal{}, errors.New("character practice store: invalid Pet proposal read")
 	}
-	return parseProposal(q.QueryRow(ctx, characterqueries.ReadPetPracticeCandidate, int64(pid), sid.UUID().String(), actorID))
+	return parseProposal(q.QueryRow(ctx, characterqueries.ReadPetPracticeCandidate, int64(pid), sid.UUID().String(), actorID), "player_pet_practice_candidates")
 }
 func (Store) LockPetProposalTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, sid identity.SessionID, actorID int64) (apppractice.Proposal, error) {
 	if t == nil {
 		return apppractice.Proposal{}, errors.New("character practice store: nil Pet proposal tx")
 	}
-	return parseProposal(t.QueryRow(ctx, characterqueries.LockPetPracticeCandidate, int64(pid), sid.UUID().String(), actorID))
+	return parseProposal(t.QueryRow(ctx, characterqueries.LockPetPracticeCandidate, int64(pid), sid.UUID().String(), actorID), "player_pet_practice_candidates")
 }
 func (Store) UpsertPetProposalTx(ctx context.Context, t tx.Tx, p apppractice.Proposal) error {
 	if t == nil {

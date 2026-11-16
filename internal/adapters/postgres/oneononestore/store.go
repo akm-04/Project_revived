@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -44,9 +45,9 @@ func one(tag tx.CommandTag, e error) error {
 	return nil
 }
 
-func encode(v any) (string, error) {
-	raw, e := json.Marshal(v)
-	return string(raw), e
+func encode(v any) (string, int16, error) {
+	raw, version, e := payload.Encode(v)
+	return string(raw), version, e
 }
 
 type competitionRow struct {
@@ -136,17 +137,42 @@ func (r playerRow) player() (d.Player, d.Totals, error) {
 	return p, d.Totals{Fights: r.Fights, Wins: r.Wins}, p.Validate()
 }
 
-const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'level',level,'slot',COALESCE(slot,0),'points',points,'points_at',points_at,'tries_day',tries_day,'tries_left',tries_left,'purchases',purchases,'last_fight_at',last_fight_at,'teams',teams,'offered_day',offered_day,'refreshes',refreshes,'offered',offered,'offer_snapshot',offer_snapshot,'mode',mode,'promotion_week',promotion_week,'candidates',candidates,'opponent',COALESCE(opponent,0),'challenges',challenges,'promotion_wins',promotion_wins,'last_promotion_at',last_promotion_at,'win_streak',win_streak,'fights',fights,'wins',wins,'version',state_version,'created_at',created_at,'updated_at',updated_at)`
+const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'level',level,'slot',COALESCE(slot,0),'points',points,'points_at',points_at,'tries_day',tries_day,'tries_left',tries_left,'purchases',purchases,'last_fight_at',last_fight_at,'offered_day',offered_day,'refreshes',refreshes,'mode',mode,'promotion_week',promotion_week,'opponent',COALESCE(opponent,0),'challenges',challenges,'promotion_wins',promotion_wins,'last_promotion_at',last_promotion_at,'win_streak',win_streak,'fights',fights,'wins',wins,'version',state_version,'created_at',created_at,'updated_at',updated_at)`
+
+const playerSelect = playerObject + `::text,teams::text,offered::text,COALESCE(offer_snapshot,'null')::text,candidates::text,payload_version`
 
 func (Store) ReadPlayerTx(c context.Context, q tx.Queryer, pid identity.PlayerID, lock bool) (d.Player, d.Totals, bool, error) {
-	sql := `SELECT ` + playerObject + `::text FROM one_on_one_players WHERE player_id=$1`
+	if q == nil {
+		return d.Player{}, d.Totals{}, false, d.ErrUnavailable
+	}
+	sql := `SELECT ` + playerSelect + ` FROM one_on_one_players WHERE player_id=$1`
 	if lock {
 		sql += ` FOR UPDATE`
 	}
+	var raw, teams, offered, snapshot, candidates *string
+	var version int16
+	e := q.QueryRow(c, sql, int64(pid)).Scan(&raw, &teams, &offered, &snapshot, &candidates, &version)
+	if errors.Is(e, kernelstore.ErrNoRows) || (e == nil && raw == nil) {
+		return d.Player{}, d.Totals{}, false, nil
+	}
+	if e != nil {
+		return d.Player{}, d.Totals{}, false, e
+	}
 	var r playerRow
-	found, e := readJSON(c, q, sql, &r, int64(pid))
-	if e != nil || !found {
-		return d.Player{}, d.Totals{}, found, e
+	if e := json.Unmarshal([]byte(*raw), &r); e != nil {
+		return d.Player{}, d.Totals{}, false, e
+	}
+	if e := payload.Decode("one_on_one_players", version, []byte(*teams), &r.Teams); e != nil {
+		return d.Player{}, d.Totals{}, false, e
+	}
+	if e := payload.Decode("one_on_one_players", version, []byte(*offered), &r.Offered); e != nil {
+		return d.Player{}, d.Totals{}, false, e
+	}
+	if e := payload.Decode("one_on_one_players", version, []byte(*candidates), &r.Candidates); e != nil {
+		return d.Player{}, d.Totals{}, false, e
+	}
+	if e := payload.Decode("one_on_one_players", version, []byte(*snapshot), &r.OfferSnapshot); e != nil {
+		return d.Player{}, d.Totals{}, false, e
 	}
 	p, totals, e := r.player()
 	return p, totals, true, e
@@ -163,26 +189,27 @@ type playerArgs struct {
 	teams, offered, candidates string
 	offerSnapshot              any
 	opponent                   any
+	version                    int16
 }
 
 func argsOf(p d.Player) (playerArgs, error) {
 	var a playerArgs
 	var e error
-	if a.teams, e = encode(p.Teams); e != nil {
+	if a.teams, a.version, e = encode(p.Teams); e != nil {
 		return a, e
 	}
-	if a.offered, e = encode(p.Offered); e != nil {
+	if a.offered, a.version, e = encode(p.Offered); e != nil {
 		return a, e
 	}
-	if a.candidates, e = encode(p.Candidates); e != nil {
+	if a.candidates, a.version, e = encode(p.Candidates); e != nil {
 		return a, e
 	}
 	if p.OfferSnapshot != nil {
-		raw, e := encode(p.OfferSnapshot)
+		raw, version, e := encode(p.OfferSnapshot)
 		if e != nil {
 			return a, e
 		}
-		a.offerSnapshot = raw
+		a.offerSnapshot, a.version = raw, version
 	}
 	if p.Opponent != 0 {
 		a.opponent = int64(p.Opponent)
@@ -198,9 +225,9 @@ func (Store) InsertPlayerTx(c context.Context, t tx.Tx, p d.Player) error {
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `INSERT INTO one_on_one_players(player_id,logical_server_id,competition_id,content_revision,level,slot,points,points_at,tries_day,tries_left,purchases,last_fight_at,teams,offered_day,refreshes,offered,offer_snapshot,mode,promotion_week,candidates,opponent,challenges,promotion_wins,last_promotion_at,win_streak,fights,wins,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,NULLIF($6,0),$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$15,$16::jsonb,$17::jsonb,$18,$19,$20::jsonb,$21,$22,$23,$24,$25,0,0,1,$26,$26)`,
+	return one(t.Exec(c, `INSERT INTO one_on_one_players(player_id,logical_server_id,competition_id,content_revision,level,slot,points,points_at,tries_day,tries_left,purchases,last_fight_at,teams,offered_day,refreshes,offered,offer_snapshot,mode,promotion_week,candidates,opponent,challenges,promotion_wins,last_promotion_at,win_streak,fights,wins,state_version,created_at,updated_at,payload_version)VALUES($1,$2,$3,$4,$5,NULLIF($6,0),$7,$8,$9,$10,$11,$12,$13::jsonb,$14,$15,$16::jsonb,$17::jsonb,$18,$19,$20::jsonb,$21,$22,$23,$24,$25,0,0,1,$26,$26,$27)`,
 		int64(p.PlayerID), int64(p.Server), d.CompetitionID, p.ContentRevision, p.Level, p.Slot, p.Points, p.PointsAt, p.TriesDay, p.TriesLeft, p.Purchases, p.LastFightAt, a.teams, p.OfferedDay, p.Refreshes, a.offered, a.offerSnapshot,
-		p.Mode, p.PromotionWeek, a.candidates, a.opponent, p.Challenges, p.PromotionWins, p.LastPromotionAt, p.WinStreak, p.CreatedAt))
+		p.Mode, p.PromotionWeek, a.candidates, a.opponent, p.Challenges, p.PromotionWins, p.LastPromotionAt, p.WinStreak, p.CreatedAt, a.version))
 }
 
 // SavePlayerTx advances one player version; totals is the history increment.
@@ -212,9 +239,9 @@ func (Store) SavePlayerTx(c context.Context, t tx.Tx, p d.Player, old int64, tot
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `UPDATE one_on_one_players SET level=$3,slot=NULLIF($4,0),points=$5,points_at=$6,tries_day=$7,tries_left=$8,purchases=$9,last_fight_at=$10,teams=$11::jsonb,offered_day=$12,refreshes=$13,offered=$14::jsonb,offer_snapshot=$15::jsonb,mode=$16,promotion_week=$17,candidates=$18::jsonb,opponent=$19,challenges=$20,promotion_wins=$21,last_promotion_at=$22,win_streak=$23,fights=fights+$24,wins=wins+$25,state_version=$26,updated_at=$27 WHERE player_id=$1 AND state_version=$2`,
+	return one(t.Exec(c, `UPDATE one_on_one_players SET level=$3,slot=NULLIF($4,0),points=$5,points_at=$6,tries_day=$7,tries_left=$8,purchases=$9,last_fight_at=$10,teams=$11::jsonb,offered_day=$12,refreshes=$13,offered=$14::jsonb,offer_snapshot=$15::jsonb,mode=$16,promotion_week=$17,candidates=$18::jsonb,opponent=$19,challenges=$20,promotion_wins=$21,last_promotion_at=$22,win_streak=$23,fights=fights+$24,wins=wins+$25,state_version=$26,updated_at=$27,payload_version=$28 WHERE player_id=$1 AND state_version=$2`,
 		int64(p.PlayerID), old, p.Level, p.Slot, p.Points, p.PointsAt, p.TriesDay, p.TriesLeft, p.Purchases, p.LastFightAt, a.teams, p.OfferedDay, p.Refreshes, a.offered, a.offerSnapshot, p.Mode, p.PromotionWeek, a.candidates,
-		a.opponent, p.Challenges, p.PromotionWins, p.LastPromotionAt, p.WinStreak, totals.Fights, totals.Wins, p.StateVersion, p.UpdatedAt))
+		a.opponent, p.Challenges, p.PromotionWins, p.LastPromotionAt, p.WinStreak, totals.Fights, totals.Wins, p.StateVersion, p.UpdatedAt, a.version))
 }
 
 // StandingsTx lists every competitor's place; HasDefense means at least one saved team.
@@ -267,20 +294,42 @@ func (r matchRow) match() (d.Match, error) {
 	return m, m.Validate()
 }
 
-const matchObject = `jsonb_build_object('id',m.match_id,'attacker',m.attacker_id,'defender',m.defender_id,'mode',m.mode,'fingerprint',m.start_fingerprint,'attack_teams',m.attack_teams,'defense_teams',m.defense_teams,'rounds',(SELECT jsonb_agg(r.attempt_id ORDER BY r.round) FROM one_on_one_rounds r WHERE r.match_id=m.match_id),'started_at',m.started_at,'status',m.status,'outcome',m.outcome,'settled_at',m.settled_at,'version',m.state_version)`
+const matchObject = `jsonb_build_object('id',m.match_id,'attacker',m.attacker_id,'defender',m.defender_id,'mode',m.mode,'fingerprint',m.start_fingerprint,'rounds',(SELECT jsonb_agg(r.attempt_id ORDER BY r.round) FROM one_on_one_rounds r WHERE r.match_id=m.match_id),'started_at',m.started_at,'status',m.status,'settled_at',m.settled_at,'version',m.state_version)`
+
+const matchSelect = matchObject + `::text,attack_teams::text,defense_teams::text,COALESCE(outcome,'null')::text,payload_version`
 
 func (Store) readMatch(c context.Context, q tx.Queryer, sql string, args ...any) (d.Match, bool, error) {
+	if q == nil {
+		return d.Match{}, false, d.ErrUnavailable
+	}
+	var raw, attack, defense, outcome *string
+	var version int16
+	e := q.QueryRow(c, sql, args...).Scan(&raw, &attack, &defense, &outcome, &version)
+	if errors.Is(e, kernelstore.ErrNoRows) || (e == nil && raw == nil) {
+		return d.Match{}, false, nil
+	}
+	if e != nil {
+		return d.Match{}, false, e
+	}
 	var r matchRow
-	found, e := readJSON(c, q, sql, &r, args...)
-	if e != nil || !found {
-		return d.Match{}, found, e
+	if e := json.Unmarshal([]byte(*raw), &r); e != nil {
+		return d.Match{}, false, e
+	}
+	if e := payload.Decode("one_on_one_matches", version, []byte(*attack), &r.AttackTeams); e != nil {
+		return d.Match{}, false, e
+	}
+	if e := payload.Decode("one_on_one_matches", version, []byte(*defense), &r.DefenseTeams); e != nil {
+		return d.Match{}, false, e
+	}
+	if e := payload.Decode("one_on_one_matches", version, []byte(*outcome), &r.Outcome); e != nil {
+		return d.Match{}, false, e
 	}
 	m, e := r.match()
 	return m, true, e
 }
 
 func (s Store) ReadMatchTx(c context.Context, q tx.Queryer, id ids.UUID, lock bool) (d.Match, bool, error) {
-	sql := `SELECT ` + matchObject + `::text FROM one_on_one_matches m WHERE m.match_id=$1`
+	sql := `SELECT ` + matchSelect + ` FROM one_on_one_matches m WHERE m.match_id=$1`
 	if lock {
 		sql += ` FOR UPDATE OF m`
 	}
@@ -289,7 +338,7 @@ func (s Store) ReadMatchTx(c context.Context, q tx.Queryer, id ids.UUID, lock bo
 
 // LatestMatchTx is the attacker's most recent match, open or finished.
 func (s Store) LatestMatchTx(c context.Context, q tx.Queryer, attacker identity.PlayerID) (d.Match, bool, error) {
-	return s.readMatch(c, q, `SELECT `+matchObject+`::text FROM one_on_one_matches m WHERE m.attacker_id=$1 ORDER BY m.started_at DESC,m.match_id LIMIT 1`, int64(attacker))
+	return s.readMatch(c, q, `SELECT `+matchSelect+` FROM one_on_one_matches m WHERE m.attacker_id=$1 ORDER BY m.started_at DESC,m.match_id LIMIT 1`, int64(attacker))
 }
 
 // OpenMatchesTx lists unsettled match ids started before the instant, oldest first.
@@ -303,16 +352,16 @@ func (Store) InsertMatchTx(c context.Context, t tx.Tx, m d.Match) error {
 	if t == nil || m.Validate() != nil || m.Status != d.StatusStarted || m.StateVersion != 1 {
 		return d.ErrConflict
 	}
-	attack, e := encode(m.AttackTeams)
+	attack, version, e := encode(m.AttackTeams)
 	if e != nil {
 		return e
 	}
-	defense, e := encode(m.DefenseTeams)
+	defense, _, e := encode(m.DefenseTeams)
 	if e != nil {
 		return e
 	}
-	if e = one(t.Exec(c, `INSERT INTO one_on_one_matches(match_id,attacker_id,defender_id,mode,start_fingerprint,attack_teams,defense_teams,started_at,status,state_version)VALUES($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,'STARTED',1)`,
-		m.ID.String(), int64(m.Attacker), int64(m.Defender), m.Mode, m.Fingerprint, attack, defense, m.StartedAt)); e != nil {
+	if e = one(t.Exec(c, `INSERT INTO one_on_one_matches(match_id,attacker_id,defender_id,mode,start_fingerprint,attack_teams,defense_teams,started_at,status,state_version,payload_version)VALUES($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,'STARTED',1,$9)`,
+		m.ID.String(), int64(m.Attacker), int64(m.Defender), m.Mode, m.Fingerprint, attack, defense, m.StartedAt, version)); e != nil {
 		return e
 	}
 	for i, r := range m.Rounds {
@@ -332,14 +381,15 @@ func (Store) FinishMatchTx(c context.Context, t tx.Tx, m d.Match, old int64) err
 		return d.ErrConflict
 	}
 	var outcome any
+	var version any
 	if m.Outcome != nil {
-		raw, e := encode(m.Outcome)
+		raw, encodedVersion, e := encode(m.Outcome)
 		if e != nil {
 			return e
 		}
-		outcome = raw
+		outcome, version = raw, encodedVersion
 	}
-	return one(t.Exec(c, `UPDATE one_on_one_matches SET status=$3,outcome=$4::jsonb,settled_at=$5,state_version=$6 WHERE match_id=$1 AND state_version=$2 AND status='STARTED'`, m.ID.String(), old, m.Status, outcome, m.SettledAt, m.StateVersion))
+	return one(t.Exec(c, `UPDATE one_on_one_matches SET status=$3,outcome=$4::jsonb,settled_at=$5,state_version=$6,payload_version=COALESCE($7,payload_version) WHERE match_id=$1 AND state_version=$2 AND status='STARTED'`, m.ID.String(), old, m.Status, outcome, m.SettledAt, m.StateVersion, version))
 }
 
 // InsertRecordTx appends one side's record and keeps only the newest keep records of that owner.

@@ -1,0 +1,1426 @@
+{
+  "friend_invitation": "00000000-0000-0000-0000-000000000000",
+  "friend_mode": 0,
+  "notice_version": 5,
+  "selection_heroes": [
+    {
+      "11": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 11,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 2,
+        "table_id": 10001011,
+        "unlocked_dynamic_card": ""
+      },
+      "12": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 12,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 3,
+        "table_id": 10001012,
+        "unlocked_dynamic_card": ""
+      },
+      "13": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 13,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 2,
+        "table_id": 10001013,
+        "unlocked_dynamic_card": ""
+      },
+      "14": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 14,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 3,
+        "table_id": 10001014,
+        "unlocked_dynamic_card": ""
+      },
+      "15": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 15,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 3,
+        "table_id": 10001015,
+        "unlocked_dynamic_card": ""
+      }
+    },
+    {
+      "11": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 11,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 2,
+        "table_id": 10001011,
+        "unlocked_dynamic_card": ""
+      },
+      "12": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 12,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 3,
+        "table_id": 10001012,
+        "unlocked_dynamic_card": ""
+      },
+      "13": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 13,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 2,
+        "table_id": 10001013,
+        "unlocked_dynamic_card": ""
+      },
+      "14": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 14,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 3,
+        "table_id": 10001014,
+        "unlocked_dynamic_card": ""
+      },
+      "15": {
+        "board_card": 1,
+        "board_model_id": 0,
+        "book_shelf_lev": 1,
+        "collect_quality_stage": 0,
+        "collect_star_stage": 0,
+        "color": 1,
+        "courses": [],
+        "courses_exp": [],
+        "courses_progress": [],
+        "courses_quality": [],
+        "courses_skill": [],
+        "current_skin_id": 0,
+        "dynamic_card_state": "",
+        "element_bak_equips": [],
+        "element_bak_levels": [],
+        "element_equips": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "element_levels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "equips": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "evo_attr_points": {},
+        "evo_stage": 1,
+        "exp": 0,
+        "favor_degree": 0,
+        "feed_attrs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumo_levels": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fumos": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_comfort": 0,
+        "house_equips": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "house_expand_lev": 0,
+        "house_id": 0,
+        "house_table_id": 0,
+        "illusion_skin_id": 0,
+        "inscript_items": [],
+        "is_board": 0,
+        "is_like": 0,
+        "is_married": 0,
+        "lev": 1,
+        "partner_id": 15,
+        "practice_attr": [
+          0,
+          0,
+          0
+        ],
+        "skill_book_info": {},
+        "skill_ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "skills": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "skin_ids": {},
+        "spirit_equip": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "spirit_item": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ],
+        "star": 3,
+        "table_id": 10001015,
+        "unlocked_dynamic_card": ""
+      }
+    }
+  ],
+  "selection_pets": [
+    {},
+    {}
+  ],
+  "faces": [
+    {
+      "Player": 5652625001,
+      "Name": "Ranker",
+      "Level": 60,
+      "AvatarID": 110001001,
+      "FrameID": 0,
+      "ConquerLevel": 0,
+      "ConquerLoop": 1,
+      "Server": 56526,
+      "ServerName": "Ranking native",
+      "GuildName": ""
+    },
+    {
+      "Player": 2896225001,
+      "Name": "Ranker",
+      "Level": 60,
+      "AvatarID": 110001001,
+      "FrameID": 0,
+      "ConquerLevel": 0,
+      "ConquerLoop": 1,
+      "Server": 28962,
+      "ServerName": "Ranking native",
+      "GuildName": ""
+    }
+  ],
+  "round_results": [
+    1,
+    1,
+    0
+  ],
+  "genuine_battles": 2,
+  "settled_at": "2026-11-25T07:30:00Z",
+  "identifier": "be8906a1-b255-42a9-a9bd-593182b79875",
+  "season": 33,
+  "casual_week_day": 0,
+  "casual": false,
+  "stage": 5,
+  "substage": 0,
+  "contest": 1,
+  "actors": [
+    {
+      "AccountID": "8ad56cb0-796a-428f-bad8-fb27de676161",
+      "AccountUID": "8ad56cb0-796a-428f-bad8-fb27de676161",
+      "SessionID": "edfaa727-c8b0-4dbd-a7c7-9c8d64a295b1",
+      "ContextID": "a9064296-7539-4c4c-a88c-70a28acd93f5",
+      "LogicalServerID": 56526,
+      "PlayerID": 5652625001,
+      "ContextGeneration": 1,
+      "SessionLivenessVersion": 1,
+      "ContextLivenessVersion": 1
+    },
+    {
+      "AccountID": "1fb16e89-2ddf-472f-b063-74cb82274b81",
+      "AccountUID": "1fb16e89-2ddf-472f-b063-74cb82274b81",
+      "SessionID": "44963cb3-0086-41d1-8c38-1f8fc166f97f",
+      "ContextID": "df42a1a4-0e0c-4108-bd24-55304406348f",
+      "LogicalServerID": 28962,
+      "PlayerID": 2896225001,
+      "ContextGeneration": 1,
+      "SessionLivenessVersion": 1,
+      "ContextLivenessVersion": 1
+    }
+  ],
+  "ready": [
+    true,
+    false
+  ],
+  "acknowledged": [
+    0,
+    0
+  ],
+  "selection": {
+    "players": [
+      5652625001,
+      2896225001
+    ],
+    "teams": [
+      [
+        {
+          "heroes": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "pet": 0
+        },
+        {
+          "heroes": [
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "pet": 0
+        },
+        {
+          "heroes": [
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "pet": 0
+        }
+      ],
+      [
+        {
+          "heroes": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "pet": 0
+        },
+        {
+          "heroes": [
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "pet": 0
+        },
+        {
+          "heroes": [
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "pet": 0
+        }
+      ]
+    ],
+    "team": 3,
+    "turn": 8,
+    "deadline": "2026-11-24T04:42:30Z"
+  },
+  "status": "SETTLED",
+  "starts_at": "2026-11-24T04:30:00Z",
+  "content_revision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+  "attempts": [
+    "c7a9f671-4484-4874-9521-2e601dfcdab0",
+    "09973ac5-f4ba-4984-a989-807b60973397",
+    "f917fe18-d179-4567-a967-b0a7667391ae"
+  ],
+  "wins": [
+    2,
+    0
+  ],
+  "winner": 5652625001,
+  "state_version": 5
+}

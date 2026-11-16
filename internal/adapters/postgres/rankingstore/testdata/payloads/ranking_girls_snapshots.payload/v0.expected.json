@@ -1,0 +1,37 @@
+{
+  "Server": 11,
+  "Policy": "C4C_PRIVATE_GIRLS_SERVER_RANKING_V1",
+  "Revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "Generation": 1,
+  "OperationID": "6c33a417-c826-412d-b211-7d6f9054cb6f",
+  "ObservedAt": "2026-11-16T03:01:00.123456Z",
+  "Entries": [
+    {
+      "Metric": {
+        "Player": 1100001,
+        "Owner": "CharacterHero",
+        "Policy": "C4C_PRIVATE_CURRENT_ROSTER_V1",
+        "Semantics": "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1",
+        "Revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "PopulationDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "FieldID": 1001,
+        "Value": 7,
+        "SourceVersion": 1,
+        "PopulationVersion": 1,
+        "ObservedAt": "2026-11-16T03:01:00.123456Z"
+      },
+      "Display": {
+        "Player": 1100001,
+        "Name": "Golden",
+        "Level": 42,
+        "AvatarID": 0,
+        "FrameID": 0,
+        "ConquerLevel": 0,
+        "ConquerLoopID": 0
+      },
+      "ScoreSince": "2026-11-16T03:00:00.123456Z"
+    }
+  ],
+  "CohortDigest": "8ec21b273b460912a3912f29a930c087e17bed4be3758be8266a875894eaa7a0",
+  "Digest": "3a5bf4a670ba8ff1ee060c2d80496ca024f2ee029482abfcd023fd2a6d704dcc"
+}

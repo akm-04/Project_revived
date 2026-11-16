@@ -1,0 +1,1 @@
+{"Lines": [{"Kind": "SCALAR_CURRENCY", "Amount": 5, "Domain": "", "ItemID": 0, "Metadata": null, "ResourceKey": "coin"}], "Source": {"Domain": "redeem", "Operation": "grant", "Occurrence": "", "BusinessKey": "bundle-1", "PolicyVersion": "content-rev-1"}, "PlayerID": 0}

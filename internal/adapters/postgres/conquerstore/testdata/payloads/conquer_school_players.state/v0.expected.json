@@ -1,0 +1,18 @@
+{
+  "day": 20261116,
+  "left_times": 7,
+  "buy_times": 2,
+  "buff": 3,
+  "report_award_times": 1,
+  "team_status": [
+    1,
+    2
+  ],
+  "used_heroes": [
+    10001001,
+    10001002
+  ],
+  "used_pets": [
+    50001
+  ]
+}

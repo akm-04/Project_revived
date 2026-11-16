@@ -1,0 +1,26 @@
+{
+  "Recycle": {
+    "Energy": 0,
+    "EnergyAt": "0001-01-01T00:00:00Z"
+  },
+  "Desk": {
+    "Job": null,
+    "PendingItem": 0,
+    "PetID": 0
+  },
+  "Pet": {
+    "Job": null,
+    "PendingItem": 0,
+    "PetID": 0
+  },
+  "Admin": {},
+  "AdminDay": 0,
+  "Board": {
+    "refresh_day": 0,
+    "offers": null,
+    "Doing": null,
+    "history": null,
+    "award_log": null,
+    "next_report_id": 1
+  }
+}

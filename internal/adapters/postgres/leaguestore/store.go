@@ -11,13 +11,29 @@ import (
 	d "gxb.local/backend/v2/internal/domain/championsleague"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	"strings"
 )
 
 type Store struct{}
 
-func read(c context.Context, q tx.Queryer, sql string, dst any, args ...any) (bool, error) {
+func read[T any](c context.Context, q tx.Queryer, table, sql string, dst *T, args ...any) (bool, error) {
+	if q == nil {
+		return false, d.ErrUnavailable
+	}
+	var raw *string
+	var version int16
+	e := q.QueryRow(c, sql, args...).Scan(&raw, &version)
+	if errors.Is(e, kernelstore.ErrNoRows) || e == nil && raw == nil {
+		return false, nil
+	}
+	if e != nil {
+		return false, e
+	}
+	return true, payload.Decode(table, version, []byte(*raw), dst)
+}
+
+func readAggregate[T any](c context.Context, q tx.Queryer, sql string, dst *T, args ...any) (bool, error) {
 	if q == nil {
 		return false, d.ErrUnavailable
 	}
@@ -29,11 +45,26 @@ func read(c context.Context, q tx.Queryer, sql string, dst any, args ...any) (bo
 	if e != nil {
 		return false, e
 	}
-	dec := json.NewDecoder(strings.NewReader(*raw))
-	dec.UseNumber()
-	return true, dec.Decode(dst)
+	return true, json.Unmarshal([]byte(*raw), dst)
 }
-func enc(v any) (string, error) { b, e := json.Marshal(v); return string(b), e }
+
+// versionedPayload carries one aggregated payload row with its version.
+type versionedPayload struct {
+	Payload json.RawMessage `json:"payload"`
+	Version int16           `json:"version"`
+}
+
+func decodePayloads[T any](table string, rows []versionedPayload) ([]T, error) {
+	out := make([]T, 0, len(rows))
+	for _, row := range rows {
+		var value T
+		if e := payload.Decode(table, row.Version, row.Payload, &value); e != nil {
+			return nil, e
+		}
+		out = append(out, value)
+	}
+	return out, nil
+}
 func one(t tx.CommandTag, e error) error {
 	if e != nil {
 		return e
@@ -44,12 +75,12 @@ func one(t tx.CommandTag, e error) error {
 	return nil
 }
 func (Store) RootTx(c context.Context, q tx.Queryer, lock bool) (d.Root, bool, error) {
-	sql := `SELECT payload::text FROM league_competitions WHERE competition_id='GLOBAL'`
+	sql := `SELECT payload::text,payload_version FROM league_competitions WHERE competition_id='GLOBAL'`
 	if lock {
 		sql += ` FOR UPDATE`
 	}
 	var r d.Root
-	ok, e := read(c, q, sql, &r)
+	ok, e := read(c, q, "league_competitions", sql, &r)
 	if ok && e == nil {
 		e = r.Validate()
 	}
@@ -59,50 +90,54 @@ func (Store) PutRootTx(c context.Context, t tx.Tx, r d.Root, old int64) error {
 	if t == nil || r.Validate() != nil || r.Version != old+1 {
 		return d.ErrConflict
 	}
-	raw, e := enc(r)
+	raw, version, e := payload.Encode(r)
 	if e != nil {
 		return e
 	}
 	if old == 0 {
-		return one(t.Exec(c, `INSERT INTO league_competitions(competition_id,content_revision,state_version,payload)VALUES('GLOBAL',$1,1,$2::jsonb) ON CONFLICT DO NOTHING`, r.Revision, raw))
+		return one(t.Exec(c, `INSERT INTO league_competitions(competition_id,content_revision,state_version,payload,payload_version)VALUES('GLOBAL',$1,1,$2::jsonb,$3) ON CONFLICT DO NOTHING`, r.Revision, string(raw), version))
 	}
-	return one(t.Exec(c, `UPDATE league_competitions SET content_revision=$2,state_version=$3,payload=$4::jsonb WHERE competition_id='GLOBAL' AND state_version=$1`, old, r.Revision, r.Version, raw))
+	return one(t.Exec(c, `UPDATE league_competitions SET content_revision=$2,state_version=$3,payload=$4::jsonb,payload_version=$5 WHERE competition_id='GLOBAL' AND state_version=$1`, old, r.Revision, r.Version, string(raw), version))
 }
 func (Store) PlayersTx(c context.Context, q tx.Queryer, lock bool) ([]d.Player, error) {
-	sql := `SELECT COALESCE(jsonb_agg(payload ORDER BY player_id),'[]'::jsonb)::text FROM league_players`
+	sql := `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',payload,'version',payload_version) ORDER BY player_id),'[]'::jsonb)::text FROM league_players`
 	if lock {
-		sql = `SELECT COALESCE(jsonb_agg(payload ORDER BY player_id),'[]'::jsonb)::text FROM(SELECT player_id,payload FROM league_players ORDER BY player_id FOR UPDATE)x`
+		sql = `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',payload,'version',payload_version) ORDER BY player_id),'[]'::jsonb)::text FROM(SELECT player_id,payload,payload_version FROM league_players ORDER BY player_id FOR UPDATE)x`
 	}
-	out := []d.Player{}
-	_, e := read(c, q, sql, &out)
-	if e == nil {
-		for _, p := range out {
-			if e = p.Validate(); e != nil {
-				break
-			}
+	var rows []versionedPayload
+	if _, e := readAggregate(c, q, sql, &rows); e != nil {
+		return nil, e
+	}
+	out, e := decodePayloads[d.Player]("league_players", rows)
+	if e != nil {
+		return nil, e
+	}
+	for _, p := range out {
+		if e = p.Validate(); e != nil {
+			return nil, e
 		}
 	}
-	return out, e
+	return out, nil
 }
 func (Store) PutPlayerTx(c context.Context, t tx.Tx, p d.Player, old int64) error {
 	if t == nil || p.Validate() != nil || p.Version != old+1 {
 		return d.ErrConflict
 	}
-	raw, e := enc(p)
+	raw, version, e := payload.Encode(p)
 	if e != nil {
 		return e
 	}
 	if old == 0 {
-		return one(t.Exec(c, `INSERT INTO league_players(player_id,logical_server_id,state_version,payload)VALUES($1,$2,1,$3::jsonb) ON CONFLICT DO NOTHING`, int64(p.ID), int64(p.Server), raw))
+		return one(t.Exec(c, `INSERT INTO league_players(player_id,logical_server_id,state_version,payload,payload_version)VALUES($1,$2,1,$3::jsonb,$4) ON CONFLICT DO NOTHING`, int64(p.ID), int64(p.Server), string(raw), version))
 	}
-	return one(t.Exec(c, `UPDATE league_players SET state_version=$3,payload=$4::jsonb WHERE player_id=$1 AND logical_server_id=$5 AND state_version=$2`, int64(p.ID), old, p.Version, raw, int64(p.Server)))
+	return one(t.Exec(c, `UPDATE league_players SET state_version=$3,payload=$4::jsonb,payload_version=$6 WHERE player_id=$1 AND logical_server_id=$5 AND state_version=$2`, int64(p.ID), old, p.Version, string(raw), int64(p.Server), version))
 }
 
 const matchObject = `(payload||jsonb_build_object('WireID',wire_id))::text`
 
 func (Store) MatchTx(c context.Context, q tx.Queryer, id ids.UUID) (d.Match, bool, error) {
 	var m d.Match
-	ok, e := read(c, q, `SELECT `+matchObject+` FROM league_matches WHERE match_id=$1`, &m, id.String())
+	ok, e := read(c, q, "league_matches", `SELECT `+matchObject+`,payload_version FROM league_matches WHERE match_id=$1`, &m, id.String())
 	if ok && e == nil {
 		e = m.Validate()
 	}
@@ -110,7 +145,7 @@ func (Store) MatchTx(c context.Context, q tx.Queryer, id ids.UUID) (d.Match, boo
 }
 func (Store) IntentTx(c context.Context, q tx.Queryer, pid identity.PlayerID, intent int64) (d.Match, bool, error) {
 	var m d.Match
-	ok, e := read(c, q, `SELECT `+matchObject+` FROM league_matches WHERE attacker=$1 AND intent=$2`, &m, int64(pid), intent)
+	ok, e := read(c, q, "league_matches", `SELECT `+matchObject+`,payload_version FROM league_matches WHERE attacker=$1 AND intent=$2`, &m, int64(pid), intent)
 	if ok && e == nil {
 		e = m.Validate()
 	}
@@ -120,53 +155,59 @@ func (Store) PutMatchTx(c context.Context, t tx.Tx, m d.Match, old int64) (d.Mat
 	if t == nil || m.Validate() != nil || m.Version != old+1 {
 		return m, d.ErrConflict
 	}
-	raw, e := enc(m)
+	raw, version, e := payload.Encode(m)
 	if e != nil {
 		return m, e
 	}
 	if old == 0 {
-		e = t.QueryRow(c, `INSERT INTO league_matches(match_id,attacker,defender,intent,attempt_id,state_version,payload)VALUES($1,$2,$3,$4,$5,1,$6::jsonb) RETURNING wire_id`, m.ID.String(), int64(m.Attacker), int64(m.Defender), m.Intent, m.Attempt.String(), raw).Scan(&m.WireID)
+		e = t.QueryRow(c, `INSERT INTO league_matches(match_id,attacker,defender,intent,attempt_id,state_version,payload,payload_version)VALUES($1,$2,$3,$4,$5,1,$6::jsonb,$7) RETURNING wire_id`, m.ID.String(), int64(m.Attacker), int64(m.Defender), m.Intent, m.Attempt.String(), string(raw), version).Scan(&m.WireID)
 		return m, e
 	}
-	return m, one(t.Exec(c, `UPDATE league_matches SET state_version=$3,payload=$4::jsonb WHERE match_id=$1 AND state_version=$2`, m.ID.String(), old, m.Version, raw))
+	return m, one(t.Exec(c, `UPDATE league_matches SET state_version=$3,payload=$4::jsonb,payload_version=$5 WHERE match_id=$1 AND state_version=$2`, m.ID.String(), old, m.Version, string(raw), version))
 }
 func (Store) OpenTx(c context.Context, q tx.Queryer, limit int) ([]d.Match, error) {
-	out := []d.Match{}
-	_, e := read(c, q, `SELECT COALESCE(jsonb_agg(v ORDER BY wire_id),'[]'::jsonb)::text FROM(SELECT payload||jsonb_build_object('WireID',wire_id) v,wire_id FROM league_matches WHERE payload->>'Status'='FIGHTING' ORDER BY wire_id LIMIT $1)x`, &out, limit)
-	return out, e
+	var rows []versionedPayload
+	if _, e := readAggregate(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',v,'version',payload_version) ORDER BY wire_id),'[]'::jsonb)::text FROM(SELECT payload||jsonb_build_object('WireID',wire_id) v,wire_id,payload_version FROM league_matches WHERE payload->>'Status'='FIGHTING' ORDER BY wire_id LIMIT $1)x`, &rows, limit); e != nil {
+		return nil, e
+	}
+	return decodePayloads[d.Match]("league_matches", rows)
 }
 func (Store) RecordsTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]d.Match, error) {
-	out := []d.Match{}
-	_, e := read(c, q, `SELECT COALESCE(jsonb_agg(v ORDER BY wire_id DESC),'[]'::jsonb)::text FROM(SELECT payload||jsonb_build_object('WireID',wire_id) v,wire_id FROM league_matches WHERE(attacker=$1 OR defender=$1) AND payload->>'Status'='SETTLED' ORDER BY wire_id DESC LIMIT $2)x`, &out, int64(pid), d.RecordsMax)
-	return out, e
+	var rows []versionedPayload
+	if _, e := readAggregate(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',v,'version',payload_version) ORDER BY wire_id DESC),'[]'::jsonb)::text FROM(SELECT payload||jsonb_build_object('WireID',wire_id) v,wire_id,payload_version FROM league_matches WHERE(attacker=$1 OR defender=$1) AND payload->>'Status'='SETTLED' ORDER BY wire_id DESC LIMIT $2)x`, &rows, int64(pid), d.RecordsMax); e != nil {
+		return nil, e
+	}
+	return decodePayloads[d.Match]("league_matches", rows)
 }
 func (Store) SettlementTx(c context.Context, q tx.Queryer, kind string, n int64) (d.Settlement, bool, error) {
 	var s d.Settlement
-	ok, e := read(c, q, `SELECT payload::text FROM league_settlements WHERE kind=$1 AND number=$2`, &s, kind, n)
+	ok, e := read(c, q, "league_settlements", `SELECT payload::text,payload_version FROM league_settlements WHERE kind=$1 AND number=$2`, &s, kind, n)
 	return s, ok, e
 }
 func (Store) PutSettlementTx(c context.Context, t tx.Tx, s d.Settlement) error {
-	raw, e := enc(s)
+	raw, version, e := payload.Encode(s)
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `INSERT INTO league_settlements(kind,number,content_revision,payload)VALUES($1,$2,$3,$4::jsonb)`, s.Kind, s.Number, s.Revision, raw))
+	return one(t.Exec(c, `INSERT INTO league_settlements(kind,number,content_revision,payload,payload_version)VALUES($1,$2,$3,$4::jsonb,$5)`, s.Kind, s.Number, s.Revision, string(raw), version))
 }
 func (Store) OriginsTx(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]app.OriginAward, error) {
-	out := []app.OriginAward{}
-	_, e := read(c, q, `SELECT COALESCE(jsonb_agg(payload ORDER BY origin_key),'[]'::jsonb)::text FROM league_cosmetic_origins WHERE player_id=$1`, &out, int64(pid))
-	return out, e
+	var rows []versionedPayload
+	if _, e := readAggregate(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',payload,'version',payload_version) ORDER BY origin_key),'[]'::jsonb)::text FROM league_cosmetic_origins WHERE player_id=$1`, &rows, int64(pid)); e != nil {
+		return nil, e
+	}
+	return decodePayloads[app.OriginAward]("league_cosmetic_origins", rows)
 }
 func (Store) PutOriginTx(c context.Context, t tx.Tx, award app.OriginAward) error {
 	o := award.Origin
 	if o.Validate() != nil {
 		return d.ErrConflict
 	}
-	raw, e := enc(award)
+	raw, version, e := payload.Encode(award)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `INSERT INTO league_cosmetic_origins(player_id,origin_key,family,catalog_id,content_revision,payload)VALUES($1,$2,$3,$4,$5,$6::jsonb) ON CONFLICT DO NOTHING`, int64(o.PlayerID), o.Key, o.Family, o.CatalogID, o.Revision, raw)
+	tag, e := t.Exec(c, `INSERT INTO league_cosmetic_origins(player_id,origin_key,family,catalog_id,content_revision,payload,payload_version)VALUES($1,$2,$3,$4,$5,$6::jsonb,$7) ON CONFLICT DO NOTHING`, int64(o.PlayerID), o.Key, o.Family, o.CatalogID, o.Revision, string(raw), version)
 	if e != nil {
 		return e
 	}

@@ -737,7 +737,7 @@ var (
 	traceUpdate = regexp.MustCompile(`(?i)\bupdate\s+([a-zA-Z0-9_".]+)(?:\s+(?:as\s+)?[a-z][a-zA-Z0-9_]*)?\s+set\b`)
 	traceDelete = regexp.MustCompile(`(?i)\bdelete\s+from\s+([a-zA-Z0-9_".]+)`)
 	traceRead   = regexp.MustCompile(`(?i)\b(?:from|join)\s+([a-zA-Z0-9_".]+)`)
-	traceLock   = regexp.MustCompile(`(?is)\bfor\s+(update|share)(?:\s+of\s+([a-zA-Z0-9_".]+(?:\s*,\s*[a-zA-Z0-9_".]+)*))?`)
+	traceLock   = regexp.MustCompile(`(?is)\bfor\s+((?:no\s+key\s+|key\s+)?(?:update|share))(?:\s+of\s+([a-zA-Z0-9_".]+(?:\s*,\s*[a-zA-Z0-9_".]+)*))?`)
 )
 
 var traceKeywords = map[string]bool{

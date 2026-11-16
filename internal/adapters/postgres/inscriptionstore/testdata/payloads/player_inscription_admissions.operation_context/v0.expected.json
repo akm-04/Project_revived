@@ -1,0 +1,73 @@
+{
+  "Operation": {
+    "ID": "c7b4ac41-68ed-4802-9a51-c62b1aee3193",
+    "StartedAt": "2026-11-16T02:23:59Z",
+    "EntropySeed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Policies": [
+      {
+        "name": "content",
+        "version": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356"
+      },
+      {
+        "name": "inscription",
+        "version": "INSCRIPTION_INPUT_LIFECYCLE_V1"
+      }
+    ]
+  },
+  "DecisionAt": "2026-11-16T02:23:59Z",
+  "Actor": {
+    "Account": "75f6dc3f-a084-4f72-aaac-80fb1a97b508",
+    "Session": "35956330-0dff-4ab8-910d-bea615629a81",
+    "Context": "cb987243-bbef-4347-b40d-a26cd308daa2",
+    "AccountUID": "r8-2b-inscription-golden-112015",
+    "Server": 1,
+    "Player": 112015,
+    "Generation": 1,
+    "SessionVersion": 1,
+    "ContextVersion": 1
+  },
+  "Command": {
+    "Family": "INSCRIPTION_REBUILD",
+    "PartnerID": 0,
+    "FamilyID": 0,
+    "ItemID": 160100101,
+    "ReplaceID": 0,
+    "Amount": 10,
+    "CostType": 1
+  },
+  "ContentRevision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+  "State": "PENDING"
+}

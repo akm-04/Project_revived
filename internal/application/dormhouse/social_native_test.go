@@ -167,7 +167,17 @@ func newSocialHarness(t *testing.T) socialHarness {
 	}
 	t.Cleanup(pool.Close)
 	now := time.Now().UTC().Truncate(time.Microsecond)
-	for _, player := range []identity.PlayerID{126701, 126702, 126703} {
+	players := []identity.PlayerID{126701, 126702, 126703}
+	for _, player := range players {
+		accountUID := "dormhouse-social-" + strconv.FormatInt(int64(player), 10)
+		if _, err = pool.Raw().Exec(context.Background(), `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES(gen_random_uuid(),$1,'ACTIVE',$2) ON CONFLICT (account_uid) DO NOTHING`, accountUID, now); err != nil {
+			t.Fatal(err)
+		}
+		if _, err = pool.Raw().Exec(context.Background(), `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) SELECT $1,account_id,1,$2,'dormhouse-social-native' FROM accounts WHERE account_uid=$3 ON CONFLICT (player_id) DO NOTHING`, int64(player), now, accountUID); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, player := range players {
 		if _, err = pool.Raw().Exec(context.Background(), `INSERT INTO player_dorm_roots(player_id,next_house_id,state_version,created_at,updated_at) VALUES($1,2,1,$2,$2) ON CONFLICT DO NOTHING`, int64(player), now); err != nil {
 			t.Fatal(err)
 		}
@@ -176,19 +186,24 @@ func newSocialHarness(t *testing.T) socialHarness {
 		}
 	}
 	t.Cleanup(func() {
-		for _, player := range []identity.PlayerID{126701, 126702, 126703} {
+		for _, player := range players {
 			for _, statement := range []string{
+				`DELETE FROM player_dorm_admissions WHERE player_id=$1`,
 				`DELETE FROM player_dorm_comment_reactions WHERE player_id=$1`,
 				`DELETE FROM player_dorm_comments WHERE player_id=$1`,
 				`DELETE FROM player_dorm_praises WHERE player_id=$1`,
 				`DELETE FROM player_dorm_room_social WHERE player_id=$1`,
 				`DELETE FROM player_dorm_rooms WHERE player_id=$1`,
 				`DELETE FROM player_dorm_roots WHERE player_id=$1`,
+				`DELETE FROM players WHERE player_id=$1`,
 			} {
 				if _, err = pool.Raw().Exec(context.Background(), statement, int64(player)); err != nil {
 					t.Error(err)
 				}
 			}
+		}
+		if _, err = pool.Raw().Exec(context.Background(), `DELETE FROM accounts WHERE account_uid LIKE 'dormhouse-social-%'`); err != nil {
+			t.Error(err)
 		}
 	})
 	runner := tx.Runner{DB: pool}

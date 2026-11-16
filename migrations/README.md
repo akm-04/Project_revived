@@ -50,5 +50,8 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00157: I9-10 Hero Recommend per-logical-server weekly derived snapshot.
 - 00158: R3 per-player game-day marker of the last delivered daily reset signal. Empty on upgrade.
 - 00159: R7 stored per-board score row (policy, player, score, score_since, revision, metric) with the board ordering index. Empty on upgrade; the R7 backfill seeds it.
+- 00161: R8-3 part A (A-040): 35 player columns that no foreign key covered now reference players(player_id), NOT VALID (new rows only, short lock), NO ACTION, no index. Client logs, request_journal, the logical_servers counters and the text redeem subject are excluded.
+- 00162: R8-3 part B: NO TRANSACTION, one VALIDATE CONSTRAINT per 00161 key. An orphan row fails the step and is reported; deletions, if any, go in their own reviewed migration.
+- 00163: R8-2 (A-037): payload_version smallint NOT NULL DEFAULT 0 on the 133 tables whose JSON payload the code decodes (docs/data/PAYLOAD_COLUMNS.json). Existing rows are version 0; payload bytes and digests do not change. Metadata-only.
 - 00166: R6 undelivered-reply replay cache: one row per player for the latest committed reply the edge could not deliver. Cache, never restored; cleared by the player's next state-changing request. Empty on upgrade.
 - 00167: R6 request journal replay flag: the edge marks a line answered from an undelivered-reply mark.

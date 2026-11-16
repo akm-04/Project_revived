@@ -1,0 +1,80 @@
+{
+  "Operation": {
+    "ID": "10227c6a-e31c-41a5-950c-c944a63cbefd",
+    "StartedAt": "2026-11-16T00:48:27.783930234Z",
+    "EntropySeed": [
+      106,
+      105,
+      154,
+      110,
+      112,
+      225,
+      15,
+      13,
+      251,
+      85,
+      121,
+      197,
+      127,
+      90,
+      43,
+      219,
+      153,
+      92,
+      150,
+      231,
+      248,
+      9,
+      3,
+      46,
+      25,
+      172,
+      116,
+      149,
+      30,
+      212,
+      59,
+      128
+    ],
+    "Policies": [
+      {
+        "name": "content",
+        "version": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356"
+      },
+      {
+        "name": "course",
+        "version": "CAPTURE_V1"
+      }
+    ]
+  },
+  "DecisionAt": "2026-11-15T23:48:27.776767099Z",
+  "Actor": {
+    "Account": "605b38cc-7042-4ce0-bbdc-fe8e0d8d2c23",
+    "Session": "1632d33d-a379-4678-af98-d01b8620a5b6",
+    "Context": "b97e9286-e7bb-4132-9066-fe37f089d1e2",
+    "AccountUID": "605b38cc-7042-4ce0-bbdc-fe8e0d8d2c23",
+    "Server": 1,
+    "Player": 125001,
+    "Generation": 1,
+    "SessionVersion": 1,
+    "ContextVersion": 1
+  },
+  "Command": {
+    "Family": "COURSE_COLLECT",
+    "PartnerID": 1,
+    "CourseID": 1,
+    "SkillID": 0,
+    "ItemID": 0,
+    "Amount": 0,
+    "Total": 0
+  },
+  "ContentRevision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+  "State": "PENDING",
+  "Privileges": {
+    "ProviderRevision": "",
+    "VIPLevel": 0,
+    "MonthlyPrivilegeActive": false,
+    "MonthCardActive": false,
+    "SkillPointNaturalCap": 0
+  }
+}

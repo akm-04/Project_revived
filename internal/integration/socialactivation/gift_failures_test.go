@@ -211,13 +211,12 @@ func Test7A_DeletedSenderReceiverRestrictionAndPreparedTx(t *testing.T) {
 	f.sql(`DELETE FROM gameplay_contexts WHERE player_id=100001`)
 	clearBirthOwners(f, f.p.Raw(), 100001)
 	f.sql(`DELETE FROM player_directory_profiles WHERE player_id=100001`)
-	f.sql(`DELETE FROM players WHERE player_id=100001`)
+	// R8-3: players are never deleted; the key refuses it (00161).
+	_, e = f.p.Raw().Exec(ctx, `DELETE FROM players WHERE player_id=100001`)
+	f.refusedByPlayerKey(e, "player_dorm_roots_player_id_fkey")
 	got, e := s.Claim(ctx, b, r.NoticeIDs, f.op())
 	if e != nil || got.Amount != 5 {
 		t.Fatal(got, e)
-	}
-	if f.number(`SELECT count(*) FROM players WHERE player_id=100001`) != 0 || f.number(`SELECT count(*) FROM social_notices WHERE notice_type=4 AND related_player_id IS NULL`) != 1 {
-		t.Fatal("sender resurrected")
 	}
 	x, e := f.p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {
@@ -237,5 +236,5 @@ func Test7A_DeletedSenderReceiverRestrictionAndPreparedTx(t *testing.T) {
 	if _, e = s.Inbox.ApplyTx(ctx, y, p); e == nil {
 		t.Fatal("prepared plan crossed caller Tx")
 	}
-	t.Log("REAL_PG retained sender tombstone and claim value, receiver FK restrict, private prepared plan Tx binding")
+	t.Log("REAL_PG retained sender facts and claim value, receiver FK restrict, private prepared plan Tx binding")
 }

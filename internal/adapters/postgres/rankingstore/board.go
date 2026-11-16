@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/ranking"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -22,23 +23,24 @@ func (Store) LockBoardRootTx(c context.Context, t tx.Tx, b d.Board, server ident
 	if t == nil || e != nil {
 		return seed, d.ErrSnapshot
 	}
-	raw, e := json.Marshal(seed)
+	raw, version, e := payload.Encode(seed)
 	if e != nil {
 		return seed, e
 	}
-	if _, e = t.Exec(c, `INSERT INTO ranking_girls_roots(logical_server_id,policy_id,state_version,payload)VALUES($1,$2,1,$3::jsonb) ON CONFLICT(logical_server_id,policy_id)DO NOTHING`, int64(server), b.Policy, string(raw)); e != nil {
+	if _, e = t.Exec(c, `INSERT INTO ranking_girls_roots(logical_server_id,policy_id,state_version,payload,payload_version)VALUES($1,$2,1,$3::jsonb,$4) ON CONFLICT(logical_server_id,policy_id)DO NOTHING`, int64(server), b.Policy, string(raw), version); e != nil {
 		return seed, e
 	}
 	var data string
-	var version int64
-	if e = t.QueryRow(c, `SELECT payload::text,state_version FROM ranking_girls_roots WHERE logical_server_id=$1 AND policy_id=$2 FOR UPDATE`, int64(server), b.Policy).Scan(&data, &version); e != nil {
+	var stateVersion int64
+	var payloadVersion int16
+	if e = t.QueryRow(c, `SELECT payload::text,state_version,payload_version FROM ranking_girls_roots WHERE logical_server_id=$1 AND policy_id=$2 FOR UPDATE`, int64(server), b.Policy).Scan(&data, &stateVersion, &payloadVersion); e != nil {
 		return seed, e
 	}
 	var r d.BoardRoot
-	if e = json.Unmarshal([]byte(data), &r); e != nil {
+	if e = payload.Decode("ranking_girls_roots", payloadVersion, []byte(data), &r); e != nil {
 		return r, e
 	}
-	if r.Validate() != nil || r.Server != server || r.Policy != b.Policy || r.StateVersion != version {
+	if r.Validate() != nil || r.Server != server || r.Policy != b.Policy || r.StateVersion != stateVersion {
 		return r, d.ErrSnapshot
 	}
 	return r, nil
@@ -47,11 +49,11 @@ func (Store) SaveBoardRootTx(c context.Context, t tx.Tx, r d.BoardRoot, old int6
 	if t == nil || r.Validate() != nil || r.StateVersion != old+1 {
 		return d.ErrSnapshot
 	}
-	raw, e := json.Marshal(r)
+	raw, version, e := payload.Encode(r)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `UPDATE ranking_girls_roots SET state_version=$3,payload=$4::jsonb WHERE logical_server_id=$1 AND policy_id=$2 AND state_version=$5`, int64(r.Server), r.Policy, r.StateVersion, string(raw), old)
+	tag, e := t.Exec(c, `UPDATE ranking_girls_roots SET state_version=$3,payload=$4::jsonb,payload_version=$6 WHERE logical_server_id=$1 AND policy_id=$2 AND state_version=$5`, int64(r.Server), r.Policy, r.StateVersion, string(raw), old, version)
 	if e != nil {
 		return e
 	}
@@ -64,11 +66,11 @@ func (Store) InsertBoardSnapshotTx(c context.Context, t tx.Tx, s d.BoardSnapshot
 	if t == nil || s.Validate() != nil {
 		return d.ErrSnapshot
 	}
-	raw, e := json.Marshal(s)
+	raw, version, e := payload.Encode(s)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `INSERT INTO ranking_girls_snapshots(logical_server_id,policy_id,generation,operation_id,content_revision,observed_at,digest,payload)VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb)`, int64(s.Server), s.Policy, s.Generation, s.OperationID.String(), s.Revision, s.ObservedAt, s.Digest, string(raw))
+	tag, e := t.Exec(c, `INSERT INTO ranking_girls_snapshots(logical_server_id,policy_id,generation,operation_id,content_revision,observed_at,digest,payload,payload_version)VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9)`, int64(s.Server), s.Policy, s.Generation, s.OperationID.String(), s.Revision, s.ObservedAt, s.Digest, string(raw), version)
 	if e != nil {
 		return e
 	}
@@ -80,14 +82,15 @@ func (Store) InsertBoardSnapshotTx(c context.Context, t tx.Tx, s d.BoardSnapshot
 func decodeSnapshot(row tx.Row) (d.BoardSnapshot, bool, error) {
 	var out d.BoardSnapshot
 	var raw, hash string
-	e := row.Scan(&raw, &hash)
+	var version int16
+	e := row.Scan(&raw, &hash, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return out, false, nil
 	}
 	if e != nil {
 		return out, false, e
 	}
-	if e = json.Unmarshal([]byte(raw), &out); e != nil {
+	if e = payload.Decode("ranking_girls_snapshots", version, []byte(raw), &out); e != nil {
 		return out, true, e
 	}
 	if out.Validate() != nil || out.Digest != hash {
@@ -99,7 +102,7 @@ func (Store) ReadBoardSnapshotTx(c context.Context, q tx.Queryer, b d.Board, ser
 	if q == nil || !server.Valid() || gen < 1 {
 		return d.BoardSnapshot{}, false, d.ErrSnapshot
 	}
-	s, ok, e := decodeSnapshot(q.QueryRow(c, `SELECT payload::text,digest FROM ranking_girls_snapshots WHERE logical_server_id=$1 AND policy_id=$2 AND generation=$3`, int64(server), b.Policy, gen))
+	s, ok, e := decodeSnapshot(q.QueryRow(c, `SELECT payload::text,digest,payload_version FROM ranking_girls_snapshots WHERE logical_server_id=$1 AND policy_id=$2 AND generation=$3`, int64(server), b.Policy, gen))
 	if e == nil && ok && (s.Server != server || s.Generation != gen) {
 		return s, ok, d.ErrSnapshot
 	}
@@ -197,13 +200,28 @@ func (Store) BoardAwardEvidenceTx(c context.Context, q tx.Queryer, b d.Board, pi
 		return nil, d.ErrSnapshot
 	}
 	var raw string
-	e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('Server',s.logical_server_id,'Generation',s.generation,'SnapshotDigest',s.digest,'SettledAt',p.settled_at,'Snapshot',s.payload,'Award',jsonb_build_object('Player',a.player_id,'Rank',a.rank,'TitleID',a.title_id,'OriginKey',a.origin_key,'StartsAt',a.starts_at,'EndTime',a.end_time)) ORDER BY a.week_start,a.origin_key),'[]'::jsonb)::text FROM ranking_girls_awards a JOIN ranking_girls_periods p ON p.logical_server_id=a.logical_server_id AND p.policy_id=a.policy_id AND p.week_start=a.week_start JOIN ranking_girls_snapshots s ON s.logical_server_id=p.logical_server_id AND s.policy_id=p.policy_id AND s.generation=p.snapshot_generation WHERE a.player_id=$1 AND a.policy_id=$2 AND p.settled_at IS NOT NULL`, int64(pid), b.Policy).Scan(&raw)
+	e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(jsonb_build_object('Server',s.logical_server_id,'Generation',s.generation,'SnapshotDigest',s.digest,'SettledAt',p.settled_at,'Snapshot',s.payload,'SnapshotVersion',s.payload_version,'Award',jsonb_build_object('Player',a.player_id,'Rank',a.rank,'TitleID',a.title_id,'OriginKey',a.origin_key,'StartsAt',a.starts_at,'EndTime',a.end_time)) ORDER BY a.week_start,a.origin_key),'[]'::jsonb)::text FROM ranking_girls_awards a JOIN ranking_girls_periods p ON p.logical_server_id=a.logical_server_id AND p.policy_id=a.policy_id AND p.week_start=a.week_start JOIN ranking_girls_snapshots s ON s.logical_server_id=p.logical_server_id AND s.policy_id=p.policy_id AND s.generation=p.snapshot_generation WHERE a.player_id=$1 AND a.policy_id=$2 AND p.settled_at IS NOT NULL`, int64(pid), b.Policy).Scan(&raw)
 	if e != nil {
 		return nil, e
 	}
-	out := []d.BoardAwardEvidence{}
-	if e = json.Unmarshal([]byte(raw), &out); e != nil {
+	var wire []struct {
+		Snapshot           json.RawMessage
+		SnapshotVersion    int16
+		Award              d.BoardAward
+		Server, Generation int64
+		SnapshotDigest     string
+		SettledAt          time.Time
+	}
+	if e = json.Unmarshal([]byte(raw), &wire); e != nil {
 		return nil, e
+	}
+	out := make([]d.BoardAwardEvidence, 0, len(wire))
+	for _, row := range wire {
+		var snapshot d.BoardSnapshot
+		if e = payload.Decode("ranking_girls_snapshots", row.SnapshotVersion, row.Snapshot, &snapshot); e != nil {
+			return nil, e
+		}
+		out = append(out, d.BoardAwardEvidence{Snapshot: snapshot, Award: row.Award, Server: row.Server, Generation: row.Generation, SnapshotDigest: row.SnapshotDigest, SettledAt: row.SettledAt})
 	}
 	seen := map[string]bool{}
 	for _, v := range out {

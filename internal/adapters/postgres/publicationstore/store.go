@@ -7,6 +7,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	pub "gxb.local/backend/v2/internal/domain/publication"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -29,7 +30,7 @@ func (Store) InstallTx(c context.Context, t tx.Tx, s pub.Set, digest string) err
 		return nil
 	}
 	for pos, item := range s.Items {
-		b, e := json.Marshal(item)
+		b, version, e := payload.Encode(item)
 		if e != nil {
 			return e
 		}
@@ -37,7 +38,7 @@ func (Store) InstallTx(c context.Context, t tx.Tx, s pub.Set, digest string) err
 		if item.Board != nil {
 			wire = item.Board.ID
 		}
-		if _, e = t.Exec(c, `INSERT INTO publication_items(set_id,position,board_wire_id,payload) VALUES($1,$2,$3,$4::jsonb)`, s.ID.String(), pos, wire, string(b)); e != nil {
+		if _, e = t.Exec(c, `INSERT INTO publication_items(set_id,position,board_wire_id,payload,payload_version) VALUES($1,$2,$3,$4::jsonb,$5)`, s.ID.String(), pos, wire, string(b), version); e != nil {
 			return e
 		}
 	}
@@ -45,16 +46,35 @@ func (Store) InstallTx(c context.Context, t tx.Tx, s pub.Set, digest string) err
 }
 func (Store) SelectTx(c context.Context, q tx.Queryer, family string, server identity.LogicalServerID, at time.Time) (pub.Set, bool, error) {
 	var raw []byte
-	e := q.QueryRow(c, `SELECT COALESCE((SELECT jsonb_build_object('id',s.set_id,'family',s.family,'server_id',s.server_id,'starts_at',s.starts_at,'ends_at',s.ends_at,'items',COALESCE((SELECT jsonb_agg(i.payload ORDER BY i.position) FROM publication_items i WHERE i.set_id=s.set_id),'[]'::jsonb)) FROM publication_sets s WHERE s.family=$1 AND s.server_id IN(0,$2) AND s.starts_at<=$3 ORDER BY (s.server_id<>0) DESC,s.starts_at DESC,s.install_sequence DESC LIMIT 1),'null'::jsonb)`, family, int32(server), at).Scan(&raw)
+	e := q.QueryRow(c, `SELECT COALESCE((SELECT jsonb_build_object('id',s.set_id,'family',s.family,'server_id',s.server_id,'starts_at',s.starts_at,'ends_at',s.ends_at,'items',COALESCE((SELECT jsonb_agg(i.payload ORDER BY i.position) FROM publication_items i WHERE i.set_id=s.set_id),'[]'::jsonb),'item_versions',COALESCE((SELECT jsonb_agg(i.payload_version ORDER BY i.position) FROM publication_items i WHERE i.set_id=s.set_id),'[]'::jsonb)) FROM publication_sets s WHERE s.family=$1 AND s.server_id IN(0,$2) AND s.starts_at<=$3 ORDER BY (s.server_id<>0) DESC,s.starts_at DESC,s.install_sequence DESC LIMIT 1),'null'::jsonb)`, family, int32(server), at).Scan(&raw)
 	if e != nil {
 		return pub.Set{}, false, e
 	}
 	if string(raw) == "null" {
 		return pub.Set{}, false, nil
 	}
-	var s pub.Set
-	if e = json.Unmarshal(raw, &s); e != nil {
+	var wire struct {
+		ID       ids.UUID          `json:"id"`
+		Family   string            `json:"family"`
+		ServerID int32             `json:"server_id"`
+		StartsAt time.Time         `json:"starts_at"`
+		EndsAt   *time.Time        `json:"ends_at"`
+		Payloads []json.RawMessage `json:"items"`
+		Versions []int16           `json:"item_versions"`
+	}
+	if e = json.Unmarshal(raw, &wire); e != nil {
 		return pub.Set{}, false, e
+	}
+	if len(wire.Payloads) != len(wire.Versions) {
+		return pub.Set{}, false, pub.ErrInvalid
+	}
+	s := pub.Set{ID: wire.ID, Family: wire.Family, ServerID: wire.ServerID, StartsAt: wire.StartsAt, EndsAt: wire.EndsAt, Items: make([]pub.Item, 0, len(wire.Payloads))}
+	for index, itemPayload := range wire.Payloads {
+		var item pub.Item
+		if e = payload.Decode("publication_items", wire.Versions[index], itemPayload, &item); e != nil {
+			return pub.Set{}, false, e
+		}
+		s.Items = append(s.Items, item)
 	}
 	if e = s.Validate(); e != nil {
 		return pub.Set{}, false, e

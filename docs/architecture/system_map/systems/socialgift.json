@@ -117,6 +117,7 @@
  },
  "tests": {
   "integration": [
+   "datacontract",
    "guildinvite",
    "playerdisplay",
    "socialactivation"

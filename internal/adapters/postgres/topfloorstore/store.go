@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/modes"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -196,17 +197,36 @@ type playerRow struct {
 	UpdatedAt       time.Time                `json:"updated_at"`
 }
 
-const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'best_rank',best_rank,'ticket_day',ticket_day,'tickets_left',tickets_left,'purchases',purchases,'last_match_at',last_match_at,'refresh_count',refresh_count,'offered_day',offered_day,'offered',offered,'defense',defense,'defense_pet',defense_pet,'defense_set_at',defense_set_at,'fights',fights,'wins',wins,'win_streak',win_streak,'version',state_version,'created_at',created_at,'updated_at',updated_at)::text`
+const playerObject = `jsonb_build_object('player_id',player_id,'server',logical_server_id,'revision',content_revision,'best_rank',best_rank,'ticket_day',ticket_day,'tickets_left',tickets_left,'purchases',purchases,'last_match_at',last_match_at,'refresh_count',refresh_count,'offered_day',offered_day,'defense_pet',defense_pet,'defense_set_at',defense_set_at,'fights',fights,'wins',wins,'win_streak',win_streak,'version',state_version,'created_at',created_at,'updated_at',updated_at)::text`
+
+const playerSelect = playerObject + `,offered::text,defense::text,payload_version`
 
 func (Store) ReadPlayerTx(c context.Context, q tx.Queryer, pid identity.PlayerID, lock bool) (d.Player, bool, error) {
-	sql := `SELECT ` + playerObject + ` FROM top_floor_players WHERE player_id=$1`
+	if q == nil {
+		return d.Player{}, false, d.ErrUnavailable
+	}
+	sql := `SELECT ` + playerSelect + ` FROM top_floor_players WHERE player_id=$1`
 	if lock {
 		sql += ` FOR UPDATE`
 	}
+	var raw, offered, defense *string
+	var version int16
+	e := q.QueryRow(c, sql, int64(pid)).Scan(&raw, &offered, &defense, &version)
+	if errors.Is(e, kernelstore.ErrNoRows) || (e == nil && raw == nil) {
+		return d.Player{}, false, nil
+	}
+	if e != nil {
+		return d.Player{}, false, e
+	}
 	var r playerRow
-	found, e := readJSON(c, q, sql, &r, int64(pid))
-	if e != nil || !found {
-		return d.Player{}, found, e
+	if e := json.Unmarshal([]byte(*raw), &r); e != nil {
+		return d.Player{}, false, e
+	}
+	if e := payload.Decode("top_floor_players", version, []byte(*offered), &r.Offered); e != nil {
+		return d.Player{}, false, e
+	}
+	if e := payload.Decode("top_floor_players", version, []byte(*defense), &r.Defense); e != nil {
+		return d.Player{}, false, e
 	}
 	p := d.Player(r)
 	return p, true, p.Validate()
@@ -226,14 +246,25 @@ func (Store) ReadOfferSnapshotTx(c context.Context, q tx.Queryer, player identit
 	if q == nil || !player.Valid() || (scope != d.OfferScopeNormal && scope != d.OfferScopeSpecial) {
 		return d.OfferSnapshot{}, false, d.ErrInvalid
 	}
-	statement := `SELECT jsonb_build_object('server',logical_server_id,'generation',generation,'challenger_rank',challenger_rank,'offers',offers,'updated_at',updated_at)::text FROM top_floor_offer_snapshots WHERE player_id=$1 AND scope=$2`
+	statement := `SELECT jsonb_build_object('server',logical_server_id,'generation',generation,'challenger_rank',challenger_rank,'updated_at',updated_at)::text,offers::text,payload_version FROM top_floor_offer_snapshots WHERE player_id=$1 AND scope=$2`
 	if lock {
 		statement += ` FOR UPDATE`
 	}
+	var raw, offers *string
+	var version int16
+	e := q.QueryRow(c, statement, int64(player), scope).Scan(&raw, &offers, &version)
+	if errors.Is(e, kernelstore.ErrNoRows) || (e == nil && raw == nil) {
+		return d.OfferSnapshot{}, false, nil
+	}
+	if e != nil {
+		return d.OfferSnapshot{}, false, e
+	}
 	var row offerSnapshotRow
-	found, err := readJSON(c, q, statement, &row, int64(player), scope)
-	if err != nil || !found {
-		return d.OfferSnapshot{}, found, err
+	if e := json.Unmarshal([]byte(*raw), &row); e != nil {
+		return d.OfferSnapshot{}, false, e
+	}
+	if e := payload.Decode("top_floor_offer_snapshots", version, []byte(*offers), &row.Offers); e != nil {
+		return d.OfferSnapshot{}, false, e
 	}
 	snapshot := d.OfferSnapshot{Player: player, Server: row.Server, Scope: scope, Generation: row.Generation, ChallengerRank: row.ChallengerRank, Offers: row.Offers, UpdatedAt: row.UpdatedAt}
 	return snapshot, true, snapshot.Validate()
@@ -243,12 +274,12 @@ func (Store) SaveOfferSnapshotTx(c context.Context, t tx.Tx, snapshot d.OfferSna
 	if t == nil || snapshot.Validate() != nil {
 		return d.ErrConflict
 	}
-	offers, err := json.Marshal(snapshot.Offers)
+	offers, version, err := payload.Encode(snapshot.Offers)
 	if err != nil {
 		return err
 	}
-	return one(t.Exec(c, `INSERT INTO top_floor_offer_snapshots(player_id,logical_server_id,scope,generation,challenger_rank,offers,updated_at)VALUES($1,$2,$3,$4,$5,$6::jsonb,$7) ON CONFLICT(player_id,scope) DO UPDATE SET logical_server_id=EXCLUDED.logical_server_id,generation=EXCLUDED.generation,challenger_rank=EXCLUDED.challenger_rank,offers=EXCLUDED.offers,updated_at=EXCLUDED.updated_at`,
-		int64(snapshot.Player), int64(snapshot.Server), snapshot.Scope, snapshot.Generation, snapshot.ChallengerRank, string(offers), snapshot.UpdatedAt))
+	return one(t.Exec(c, `INSERT INTO top_floor_offer_snapshots(player_id,logical_server_id,scope,generation,challenger_rank,offers,updated_at,payload_version)VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$8) ON CONFLICT(player_id,scope) DO UPDATE SET logical_server_id=EXCLUDED.logical_server_id,generation=EXCLUDED.generation,challenger_rank=EXCLUDED.challenger_rank,offers=EXCLUDED.offers,updated_at=EXCLUDED.updated_at,payload_version=EXCLUDED.payload_version`,
+		int64(snapshot.Player), int64(snapshot.Server), snapshot.Scope, snapshot.Generation, snapshot.ChallengerRank, string(offers), snapshot.UpdatedAt, version))
 }
 
 // DefendedTx reports which of the players have saved a non-empty defense.
@@ -271,37 +302,43 @@ func (Store) DefendedTx(c context.Context, q tx.Queryer, players []identity.Play
 	return out, nil
 }
 
-func playerArgs(p d.Player) ([]byte, []byte, error) {
-	offered, e := json.Marshal(p.Offered)
+func playerArgs(p d.Player) ([]byte, []byte, int16, error) {
+	offered, version, e := payload.Encode(p.Offered)
 	if e != nil {
-		return nil, nil, e
+		return nil, nil, 0, e
 	}
-	defense, e := json.Marshal(p.Defense)
-	return offered, defense, e
+	defense, defenseVersion, e := payload.Encode(p.Defense)
+	if e != nil {
+		return nil, nil, 0, e
+	}
+	if defenseVersion != version {
+		return nil, nil, 0, d.ErrConflict
+	}
+	return offered, defense, version, nil
 }
 
 func (Store) InsertPlayerTx(c context.Context, t tx.Tx, p d.Player) error {
 	if t == nil || p.Validate() != nil || p.StateVersion != 1 {
 		return d.ErrConflict
 	}
-	offered, defense, e := playerArgs(p)
+	offered, defense, version, e := playerArgs(p)
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `INSERT INTO top_floor_players(player_id,logical_server_id,content_revision,best_rank,ticket_day,tickets_left,purchases,last_match_at,refresh_count,offered_day,offered,defense,defense_pet,defense_set_at,fights,wins,win_streak,state_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15,$16,$17,1,$18,$18)`,
-		int64(p.PlayerID), int64(p.Server), p.ContentRevision, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.WinStreak, p.CreatedAt))
+	return one(t.Exec(c, `INSERT INTO top_floor_players(player_id,logical_server_id,content_revision,best_rank,ticket_day,tickets_left,purchases,last_match_at,refresh_count,offered_day,offered,defense,defense_pet,defense_set_at,fights,wins,win_streak,state_version,created_at,updated_at,payload_version)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15,$16,$17,1,$18,$18,$19)`,
+		int64(p.PlayerID), int64(p.Server), p.ContentRevision, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.WinStreak, p.CreatedAt, version))
 }
 
 func (Store) SavePlayerTx(c context.Context, t tx.Tx, p d.Player, old int64) error {
 	if t == nil || p.Validate() != nil || p.StateVersion != old+1 {
 		return d.ErrConflict
 	}
-	offered, defense, e := playerArgs(p)
+	offered, defense, version, e := playerArgs(p)
 	if e != nil {
 		return e
 	}
-	return one(t.Exec(c, `UPDATE top_floor_players SET best_rank=$3,ticket_day=$4,tickets_left=$5,purchases=$6,last_match_at=$7,refresh_count=$8,offered_day=$9,offered=$10::jsonb,defense=$11::jsonb,defense_pet=$12,defense_set_at=$13,fights=$14,wins=$15,win_streak=$16,state_version=$17,updated_at=$18 WHERE player_id=$1 AND state_version=$2`,
-		int64(p.PlayerID), old, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.WinStreak, p.StateVersion, p.UpdatedAt))
+	return one(t.Exec(c, `UPDATE top_floor_players SET best_rank=$3,ticket_day=$4,tickets_left=$5,purchases=$6,last_match_at=$7,refresh_count=$8,offered_day=$9,offered=$10::jsonb,defense=$11::jsonb,defense_pet=$12,defense_set_at=$13,fights=$14,wins=$15,win_streak=$16,state_version=$17,updated_at=$18,payload_version=$19 WHERE player_id=$1 AND state_version=$2`,
+		int64(p.PlayerID), old, p.BestRank, p.TicketDay, p.TicketsLeft, p.Purchases, p.LastMatchAt, p.RefreshCount, p.OfferedDay, string(offered), string(defense), p.DefensePet, p.DefenseSetAt, p.Fights, p.Wins, p.WinStreak, p.StateVersion, p.UpdatedAt, version))
 }
 
 type fightRow struct {
@@ -329,20 +366,39 @@ func (r fightRow) fight() (d.Fight, error) {
 	return f, f.Validate()
 }
 
-const fightObject = `jsonb_build_object('attempt_id',attempt_id,'server',logical_server_id,'challenger',challenger_id,'defender_robot',COALESCE(defender_robot,0),'defender_player',COALESCE(defender_player,0),'avenge',is_avenge,'fingerprint',start_fingerprint,'formation',formation,'pet_id',pet_id,'challenger_rank',challenger_rank,'defender_rank',defender_rank,'started_at',started_at,'status',status,'outcome',outcome,'settled_at',settled_at,'version',state_version)`
+const fightObject = `jsonb_build_object('attempt_id',attempt_id,'server',logical_server_id,'challenger',challenger_id,'defender_robot',COALESCE(defender_robot,0),'defender_player',COALESCE(defender_player,0),'avenge',is_avenge,'fingerprint',start_fingerprint,'pet_id',pet_id,'challenger_rank',challenger_rank,'defender_rank',defender_rank,'started_at',started_at,'status',status,'settled_at',settled_at,'version',state_version)`
+
+const fightSelect = fightObject + `::text,formation::text,COALESCE(outcome,'null')::text,payload_version`
 
 func (Store) readFight(c context.Context, q tx.Queryer, sql string, args ...any) (d.Fight, bool, error) {
+	if q == nil {
+		return d.Fight{}, false, d.ErrUnavailable
+	}
+	var raw, formation, outcome *string
+	var version int16
+	e := q.QueryRow(c, sql, args...).Scan(&raw, &formation, &outcome, &version)
+	if errors.Is(e, kernelstore.ErrNoRows) || (e == nil && raw == nil) {
+		return d.Fight{}, false, nil
+	}
+	if e != nil {
+		return d.Fight{}, false, e
+	}
 	var r fightRow
-	found, e := readJSON(c, q, sql, &r, args...)
-	if e != nil || !found {
-		return d.Fight{}, found, e
+	if e := json.Unmarshal([]byte(*raw), &r); e != nil {
+		return d.Fight{}, false, e
+	}
+	if e := payload.Decode("top_floor_fights", version, []byte(*formation), &r.Formation); e != nil {
+		return d.Fight{}, false, e
+	}
+	if e := payload.Decode("top_floor_fights", version, []byte(*outcome), &r.Outcome); e != nil {
+		return d.Fight{}, false, e
 	}
 	f, e := r.fight()
 	return f, true, e
 }
 
 func (s Store) ReadFightTx(c context.Context, q tx.Queryer, attempt ids.UUID, lock bool) (d.Fight, bool, error) {
-	sql := `SELECT ` + fightObject + `::text FROM top_floor_fights WHERE attempt_id=$1`
+	sql := `SELECT ` + fightSelect + ` FROM top_floor_fights WHERE attempt_id=$1`
 	if lock {
 		sql += ` FOR UPDATE`
 	}
@@ -351,17 +407,36 @@ func (s Store) ReadFightTx(c context.Context, q tx.Queryer, attempt ids.UUID, lo
 
 // LatestFightTx is the challenger's most recent fight, open or finished.
 func (s Store) LatestFightTx(c context.Context, q tx.Queryer, challenger identity.PlayerID) (d.Fight, bool, error) {
-	return s.readFight(c, q, `SELECT `+fightObject+`::text FROM top_floor_fights WHERE challenger_id=$1 ORDER BY started_at DESC,attempt_id LIMIT 1`, int64(challenger))
+	return s.readFight(c, q, `SELECT `+fightSelect+` FROM top_floor_fights WHERE challenger_id=$1 ORDER BY started_at DESC,attempt_id LIMIT 1`, int64(challenger))
 }
 
 // OpenFightsTx lists unsettled fights started before the instant, oldest first.
 func (Store) OpenFightsTx(c context.Context, q tx.Queryer, before time.Time, limit int) ([]d.Fight, error) {
-	var rows []fightRow
-	if _, e := readJSON(c, q, `SELECT COALESCE(jsonb_agg(o ORDER BY o->>'started_at'),'[]'::jsonb)::text FROM (SELECT `+fightObject+` o FROM top_floor_fights WHERE status='STARTED' AND started_at<$1 ORDER BY started_at LIMIT $2) x`, &rows, before, limit); e != nil {
+	if q == nil {
+		return nil, d.ErrUnavailable
+	}
+	var rows []struct {
+		Row       json.RawMessage `json:"row"`
+		Formation json.RawMessage `json:"formation"`
+		Outcome   json.RawMessage `json:"outcome"`
+		Version   int16           `json:"version"`
+	}
+	_, e := readJSON(c, q, `SELECT COALESCE(jsonb_agg(jsonb_build_object('row',`+fightObject+`,'formation',formation,'outcome',outcome,'version',payload_version) ORDER BY started_at),'[]'::jsonb)::text FROM (SELECT * FROM top_floor_fights WHERE status='STARTED' AND started_at<$1 ORDER BY started_at LIMIT $2) pending`, &rows, before, limit)
+	if e != nil {
 		return nil, e
 	}
 	out := make([]d.Fight, 0, len(rows))
-	for _, r := range rows {
+	for _, row := range rows {
+		var r fightRow
+		if e := json.Unmarshal(row.Row, &r); e != nil {
+			return nil, e
+		}
+		if e := payload.Decode("top_floor_fights", row.Version, row.Formation, &r.Formation); e != nil {
+			return nil, e
+		}
+		if e := payload.Decode("top_floor_fights", row.Version, row.Outcome, &r.Outcome); e != nil {
+			return nil, e
+		}
 		f, e := r.fight()
 		if e != nil {
 			return nil, e
@@ -382,13 +457,13 @@ func (Store) InsertFightTx(c context.Context, t tx.Tx, f d.Fight) error {
 	if t == nil || f.Validate() != nil || f.Status != d.StatusStarted || f.StateVersion != 1 {
 		return d.ErrConflict
 	}
-	formation, e := json.Marshal(f.Formation)
+	formation, version, e := payload.Encode(f.Formation)
 	if e != nil {
 		return e
 	}
 	robot, player := defenderArgs(f.Defender)
-	return one(t.Exec(c, `INSERT INTO top_floor_fights(attempt_id,logical_server_id,challenger_id,defender_robot,defender_player,is_avenge,start_fingerprint,formation,pet_id,challenger_rank,defender_rank,started_at,status,state_version)VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,'STARTED',1)`,
-		f.AttemptID.String(), int64(f.Server), int64(f.Challenger), robot, player, f.Avenge, f.Fingerprint, string(formation), f.PetID, f.ChallengerRank, f.DefenderRank, f.StartedAt))
+	return one(t.Exec(c, `INSERT INTO top_floor_fights(attempt_id,logical_server_id,challenger_id,defender_robot,defender_player,is_avenge,start_fingerprint,formation,pet_id,challenger_rank,defender_rank,started_at,status,state_version,payload_version)VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,'STARTED',1,$13)`,
+		f.AttemptID.String(), int64(f.Server), int64(f.Challenger), robot, player, f.Avenge, f.Fingerprint, string(formation), f.PetID, f.ChallengerRank, f.DefenderRank, f.StartedAt, version))
 }
 
 func (Store) FinishFightTx(c context.Context, t tx.Tx, f d.Fight, old int64) error {
@@ -396,14 +471,15 @@ func (Store) FinishFightTx(c context.Context, t tx.Tx, f d.Fight, old int64) err
 		return d.ErrConflict
 	}
 	var outcome any
+	var version any
 	if f.Outcome != nil {
-		raw, e := json.Marshal(f.Outcome)
+		raw, encodedVersion, e := payload.Encode(f.Outcome)
 		if e != nil {
 			return e
 		}
-		outcome = string(raw)
+		outcome, version = string(raw), encodedVersion
 	}
-	return one(t.Exec(c, `UPDATE top_floor_fights SET status=$3,outcome=$4::jsonb,settled_at=$5,state_version=$6 WHERE attempt_id=$1 AND state_version=$2 AND status='STARTED'`, f.AttemptID.String(), old, f.Status, outcome, f.SettledAt, f.StateVersion))
+	return one(t.Exec(c, `UPDATE top_floor_fights SET status=$3,outcome=$4::jsonb,settled_at=$5,state_version=$6,payload_version=COALESCE($7,payload_version) WHERE attempt_id=$1 AND state_version=$2 AND status='STARTED'`, f.AttemptID.String(), old, f.Status, outcome, f.SettledAt, f.StateVersion, version))
 }
 
 // InsertRecordTx appends one side's record and keeps only the newest keep records of that owner.

@@ -1,0 +1,69 @@
+{
+  "Player": 2200001,
+  "Server": 22,
+  "Sequence": 3,
+  "LastObserved": 1763000000,
+  "Wins": {
+    "1": 2,
+    "2": 1
+  },
+  "Fight": {
+    "ID": "fight-1",
+    "Revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "Provider": "combat",
+    "Campaign": 11,
+    "Pet": 0,
+    "Deadline": 1763000600,
+    "Formation": [
+      2200001,
+      0,
+      0,
+      0
+    ],
+    "RentPlayer": 0,
+    "RentUnit": 0,
+    "RentPetPlayer": 0,
+    "RentPetUnit": 0,
+    "Lines": [
+      {
+        "Kind": "SCALAR_CURRENCY",
+        "ResourceKey": "gold",
+        "ItemID": 1,
+        "Amount": 100,
+        "Domain": "i5",
+        "Metadata": {
+          "source": "godstrial"
+        }
+      }
+    ]
+  },
+  "Auto": {
+    "ID": "auto-1",
+    "Revision": "revision-1",
+    "Provider": "combat",
+    "Campaign": 11,
+    "Times": 2,
+    "Start": 1763000000,
+    "Due": 1763003600,
+    "Lines": [
+      {
+        "Kind": "SCALAR_CURRENCY",
+        "ResourceKey": "gold",
+        "ItemID": 1,
+        "Amount": 100,
+        "Domain": "i5",
+        "Metadata": {
+          "source": "godstrial"
+        }
+      }
+    ]
+  },
+  "LastResult": {
+    "campaign": 11
+  },
+  "LastFight": null,
+  "LastStar": 3,
+  "LastAuto": {
+    "times": 1
+  }
+}

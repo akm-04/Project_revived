@@ -36,7 +36,7 @@ func TestRealPendingReconciliationBoundsAndBackwardsClock(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer p.Close()
+	t.Cleanup(p.Close)
 	// A source of its own under a fresh occurrence, so no prior guild broadcast must exist. It deliberately has no job rows.
 	bundle, e := registry.LoadBuiltinBundle()
 	if e != nil {
@@ -76,6 +76,15 @@ func TestRealPendingReconciliationBoundsAndBackwardsClock(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer x.Rollback(context.Background())
+	for _, player := range []int64{int64(leader), int64(leader) + 1} {
+		accountUID := "guild-broadcast-reconcile-native-" + strconv.FormatInt(player, 10)
+		if _, e = x.Exec(c, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES(gen_random_uuid(),$1,'ACTIVE',$2) ON CONFLICT (account_uid) DO NOTHING`, accountUID, now); e != nil {
+			t.Fatal(e)
+		}
+		if _, e = x.Exec(c, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) SELECT $1,account_id,1,$2,'guild-broadcast-reconcile-native' FROM accounts WHERE account_uid=$3 ON CONFLICT (player_id) DO NOTHING`, player, now, accountUID); e != nil {
+			t.Fatal(e)
+		}
+	}
 	result, _ := json.Marshal(app.SubmitResult{SourceID: source.Operation.ID, RecipientCount: 2})
 	fp, _ := receipt.FingerprintRequest(source.Request)
 	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(source.LeaderID), 10), Domain: "guild-broadcast", Operation: "submit", SemanticKey: source.Operation.ID.String()}
@@ -99,6 +108,23 @@ func TestRealPendingReconciliationBoundsAndBackwardsClock(t *testing.T) {
 	if e = x.Commit(c); e != nil {
 		t.Fatal(e)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM river_job WHERE args->>'semantic_key' LIKE $1`, []any{source.Operation.ID.String() + ":%"}},
+			{`DELETE FROM guild_broadcast_recipients WHERE source_id=$1::uuid`, []any{source.Operation.ID.String()}},
+			{`DELETE FROM guild_broadcast_sources WHERE source_id=$1::uuid`, []any{source.Operation.ID.String()}},
+			{`DELETE FROM gxb_operation_receipts WHERE receipt_id=$1::uuid`, []any{rr.ID.String()}},
+			{`DELETE FROM players WHERE player_id IN (100001,100002)`, nil},
+			{`DELETE FROM accounts WHERE account_uid LIKE 'guild-broadcast-reconcile-native-%'`, nil},
+		} {
+			if _, err := p.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	queue, e := NewGuildInsertOnly(p.Raw())
 	if e != nil {
 		t.Fatal(e)

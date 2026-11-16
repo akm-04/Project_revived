@@ -52,7 +52,7 @@ func TestCanonicalActivityAndRecallThroughFreshRetainedMID1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pool.Close()
+	t.Cleanup(pool.Close)
 	at := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC)
 	identifier := func() ids.UUID {
 		value, err := ids.NewUUID()
@@ -102,6 +102,29 @@ func TestCanonicalActivityAndRecallThroughFreshRetainedMID1(t *testing.T) {
 	if err != nil || !first.PlayerCreated {
 		t.Fatal("fresh MID1 failed", err)
 	}
+	t.Cleanup(func() {
+		player := int64(first.Player.PlayerID)
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM social_recall_tasks WHERE caller_player_id=$1 OR target_player_id=$1`, []any{player}},
+			{`DELETE FROM social_recall_tasks WHERE caller_player_id=$1`, []any{int64(199801)}},
+			{`DELETE FROM gameplay_context_credentials WHERE context_id IN (SELECT context_id FROM gameplay_contexts WHERE player_id=$1)`, []any{player}},
+			{`DELETE FROM gameplay_contexts WHERE player_id=$1`, []any{player}},
+			{`DELETE FROM player_login_observations WHERE player_id=$1`, []any{player}},
+			{`DELETE FROM player_directory_profiles WHERE player_id=$1`, []any{player}},
+			{`DELETE FROM account_session_credentials WHERE session_id=$1::uuid`, []any{session.String()}},
+			{`DELETE FROM account_session_server_observations WHERE session_id=$1::uuid`, []any{session.String()}},
+			{`DELETE FROM account_sessions WHERE account_id=$1::uuid OR session_id=$2::uuid`, []any{account.String(), session.String()}},
+			{`DELETE FROM players WHERE player_id IN ($1,$2)`, []any{player, int64(199801)}},
+			{`DELETE FROM accounts WHERE account_id IN ($1::uuid,$2::uuid)`, []any{account.String(), callerAccount.String()}},
+		} {
+			if _, err := pool.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	observed, known, err := owner.ReadPlayerActivityTx(ctx, pool, first.Player.PlayerID, clock.at)
 	if err != nil || !known || !observed.LastLoginAt.Equal(clock.at) || observed.StateVersion != 1 {
 		t.Fatal("fresh MID1 missed canonical activity", observed, known, err)

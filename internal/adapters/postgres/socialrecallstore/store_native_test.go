@@ -33,6 +33,8 @@ func TestRecallOwnerTerminalReleaseRollbackAndCAS(t *testing.T) {
 	}
 	t.Cleanup(pool.Close)
 	seedRecallLoginPlayer(t, pool, 125001)
+	seedRecallLoginPlayer(t, pool, 125002)
+	seedRecallLoginPlayer(t, pool, 125003)
 	store := socialrecallstore.Store{}
 	at := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
 	record := func(caller identity.PlayerID) application.TaskRecord {
@@ -152,6 +154,9 @@ func TestRecallOwnerConcurrentReservationAndLogin(t *testing.T) {
 	}
 	t.Cleanup(pool.Close)
 	at := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
+	seedRecallLoginPlayer(t, pool, 125101)
+	seedRecallLoginPlayer(t, pool, 125102)
+	seedRecallLoginPlayer(t, pool, 125103)
 	var records []application.TaskRecord
 	for _, caller := range []identity.PlayerID{125102, 125103} {
 		operationID, err := ids.NewUUID()
@@ -165,7 +170,6 @@ func TestRecallOwnerConcurrentReservationAndLogin(t *testing.T) {
 		}
 		records = append(records, application.TaskRecord{Task: task, StateVersion: 1, UpdatedAt: at, ContentRevision: strings.Repeat("b", 64), PolicyVersion: "test-qualified-policy"})
 	}
-	seedRecallLoginPlayer(t, pool, 125101)
 	store := socialrecallstore.Store{}
 	start := make(chan struct{})
 	results := make(chan error, 2)
@@ -256,6 +260,8 @@ func TestRecallOwnerSerializableLoginRetries(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(pool.Close)
+	seedRecallLoginPlayer(t, pool, 125201)
+	seedRecallLoginPlayer(t, pool, 125202)
 	operationID, err := ids.NewUUID()
 	if err != nil {
 		t.Fatal(err)
@@ -266,7 +272,6 @@ func TestRecallOwnerSerializableLoginRetries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	seedRecallLoginPlayer(t, pool, 125201)
 	store := socialrecallstore.Store{}
 	transaction, err := pool.Begin(requestContext, tx.Options{Isolation: tx.Serializable})
 	if err != nil {
@@ -353,6 +358,8 @@ func TestRecallOwnerStartPreparationExpiresReservationWithoutLogin(t *testing.T)
 	t.Cleanup(pool.Close)
 	at := time.Date(2026, 11, 5, 12, 0, 0, 0, time.UTC)
 	seedRecallLoginPlayer(t, pool, 125301)
+	seedRecallLoginPlayer(t, pool, 125302)
+	seedRecallLoginPlayer(t, pool, 125303)
 	store := socialrecallstore.Store{}
 	makeRecord := func(caller identity.PlayerID, started time.Time) application.TaskRecord {
 		operationID, err := ids.NewUUID()

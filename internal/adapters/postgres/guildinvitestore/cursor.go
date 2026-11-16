@@ -10,6 +10,7 @@ import (
 	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -48,7 +49,7 @@ func (Store) AdvanceProvenMarkerTx(c context.Context, t tx.Tx, old gi.MarkerProg
 	if t == nil || old.Validate() != nil || old.Complete || p.ReceiptID.IsZero() || p.Request.MarkerID != old.MarkerID || p.Request.From != old.CursorSerial || p.Request.To < old.CursorSerial || p.Request.To > old.MaxIssueSerial || p.DecisionAt.Before(old.LastEnqueueAt) {
 		return gi.ErrEvidence
 	}
-	raw, e := json.Marshal(p)
+	raw, version, e := payload.Encode(p)
 	if e != nil {
 		return e
 	}
@@ -61,7 +62,7 @@ func (Store) AdvanceProvenMarkerTx(c context.Context, t tx.Tx, old gi.MarkerProg
 		state = "COMPLETE"
 		done = p.DecisionAt
 	}
-	tag, e := t.Exec(c, `UPDATE guild_invite_projection_markers SET cursor_serial=$2,state=$3,last_enqueue_at=$4,next_wakeup_at=$5,completed_at=$6,cursor_receipt_id=$9::uuid,cursor_proof=$10::jsonb WHERE marker_id=$1::uuid AND state='PENDING' AND cursor_serial=$7 AND max_issue_serial=$8`, old.MarkerID.String(), p.Request.To, state, p.DecisionAt, p.DecisionAt.Add(time.Minute), done, old.CursorSerial, old.MaxIssueSerial, p.ReceiptID.String(), string(raw))
+	tag, e := t.Exec(c, `UPDATE guild_invite_projection_markers SET cursor_serial=$2,state=$3,last_enqueue_at=$4,next_wakeup_at=$5,completed_at=$6,cursor_receipt_id=$9::uuid,cursor_proof=$10::jsonb,payload_version=$11 WHERE marker_id=$1::uuid AND state='PENDING' AND cursor_serial=$7 AND max_issue_serial=$8`, old.MarkerID.String(), p.Request.To, state, p.DecisionAt, p.DecisionAt.Add(time.Minute), done, old.CursorSerial, old.MaxIssueSerial, p.ReceiptID.String(), string(raw), version)
 	return one(tag, e)
 }
 
@@ -83,7 +84,7 @@ func (Store) CoveredSourcePayloadsTx(c context.Context, q tx.Queryer, m gi.Marke
 	if m.Validate() != nil || cursor < 0 || cursor > m.MaxIssueSerial {
 		return out, gi.ErrEvidence
 	}
-	e := q.QueryRow(c, `SELECT count(*),encode(sha256(convert_to(COALESCE(string_agg(source_id::text||':'||((to_jsonb(s)-ARRAY['decision_at','expires_at'])||jsonb_build_object('decision_at',to_char(s.decision_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"'),'expires_at',to_char(s.expires_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"')))::text||E'\n','' ORDER BY source_id),''),'UTF8')),'hex'),COALESCE(jsonb_agg(core_receipt_id::text ORDER BY core_receipt_id),'[]'::jsonb)::text FROM guild_invite_projection_sources s WHERE source_serial<=$1 AND (($2='JOIN' AND recipient_player_id=$3 AND last_join_event_id<$4) OR ($2='RETIRE' AND guild_id=$5))`, cursor, string(m.Kind), int64(m.Subject), m.EventID, int64(m.GuildID)).Scan(&out.Payloads.Count, &digest, &raw)
+	e := q.QueryRow(c, `SELECT count(*),encode(sha256(convert_to(COALESCE(string_agg(source_id::text||':'||((to_jsonb(s)-ARRAY['decision_at','expires_at','payload_version'])||jsonb_build_object('decision_at',to_char(s.decision_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"'),'expires_at',to_char(s.expires_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"')))::text||E'\n','' ORDER BY source_id),''),'UTF8')),'hex'),COALESCE(jsonb_agg(core_receipt_id::text ORDER BY core_receipt_id),'[]'::jsonb)::text FROM guild_invite_projection_sources s WHERE source_serial<=$1 AND (($2='JOIN' AND recipient_player_id=$3 AND last_join_event_id<$4) OR ($2='RETIRE' AND guild_id=$5))`, cursor, string(m.Kind), int64(m.Subject), m.EventID, int64(m.GuildID)).Scan(&out.Payloads.Count, &digest, &raw)
 	if e != nil {
 		return out, e
 	}

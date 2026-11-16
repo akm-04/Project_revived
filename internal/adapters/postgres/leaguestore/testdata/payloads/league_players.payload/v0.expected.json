@@ -1,0 +1,47 @@
+{
+  "ID": 3991325001,
+  "Server": 39913,
+  "Season": 82,
+  "Group": 3,
+  "Points": 2018,
+  "ScoreAt": "2027-02-04T02:00:00Z",
+  "Tie": "a7bb8846efa13e2b2171900fca5418f65aa221b09f9ce2c645b9299de57bbfbb",
+  "Defense": {
+    "Heroes": [
+      1
+    ],
+    "Pet": 0
+  },
+  "Fights": 1,
+  "Wins": 1,
+  "Participated": true,
+  "LastWin": "2027-02-04T02:00:00Z",
+  "LastAttacked": "0001-01-01T00:00:00Z",
+  "ProtectedBy": "00000000-0000-0000-0000-000000000000",
+  "Prior": {
+    "Group": 0,
+    "Rank": 0,
+    "Points": 0,
+    "ScoreAt": "0001-01-01T00:00:00Z",
+    "Tie": "",
+    "Participated": false
+  },
+  "Choice": 0,
+  "ChoicePending": false,
+  "LastDay": {
+    "Group": 3,
+    "Rank": 1,
+    "Points": 2018,
+    "ScoreAt": "2027-02-04T02:00:00Z",
+    "Tie": "a7bb8846efa13e2b2171900fca5418f65aa221b09f9ce2c645b9299de57bbfbb",
+    "Participated": true
+  },
+  "ClaimedDay": 20851,
+  "QualifyingDays": 5,
+  "TopSeasons": 0,
+  "Intent": 1,
+  "Selected": 5647325001,
+  "Version": 18,
+  "CreatedAt": "2027-02-04T02:00:00Z",
+  "UpdatedAt": "2027-02-09T02:00:00Z"
+}

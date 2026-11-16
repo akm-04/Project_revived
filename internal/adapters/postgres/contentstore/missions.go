@@ -21,7 +21,7 @@ func (s Store) missionDefinitionsTx(ctx context.Context, q tx.Queryer, revision 
 		return nil, errors.New("content store: mission revision/queryer required")
 	}
 	var raw string
-	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(d)-'revision_id' ORDER BY objective_id),'[]'::jsonb)::text
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text
 FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'`, revision).Scan(&raw)
 	if err != nil {
 		return nil, err

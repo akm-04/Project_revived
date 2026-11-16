@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/playerpresentation"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
 	sg "gxb.local/backend/v2/internal/application/socialgift"
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
@@ -384,13 +385,12 @@ func Test7B_WindowTiesDeletedSenderAndDayOccupancy(t *testing.T) {
 	f.sql(`DELETE FROM gameplay_contexts WHERE player_id=100001`)
 	clearBirthOwners(f, f.p.Raw(), 100001)
 	f.sql(`DELETE FROM player_directory_profiles WHERE player_id=100001`)
-	f.sql(`DELETE FROM players WHERE player_id=100001`)
 	got, e = base.LoadList(ctx, b, sp.Notice, f.op())
-	if e != nil || len(got.Notices) != 0 {
-		t.Fatal("fabricated deleted sender", got, e)
+	if !errors.Is(e, playerpresentation.ErrMissingPresentation) {
+		t.Fatal("fabricated missing sender presentation", got, e)
 	}
 	if _, e = s.Claim(ctx, b, r.NoticeIDs, f.op()); e != nil {
 		t.Fatal("hidden gift lost value", e)
 	}
-	t.Log("deleted sender hidden from stock projection, exact Gift claim and receipt retained")
+	t.Log("missing sender presentation hidden from stock projection, exact Gift claim and receipt retained")
 }

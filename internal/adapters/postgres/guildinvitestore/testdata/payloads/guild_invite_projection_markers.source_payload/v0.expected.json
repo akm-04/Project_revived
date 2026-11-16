@@ -1,0 +1,128 @@
+{
+  "Operation": {
+    "ID": "ca586747-2c9b-43bb-aa93-2aaef00cab3a",
+    "StartedAt": "1970-01-01T00:33:20.123456Z",
+    "EntropySeed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Policies": [
+      {
+        "name": "content",
+        "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "name": "guild-core",
+        "version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "name": "guild-invite",
+        "version": "GUILD_INVITE_PRESENTATION_V1"
+      }
+    ]
+  },
+  "Kind": "JOIN",
+  "GuildID": 1000001,
+  "Server": 1,
+  "Actor": 100001,
+  "Subject": 100002,
+  "ActorAccountUID": "payload-version-uid",
+  "EventID": 100,
+  "DecisionAt": "1970-01-01T00:33:22Z",
+  "MaxIssueSerial": 7,
+  "ContentRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "GuildCoreRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "PolicyID": "GUILD_INVITE_PRESENTATION_V1",
+  "Core": {
+    "ID": "8abebf1f-69eb-4f88-9fbf-34e4d05006bc",
+    "OwnerKind": "guild",
+    "OwnerKey": "1000001",
+    "Domain": "guild",
+    "Operation": "accept_application",
+    "SemanticKey": "payload-version-marker",
+    "Schema": "gxb.i6c.guild.accept_application.v1",
+    "Fingerprint": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "OperationClass": "I6C_GUILD",
+    "PolicyVersion": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "ActorAccountUID": "payload-version-uid",
+    "ContextID": "9355fb38-e3c7-4e2a-a850-8752fc1d521e",
+    "OperationStartedAt": "1970-01-01T00:33:20.123456Z",
+    "OperationPolicyRefs": [
+      {
+        "name": "content",
+        "version": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "name": "guild-core",
+        "version": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "name": "guild-invite",
+        "version": "GUILD_INVITE_PRESENTATION_V1"
+      }
+    ]
+  }
+}

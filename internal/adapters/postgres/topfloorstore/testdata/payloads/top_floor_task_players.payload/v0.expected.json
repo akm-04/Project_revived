@@ -1,0 +1,36 @@
+{
+  "player": {
+    "PlayerID": 100001,
+    "Server": 1,
+    "ContentRevision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+    "BestRank": 1,
+    "TicketDay": 1,
+    "TicketsLeft": 10,
+    "Purchases": 0,
+    "LastMatchAt": null,
+    "RefreshCount": 0,
+    "OfferedDay": 1,
+    "Offered": [
+      {
+        "robot": 10325
+      },
+      {
+        "player": 100002
+      }
+    ],
+    "Defense": [
+      1,
+      2
+    ],
+    "DefensePet": 0,
+    "DefenseSetAt": null,
+    "Fights": 0,
+    "Wins": 0,
+    "WinStreak": 0,
+    "StateVersion": 1,
+    "CreatedAt": "2026-11-16T02:17:56Z",
+    "UpdatedAt": "2026-11-16T02:17:56Z"
+  },
+  "period_number": 1,
+  "leader": 0
+}

@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -50,14 +51,17 @@ func TestProposalArgsPreserveReplacementGenerationTimes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(args) != 14 {
-		t.Fatalf("arg count=%d want=14", len(args))
+	if len(args) != 15 {
+		t.Fatalf("arg count=%d want=15", len(args))
 	}
-	if got, ok := args[12].(time.Time); !ok || !got.Equal(created) {
-		t.Fatalf("created arg=%#v want=%s", args[12], created)
+	if got, ok := args[12].(int16); !ok || got != payload.Current {
+		t.Fatalf("payload version arg=%#v want=%d", args[12], payload.Current)
 	}
-	if got, ok := args[13].(time.Time); !ok || !got.Equal(updated) {
-		t.Fatalf("updated arg=%#v want=%s", args[13], updated)
+	if got, ok := args[13].(time.Time); !ok || !got.Equal(created) {
+		t.Fatalf("created arg=%#v want=%s", args[13], created)
+	}
+	if got, ok := args[14].(time.Time); !ok || !got.Equal(updated) {
+		t.Fatalf("updated arg=%#v want=%s", args[14], updated)
 	}
 }
 
