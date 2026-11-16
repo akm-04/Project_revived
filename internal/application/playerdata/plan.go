@@ -40,11 +40,20 @@ type Plan struct {
 }
 
 type PlanTable struct {
-	Table     string            `json:"table"`
-	Action    string            `json:"action"`
-	Select    string            `json:"select"`
-	Versioned Versioned         `json:"versioned"`
-	Inbound   []json.RawMessage `json:"inbound"`
+	Table     string             `json:"table"`
+	Action    string             `json:"action"`
+	Select    string             `json:"select"`
+	Versioned Versioned          `json:"versioned"`
+	Inbound   []InboundReference `json:"inbound"`
+}
+
+// InboundReference is a foreign key from a row the restore does not delete
+// (another owner's or a kept table's row) to this table's rows.
+type InboundReference struct {
+	Constraint string   `json:"constraint"`
+	Table      string   `json:"table"`
+	Columns    []string `json:"columns"`
+	References []string `json:"references"`
 }
 
 type Versioned struct {
@@ -96,6 +105,11 @@ func (plan Plan) Validate() error {
 		}
 		if strings.TrimSpace(table.Select) == "" {
 			return fmt.Errorf("%w: table %s has no select", ErrInvalidPlan, table.Table)
+		}
+		for _, inbound := range table.Inbound {
+			if inbound.Table == "" || len(inbound.Columns) == 0 || len(inbound.Columns) != len(inbound.References) {
+				return fmt.Errorf("%w: table %s has a malformed inbound key", ErrInvalidPlan, table.Table)
+			}
 		}
 		if table.Table != PlayersTable {
 			continue

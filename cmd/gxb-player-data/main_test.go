@@ -47,10 +47,11 @@ func TestRunPrintsValidatedPlan(t *testing.T) {
 
 func TestRunRefusesWithExitThree(t *testing.T) {
 	cases := map[string][]string{
-		"restore not built": {"-mode", "restore"},
-		"missing player":    {"-mode", "export", "-plan", writeTestPlan(t)},
-		"unknown mode":      {"-mode", "move"},
-		"missing plan":      {"-mode", "plan", "-plan", filepath.Join(t.TempDir(), "absent.json")},
+		"restore without input":  {"-mode", "restore", "-player", "1"},
+		"restore without player": {"-mode", "restore", "-in", filepath.Join(t.TempDir(), "export.json")},
+		"missing player":         {"-mode", "export", "-plan", writeTestPlan(t)},
+		"unknown mode":           {"-mode", "move"},
+		"missing plan":           {"-mode", "plan", "-plan", filepath.Join(t.TempDir(), "absent.json")},
 	}
 	for name, arguments := range cases {
 		t.Run(name, func(t *testing.T) {

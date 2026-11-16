@@ -4197,6 +4197,20 @@
    ]
   },
   "identitylifecycle": {
+   "store:identitystore": [
+    "*FindProviderBindingTx",
+    "*InsertProviderBindingTx",
+    "*InsertSessionCredentialTx",
+    "*InsertSessionTx",
+    "*LockAccountTx",
+    "*LockLiveContextTx",
+    "*LockSessionTx",
+    "*RevokeGameplayCredentialsTx",
+    "*RevokeSessionCredentialsTx",
+    "*SaveEndedContextTx",
+    "*SaveRevokedSessionTx",
+    "*TouchSessionActivityTx"
+   ],
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"
@@ -4790,7 +4804,11 @@
     "*PutTx"
    ]
   },
-  "playerdata": {},
+  "playerdata": {
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ]
+  },
   "playerdirectory": {},
   "playerdisplay": {
    "arena": [

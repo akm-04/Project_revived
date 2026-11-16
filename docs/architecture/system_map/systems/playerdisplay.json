@@ -270,6 +270,7 @@
  },
  "tests": {
   "integration": [
+   "playerdata",
    "playerdisplay",
    "publicshowcase"
   ],

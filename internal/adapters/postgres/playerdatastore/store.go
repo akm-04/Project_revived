@@ -6,8 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"gxb.local/backend/v2/internal/application/playerdata"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -30,13 +28,7 @@ func (Store) GooseVersion(ctx context.Context, query tx.Queryer) (int64, error) 
 func (Store) SelectRows(ctx context.Context, query tx.Queryer, selection string, playerID int64) ([]json.RawMessage, error) {
 	var raw string
 	sql := `SELECT COALESCE(jsonb_agg(to_jsonb(entry) ORDER BY to_jsonb(entry)::text),'[]'::jsonb)::text FROM (` + selection + `) entry`
-	// The plan pins the parameter type per owner column; gxb_operation_receipts
-	// keys a player by text owner_key, every other owner column is bigint.
-	argument := any(playerID)
-	if strings.Contains(selection, "$1::text") {
-		argument = strconv.FormatInt(playerID, 10)
-	}
-	if err := query.QueryRow(ctx, sql, argument).Scan(&raw); err != nil {
+	if err := query.QueryRow(ctx, sql, playerArgument(selection, playerID)).Scan(&raw); err != nil {
 		return nil, err
 	}
 	var rows []json.RawMessage
