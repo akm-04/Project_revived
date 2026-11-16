@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
@@ -14,6 +15,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
 	app "gxb.local/backend/v2/internal/application/publicprofile"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"reflect"
@@ -46,6 +48,22 @@ func marryMetric(t *testing.T, p *pg.Pool, a identity.ActorContext) {
 	favorForMarriage(t, p, a, 1)
 	if _, e := achievementLibraryService(p, p).Command(ctx, a, lib.Command{Family: lib.Gift, PartnerID: 1, Value: 50001112}, op()); e != nil {
 		t.Fatal(e)
+	}
+}
+func TestI7C4CForceMetricReportsLegacyUnknownBasis(t *testing.T) {
+	p := pool(t)
+	a, rev := achievementFixture(t, p, false)
+	provider := app.CanonicalMetricProvider{Roster: characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: contentstore.Store{}}, Force: rawBirthStats(p)}
+	at, e := (pg.AuthoritativeTime{Queryer: p}).Now(ctx)
+	if e != nil {
+		t.Fatal(e)
+	}
+	_, e = (tx.Runner{DB: p}).Run(ctx, opPinned(rev), lib.Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+		_, e := provider.ReadMetricsScopeTx(c, sc, app.MetricRequest{PlayerID: a.PlayerID, IDs: []int64{1007}, ContentRevision: rev, ObservedAt: at})
+		return e
+	})
+	if !errors.Is(e, character.ErrRawAwakeningUnavailable) {
+		t.Fatalf("legacy 1007 basis was not explicitly unknown: %v", e)
 	}
 }
 func TestI7C4CActualMarriageMetricReceiptReplayAndRecompute(t *testing.T) {
