@@ -221,10 +221,30 @@ func (s Mode) fillState(c context.Context, sc gen.TimedScope, a identity.ActorCo
 		awardInfo = map[string]any{"awards": []map[string]any{}}
 		body["award_info"] = awardInfo
 	}
-	awardInfo["award_detail"] = map[string]any{"extra_point": view.state.ExtraPoints, "point": point, "is_close": chapterClosed(view.state, view.catalog),
-		"close_time": view.at.Unix(), "start_time": view.state.StartedAt, "progress": view.state.ProgressFraction(view.catalog)}
+	awardInfo["award_detail"] = awardDetailOf(view, point).fields()
 	piggyback(c, body)
 	return nil
+}
+
+// awardDetail is the result window's detail block; the same value is stored with
+// the report so a replay answers what the live reply did.
+type awardDetail struct {
+	ExtraPoint int64   `json:"extra_point"`
+	Point      int64   `json:"point"`
+	IsClose    int64   `json:"is_close"`
+	CloseTime  int64   `json:"close_time"`
+	StartTime  int64   `json:"start_time"`
+	Progress   float64 `json:"progress"`
+}
+
+func awardDetailOf(view *roomView, point int64) awardDetail {
+	return awardDetail{ExtraPoint: view.state.ExtraPoints, Point: point, IsClose: chapterClosed(view.state, view.catalog),
+		CloseTime: view.at.Unix(), StartTime: view.state.StartedAt, Progress: view.state.ProgressFraction(view.catalog)}
+}
+
+func (detail awardDetail) fields() map[string]any {
+	return map[string]any{"extra_point": detail.ExtraPoint, "point": detail.Point, "is_close": detail.IsClose,
+		"close_time": detail.CloseTime, "start_time": detail.StartTime, "progress": detail.Progress}
 }
 
 // Sweep answers 2385: one ticket buys floor(60%) of the chapter's rewards, at

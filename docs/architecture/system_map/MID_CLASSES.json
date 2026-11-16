@@ -100805,7 +100805,7 @@
    "isolation": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 658,
+     "line": 663,
      "value": "repeatable_read"
     }
    ],
@@ -100813,7 +100813,7 @@
    "read_only": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 658,
+     "line": 663,
      "value": "true"
     }
    ],
@@ -100821,7 +100821,7 @@
    "retry": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 658,
+     "line": 663,
      "value": "1"
     }
    ],
@@ -100832,7 +100832,7 @@
      "file": "internal/application/occult/teamfight.go",
      "function": "Mode.TeamReport",
      "isolation": "repeatable_read",
-     "line": 658,
+     "line": 663,
      "read_only": "true",
      "retry": "1"
     }

@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -326,6 +327,13 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	if json.Unmarshal([]byte(report), &decoded) != nil || decoded["star"] == nil || decoded["fighter"] == nil {
 		t.Fatalf("report shape %s", report)
 	}
+	detail, ok := fight["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if !ok {
+		t.Fatalf("live 2377 award_info %#v", fight["award_info"])
+	}
+	if detail["point"] == nil || detail["progress"] == nil {
+		t.Fatalf("live 2377 award_detail %#v", detail)
+	}
 	state := occultRoomState(t, p, roomID)
 	if state.Team == nil || state.Team.ReportKey == "" {
 		t.Fatalf("the room did not freeze the report %+v", state.Team)
@@ -339,6 +347,10 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	if err != nil || occultStoredReport(t, stored) != report {
 		t.Fatalf("2382 replay %v", err)
 	}
+	storedDetail, ok := stored["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if !ok || !reflect.DeepEqual(storedDetail, detail) {
+		t.Fatalf("2382 replay award_detail %#v, live %#v", stored["award_info"], detail)
+	}
 	if _, err = s.TeamReport(ctx, nonMember, state.Team.ReportKey, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("a non-member read the report", err)
 	}
@@ -348,6 +360,10 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	replay, err := s.StartTeamFight(ctx, a, 20002, 1, op())
 	if err != nil || occultTeamReport(t, replay) != report {
 		t.Fatalf("2377 replay %v", err)
+	}
+	replayDetail, ok := replay["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if !ok || !reflect.DeepEqual(replayDetail, detail) {
+		t.Fatalf("2377 replay award_detail %#v, live %#v", replay["award_info"], detail)
 	}
 	for _, member := range []identity.ActorContext{a, b, c} {
 		if count := team.settlementCount(member.PlayerID); count != 1 {
