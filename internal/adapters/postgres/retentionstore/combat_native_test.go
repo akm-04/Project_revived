@@ -103,6 +103,13 @@ VALUES($1,$2,$3,clock_timestamp())`, attemptID, player, "settle-"+attemptID); er
 	}
 }
 
+func insertSettlement(t *testing.T, ctx context.Context, pool *pg.Pool, table, attemptID string, player int64, settledAt time.Time) {
+	t.Helper()
+	if _, err := pool.Raw().Exec(ctx, `INSERT INTO `+table+`(attempt_id,player_id,damage,settled_at)VALUES($1,$2,0,$3)`, attemptID, player, settledAt.UTC()); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func newHash(t *testing.T) string {
 	t.Helper()
 	first := strings.ReplaceAll(newUUID(t), "-", "")
@@ -147,15 +154,12 @@ func TestCombatChainAndBlobRules(t *testing.T) {
 	insertCombatAttempt(t, ctx, pool, revision, player, combatAttemptSeed{ID: successor, Locator: "r8-4c-successor", SnapshotHash: referencedSnapshot,
 		TrustProfile: "CLIENT_SUMMARY_ATTESTED_V1", ResolverStatus: "NOT_REQUIRED", State: "TERMINAL", TerminalKind: "WIN", TerminalAt: &newer, Supersedes: referenced, ReplayResponse: "OK"})
 
-	textReferenced := newUUID(t)
-	textReferencedSnapshot := newHash(t)
-	insertCombatSnapshot(t, ctx, pool, revision, textReferencedSnapshot)
-	insertCombatAttempt(t, ctx, pool, revision, player, combatAttemptSeed{ID: textReferenced, Locator: "r8-4c-text-referenced", SnapshotHash: textReferencedSnapshot,
+	settlementReferenced := newUUID(t)
+	settlementReferencedSnapshot := newHash(t)
+	insertCombatSnapshot(t, ctx, pool, revision, settlementReferencedSnapshot)
+	insertCombatAttempt(t, ctx, pool, revision, player, combatAttemptSeed{ID: settlementReferenced, Locator: "r8-4c-settlement-referenced", SnapshotHash: settlementReferencedSnapshot,
 		ResolverStatus: "PERMANENT_FAILED", State: "TERMINAL", TerminalKind: "WIN", TerminalAt: &old})
-	if _, err := pool.Raw().Exec(ctx, `INSERT INTO illusion_attempts(attempt_id,player_id,logical_server_id,open_day,campaign_id,formation,frozen_at,resolved,damage)
-VALUES($1,$2,$3,0,100001,'1',0,true,0)`, textReferenced, player, server); err != nil {
-		t.Fatal(err)
-	}
+	insertSettlement(t, ctx, pool, "illusion_attempt_settlements", settlementReferenced, player, newer)
 
 	fresh := newUUID(t)
 	freshSnapshot := newHash(t)
@@ -200,7 +204,7 @@ VALUES($1,$2,$3,0,100001,'1',0,true,0)`, textReferenced, player, server); err !=
 			t.Fatalf("unreferenced old %s survived", table)
 		}
 	}
-	for name, id := range map[string]string{"superseded": referenced, "text-referenced": textReferenced, "new": fresh, "successor": successor} {
+	for name, id := range map[string]string{"superseded": referenced, "settlement-referenced": settlementReferenced, "new": fresh, "successor": successor} {
 		if !combatRowExists(t, ctx, pool, `SELECT count(*) FROM combat_attempts WHERE attempt_id=$1`, id) {
 			t.Fatalf("%s attempt was deleted", name)
 		}
@@ -223,7 +227,7 @@ VALUES($1,$2,$3,0,100001,'1',0,true,0)`, textReferenced, player, server); err !=
 	if deleted != 4 {
 		t.Fatalf("blob rule deleted=%d want 4", deleted)
 	}
-	for name, hash := range map[string]string{"attempt snapshot": referencedSnapshot, "text-referenced snapshot": textReferencedSnapshot, "new snapshot": freshSnapshot} {
+	for name, hash := range map[string]string{"attempt snapshot": referencedSnapshot, "settlement-referenced snapshot": settlementReferencedSnapshot, "new snapshot": freshSnapshot} {
 		if !combatRowExists(t, ctx, pool, `SELECT count(*) FROM combat_snapshots WHERE snapshot_hash=$1`, hash) {
 			t.Fatalf("%s was deleted", name)
 		}
@@ -312,5 +316,75 @@ VALUES($1,'R8_4C','r8-4c','r8-4c-staged',$2,$3,'r8-4c-staged',repeat('a',64),'SE
 	}
 	if err = transaction.Rollback(ctx); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// R5D design, Retention: an expired settlement row is purged first, which
+// releases its attempt to the chain rule; a fresh settlement keeps its attempt.
+func TestSettlementRuleReleasesItsAttempt(t *testing.T) {
+	pool, ctx := openPool(t)
+	revision := contentRevision(t, ctx, pool)
+	server := int64(886010 + time.Now().UnixNano()%1000)
+	player := server*100000 + 25001
+	seedServerAndPlayer(t, ctx, pool, server, player)
+	old := time.Now().Add(-2 * time.Hour)
+	cutoff := time.Now().Add(-time.Hour)
+
+	attempts := map[string]string{}
+	for _, table := range []string{"adventure_attempt_settlements", "illusion_attempt_settlements", "worldboss_attempt_settlements", "fresh"} {
+		attempt := newUUID(t)
+		snapshot := newHash(t)
+		insertCombatSnapshot(t, ctx, pool, revision, snapshot)
+		insertCombatAttempt(t, ctx, pool, revision, player, combatAttemptSeed{ID: attempt, Locator: "r8-4c-settled-" + attempt, SnapshotHash: snapshot,
+			ResolverStatus: "PERMANENT_FAILED", State: "TERMINAL", TerminalKind: "WIN", TerminalAt: &old})
+		attempts[table] = attempt
+	}
+	for _, table := range []string{"adventure_attempt_settlements", "illusion_attempt_settlements", "worldboss_attempt_settlements"} {
+		insertSettlement(t, ctx, pool, table, attempts[table], player, old)
+	}
+	insertSettlement(t, ctx, pool, "illusion_attempt_settlements", attempts["fresh"], player, time.Now())
+
+	if _, err := pool.Raw().Exec(ctx, `DELETE FROM illusion_attempt_settlements WHERE attempt_id=$1`, attempts["illusion_attempt_settlements"]); err == nil {
+		t.Fatal("outside the sweep a settlement DELETE was accepted")
+	}
+
+	sweep := func(rule func(context.Context, tx.Tx) (int64, error)) int64 {
+		t.Helper()
+		transaction, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() { _ = transaction.Rollback(ctx) }()
+		deleted, err := rule(ctx, transaction)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = transaction.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+		return deleted
+	}
+	store := retentionstore.Store{}
+	if deleted := sweep(func(c context.Context, t tx.Tx) (int64, error) {
+		return store.DeleteExpiredAttemptSettlements(c, t, cutoff)
+	}); deleted < 3 {
+		t.Fatalf("settlement rule deleted=%d want at least 3", deleted)
+	}
+	for table, attempt := range attempts {
+		settled := table
+		if table == "fresh" {
+			settled = "illusion_attempt_settlements"
+		}
+		if survived := combatRowExists(t, ctx, pool, `SELECT count(*) FROM `+settled+` WHERE attempt_id=$1`, attempt); survived != (table == "fresh") {
+			t.Fatalf("%s settlement survived=%v", table, survived)
+		}
+	}
+	sweep(func(c context.Context, t tx.Tx) (int64, error) { return store.DeleteExpiredCombatChain(c, t, cutoff) })
+	// Leave no orphan snapshots behind for the exact blob count of the chain test.
+	sweep(store.DeleteUnreferencedCombatBlobs)
+	for table, attempt := range attempts {
+		if survived := combatRowExists(t, ctx, pool, `SELECT count(*) FROM combat_attempts WHERE attempt_id=$1`, attempt); survived != (table == "fresh") {
+			t.Fatalf("%s attempt survived=%v", table, survived)
+		}
 	}
 }

@@ -394,7 +394,8 @@ VALUES($1,1,'I7B_PUBLIC_V1',clock_timestamp(),clock_timestamp())`, player); err 
 		}
 	}
 	insertMediaHistory(t, ctx, pool, player, server, mustUUID(t, currentOperation), mustUUID(t, currentOperation), old, true)
-	insertMediaHistory(t, ctx, pool, player, server, mustUUID(t, orphanOperation), mustUUID(t, orphanOperation), old, false)
+	// Older than the current row so it is replaced whatever the random operation ids compare as.
+	insertMediaHistory(t, ctx, pool, player, server, mustUUID(t, orphanOperation), mustUUID(t, orphanOperation), old.Add(-time.Minute), false)
 	insertMediaHistory(t, ctx, pool, player, server, mustUUID(t, originOperation), mustUUID(t, originOperation), old, false)
 	insertMediaHistory(t, ctx, pool, player, server, mustUUID(t, descendantOperation), mustUUID(t, originOperation), time.Now(), false)
 	insertMediaHistory(t, ctx, pool, player, server, mustUUID(t, freshOperation), mustUUID(t, freshOperation), time.Now(), false)

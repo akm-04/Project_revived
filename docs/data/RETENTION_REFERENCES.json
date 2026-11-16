@@ -3,10 +3,10 @@
  "schema_version": 1,
  "attempt_ids": [
   {
-   "table": "adventure_single_attempts",
+   "table": "adventure_attempt_settlements",
    "column": "attempt_id",
-   "type": "text",
-   "foreign_key": false
+   "type": "uuid",
+   "foreign_key": true
   },
   {
    "table": "arena_matches",
@@ -27,10 +27,10 @@
    "foreign_key": false
   },
   {
-   "table": "illusion_attempts",
+   "table": "illusion_attempt_settlements",
    "column": "attempt_id",
-   "type": "text",
-   "foreign_key": false
+   "type": "uuid",
+   "foreign_key": true
   },
   {
    "table": "league_matches",
@@ -69,10 +69,10 @@
    "foreign_key": true
   },
   {
-   "table": "worldboss_attempts",
+   "table": "worldboss_attempt_settlements",
    "column": "attempt_id",
-   "type": "text",
-   "foreign_key": false
+   "type": "uuid",
+   "foreign_key": true
   }
  ],
  "receipt_ids": [

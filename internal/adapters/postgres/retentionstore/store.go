@@ -100,6 +100,35 @@ WHERE h.operation_id = d.operation_id`
 	return tag.RowsAffected(), err
 }
 
+// settlementTables are the R5D per-mode settlement records (migration 00168).
+var settlementTables = []string{"adventure_attempt_settlements", "illusion_attempt_settlements", "worldboss_attempt_settlements"}
+
+// DeleteExpiredAttemptSettlements removes R5D settlement rows (report class)
+// settled before the cutoff. It runs before the chain rule: a settlement's key
+// to its attempt would otherwise keep that attempt forever (R5D design,
+// Retention; user ruling Q2).
+func (Store) DeleteExpiredAttemptSettlements(c context.Context, t tx.Tx, settledBefore time.Time) (int64, error) {
+	if t == nil {
+		return 0, errors.New("retention settlement rule requires a transaction")
+	}
+	if _, err := t.Exec(c, retentionSweepStatement); err != nil {
+		return 0, err
+	}
+	var deleted int64
+	for _, table := range settlementTables {
+		tag, err := t.Exec(c, `DELETE FROM `+table+` WHERE attempt_id IN (
+SELECT attempt_id FROM `+table+` WHERE settled_at < $1
+ORDER BY settled_at, attempt_id
+LIMIT $2
+FOR UPDATE SKIP LOCKED)`, settledBefore.UTC(), BatchSize)
+		if err != nil {
+			return deleted, err
+		}
+		deleted += tag.RowsAffected()
+	}
+	return deleted, nil
+}
+
 // DeleteExpiredCombatChain removes terminal attempts whose terminal time has
 // passed and that no generated attempt-id column still holds, together with
 // their children in child-first order. A shared resolution is kept while a

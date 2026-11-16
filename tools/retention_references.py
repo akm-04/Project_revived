@@ -8,6 +8,9 @@ them; --check fails when it differs from the catalog, or when a listed column
 is not cited as table.column by the committed rule table
 internal/adapters/postgres/retentionstore/references.go.
 
+Tables a migration renamed to *_retired_* (R5D's old mode-local attempts) are
+kept only for a rollback and are not listed.
+
 A non-uuid attempt-id column outside the lead's text list stops the tool: the
 sweep rule would have to compare text and no foreign key can be added.
 """
@@ -47,7 +50,7 @@ EXCLUDED_OPERATION_ID_COLUMNS = {("gxb_operation_receipts", "operation_id")}
 
 COLUMNS_SQL = (
     "SELECT table_name, column_name, data_type FROM information_schema.columns "
-    "WHERE table_schema = 'public' AND table_name NOT LIKE 'river\\_%' "
+    "WHERE table_schema = 'public' AND table_name NOT LIKE 'river\\_%' AND table_name NOT LIKE '%\\_retired\\_%' "
     "AND table_name <> 'goose_db_version' ORDER BY table_name, ordinal_position"
 )
 FOREIGN_KEYS_SQL = """

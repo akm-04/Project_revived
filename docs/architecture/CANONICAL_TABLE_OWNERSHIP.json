@@ -2487,7 +2487,19 @@
         "internal/adapters/postgres/dailyresetstore/"
       ],
       "write_exceptions": [],
-      "migration": "migrations/00158_r3_player_daily_reset_marks.sql"
+      "migration": "migrations/00158_r3_player_daily_reset_marks.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null,
+        "review": "lead (night 2026-11-16, for review): R3 marker of the last delivered daily reset signal; restored with the player's daily state so a restore neither repeats nor skips the signal"
+      }
     },
     "player_directory_profiles": {
       "allowed_query_owners": [
@@ -3543,7 +3555,19 @@
       ],
       "migration": "migrations/00166_r6_undelivered_replies.sql",
       "owner": "undelivered",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "cache",
+        "backup": false,
+        "references": [],
+        "retention": null,
+        "review": "R6 design: undelivered-reply cache, never restored"
+      }
     },
     "players": {
       "allowed_query_owners": [
@@ -6147,7 +6171,19 @@
       ],
       "migration": "migrations/00170_l3b_operator_audit_events.sql",
       "owner": "operations-audit",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "journal",
+        "backup": false,
+        "references": [
+          "actor_id"
+        ],
+        "retention": null,
+        "review": "L3 D8: operational audit trail, not a player table; actor_id is the operator identity text"
+      }
     },
     "restore_epochs": {
       "allowed_query_owners": [
@@ -6161,7 +6197,17 @@
       ],
       "migration": "migrations/00171_l3b_restore_epochs.sql",
       "owner": "operations-recovery",
-      "write_exceptions": []
+      "write_exceptions": [],
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null,
+        "review": "L3 D9: operational restore history, not a player table"
+      }
     },
     "player_hero_raw_awakening": {
       "allowed_query_owners": [
@@ -8162,12 +8208,19 @@
         "worldboss"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/worldbossstore/"
+        "internal/adapters/postgres/worldbossstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/worldbossstore/"
       ],
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R5D design Retention (user ruling Q2): the sweep deletes settlement rows after R8_PRIVATE_RETENTION_DAYS_V1, before the combat chain rule; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "migration": "migrations/00168_r5d_attempt_settlements.sql",
       "data": {
         "scope": "player",
@@ -8361,12 +8414,19 @@
         "illusion"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/illusionstore/"
+        "internal/adapters/postgres/illusionstore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/illusionstore/"
       ],
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R5D design Retention (user ruling Q2): the sweep deletes settlement rows after R8_PRIVATE_RETENTION_DAYS_V1, before the combat chain rule; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "migration": "migrations/00168_r5d_attempt_settlements.sql",
       "data": {
         "scope": "player",
@@ -8632,12 +8692,19 @@
         "adventure"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/adventurestore/"
+        "internal/adapters/postgres/adventurestore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/adventurestore/"
       ],
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "R5D design Retention (user ruling Q2): the sweep deletes settlement rows after R8_PRIVATE_RETENTION_DAYS_V1, before the combat chain rule; the append-only trigger accepts DELETE only inside the sweep."
+        }
+      ],
       "migration": "migrations/00168_r5d_attempt_settlements.sql",
       "data": {
         "scope": "player",

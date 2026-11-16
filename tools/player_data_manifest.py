@@ -31,6 +31,7 @@ UNKEYED_PLAYER_REFERENCES = {
     ("client_log_capabilities", "player_id"),
     ("logical_servers", "max_player_id"),
     ("logical_servers", "next_player_id"),
+    ("operator_audit_events", "actor_id"),
     ("redeem_redemptions", "subject_id"),
 }
 

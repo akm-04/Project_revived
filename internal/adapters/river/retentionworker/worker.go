@@ -45,8 +45,8 @@ type Sweeper struct {
 	Logf   func(string, ...any)
 }
 
-// NewRules builds the production rule order at run time: receipts, the combat
-// chain and its blobs, the cache snapshots, then media history. The "existing
+// NewRules builds the production rule order at run time: receipts, the R5D
+// settlements, the combat chain and its blobs, the cache snapshots, then media history. The "existing
 // purges" row stays with its adventure, occult, illusion and client-log owners.
 func NewRules(policies retentionstore.Policies) func(time.Time) []Rule {
 	store := retentionstore.Store{}
@@ -57,6 +57,9 @@ func NewRules(policies retentionstore.Policies) func(time.Time) []Rule {
 		return []Rule{
 			{Name: "receipts", Delete: func(c context.Context, t tx.Tx) (int64, error) {
 				return store.DeleteReplayOnlyReceipts(c, t, now.Add(-retentionDays))
+			}},
+			{Name: "attempt-settlements", Delete: func(c context.Context, t tx.Tx) (int64, error) {
+				return store.DeleteExpiredAttemptSettlements(c, t, now.Add(-retentionDays))
 			}},
 			{Name: "combat-chain", Delete: func(c context.Context, t tx.Tx) (int64, error) {
 				return store.DeleteExpiredCombatChain(c, t, now.Add(-retentionDays))

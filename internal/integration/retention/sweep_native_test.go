@@ -43,9 +43,7 @@ func TestRetentionSweepKeepsReferencedModeReports(t *testing.T) {
 		{"top_floor_task_fights", `SELECT attempt_id::text FROM top_floor_task_fights`},
 		{"top_floor_task_records", `SELECT attempt_id::text FROM top_floor_task_records`},
 		{"conquer_school_reports", `SELECT attempt_id FROM conquer_school_reports`},
-		{"illusion_attempts", `SELECT attempt_id FROM illusion_attempts`},
-		{"worldboss_attempts", `SELECT attempt_id FROM worldboss_attempts`},
-		{"adventure_single_attempts", `SELECT attempt_id FROM adventure_single_attempts`},
+		// R5D settlement rows are purged after the window (R5D design, Retention), so they are not listed here.
 	}
 	referenced := map[string]struct{}{}
 	rowCounts := map[string]int64{}
@@ -92,9 +90,9 @@ func TestRetentionSweepKeepsReferencedModeReports(t *testing.T) {
 		Logf: func(format string, arguments ...any) { logs = append(logs, fmt.Sprintf(format, arguments...)) }}
 	sweeper.Run(ctx)
 	joined := strings.Join(logs, "\n")
-	for _, rule := range []string{"receipts", "combat-chain", "combat-blobs", "ranking-snapshots", "hero-recommend-snapshots", "media-history"} {
-		if !strings.Contains(joined, rule) {
-			t.Fatalf("rule %s did not run; logs=%q", rule, joined)
+	for _, rule := range []string{"receipts", "attempt-settlements", "combat-chain", "combat-blobs", "ranking-snapshots", "hero-recommend-snapshots", "media-history"} {
+		if !strings.Contains(joined, "retention rule "+rule+" deleted") || strings.Contains(joined, "retention rule "+rule+" failed") {
+			t.Fatalf("rule %s did not run cleanly; logs=%q", rule, joined)
 		}
 	}
 

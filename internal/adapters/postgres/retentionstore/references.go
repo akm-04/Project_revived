@@ -22,18 +22,18 @@ var RuleReferenceColumns = map[string][]string{
 // The combat chain's kept-while list. An attempt is kept while any generated
 // attempt-id column still holds it or another attempt supersedes it.
 var attemptReferences = []string{
-	"adventure_single_attempts.attempt_id",
+	"adventure_attempt_settlements.attempt_id",
 	"arena_matches.attempt_id",
 	"combat_attempts.supersedes_attempt_id",
 	"conquer_school_reports.attempt_id",
-	"illusion_attempts.attempt_id",
+	"illusion_attempt_settlements.attempt_id",
 	"league_matches.attempt_id",
 	"one_on_one_rounds.attempt_id",
 	"top_floor_fights.attempt_id",
 	"top_floor_records.attempt_id",
 	"top_floor_task_fights.attempt_id",
 	"top_floor_task_records.attempt_id",
-	"worldboss_attempts.attempt_id",
+	"worldboss_attempt_settlements.attempt_id",
 }
 
 var receiptIdReferences = []string{
