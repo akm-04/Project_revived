@@ -4,6 +4,7 @@ package undeliveredstore_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"sync"
 	"testing"
@@ -59,6 +60,20 @@ func nativeSession(t *testing.T) string {
 	return session.String()
 }
 
+// takeMark claims first, then stores a mark under that claim.
+func takeMark(t *testing.T, store undeliveredstore.Store, player int64, mark undelivered.Mark) undelivered.Mark {
+	t.Helper()
+	take, err := store.TakeMark(ctx, player)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if take.HasMark {
+		t.Fatalf("unexpected mark before a store: %+v", take)
+	}
+	mark.PlayerID, mark.Claim = player, take.Claim
+	return mark
+}
+
 func TestUndeliveredStoreMarkThenTake(t *testing.T) {
 	pool := nativePool(t)
 	store := undeliveredstore.Store{Pool: pool.Raw()}
@@ -68,19 +83,23 @@ func TestUndeliveredStoreMarkThenTake(t *testing.T) {
 		t.Fatal(err)
 	}
 	at := time.Now().UTC().Truncate(time.Microsecond)
-	mark := undelivered.Mark{PlayerID: player, SessionID: session.String(), MID: 5, Fingerprint: [32]byte{9, 8, 7}, Reply: []byte(`{"ok":1}` + "\n"), MarkedAt: at}
+	mark := takeMark(t, store, player, undelivered.Mark{SessionID: session.String(), MID: 5, Fingerprint: [32]byte{9, 8, 7}, Reply: []byte(`{"ok":1}` + "\n"), MarkedAt: at})
 	if err := store.Mark(ctx, mark); err != nil {
 		t.Fatal(err)
 	}
-	taken, found, err := store.TakeMark(ctx, player)
-	if err != nil || !found {
-		t.Fatalf("found=%v err=%v", found, err)
+	taken, err := store.TakeMark(ctx, player)
+	if err != nil || !taken.HasMark {
+		t.Fatalf("found=%v err=%v", taken.HasMark, err)
 	}
-	if taken.PlayerID != player || taken.SessionID != session.String() || taken.MID != 5 || taken.Fingerprint != mark.Fingerprint || string(taken.Reply) != string(mark.Reply) || !taken.MarkedAt.Equal(at) {
+	if taken.Claim <= mark.Claim {
+		t.Fatalf("claim did not advance: %d then %d", mark.Claim, taken.Claim)
+	}
+	if taken.Mark.PlayerID != player || taken.Mark.SessionID != session.String() || taken.Mark.MID != 5 || taken.Mark.Fingerprint != mark.Fingerprint || string(taken.Mark.Reply) != string(mark.Reply) || !taken.Mark.MarkedAt.Equal(at) {
 		t.Fatalf("taken=%+v", taken)
 	}
-	if _, found, err = store.TakeMark(ctx, player); err != nil || found {
-		t.Fatalf("second take found=%v err=%v", found, err)
+	empty, err := store.TakeMark(ctx, player)
+	if err != nil || empty.HasMark || empty.Claim <= taken.Claim {
+		t.Fatalf("second take=%+v err=%v", empty, err)
 	}
 }
 
@@ -88,17 +107,18 @@ func TestUndeliveredStoreUpsertKeepsOneRow(t *testing.T) {
 	pool := nativePool(t)
 	store := undeliveredstore.Store{Pool: pool.Raw()}
 	player := nativePlayer(t, pool)
-	first := undelivered.Mark{PlayerID: player, SessionID: nativeSession(t), MID: 5, Fingerprint: [32]byte{1}, Reply: []byte("first"), MarkedAt: time.Now().UTC()}
-	second := undelivered.Mark{PlayerID: player, SessionID: nativeSession(t), MID: 6, Fingerprint: [32]byte{2}, Reply: []byte("second"), MarkedAt: time.Now().UTC()}
+	first := takeMark(t, store, player, undelivered.Mark{SessionID: nativeSession(t), MID: 5, Fingerprint: [32]byte{1}, Reply: []byte("first"), MarkedAt: time.Now().UTC()})
+	second := first
+	second.MID, second.Fingerprint, second.Reply = 6, [32]byte{2}, []byte("second")
 	if err := store.Mark(ctx, first); err != nil {
 		t.Fatal(err)
 	}
 	if err := store.Mark(ctx, second); err != nil {
 		t.Fatal(err)
 	}
-	taken, found, err := store.TakeMark(ctx, player)
-	if err != nil || !found || taken.MID != 6 || string(taken.Reply) != "second" {
-		t.Fatalf("taken=%+v found=%v err=%v", taken, found, err)
+	taken, err := store.TakeMark(ctx, player)
+	if err != nil || !taken.HasMark || taken.Mark.MID != 6 || string(taken.Mark.Reply) != "second" {
+		t.Fatalf("taken=%+v err=%v", taken, err)
 	}
 }
 
@@ -106,7 +126,8 @@ func TestUndeliveredStoreConcurrentTakeReturnsTheMarkOnce(t *testing.T) {
 	pool := nativePool(t)
 	store := undeliveredstore.Store{Pool: pool.Raw()}
 	player := nativePlayer(t, pool)
-	if err := store.Mark(ctx, undelivered.Mark{PlayerID: player, SessionID: nativeSession(t), MID: 5, Fingerprint: [32]byte{1}, Reply: []byte("reply"), MarkedAt: time.Now().UTC()}); err != nil {
+	mark := takeMark(t, store, player, undelivered.Mark{SessionID: nativeSession(t), MID: 5, Fingerprint: [32]byte{1}, Reply: []byte("reply"), MarkedAt: time.Now().UTC()})
+	if err := store.Mark(ctx, mark); err != nil {
 		t.Fatal(err)
 	}
 	var wait sync.WaitGroup
@@ -116,12 +137,12 @@ func TestUndeliveredStoreConcurrentTakeReturnsTheMarkOnce(t *testing.T) {
 		wait.Add(1)
 		go func() {
 			defer wait.Done()
-			_, found, err := store.TakeMark(ctx, player)
+			take, err := store.TakeMark(ctx, player)
 			if err != nil {
 				t.Errorf("take: %v", err)
 				return
 			}
-			if found {
+			if take.HasMark {
 				mu.Lock()
 				taken++
 				mu.Unlock()
@@ -131,5 +152,26 @@ func TestUndeliveredStoreConcurrentTakeReturnsTheMarkOnce(t *testing.T) {
 	wait.Wait()
 	if taken != 1 {
 		t.Fatalf("taken=%d", taken)
+	}
+}
+
+func TestUndeliveredStoreLateMarkIsSuperseded(t *testing.T) {
+	pool := nativePool(t)
+	store := undeliveredstore.Store{Pool: pool.Raw()}
+	player := nativePlayer(t, pool)
+	first, err := store.TakeMark(ctx, player)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.TakeMark(ctx, player); err != nil {
+		t.Fatal(err)
+	}
+	late := undelivered.Mark{PlayerID: player, Claim: first.Claim, SessionID: nativeSession(t), MID: 5, Fingerprint: [32]byte{1}, Reply: []byte("late"), MarkedAt: time.Now().UTC()}
+	if err := store.Mark(ctx, late); !errors.Is(err, undelivered.ErrSuperseded) {
+		t.Fatalf("late mark err=%v want superseded", err)
+	}
+	taken, err := store.TakeMark(ctx, player)
+	if err != nil || taken.HasMark {
+		t.Fatalf("superseded mark was restored: %+v err=%v", taken, err)
 	}
 }

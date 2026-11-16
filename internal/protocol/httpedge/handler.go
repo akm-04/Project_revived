@@ -114,11 +114,19 @@ type Handler struct {
 // must not be cancelled with the client connection it is recording.
 const undeliveredMarkWriteTimeout = 2 * time.Second
 
+// supersededMarkLabels marks a mark dropped because a later state request took
+// the claim; the counter stays under the shared mark-failure name.
+var supersededMarkLabels, _ = observability.NewLabels(observability.Pair{Key: "outcome", Value: "superseded"})
+
 func (h Handler) counter(name string, delta uint64) {
+	h.counterWith(name, observability.Labels{}, delta)
+}
+
+func (h Handler) counterWith(name string, labels observability.Labels, delta uint64) {
 	if h.Metrics == nil {
 		return
 	}
-	h.Metrics.Counter(name, observability.Labels{}, delta)
+	h.Metrics.Counter(name, labels, delta)
 }
 
 func (h Handler) queueBudget() time.Duration {
@@ -301,15 +309,21 @@ func (h Handler) markUndelivered(ctx context.Context, note *observability.Reques
 		return
 	}
 	fingerprint, hasFingerprint := note.ParamsFingerprint()
+	claim, hasClaim := note.Claim()
 	actor := note.Actor()
-	if !hasFingerprint || actor.PlayerID <= 0 || actor.SessionID == "" || len(reply) == 0 {
+	if !hasFingerprint || !hasClaim || actor.PlayerID <= 0 || actor.SessionID == "" || len(reply) == 0 {
 		return
 	}
 	markContext, cancel := context.WithTimeout(context.WithoutCancel(ctx), undeliveredMarkWriteTimeout)
 	defer cancel()
 	err := h.Undelivered.Mark(markContext, undelivered.Mark{
-		PlayerID: actor.PlayerID, SessionID: actor.SessionID, MID: mid, Fingerprint: fingerprint, Reply: reply, MarkedAt: at.UTC(),
+		PlayerID: actor.PlayerID, Claim: claim, SessionID: actor.SessionID, MID: mid, Fingerprint: fingerprint, Reply: reply, MarkedAt: at.UTC(),
 	})
+	if errors.Is(err, undelivered.ErrSuperseded) {
+		h.counterWith(undelivered.MarkFailuresTotal, supersededMarkLabels, 1)
+		log.Printf("undelivered mark: superseded by a later state request")
+		return
+	}
 	if err != nil {
 		h.counter(undelivered.MarkFailuresTotal, 1)
 		log.Printf("undelivered mark: %v", err)

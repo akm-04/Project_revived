@@ -23,6 +23,7 @@ type auditLateMarkStore struct {
 	mutex   sync.Mutex
 	mark    undelivered.Mark
 	found   bool
+	claim   int64
 	started chan struct{}
 	release chan struct{}
 }
@@ -36,16 +37,20 @@ func (s *auditLateMarkStore) Mark(ctx context.Context, mark undelivered.Mark) er
 	}
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	if mark.Claim != s.claim {
+		return undelivered.ErrSuperseded
+	}
 	s.mark, s.found = mark, true
 	return nil
 }
 
-func (s *auditLateMarkStore) TakeMark(context.Context, int64) (undelivered.Mark, bool, error) {
+func (s *auditLateMarkStore) TakeMark(context.Context, int64) (undelivered.Take, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	mark, found := s.mark, s.found
-	s.found = false
-	return mark, found, nil
+	s.claim++
+	take := undelivered.Take{Claim: s.claim, Mark: s.mark, HasMark: s.found}
+	s.mark, s.found = undelivered.Mark{}, false
+	return take, nil
 }
 
 type auditDisconnectedWriter struct{ *httptest.ResponseRecorder }

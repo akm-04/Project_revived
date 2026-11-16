@@ -93,10 +93,13 @@ func undeliveredRequest(t *testing.T, handler http.Handler, writer *failingWrite
 
 var testFingerprint = [32]byte{1, 2, 3}
 
+const testClaim int64 = 41
+
 func notedSuccess(actor observability.RequestActor) DispatcherFunc {
 	return func(ctx context.Context, _ DispatchRequest) Response {
 		observability.NoteActor(ctx, actor)
 		observability.NoteParamsFingerprint(ctx, testFingerprint)
+		observability.NoteClaim(ctx, testClaim)
 		return Response{HTTPStatus: http.StatusOK, Body: map[string]any{"ok": int64(1)}}
 	}
 }
@@ -111,7 +114,7 @@ func TestUndeliveredMarksACommittedReplyWhoseWriteFailed(t *testing.T) {
 		t.Fatalf("marks=%d", len(marker.marks))
 	}
 	mark := marker.marks[0]
-	if mark.PlayerID != actor.PlayerID || mark.SessionID != actor.SessionID || mark.MID != 18 || mark.Fingerprint != testFingerprint {
+	if mark.PlayerID != actor.PlayerID || mark.Claim != testClaim || mark.SessionID != actor.SessionID || mark.MID != 18 || mark.Fingerprint != testFingerprint {
 		t.Fatalf("mark=%+v", mark)
 	}
 	if string(mark.Reply) != `{"ok":1}`+"\n" || string(writer.written) != string(mark.Reply) {
@@ -185,6 +188,32 @@ func TestUndeliveredSkipsWhenNoActorOrFingerprintWasNoted(t *testing.T) {
 	undeliveredRequest(t, undeliveredHandler(t, dispatcher, marker, nil), writer, false)
 	if len(marker.marks) != 0 {
 		t.Fatalf("marks=%d", len(marker.marks))
+	}
+}
+
+func TestUndeliveredSkipsWithoutAClaim(t *testing.T) {
+	marker := &recordingMarker{}
+	actor := observability.RequestActor{AccountUID: "7", PlayerID: 100001, SessionID: "session-a"}
+	dispatcher := func(ctx context.Context, _ DispatchRequest) Response {
+		observability.NoteActor(ctx, actor)
+		observability.NoteParamsFingerprint(ctx, testFingerprint)
+		return Response{HTTPStatus: http.StatusOK, Body: map[string]any{"ok": int64(1)}}
+	}
+	writer := &failingWriter{err: errors.New("client disconnected")}
+	undeliveredRequest(t, undeliveredHandler(t, dispatcher, marker, nil), writer, false)
+	if len(marker.marks) != 0 {
+		t.Fatalf("an unfenced mark was written: %+v", marker.marks)
+	}
+}
+
+func TestUndeliveredCountsASupersededMarkAsAFailure(t *testing.T) {
+	marker := &recordingMarker{err: undelivered.ErrSuperseded}
+	metrics := &countingMetrics{}
+	actor := observability.RequestActor{AccountUID: "7", PlayerID: 100001, SessionID: "session-a"}
+	writer := &failingWriter{err: errors.New("client disconnected")}
+	undeliveredRequest(t, undeliveredHandler(t, notedSuccess(actor), marker, metrics), writer, false)
+	if metrics.counters[undelivered.MarkFailuresTotal] != 1 || metrics.counters[undelivered.MarksTotal] != 0 {
+		t.Fatalf("counters=%v", metrics.counters)
 	}
 }
 

@@ -33,9 +33,9 @@ type replayTaker struct {
 	calls int
 }
 
-func (t *replayTaker) TakeMark(context.Context, int64) (undelivered.Mark, bool, error) {
+func (t *replayTaker) TakeMark(context.Context, int64) (undelivered.Take, error) {
 	t.calls++
-	return t.mark, t.found, t.err
+	return undelivered.Take{Claim: 1, Mark: t.mark, HasMark: t.found}, t.err
 }
 
 type nextDispatcher struct {

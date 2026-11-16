@@ -236,10 +236,10 @@ func (h *harness) questionCount() int64 {
 	return count
 }
 
-func (h *harness) markExists() bool {
+func (h *harness) markReplyExists() bool {
 	h.t.Helper()
 	var exists bool
-	if err := h.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM player_undelivered_replies WHERE player_id=$1)`, h.player).Scan(&exists); err != nil {
+	if err := h.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM player_undelivered_replies WHERE player_id=$1 AND reply IS NOT NULL)`, h.player).Scan(&exists); err != nil {
 		h.t.Fatal(err)
 	}
 	return exists
@@ -312,7 +312,7 @@ func TestUndeliveredReplayThroughProductionDispatcher(t *testing.T) {
 	if len(first.written) == 0 {
 		t.Fatal("first reply was not encoded")
 	}
-	if !h.markExists() {
+	if !h.markReplyExists() {
 		t.Fatal("no mark after an undelivered success")
 	}
 	resend := httptest.NewRecorder()
@@ -347,7 +347,7 @@ func TestUndeliveredReplayInterveningStateRequestClearsTheMark(t *testing.T) {
 	before := h.questionCount()
 	h.request(5, "first", &disconnectWriter{})
 	h.request(5, "different", nil)
-	if h.markExists() {
+	if h.markReplyExists() {
 		t.Fatal("intervening state request did not clear the mark")
 	}
 	h.request(5, "first", nil)
@@ -361,7 +361,7 @@ func TestUndeliveredReplayReadRequestLeavesTheMark(t *testing.T) {
 	before := h.questionCount()
 	h.request(5, "first", &disconnectWriter{})
 	h.request(4, "", nil)
-	if !h.markExists() {
+	if !h.markReplyExists() {
 		t.Fatal("read request consumed the mark")
 	}
 	first := &disconnectWriter{}
@@ -477,7 +477,7 @@ func TestUndeliveredReplayFailedMarkWriteStaysAsToday(t *testing.T) {
 	failing := h.buildHandler(failingMarker{}, h.metrics)
 	h.handler = failing
 	h.request(5, "first", &disconnectWriter{})
-	if h.markExists() {
+	if h.markReplyExists() {
 		t.Fatal("a failed mark write still stored a mark")
 	}
 	if h.metrics.value(undelivered.MarkFailuresTotal) != 1 {

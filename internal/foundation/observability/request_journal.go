@@ -56,6 +56,8 @@ type RequestNote struct {
 	actor             RequestActor
 	paramsFingerprint [32]byte
 	hasFingerprint    bool
+	claim             int64
+	hasClaim          bool
 	replayed          bool
 }
 
@@ -103,6 +105,26 @@ func (n *RequestNote) ParamsFingerprint() ([32]byte, bool) {
 	n.mutex.Lock()
 	defer n.mutex.Unlock()
 	return n.paramsFingerprint, n.hasFingerprint
+}
+
+// NoteClaim records the claim the replay guard took for this state request
+// before dispatch. A mark write is stored only while the claim still holds.
+func NoteClaim(ctx context.Context, claim int64) {
+	note, _ := ctx.Value(requestNoteKey{}).(*RequestNote)
+	if note == nil {
+		return
+	}
+	note.mutex.Lock()
+	defer note.mutex.Unlock()
+	note.claim = claim
+	note.hasClaim = true
+}
+
+// Claim returns the claim noted for this request.
+func (n *RequestNote) Claim() (int64, bool) {
+	n.mutex.Lock()
+	defer n.mutex.Unlock()
+	return n.claim, n.hasClaim
 }
 
 // NoteReplay records that the request was answered from an undelivered-reply mark.

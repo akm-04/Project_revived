@@ -45,19 +45,20 @@ func (d UndeliveredReplay) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		return d.Next.Dispatch(ctx, req)
 	}
 	observability.NoteParamsFingerprint(ctx, fingerprint)
-	mark, found, err := d.Marks.TakeMark(ctx, int64(actor.PlayerID))
+	take, err := d.Marks.TakeMark(ctx, int64(actor.PlayerID))
 	if err != nil {
 		log.Printf("undelivered replay lookup: %v", err)
 		return d.Next.Dispatch(ctx, req)
 	}
-	if !found || !d.matches(mark, actor.SessionID.UUID().String(), int64(req.Envelope.MID), fingerprint, req.Envelope.ReceivedAt) {
+	observability.NoteClaim(ctx, take.Claim)
+	if !take.HasMark || !d.matches(take.Mark, actor.SessionID.UUID().String(), int64(req.Envelope.MID), fingerprint, req.Envelope.ReceivedAt) {
 		return d.Next.Dispatch(ctx, req)
 	}
 	observability.NoteReplay(ctx)
 	if d.Metrics != nil {
 		d.Metrics.Counter(undelivered.ReplaysTotal, observability.Labels{}, 1)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusOK, Raw: mark.Reply}
+	return httpedge.Response{HTTPStatus: http.StatusOK, Raw: take.Mark.Reply}
 }
 
 func (d UndeliveredReplay) matches(mark undelivered.Mark, sessionID string, mid int64, fingerprint [32]byte, now time.Time) bool {
