@@ -42,6 +42,7 @@ type Enemy struct {
 	Avatar       int64                     `json:"avatar"`
 	Robot        int64                     `json:"is_robot"`
 	Heroes       map[string]map[string]any `json:"heroes"`
+	Pet          map[string]any            `json:"pet,omitempty"`
 	Force        int64                     `json:"force"`
 }
 
