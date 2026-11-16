@@ -34,7 +34,12 @@ COMBAT_CHAIN_TABLES = (
 )
 
 # Text attempt ids the lead approved (R8_4_RETENTION_TASKS.md, text-typed attempt ids).
-TEXT_ATTEMPT_ID_TABLES = frozenset(("adventure_single_attempts", "illusion_attempts", "worldboss_attempts"))
+TEXT_ATTEMPT_ID_TABLES = frozenset((
+    "adventure_single_attempts",
+    "conquer_school_reports",
+    "illusion_attempts",
+    "worldboss_attempts",
+))
 
 # The receipts table's own operation id is the command id it was written with,
 # not a row key another owner holds.

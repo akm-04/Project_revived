@@ -72,12 +72,20 @@ class RetentionReferencesTests(unittest.TestCase):
         self.assertEqual(attempts[("worldboss_attempts", "attempt_id")]["type"], "text")
         self.assertFalse(attempts[("worldboss_attempts", "attempt_id")]["foreign_key"])
 
-    def test_other_text_attempt_id_stops(self):
+    def test_conquer_school_report_text_attempt_id_is_listed_as_text(self):
         catalog = fake_catalog()
         catalog.columns[("conquer_school_reports", "attempt_id")] = "text"
+        attempts = {(item["table"], item["column"]): item
+                    for item in references_tool.build_document(catalog)["attempt_ids"]}
+        self.assertEqual(attempts[("conquer_school_reports", "attempt_id")]["type"], "text")
+        self.assertFalse(attempts[("conquer_school_reports", "attempt_id")]["foreign_key"])
+
+    def test_other_text_attempt_id_stops(self):
+        catalog = fake_catalog()
+        catalog.columns[("mystery_reports", "attempt_id")] = "text"
         with self.assertRaises(references_tool.CatalogProblem) as raised:
             references_tool.build_document(catalog)
-        self.assertIn("conquer_school_reports.attempt_id: text attempt-id column is not in the lead's text list",
+        self.assertIn("mystery_reports.attempt_id: text attempt-id column is not in the lead's text list",
                       str(raised.exception))
 
     def test_receipts_own_operation_id_is_excluded(self):
