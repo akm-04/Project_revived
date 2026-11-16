@@ -5750,7 +5750,9 @@
         "via": null,
         "kind": "report",
         "backup": true,
-        "references": [],
+        "references": [
+          "defender_player"
+        ],
         "retention": null
       }
     },
@@ -6720,7 +6722,10 @@
         "via": null,
         "kind": "report",
         "backup": false,
-        "references": [],
+        "references": [
+          "attacker",
+          "defender"
+        ],
         "retention": null
       }
     },

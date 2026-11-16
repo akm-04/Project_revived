@@ -2970,7 +2970,9 @@
    "via": null,
    "kind": "report",
    "backup": true,
-   "references": [],
+   "references": [
+    "defender_player"
+   ],
    "retention": null,
    "restore_order": 353,
    "payload_columns": [

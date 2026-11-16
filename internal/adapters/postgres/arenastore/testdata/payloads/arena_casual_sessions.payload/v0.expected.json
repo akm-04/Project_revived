@@ -1,0 +1,10 @@
+{
+  "period": {
+    "WeekDay": 20778,
+    "OpensAt": "2026-11-21T10:00:00Z",
+    "ClosesAt": "2026-11-21T12:00:00Z"
+  },
+  "content_revision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+  "settled": true,
+  "state_version": 2
+}

@@ -12,6 +12,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -32,7 +33,7 @@ type nodeRow struct {
 
 const readSQL = `SELECT p.normal_bonus_id,p.super_bonus_id,p.pending_generation,COALESCE(p.pending_items::text,'[]'),p.last_generation,COALESCE(p.last_result::text,''),p.state_version,
 COALESCE((SELECT jsonb_agg(jsonb_build_object('campaign_id',n.campaign_id,'first_clear_day',n.first_clear_day,'clear_count_floor',n.clear_count_floor,'clear_count_exact',n.clear_count_exact,'star',n.star,'win_day',n.win_day,'wins',n.wins,'reset_day',n.reset_day,'resets',n.resets,'partner_drop',n.partner_drop))
-FROM campaign_nodes n WHERE n.player_id=p.player_id),'[]'::jsonb)::text,p.chapter_claims::text,p.story_claims::text,p.trial_wins::text,COALESCE(p.pending_awakening::text,'') FROM campaign_players p WHERE p.player_id=$1`
+FROM campaign_nodes n WHERE n.player_id=p.player_id),'[]'::jsonb)::text,p.chapter_claims::text,p.story_claims::text,p.trial_wins::text,COALESCE(p.pending_awakening::text,''),p.payload_version FROM campaign_players p WHERE p.player_id=$1`
 
 // ReadTx is the unlocked read for projections; an absent row is the new-player map.
 func (Store) ReadTx(c context.Context, q tx.Queryer, p identity.PlayerID) (d.Record, error) {
@@ -54,7 +55,8 @@ func (Store) LockTx(c context.Context, t tx.Tx, p identity.PlayerID, at time.Tim
 func scan(row tx.Row) (d.Record, error) {
 	var r d.Record
 	var pending, result, nodes, chapters, stories, trials, awakening string
-	if err := row.Scan(&r.Progress.NormalBonusID, &r.Progress.SuperBonusID, &r.PendingGeneration, &pending, &r.LastGeneration, &result, &r.StateVersion, &nodes, &chapters, &stories, &trials, &awakening); err != nil {
+	var version int16
+	if err := row.Scan(&r.Progress.NormalBonusID, &r.Progress.SuperBonusID, &r.PendingGeneration, &pending, &r.LastGeneration, &result, &r.StateVersion, &nodes, &chapters, &stories, &trials, &awakening, &version); err != nil {
 		return d.Record{}, err
 	}
 	if awakening != "" {
@@ -63,19 +65,19 @@ func scan(row tx.Row) (d.Record, error) {
 		}
 		r.PendingAwakening = json.RawMessage(awakening)
 	}
-	if err := json.Unmarshal([]byte(pending), &r.PendingItems); err != nil {
+	if err := payload.Decode("campaign_players", version, []byte(pending), &r.PendingItems); err != nil {
 		return d.Record{}, err
 	}
 	if result != "" {
 		r.LastResult = json.RawMessage(result)
 	}
-	if err := json.Unmarshal([]byte(chapters), &r.Progress.ChapterClaims); err != nil {
+	if err := payload.Decode("campaign_players", version, []byte(chapters), &r.Progress.ChapterClaims); err != nil {
 		return r, err
 	}
-	if err := json.Unmarshal([]byte(stories), &r.Progress.StoryClaims); err != nil {
+	if err := payload.Decode("campaign_players", version, []byte(stories), &r.Progress.StoryClaims); err != nil {
 		return r, err
 	}
-	if err := json.Unmarshal([]byte(trials), &r.Progress.TrialWins); err != nil {
+	if err := payload.Decode("campaign_players", version, []byte(trials), &r.Progress.TrialWins); err != nil {
 		return r, err
 	}
 	var rows []nodeRow
@@ -100,7 +102,7 @@ func (Store) SaveTx(c context.Context, t tx.Tx, p identity.PlayerID, r d.Record,
 		awakening = string(r.PendingAwakening)
 	}
 	if r.PendingGeneration != "" {
-		raw, err := json.Marshal(r.PendingItems)
+		raw, _, err := payload.Encode(r.PendingItems)
 		if err != nil {
 			return err
 		}
@@ -109,29 +111,29 @@ func (Store) SaveTx(c context.Context, t tx.Tx, p identity.PlayerID, r d.Record,
 	if r.LastResult != nil {
 		result = string(r.LastResult)
 	}
-	chapters, err := json.Marshal(r.Progress.ChapterClaims)
+	chapters, version, err := payload.Encode(r.Progress.ChapterClaims)
 	if err != nil {
 		return err
 	}
 	if string(chapters) == "null" {
 		chapters = []byte("{}")
 	}
-	stories, err := json.Marshal(r.Progress.StoryClaims)
+	stories, _, err := payload.Encode(r.Progress.StoryClaims)
 	if err != nil {
 		return err
 	}
 	if string(stories) == "null" {
 		stories = []byte("{}")
 	}
-	trials, err := json.Marshal(r.Progress.TrialWins)
+	trials, _, err := payload.Encode(r.Progress.TrialWins)
 	if err != nil {
 		return err
 	}
 	if string(trials) == "null" {
 		trials = []byte("{}")
 	}
-	tag, err := t.Exec(c, `UPDATE campaign_players SET normal_bonus_id=$2,super_bonus_id=$3,pending_generation=$4,pending_items=$5::jsonb,last_generation=$6,last_result=$7::jsonb,state_version=state_version+1,updated_at=$8,chapter_claims=$10::jsonb,story_claims=$11::jsonb,trial_wins=$12::jsonb,pending_awakening=$13::jsonb
-WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.Progress.SuperBonusID, r.PendingGeneration, pending, r.LastGeneration, result, at, r.StateVersion, string(chapters), string(stories), string(trials), awakening)
+	tag, err := t.Exec(c, `UPDATE campaign_players SET normal_bonus_id=$2,super_bonus_id=$3,pending_generation=$4,pending_items=$5::jsonb,last_generation=$6,last_result=$7::jsonb,state_version=state_version+1,updated_at=$8,chapter_claims=$10::jsonb,story_claims=$11::jsonb,trial_wins=$12::jsonb,pending_awakening=$13::jsonb,payload_version=$14
+WHERE player_id=$1 AND state_version=$9`, int64(p), r.Progress.NormalBonusID, r.Progress.SuperBonusID, r.PendingGeneration, pending, r.LastGeneration, result, at, r.StateVersion, string(chapters), string(stories), string(trials), awakening, version)
 	if err != nil {
 		return err
 	}
