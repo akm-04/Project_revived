@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	projection "gxb.local/backend/v2/internal/projection/arena"
 )
 
 func TestI97BEnrollmentUsesImmutableSettlementNative(t *testing.T) {
@@ -86,6 +87,20 @@ func TestI97BEnrollmentUsesImmutableSettlementNative(t *testing.T) {
 	}
 	if _, err := service.DeclareTournament(ctx, first, string(make([]byte, 100)), op()); err == nil {
 		t.Fatal("oversized declaration accepted")
+	}
+	declaredView, err := service.PlayoffsView(ctx, first, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info := projection.PlayoffsInfo(declaredView)["player_info"].(map[string]any); info["have_dec_flag"] != int64(1) {
+		t.Fatalf("declared viewer have_dec_flag = %#v", info["have_dec_flag"])
+	}
+	undeclaredView, err := service.PlayoffsView(ctx, second, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info := projection.PlayoffsInfo(undeclaredView)["player_info"].(map[string]any); info["have_dec_flag"] != int64(0) {
+		t.Fatalf("undeclared viewer have_dec_flag = %#v", info["have_dec_flag"])
 	}
 	clock.at = calendar.Stages[1]
 	locked, err := service.AdvanceTournament(ctx, season, op())

@@ -552,12 +552,21 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 		return err
 	}
 	m, found, err := s.Store.ReadMatchTx(c, sc.Tx, id, true)
+	if err != nil || !found {
+		return errors.Join(err, d.ErrConflict)
+	}
+	// A concurrent RESULT or close already holds this match's terminal; the
+	// losing request serves it (the caller reads the match) without settling
+	// again (H-52: value is paid only when RESULT wins).
+	if m.Status == d.StatusSettled || m.Status == d.StatusClosed {
+		return nil
+	}
 	expected := d.StatusFighting
 	if forfeit {
 		expected = d.StatusStarted
 	}
-	if err != nil || !found || m.Status != expected {
-		return errors.Join(err, d.ErrConflict)
+	if m.Status != expected {
+		return d.ErrConflict
 	}
 	players := map[identity.PlayerID][2]d.Player{}
 	for _, pid := range sortedPlayers(m.Attacker, m.Defender) {

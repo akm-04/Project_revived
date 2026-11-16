@@ -3,11 +3,26 @@ package arena
 import (
 	"encoding/json"
 	d "gxb.local/backend/v2/internal/domain/arena"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"strconv"
 	"strings"
 	"testing"
 )
+
+func TestPlayoffsInfoReportsViewerDeclarationState(t *testing.T) {
+	viewer := identity.PlayerID(41)
+	view := d.TournamentView{Viewer: viewer, Period: d.TournamentPeriod{Entrants: []d.TournamentEntrant{{TournamentEnrollment: d.TournamentEnrollment{PlayerID: viewer}}}}}
+	info := PlayoffsInfo(view)["player_info"].(map[string]any)
+	if info["have_dec_flag"] != int64(0) {
+		t.Fatalf("undeclared viewer have_dec_flag = %#v", info["have_dec_flag"])
+	}
+	view.Period.Entrants[0].Declaration = "Compete hard"
+	info = PlayoffsInfo(view)["player_info"].(map[string]any)
+	if info["have_dec_flag"] != int64(1) {
+		t.Fatalf("declared viewer have_dec_flag = %#v", info["have_dec_flag"])
+	}
+}
 
 func TestReplayIndexesOnlyActualBattlesAndUsesJSONStringContent(t *testing.T) {
 	identifier, _ := ids.NewUUID()

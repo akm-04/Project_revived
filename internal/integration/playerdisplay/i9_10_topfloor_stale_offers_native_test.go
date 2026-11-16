@@ -117,6 +117,42 @@ func TestI9_10TopFloorOfferRefreshAndBotStartNative(t *testing.T) {
 	}
 }
 
+// Preflight 294 answers the stock stale-rank toast when the challenger or the
+// selected target has left the ladder, matching START's rank recheck.
+func TestI9_10TopFloorPreFightMissingRanksNative(t *testing.T) {
+	database := pool(t)
+	defer database.Close()
+	service := topFloorService(t, database)
+	server := rankingServer(t, database)
+	actor, _, hero := topFloorPlayer(t, database, server)
+	view, err := service.Load(ctx, actor, op())
+	if err != nil || len(view.Enemies) == 0 {
+		t.Fatalf("load offers: %v", err)
+	}
+	if err = service.SaveDefense(ctx, actor, []int64{hero.PartnerID}, 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	target := view.Enemies[0]
+	if err = service.PreFight(ctx, actor, target.Occupant.TableID(), op()); err != nil {
+		t.Fatalf("fresh preflight: %v", err)
+	}
+	dispatcher := stockruntime.TopFloorDispatcher{Authority: playtestAuthority{actor}, Service: service}
+	preflight := func() {
+		response := dispatcher.Dispatch(ctx, playtestRequest(actor, 294, map[string]any{"enemy_id": target.Occupant.TableID()}))
+		if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35026) {
+			t.Fatalf("missing-rank preflight response: %+v", response)
+		}
+	}
+	exec(t, database, `DELETE FROM top_floor_ranks WHERE logical_server_id=$1 AND rank=$2`, int64(server), target.Rank)
+	preflight()
+	exec(t, database, `DELETE FROM top_floor_ranks WHERE logical_server_id=$1 AND player_id=$2`, int64(server), int64(actor.PlayerID))
+	preflight()
+	if scalar(t, database, `SELECT tickets_left FROM top_floor_players WHERE player_id=$1`, int64(actor.PlayerID)) != 5 ||
+		scalar(t, database, `SELECT count(*) FROM top_floor_fights WHERE challenger_id=$1`, int64(actor.PlayerID)) != 0 {
+		t.Fatal("missing-rank preflight spent state")
+	}
+}
+
 func TestI9_10TopFloorTaskStaleOffersAndRevengeNative(t *testing.T) {
 	database := pool(t)
 	service := topFloorService(t, database)

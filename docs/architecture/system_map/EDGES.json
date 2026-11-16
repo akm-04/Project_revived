@@ -1601,6 +1601,9 @@
    "ranking": [
     "*ReceiveOriginTx",
     "Validate"
+   ],
+   "topfloor": [
+    "*ReadEffectivePlayerDisplayTx"
    ]
   },
   "playerpresentation": {
@@ -5727,6 +5730,9 @@
    ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
+   ],
+   "playerdisplay": [
+    "*ReadEffectivePlayerDisplayTx"
    ],
    "publicstats": [
     "*HeroTx",

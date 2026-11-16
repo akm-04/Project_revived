@@ -39,4 +39,8 @@ func TestC13BReadOnlyArenaPlayoffsNative(t *testing.T) {
 			t.Fatalf("1283 reply lost %s: %+v", key, response.Body)
 		}
 	}
+	info, ok := response.Body["player_info"].(map[string]any)
+	if !ok || info["have_dec_flag"] != int64(0) {
+		t.Fatalf("1283 player_info.have_dec_flag = %#v", response.Body["player_info"])
+	}
 }

@@ -47,9 +47,12 @@ func TestI97ATaskWireAndValidation(t *testing.T) {
 		t.Fatal(load)
 	}
 	number := func(value string) json.Number { return json.Number(value) }
-	call(284, map[string]any{"heroIDs": []any{number("3")}, "leader_id": number("3")})
-	if fixture.defense.Leader != 3 || len(fixture.defense.Heroes) != 1 {
+	saved := call(284, map[string]any{"heroIDs": []any{number("3")}, "pet_id": number("9"), "leader_id": number("3")})
+	if fixture.defense.Leader != 3 || fixture.defense.Pet != 9 || len(fixture.defense.Heroes) != 1 {
 		t.Fatal(fixture.defense)
+	}
+	if saved["pet_id"] != int64(9) {
+		t.Fatal("MID 284 must echo the saved pet id (Arena.lua:248 mPetId)", saved)
 	}
 	battle := call(286, map[string]any{"formation": "3|4", "enemy_id": number("7"), "leader_id": number("3"), "campaign_type": number("57")})
 	if fixture.command.Leader != 3 || len(fixture.command.Formation) != 2 || battle["award_crystal"] != int64(0) {

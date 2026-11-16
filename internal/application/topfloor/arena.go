@@ -354,7 +354,7 @@ func (s Service) displayTeam(c context.Context, q tx.Queryer, catalog d.Catalog,
 		view.Force = teamForce(view.Heroes)
 		return view, nil
 	}
-	view, err := s.playerDisplay(c, q, o)
+	view, err := s.playerDisplay(c, q, o, at)
 	if err != nil {
 		return d.Display{}, err
 	}
@@ -570,12 +570,18 @@ func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int6
 			return d.ErrRefused
 		}
 		rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
-		if err != nil || !ok {
-			return errors.Join(err, d.ErrRefused)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return d.ErrOfferStale
 		}
 		targetRank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, occupant)
-		if err != nil || !ok {
-			return errors.Join(err, d.ErrRefused)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return d.ErrOfferStale
 		}
 		snapshot, found, err := s.Store.ReadOfferSnapshotTx(c, sc.Tx, a.PlayerID, d.OfferScopeNormal, false)
 		if err != nil {
@@ -676,12 +682,20 @@ func (s Service) ResetTimer(c context.Context, a identity.ActorContext, op opera
 	})
 }
 
-func (s Service) playerDisplay(c context.Context, q tx.Queryer, o d.Occupant) (d.Display, error) {
+func (s Service) playerDisplay(c context.Context, q tx.Queryer, o d.Occupant, at time.Time) (d.Display, error) {
 	profile, found, err := s.Directory.ProfileTx(c, q, o.Player)
 	if err != nil || !found {
 		return d.Display{}, errors.Join(err, d.ErrUnavailable)
 	}
-	view := d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID}
+	revision, err := s.Content.ActiveRevision(c, q)
+	if err != nil {
+		return d.Display{}, err
+	}
+	display, err := s.PlayerDisplay.ReadEffectivePlayerDisplayTx(c, q, o.Player, revision, at)
+	if err != nil {
+		return d.Display{}, err
+	}
+	view := d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID, TitleInfo: display.TitleInfo}
 	if membership, member, err := s.Guilds.ReadMembershipTx(c, q, o.Player); err != nil {
 		return d.Display{}, err
 	} else if member {

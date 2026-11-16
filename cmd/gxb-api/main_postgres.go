@@ -504,7 +504,7 @@ func main() {
 		ranking.Illusion = illusion
 		roomChat = illusion
 		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites, retentionPolicies.RetentionDays)
-		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners, broadcastEmitter)
+		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners, broadcastEmitter, displayService)
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
 			mustRegister(mid, stockruntime.MemoirDispatcher{Authority: authority, Service: memoir})
