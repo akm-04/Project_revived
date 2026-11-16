@@ -1,0 +1,20 @@
+{
+  "identifier": "d0b43caf-0c4b-4eb6-9a91-c98ff6377ed1",
+  "week_day": 20778,
+  "actor": {
+    "AccountID": "b367fd6b-234a-4d5c-81e8-b2b27436a295",
+    "AccountUID": "b367fd6b-234a-4d5c-81e8-b2b27436a295",
+    "SessionID": "dad2885d-907d-4783-9f83-eea3cf37e6a2",
+    "ContextID": "8ca63ec5-de2e-4583-881e-2a03ca9613c5",
+    "LogicalServerID": 35617,
+    "PlayerID": 3561725001,
+    "ContextGeneration": 1,
+    "SessionLivenessVersion": 1,
+    "ContextLivenessVersion": 1
+  },
+  "status": "FINISHED",
+  "room": "88935a42-bec5-4328-adb9-74c26aea0046",
+  "admitted_at": "2026-11-21T10:02:00.001Z",
+  "expires_at": "2026-11-21T10:03:00.001Z",
+  "state_version": 3
+}

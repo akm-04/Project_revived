@@ -1,0 +1,32 @@
+[
+  {
+    "table_id": 10001001,
+    "add_star": 0,
+    "is_awake": false,
+    "is_summon": false
+  },
+  {
+    "table_id": 10001002,
+    "add_star": 0,
+    "is_awake": false,
+    "is_summon": false
+  },
+  {
+    "table_id": 10001003,
+    "add_star": 0,
+    "is_awake": false,
+    "is_summon": false
+  },
+  {
+    "table_id": 10001004,
+    "add_star": 0,
+    "is_awake": false,
+    "is_summon": false
+  },
+  {
+    "table_id": 10001005,
+    "add_star": 0,
+    "is_awake": false,
+    "is_summon": false
+  }
+]
