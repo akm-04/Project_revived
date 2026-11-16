@@ -85,7 +85,9 @@
    "file": "docs/i9/I9_WORLD_BOSS_V1.json"
   }
  ],
- "decorated_by": [],
+ "decorated_by": [
+  "observing"
+ ],
  "dispatcher_files": [
   "internal/adapters/stockruntime/guild_campaign_dispatcher.go"
  ],

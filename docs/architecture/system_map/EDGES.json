@@ -63,6 +63,9 @@
   "bootstrap": {},
   "broadcast": {},
   "campaign": {
+   "achievement": [
+    "*NormalStarsTx"
+   ],
    "missioninputs": [
     "*ReadTx"
    ],
@@ -918,6 +921,9 @@
    ]
   },
   "guildcampaign": {
+   "achievement": [
+    "*BestDamageTx"
+   ],
    "guildcore": [
     "*CloseGuildTx",
     "*RemoveMemberTx"
@@ -1519,7 +1525,8 @@
   "librarylocal": {
    "achievement": [
     "*HeroLibraryInputsTx",
-    "*MarriedHeroCountTx"
+    "*MarriedHeroCountTx",
+    "*SchoolStoryCountTx"
    ],
    "combat": [
     "*PlayerCollectionInputsTx"
@@ -1536,8 +1543,15 @@
    ]
   },
   "march": {},
-  "memoir": {},
+  "memoir": {
+   "achievement": [
+    "*TenthFloorTx"
+   ]
+  },
   "mentor": {
+   "achievement": [
+    "*GraduatedCountTx"
+   ],
    "socialgift": [
     "*AddDailyBondTx"
    ]
@@ -1548,7 +1562,11 @@
     "*ObserveMissionTx"
    ]
   },
-  "occult": {},
+  "occult": {
+   "achievement": [
+    "*ClearedChapterCountTx"
+   ]
+  },
   "oneonone": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
@@ -1560,7 +1578,11 @@
     "*PublicHistoryTx"
    ]
   },
-  "petcampaign": {},
+  "petcampaign": {
+   "achievement": [
+    "*MaxFloorTx"
+   ]
+  },
   "playerdata": {},
   "playerdirectory": {
    "dormhouse": [
@@ -2155,6 +2177,9 @@
    "bookskill": [
     "*BookInputsTx"
    ],
+   "campaign": [
+    "*NormalStarsTx"
+   ],
    "characterasset": [
     "NewCoherentReadScope",
     "Queryer",
@@ -2174,6 +2199,9 @@
     "Operation",
     "Run"
    ],
+   "guildcampaign": [
+    "*BestDamageTx"
+   ],
    "i5": [
     "*FenceActorTx",
     "*SettleGrantTx"
@@ -2183,7 +2211,20 @@
    ],
    "librarylocal": [
     "*HeroLibraryInputsTx",
-    "*MarriedHeroCountTx"
+    "*MarriedHeroCountTx",
+    "*SchoolStoryCountTx"
+   ],
+   "memoir": [
+    "*TenthFloorTx"
+   ],
+   "mentor": [
+    "*GraduatedCountTx"
+   ],
+   "occult": [
+    "*ClearedChapterCountTx"
+   ],
+   "petcampaign": [
+    "*MaxFloorTx"
    ],
    "playerdisplay": [
     "*SkinCollectionTx"

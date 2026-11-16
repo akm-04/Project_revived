@@ -153,6 +153,13 @@ func (Store) UpsertDamageTx(ctx context.Context, t tx.Tx, guildID, chapterID, ru
 	return err
 }
 
+// BestDamageTx is the player's highest recorded hit across the guild's runs.
+func (Store) BestDamageTx(ctx context.Context, q tx.Queryer, player identity.PlayerID) (int64, error) {
+	var damage int64
+	err := q.QueryRow(ctx, `SELECT COALESCE(MAX(best_damage),0) FROM guild_campaign_damage WHERE player_id=$1`, int64(player)).Scan(&damage)
+	return damage, err
+}
+
 func (Store) ListDamageTx(ctx context.Context, q tx.Queryer, guildID, chapterID, run int64, limit int) ([]app.DamageRow, error) {
 	var raw string
 	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'damage',best_damage,'hit',EXTRACT(EPOCH FROM hit_at)::bigint) ORDER BY best_damage DESC,hit_at ASC),'[]'::jsonb)::text

@@ -101,6 +101,7 @@
   "internal/adapters/postgres/achievementstore",
   "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildcampaignstore",
   "internal/adapters/postgres/guildrentalread",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
@@ -126,6 +127,7 @@
    "content_player_display_catalogs",
    "content_public_profile_policies",
    "gameplay_contexts",
+   "guild_campaign_damage",
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
@@ -153,6 +155,8 @@
    "achievement.json",
    "display.json"
   ],
-  "unit": []
+  "unit": [
+   "counts_test.go"
+  ]
  }
 }

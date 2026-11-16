@@ -495,6 +495,10 @@ func main() {
 		guildSvc.Campaign = campaignMode
 		campaignD := stockruntime.GuildCampaignDispatcher{Authority: authority, Service: campaignMode}
 		for _, mid := range stockruntime.GuildCampaignMIDs {
+			if mid == 610 {
+				mustRegister(mid, observing(authority, achievements, "GuildCampaign", campaignD))
+				continue
+			}
 			mustRegister(mid, campaignD)
 		}
 		go runReconcile(ctx, pool, appguildcampaign.Reconciler{Mode: campaignMode})
@@ -517,7 +521,12 @@ func main() {
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners, broadcastEmitter, displayService)
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
-			mustRegister(mid, stockruntime.MemoirDispatcher{Authority: authority, Service: memoir})
+			memoirD := stockruntime.MemoirDispatcher{Authority: authority, Service: memoir}
+			if mid == 2310 || mid == 2313 {
+				mustRegister(mid, observing(authority, achievements, "Memoir", memoirD))
+				continue
+			}
+			mustRegister(mid, memoirD)
 		}
 		dodgeball := canonicalDodgeball(pool, runner, contentDB, i5db, i5svc, fight, displayService)
 		for _, mid := range stockruntime.DodgeballMIDs {
@@ -530,7 +539,12 @@ func main() {
 		petCampaign := canonicalPetCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight)
 		ranking.PetCampaign = petCampaign
 		for _, mid := range stockruntime.PetCampaignMIDs {
-			mustRegister(mid, stockruntime.PetCampaignDispatcher{Authority: authority, Service: petCampaign})
+			petD := stockruntime.PetCampaignDispatcher{Authority: authority, Service: petCampaign}
+			if mid == 820 {
+				mustRegister(mid, observing(authority, achievements, "PetCampaign", petD))
+				continue
+			}
+			mustRegister(mid, petD)
 		}
 		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, rentalReads, broadcastEmitter)
 		for _, mid := range stockruntime.WorkplaceMIDs {
@@ -591,7 +605,12 @@ func main() {
 		campaign.StoryHeroes, campaign.Pets, campaign.MaxColor = heroSvc, petSvc, maxHeroColorPolicy
 		campaign.StoryWire = heroproj.StockHero
 		for _, mid := range stockruntime.CampaignMIDs {
-			mustRegister(mid, stockruntime.CampaignDispatcher{Authority: authority, Service: campaign})
+			campaignD := stockruntime.CampaignDispatcher{Authority: authority, Service: campaign}
+			if mid == 114 {
+				mustRegister(mid, observing(authority, achievements, "Campaign", campaignD))
+				continue
+			}
+			mustRegister(mid, campaignD)
 		}
 		for _, mid := range stockruntime.ConquerMIDs {
 			mustRegister(mid, observing(authority, achievements, "Conquer", stockruntime.ConquerDispatcher{Authority: authority, Service: conquer}))
@@ -608,7 +627,12 @@ func main() {
 			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion, ReportFallback: adventureMode})
 		}
 		for _, mid := range stockruntime.OccultMIDs {
-			mustRegister(mid, stockruntime.OccultDispatcher{Authority: authority, Service: occultMode})
+			occultD := stockruntime.OccultDispatcher{Authority: authority, Service: occultMode}
+			if mid == 2371 || mid == 2372 || mid == 2374 || mid == 2377 {
+				mustRegister(mid, observing(authority, achievements, "Occult", occultD))
+				continue
+			}
+			mustRegister(mid, occultD)
 		}
 		for _, mid := range stockruntime.AdventureMIDs {
 			mustRegister(mid, stockruntime.AdventureDispatcher{Authority: authority, Service: adventureMode})
@@ -732,6 +756,10 @@ func main() {
 	}
 	mentorDispatcher := stockruntime.MentorDispatcher{Authority: authority, Service: mentorSvc}
 	for _, mid := range []uint16{1856, 1857, 1858, 1859, 1860, 1861, 1862, 1863} {
+		if mid == 1862 {
+			mustRegister(mid, observing(authority, achievements, "Mentor", mentorDispatcher))
+			continue
+		}
 		mustRegister(mid, mentorDispatcher)
 	}
 	practiceD := stockruntime.PracticeDispatcher{Authority: authority, Service: practiceSvc, Tracker: tracker}
@@ -778,7 +806,7 @@ func main() {
 	}
 	eventCentreD := stockruntime.EventCentreDispatcher{Authority: authority, Service: eventCentreSvc}
 	for _, mid := range []uint16{1072, 1073, 1074, 1075, 1076, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091} {
-		mustRegister(mid, observing(authority, achievements, "EventCentre", eventCentreD))
+		mustRegister(mid, eventCentreD)
 	}
 	dormD := stockruntime.DormDispatcher{Authority: authority, Service: dormSvc}
 	for _, mid := range []uint16{1845, 2512, 2513, 2514, 2515, 2516, 2517, 2518, 2519, 2520, 2521, 2522, 2523, 2524, 2525, 2526, 2693, 2694, 2695} {
@@ -786,6 +814,10 @@ func main() {
 	}
 	libraryD := stockruntime.LibraryDispatcher{Authority: authority, Service: librarySvc}
 	for _, mid := range []uint16{72, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 851, 852, 853, 854, 855, 856, 857, 2784, 2785} {
+		if mid == 851 {
+			mustRegister(mid, observing(authority, achievements, "SchoolStory", libraryD))
+			continue
+		}
 		mustRegister(mid, libraryD)
 	}
 	forumD := stockruntime.LibraryForumDispatcher{Authority: authority, Service: forumSvc}
