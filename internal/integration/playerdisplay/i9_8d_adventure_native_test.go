@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -17,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -579,4 +581,48 @@ func adventureRoomIDFrom(body map[string]any) int64 {
 	}
 	roomID, _ := body["room_id"].(int64)
 	return roomID
+}
+
+func TestI9_8DAdventureAdmissionSeatOrderNative(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	server := rankingServer(t, p)
+	owner, _ := playerRoot(t, p, server)
+	member, _ := playerRoot(t, p, server)
+	clock := &leagueClock{at: time.Now().UTC()}
+	timed := gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}
+	rooms := appsharedroom.Service{Timed: timed, Fresh: p, Store: sharedroomstore.Store{}, Fence: i5store.Store{Queryer: p}, Players: i4store.PlayerRootLocker{}}
+	created, err := rooms.Open(ctx, owner, appsharedroom.OpenRequest{Family: appadventure.IllusionFamily(),
+		Capacity: int64(d.IllusionCoopSeats), Lease: time.Hour, Payload: json.RawMessage(`{}`)}, opPinned(rev))
+	if err != nil {
+		t.Fatal("open room", err)
+	}
+	if _, err = rooms.Join(ctx, member, appsharedroom.JoinRequest{Family: appadventure.IllusionFamily(), RoomID: created.ID}, opPinned(rev)); err != nil {
+		t.Fatal("join room", err)
+	}
+	for _, seated := range []identity.ActorContext{owner, member} {
+		if _, err = rooms.SetReady(ctx, seated, appadventure.IllusionFamily(), true, opPinned(rev)); err != nil {
+			t.Fatal("ready", err)
+		}
+	}
+	router := stockruntime.NewAdmissionRouter()
+	locator := cd.Locator{DomainKind: "ADVENTURE_ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", server), DomainLocator: fmt.Sprintf("room:%d", created.ID)}
+	admit := func(convener identity.PlayerID, roster []identity.PlayerID) error {
+		tr, beginErr := p.Begin(ctx, tx.Options{Isolation: tx.RepeatableRead})
+		if beginErr != nil {
+			t.Fatal(beginErr)
+		}
+		defer tr.Rollback(ctx)
+		scope, scopeErr := ca.NewCoherentReadScope(tx.Scope{Tx: tr, Operation: opPinned(rev), Attempt: 1, Options: tx.Options{Isolation: tx.RepeatableRead}}, rev, clock.at)
+		if scopeErr != nil {
+			t.Fatal(scopeErr)
+		}
+		return router.AdmitTx(ctx, tr, scope, cb.Admission{Convener: convener, Members: roster, Locator: locator})
+	}
+	if err = admit(member.PlayerID, []identity.PlayerID{member.PlayerID, owner.PlayerID}); !errors.Is(err, cd.ErrRoomRefused) {
+		t.Fatalf("a non-owner convener was admitted: %v", err)
+	}
+	if err = admit(owner.PlayerID, []identity.PlayerID{owner.PlayerID, member.PlayerID}); err != nil {
+		t.Fatalf("the owner was refused in seat order: %v", err)
+	}
 }
