@@ -7,6 +7,7 @@ import (
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/guildbroadcastworker"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/retentionstore"
 	"log"
 	"os"
 	"os/signal"
@@ -25,6 +26,9 @@ func run() error {
 	dsn := os.Getenv("GXB_POSTGRES_DSN")
 	if dsn == "" {
 		return errors.New("Guild broadcast worker requires GXB_POSTGRES_DSN")
+	}
+	if _, e := retentionstore.PoliciesFromEnvironment(); e != nil {
+		return e
 	}
 	p, e := postgres.Open(c, dsn, postgres.PoolSettings{MaxConns: 16, MinConns: 1, MaxConnLifetime: 30 * time.Minute, MaxConnIdleTime: 5 * time.Minute, HealthCheckPeriod: 30 * time.Second, ApplicationName: "gxb-guild-broadcast-worker"})
 	if e != nil {

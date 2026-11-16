@@ -9626,6 +9626,22 @@
    "declared": true
   },
   {
+   "table": "gxb_operation_receipts",
+   "packages": [
+    "internal/adapters/postgres/kernelqueries",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "hero_recommend_snapshots",
+   "packages": [
+    "internal/adapters/postgres/herorecommendstore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
    "table": "player_guild_activity_days",
    "packages": [
     "internal/adapters/postgres/guildstore",
@@ -9650,10 +9666,26 @@
    "declared": true
   },
   {
+   "table": "player_public_profile_media_history",
+   "packages": [
+    "internal/adapters/postgres/publicprofilestore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
    "table": "players",
    "packages": [
     "internal/adapters/postgres/i4store",
     "internal/adapters/postgres/i5store"
+   ],
+   "declared": true
+  },
+  {
+   "table": "ranking_girls_snapshots",
+   "packages": [
+    "internal/adapters/postgres/rankingstore",
+    "internal/adapters/postgres/retentionstore"
    ],
    "declared": true
   }
