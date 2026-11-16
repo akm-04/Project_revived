@@ -319,6 +319,8 @@ var adventureFailureRows = []failureRow{
 	{match: sr.ErrNotFound, class: failureRefusal, code: unprovenRefusalCode},
 	{match: room.ErrFull, class: failureRefusal, code: unprovenRefusalCode},
 	{match: room.ErrKicked, class: failureRefusal, code: unprovenRefusalCode},
+	// The shared-room join callback toasts 35029 "Time limited!" (AdventureEvent.lua:481).
+	{match: room.ErrJoinThrottled, class: failureRefusal, code: adventureExpired},
 	{match: room.ErrExpired, class: failureRefusal, code: unprovenRefusalCode},
 	{match: room.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
 	{match: room.ErrNotOwner, class: failureRefusal, code: unprovenRefusalCode},

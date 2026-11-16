@@ -44,6 +44,7 @@ func TestPart3CAdventureFailureRows(t *testing.T) {
 		{"refused", failAdventure(d.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"not in room", failAdventure(sr.ErrNotInRoom), http.StatusConflict, unprovenRefusalCode, ""},
 		{"room full", failAdventure(room.ErrFull), http.StatusConflict, unprovenRefusalCode, ""},
+		{"join throttled", failAdventure(room.ErrJoinThrottled), http.StatusConflict, adventureExpired, ""},
 		{"balance diamonds", failAdventure(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"balance coins", failAdventure(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
 		{"balance stamina", failAdventure(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
@@ -129,6 +130,7 @@ func TestPart3CIllusionRoomFailureRows(t *testing.T) {
 		{"not in room", failIllusionRoom(sr.ErrNotInRoom), http.StatusConflict, unprovenRefusalCode, ""},
 		{"room changed", failIllusionRoom(sr.ErrConflict), http.StatusConflict, staleConflictCode, ""},
 		{"room full", failIllusionRoom(room.ErrFull), http.StatusConflict, unprovenRefusalCode, ""},
+		{"join throttled", failIllusionRoom(room.ErrJoinThrottled), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", failIllusionRoom(illusion.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
@@ -173,6 +175,7 @@ func TestPart3COccultFailureRows(t *testing.T) {
 		{"no scrolls", failOccult(economy.ErrInsufficientBalance), http.StatusConflict, occultNoScrollsCode, ""},
 		{"not in room", failOccult(sr.ErrNotInRoom), http.StatusConflict, occultRoomRefusedCode, ""},
 		{"room full", failOccult(room.ErrFull), http.StatusConflict, occultRoomRefusedCode, ""},
+		{"join throttled", failOccult(room.ErrJoinThrottled), http.StatusConflict, occultRoomRefusedCode, ""},
 		{"unavailable", failOccult(occult.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

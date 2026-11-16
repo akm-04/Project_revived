@@ -163,6 +163,12 @@ func testService(store *fakeStore) (Service, *fakeFence, *fakePlayers) {
 	}, fence, players
 }
 
+func testServiceAt(store *fakeStore, at time.Time) Service {
+	service, _, _ := testService(store)
+	service.Timed = gen.TimedRunner{Binder: gen.Binder{Time: testTime{at: at}}, Runner: tx.Runner{DB: &testDB{}}}
+	return service
+}
+
 func testOperation(t *testing.T) operation.Context {
 	t.Helper()
 	id, err := ids.NewUUID()
@@ -248,6 +254,25 @@ func admissionScope(t *testing.T) ca.CoherentReadScope {
 		t.Fatal(err)
 	}
 	return scope
+}
+
+func TestJoinThrottlesSameRoomFor30Seconds(t *testing.T) {
+	store := newFakeStore()
+	service, _, _ := testService(store)
+	openRoom(t, service)
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Leave(context.Background(), actor(11), illusionFamily(), testOperation(t)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); !errors.Is(err, d.ErrJoinThrottled) {
+		t.Fatalf("rejoin inside the join throttle %v", err)
+	}
+	after := testServiceAt(store, testAt.Add(d.JoinThrottle))
+	if _, err := after.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
+		t.Fatalf("rejoin after the throttle %v", err)
+	}
 }
 
 func TestJoinRefusesASecondRoomKickedRejoinAndFullRoom(t *testing.T) {
