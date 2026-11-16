@@ -121,6 +121,9 @@ func TestI9_6AGodsTrialNative(t *testing.T) {
 	if before != 180 || after != 160 {
 		t.Fatal("no cost", before, after)
 	}
+	if balances, ok := out["economy_"].(map[string]int64); !ok || balances["spirit_energy"] != 160 {
+		t.Fatalf("RESULT reply reports the debited spirit balance %#v", out["economy_"])
+	}
 	if _, e = s.Result(ctx, a, q, settleOp); e != nil {
 		t.Fatal("exact RESULT", e)
 	}

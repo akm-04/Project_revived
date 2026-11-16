@@ -759,9 +759,7 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	balances, functions := changes.Recorded(c)
 	stored := map[string]any{}
 	changes.WriteEconomy(stored, balances)
-	if len(functions) > 0 {
-		stored["new_funcs_"] = functions
-	}
+	changes.WriteFunctions(stored, functions)
 	for key, value := range body {
 		stored[key] = value
 	}

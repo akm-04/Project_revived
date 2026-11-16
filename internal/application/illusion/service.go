@@ -88,14 +88,9 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		if out.Body == nil {
 			out.Body = map[string]any{}
 		}
-		if balance, functions := changes.Recorded(c); len(balance) > 0 || len(functions) > 0 {
-			if len(balance) > 0 {
-				out.Body["economy_"] = balance
-			}
-			if len(functions) > 0 {
-				out.Body["new_funcs_"] = functions
-			}
-		}
+		balance, functions := changes.Recorded(c)
+		changes.WriteEconomy(out.Body, balance)
+		changes.WriteFunctions(out.Body, functions)
 		for key, value := range changes.RecordedMissions(c) {
 			out.Body[key] = value
 		}

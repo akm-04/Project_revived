@@ -54,6 +54,19 @@ func TestMissionFieldsFollowCommitAndDiscardRules(t *testing.T) {
 	}
 }
 
+func TestWriteFunctionsOmitsEmptyChanges(t *testing.T) {
+	body := map[string]any{}
+	WriteFunctions(body, nil)
+	if _, present := body["new_funcs_"]; present {
+		t.Fatal("an empty change set wrote new_funcs_")
+	}
+	WriteFunctions(body, []int64{7, 12})
+	opened, ok := body["new_funcs_"].([]int64)
+	if !ok || !slices.Equal(opened, []int64{7, 12}) {
+		t.Fatalf("new_funcs_ %v", body["new_funcs_"])
+	}
+}
+
 func TestWriteEconomyOmitsEmptyBalances(t *testing.T) {
 	body := map[string]any{}
 	WriteEconomy(body, map[string]int64{})

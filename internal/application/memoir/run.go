@@ -127,12 +127,8 @@ func (mode Mode) run(ctx context.Context, actor identity.ActorContext, name stri
 			return err
 		}
 		balances, functions := changes.Recorded(ctx)
-		if len(balances) > 0 {
-			response["economy_"] = balances
-		}
-		if len(functions) > 0 {
-			response["new_funcs_"] = functions
-		}
+		changes.WriteEconomy(response, balances)
+		changes.WriteFunctions(response, functions)
 		payload, err := json.Marshal(response)
 		if err != nil {
 			return err

@@ -208,12 +208,8 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		}
 		balances, functions := changes.Recorded(c)
 		delete(balances, i5.WorkplaceSPKey)
-		if len(balances) > 0 {
-			out["economy_"] = balances
-		}
-		if len(functions) > 0 {
-			out["new_funcs_"] = functions
-		}
+		changes.WriteEconomy(out, balances)
+		changes.WriteFunctions(out, functions)
 		for k, val := range changes.RecordedMissions(c) {
 			out[k] = val
 		}

@@ -222,9 +222,7 @@ func (s Mode) purchase(c context.Context, a identity.ActorContext, name string, 
 			out[key] = value
 		}
 		changes.WriteEconomy(out, balances)
-		if len(functions) > 0 {
-			out["new_funcs_"] = functions
-		}
+		changes.WriteFunctions(out, functions)
 		raw, err := json.Marshal(out)
 		if err != nil {
 			return err

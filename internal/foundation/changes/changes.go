@@ -133,6 +133,14 @@ func WriteEconomy(body map[string]any, balances map[string]int64) {
 	body["economy_"] = balances
 }
 
+// WriteFunctions adds the F17 new_funcs_ key to a stored reply body; an owner that reported nothing writes no key.
+func WriteFunctions(body map[string]any, functions []int64) {
+	if len(functions) == 0 {
+		return
+	}
+	body["new_funcs_"] = functions
+}
+
 func Missions(ctx context.Context, fields map[string]any) {
 	set, _ := ctx.Value(contextKey{}).(*Set)
 	if set == nil {
