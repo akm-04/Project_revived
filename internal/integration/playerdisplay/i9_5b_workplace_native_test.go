@@ -26,6 +26,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/workplace"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"sync"
 	"testing"
 	"time"
@@ -354,9 +355,11 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 		}
 		attempt := workplaceRecord(t, p, a).Slots[location.ID]
 		clock.at = time.Unix(attempt.Start+attempt.Quote.Seconds+1, 0).UTC()
-		if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
-			t.Fatal("full crew real claim", err)
+		claimed, claimErr := s.Claim(ctx, a, location.ID, op())
+		if claimErr != nil {
+			t.Fatal("full crew real claim", claimErr)
 		}
+		replyconformance.Check(t, 532, claimed)
 		result := workplaceRecord(t, p, a).Diary[0]
 		award, ok := result["award"].(map[string]any)
 		if !ok {

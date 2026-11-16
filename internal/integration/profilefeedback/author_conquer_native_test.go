@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/postgres/profilefeedbackstore"
 	app "gxb.local/backend/v2/internal/application/profilefeedback"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"testing"
 )
 
@@ -39,6 +40,7 @@ func TestCommentAndPraiseAuthorCarryConquerFields(t *testing.T) {
 	if e != nil || len(page.Best)+len(page.Rows) != 1 {
 		t.Fatal("comment page", e, page)
 	}
+	replyconformance.Check(t, 1839, page.Wire())
 	raw, e := json.Marshal(page.Wire())
 	if e != nil {
 		t.Fatal(e)

@@ -15,6 +15,7 @@ import (
 	wb "gxb.local/backend/v2/internal/domain/worldboss"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 // r1TournamentRoom seeds one stage-7 selecting room whose sides picked no pet.
@@ -61,6 +62,7 @@ func TestR1ArenaTournamentRoomNoPetThroughDispatcher(t *testing.T) {
 	if response.HTTPStatus != 200 {
 		t.Fatalf("MID 1292 status %d body %#v cause %v", response.HTTPStatus, response.Body, response.Cause)
 	}
+	replyconformance.Check(t, 1292, response.Body)
 	for _, key := range []string{"A_pet_info", "B_pet_info"} {
 		if _, present := response.Body[key]; present {
 			t.Fatalf("MID 1292 sent %s for a side with no pet: %#v", key, response.Body[key])
@@ -102,6 +104,7 @@ func TestR1WorldBossSweepKeepsPreInfoThroughDispatcher(t *testing.T) {
 	if response.HTTPStatus != 200 {
 		t.Fatalf("MID 628 status %d body %#v cause %v", response.HTTPStatus, response.Body, response.Cause)
 	}
+	replyconformance.Check(t, 628, response.Body)
 	if rank, _ := response.Body["total_rank"].(int64); rank != 2 {
 		t.Fatalf("MID 628 total_rank %#v", response.Body["total_rank"])
 	}

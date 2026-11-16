@@ -31,6 +31,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type adventureWake struct{}
@@ -424,6 +425,7 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	if err != nil {
 		t.Fatal("create coop", err)
 	}
+	replyconformance.Check(t, 2423, created)
 	coopID := adventureRoomIDFrom(created)
 	if _, ok := created["room_info"].(map[string]any); !ok {
 		t.Fatalf("2423 reply lacks the room_info wrapper: %#v", created)
@@ -439,9 +441,11 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	}
 	for _, member := range []identity.ActorContext{b, c} {
 		putAdventureOccurrence(t, p, member.PlayerID, d.EventIllusion, d.IllusionHiddenBoss, now, now.Add(2*time.Hour), fmt.Sprintf("coop-%d", member.PlayerID))
-		if _, err = mode.EnterCoop(ctx, member, coopID, opContext); err != nil {
-			t.Fatal("coop join", err)
+		joined, joinErr := mode.EnterCoop(ctx, member, coopID, opContext)
+		if joinErr != nil {
+			t.Fatal("coop join", joinErr)
 		}
+		replyconformance.Check(t, 2425, joined)
 	}
 	if _, err = mode.EnterTeamFight(ctx, a, opContext); err != nil {
 		t.Fatal("enter team fight", err)
