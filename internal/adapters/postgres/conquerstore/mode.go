@@ -9,44 +9,46 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	d "gxb.local/backend/v2/internal/domain/conquerschool"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 // ReadModeTx reads the mode row; lock takes it after the I4 root and the facts row.
 func (Store) ReadModeTx(c context.Context, q tx.Queryer, p identity.PlayerID, lock bool) (d.Mode, bool, error) {
-	query := `SELECT state::text,state_version,created_at,updated_at FROM conquer_school_players WHERE player_id=$1`
+	query := `SELECT state::text,payload_version,state_version,created_at,updated_at FROM conquer_school_players WHERE player_id=$1`
 	if lock {
 		query += ` FOR UPDATE`
 	}
 	m := d.Mode{Player: p}
 	var raw string
-	err := q.QueryRow(c, query, int64(p)).Scan(&raw, &m.StateVersion, &m.CreatedAt, &m.UpdatedAt)
+	var version int16
+	err := q.QueryRow(c, query, int64(p)).Scan(&raw, &version, &m.StateVersion, &m.CreatedAt, &m.UpdatedAt)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Mode{}, false, nil
 	}
 	if err != nil {
 		return d.Mode{}, false, err
 	}
-	return m, true, json.Unmarshal([]byte(raw), &m)
+	return m, true, payload.Decode("conquer_school_players", version, []byte(raw), &m)
 }
 
 func (Store) InsertModeTx(c context.Context, t tx.Tx, m d.Mode, server identity.LogicalServerID, revision string) error {
-	raw, err := json.Marshal(m)
+	raw, version, err := payload.Encode(m)
 	if err != nil {
 		return err
 	}
-	_, err = t.Exec(c, `INSERT INTO conquer_school_players(player_id,logical_server_id,content_revision,state,state_version,created_at,updated_at)VALUES($1,$2,$3,$4::jsonb,1,$5,$5)`,
-		int64(m.Player), int64(server), revision, string(raw), m.CreatedAt)
+	_, err = t.Exec(c, `INSERT INTO conquer_school_players(player_id,logical_server_id,content_revision,state,payload_version,state_version,created_at,updated_at)VALUES($1,$2,$3,$4::jsonb,$5,1,$6,$6)`,
+		int64(m.Player), int64(server), revision, string(raw), version, m.CreatedAt)
 	return err
 }
 
 func (Store) SaveModeTx(c context.Context, t tx.Tx, m d.Mode, old int64) error {
-	raw, err := json.Marshal(m)
+	raw, version, err := payload.Encode(m)
 	if err != nil {
 		return err
 	}
-	tag, err := t.Exec(c, `UPDATE conquer_school_players SET state=$2::jsonb,state_version=$3,updated_at=$4 WHERE player_id=$1 AND state_version=$5 AND updated_at<=$4`,
-		int64(m.Player), string(raw), m.StateVersion, m.UpdatedAt, old)
+	tag, err := t.Exec(c, `UPDATE conquer_school_players SET state=$2::jsonb,payload_version=$3,state_version=$4,updated_at=$5 WHERE player_id=$1 AND state_version=$6 AND updated_at<=$5`,
+		int64(m.Player), string(raw), version, m.StateVersion, m.UpdatedAt, old)
 	if err != nil {
 		return err
 	}
@@ -58,13 +60,13 @@ func (Store) SaveModeTx(c context.Context, t tx.Tx, m d.Mode, old int64) error {
 
 // InsertReportTx keeps a report and prunes its (loop, mission, team) to the best limit.
 func (Store) InsertReportTx(c context.Context, t tx.Tx, r d.Report, limit int64) error {
-	profile, err := json.Marshal(r.Profile)
+	profile, version, err := payload.Encode(r.Profile)
 	if err != nil {
 		return err
 	}
-	_, err = t.Exec(c, `INSERT INTO conquer_school_reports(report_key,owner_player_id,loop_id,mission_id,team_id,score,profile,heroes,pet,report,attempt_id,recorded_at)
-VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9::jsonb,$10::jsonb,$11,$12)`,
-		r.Key, int64(r.Owner), r.Loop, r.MissionID, r.TeamID, r.Score, string(profile), string(r.Heroes), string(r.Pet), string(r.Body), r.AttemptID, r.RecordedAt)
+	_, err = t.Exec(c, `INSERT INTO conquer_school_reports(report_key,owner_player_id,loop_id,mission_id,team_id,score,profile,payload_version,heroes,pet,report,attempt_id,recorded_at)
+VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb,$8,$9::jsonb,$10::jsonb,$11::jsonb,$12,$13)`,
+		r.Key, int64(r.Owner), r.Loop, r.MissionID, r.TeamID, r.Score, string(profile), version, string(r.Heroes), string(r.Pet), string(r.Body), r.AttemptID, r.RecordedAt)
 	if err != nil {
 		return err
 	}
@@ -73,17 +75,18 @@ SELECT report_id FROM conquer_school_reports WHERE loop_id=$1 AND mission_id=$2 
 	return err
 }
 
-const reportCols = `report_key::text,owner_player_id,loop_id,mission_id,team_id,score,profile::text,heroes::text,pet::text,report::text,attempt_id,recorded_at`
+const reportCols = `report_key::text,owner_player_id,loop_id,mission_id,team_id,score,profile::text,payload_version,heroes::text,pet::text,report::text,attempt_id,recorded_at`
 
 func scanReport(row tx.Row) (d.Report, error) {
 	var r d.Report
 	var owner int64
 	var profile, heroes, pet, body string
-	if err := row.Scan(&r.Key, &owner, &r.Loop, &r.MissionID, &r.TeamID, &r.Score, &profile, &heroes, &pet, &body, &r.AttemptID, &r.RecordedAt); err != nil {
+	var version int16
+	if err := row.Scan(&r.Key, &owner, &r.Loop, &r.MissionID, &r.TeamID, &r.Score, &profile, &version, &heroes, &pet, &body, &r.AttemptID, &r.RecordedAt); err != nil {
 		return r, err
 	}
 	r.Owner, r.Heroes, r.Pet, r.Body = identity.PlayerID(owner), json.RawMessage(heroes), json.RawMessage(pet), json.RawMessage(body)
-	return r, json.Unmarshal([]byte(profile), &r.Profile)
+	return r, payload.Decode("conquer_school_reports", version, []byte(profile), &r.Profile)
 }
 
 // ReportsTx lists the best reports, ties to the earlier report.
