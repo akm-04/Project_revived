@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -90,11 +89,6 @@ VALUES(29,'payload-version-media',NULL,false,false,false,2999999,2999999,1,now()
 	if err := pool.Raw().QueryRow(ctx, `SELECT reference::text,payload_version FROM player_public_profile_media_history WHERE operation_id=$1::uuid`, operationID.String()).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	directory := filepath.Join("testdata", "payloads", mediaHistoryTable+"."+mediaHistoryColumn)
-	if capture := os.Getenv("GXB_R8_2C_BATCH18_CAPTURE"); capture != "" {
-		capturePublicProfileGolden(t, filepath.Join(capture, "internal/adapters/postgres/publicprofilestore", directory), storedText)
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -143,26 +137,5 @@ func assertSamePublicProfileJSON(t *testing.T, got, want any) {
 	}
 	if !bytes.Equal(gotRaw, wantRaw) {
 		t.Fatalf("decoded=%s want=%s", gotRaw, wantRaw)
-	}
-}
-
-func capturePublicProfileGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded app.MediaReference
-	if err := payload.Decode(mediaHistoryTable, 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	expected, err := json.MarshalIndent(decoded, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
