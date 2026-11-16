@@ -17,9 +17,16 @@ def archive_path():
 
 def required_paths(payload, mid):
     return {
-        entry["path"]
+        reply_consumers.path_name(entry)
         for entry in payload["mids"][str(mid)]["paths"]
-        if entry["requirement"] == "REQUIRED"
+        if reply_consumers.path_requirement(entry) == "REQUIRED"
+    }
+
+
+def obligation_map(payload):
+    return {
+        mid: {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in record["paths"]}
+        for mid, record in payload["mids"].items()
     }
 
 
@@ -31,7 +38,8 @@ class ReplyConsumerTests(unittest.TestCase):
             raise unittest.SkipTest(f"source archive not supplied: {archive}")
         with zipfile.ZipFile(archive) as bundle:
             cls.blobs = reply_consumers.lua_blobs(bundle)
-        cls.payload = reply_consumers.build(cls.blobs)
+        cls.uncollapsed = reply_consumers.build(cls.blobs, collapse=False)
+        cls.payload = reply_consumers.compact_payload(reply_consumers.collapse_sites(cls.uncollapsed))
 
     def test_r1_crash_class_is_required(self):
         self.assertIn("award", required_paths(self.payload, 532))
@@ -43,6 +51,17 @@ class ReplyConsumerTests(unittest.TestCase):
         self.assertIn("list", required_paths(self.payload, 176))
         self.assertIn("player_id", required_paths(self.payload, 177))
         self.assertTrue({"player_info"} <= required_paths(self.payload, 185) or "list[].player_info" in required_paths(self.payload, 185))
+
+    def test_site_collapse_keeps_every_obligation_and_output_under_five_megabytes(self):
+        self.assertEqual(obligation_map(self.uncollapsed), obligation_map(self.payload))
+        size = len(json.dumps(self.payload, sort_keys=True, separators=(",", ":")).encode())
+        self.assertLess(size, 5 * 1024 * 1024, f"REPLY_CONSUMERS.json is {size} bytes")
+
+    def test_site_collapse_merges_one_entry_per_file_and_line(self):
+        for record in self.payload["mids"].values():
+            for entry in record["paths"]:
+                keys = [(site[0], site[1]) for site in entry[2]]
+                self.assertEqual(len(keys), len(set(keys)))
 
     def test_every_sent_mid_has_a_callback_record(self):
         for mid in ("118", "176", "185", "532", "628", "1292", "1839"):

@@ -24,6 +24,9 @@ reason and the client file:line that shows the guard or the branch.
 
 ``--write`` regenerates docs/architecture/reply_consumers/REPLY_CONSUMERS.json
 and creates WAIVERS.json when it is absent (it is hand edited afterwards).
+Sites are collapsed to one entry per (file, line) and encoded compactly:
+``site_files`` interns every client path and a site row is
+``[site_files index, line, guarded (0/1), sorted via values]``.
 """
 from __future__ import annotations
 
@@ -73,6 +76,8 @@ SEED_PATHS = (
     ("friend request player", 177, "player_id"),
     ("black list player profile", 185, "player_info"),
 )
+REQUIREMENT_CODES = {"REQUIRED": 1, "OPTIONAL": 0, "WAIVED": 2}
+REQUIREMENT_NAMES = {code: name for name, code in REQUIREMENT_CODES.items()}
 
 
 @dataclass(frozen=True)
@@ -1465,7 +1470,7 @@ def parse_mid_events(text: str) -> dict[int, str]:
 
 
 # -------------------------------------------------------------------- output
-def build(blobs: dict[str, str]) -> dict:
+def build(blobs: dict[str, str], collapse: bool = True) -> dict:
     extractor = Extractor(blobs)
     extractor.run()
     mids: dict[str, dict] = {}
@@ -1485,13 +1490,79 @@ def build(blobs: dict[str, str]) -> dict:
             "paths": path_entries,
         }
     unknown = sum(1 for entry in mids.values() for callback in entry["callbacks"] if callback["status"] == "UNKNOWN")
-    return {
-        "schema_version": 1,
+    payload = {
+        "schema_version": 2,
         "source": "current src_64 Lua reply callbacks",
         "source_archive_sha256": archive_sha(),
         "status": "UNKNOWN" if unknown else "CHECKED",
         "unknown_callbacks": unknown,
         "mid_count": len(mids),
+        "mids": mids,
+    }
+    return compact_payload(collapse_sites(payload)) if collapse else payload
+
+
+def collapse_sites(payload: dict) -> dict:
+    mids: dict[str, dict] = {}
+    for mid, record in payload["mids"].items():
+        paths = []
+        for entry in record["paths"]:
+            groups: dict[tuple[str, int], dict] = {}
+            for site in entry["sites"]:
+                group = groups.setdefault(
+                    (site["file"], site["line"]),
+                    {"file": site["file"], "line": site["line"], "guarded": True, "via": set()},
+                )
+                group["guarded"] = group["guarded"] and site["guarded"]
+                group["via"].add(site["via"])
+            sites = [
+                {"file": key[0], "line": key[1], "guarded": group["guarded"], "via": sorted(group["via"])}
+                for key, group in sorted(groups.items())
+            ]
+            collapsed = {"path": entry["path"], "requirement": entry["requirement"], "sites": sites}
+            if "waiver" in entry:
+                collapsed["waiver"] = entry["waiver"]
+            paths.append(collapsed)
+        mids[mid] = {"name": record["name"], "callbacks": record["callbacks"], "paths": paths}
+    return {**payload, "mids": mids}
+
+
+def compact_payload(payload: dict) -> dict:
+    files = sorted({
+        site["file"]
+        for record in payload["mids"].values()
+        for entry in record["paths"]
+        for site in entry["sites"]
+    } | {
+        callback["file"]
+        for record in payload["mids"].values()
+        for callback in record["callbacks"]
+    })
+    index = {name: position for position, name in enumerate(files)}
+    mids: dict[str, dict] = {}
+    for mid, record in payload["mids"].items():
+        callbacks = []
+        for callback in record["callbacks"]:
+            row = {"file": index[callback["file"]], "line": callback["line"], "status": callback["status"]}
+            if "reason" in callback:
+                row["reason"] = callback["reason"]
+            if "detail" in callback:
+                row["detail"] = callback["detail"]
+            callbacks.append(row)
+        paths = []
+        for entry in record["paths"]:
+            sites = [[index[site["file"]], site["line"], 1 if site["guarded"] else 0, list(site["via"])]
+                     for site in entry["sites"]]
+            path = [entry["path"], REQUIREMENT_CODES[entry["requirement"]], sites]
+            if "waiver" in entry:
+                path.append(entry["waiver"])
+            paths.append(path)
+        mids[mid] = {"name": record["name"], "callbacks": callbacks, "paths": paths}
+    return {
+        **payload,
+        "site_encoding": "site = [site_files index, line, guarded (0/1), sorted via values]; callbacks use the same file index",
+        "path_encoding": "path = [path, requirement (1 REQUIRED, 0 OPTIONAL, 2 WAIVED), sites, waiver when waived]",
+        "site_files": files,
         "mids": mids,
     }
 
@@ -1517,12 +1588,24 @@ def lua_blobs(bundle: zipfile.ZipFile) -> dict[str, str]:
     return blobs
 
 
+def path_name(entry) -> str:
+    return entry[0] if isinstance(entry, list) else entry["path"]
+
+
+def path_requirement(entry) -> str:
+    if isinstance(entry, list):
+        return REQUIREMENT_NAMES.get(entry[1], "OPTIONAL")
+    return entry["requirement"]
+
+
 def seed_problems(payload: dict) -> list[str]:
     problems = []
     for label, mid, path in SEED_PATHS:
         record = payload.get("mids", {}).get(str(mid))
-        paths = {entry["path"] for entry in record.get("paths", [])} if record else set()
-        if path not in paths:
+        required = {
+            path_name(entry) for entry in record.get("paths", []) if path_requirement(entry) == "REQUIRED"
+        } if record else set()
+        if path not in required:
             problems.append(f"seed {label}: MID {mid} does not come out required for {path}")
     return problems
 
@@ -1530,10 +1613,10 @@ def seed_problems(payload: dict) -> list[str]:
 def validate_waivers(waivers: dict, payload: dict, blobs: dict[str, str]) -> list[str]:
     problems: list[str] = []
     known = {
-        (int(mid), entry["path"])
+        (int(mid), path_name(entry))
         for mid, record in payload.get("mids", {}).items()
         for entry in record.get("paths", [])
-        if entry["requirement"] == "REQUIRED"
+        if path_requirement(entry) == "REQUIRED"
     }
     for waiver in waivers.get("waivers", []):
         mid = waiver.get("mid")
@@ -1569,9 +1652,18 @@ def apply_waivers(waivers: dict, payload: dict) -> dict:
         if record is None:
             continue
         for entry in record.get("paths", []):
-            if entry["path"] == waiver["path"] and entry["requirement"] == "REQUIRED":
+            if path_name(entry) != waiver["path"] or path_requirement(entry) != "REQUIRED":
+                continue
+            applied = {"reason": waiver["reason"], "client": waiver["client"]}
+            if isinstance(entry, list):
+                entry[1] = REQUIREMENT_CODES["WAIVED"]
+                if len(entry) == 3:
+                    entry.append(applied)
+                else:
+                    entry[3] = applied
+            else:
                 entry["requirement"] = "WAIVED"
-                entry["waiver"] = {"reason": waiver["reason"], "client": waiver["client"]}
+                entry["waiver"] = applied
     return payload
 
 
