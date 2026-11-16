@@ -101,6 +101,24 @@ func TestOpeningAdmissionAndSettlement(t *testing.T) {
 	}
 }
 
+func TestAssistStones(t *testing.T) {
+	c := loadCatalog(t)
+	node, ok := c.Node(100007)
+	if !ok {
+		t.Fatal("assist node missing")
+	}
+	if item, count, ok := node.AssistStones(10001053); !ok || item != 40001053 || count != 5 {
+		t.Fatalf("assist stones %d %d %v", item, count, ok)
+	}
+	if _, _, ok := node.AssistStones(10001001); ok {
+		t.Fatal("unlisted assist partner paid")
+	}
+	plain, ok := c.Node(100001)
+	if !ok || len(plain.AssistPartners) != 0 {
+		t.Fatalf("plain node assist %v", plain.AssistPartners)
+	}
+}
+
 func TestDropLaw(t *testing.T) {
 	c := Catalog{DropBoxes: []DropBox{{ID: 7, Rows: [][2]int64{{1, 25000}, {2, 4000}, {3, 10000}}}}}
 	c.boxes = map[int64]int{7: 0}

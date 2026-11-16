@@ -147,6 +147,7 @@ type Fight struct {
 type Result struct {
 	AwakeMission    int64
 	PetAwakeMission int64
+	AssistPartner   int64
 	CampaignID      int64
 	Type            int64
 	Star            int64
@@ -581,6 +582,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, request Result,
 	if request.PetAwakeMission != 0 {
 		fields["pet_awaken_mission"] = request.PetAwakeMission
 	}
+	if request.AssistPartner != 0 {
+		fields["assist_partner"] = request.AssistPartner
+	}
 	fingerprint, err := receipt.FingerprintRequest(fields)
 	if err != nil {
 		return out, err
@@ -727,7 +731,7 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	}
 	if outcome.Win {
 		body["is_win"], body["result"] = 1, 1
-		if err = s.reward(c, sc, a, v, node, outcome, record, heroes, attested.Attempt.ID.String(), request.Pet, body); err != nil {
+		if err = s.reward(c, sc, a, v, node, outcome, record, heroes, attested.Attempt.ID.String(), request.AssistPartner, request.Pet, body); err != nil {
 			return Settled{}, false, err
 		}
 	}
@@ -830,7 +834,7 @@ func (s Mode) debit(c context.Context, sc gen.TimedScope, pid identity.PlayerID,
 // reward grants a win's value (mana, player exp, star_gift, frozen drops),
 // then hero exp at the player level after that exp, the kind-2 openings of a
 // first Normal clear and the objective fact.
-func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, outcome d.Outcome, record d.Record, heroes []int64, attempt string, petID int64, body map[string]any) error {
+func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, outcome d.Outcome, record d.Record, heroes []int64, attempt string, assistPartner, petID int64, body map[string]any) error {
 	at, current := sc.Operation.DecisionAt(), sc.Operation.Operation()
 	lines := []grant.Line{}
 	if outcome.Mana > 0 {
@@ -846,6 +850,14 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	if record.PendingGeneration == generation(node.Type, node.ID) {
 		for _, item := range record.PendingItems {
 			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: item.ItemID, Amount: item.Num})
+		}
+	}
+	// The assist choice exists only on a Normal first clear (MapDetailWindow
+	// assist story gate); the stones belong to the chosen partner.
+	if assistPartner != 0 && outcome.FirstClear {
+		if itemID, count, ok := node.AssistStones(assistPartner); ok {
+			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: itemID, Amount: count})
+			body["assist_awards"] = []any{map[string]any{"table_id": itemID, "item_num": count, "to_stone": true}}
 		}
 	}
 	profile, found, err := s.Directory.ProfileTx(c, sc.Tx, a.PlayerID)
