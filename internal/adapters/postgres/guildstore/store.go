@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -371,10 +372,15 @@ func (Store) AppendAuditTx(ctx context.Context, t tx.Tx, gid guild.ID, kind stri
 	if !op.IsZero() {
 		opv = op.String()
 	}
-	if details == "" {
-		details = "{}"
+	parsedDetails, err := parseAuditDetails(details)
+	if err != nil {
+		return fmt.Errorf("guild audit details: %w", err)
 	}
-	tag, err := t.Exec(ctx, `INSERT INTO guild_audit_log(guild_id,sequence,event_kind,actor_player_id,subject_player_id,occurred_at,policy_revision,operation_id,details) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`, int64(gid), seq, kind, actorv, subjectv, at.UTC(), policyRevision, opv, details)
+	detailsPayload, detailsVersion, err := payload.Encode(parsedDetails)
+	if err != nil {
+		return err
+	}
+	tag, err := t.Exec(ctx, `INSERT INTO guild_audit_log(guild_id,sequence,event_kind,actor_player_id,subject_player_id,occurred_at,policy_revision,operation_id,details,payload_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)`, int64(gid), seq, kind, actorv, subjectv, at.UTC(), policyRevision, opv, string(detailsPayload), detailsVersion)
 	if err != nil {
 		return err
 	}
@@ -387,25 +393,34 @@ func (Store) ListMemberLogTx(ctx context.Context, q tx.Queryer, guildID int64, c
 	var raw string
 	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 		'kind',event_kind,'actor',COALESCE(actor_player_id,0),'subject',COALESCE(subject_player_id,0),
-		'role',COALESCE((details->>'role')::bigint,-1),'at',EXTRACT(EPOCH FROM occurred_at)::bigint) ORDER BY occurred_at DESC,sequence DESC),'[]'::jsonb)::text
-		FROM (SELECT event_kind,actor_player_id,subject_player_id,details,occurred_at,sequence
+		'details',details,'payload_version',payload_version,'at',EXTRACT(EPOCH FROM occurred_at)::bigint) ORDER BY occurred_at DESC,sequence DESC),'[]'::jsonb)::text
+		FROM (SELECT event_kind,actor_player_id,subject_player_id,details,payload_version,occurred_at,sequence
 			FROM guild_audit_log WHERE guild_id=$1 AND occurred_at>=$2 ORDER BY occurred_at DESC,sequence DESC LIMIT $3) recent`, guildID, cutoff, limit).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}
 	var rows []struct {
-		Kind    string `json:"kind"`
-		Actor   int64  `json:"actor"`
-		Subject int64  `json:"subject"`
-		Role    int64  `json:"role"`
-		At      int64  `json:"at"`
+		Kind           string          `json:"kind"`
+		Actor          int64           `json:"actor"`
+		Subject        int64           `json:"subject"`
+		Details        json.RawMessage `json:"details"`
+		PayloadVersion int16           `json:"payload_version"`
+		At             int64           `json:"at"`
 	}
 	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
 		return nil, err
 	}
 	out := make([]app.MemberLogRow, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, app.MemberLogRow{Kind: row.Kind, ActorID: row.Actor, SubjectID: row.Subject, Role: row.Role, At: time.Unix(row.At, 0).UTC()})
+		var details AuditDetails
+		if err := payload.Decode("guild_audit_log", row.PayloadVersion, row.Details, &details); err != nil {
+			return nil, err
+		}
+		role := int64(-1)
+		if details.Role != nil {
+			role = *details.Role
+		}
+		out = append(out, app.MemberLogRow{Kind: row.Kind, ActorID: row.Actor, SubjectID: row.Subject, Role: role, At: time.Unix(row.At, 0).UTC()})
 	}
 	return out, nil
 }

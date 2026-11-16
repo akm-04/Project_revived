@@ -17,7 +17,7 @@ func TestPayloadGoldenGuildStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var value auditDetails
+	var value AuditDetails
 	if err := payload.Decode(table, 0, raw, &value); err != nil {
 		t.Fatalf("%s v0: %v", table, err)
 	}
