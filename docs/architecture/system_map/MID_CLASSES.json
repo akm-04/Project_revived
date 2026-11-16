@@ -27251,22 +27251,22 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 47,
+     "line": 51,
      "value": "unset"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 85,
+     "line": 92,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 307,
+     "line": 314,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 412,
+     "line": 419,
      "value": "repeatable_read"
     },
     {
@@ -27289,22 +27289,22 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 47,
+     "line": 51,
      "value": "false"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 85,
+     "line": 92,
      "value": "false"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 307,
+     "line": 314,
      "value": "false"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 412,
+     "line": 419,
      "value": "false"
     },
     {
@@ -27330,22 +27330,22 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 47,
+     "line": 51,
      "value": "6"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 85,
+     "line": 92,
      "value": "6"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 307,
+     "line": 314,
      "value": "6"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 412,
+     "line": 419,
      "value": "6"
     },
     {
@@ -27411,7 +27411,7 @@
      "file": "internal/application/topfloor/task_battle.go",
      "function": "Service.StartTask",
      "isolation": "unset",
-     "line": 47,
+     "line": 51,
      "read_only": "false",
      "retry": "6"
     },
@@ -27419,7 +27419,7 @@
      "file": "internal/application/topfloor/task_battle.go",
      "function": "Service.StartTask",
      "isolation": "repeatable_read",
-     "line": 85,
+     "line": 92,
      "read_only": "false",
      "retry": "6"
     },
@@ -27427,7 +27427,7 @@
      "file": "internal/application/topfloor/task_battle.go",
      "function": "Service.settleTask",
      "isolation": "repeatable_read",
-     "line": 307,
+     "line": 314,
      "read_only": "false",
      "retry": "6"
     },
@@ -27435,7 +27435,7 @@
      "file": "internal/application/topfloor/task_battle.go",
      "function": "Service.closeTask",
      "isolation": "repeatable_read",
-     "line": 412,
+     "line": 419,
      "read_only": "false",
      "retry": "6"
     },
