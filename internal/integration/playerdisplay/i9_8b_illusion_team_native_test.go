@@ -17,13 +17,17 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	il "gxb.local/backend/v2/internal/application/illusion"
+	"gxb.local/backend/v2/internal/application/publicstats"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	di "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
+	"gxb.local/backend/v2/internal/domain/statrules"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -47,6 +51,14 @@ func (c *illusionTeamCombat) SettleMemberTx(ctx context.Context, t tx.Tx, reques
 	}
 	c.settlements[request.Member]++
 	return settled, nil
+}
+
+// illusionForceStats pins each partner's public force so the C5 power floor
+// can be told apart from the summed picked force.
+type illusionForceStats map[int64]float64
+
+func (s illusionForceStats) HeroTx(_ context.Context, _ ca.CoherentReadScope, ref character.HeroRef, _ publicstats.View) (publicstats.Result, error) {
+	return publicstats.Result{Stats: statrules.Result{Force: s[ref.PartnerID]}}, nil
 }
 
 func (c *illusionTeamCombat) settlementCount(member identity.PlayerID) int {
@@ -191,6 +203,62 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 	other, _ := illusionOwner(t, p, rankingServer(t, p))
 	if _, err = s.GetReport(ctx, other, state.ReportID, op()); !errors.Is(err, di.ErrRefused) {
 		t.Fatalf("1362 crossed a logical server: %v", err)
+	}
+}
+
+// TestI9_8BIllusionTeamPowerFloorNative pins C5 through the production pick
+// path: a hero's own force must reach the player's best-15 force divided by
+// team_power_limit (30), not the selected heroes' sum.
+func TestI9_8BIllusionTeamPowerFloorNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	a, masterPartners := illusionTeamOwner(t, p, server, 10001002)
+	b, matePartners := illusionTeamOwner(t, p, server, 10001003, 10001004, 10001005, 10001008)
+	c, _ := illusionTeamOwner(t, p, server, 10001006, 10001007)
+	if len(masterPartners) != 1 || len(matePartners) != 4 {
+		t.Fatalf("partners %v %v", masterPartners, matePartners)
+	}
+	s.Stats = illusionForceStats{masterPartners[0]: 30000, matePartners[0]: 30000, matePartners[3]: 30000,
+		matePartners[1]: 100, matePartners[2]: 100}
+
+	revision := installed(t, p)
+	contentStore := contentstore.Store{Queryer: p}
+	definition, err := contentStore.PetAcquisitionTx(ctx, p, revision, 10010001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grantGenuine(t, p, a, revision, "illusion master pet", []grant.Line{
+		{Kind: grant.StackItem, ItemID: definition.EggItemID, Amount: 1},
+		{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 10000}})
+	pets := genuinePetService(p)
+	ricky := must(pets.Summon(ctx, a, 10010001, op()))(t, "pet summon")
+	must(pets.CleanCD(ctx, a, ricky.PetID, op()))(t, "pet hatch")
+
+	created, err := s.CreateRoom(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := illusionRoomID(t, created)
+	for _, member := range []identity.ActorContext{b, c} {
+		if _, err = s.EnterRoom(ctx, member, roomID, op()); err != nil {
+			t.Fatal("join", err)
+		}
+	}
+	if _, err = s.Prepare(ctx, a, op()); err != nil {
+		t.Fatal("master 1351", err)
+	}
+	if _, err = s.SetPartner(ctx, a, il.PartnerRequest{Heroes: []int64{10001002}, PetID: 10010001}, op()); err != nil {
+		t.Fatal("master hero", err)
+	}
+	// Mate one's best-15 is 60200 and the floor 2006; its two 100-force heroes
+	// pass the old selected-sum floor (200/30) but not the player floor.
+	if _, err = s.SetPartner(ctx, b, il.PartnerRequest{Heroes: []int64{10001004, 10001005}}, op()); !errors.Is(err, di.ErrRefused) {
+		t.Fatalf("two 100-force heroes against a 60200 best-15 were accepted: %v", err)
+	}
+	if _, err = s.SetPartner(ctx, b, il.PartnerRequest{Heroes: []int64{10001003, 10001008}}, op()); err != nil {
+		t.Fatalf("two 30000-force heroes against a 60200 best-15 were refused: %v", err)
 	}
 }
 
