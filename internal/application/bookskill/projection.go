@@ -171,6 +171,9 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, mid uint16, 
 	var body map[string]any
 	due := false
 	_, result, e := s.Timed.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc gen.TimedScope) error {
+		if err := s.fenceActor(ctx, sc.Tx, a, sc.Operation.DecisionAt()); err != nil {
+			return err
+		}
 		body, due, e = s.readSnapshot(ctx, sc.Tx, a.PlayerID, mid, rev, sc.Operation.DecisionAt())
 		return e
 	})
