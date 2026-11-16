@@ -28,11 +28,31 @@ func Encode(value any) ([]byte, int16, error) {
 // newer than this build is an error. Version 0 rows predate the column; they decode leniently and every key the struct
 // cannot hold is logged with its table, so the lead's sweep can list them before version 0 turns strict.
 func Decode[T any](table string, version int16, raw []byte, out *T) error {
+	return decode(table, version, raw, out, false)
+}
+
+// DecodeNumbers is Decode with json.Number kept in any-typed values, for payload types whose untyped maps already
+// relied on json.Decoder.UseNumber before the version column (march and memoir). Int64 numbers formatted as float64
+// would otherwise print differently.
+func DecodeNumbers[T any](table string, version int16, raw []byte, out *T) error {
+	return decode(table, version, raw, out, true)
+}
+
+func decode[T any](table string, version int16, raw []byte, out *T, numbers bool) error {
 	if version < 0 || version > Current {
 		return fmt.Errorf("%s payload version %d is outside 0..%d", table, version, Current)
 	}
 	if version == 0 {
-		if err := json.Unmarshal(raw, out); err != nil {
+		if numbers {
+			decoder := json.NewDecoder(bytes.NewReader(raw))
+			decoder.UseNumber()
+			if err := decoder.Decode(out); err != nil {
+				return fmt.Errorf("%s payload: %w", table, err)
+			}
+			if _, err := decoder.Token(); !errors.Is(err, io.EOF) {
+				return fmt.Errorf("%s payload: trailing data after the value", table)
+			}
+		} else if err := json.Unmarshal(raw, out); err != nil {
 			return fmt.Errorf("%s payload: %w", table, err)
 		}
 		for _, key := range UnknownKeys(raw, reflect.TypeOf(out).Elem()) {
@@ -42,6 +62,9 @@ func Decode[T any](table string, version int16, raw []byte, out *T) error {
 	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
+	if numbers {
+		decoder.UseNumber()
+	}
 	if err := decoder.Decode(out); err != nil {
 		return fmt.Errorf("%s payload: %w", table, err)
 	}
