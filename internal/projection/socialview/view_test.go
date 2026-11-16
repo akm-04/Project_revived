@@ -56,8 +56,14 @@ func TestC22EmptyBaseAndShapeTypes(t *testing.T) {
 	if e = json.Unmarshal(raw, &obj); e != nil {
 		t.Fatal(e)
 	}
-	if len(obj) != 12 {
+	if len(obj) != 14 {
 		t.Fatalf("base keys %d %s", len(obj), raw)
+	}
+	if obj["count"] != float64(80) {
+		t.Fatalf("friend capacity count %s", raw)
+	}
+	if v, ok := obj["list"].([]any); !ok || len(v) != 0 {
+		t.Fatalf("legacy friend list %s", raw)
 	}
 	for _, k := range []string{"blacklist", "friend_list", "notice_list", "request_list", "offline_msg_list", "doing_recall", "done_recall", "got_recall", "recall_awarded"} {
 		v, ok := obj[k].([]any)

@@ -64,6 +64,12 @@ type scenario struct {
 	FriendFixture bool `json:"friend_fixture"`
 	// DormSocialFixture opens Dorm function 71 through the production stage owner and births one peer whose praise, comments and reactions the scenario reads.
 	DormSocialFixture bool `json:"dorm_social_fixture"`
+	// ProfileCommentFixture declares one peer-written comment on the driven player's profile so the stock card space tab renders a comment row.
+	ProfileCommentFixture bool `json:"profile_comment_fixture"`
+	// TournamentRoomFixture seeds a stage-7 tournament room whose sides picked no pet so the stock selection window reads the room reply.
+	TournamentRoomFixture bool `json:"tournament_room_fixture"`
+	// WorldBossSweepFixture seeds a ranked board whose player directly ahead has no directory profile.
+	WorldBossSweepFixture bool `json:"worldboss_sweep_fixture"`
 	// GuildRentalFixture births the peer that joins the guild and lends one girl.
 	GuildRentalFixture bool `json:"guild_rental_fixture"`
 	// SocialInviteFixture births the invited peer and binds it to the driven player's code.
@@ -175,7 +181,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.MentorFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.AdventureEventFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.ProfileCommentFixture || run.scenario.TournamentRoomFixture || run.scenario.WorldBossSweepFixture || run.scenario.MentorFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.AdventureEventFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -243,7 +249,7 @@ func (run run) play() ([]string, error) {
 			return nil, err
 		}
 	}
-	if run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.MentorFixture || run.scenario.GuildRentalFixture || run.scenario.SocialInviteFixture {
+	if run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.ProfileCommentFixture || run.scenario.TournamentRoomFixture || run.scenario.WorldBossSweepFixture || run.scenario.MentorFixture || run.scenario.GuildRentalFixture || run.scenario.SocialInviteFixture {
 		peer, err := run.bornPeer(ctx, secret)
 		if err != nil {
 			return nil, fmt.Errorf("peer: %w", err)
@@ -257,6 +263,21 @@ func (run run) play() ([]string, error) {
 	}
 	if run.scenario.DormSocialFixture {
 		if err := provision.DormSocialFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.ProfileCommentFixture {
+		if err := provision.ProfileCommentFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.TournamentRoomFixture {
+		if err := provision.TournamentRoomNoPetFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount, "55555555-5555-5555-5555-555555555555"); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.WorldBossSweepFixture {
+		if err := provision.WorldBossSweepFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
 			return nil, err
 		}
 	}

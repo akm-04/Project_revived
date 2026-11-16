@@ -2,6 +2,7 @@ package socialpresentation
 
 import (
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
+	sr "gxb.local/backend/v2/internal/application/socialrelation"
 	sv "gxb.local/backend/v2/internal/projection/socialview"
 	"time"
 )
@@ -54,6 +55,7 @@ func wireInput(r sp.Result) sv.Result {
 }
 func MapBase(r sp.Result) sv.Base {
 	out := sv.MapBase(wireInput(r))
+	out.Count = int(sr.FriendCapacity)
 	for _, m := range r.PrivateMessages {
 		out.Offline = append(out.Offline, sv.PrivateMessage{PlayerID: int64(m.PlayerID), Message: m.Message, Time: m.Time})
 	}

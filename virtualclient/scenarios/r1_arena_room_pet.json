@@ -1,0 +1,18 @@
+{
+  "name": "r1_arena_room_pet",
+  "level": 100,
+  "tournament_room_fixture": true,
+  "note": "R1 case D (BUGS #95). The fixture seeds a stage-7 tournament room whose A and B sides selected no pet. The scenario sends the stock PLAYOFFS_REQUEST_ROOM_INFO (1292) through xyd.Backend and hands the real reply to the stock sync_select_team window; its updateSelectHeroes -> updateSelfSelectPets indexes A_pet_info when the server sends null instead of omitting the key. Not a second device: the peer row and the room come from the provisioner fixture.",
+  "steps": [
+    "wait:3",
+    "lua:_G.vcDCode=nil _G.vcDReply=nil xyd.Backend.get():request(xyd.mid.PLAYOFFS_REQUEST_ROOM_INFO,{stage=7,room_key='55555555-5555-5555-5555-555555555555/1'},function(code,reply) _G.vcDCode=code _G.vcDReply=reply end)",
+    "wait:3",
+    "lua:if vcDCode~=xyd.error.OK then error('vc-d-code-'..tostring(vcDCode)) end if type(vcDReply)~='table' then error('vc-d-reply') end xyd.WindowManager.get():openWindow('sync_select_team',vcDReply)",
+    "wait:2",
+    "lua:local w=xyd.WindowManager.get():getWindow('sync_select_team') if not w then error('vc-d-no-window') end w:updateSelectHeroes(vcDReply)"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    1292
+  ]
+}

@@ -147,6 +147,40 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	if _, err = s.Dispatch(ctx, a, request, start); err != nil {
 		t.Fatal("dispatch", err)
 	}
+	loaded, err := s.Load(ctx, a, op())
+	if err != nil {
+		t.Fatal("load after dispatch", err)
+	}
+	loadedTeams, ok := loaded["teams_info"].([]map[string]any)
+	if !ok {
+		t.Fatal("teams_info", loaded["teams_info"])
+	}
+	var busy map[string]any
+	for _, row := range loadedTeams {
+		if row["team_id"] == location.ID {
+			busy = row
+		}
+	}
+	if busy == nil {
+		t.Fatal("busy team row absent", loadedTeams)
+	}
+	award, ok := busy["award"].(map[string]any)
+	if !ok {
+		t.Fatal("busy team row award", busy)
+	}
+	normal, ok := award["normal_award"].(map[string]any)
+	if !ok || normal["award_type"] == nil || normal["item_num"] == nil || normal["award_time"] == nil {
+		t.Fatal("normal_award shape", award)
+	}
+	if _, ok = award["chest_award"].(map[string]any); !ok {
+		t.Fatal("chest_award object", award)
+	}
+	if _, ok = award["battle_award"].(map[string]any); !ok {
+		t.Fatal("battle_award object", award)
+	}
+	if award["externa_crystal_award"] == nil {
+		t.Fatal("externa_crystal_award", award)
+	}
 	first := workplaceRecord(t, p, a).Slots[location.ID]
 	if first == nil || first.Attempt != "" {
 		t.Fatal("dispatch snapshot", first)

@@ -563,6 +563,9 @@ func (st commandState) plan(c Command, at time.Time) (commandPlan, error) {
 		}
 		p.requests = append(p.requests, writePlan[FriendRequest]{previous, req})
 		p.epoch = &writePlan[RequestEpoch]{oldEpoch, epoch}
+		if st.present[b] {
+			p.project = append(p.project, b)
+		}
 		p.mark(a, b, RequestFriend)
 	case DenyRequests, IgnoreRequests:
 		for _, b := range st.order {

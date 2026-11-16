@@ -248,7 +248,8 @@ func TestCommentActualAPIProcess(t *testing.T) {
 	best := body["best_comments"].([]any)
 	row := best[0].(map[string]any)
 	id := int64(row["comment_id"].(float64))
-	if row["player_id"] != float64(b.PlayerID) || row["player_info"].(map[string]any)["player_id"] != float64(a.PlayerID) {
+	author, ok := row["from_player_info"].(map[string]any)
+	if !ok || row["player_id"] != float64(b.PlayerID) || author["player_id"] != float64(a.PlayerID) || author["player_name"] == nil || author["lev"] == nil || author["avatar_id"] == nil || author["avatar_frame_id"] == nil || row["content"] != "wire" || row["praise_num"] != float64(0) || row["is_has_praise"] != float64(0) {
 		t.Fatal("source owner/author", row)
 	}
 	status, body, e = send(fmt.Sprintf(`{"mid":1836,"token":%q,"region":1,"to_player_id":%d,"comment_id":%d}`, bearer, b.PlayerID, id))

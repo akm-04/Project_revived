@@ -178,7 +178,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [
-   "i9_8a_world_boss.json"
+   "i9_8a_world_boss.json",
+   "r1_worldboss_sweep.json"
   ],
   "unit": [
    "service_test.go"

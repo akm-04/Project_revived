@@ -590,7 +590,8 @@
    "i9_7b_playoffs.json",
    "i9_7c_friend_fight.json",
    "i9_7d_production_functions.json",
-   "i9_8a_world_boss.json"
+   "i9_8a_world_boss.json",
+   "r1_arena_room_pet.json"
   ],
   "unit": [
    "tournament_view_test.go"

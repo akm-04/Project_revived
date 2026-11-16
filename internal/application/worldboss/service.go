@@ -242,13 +242,12 @@ func (s Mode) preInfo(c context.Context, q tx.Queryer, ranks []d.RankEntry, play
 		return nil, nil
 	}
 	ahead := ordered[position-1]
-	profile, found, err := s.Directory.ProfileTx(c, q, identity.PlayerID(ahead.PlayerID))
+	profile, _, err := s.Directory.ProfileTx(c, q, identity.PlayerID(ahead.PlayerID))
 	if err != nil {
 		return nil, err
 	}
-	if !found {
-		return nil, nil
-	}
+	// The sweep window indexes pre_info whenever the viewer is not first; a
+	// missing profile still owes the client a shaped row (zero identity).
 	return map[string]any{"player_name": profile.Name, "avatar_id": profile.AvatarID, "avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "hurt": ahead.TotalHurt, "pre_rank": int64(position)}, nil
 }
 

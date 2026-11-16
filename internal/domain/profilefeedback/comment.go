@@ -70,7 +70,7 @@ type PublicAuthor struct {
 type CommentRow struct {
 	ID          int64             `json:"comment_id"`
 	Owner       identity.PlayerID `json:"player_id"`
-	Author      PublicAuthor      `json:"player_info"`
+	Author      PublicAuthor      `json:"from_player_info"`
 	Content     string            `json:"content"`
 	PraiseCount int64             `json:"praise_num"`
 	HasPraised  int64             `json:"is_has_praise"`

@@ -261,6 +261,7 @@ func team(v view, r *d.State, id int64) map[string]any {
 		}
 		wire["partners"], wire["start_time"], wire["need_time"], wire["treasure_type"] = ids, o.Start, o.Quote.Seconds, o.Job
 		wire["total_lev"], wire["total_star"], wire["total_color"] = o.Quote.TotalLevel, o.Quote.TotalStar, o.Quote.TotalColor
+		wire["award"] = o.Award
 		wire["externa_crystal_award"] = o.Award["externa_crystal_award"]
 		wire["with_external_award"] = int64(0)
 		if n, ok := o.Award["externa_crystal_award"].(int64); ok && n > 0 {
