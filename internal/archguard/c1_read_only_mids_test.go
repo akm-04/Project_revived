@@ -20,15 +20,28 @@ type readOnlyMID struct {
 	MID      int    `json:"mid"`
 	Function string `json:"function"`
 	File     string `json:"file"`
-	Line     int    `json:"line"`
 }
 
 type readOnlyMIDsFile struct {
 	MIDs []readOnlyMID `json:"mids"`
 }
 
-func TestC1ReadOnlyMIDsStayRepeatableReadOnly(t *testing.T) {
-	root := repoRoot(t)
+// midClassesFile is the part of the generated system map the read-only ledger
+// is proved complete against. A MID is read-only when the map traces at least
+// one transaction and every traced transaction is read_only true.
+type midClassesFile struct {
+	MIDs []struct {
+		MID          int `json:"mid"`
+		Transactions []struct {
+			Function string `json:"function"`
+			File     string `json:"file"`
+			ReadOnly string `json:"read_only"`
+		} `json:"transactions"`
+	} `json:"mids"`
+}
+
+func loadReadOnlyMIDs(t *testing.T, root string) readOnlyMIDsFile {
+	t.Helper()
 	raw, err := os.ReadFile(filepath.Join(root, "internal", "archguard", "read_only_mids.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -37,6 +50,70 @@ func TestC1ReadOnlyMIDsStayRepeatableReadOnly(t *testing.T) {
 	if err := json.Unmarshal(raw, &listed); err != nil {
 		t.Fatal(err)
 	}
+	return listed
+}
+
+func loadMIDClasses(t *testing.T, root string) midClassesFile {
+	t.Helper()
+	raw, err := os.ReadFile(filepath.Join(root, "docs", "architecture", "system_map", "MID_CLASSES.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var classes midClassesFile
+	if err := json.Unmarshal(raw, &classes); err != nil {
+		t.Fatal(err)
+	}
+	if len(classes.MIDs) == 0 {
+		t.Fatal("MID_CLASSES.json has no rows")
+	}
+	return classes
+}
+
+// TestC1ReadOnlyMIDLedgerCoversLiveReadOnlyMIDs derives the required ledger
+// population from the generated system map instead of trusting the hand list.
+// A ledger entry whose MID has no traced transaction stays admissible: the map
+// cannot see that route's transactions, so the ledger is the only evidence.
+func TestC1ReadOnlyMIDLedgerCoversLiveReadOnlyMIDs(t *testing.T) {
+	root := repoRoot(t)
+	ledger := loadReadOnlyMIDs(t, root)
+	classes := loadMIDClasses(t, root)
+	live := map[readOnlyMID]bool{}
+	mapBlindMIDs := map[int]bool{}
+	for _, row := range classes.MIDs {
+		if len(row.Transactions) == 0 {
+			mapBlindMIDs[row.MID] = true
+			continue
+		}
+		readOnly := true
+		for _, transaction := range row.Transactions {
+			if strings.ToLower(transaction.ReadOnly) != "true" {
+				readOnly = false
+			}
+		}
+		if !readOnly {
+			continue
+		}
+		for _, transaction := range row.Transactions {
+			live[readOnlyMID{MID: row.MID, Function: transaction.Function, File: transaction.File}] = true
+		}
+	}
+	listed := map[readOnlyMID]bool{}
+	for _, entry := range ledger.MIDs {
+		listed[entry] = true
+		if !live[entry] && !mapBlindMIDs[entry.MID] {
+			t.Errorf("MID %d: ledger names %s %s, but the system map traces no read-only-only route for it", entry.MID, entry.File, entry.Function)
+		}
+	}
+	for entry := range live {
+		if !listed[entry] {
+			t.Errorf("MID %d: live read-only route %s %s is missing from internal/archguard/read_only_mids.json", entry.MID, entry.File, entry.Function)
+		}
+	}
+}
+
+func TestC1ReadOnlyMIDsStayRepeatableReadOnly(t *testing.T) {
+	root := repoRoot(t)
+	listed := loadReadOnlyMIDs(t, root)
 	files := map[string][]byte{}
 	for _, entry := range listed.MIDs {
 		if _, ok := files[entry.File]; ok {

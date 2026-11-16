@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+const expected6BSelectionSHA = "ec5e3207c9d6b634499cb4749157946a9328f438d6730bd53311882198170247"
+
 func selectedGeneralDMActivation(t *testing.T) bool {
 	root := repoRoot(t)
 	b, e := os.ReadFile(filepath.Join(root, "BUILD_INFO.json"))
@@ -24,7 +26,7 @@ func selectedGeneralDMActivation(t *testing.T) bool {
 		return false
 	}
 	raw, e := os.ReadFile(filepath.Join(root, "docs/i7a6b/IMPLEMENTATION_SELECTION.json"))
-	if e != nil || fmt.Sprintf("%x", sha256.Sum256(raw)) != build["i7a6b_contract_sha256"] {
+	if e != nil || fmt.Sprintf("%x", sha256.Sum256(raw)) != expected6BSelectionSHA || build["i7a6b_contract_sha256"] != expected6BSelectionSHA {
 		t.Fatal("GeneralDM selection identity mismatch")
 	}
 	var value struct{ Contracts map[string]string }
