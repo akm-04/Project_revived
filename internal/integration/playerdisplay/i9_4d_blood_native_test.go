@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
@@ -144,11 +145,18 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	if e != nil || body["twice_awake_mission_"] == nil {
 		t.Fatal(body, e)
 	}
+	if exps, ok := body["exps"].([]any); !ok || len(exps) != 0 || body["old_num"] != float64(0) || body["add_exp"] != float64(0) {
+		t.Fatalf("Blood result win-window fields: exps=%#v old_num=%#v add_exp=%#v", body["exps"], body["old_num"], body["add_exp"])
+	}
 	if _, e = mode.Result(ctx, actor, 2001002, 20, terminal); e != nil {
 		t.Fatal("exact result replay", e)
 	}
 	if _, e = mode.Result(ctx, actor, 2001002, 20, op()); e != nil {
 		t.Fatal("terminal drain", e)
+	}
+	drained := dispatcher.Dispatch(ctx, playtestRequest(actor, 867, map[string]any{"twice_awake_mission": json.Number("2001002"), "incubus_id": json.Number("2001002"), "num": json.Number("20"), "npc_ids": map[string]any{}}))
+	if exps, ok := drained.Body["exps"].([]any); drained.HTTPStatus != 200 || !ok || len(exps) != 0 || fmt.Sprint(drained.Body["old_num"]) != "0" || fmt.Sprint(drained.Body["add_exp"]) != "0" {
+		t.Fatalf("Blood result wire: %+v", drained)
 	}
 	if _, e = owner.ChangeAwakening(ctx, actor, "claim", 2001002, 2, op()); e != nil {
 		t.Fatal(e)
