@@ -549,6 +549,7 @@
    "mail_attachments",
    "mail_namespace_counters",
    "mail_records",
+   "operator_audit_events",
    "player_awakening_roots",
    "player_crystal_spend_days",
    "player_currency_balances",

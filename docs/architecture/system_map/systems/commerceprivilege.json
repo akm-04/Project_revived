@@ -153,6 +153,7 @@
    "commerce_privilege_roots",
    "commerce_vip_awards",
    "gxb_operation_receipts",
+   "operator_audit_events",
    "player_directory_profiles"
   ]
  },

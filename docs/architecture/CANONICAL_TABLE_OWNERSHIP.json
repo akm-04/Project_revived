@@ -3707,6 +3707,34 @@
       "owner": "Ranking",
       "write_exceptions": []
     },
+    "operator_audit_events": {
+      "allowed_query_owners": [
+        "operations-audit"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/auditstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/auditstore/"
+      ],
+      "migration": "migrations/00170_l3b_operator_audit_events.sql",
+      "owner": "operations-audit",
+      "write_exceptions": []
+    },
+    "restore_epochs": {
+      "allowed_query_owners": [
+        "operations-recovery"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/restorestore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/restorestore/"
+      ],
+      "migration": "migrations/00171_l3b_restore_epochs.sql",
+      "owner": "operations-recovery",
+      "write_exceptions": []
+    },
     "player_hero_raw_awakening": {
       "allowed_query_owners": [
         "character/hero-core"

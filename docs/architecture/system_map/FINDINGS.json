@@ -9661,14 +9661,7 @@
    "declared": true
   }
  ],
- "tables_without_owner_row": [
-  {
-   "table": "operator_audit_events",
-   "migrations": [
-    "migrations/00170_l3b_operator_audit_events.sql"
-   ]
-  }
- ],
+ "tables_without_owner_row": [],
  "unattributed_mids": [
   {
    "mid": 2,
