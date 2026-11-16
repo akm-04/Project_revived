@@ -71,6 +71,14 @@ class ReplyConsumerTests(unittest.TestCase):
             for callback in callbacks:
                 self.assertIn(callback["status"], {"CHECKED", "UNKNOWN"}, mid)
 
+    def test_write_outputs_carry_the_embedded_copy(self):
+        outputs = reply_consumers.written_outputs(self.payload)
+        self.assertEqual(
+            set(outputs),
+            {reply_consumers.CONSUMERS_PATH, reply_consumers.EMBED_PATH},
+        )
+        self.assertEqual(outputs[reply_consumers.EMBED_PATH], reply_consumers.serialise(self.payload))
+
     def test_generation_is_deterministic(self):
         again = reply_consumers.build(self.blobs)
         self.assertEqual(

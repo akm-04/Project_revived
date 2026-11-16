@@ -111,7 +111,14 @@ type Handler struct {
 	Undelivered undelivered.Marker
 	// Metrics receives the R6 mark counters; nil disables them.
 	Metrics observability.Metrics
+	// Conformance, when set, checks every successful Body/JSON reply against the
+	// stock client's REQUIRED paths. It reports violations only, never a change.
+	Conformance interface {
+		Check(mid uint16, reply any) []string
+	}
 }
+
+const replyConformanceViolations = "reply_conformance_violations_total"
 
 // undeliveredMarkWriteTimeout bounds the separate autocommit mark write, which
 // must not be cancelled with the client connection it is recording.
@@ -278,6 +285,7 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	if record.Cause == nil && status >= http.StatusInternalServerError && hasPublicCode {
 		record.Cause = errors.New(publicCode)
 	}
+	h.checkReplyConformance(decoded.MID, status, resp)
 	for k, v := range resp.Headers {
 		w.Header().Set(k, v)
 	}
@@ -301,6 +309,23 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	notDelivered := writeErr != nil || flushErr != nil || r.Context().Err() != nil
 	if notDelivered && encodable {
 		h.markUndelivered(r.Context(), note, int64(decoded.MID), status, resp, op.StartedAt, encoded)
+	}
+}
+
+// checkReplyConformance reports, but never changes, a successful Body/JSON reply
+// that omits a REQUIRED client path (A-079). A Raw reply was checked when its
+// committed bytes were produced, and failures carry no client reply obligation.
+func (h Handler) checkReplyConformance(mid uint16, status int, response Response) {
+	if h.Conformance == nil || response.Raw != nil || !successReply(status, response) {
+		return
+	}
+	reply := any(response.Body)
+	if response.JSON != nil {
+		reply = response.JSON
+	}
+	for _, path := range h.Conformance.Check(mid, reply) {
+		log.Printf("reply_conformance_violation mid=%d path=%s", mid, path)
+		h.counter(replyConformanceViolations, 1)
 	}
 }
 

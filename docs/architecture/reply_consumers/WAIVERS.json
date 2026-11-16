@@ -1,4 +1,101 @@
 {
  "schema_version": 1,
- "waivers": []
+ "waivers": [
+  {
+   "client": "app/model/NonFriendPlayer.lua:15",
+   "mid": 177,
+   "path": "request_time",
+   "reason": "NonFriendPlayer.populate passes the field to tonumber, which accepts nil; the request row uses the same player shape as a friend row"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2431",
+   "mid": 1292,
+   "path": "A_pet_info",
+   "reason": "updateSelfSelectPets guards the passed table with `if arg_102_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2431",
+   "mid": 1292,
+   "path": "A_pet_info.star",
+   "reason": "updateSelfSelectPets guards the passed table with `if arg_102_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2431",
+   "mid": 1292,
+   "path": "A_pet_info.table_id",
+   "reason": "updateSelfSelectPets guards the passed table with `if arg_102_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2472",
+   "mid": 1292,
+   "path": "A_pet_info.color",
+   "reason": "updateEnemySelectPets guards the passed table with `if arg_103_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2431",
+   "mid": 1292,
+   "path": "B_pet_info",
+   "reason": "updateSelfSelectPets guards the passed table with `if arg_102_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2431",
+   "mid": 1292,
+   "path": "B_pet_info.star",
+   "reason": "updateSelfSelectPets guards the passed table with `if arg_102_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2431",
+   "mid": 1292,
+   "path": "B_pet_info.table_id",
+   "reason": "updateSelfSelectPets guards the passed table with `if arg_102_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/SyncSelectTeamWindow.lua:2472",
+   "mid": 1292,
+   "path": "B_pet_info.color",
+   "reason": "updateEnemySelectPets guards the passed table with `if arg_103_1 then` before indexing it; the R1 fixed shape omits the table for a side that selected no pet"
+  },
+  {
+   "client": "app/windows/AdventureIllusionSelectHeroWindow.lua:545",
+   "mid": 2423,
+   "path": "room_info.master_pet",
+   "reason": "the adventure room projection carries no master pet; the client reads the stored teamInfo field through tonumber, which accepts nil"
+  },
+  {
+   "client": "app/model/AdventureEvent.lua:784",
+   "mid": 2425,
+   "path": "challenge_times[]",
+   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
+  },
+  {
+   "client": "app/model/AdventureEvent.lua:306",
+   "mid": 2425,
+   "path": "monster_statuses",
+   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
+  },
+  {
+   "client": "app/windows/AdventureDefenseWindow.lua:91",
+   "mid": 2425,
+   "path": "monster_statuses[]",
+   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
+  },
+  {
+   "client": "app/model/AdventureEvent.lua:302",
+   "mid": 2425,
+   "path": "pos_statuses[]",
+   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
+  },
+  {
+   "client": "app/windows/AdventureDefenseMonsterDetailWindow.lua:147",
+   "mid": 2425,
+   "path": "pos_statuses[].player_id",
+   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
+  },
+  {
+   "client": "app/windows/AdventureDefenseMonsterDetailWindow.lua:14",
+   "mid": 2425,
+   "path": "room_info.campaign_id",
+   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; campaign_id is read from the Defense room_info"
+  }
+ ]
 }

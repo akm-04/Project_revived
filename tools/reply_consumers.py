@@ -22,8 +22,9 @@ reason and the client file:line that shows the guard or the branch.
     tools/reply_consumers.py --source-archive ZIP --write
     tools/reply_consumers.py --source-archive ZIP --check
 
-``--write`` regenerates docs/architecture/reply_consumers/REPLY_CONSUMERS.json
-and creates WAIVERS.json when it is absent (it is hand edited afterwards).
+``--write`` regenerates docs/architecture/reply_consumers/REPLY_CONSUMERS.json,
+copies it into the replyconformance package for go:embed, and creates
+WAIVERS.json when it is absent (it is hand edited afterwards).
 Sites are collapsed to one entry per (file, line) and encoded compactly:
 ``site_files`` interns every client path and a site row is
 ``[site_files index, line, guarded (0/1), sorted via values]``.
@@ -45,6 +46,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIRECTORY = ROOT / "docs/architecture/reply_consumers"
 CONSUMERS_PATH = OUTPUT_DIRECTORY / "REPLY_CONSUMERS.json"
 WAIVERS_PATH = OUTPUT_DIRECTORY / "WAIVERS.json"
+EMBED_PATH = ROOT / "internal/protocol/replyconformance/reply_consumers.json"
 LOCK_PATH = ROOT / "oracles.lock.json"
 DEFAULT_ARCHIVE = ROOT / "inputs/assets/Older/all-assest-rechecked-1.zip"
 
@@ -1700,6 +1702,11 @@ def serialise_waivers(waivers: dict) -> str:
     return json.dumps(waivers, indent=1, sort_keys=True) + "\n"
 
 
+def written_outputs(payload: dict) -> dict[Path, str]:
+    rendered = serialise(payload)
+    return {CONSUMERS_PATH: rendered, EMBED_PATH: rendered}
+
+
 def read_waivers() -> dict:
     if WAIVERS_PATH.exists():
         return json.loads(WAIVERS_PATH.read_text())
@@ -1726,16 +1733,19 @@ def main(argv: list[str] | None = None) -> int:
             print(problem, file=sys.stderr)
         return 1
     payload = apply_waivers(waivers, payload)
+    outputs = written_outputs(payload)
     if arguments.check:
-        if not CONSUMERS_PATH.exists() or CONSUMERS_PATH.read_text() != serialise(payload):
-            print(f"{CONSUMERS_PATH} is stale; rerun with --write", file=sys.stderr)
-            return 1
+        for path, content in outputs.items():
+            if not path.exists() or path.read_text() != content:
+                print(f"{path} is stale; rerun with --write", file=sys.stderr)
+                return 1
         return 0
-    OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    CONSUMERS_PATH.write_text(serialise(payload))
+    for path, content in outputs.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
     if not WAIVERS_PATH.exists():
         WAIVERS_PATH.write_text(serialise_waivers(waivers))
-    print(f"wrote {CONSUMERS_PATH} mids={payload['mid_count']} unknown={payload['unknown_callbacks']}")
+    print(f"wrote {CONSUMERS_PATH} and {EMBED_PATH} mids={payload['mid_count']} unknown={payload['unknown_callbacks']}")
     return 0
 
 
