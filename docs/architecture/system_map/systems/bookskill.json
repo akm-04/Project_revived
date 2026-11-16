@@ -98,7 +98,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 83,
    "name": "COMPOSE_ITEM"
@@ -106,7 +106,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1056,
    "name": "GET_BUILDING_LIST"
@@ -114,7 +114,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1057,
    "name": "UPGRADE_BUILDING"
@@ -122,7 +122,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1058,
    "name": "CANCEL_EVOLVE_BUILDING"
@@ -130,7 +130,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1059,
    "name": "GET_CABINET_INFO"
@@ -138,7 +138,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1060,
    "name": "LEARN_SKILL"
@@ -146,7 +146,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1061,
    "name": "GIVE_UP_LEARN_SKILL"
@@ -154,7 +154,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1077,
    "name": "SPEED_UP_BUILDING"
@@ -162,7 +162,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1078,
    "name": "SPEED_UP_SKILL"
@@ -170,7 +170,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1079,
    "name": "CABINET_SKILL_CONFIRM"
@@ -178,7 +178,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/book_dispatcher.go",
-    "line": 23
+    "line": 25
    },
    "mid": 1080,
    "name": "CONFIRM_BUILDING_UPGRADE"
@@ -232,7 +232,8 @@
    "a44_boundary_test.go",
    "extension_start_test.go",
    "pinned_buildings_test.go",
-   "pins_a55_test.go"
+   "pins_a55_test.go",
+   "read_snapshot_test.go"
   ]
  }
 }

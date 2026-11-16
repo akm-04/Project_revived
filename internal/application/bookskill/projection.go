@@ -123,20 +123,27 @@ func (s Service) buildingsWire(ctx context.Context, q tx.Queryer, scope InputSco
 	if e != nil {
 		return nil, e
 	}
+	return s.buildingsWireFrom(ctx, q, scope, v.Applied)
+}
+
+func (s Service) buildingsWireFrom(ctx context.Context, q tx.Queryer, scope InputScope, applied book.State) (map[string]any, error) {
+	if s.MakeInfo == nil {
+		return nil, ErrUnavailable
+	}
 	desk, pet, e := s.MakeInfo.MakeInfoTx(ctx, q, scope.Player, scope.ObservedAt)
 	if e != nil {
 		return nil, e
 	}
 	bs := map[string]any{}
 	for t := int64(1); t <= 7; t++ {
-		b, ok := v.Applied.Buildings[t]
+		b, ok := applied.Buildings[t]
 		if ok {
 			bs[strconv.FormatInt(t, 10)] = book.BuildingWire(b)
 		} else {
 			bs[strconv.FormatInt(t, 10)] = map[string]any{"lev": int64(1), "need_time": int64(0), "start_time": int64(0), "new_evolve": int64(0)}
 		}
 	}
-	body := map[string]any{"building_list": bs, "cabinet_info": book.CabinetWire(v.Applied), "desk_info": desk, "pet_cabin_info": pet}
+	body := map[string]any{"building_list": bs, "cabinet_info": book.CabinetWire(applied), "desk_info": desk, "pet_cabin_info": pet}
 	wallet, e := s.wallet(ctx, q, scope.Player)
 	if e != nil {
 		return nil, e
@@ -146,6 +153,10 @@ func (s Service) buildingsWire(ctx context.Context, q tx.Queryer, scope InputSco
 	}
 	return body, nil
 }
+
+// Read hydrates MID 1056/1059. A read-only repeatable-read snapshot settles a
+// clone first: an idle poll takes no lock and writes nothing. Only a due settle
+// falls through to the serializable owner path that persists it.
 func (s Service) Read(ctx context.Context, a identity.ActorContext, mid uint16, op operation.Context) (map[string]any, error) {
 	if !s.complete() || (mid != 1056 && mid != 1059) {
 		return nil, ErrUnavailable
@@ -157,6 +168,52 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, mid uint16, 
 	if !on {
 		return nil, ErrUnavailable
 	}
+	var body map[string]any
+	due := false
+	_, result, e := s.Timed.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc gen.TimedScope) error {
+		body, due, e = s.readSnapshot(ctx, sc.Tx, a.PlayerID, mid, rev, sc.Operation.DecisionAt())
+		return e
+	})
+	if e != nil {
+		return nil, e
+	}
+	if result.Outcome != tx.DefiniteCommit {
+		return nil, ErrUnavailable
+	}
+	if !due {
+		return body, nil
+	}
+	return s.settledRead(ctx, a, mid, op, rev)
+}
+
+func (s Service) readSnapshot(ctx context.Context, q tx.Queryer, player identity.PlayerID, mid uint16, rev string, at time.Time) (map[string]any, bool, error) {
+	r, e := s.Owner.ReadRootTx(ctx, q, player)
+	if e != nil {
+		return nil, false, e
+	}
+	if at.Before(r.UpdatedAt) {
+		return nil, false, ErrStale
+	}
+	c, e := s.Content.BookCatalogTx(ctx, q, rev)
+	if e != nil {
+		return nil, false, e
+	}
+	if e = s.validateFacts(ctx, q, r.Facts, c, rev); e != nil {
+		return nil, false, e
+	}
+	applied := r.Facts.Clone()
+	due, e := applied.Settle(at)
+	if e != nil {
+		return nil, false, e
+	}
+	if due {
+		return nil, true, nil
+	}
+	body, e := s.readBody(ctx, q, player, mid, rev, applied, c, at)
+	return body, false, e
+}
+
+func (s Service) settledRead(ctx context.Context, a identity.ActorContext, mid uint16, op operation.Context, rev string) (map[string]any, error) {
 	var body map[string]any
 	_, result, e := s.Timed.Run(ctx, op, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, nil, func(ctx context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
@@ -189,30 +246,33 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, mid uint16, 
 				return e
 			}
 		}
-		scope := InputScope{a.PlayerID, rev, at}
-		if mid == 1056 {
-			body, e = s.buildingsWire(ctx, sc.Tx, scope)
-			return e
-		}
-		books := map[string]any{}
-		for id := range c.Books {
-			books[strconv.FormatInt(id, 10)] = book.BookWire(c, r.Facts, id, false)
-		}
-		body = map[string]any{"book_info": books, "cabinet_info": book.CabinetWire(r.Facts)}
-		wallet, e := s.wallet(ctx, sc.Tx, a.PlayerID)
-		if e != nil {
-			return e
-		}
-		for k, v := range wallet {
-			body[k] = v
-		}
-		return nil
+		body, e = s.readBody(ctx, sc.Tx, a.PlayerID, mid, rev, r.Facts, c, at)
+		return e
 	})
 	if e != nil {
 		return nil, e
 	}
 	if result.Outcome != tx.DefiniteCommit {
 		return nil, ErrUnavailable
+	}
+	return body, nil
+}
+
+func (s Service) readBody(ctx context.Context, q tx.Queryer, player identity.PlayerID, mid uint16, rev string, facts book.State, catalog book.Catalog, at time.Time) (map[string]any, error) {
+	if mid == 1056 {
+		return s.buildingsWireFrom(ctx, q, InputScope{Player: player, ContentRevision: rev, ObservedAt: at}, facts)
+	}
+	books := map[string]any{}
+	for id := range catalog.Books {
+		books[strconv.FormatInt(id, 10)] = book.BookWire(catalog, facts, id, false)
+	}
+	body := map[string]any{"book_info": books, "cabinet_info": book.CabinetWire(facts)}
+	wallet, e := s.wallet(ctx, q, player)
+	if e != nil {
+		return nil, e
+	}
+	for k, v := range wallet {
+		body[k] = v
 	}
 	return body, nil
 }
