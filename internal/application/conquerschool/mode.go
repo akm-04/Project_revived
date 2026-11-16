@@ -150,7 +150,8 @@ func retry() tx.RetryPolicy {
 func (s Mode) ready() bool {
 	return s.Facts.Owner != nil && s.Facts.Content != nil && s.Facts.Players != nil && s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil &&
 		s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil && s.Grants != nil && s.Mail != nil &&
-		s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Directory != nil && s.Projection != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Directory != nil && s.Projection != nil && s.Receipts != nil && s.ReceiptRead != nil &&
+		s.Broadcast != nil
 }
 
 // pin binds the active content revision to the operation once, so the facts
@@ -487,9 +488,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result
 		if settled.Promoted {
 			err = s.Projection.ProjectConquerTx(c, sc.Tx, a.PlayerID, settled.Progress.Level, settled.Progress.Loop, at)
 		}
-		if err == nil && settled.Promoted && s.Broadcast != nil {
+		if err == nil && settled.Promoted {
 			message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.ConquerSchool, Server: a.LogicalServerID, Player: a.PlayerID,
-				Fields: broadcast.Fields{Region: view.Region, ConquerLoopID: settled.Attempt.Loop, ConquerLev: settled.Progress.Level}}
+				Fields: broadcast.Fields{Region: settled.Region, ConquerLoopID: settled.Attempt.Loop, ConquerLev: settled.Progress.Level}}
 			err = s.Broadcast.EmitTx(c, sc.Tx, message)
 		}
 		return view, err

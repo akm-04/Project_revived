@@ -467,6 +467,10 @@ type generalWaitFault struct {
 func (v generalWaitFault) Accept(c context.Context, a, b int64, msg string, op operation.Context) (dm.Intent, error) {
 	return dm.Intent{ID: op.ID.String(), Digest: dm.Digest(a, b, msg), ExpiresAt: time.Now().Add(8 * time.Second), Status: dm.Pending}, nil
 }
+
+type generalDMWakeupRecorder struct{ emitted atomic.Int64 }
+
+func (r *generalDMWakeupRecorder) EmitGeneralDM(context.Context, dm.Intent) { r.emitted.Add(1) }
 func (v generalWaitFault) Wait(c context.Context, i dm.Intent) (dm.Intent, error) {
 	v.entered <- struct{}{}
 	select {
@@ -485,7 +489,8 @@ func Test6B_G25_G30APIWaiterCapacityAndFalseEcho(t *testing.T) {
 	defer once.Do(func() { close(release) })
 	entered := make(chan struct{}, 16)
 	r := httpedge.NewRouter()
-	d := stockruntime.GeneralDMDispatcher{Authority: f.authority(), Service: generalWaitFault{entered: entered, release: release}, Slots: make(chan struct{}, 16)}
+	emitter := &generalDMWakeupRecorder{}
+	d := stockruntime.GeneralDMDispatcher{Authority: f.authority(), Service: generalWaitFault{entered: entered, release: release}, Slots: make(chan struct{}, 16), Emitter: emitter}
 	if e := r.Register(513, d); e != nil {
 		t.Fatal(e)
 	}
@@ -508,6 +513,9 @@ func Test6B_G25_G30APIWaiterCapacityAndFalseEcho(t *testing.T) {
 		case <-time.After(3 * time.Second):
 			t.Fatal("waiter not admitted", n)
 		}
+	}
+	if got := emitter.emitted.Load(); got != 16 {
+		t.Fatalf("general DM wakeups=%d want 16", got)
 	}
 	if code, _ := httpRequest(t, server, token, 1, 513, map[string]any{"to_player_id": 200001, "message": "overflow"}); code != 503 {
 		t.Fatal("capacity not finite", code)

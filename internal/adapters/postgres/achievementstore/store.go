@@ -9,11 +9,14 @@ import (
 	app "gxb.local/backend/v2/internal/application/achievement"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
 
-type Store struct{}
+type Store struct {
+	Metrics observability.Metrics
+}
 
 func (Store) ReadRootTx(c context.Context, q tx.Queryer, pid identity.PlayerID, lock bool) (d.Root, bool, error) {
 	var r d.Root

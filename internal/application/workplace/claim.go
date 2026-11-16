@@ -121,7 +121,7 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 			if _, err = s.Values.SettleGrantTx(c, sc.Tx, a, plan, bound, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 				return nil, err
 			}
-			if amount := externalCrystalAward(o.Award); amount > 0 && s.Broadcast != nil {
+			if amount := externalCrystalAward(o.Award); amount > 0 {
 				message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.TreasureDiamond, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{CrystalAward: amount}}
 				if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
 					return nil, err

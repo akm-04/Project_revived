@@ -492,11 +492,9 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 			return err
 		}
 	}
-	if s.Broadcast != nil {
-		for _, message := range settlementMessages(catalog, f, outcome, challengerStreak) {
-			if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
-				return err
-			}
+	for _, message := range settlementMessages(catalog, f, outcome, challengerStreak) {
+		if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+			return err
 		}
 	}
 	fact := objective.Fact{PlayerID: f.Challenger, SourceDomain: "top-floor", SourceBusinessKey: f.AttemptID.String(), Kind: objective.PVPFightKind, Delta: 1}

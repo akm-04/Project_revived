@@ -343,7 +343,8 @@
    "playtest4_fixes.json"
   ],
   "unit": [
-   "audit_snapshot_test.go"
+   "audit_snapshot_test.go",
+   "notice_policy_native_test.go"
   ]
  }
 }

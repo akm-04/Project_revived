@@ -216,6 +216,7 @@ type Settlement struct {
 	Mode       Mode
 	Run        Run
 	Progress   Progress
+	Region     int64
 	Promoted   bool
 	Rewards    [][2]int64
 	KeepReport bool
@@ -235,7 +236,7 @@ func (c ModeCatalog) Settle(m Mode, r Run, p Progress, res Result, attemptID str
 	}
 	a := Attempt{ID: attemptID, Loop: r.Loop, MissionID: r.CurrentID, Formation: slices.Clone(res.Formation), Pet: res.Pet}
 	m = m.clone()
-	out := Settlement{Run: r, Progress: p, KeepReport: res.Win && !res.ReportInvalid, Attempt: a}
+	out := Settlement{Run: r, Progress: p, Region: mission.Region, KeepReport: res.Win && !res.ReportInvalid, Attempt: a}
 	if !res.Win {
 		m.Buff = min(m.Buff+1, c.BuffLimit)
 		out.Mode = m

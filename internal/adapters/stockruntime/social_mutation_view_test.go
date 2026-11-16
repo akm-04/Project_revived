@@ -15,13 +15,17 @@ import (
 
 type relationMutationProbe struct{ result sr.Result }
 
+type discardReloads struct{}
+
+func (discardReloads) Emit(context.Context, []sr.ReloadReference) {}
+
 func (p relationMutationProbe) Execute(context.Context, identity.ActorContext, sr.Command, operation.Context) (sr.Result, error) {
 	return p.result, nil
 }
 
 func mutationResponse(t *testing.T, mid uint16, result sr.Result) map[string]any {
 	t.Helper()
-	dispatcher := SocialDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Relations: relationMutationProbe{result: result}}
+	dispatcher := SocialDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Relations: relationMutationProbe{result: result}, Emitter: discardReloads{}}
 	response := dispatcher.Dispatch(context.Background(), heroReq(t, mid, map[string]any{"player_id": int64(200001)}))
 	if response.HTTPStatus != 200 {
 		t.Fatalf("mid %d status %d %#v", mid, response.HTTPStatus, response.Body)

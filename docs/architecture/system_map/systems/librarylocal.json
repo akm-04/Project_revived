@@ -378,7 +378,9 @@
   ],
   "unit": [
    "command_reward_test.go",
+   "commands_log_test.go",
    "inputs_test.go",
+   "journal_policy_native_test.go",
    "roll_policy_test.go"
   ]
  }

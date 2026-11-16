@@ -50,3 +50,16 @@ type NopMetrics struct{}
 
 func (NopMetrics) Counter(string, Labels, uint64)        {}
 func (NopMetrics) Observe(string, Labels, time.Duration) {}
+
+// CountDropped records one optional, display-only payload its owner discarded
+// after failed validation (D1). It never decides whether to drop an error.
+func CountDropped(metrics Metrics, name, domain string) {
+	if metrics == nil {
+		return
+	}
+	labels, err := NewLabels(Pair{Key: "domain", Value: domain})
+	if err != nil {
+		return
+	}
+	metrics.Counter(name, labels, 1)
+}

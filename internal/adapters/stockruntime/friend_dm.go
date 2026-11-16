@@ -91,15 +91,13 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 	if msg.SelectType != friendmessage.SelectSocialSystem {
 		return bad()
 	}
-	if d.Service == nil {
+	if d.Service == nil || d.Emitter == nil {
 		return failureReply(defect(nil))
 	}
 	o, e := d.Service.Accept(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation)
 	if e != nil {
 		return refusalOrTransient(e)
 	}
-	if d.Emitter != nil {
-		d.Emitter.EmitFriendDM(c, o)
-	}
+	d.Emitter.EmitFriendDM(c, o)
 	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
 }

@@ -300,7 +300,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		}
 		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{"ids": out}}
 	}
-	if d.Relations == nil {
+	if d.Relations == nil || d.Emitter == nil {
 		return failureReply(defect(nil))
 	}
 	command := sr.Command{}
@@ -367,7 +367,7 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 			return socialFailure(e)
 		}
 	}
-	if d.Emitter != nil && len(result.Reloads) > 0 {
+	if len(result.Reloads) > 0 {
 		d.Emitter.Emit(ctx, result.Reloads)
 	}
 	return httpedge.Response{HTTPStatus: 200, JSON: body}

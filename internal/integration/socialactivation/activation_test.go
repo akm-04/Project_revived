@@ -206,7 +206,7 @@ func (f *fixture) authority() i4store.RealtimeAuthority {
 }
 func (f *fixture) httpServer() *httptest.Server {
 	r := httpedge.NewRouter()
-	d := stockruntime.SocialDispatcher{Authority: f.authority(), Relations: f.s, Projection: f.v, Dismissal: f.dismiss()}
+	d := stockruntime.SocialDispatcher{Authority: f.authority(), Relations: f.s, Projection: f.v, Dismissal: f.dismiss(), Emitter: postgres.SocialWakeupEmitter{Pool: f.p}}
 	if e := stockruntime.RegisterSocialRoutes(r, d); e != nil {
 		f.t.Fatal(e)
 	}

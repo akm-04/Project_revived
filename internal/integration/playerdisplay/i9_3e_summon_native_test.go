@@ -28,9 +28,10 @@ import (
 
 func summonMode(p *pg.Pool) app.Mode {
 	values, content, heroes := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}, characterstore.Store{Queryer: p}
-	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: summonstore.Store{}, Content: content, Fence: values,
+	mode := app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: summonstore.Store{}, Content: content, Fence: values,
 		Heroes:   hero.Service{AcquisitionStore: heroes, Acquisition: content, CollectionAdmission: hero.CatalogCollectionAdmission{Content: content}, FreshFacets: characterbirth.FreshHeroFacets()},
-		HeroWire: heroproj.StockHero, Grants: compositeI5(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Privileges: i5.BaselinePrivilegeProvider{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		HeroWire: heroproj.StockHero, Grants: compositeI5(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Privileges: i5.BaselinePrivilegeProvider{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Broadcast: pg.BroadcastEmitter{}}
+	return mode
 }
 
 func summonRows(t *testing.T, body map[string]any) []map[string]any {

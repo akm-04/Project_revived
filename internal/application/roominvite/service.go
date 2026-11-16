@@ -125,7 +125,7 @@ func MaterializeProfile() tx.Profile {
 }
 
 func (s Service) valid() bool {
-	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Players != nil && s.Roots.Store != nil && s.Store != nil
+	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Players != nil && s.Roots.Store != nil && s.Store != nil && s.Notices != nil
 }
 
 func childOperation(parent operation.Context, source socialinbox.SourceKey) (operation.Context, error) {
@@ -216,7 +216,7 @@ func (s Service) Materialize(c context.Context, actor identity.ActorContext, inv
 	if result.Outcome != tx.DefiniteCommit {
 		return ErrUnresolved
 	}
-	if changed && !result.Reconciled && s.Notices != nil {
+	if changed && !result.Reconciled {
 		s.Notices.NoticeListChanged(c, invite.Recipient)
 	}
 	return nil

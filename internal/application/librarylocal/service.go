@@ -17,11 +17,13 @@ import (
 	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"log"
 	"strconv"
 	"time"
 )
@@ -284,14 +286,29 @@ type Service struct {
 	Stacks       StackReader
 	Skins        SkinPort
 	Broadcast    broadcast.Emitter
+	Metrics      observability.Metrics
 }
 
 func Profile() tx.Profile {
 	return tx.Profile{Name: "I7C2B_LIBRARY_INPUTS", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 8 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 15 * time.Second}
 }
 func (s Service) complete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Library != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Receipts != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Library != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Receipts != nil && s.Broadcast != nil
 }
+
+// RecordHeroLogTx writes one display-only Girls Log row (D1): a row that
+// fails its own validation is dropped, journalled and counted, and the gift
+// or marriage commits; a database error stays fatal.
+func (s Service) RecordHeroLogTx(ctx context.Context, t tx.Tx, f lib.HeroLogFact) error {
+	_, err := s.Library.InsertHeroLogTx(ctx, t, f)
+	if err == nil || !errors.Is(err, lib.ErrInvalidFacts) {
+		return err
+	}
+	log.Printf("library: dropped Girls Log row partner=%d log_id=%d: %v", f.PartnerID, f.LogID, err)
+	observability.CountDropped(s.Metrics, "girls_log_dropped", "library")
+	return nil
+}
+
 func receiptID(d Admission) receipt.Identity {
 	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(d.Actor.Player, 10), Domain: "library-local", Operation: d.Command.Family, SemanticKey: d.Operation.ID.String()}
 }
@@ -766,7 +783,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			}
 			if facts.Favor > oldFavor {
 				for _, logID := range lib.FavorLogIDsCrossed(oldFavor, facts.Favor) {
-					if _, e = s.Library.InsertHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: logID, OccurredAt: d.DecisionAt}); e != nil {
+					if e = s.RecordHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: logID, OccurredAt: d.DecisionAt}); e != nil {
 						return e
 					}
 				}
@@ -775,14 +792,12 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				}
 			}
 			if !wasMarried && facts.Married {
-				if _, e = s.Library.InsertHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: lib.LogMarried, OccurredAt: d.DecisionAt}); e != nil {
+				if e = s.RecordHeroLogTx(ctx, sc.Tx, lib.HeroLogFact{PlayerID: a.PlayerID, PartnerID: d.Command.PartnerID, LogID: lib.LogMarried, OccurredAt: d.DecisionAt}); e != nil {
 					return e
 				}
-				if s.Broadcast != nil {
-					message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.Married, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{HeroTableID: h.TableID}}
-					if e = s.Broadcast.EmitTx(ctx, sc.Tx, message); e != nil {
-						return e
-					}
+				message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.Married, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{HeroTableID: h.TableID}}
+				if e = s.Broadcast.EmitTx(ctx, sc.Tx, message); e != nil {
+					return e
 				}
 			}
 			if d.Command.Family == TalkAward && out.HasDialog && out.Dialog.IsAwarded {

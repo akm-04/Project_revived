@@ -54,7 +54,7 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	if r.Envelope.MID != 513 {
 		return fail(409, "general_message_unavailable")
 	}
-	if d.Service == nil || d.Slots == nil || cap(d.Slots) != 16 {
+	if d.Service == nil || d.Slots == nil || cap(d.Slots) != 16 || d.Emitter == nil {
 		return failureReply(defect(nil))
 	}
 	params, e := socialFields(r.Envelope.Params, "message", "to_player_id", "channel")
@@ -110,7 +110,7 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	if e != nil {
 		return refusalOrTransient(e)
 	}
-	if d.Emitter != nil && !i.Status.Terminal() {
+	if !i.Status.Terminal() {
 		d.Emitter.EmitGeneralDM(bounded, i)
 	}
 	result, e := d.Service.Wait(bounded, i)

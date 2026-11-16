@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"strconv"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -97,6 +100,7 @@ type Service struct {
 	AppearanceMutationStore   HeroAppearanceMutationStore
 	AppearanceMutationContent HeroAppearanceMutationContent
 	LIVEMutationStore         HeroLIVEMutationStore
+	Metrics                   observability.Metrics
 }
 
 func profile() tx.Profile {
@@ -105,11 +109,20 @@ func profile() tx.Profile {
 
 // recordHeroJournalTx writes a Girls Log milestone when the production
 // composition supplies the Library journal. Nil keeps standalone compositions.
+// The diary is display-only (D1): a row that fails its own validation is
+// dropped, journalled and counted, and the star, promotion or awakening
+// commits; a database error stays fatal.
 func (s Service) recordHeroJournalTx(ctx context.Context, t tx.Tx, player identity.PlayerID, partnerID, logID int64, at time.Time) error {
 	if s.Journals == nil {
 		return nil
 	}
-	return s.Journals.RecordHeroLogTx(ctx, t, player, partnerID, logID, at)
+	err := s.Journals.RecordHeroLogTx(ctx, t, player, partnerID, logID, at)
+	if err == nil || !errors.Is(err, lib.ErrInvalidFacts) {
+		return err
+	}
+	log.Printf("characterhero: dropped Girls Log row partner=%d log_id=%d: %v", partnerID, logID, err)
+	observability.CountDropped(s.Metrics, "girls_log_dropped", "library")
+	return nil
 }
 
 func (s Service) validate() error {

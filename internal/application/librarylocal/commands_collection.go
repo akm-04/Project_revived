@@ -33,11 +33,9 @@ func (s Service) claimCGTx(ctx context.Context, t tx.Tx, a identity.ActorContext
 	if e != nil {
 		return nil, e
 	}
-	if s.Broadcast != nil {
-		message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.UnlockCG, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{CGID: rule.ID}}
-		if e = s.Broadcast.EmitTx(ctx, t, message); e != nil {
-			return nil, e
-		}
+	message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.UnlockCG, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{CGID: rule.ID}}
+	if e = s.Broadcast.EmitTx(ctx, t, message); e != nil {
+		return nil, e
 	}
 	return result.Awards, nil
 }

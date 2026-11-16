@@ -141,6 +141,28 @@ func TestI8_5DConquerStartBindsCombatAttemptNative(t *testing.T) {
 	if _, err = s.Reset(ctx, a, op()); err != nil {
 		t.Fatal("reset without an open attempt", err)
 	}
+
+	// D5-06 announcement: a promotion emits 3005 with the cleared mission's
+	// region (mission 10001 is region 1), through the composed emitter.
+	if _, err = s.Start(ctx, a, girls[:1], 0, op()); err != nil {
+		t.Fatal(err)
+	}
+	promoted, err := s.Result(ctx, a, d.Result{CampaignID: 10001, TeamID: 1, Win: true, Formation: girls[:1], Alive: 1}, json.RawMessage(`{"fighter":{}}`), op())
+	if err != nil || !promoted.Promoted {
+		t.Fatalf("promotion %+v %v", promoted, err)
+	}
+	row := struct {
+		Region int64
+		Loop   int64
+		Level  int64
+	}{}
+	if err = pool.Raw().QueryRow(ctx, `SELECT (fields->>'region')::bigint,(fields->>'conquer_loop_id')::bigint,(fields->>'conquer_lev')::bigint
+		FROM broadcast_outbox WHERE player_id=$1 AND msg_type=3005 ORDER BY broadcast_id DESC LIMIT 1`, int64(a.PlayerID)).Scan(&row.Region, &row.Loop, &row.Level); err != nil {
+		t.Fatal("3005 announcement", err)
+	}
+	if row.Region != 1 || row.Loop != 1 || row.Level != 1 {
+		t.Fatalf("3005 fields %+v", row)
+	}
 }
 
 func TestI8_5DConquerConcurrentStartsNative(t *testing.T) {

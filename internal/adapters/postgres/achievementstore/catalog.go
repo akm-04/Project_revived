@@ -9,7 +9,9 @@ import (
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"log"
 	"strconv"
 	"time"
 )
@@ -66,10 +68,18 @@ func (Store) PutClaimTx(c context.Context, t tx.Tx, pid identity.PlayerID, level
 }
 
 // PutNoticesTx records notice intents once per earned tier. The wakeup is a
-// transactional NOTIFY, so it reaches the realtime route only on commit.
-func (Store) PutNoticesTx(c context.Context, t tx.Tx, notices []app.Notice) error {
+// transactional NOTIFY, so it reaches the realtime route only on commit. The
+// earned tier fact is written by its owner before this call; a notice that
+// fails its own validation is display-only and is dropped, journalled and
+// counted (D1), while a database or wakeup error stays fatal.
+func (s Store) PutNoticesTx(c context.Context, t tx.Tx, notices []app.Notice) error {
 	woken := map[identity.PlayerID]bool{}
 	for _, n := range notices {
+		if err := n.Validate(); err != nil {
+			log.Printf("achievement: dropped notice achievement=%d tier=%d: %v", n.AchievementID, n.Tier, err)
+			observability.CountDropped(s.Metrics, "achievement_notice_dropped", "achievement")
+			continue
+		}
 		tag, e := t.Exec(c, `INSERT INTO achievement_notices(player_id,achievement_id,tier,complete_time)VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING`, int64(n.Player), n.AchievementID, n.Tier, n.CompleteTime.UTC())
 		if e != nil {
 			return e

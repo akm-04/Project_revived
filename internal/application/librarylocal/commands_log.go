@@ -10,7 +10,8 @@ import (
 )
 
 // recordDialogueLogsTx writes the type-7 milestones reached by the hero's
-// awarded dialog count. Inserts are once-only, so a replay is harmless.
+// awarded dialog count. Inserts are once-only, so a replay is harmless; an
+// invalid row is dropped per D1 by RecordHeroLogTx.
 func (s Service) recordDialogueLogsTx(ctx context.Context, t tx.Tx, player identity.PlayerID, partnerID int64, at time.Time) error {
 	rows, e := s.Library.ListDialogsTx(ctx, t, player)
 	if e != nil {
@@ -23,7 +24,7 @@ func (s Service) recordDialogueLogsTx(ctx context.Context, t tx.Tx, player ident
 		}
 	}
 	for _, logID := range lib.DialogueLogIDsReached(0, count) {
-		if _, e = s.Library.InsertHeroLogTx(ctx, t, lib.HeroLogFact{PlayerID: player, PartnerID: partnerID, LogID: logID, OccurredAt: at}); e != nil {
+		if e = s.RecordHeroLogTx(ctx, t, lib.HeroLogFact{PlayerID: player, PartnerID: partnerID, LogID: logID, OccurredAt: at}); e != nil {
 			return e
 		}
 	}

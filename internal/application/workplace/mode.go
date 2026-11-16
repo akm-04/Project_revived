@@ -61,7 +61,7 @@ func withRevision(op operation.Context, rev string) (operation.Context, error) {
 	return op, err
 }
 func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, error) {
-	if s.Fresh == nil || s.Store == nil || s.Content == nil || s.Fence == nil || s.Functions == nil || s.Directory == nil || s.Campaigns == nil || s.Heroes == nil || s.HeroLocks == nil || s.Values == nil || s.Privileges == nil || s.Facts == nil || s.Combat == nil || s.Stats == nil || s.Opponents == nil || s.HeroWire == nil || s.Receipts == nil || s.ReceiptRead == nil {
+	if s.Fresh == nil || s.Store == nil || s.Content == nil || s.Fence == nil || s.Functions == nil || s.Directory == nil || s.Campaigns == nil || s.Heroes == nil || s.HeroLocks == nil || s.Values == nil || s.Privileges == nil || s.Facts == nil || s.Combat == nil || s.Stats == nil || s.Opponents == nil || s.HeroWire == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Broadcast == nil || s.Rental == nil {
 		return op, d.ErrUnavailable
 	}
 	if _, ok := op.Policies.Get("content"); ok {
@@ -128,14 +128,12 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 			if e != nil {
 				return e
 			}
-			if s.Rental != nil {
-				offered, e := s.Rental.HeroOfferedTx(c, sc.Tx, a.PlayerID, pid)
-				if e != nil {
-					return e
-				}
-				if offered {
-					return d.ErrRefused
-				}
+			offered, e := s.Rental.HeroOfferedTx(c, sc.Tx, a.PlayerID, pid)
+			if e != nil {
+				return e
+			}
+			if offered {
+				return d.ErrRefused
 			}
 			h.Kind, e = s.Content.HeroKindTx(c, sc.Tx, h.CreationContentRevision, h.TableID)
 			if e != nil {

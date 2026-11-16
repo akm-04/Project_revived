@@ -34,7 +34,7 @@ func libraryService(p *pg.Pool, db tx.Beginner) app.Service {
 	content := contentstore.Store{Queryer: p}
 	hero := characterstore.Store{Queryer: p}
 	inv := i5store.Store{Queryer: p}
-	s := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hero}, Library: librarystore.Store{}, Content: content, Players: i4store.PlayerRootLocker{}, Fence: inv, Costs: i5.MaterialCostDebiter{Store: inv, Content: content}, Receipts: kernelstore.Store{}}
+	s := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hero}, Library: librarystore.Store{}, Content: content, Players: i4store.PlayerRootLocker{}, Fence: inv, Costs: i5.MaterialCostDebiter{Store: inv, Content: content}, Receipts: kernelstore.Store{}, Broadcast: pg.BroadcastEmitter{}}
 	s.Achievements = ach.Service{Store: achievementstore.Store{}, Content: content, Population: s}
 	s.Roster = characterstore.HeroBootstrapProjection{Content: content, Library: s}
 	// Favor-producing commands fail closed without the objective port, so the

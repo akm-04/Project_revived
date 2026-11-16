@@ -33,6 +33,24 @@ type Notice struct {
 	CompleteTime  time.Time
 }
 
+// The achievement_notices CHECK constraint's bounds; a notice outside them
+// cannot be stored, so it is dropped as display-only instead of aborting the
+// earned tier fact's transaction (D1).
+const (
+	minimumNoticeAchievementID int64 = 100001
+	maximumNoticeAchievementID int64 = 100033
+	maximumNoticeTier                = 3
+)
+
+var ErrInvalidNotice = errors.New("achievement: invalid notice")
+
+func (n Notice) Validate() error {
+	if !n.Player.Valid() || n.AchievementID < minimumNoticeAchievementID || n.AchievementID > maximumNoticeAchievementID || n.Tier < 1 || n.Tier > maximumNoticeTier || n.CompleteTime.IsZero() {
+		return ErrInvalidNotice
+	}
+	return nil
+}
+
 type Counter interface {
 	OwnedStateCountsTx(context.Context, ca.CoherentReadScope, identity.PlayerID, []int64) map[int64]int64
 }

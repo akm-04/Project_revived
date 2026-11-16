@@ -17,6 +17,11 @@ import (
 
 var ErrSettlementMailConflict = errors.New("i5: settlement mail source already delivered with different content")
 
+// ErrSettlementMailInvalid marks a request whose own fields fail validation.
+// It is the only error an optional notice producer may drop (D1); database
+// errors keep their own type and stay fatal.
+var ErrSettlementMailInvalid = errors.New("i5: settlement mail request invalid")
+
 // Source kinds owned by I5 itself or other producers are never accepted here.
 var reservedMailSources = map[string]bool{"ADMIN": true, "GRANT_OVERFLOW": true, "GUILD_BROADCAST": true}
 
@@ -85,7 +90,7 @@ func (m SettlementMail) DeliverTx(ctx context.Context, t tx.Tx, r SettlementMail
 // DeliverNoticeTx sends one mail with no attachment (I9_GUILD_CAMPAIGN_V1 C13).
 func (m SettlementMail) DeliverNoticeTx(ctx context.Context, t tx.Tx, r SettlementMailRequest) (mail.Record, bool, error) {
 	if len(r.Lines) != 0 {
-		return mail.Record{}, false, errors.New("i5: a notice carries no attachment")
+		return mail.Record{}, false, ErrSettlementMailInvalid
 	}
 	return m.deliverTx(ctx, t, r, true)
 }
@@ -98,8 +103,11 @@ func (m SettlementMail) DeliverLeagueTitleNoticeTx(ctx context.Context, t tx.Tx,
 }
 
 func (m SettlementMail) deliverTx(ctx context.Context, t tx.Tx, r SettlementMailRequest, notice bool) (mail.Record, bool, error) {
-	if m.Store == nil || t == nil || !r.Recipient.Valid() || strings.TrimSpace(r.SourceKind) == "" || reservedMailSources[r.SourceKind] || strings.TrimSpace(r.SourceKey) == "" || strings.TrimSpace(r.PolicyVersion) == "" || (len(r.Lines) == 0 && !notice) || r.At.IsZero() {
-		return mail.Record{}, false, errors.New("i5: settlement mail request incomplete")
+	if m.Store == nil || t == nil {
+		return mail.Record{}, false, errors.New("i5: settlement mail store or transaction missing")
+	}
+	if !r.Recipient.Valid() || strings.TrimSpace(r.SourceKind) == "" || reservedMailSources[r.SourceKind] || strings.TrimSpace(r.SourceKey) == "" || strings.TrimSpace(r.PolicyVersion) == "" || (len(r.Lines) == 0 && !notice) || r.At.IsZero() {
+		return mail.Record{}, false, ErrSettlementMailInvalid
 	}
 	for _, line := range r.Lines {
 		if err := line.Validate(); err != nil {
