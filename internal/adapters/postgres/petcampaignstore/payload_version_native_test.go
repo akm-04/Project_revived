@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -74,11 +73,6 @@ VALUES(27,'payload-version-petcampaign',NULL,false,false,false,2799999,2799999,1
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM petcampaign_players WHERE player_id=$1`, int64(player)).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	directory := filepath.Join("testdata", "payloads", petcampaignTable+".payload")
-	if capture := os.Getenv("GXB_R8_2C_BATCH18_CAPTURE"); capture != "" {
-		capturePetcampaignGolden(t, filepath.Join(capture, "internal/adapters/postgres/petcampaignstore", directory), storedText)
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -125,26 +119,5 @@ func assertSamePetcampaignJSON(t *testing.T, got, want any) {
 	}
 	if !bytes.Equal(gotRaw, wantRaw) {
 		t.Fatalf("decoded=%s want=%s", gotRaw, wantRaw)
-	}
-}
-
-func capturePetcampaignGolden(t *testing.T, directory, stored string) {
-	t.Helper()
-	var decoded d.State
-	if err := payload.Decode(petcampaignTable, 0, []byte(stored), &decoded); err != nil {
-		t.Fatal(err)
-	}
-	expected, err := json.MarshalIndent(decoded, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
