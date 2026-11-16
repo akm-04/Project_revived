@@ -50,20 +50,12 @@ func TestClosureE8MarchStartChoiceConformance(t *testing.T) {
 	assertStartChoiceRule(t, d.ModeMarch)
 }
 
-func TestClosureE8MemoirBattleStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeMemoirBattle)
-}
-
 func TestClosureE8PetCampaignStartChoiceConformance(t *testing.T) {
 	assertStartChoiceRule(t, d.ModePetCampaign)
 }
 
 func TestClosureE8PetCampaignPracticeStartChoiceConformance(t *testing.T) {
 	assertStartChoiceRule(t, d.ModePetCampaignPractice)
-}
-
-func TestClosureE8WorldBossStartChoiceConformance(t *testing.T) {
-	assertStartChoiceRule(t, d.ModeWorldBoss)
 }
 
 func assertStartChoiceRule(t *testing.T, key d.ModeKey) {

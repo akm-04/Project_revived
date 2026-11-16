@@ -36,7 +36,7 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModeIllusionSolo:        {ChoiceSupersedes, "TestStartChoiceConformanceIllusionSolo"},
 	ModeIllusionTeam:        {ChoiceReplaysFrozen, "TestStartChoiceConformanceIllusionTeam"},
 	ModeMarch:               {ChoiceSupersedes, "TestClosureE8MarchStartChoiceConformance"},
-	ModeMemoirBattle:        {ChoiceReplaysFrozen, "TestClosureE8MemoirBattleStartChoiceConformance"},
+	ModeMemoirBattle:        {ChoiceReplaysFrozen, "TestStartChoiceConformanceMemoirBattle"},
 	ModeMemoirPlayer:        {ChoiceReplaysFrozen, "TestClosureE4MemoirPlayerStartReplayIdentityNative"},
 	ModeOccultSolo:          {ChoiceSupersedes, "TestStartChoiceConformanceOccultSolo"},
 	ModeOccultTeam:          {ChoiceReplaysFrozen, "TestStartChoiceConformanceOccultTeam"},
@@ -46,7 +46,7 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModeTopFloor:            {ChoiceReplaysFrozen, "TestClosureE2TopFloorReplayIgnoresPetNative"},
 	ModeTopFloorTask:        {ChoiceReplaysFrozen, "TestClosureE2TopFloorTaskReplayIgnoresLeaderNative"},
 	ModeWorkplace:           {ChoiceReplaysFrozen, "TestI9_5BWorkplaceNativeLifecycle"},
-	ModeWorldBoss:           {ChoiceSupersedes, "TestClosureE8WorldBossStartChoiceConformance"},
+	ModeWorldBoss:           {ChoiceSupersedes, "TestStartChoiceConformanceWorldBoss"},
 }
 
 func TestEveryModeHasAStartChoiceProof(t *testing.T) {
