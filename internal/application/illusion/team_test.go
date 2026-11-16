@@ -229,3 +229,24 @@ func TestReportDamageSumsOnlyAAndCaps(t *testing.T) {
 		t.Fatal("negative harms accepted")
 	}
 }
+
+func TestTeamFingerprintHoldsOnlyTheStage(t *testing.T) {
+	room := sharedroom.Room{ID: 12}
+	occurrence := d.Occurrence{CampaignID: d.FirstCampaignID, OpenDay: 3}
+	picked := d.Team{Members: []d.TeamMember{{PlayerID: 1, Heroes: []d.Hero{{TableID: 101, PartnerID: 101}}, PetID: 55}}}
+	other := d.Team{Members: []d.TeamMember{{PlayerID: 1, Heroes: []d.Hero{{TableID: 201, PartnerID: 201}}, PetID: 56}}}
+	if teamFingerprint(room, picked, occurrence) != teamFingerprint(room, other, occurrence) {
+		t.Fatal("a changed pick is the same stage: START_REPLAY_IDENTITY_V1 ruling 1")
+	}
+	for name, mutate := range map[string]func(*sharedroom.Room, *d.Occurrence){
+		"room":     func(r *sharedroom.Room, _ *d.Occurrence) { r.ID = 13 },
+		"open day": func(_ *sharedroom.Room, o *d.Occurrence) { o.OpenDay = 4 },
+		"campaign": func(_ *sharedroom.Room, o *d.Occurrence) { o.CampaignID = d.LastCampaignID },
+	} {
+		changedRoom, changed := room, occurrence
+		mutate(&changedRoom, &changed)
+		if teamFingerprint(room, picked, occurrence) == teamFingerprint(changedRoom, picked, changed) {
+			t.Fatalf("%s change must be a different stage", name)
+		}
+	}
+}

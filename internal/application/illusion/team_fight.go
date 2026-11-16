@@ -388,14 +388,15 @@ func teamMemberReceipt(attemptID string, member identity.PlayerID) string {
 }
 
 // teamFingerprint is deterministic so a replayed 1358 is a Combat replay, not a
-// new attempt: it never names the request operation.
-func teamFingerprint(room sharedroom.Room, team d.Team, occurrence d.Occurrence) string {
+// new attempt: the stage is the room, its open day and campaign. The picked team
+// is deliberately not hashed (START_REPLAY_IDENTITY_V1 ruling 1: picks are the
+// players' choice); the Combat Members check keeps the roster identity.
+func teamFingerprint(room sharedroom.Room, _ d.Team, occurrence d.Occurrence) string {
 	raw, _ := json.Marshal(struct {
 		Room       int64
 		OpenDay    int64
 		CampaignID int64
-		Team       d.Team
-	}{room.ID, occurrence.OpenDay, occurrence.CampaignID, team})
+	}{room.ID, occurrence.OpenDay, occurrence.CampaignID})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }

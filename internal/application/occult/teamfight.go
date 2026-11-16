@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -465,7 +464,7 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, a identity.
 		return cb.Started{}, err
 	}
 	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeOccultTeam, Actor: a, Locator: teamLocator(view.room.ID, view.room.LogicalServerID), GenerationRef: teamGeneration(view.room.ID, team),
-		StartFingerprint: teamFingerprint(view.room.ID, team, roster), ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle,
+		StartFingerprint: teamFingerprint(view.room.ID, team), ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle,
 		TrustProfile: cd.ServerReport, Members: roster})
 }
 
@@ -698,18 +697,13 @@ func teamMemberReceipt(attemptID string, member identity.PlayerID) string {
 }
 
 // teamFingerprint is deterministic so a replayed start is a Combat replay, not a
-// new attempt: it never names the request operation.
-func teamFingerprint(roomID int64, team d.TeamFight, roster []identity.PlayerID) string {
-	picks := make([]d.TeamPick, 0, len(roster))
-	for _, member := range roster {
-		picks = append(picks, team.Pick(int64(member)))
-	}
+// new attempt: the stage is the room and the generation, while the roster and its
+// picks are not (START_REPLAY_IDENTITY_V1 ruling 1; replayStartTx keeps the roster).
+func teamFingerprint(roomID int64, team d.TeamFight) string {
 	raw, _ := json.Marshal(struct {
-		Room   int64
-		Team   string
-		Roster []identity.PlayerID
-		Picks  []d.TeamPick
-	}{roomID, teamGeneration(roomID, team), slices.Clone(roster), picks})
+		Room int64
+		Team string
+	}{roomID, teamGeneration(roomID, team)})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
