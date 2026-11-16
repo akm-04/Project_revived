@@ -1,0 +1,46 @@
+{
+  "day": 20600,
+  "incoming": 1,
+  "played": 2,
+  "invited": {
+    "2100002": true,
+    "2100003": false
+  },
+  "sequence": 7,
+  "pending": {
+    "identity": "occurrence-7",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "friend": 2100002,
+    "deadline": 1763000000,
+    "board": {
+      "monsters": [
+        101,
+        102
+      ],
+      "buffs": [
+        {
+          "id": 7,
+          "pos": 2
+        }
+      ],
+      "select_monsters": [
+        101
+      ]
+    },
+    "marked": 101,
+    "draws": {
+      "policy": "dodgeball.draw/v1",
+      "version": 1,
+      "streams": {
+        "self": [
+          1,
+          2
+        ]
+      }
+    }
+  },
+  "last_fingerprint": "fingerprint-7",
+  "last_result": {
+    "error_code": 0
+  }
+}

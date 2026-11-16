@@ -16,7 +16,7 @@ func TestStrictStoredEvidenceRoundtripAndTampering(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	w, e := DecodeIssue(raw, hex.EncodeToString(fp[:]))
+	w, e := DecodeIssue("guild_invite_projection_sources", 1, raw, hex.EncodeToString(fp[:]))
 	if e != nil || w.Operation.StartedAt.Nanosecond() != s.Operation.StartedAt.Nanosecond() {
 		t.Fatal(w, e)
 	}
@@ -26,11 +26,11 @@ func TestStrictStoredEvidenceRoundtripAndTampering(t *testing.T) {
 	}
 	fields["AuthorityFromJob"] = json.RawMessage(`true`)
 	extra, _ := json.Marshal(fields)
-	if _, e = DecodeIssue(extra, hex.EncodeToString(fp[:])); e == nil {
+	if _, e = DecodeIssue("guild_invite_projection_sources", 1, extra, hex.EncodeToString(fp[:])); e == nil {
 		t.Fatal("unknown stored source field accepted")
 	}
 	for _, bad := range [][]byte{append(append([]byte{}, raw...), []byte(` {}`)...), []byte(`null`), []byte(`{}`)} {
-		if _, e = DecodeIssue(bad, hex.EncodeToString(fp[:])); e == nil {
+		if _, e = DecodeIssue("guild_invite_projection_sources", 1, bad, hex.EncodeToString(fp[:])); e == nil {
 			t.Fatal("incomplete/trailing source accepted")
 		}
 	}

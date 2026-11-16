@@ -1,0 +1,31 @@
+{
+  "Server": 27,
+  "Player": 2700001,
+  "Initialized": true,
+  "Day": 5,
+  "Sequence": 0,
+  "Current": 7,
+  "Max": 42,
+  "EliteMax": 3,
+  "Selected": 0,
+  "View": 0,
+  "ResetLeft": 0,
+  "SweepLeft": 0,
+  "AwakeUsed": 0,
+  "Attained": 1794805200123,
+  "LastObserved": 0,
+  "EliteUsed": null,
+  "EliteBuys": null,
+  "TestFormation": null,
+  "Sweep": null,
+  "Fight": null,
+  "LastSweep": {
+    "floor": 7
+  },
+  "LastResult": {
+    "kind": "win"
+  },
+  "LastResultKind": 0,
+  "LastResultFloor": 0,
+  "LastResultPet": 0
+}

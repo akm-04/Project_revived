@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/payload"
 )
@@ -30,11 +31,13 @@ func assertPayloadGolden[T any](t *testing.T, table, column string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(stored, expected) {
+	if !bytes.Equal(bytes.TrimSpace(stored), bytes.TrimSpace(expected)) {
 		t.Fatalf("%s.%s: re-marshalled value differs\n got: %s\nwant: %s", table, column, stored, expected)
 	}
 }
 
 func TestPayloadGoldenI5Store(t *testing.T) {
 	assertPayloadGolden[objective.AwakeRoot](t, "player_awakening_roots", "payload")
+	assertPayloadGolden[map[string]string](t, "mail_attachments", "metadata")
+	assertPayloadGolden[mail.Tuning](t, "mail_tuning", "payload")
 }

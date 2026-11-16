@@ -1,6 +1,7 @@
 package payload
 
 import (
+	"encoding/json"
 	"reflect"
 	"strings"
 	"testing"
@@ -57,5 +58,28 @@ func TestEncodeStoresTheCurrentVersion(t *testing.T) {
 	raw, version, err := Encode(inner{Count: 1})
 	if err != nil || version != Current || string(raw) != `{"count":1}` {
 		t.Fatalf("%s %d %v", raw, version, err)
+	}
+}
+
+func TestDecodeNumbersKeepsUntypedNumbers(t *testing.T) {
+	type holder struct {
+		Data map[string]any `json:"data"`
+	}
+	var numbered holder
+	if err := DecodeNumbers("t", 1, []byte(`{"data":{"big":10001009}}`), &numbered); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := numbered.Data["big"].(json.Number); !ok {
+		t.Fatalf("DecodeNumbers projected %T", numbered.Data["big"])
+	}
+	if err := DecodeNumbers("t", 1, []byte(`{"data":{},"extra":1}`), &numbered); err == nil {
+		t.Fatal("DecodeNumbers accepted an unknown key")
+	}
+	var plain holder
+	if err := Decode("t", 1, []byte(`{"data":{"big":10001009}}`), &plain); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := plain.Data["big"].(float64); !ok {
+		t.Fatalf("Decode projected %T", plain.Data["big"])
 	}
 }

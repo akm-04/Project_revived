@@ -7,11 +7,11 @@ WITH ins AS (
         receipt_id, owner_kind, owner_key, domain, operation, operation_class,
         semantic_key, request_fingerprint, result_schema, result_payload,
         operation_started_at, policy_version, operation_policy_refs,
-        actor_account_uid, context_id, retain_until
+        actor_account_uid, context_id, retain_until, payload_version
     ) VALUES (
         $1::uuid, $2, $3, $4, $5, $6, $7, $8::bytea, $9, $10::jsonb,
         $11::timestamptz, NULLIF($12, ''), $13::jsonb, NULLIF($14, ''),
-        NULLIF($15, '')::uuid, $16::timestamptz
+        NULLIF($15, '')::uuid, $16::timestamptz, $17
     )
     ON CONFLICT (owner_kind, owner_key, domain, operation, semantic_key)
     DO NOTHING
@@ -38,7 +38,8 @@ SELECT
     COALESCE(context_id::text, '') AS context_id,
     recorded_at,
     retain_until IS NOT NULL AS has_retain_until,
-    COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until
+    COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until,
+    payload_version
 FROM gxb_operation_receipts
 WHERE owner_kind = $1
   AND owner_key = $2

@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -23,30 +24,40 @@ func (Store) LockPlayerTx(ctx context.Context, t tx.Tx, serverID int64, playerID
 		return nil, err
 	}
 	var raw string
-	if err := t.QueryRow(ctx, `SELECT scores::text FROM occult_players WHERE player_id=$1 FOR UPDATE`, int64(playerID)).Scan(&raw); err != nil {
+	var version int16
+	if err := t.QueryRow(ctx, `SELECT scores::text,payload_version FROM occult_players WHERE player_id=$1 FOR UPDATE`, int64(playerID)).Scan(&raw, &version); err != nil {
 		return nil, err
 	}
-	return d.LoadScores(json.RawMessage(raw))
+	var scores d.Scores
+	if err := payload.Decode("occult_players", version, []byte(raw), &scores); err != nil {
+		return nil, err
+	}
+	return scores, nil
 }
 
 func (Store) ReadScoresTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) (d.Scores, error) {
 	var raw string
-	err := q.QueryRow(ctx, `SELECT scores::text FROM occult_players WHERE player_id=$1`, int64(playerID)).Scan(&raw)
+	var version int16
+	err := q.QueryRow(ctx, `SELECT scores::text,payload_version FROM occult_players WHERE player_id=$1`, int64(playerID)).Scan(&raw, &version)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Scores{}, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return d.LoadScores(json.RawMessage(raw))
+	var scores d.Scores
+	if err := payload.Decode("occult_players", version, []byte(raw), &scores); err != nil {
+		return nil, err
+	}
+	return scores, nil
 }
 
 func (Store) SaveScoresTx(ctx context.Context, t tx.Tx, playerID identity.PlayerID, scores d.Scores, at time.Time) error {
-	raw, err := json.Marshal(scores)
+	raw, version, err := payload.Encode(scores)
 	if err != nil {
 		return err
 	}
-	tag, err := t.Exec(ctx, `UPDATE occult_players SET scores=$2::jsonb,updated_at=$3 WHERE player_id=$1`, int64(playerID), string(raw), at)
+	tag, err := t.Exec(ctx, `UPDATE occult_players SET scores=$2::jsonb,updated_at=$3,payload_version=$4 WHERE player_id=$1`, int64(playerID), string(raw), at, version)
 	if err == nil && tag.RowsAffected() != 1 {
 		return d.ErrUnavailable
 	}
