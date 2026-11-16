@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -67,11 +66,6 @@ VALUES(12,'payload-version-summon',NULL,false,false,false,1225001,1299999,1,now(
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM summon_tuning`).Scan(&tuningText, &tuningVersion); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH16_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/summonstore/testdata/payloads/summon_players.counters"), counterText, final.Counters)
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/summonstore/testdata/payloads/summon_tuning.payload"), tuningText, d.Tuning{Version: 1, Partner: 50001002})
-		return
-	}
 	if counterVersion != payload.Current {
 		t.Fatalf("counters payload_version=%d want=%d", counterVersion, payload.Current)
 	}
@@ -103,22 +97,5 @@ VALUES(12,'payload-version-summon',NULL,false,false,false,1225001,1299999,1,now(
 	tuning, found, err := (summonstore.Store{}).TuningTx(ctx, pool)
 	if err != nil || !found || tuning.Version != 1 || tuning.Partner != 50001002 {
 		t.Fatalf("TuningTx found=%v err=%v tuning=%#v", found, err, tuning)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string, value any) {
-	t.Helper()
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }

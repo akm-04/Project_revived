@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -61,10 +60,6 @@ func TestPayloadVersionRoundTripPublicationStore(t *testing.T) {
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM publication_items WHERE set_id=$1 ORDER BY position LIMIT 1`, setID.String()).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH16_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/publicationstore/testdata/payloads/publication_items.payload"), storedText, written.Items[0])
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -89,22 +84,5 @@ func TestPayloadVersionRoundTripPublicationStore(t *testing.T) {
 	read, visible, err := (publicationstore.Store{}).SelectTx(ctx, pool, pub.Announcement, 0, startsAt.Add(time.Hour))
 	if err != nil || !visible || read.ID != written.ID || read.Family != written.Family || read.ServerID != written.ServerID || !read.StartsAt.Equal(written.StartsAt) || read.EndsAt != nil || !reflect.DeepEqual(read.Items, written.Items) {
 		t.Fatalf("SelectTx visible=%v err=%v read=%#v want=%#v", visible, err, read, written)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string, value any) {
-	t.Helper()
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -74,10 +73,6 @@ VALUES(10,'payload-version-herorecommend',NULL,false,false,false,1025001,1099999
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM hero_recommend_snapshots WHERE logical_server_id=$1 AND generation=$2`, written.Server, written.Generation).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH16_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/herorecommendstore/testdata/payloads/hero_recommend_snapshots.payload"), storedText, written)
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -102,22 +97,5 @@ VALUES(10,'payload-version-herorecommend',NULL,false,false,false,1025001,1099999
 	read, found, err := (herorecommendstore.Store{}).LatestSnapshotTx(ctx, pool, identity.LogicalServerID(10))
 	if err != nil || !found || !reflect.DeepEqual(read, written) {
 		t.Fatalf("LatestSnapshotTx found=%v err=%v read=%#v want=%#v", found, err, read, written)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string, value any) {
-	t.Helper()
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }

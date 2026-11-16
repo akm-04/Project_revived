@@ -7,7 +7,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -160,12 +159,6 @@ VALUES($1,$2,$3,'guild',$4,'I6C_GUILD',$5,decode(repeat('ab',32),'hex'),'gxb.i6c
 	if err := pool.Raw().QueryRow(ctx, `SELECT source_payload::text,cursor_proof::text,payload_version FROM guild_invite_projection_markers WHERE marker_id=$1::uuid`, markerOperationID.String()).Scan(&markerText, &cursorText, &markerVersion); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH16_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/guildinvitestore/testdata/payloads/guild_invite_projection_sources.source_payload"), issueText, issue)
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/guildinvitestore/testdata/payloads/guild_invite_projection_markers.source_payload"), markerText, marker)
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/guildinvitestore/testdata/payloads/guild_invite_projection_markers.cursor_proof"), cursorText, cursorProof)
-		return
-	}
 	if issueVersion != payload.Current || markerVersion != payload.Current {
 		t.Fatalf("payload_version issue=%d marker=%d want=%d", issueVersion, markerVersion, payload.Current)
 	}
@@ -213,22 +206,5 @@ VALUES($1,$2,$3,'guild',$4,'I6C_GUILD',$5,decode(repeat('ab',32),'hex'),'gxb.i6c
 	}
 	if readProgress.CursorProof == nil || !reflect.DeepEqual(*readProgress.CursorProof, cursorProof) {
 		t.Fatalf("ReadMarkerTx cursor proof=%#v want=%#v", readProgress.CursorProof, cursorProof)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string, value any) {
-	t.Helper()
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }

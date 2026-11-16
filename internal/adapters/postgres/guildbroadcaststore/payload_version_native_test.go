@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -105,14 +104,6 @@ VALUES($1,'player','100001','guild-broadcast','submit','I7A8A_GUILD_SOURCE','pay
 	if err := pool.Raw().QueryRow(ctx, `SELECT policy_refs::text,payload_version FROM guild_broadcast_sources WHERE source_id=$1::uuid`, operationID.String()).Scan(&storedText, &version); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH16_CAPTURE"); directory != "" {
-		var captured policy.Set
-		if err := payload.Decode("guild_broadcast_sources", 0, []byte(storedText), &captured); err != nil {
-			t.Fatal(err)
-		}
-		writeGolden(t, filepath.Join(directory, "internal/adapters/postgres/guildbroadcaststore/testdata/payloads/guild_broadcast_sources.policy_refs"), storedText, captured)
-		return
-	}
 	if version != payload.Current {
 		t.Fatalf("payload_version=%d want=%d", version, payload.Current)
 	}
@@ -140,22 +131,5 @@ VALUES($1,'player','100001','guild-broadcast','submit','I7A8A_GUILD_SOURCE','pay
 	}
 	if !reflect.DeepEqual(read.Recipients, written.Recipients) || !read.Operation.Policies.Equal(written.Operation.Policies) {
 		t.Fatalf("read=%#v want=%#v", read, written)
-	}
-}
-
-func writeGolden(t *testing.T, directory, stored string, value any) {
-	t.Helper()
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }

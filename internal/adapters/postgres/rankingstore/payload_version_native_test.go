@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -85,11 +84,6 @@ VALUES($1,decode($1,'hex'),1,'probe','probe',jsonb_build_object('revision_id',$1
 	if err := pool.Raw().QueryRow(ctx, `SELECT payload::text,payload_version FROM ranking_girls_snapshots WHERE logical_server_id=$1 AND policy_id=$2 AND generation=$3`, int64(server), d.GirlsBoard.Policy, snapshot.Generation).Scan(&snapshotText, &snapshotVersion); err != nil {
 		t.Fatal(err)
 	}
-	if directory := os.Getenv("GXB_R8_2C_BATCH16_CAPTURE"); directory != "" {
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/rankingstore/testdata/payloads/ranking_girls_roots.payload"), rootText, next)
-		captureGolden(t, filepath.Join(directory, "internal/adapters/postgres/rankingstore/testdata/payloads/ranking_girls_snapshots.payload"), snapshotText, snapshot)
-		return
-	}
 	if rootVersion != payload.Current || snapshotVersion != payload.Current {
 		t.Fatalf("payload_version root=%d snapshot=%d want=%d", rootVersion, snapshotVersion, payload.Current)
 	}
@@ -130,22 +124,5 @@ VALUES($1,decode($1,'hex'),1,'probe','probe',jsonb_build_object('revision_id',$1
 	readSnapshot, found, err := (rankingstore.Store{}).ReadBoardSnapshotTx(ctx, pool, d.GirlsBoard, server, snapshot.Generation)
 	if err != nil || !found || !reflect.DeepEqual(readSnapshot, snapshot) {
 		t.Fatalf("ReadBoardSnapshotTx found=%v err=%v read=%#v want=%#v", found, err, readSnapshot, snapshot)
-	}
-}
-
-func captureGolden(t *testing.T, directory, stored string, value any) {
-	t.Helper()
-	expected, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.json"), []byte(stored), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(directory, "v0.expected.json"), expected, 0o644); err != nil {
-		t.Fatal(err)
 	}
 }
