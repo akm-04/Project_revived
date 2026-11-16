@@ -2,19 +2,30 @@ package socialrelation
 
 import (
 	"context"
+	"errors"
 	"sort"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// ErrPairBlocked refuses a new friendship while either direction is blocked.
+var ErrPairBlocked = errors.New("social relation: pair is blocked")
+
+// FriendCapacityError names the player whose active friend list is full.
+type FriendCapacityError struct{ PlayerID identity.PlayerID }
+
+func (err *FriendCapacityError) Error() string { return "social relation: friend list full" }
+
 // FriendshipEnsurer is the exported transaction-level auto-friend seam for
 // owners (Mentor) that must create a friendship without writing the Social
-// tables themselves. It fences both I4 player roots before the Social root and
-// friendship rows, so callers must invoke it before any higher-rank lock.
+// tables themselves. It fences both I4 player roots before the Social root,
+// friendship and block rows, and applies the owner's block and 80-friend
+// capacity invariants, so callers must invoke it before any higher-rank lock.
 type FriendshipEnsurer struct {
 	Players playerroot.TxLocker
 	Store   CommandStore
@@ -52,6 +63,36 @@ func (ensurer FriendshipEnsurer) EnsureFriendshipTx(ctx context.Context, t tx.Tx
 	}
 	if found && existing.Active {
 		return false, nil
+	}
+	firstKey, err := BlockLockKey(first, second)
+	if err != nil {
+		return false, err
+	}
+	secondKey, err := BlockLockKey(second, first)
+	if err != nil {
+		return false, err
+	}
+	blockPairs := [][2]identity.PlayerID{{first, second}, {second, first}}
+	if lockkey.Compare(secondKey, firstKey) < 0 {
+		blockPairs[0], blockPairs[1] = blockPairs[1], blockPairs[0]
+	}
+	for _, pair := range blockPairs {
+		block, found, err := ensurer.Store.LockBlockTx(ctx, t, pair[0], pair[1])
+		if err != nil {
+			return false, err
+		}
+		if found && block.Active {
+			return false, ErrPairBlocked
+		}
+	}
+	for _, player := range []identity.PlayerID{first, second} {
+		count, err := ensurer.Store.CountActiveFriendsTx(ctx, t, player)
+		if err != nil {
+			return false, err
+		}
+		if count >= FriendCapacity {
+			return false, &FriendCapacityError{PlayerID: player}
+		}
 	}
 	next := Friendship{PlayerLowID: low, PlayerHighID: high, Generation: 1, Active: true, ActivatedAt: at.UTC(), StateVersion: 1, UpdatedAt: at.UTC()}
 	var previous *Friendship

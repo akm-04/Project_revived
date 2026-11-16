@@ -186,6 +186,7 @@
   ],
   "unit": [
    "calendar_test.go",
+   "friendship_refusal_test.go",
    "read_test.go"
   ]
  }
