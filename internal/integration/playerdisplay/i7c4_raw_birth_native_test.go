@@ -112,10 +112,12 @@ func TestI7C4RawBirthActualCreationAndStrictLegacyRead(t *testing.T) {
 		t.Fatal(e)
 	}
 	if e = statRead(t, p, rev, func(sc ca.CoherentReadScope) error {
-		_, e := rawBirthReader().RawAwakeningTx(ctx, sc, old.Ref())
-		return e
-	}); e == nil {
-		t.Fatal("legacy missing birth became zero")
+		if _, e := rawBirthReader().RawAwakeningTx(ctx, sc, old.Ref()); !errors.Is(e, character.ErrRawAwakeningUnavailable) {
+			t.Fatalf("legacy missing birth was not explicitly unknown: %v", e)
+		}
+		return nil
+	}); e != nil {
+		t.Fatal(e)
 	}
 	if _, e = rawBirthService(p).SummonNormal(ctx, b, legacyDef.Template.TableID, legacyDef.Template.FragmentItemID, legacyDef.FragmentCount, oldOp); e != nil || rawCount(t, p, old.Ref()) != 0 {
 		t.Fatal("historic proof backfilled/rejected", e)
