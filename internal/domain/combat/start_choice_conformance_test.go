@@ -31,7 +31,7 @@ var startChoiceConformance = map[ModeKey]struct {
 	ModeAwakeningBlood:      {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceAwakeningBlood", reason: "MID 866 carries no team; the team is the frozen occurrence owner (awakeningbattle/mode.go:83,98; stockruntime/awakening_blood_dispatcher.go:41-44)"},
 	ModeCampaign:            {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceCampaign"},
 	ModeChampionsLeague:     {rule: ChoiceReplaysFrozen, test: "TestI7C5FLeagueChangedLineupReplaysOpenFightNative"},
-	ModeConquerSchool:       {rule: ChoiceSupersedes, test: "TestI8_5DConquerStartBindsCombatAttemptNative"},
+	ModeConquerSchool:       {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceConquerSchool"},
 	ModeDodgeball:           {rule: ChoiceRefusedWhileOpen, test: "TestI9_6BDodgeballNativeLifecycle"},
 	ModeEventCentreBoard:    {rule: ChoiceReplaysFrozen, test: "TestStartChoiceConformanceEventCentreBoard", reason: "the leader and partners are frozen at receive (eventcentre/board.go:205) and START reads the stored mission (eventcentre/board.go:455-457)"},
 	ModeGodsTrial:           {rule: ChoiceSupersedes, test: "TestStartChoiceConformanceGodsTrial"},
