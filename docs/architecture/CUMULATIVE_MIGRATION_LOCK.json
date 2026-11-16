@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00159_r7_ranking_board_scores.sql",
+  "highest_migration": "00171_l3b_restore_epochs.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -141,7 +141,19 @@
     "00156_i9_10_broadcast_outbox.sql": "2ce70f43974e85a2e7ec6fdc618af214f66c719b1bafb48bff03afe56a6cb056",
     "00157_i9_10_hero_recommend.sql": "fbfae12b34aad2065a51ca8ee5ff3c9f125ce6f7cdb4560ce714b60c26b33d63",
     "00158_r3_player_daily_reset_marks.sql": "4e1d6898e0c99d2d436cb80de597c17df3e44c97818d10a6ba0155ac630c92df",
-    "00159_r7_ranking_board_scores.sql": "82a0aa9ab425587449bfb1776ae299dd432adc7a9b5dd4867445d0e06b351919"
+    "00159_r7_ranking_board_scores.sql": "82a0aa9ab425587449bfb1776ae299dd432adc7a9b5dd4867445d0e06b351919",
+    "00160_i9_11_guild_broadcast_daily_limit.sql": "233f12882a676d46cd378bd9db5c26d3e5ca10727088249a92fc5b8eebfae84f",
+    "00161_r8_player_foreign_keys.sql": "a52efa9ba07f59b8e84906dfad9f72e3af9dbe076fb3a1eb723dbf4eec1b91d9",
+    "00162_r8_validate_player_foreign_keys.sql": "7b63de9ca2c87e1328b01d582d1af1f8ae9eab0eba71eee9740195379af13007",
+    "00163_r8_payload_version.sql": "6da7482f7b68b931f83be29d7ae2ba19cdb253578eaa1c58e1567666d3d819cd",
+    "00164_r8_receipt_operation_id.sql": "268c238845d96bc0b5f3669b830ba68d07ed9740045fd064fb79a2de2ded74b7",
+    "00165_r8_4_combat_retention_sweep.sql": "a21ee5b3037fac9db50d134494023f630d3cd495a452009d1c889d822d6daba0",
+    "00166_r6_undelivered_replies.sql": "9f84d134f94d8615b407e6a23f8597826280408eb0d2b097c3dce5beebb98541",
+    "00167_r6_request_journal_replay.sql": "4f99ea5a7823eb2f46d9c09ee5095e893d0718704f5f19f7e0e2cf9fcfa7ca64",
+    "00168_r5d_attempt_settlements.sql": "e674360c4513548eebfbcecf1b034c5131cf954c901140e20d4f055d1fceb0dc",
+    "00169_r5d_retire_mode_attempts.sql": "872885dd98cafc26cc414639b10730949c88e199e97f220ba3914798b0fb6de6",
+    "00170_l3b_operator_audit_events.sql": "2c2b9e3da909ec3bc221e4f74053056e2f8ef9a9b1e3776b54498cf72ecf7d04",
+    "00171_l3b_restore_epochs.sql": "3ac0b8364c592a01094b415d7e1acd8533758fcd3a7955a75d893f26fe269bbd"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
