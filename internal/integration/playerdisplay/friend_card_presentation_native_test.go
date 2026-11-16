@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/socialview"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -92,6 +93,9 @@ func TestPlaytestFriendCardVIPFrameAndSkinAvatar(t *testing.T) {
 			Claims: wire.CredentialClaims{Token: "fixture", Region: int64(requester.LogicalServerID)}, Params: request.params}})
 		if response.HTTPStatus != 200 {
 			t.Fatalf("MID %d status=%d body=%v cause=%v", request.mid, response.HTTPStatus, response.Body, response.Cause)
+		}
+		if request.mid == 176 {
+			replyconformance.Check(t, 176, response.JSON)
 		}
 		var cards []socialview.Friend
 		switch body := response.JSON.(type) {
