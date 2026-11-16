@@ -129,16 +129,13 @@ func (s Service) RecordReplay(c context.Context, recordID int64) (RecordReplay, 
 	if err != nil || !retained {
 		return view, err
 	}
-	result, _, err := s.Combat.ReplayTx(c, s.Fresh, record.AttemptID, reportRetention, now)
+	result, _, err := s.Combat.ReplayTx(c, s.Fresh, record.AttemptID, *cd.MustMode(cd.ModeTopFloor).Retention, now)
 	if err != nil {
 		return RecordReplay{}, err
 	}
 	view.Report = result.Report
 	return view, nil
 }
-
-// reportRetention is the top floor replay window (D25a private policy, at the D9 Q6 ceiling).
-var reportRetention = cd.Retention{ID: "C5B_TOP_FLOOR_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
 
 // Report replays a fight while any retained record references it; nil is ARENA_RECORD_OUT_OF_DATE.
 func (s Service) Report(c context.Context, key string, op operation.Context) ([]byte, error) {
@@ -155,7 +152,7 @@ func (s Service) Report(c context.Context, key string, op operation.Context) ([]
 		if err != nil || !retained {
 			return err
 		}
-		result, _, err := s.Combat.ReplayTx(c, sc.Tx, id, reportRetention, sc.Operation.DecisionAt())
+		result, _, err := s.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeTopFloor).Retention, sc.Operation.DecisionAt())
 		report = result.Report
 		return err
 	})

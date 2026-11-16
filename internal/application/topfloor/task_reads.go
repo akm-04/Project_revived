@@ -6,6 +6,7 @@ import (
 	"errors"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -269,7 +270,7 @@ func (service Service) TaskReport(requestContext context.Context, actor identity
 		if !retained {
 			return domain.ErrRefused
 		}
-		result, _, err := service.Combat.ReplayTx(c, sc.Tx, id, reportRetention, sc.Operation.DecisionAt())
+		result, _, err := service.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeTopFloorTask).Retention, sc.Operation.DecisionAt())
 		report = result.Report
 		return err
 	})
