@@ -172,6 +172,62 @@ func (Store) ReadMembershipTx(ctx context.Context, q tx.Queryer, pid identity.Pl
 	}
 	return m, err == nil, err
 }
+
+// guildNamesByPlayersSQL resolves the current active guild name of an entire
+// requested player set in one owner read. A player with no current same-server
+// membership produces no row, and the caller renders "".
+const guildNamesByPlayersSQL = `
+WITH requested(player_id,logical_server_id) AS (
+  SELECT * FROM unnest($1::bigint[],$2::int[])
+)
+SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]),
+       COALESCE(array_agg(g.name), '{}'::text[])
+FROM requested r
+JOIN guild_memberships gm ON gm.player_id=r.player_id
+JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id
+WHERE g.retired_at IS NULL`
+
+// GuildNamesTx is the typed guild identity read for rank and board rows that
+// carry a player's guild name.
+func (Store) GuildNamesTx(ctx context.Context, q tx.Queryer, server identity.LogicalServerID, players []identity.PlayerID) (map[identity.PlayerID]string, error) {
+	out := make(map[identity.PlayerID]string, len(players))
+	if q == nil || !server.Valid() {
+		return nil, errors.New("invalid guild name read")
+	}
+	playerIDs := make([]int64, 0, len(players))
+	servers := make([]int32, 0, len(players))
+	seen := make(map[identity.PlayerID]struct{}, len(players))
+	for _, playerID := range players {
+		if !playerID.Valid() {
+			continue
+		}
+		if _, repeated := seen[playerID]; repeated {
+			continue
+		}
+		seen[playerID] = struct{}{}
+		playerIDs = append(playerIDs, int64(playerID))
+		servers = append(servers, int32(server))
+	}
+	if len(playerIDs) == 0 {
+		return out, nil
+	}
+	var foundIDs []int64
+	var names []string
+	if err := q.QueryRow(ctx, guildNamesByPlayersSQL, playerIDs, servers).Scan(&foundIDs, &names); err != nil {
+		return nil, err
+	}
+	if len(foundIDs) != len(names) {
+		return nil, errors.New("inconsistent canonical guild names")
+	}
+	for index, playerID := range foundIDs {
+		if names[index] == "" {
+			return nil, errors.New("invalid canonical guild name")
+		}
+		out[identity.PlayerID(playerID)] = names[index]
+	}
+	return out, nil
+}
+
 func (Store) InsertMembershipTx(ctx context.Context, t tx.Tx, m guild.Membership) error {
 	if err := m.Validate(); err != nil {
 		return err

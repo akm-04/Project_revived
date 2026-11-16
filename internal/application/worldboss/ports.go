@@ -66,6 +66,11 @@ type Heroes interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+// Guilds is the I6C owner's typed guild identity read for the 276 rank rows.
+type Guilds interface {
+	GuildNamesTx(context.Context, tx.Queryer, identity.LogicalServerID, []identity.PlayerID) (map[identity.PlayerID]string, error)
+}
+
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
 	CurrentAttemptTx(context.Context, tx.Queryer, cd.Locator) (cb.CurrentAttempt, bool, error)
@@ -90,6 +95,7 @@ type Mode struct {
 	Directory   Directory
 	Population  Population
 	Heroes      Heroes
+	Guilds      Guilds
 	Combat      Combat
 	Privileges  i5.PrivilegeSnapshotProvider
 	Costs       Costs

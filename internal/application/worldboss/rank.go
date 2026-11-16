@@ -11,7 +11,7 @@ import (
 
 // BossRank projects the shared 276 boss_rank aggregate for all five bosses.
 func (s Mode) BossRank(c context.Context, a identity.ActorContext, _ operation.Context) ([]map[string]any, error) {
-	if s.Fresh == nil || s.Store == nil || s.Directory == nil {
+	if s.Fresh == nil || s.Store == nil || s.Directory == nil || s.Guilds == nil {
 		return nil, d.ErrUnavailable
 	}
 	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
@@ -41,6 +41,14 @@ func (s Mode) projectBoard(c context.Context, a identity.ActorContext, board d.B
 	}
 	ordered := d.OrderRank(ranks)
 	shown := ordered[:min(len(ordered), boardLimit)]
+	shownPlayers := make([]identity.PlayerID, 0, len(shown))
+	for _, entry := range shown {
+		shownPlayers = append(shownPlayers, identity.PlayerID(entry.PlayerID))
+	}
+	guildNames, err := s.Guilds.GuildNamesTx(c, s.Fresh, identity.LogicalServerID(board.LogicalServerID), shownPlayers)
+	if err != nil {
+		return nil, err
+	}
 	infos := make([]map[string]any, 0, len(shown))
 	for index, entry := range shown {
 		profile, known := profiles[entry.PlayerID]
@@ -56,7 +64,7 @@ func (s Mode) projectBoard(c context.Context, a identity.ActorContext, board d.B
 			profiles[entry.PlayerID] = profile
 		}
 		infos = append(infos, map[string]any{"player_id": entry.PlayerID, "player_name": profile.Name, "level": profile.Level, "avatar_id": profile.AvatarID,
-			"avatar_frame_id": profile.AvatarFrameID, "total_hurt": entry.TotalHurt, "title_info": "", "conquer_lev": profile.ConquerLevel,
+			"avatar_frame_id": profile.AvatarFrameID, "guild_name": guildNames[identity.PlayerID(entry.PlayerID)], "total_hurt": entry.TotalHurt, "title_info": "", "conquer_lev": profile.ConquerLevel,
 			"conquer_loop_id": profile.ConquerLoopID, "rank": int64(index + 1)})
 	}
 	rank, _ := d.RankOf(ranks, int64(a.PlayerID))

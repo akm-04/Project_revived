@@ -1614,7 +1614,7 @@
    "tables": 1
   },
   {
-   "callees": 10,
+   "callees": 11,
    "callers": 1,
    "mids": 5,
    "name": "worldboss",

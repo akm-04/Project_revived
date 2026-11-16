@@ -5934,6 +5934,9 @@
    "store:guildrentalread": [
     "*ProfileTx"
    ],
+   "store:guildstore": [
+    "*GuildNamesTx"
+   ],
    "store:i4store": [
     "*LevelAtLeastCountTx",
     "*LockPlayerRootsTx",

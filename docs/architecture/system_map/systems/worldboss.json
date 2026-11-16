@@ -17,7 +17,7 @@
    "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
   },
   {
-   "count": 1,
+   "count": 2,
    "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
   },
   {
@@ -138,6 +138,7 @@
  "stores": [
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
@@ -155,6 +156,8 @@
    "account_sessions",
    "accounts",
    "gameplay_contexts",
+   "guild_memberships",
+   "guilds",
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
@@ -183,6 +186,7 @@
    "r1_worldboss_sweep.json"
   ],
   "unit": [
+   "rank_test.go",
    "service_test.go"
   ]
  }

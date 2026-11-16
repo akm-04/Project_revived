@@ -25575,6 +25575,21 @@
      "statement": "SELECT guild_id,logical_server_id,name,icon,icon_frame,des,apply_type,min_allow_level,vitality,policy_revision,state_version,created_at,updated_at,retired_at FROM guilds WHERE guild_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT * FROM unnest($1::bigint[],$2::int[]) )"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]), COALESCE(array_agg(g.name), '{}'::text[]) FROM requested r JOIN guild_memberships gm ON gm.player_id=r.player_id JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id WHERE g.retired_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/store.go",
+     "line": 192,
+     "statement": "WITH requested(player_id,logical_server_id) AS ("
+    },
+    {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
      "line": 724,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
@@ -30442,7 +30457,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -37058,7 +37073,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -37127,11 +37142,11 @@
     "internal/adapters/postgres/guildstore/invite_projection.go:16",
     "internal/adapters/postgres/guildstore/invite_projection.go:47",
     "internal/adapters/postgres/guildstore/store.go:109",
-    "internal/adapters/postgres/guildstore/store.go:175",
-    "internal/adapters/postgres/guildstore/store.go:216",
+    "internal/adapters/postgres/guildstore/store.go:231",
+    "internal/adapters/postgres/guildstore/store.go:272",
     "internal/adapters/postgres/guildstore/store.go:33",
-    "internal/adapters/postgres/guildstore/store.go:360",
-    "internal/adapters/postgres/guildstore/store.go:431",
+    "internal/adapters/postgres/guildstore/store.go:416",
+    "internal/adapters/postgres/guildstore/store.go:487",
     "internal/adapters/postgres/guildstore/store.go:49",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270"
@@ -37337,11 +37352,11 @@
     "internal/adapters/postgres/guildstore/invite_projection.go:47",
     "internal/adapters/postgres/guildstore/rental.go:108",
     "internal/adapters/postgres/guildstore/store.go:122",
-    "internal/adapters/postgres/guildstore/store.go:195",
-    "internal/adapters/postgres/guildstore/store.go:216",
-    "internal/adapters/postgres/guildstore/store.go:360",
-    "internal/adapters/postgres/guildstore/store.go:554",
-    "internal/adapters/postgres/guildstore/store.go:558",
+    "internal/adapters/postgres/guildstore/store.go:251",
+    "internal/adapters/postgres/guildstore/store.go:272",
+    "internal/adapters/postgres/guildstore/store.go:416",
+    "internal/adapters/postgres/guildstore/store.go:610",
+    "internal/adapters/postgres/guildstore/store.go:614",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528"
@@ -37468,7 +37483,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 202,
+     "line": 258,
      "statement": "SELECT count(*) FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -37540,7 +37555,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -37619,11 +37634,11 @@
     "internal/adapters/postgres/guildstore/activity.go:46",
     "internal/adapters/postgres/guildstore/invite_projection.go:16",
     "internal/adapters/postgres/guildstore/invite_projection.go:47",
-    "internal/adapters/postgres/guildstore/store.go:175",
-    "internal/adapters/postgres/guildstore/store.go:216",
-    "internal/adapters/postgres/guildstore/store.go:292",
-    "internal/adapters/postgres/guildstore/store.go:360",
-    "internal/adapters/postgres/guildstore/store.go:431"
+    "internal/adapters/postgres/guildstore/store.go:231",
+    "internal/adapters/postgres/guildstore/store.go:272",
+    "internal/adapters/postgres/guildstore/store.go:348",
+    "internal/adapters/postgres/guildstore/store.go:416",
+    "internal/adapters/postgres/guildstore/store.go:487"
    ],
    "system": "guildcore",
    "transactions": [
@@ -37722,12 +37737,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 202,
+     "line": 258,
      "statement": "SELECT count(*) FROM guild_memberships WHERE guild_id=$1"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 311,
+     "line": 367,
      "statement": "SELECT count(*) FROM guild_applications WHERE guild_id=$1"
     },
     {
@@ -37789,12 +37804,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 493,
+     "line": 549,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('GuildID',guild_id,'PlayerID',player_id,'Generation',application_generation,'CreatedAt',created_at,'StateVersion',state_version) ORDER BY created_at,player_id),'[]'::jsonb)::text FROM guild_applications WHERE guild_id=$1"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -37862,11 +37877,11 @@
     "internal/adapters/postgres/guildstore/activity.go:46",
     "internal/adapters/postgres/guildstore/invite_projection.go:16",
     "internal/adapters/postgres/guildstore/invite_projection.go:47",
-    "internal/adapters/postgres/guildstore/store.go:175",
-    "internal/adapters/postgres/guildstore/store.go:216",
-    "internal/adapters/postgres/guildstore/store.go:302",
-    "internal/adapters/postgres/guildstore/store.go:360",
-    "internal/adapters/postgres/guildstore/store.go:431"
+    "internal/adapters/postgres/guildstore/store.go:231",
+    "internal/adapters/postgres/guildstore/store.go:272",
+    "internal/adapters/postgres/guildstore/store.go:358",
+    "internal/adapters/postgres/guildstore/store.go:416",
+    "internal/adapters/postgres/guildstore/store.go:487"
    ],
    "system": "guildcore",
    "transactions": [
@@ -37980,17 +37995,17 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 202,
+     "line": 258,
      "statement": "SELECT count(*) FROM guild_memberships WHERE guild_id=$1"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 493,
+     "line": 549,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('GuildID',guild_id,'PlayerID',player_id,'Generation',application_generation,'CreatedAt',created_at,'StateVersion',state_version) ORDER BY created_at,player_id),'[]'::jsonb)::text FROM guild_applications WHERE guild_id=$1"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -38052,8 +38067,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildstore/store.go:302",
-    "internal/adapters/postgres/guildstore/store.go:360"
+    "internal/adapters/postgres/guildstore/store.go:358",
+    "internal/adapters/postgres/guildstore/store.go:416"
    ],
    "system": "guildcore",
    "transactions": [
@@ -38089,12 +38104,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 493,
+     "line": 549,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('GuildID',guild_id,'PlayerID',player_id,'Generation',application_generation,'CreatedAt',created_at,'StateVersion',state_version) ORDER BY created_at,player_id),'[]'::jsonb)::text FROM guild_applications WHERE guild_id=$1"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -38158,9 +38173,9 @@
     "internal/adapters/postgres/guildstore/activity.go:53",
     "internal/adapters/postgres/guildstore/rental.go:108",
     "internal/adapters/postgres/guildstore/store.go:122",
-    "internal/adapters/postgres/guildstore/store.go:195",
-    "internal/adapters/postgres/guildstore/store.go:216",
-    "internal/adapters/postgres/guildstore/store.go:360",
+    "internal/adapters/postgres/guildstore/store.go:251",
+    "internal/adapters/postgres/guildstore/store.go:272",
+    "internal/adapters/postgres/guildstore/store.go:416",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528"
@@ -38264,7 +38279,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/guildstore/store.go:122",
-    "internal/adapters/postgres/guildstore/store.go:360"
+    "internal/adapters/postgres/guildstore/store.go:416"
    ],
    "system": "guildcore",
    "transactions": [
@@ -38339,8 +38354,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildstore/store.go:185",
-    "internal/adapters/postgres/guildstore/store.go:360"
+    "internal/adapters/postgres/guildstore/store.go:241",
+    "internal/adapters/postgres/guildstore/store.go:416"
    ],
    "system": "guildcore",
    "transactions": [
@@ -38381,12 +38396,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 207,
+     "line": 263,
      "statement": "SELECT count(*) FROM guild_memberships WHERE guild_id=$1 AND role=$2"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -38460,9 +38475,9 @@
     "internal/adapters/postgres/guildstore/activity.go:53",
     "internal/adapters/postgres/guildstore/rental.go:108",
     "internal/adapters/postgres/guildstore/store.go:122",
-    "internal/adapters/postgres/guildstore/store.go:195",
-    "internal/adapters/postgres/guildstore/store.go:216",
-    "internal/adapters/postgres/guildstore/store.go:360",
+    "internal/adapters/postgres/guildstore/store.go:251",
+    "internal/adapters/postgres/guildstore/store.go:272",
+    "internal/adapters/postgres/guildstore/store.go:416",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528"
@@ -38526,7 +38541,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -38617,7 +38632,7 @@
    "state_writes": [
     "internal/adapters/postgres/guildbroadcaststore/store.go:30",
     "internal/adapters/postgres/guildbroadcaststore/store.go:60",
-    "internal/adapters/postgres/guildstore/store.go:360"
+    "internal/adapters/postgres/guildstore/store.go:416"
    ],
    "system": "guildbroadcast",
    "transactions": [
@@ -38742,7 +38757,7 @@
    "state_writes": [
     "internal/adapters/postgres/guildstore/store.go:122",
     "internal/adapters/postgres/guildstore/store.go:33",
-    "internal/adapters/postgres/guildstore/store.go:360",
+    "internal/adapters/postgres/guildstore/store.go:416",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270"
    ],
@@ -39009,7 +39024,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -39058,8 +39073,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildstore/store.go:302",
-    "internal/adapters/postgres/guildstore/store.go:360"
+    "internal/adapters/postgres/guildstore/store.go:358",
+    "internal/adapters/postgres/guildstore/store.go:416"
    ],
    "system": "guildcore",
    "transactions": [
@@ -40718,7 +40733,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
@@ -124134,9 +124149,9 @@
     "internal/adapters/postgres/guildstore/invite_projection.go:176",
     "internal/adapters/postgres/guildstore/invite_projection.go:26",
     "internal/adapters/postgres/guildstore/invite_projection.go:37",
-    "internal/adapters/postgres/guildstore/store.go:332",
-    "internal/adapters/postgres/guildstore/store.go:348",
-    "internal/adapters/postgres/guildstore/store.go:360"
+    "internal/adapters/postgres/guildstore/store.go:388",
+    "internal/adapters/postgres/guildstore/store.go:404",
+    "internal/adapters/postgres/guildstore/store.go:416"
    ],
    "system": "guildcore",
    "transactions": [
@@ -124225,12 +124240,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 343,
+     "line": 399,
      "statement": "SELECT count(*) FROM guild_invite_send_events WHERE inviter_player_id=$1 AND occurred_at >= $2"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 479,
+     "line": 535,
      "statement": "SELECT guild_id,invited_player_id,invite_generation,inviter_player_id,created_at,expires_at,state_version FROM guild_invites WHERE guild_id=$1 AND invited_player_id=$2 FOR UPDATE"
     },
     {
@@ -124336,11 +124351,11 @@
     "internal/adapters/postgres/guildstore/activity.go:46",
     "internal/adapters/postgres/guildstore/invite_projection.go:16",
     "internal/adapters/postgres/guildstore/invite_projection.go:47",
-    "internal/adapters/postgres/guildstore/store.go:175",
-    "internal/adapters/postgres/guildstore/store.go:216",
-    "internal/adapters/postgres/guildstore/store.go:339",
-    "internal/adapters/postgres/guildstore/store.go:360",
-    "internal/adapters/postgres/guildstore/store.go:431"
+    "internal/adapters/postgres/guildstore/store.go:231",
+    "internal/adapters/postgres/guildstore/store.go:272",
+    "internal/adapters/postgres/guildstore/store.go:395",
+    "internal/adapters/postgres/guildstore/store.go:416",
+    "internal/adapters/postgres/guildstore/store.go:487"
    ],
    "system": "guildcore",
    "transactions": [
@@ -124444,12 +124459,12 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 202,
+     "line": 258,
      "statement": "SELECT count(*) FROM guild_memberships WHERE guild_id=$1"
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 479,
+     "line": 535,
      "statement": "SELECT guild_id,invited_player_id,invite_generation,inviter_player_id,created_at,expires_at,state_version FROM guild_invites WHERE guild_id=$1 AND invited_player_id=$2 FOR UPDATE"
     },
     {
@@ -124511,7 +124526,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildstore/store.go",
-     "line": 533,
+     "line": 589,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('PlayerID',player_id,'GuildID',guild_id,'Role',role,'JoinedAt',joined_at,'MembershipVersion',membership_version,'StateVersion',state_version,'UpdatedAt',updated_at) ORDER BY player_id),'[]'::jsonb)::text FROM guild_memberships WHERE guild_id=$1"
     },
     {
