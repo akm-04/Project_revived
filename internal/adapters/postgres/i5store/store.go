@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/redeem"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -486,7 +487,8 @@ func (Store) AllocateMailWireIDTx(ctx context.Context, t tx.Tx, pid identity.Pla
 // MailTuningTx reads the operator overlay; found=false keeps the built-in durations.
 func (Store) MailTuningTx(c context.Context, q tx.Queryer) (mail.Tuning, bool, error) {
 	var raw string
-	err := q.QueryRow(c, `SELECT payload::text FROM mail_tuning`).Scan(&raw)
+	var version int16
+	err := q.QueryRow(c, `SELECT payload::text,payload_version FROM mail_tuning`).Scan(&raw, &version)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return mail.Tuning{}, false, nil
 	}
@@ -494,7 +496,7 @@ func (Store) MailTuningTx(c context.Context, q tx.Queryer) (mail.Tuning, bool, e
 		return mail.Tuning{}, false, err
 	}
 	var tuning mail.Tuning
-	err = json.Unmarshal([]byte(raw), &tuning)
+	err = payload.Decode("mail_tuning", version, []byte(raw), &tuning)
 	return tuning, true, err
 }
 
@@ -526,7 +528,7 @@ func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 		return err
 	}
 	for _, a := range r.Attachments {
-		meta, err := json.Marshal(a.Line.Metadata)
+		meta, version, err := payload.Encode(a.Line.Metadata)
 		if err != nil {
 			return err
 		}
@@ -538,7 +540,7 @@ func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 		if a.Line.ItemID > 0 {
 			item = a.Line.ItemID
 		}
-		tag, err = t.Exec(ctx, `INSERT INTO mail_attachments(mail_uuid,ordinal,grant_line_kind,resource_key,item_id,amount,metadata) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb)`, r.MailUUID.String(), a.Ordinal, string(a.Line.Kind), key, item, a.Line.Amount, string(meta))
+		tag, err = t.Exec(ctx, `INSERT INTO mail_attachments(mail_uuid,ordinal,grant_line_kind,resource_key,item_id,amount,metadata,payload_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb,$8)`, r.MailUUID.String(), a.Ordinal, string(a.Line.Kind), key, item, a.Line.Amount, string(meta), version)
 		if err != nil {
 			return err
 		}
@@ -560,7 +562,7 @@ SELECT COALESCE((SELECT jsonb_agg(jsonb_build_object(
  'source_kind',p.source_kind,'source_key',p.source_key,'category',p.category,'title',p.title,'sender',p.sender,'body',p.body,
  'created_at',p.created_at,'expires_at',p.expires_at,'read_at',p.read_at,'shown',p.shown,'claimed_at',p.claimed_at,
  'platform',p.platform_eligibility,'policy',p.compatibility_policy_version,'state_version',p.state_version,
- 'attachments',COALESCE((SELECT jsonb_agg(jsonb_build_object('ordinal',a.ordinal,'kind',a.grant_line_kind,'resource_key',a.resource_key,'item_id',a.item_id,'amount',a.amount,'metadata',a.metadata) ORDER BY a.ordinal) FROM mail_attachments a WHERE a.mail_uuid=p.mail_uuid),'[]'::jsonb)
+ 'attachments',COALESCE((SELECT jsonb_agg(jsonb_build_object('ordinal',a.ordinal,'kind',a.grant_line_kind,'resource_key',a.resource_key,'item_id',a.item_id,'amount',a.amount,'metadata',a.metadata,'payload_version',a.payload_version) ORDER BY a.ordinal) FROM mail_attachments a WHERE a.mail_uuid=p.mail_uuid),'[]'::jsonb)
  ) ORDER BY p.created_at DESC,p.namespace,p.wire_id DESC)::text FROM page p),'[]'),
  (SELECT count(*) FROM active), (SELECT count(*) FROM active WHERE read_at IS NULL)`
 
@@ -594,7 +596,7 @@ func (Store) LockMailTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, add
 		return mail.Record{}, err
 	}
 	var ar string
-	if err := t.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'kind',grant_line_kind,'resource_key',resource_key,'item_id',item_id,'amount',amount,'metadata',metadata) ORDER BY ordinal),'[]'::jsonb)::text FROM mail_attachments WHERE mail_uuid=$1::uuid`, uuid).Scan(&ar); err != nil {
+	if err := t.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'kind',grant_line_kind,'resource_key',resource_key,'item_id',item_id,'amount',amount,'metadata',metadata,'payload_version',payload_version) ORDER BY ordinal),'[]'::jsonb)::text FROM mail_attachments WHERE mail_uuid=$1::uuid`, uuid).Scan(&ar); err != nil {
 		return mail.Record{}, err
 	}
 	u, err := ids.ParseUUID(uuid)
@@ -807,12 +809,13 @@ func (Store) InsertRedemptionTx(ctx context.Context, t tx.Tx, r appi5.Redemption
 // JSON decode helpers intentionally sit in the adapter: JSON is a PostgreSQL
 // storage representation here, not a domain contract.
 type attachJSON struct {
-	Ordinal     int               `json:"ordinal"`
-	Kind        string            `json:"kind"`
-	ResourceKey *string           `json:"resource_key"`
-	ItemID      *int64            `json:"item_id"`
-	Amount      int64             `json:"amount"`
-	Metadata    map[string]string `json:"metadata"`
+	Ordinal        int             `json:"ordinal"`
+	Kind           string          `json:"kind"`
+	ResourceKey    *string         `json:"resource_key"`
+	ItemID         *int64          `json:"item_id"`
+	Amount         int64           `json:"amount"`
+	Metadata       json.RawMessage `json:"metadata"`
+	PayloadVersion int16           `json:"payload_version"`
 }
 
 func decodeAttachments(raw []byte) ([]mail.Attachment, error) {
@@ -822,7 +825,11 @@ func decodeAttachments(raw []byte) ([]mail.Attachment, error) {
 	}
 	out := make([]mail.Attachment, 0, len(rows))
 	for _, x := range rows {
-		l := grant.Line{Kind: grant.LineKind(x.Kind), Amount: x.Amount, Metadata: x.Metadata}
+		var metadata map[string]string
+		if err := payload.Decode("mail_attachments", x.PayloadVersion, x.Metadata, &metadata); err != nil {
+			return nil, err
+		}
+		l := grant.Line{Kind: grant.LineKind(x.Kind), Amount: x.Amount, Metadata: metadata}
 		if x.ResourceKey != nil {
 			l.ResourceKey = *x.ResourceKey
 		}
