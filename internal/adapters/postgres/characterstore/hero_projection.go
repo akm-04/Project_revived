@@ -29,7 +29,7 @@ type LibraryRosterOverlay interface {
 // SeasonPicksReader is Arena's ARENA_HERO_PICKS_V1 read: base table id -> the
 // girl's ranked attack fights in the player's current season.
 type SeasonPicksReader interface {
-	SeasonPicksTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]int64, error)
+	SeasonPicksTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (map[int64]int64, error)
 }
 
 // HeroBootstrapProjection repairs MID1 key49 with canonical owner state while
@@ -181,7 +181,7 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 		}
 	}
 	if p.SeasonPicks != nil {
-		picks, err := p.SeasonPicks.SeasonPicksTx(ctx, q, actor.PlayerID)
+		picks, err := p.SeasonPicks.SeasonPicksTx(ctx, q, actor.PlayerID, observedAt)
 		if err != nil {
 			return err
 		}

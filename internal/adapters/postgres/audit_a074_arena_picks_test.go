@@ -57,7 +57,7 @@ func TestAuditA074ArenaPicksUsesCallerConnection(t *testing.T) {
 		if !tx.HoldsConnection(ctx) {
 			t.Fatal("fixture did not enter a runner transaction")
 		}
-		_, err := service.SeasonPicksTx(ctx, scope.Tx, 7)
+		_, err := service.SeasonPicksTx(ctx, scope.Tx, 7, currentOperation.StartedAt)
 		return err
 	})
 	if err != nil {

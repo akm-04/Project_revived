@@ -10,10 +10,14 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-type seasonPicksStub map[int64]int64
+type seasonPicksStub struct {
+	counts     map[int64]int64
+	observedAt time.Time
+}
 
-func (s seasonPicksStub) SeasonPicksTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]int64, error) {
-	return s, nil
+func (s *seasonPicksStub) SeasonPicksTx(_ context.Context, _ tx.Queryer, _ identity.PlayerID, at time.Time) (map[int64]int64, error) {
+	s.observedAt = at
+	return s.counts, nil
 }
 
 // ARENA_HERO_PICKS_V1: every roster row carries the count of the girl's
@@ -24,9 +28,13 @@ func TestHeroBootstrapProjectionCarriesSeasonArenaPicksByBaseTable(t *testing.T)
 	q := &heroBootstrapQueryer{root: root, heroes: []character.Hero{h}}
 	content := heroBootstrapContent{revision: h.CreationContentRevision, core: true, equipment: true, fumo: true, appearance: true, kind: character.NormalHero}
 	detail := map[string]any{"49": map[string]any{"sort_type": int64(0), "heros": map[string]any{}}}
-	p := HeroBootstrapProjection{Content: content, SeasonPicks: seasonPicksStub{10001040: 2}}
+	picks := &seasonPicksStub{counts: map[int64]int64{10001040: 2}}
+	p := HeroBootstrapProjection{Content: content, SeasonPicks: picks}
 	if err := p.OverlayMID1(context.Background(), q, identity.ActorContext{PlayerID: 7}, false, time.Unix(200, 0).UTC(), detail); err != nil {
 		t.Fatal(err)
+	}
+	if !picks.observedAt.Equal(time.Unix(200, 0).UTC()) {
+		t.Fatalf("Arena observed instant = %v", picks.observedAt)
 	}
 	wire := detail["49"].(map[string]any)["heros"].(map[string]any)["1"].(map[string]any)
 	if wire["region_arena_times"] != int64(2) {

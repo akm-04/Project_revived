@@ -2,6 +2,7 @@ package arena
 
 import (
 	"context"
+	"time"
 
 	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -12,19 +13,18 @@ import (
 // (pre-awaken) table id, the ranked attack fights this season in which the girl
 // was in the attacking team. The stored season is rolled at the decision
 // instant without saving it, so a stale row counts 0 until the next arena write.
-func (s Service) SeasonPicksTx(c context.Context, q tx.Queryer, player identity.PlayerID) (map[int64]int64, error) {
+func (s Service) SeasonPicksTx(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time) (map[int64]int64, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
+	}
+	if !player.Valid() || at.IsZero() {
+		return nil, d.ErrInvalid
 	}
 	revision, catalog, err := s.catalogTx(c, q)
 	if err != nil {
 		return nil, err
 	}
 	templates, err := s.Content.ArenaTemplatesTx(c, q, revision)
-	if err != nil {
-		return nil, err
-	}
-	at, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
 		return nil, err
 	}
