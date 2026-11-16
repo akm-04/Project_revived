@@ -349,8 +349,14 @@ func enemyStatus(waves map[int64][]guildcampaign.EnemyRow) []any {
 		enemies := waves[wave]
 		rows := make([]any, 0, len(enemies))
 		for _, enemy := range enemies {
-			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": enemy.Health}
+			// The client applies hp only when health is 1 (BattleCreate.lua:1106-1111),
+			// so health marks every row that carries a stored HP and hp stays numeric.
+			health := enemy.Health
 			if enemy.HP > 0 {
+				health = 1
+			}
+			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": health}
+			if health != 0 {
 				row["hp"] = enemy.HP
 			}
 			if enemy.Reborn != 0 {

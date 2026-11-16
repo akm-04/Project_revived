@@ -146,6 +146,41 @@ func TestI9_9CDispatcherChapterAndCopyJSON(t *testing.T) {
 	}
 }
 
+func TestI9_9CEnemyStatusCarriesHPForRecordedRows(t *testing.T) {
+	// SelectTeamNewWindow.lua:6795-6799 builds healthStatus from health/hp, and
+	// BattleCreate.lua:1106-1111 applies hp only when health is 1, so a recorded
+	// row owes health 1 with hp numeric; an untouched row keeps health 0 and no hp.
+	waves := map[int64][]app.EnemyRow{1: {
+		{TableID: 80000010, Lev: 60, Star: 5, Color: 6, HP: 77},
+		{TableID: 80000011, Lev: 60, Star: 5, Color: 6, Health: 1},
+		{TableID: 80000012, Lev: 60, Star: 5, Color: 6},
+	}}
+	stub := &campaignStub{started: app.Started{CopyID: 700028, CurrentIndex: 1, Waves: waves},
+		detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, Waves: waves, IsOpen: true}}
+	replies := map[uint16]map[string]any{
+		604: {"copy_id": int64(700028), "chapter_id": int64(7), "campaign_type": int64(7), "formation": "10001001"},
+		613: {"copy_id": int64(700028)},
+	}
+	for mid, params := range replies {
+		got := campaignDispatch(t, stub, mid, params)
+		key := "enemy_status"
+		if mid == 613 {
+			key = "monster_status"
+		}
+		rows := got.Body[key].([]any)[0].([]any)
+		damaged, dead, untouched := rows[0].(map[string]any), rows[1].(map[string]any), rows[2].(map[string]any)
+		if damaged["health"] != int64(1) || damaged["hp"] != int64(77) {
+			t.Fatalf("%d damaged row %+v", mid, damaged)
+		}
+		if dead["health"] != int64(1) || dead["hp"] != int64(0) {
+			t.Fatalf("%d dead row %+v", mid, dead)
+		}
+		if untouched["health"] != int64(0) || untouched["hp"] != nil {
+			t.Fatalf("%d untouched row %+v", mid, untouched)
+		}
+	}
+}
+
 func TestI9_9CDetailCarriesFightInfoForTheLiveHolder(t *testing.T) {
 	// MapWindow.lua:1100,1121-1130 and GuildMapDetailWindow.lua:60-82 index
 	// fight_info whenever current_fight_player>0 and last_fight_time>0, so the

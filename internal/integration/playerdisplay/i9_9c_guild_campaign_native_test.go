@@ -311,6 +311,51 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	}
 }
 
+// TestI9_9CEnemyHPRecordedForClientCarry guards DL-33b38484: a row that took
+// damage carries health 1 so the client applies the stored hp (BattleCreate.lua
+// 1106) and a later loss lowers the known HP.
+func TestI9_9CEnemyHPRecordedForClientCarry(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.copyID(t)
+	if _, err := f.mode.Claim(ctx, f.second, copyID, f.op()); err != nil {
+		t.Fatal("claim second", err)
+	}
+	started := f.startAt(t, f.second, chapterID, copyID, f.secondHero, f.at)
+	if _, err := f.mode.Settle(ctx, f.second, f.waveEnemies(t, started, 0, 1000, 77), f.op()); err != nil {
+		t.Fatal("first loss", err)
+	}
+	detail, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
+	if err != nil {
+		t.Fatal("detail", err)
+	}
+	for _, row := range detail.Waves[detail.CurrentIndex] {
+		if row.Health != 1 || row.HP != 77 {
+			t.Fatalf("recorded row health=%d hp=%d, want health=1 hp=77", row.Health, row.HP)
+		}
+	}
+	if _, err := f.mode.Claim(ctx, f.third, copyID, f.op()); err != nil {
+		t.Fatal("claim third", err)
+	}
+	second := f.startAt(t, f.third, chapterID, copyID, f.thirdHero, f.at.Add(time.Minute))
+	if row := second.Waves[second.CurrentIndex][0]; row.Health != 1 || row.HP != 77 {
+		t.Fatalf("start rows health=%d hp=%d, want health=1 hp=77", row.Health, row.HP)
+	}
+	if _, err := f.mode.Settle(ctx, f.third, f.waveEnemies(t, second, 0, 500, 33), f.opAt(f.at.Add(time.Minute))); err != nil {
+		t.Fatal("second loss", err)
+	}
+	lowered, err := f.mode.MapDetail(ctx, f.third, copyID, f.opAt(f.at.Add(time.Minute)))
+	if err != nil {
+		t.Fatal("detail after second loss", err)
+	}
+	if row := lowered.Waves[lowered.CurrentIndex][0]; row.Health != 1 || row.HP != 33 {
+		t.Fatalf("known HP did not fall: health=%d hp=%d", row.Health, row.HP)
+	}
+}
+
 func TestI9_9CAttemptCapAndRegistrationForfeit(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)
