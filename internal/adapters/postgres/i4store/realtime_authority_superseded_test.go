@@ -66,13 +66,21 @@ func TestResolveGameplayBearerClassifiesSupersededContext(t *testing.T) {
 		t.Fatalf("queries = %d, want the live lookup and one classification read", len(q.queries))
 	}
 	classify := q.queries[1].query
-	for _, needle := range []string{"gameplay_context_credentials", "JOIN gameplay_contexts", "JOIN account_sessions", "end_reason='superseded'", "s.revoked_at IS NULL"} {
+	for _, needle := range []string{"gameplay_context_credentials", "JOIN gameplay_contexts", "JOIN account_sessions", "end_reason='superseded'", "s.revoked_at IS NULL", "s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at", "s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval"} {
 		if !strings.Contains(classify, needle) {
 			t.Fatalf("classification query missing %q:\n%s", needle, classify)
 		}
 	}
 	if strings.Contains(classify, "c.ended_at IS NULL") {
 		t.Fatalf("classification query kept the liveness filter:\n%s", classify)
+	}
+	classifyArgs := q.queries[1].args
+	if len(classifyArgs) != 2 {
+		t.Fatalf("classification args = %d, want digest and decision instant", len(classifyArgs))
+	}
+	decisionInstant, ok := classifyArgs[1].(time.Time)
+	if !ok || !decisionInstant.Equal(time.Unix(100, 0)) {
+		t.Fatalf("classification decision instant = %#v", classifyArgs[1])
 	}
 }
 

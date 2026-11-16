@@ -50,8 +50,8 @@ func supersededRequest(token string, at time.Time) httpedge.DispatchRequest {
 }
 
 // A late request from a context that a server switch superseded answers 409 with
-// an empty error_msg, so the newly switched scene is not restarted. A revoked
-// session still answers 401 with the message.lua 20003 relog text.
+// an empty error_msg, so the newly switched scene is not restarted. A revoked or
+// expired session still answers 401 with the message.lua 20003 relog text.
 func TestContextSupersededBearerAnswersQuietRefusal(t *testing.T) {
 	dsn := os.Getenv("GXB_CONTEXT_SUPERSEDED_DSN")
 	if dsn == "" {
@@ -127,5 +127,14 @@ func TestContextSupersededBearerAnswersQuietRefusal(t *testing.T) {
 	response = dispatcher.Dispatch(ctx, supersededRequest(second.Token, replayAt))
 	if response.HTTPStatus != http.StatusUnauthorized || response.Body["error_code"] != int64(20003) || response.Body["error_msg"] == "" {
 		t.Fatalf("revoked session reply: status=%d body=%v", response.HTTPStatus, response.Body)
+	}
+
+	execute(`UPDATE account_sessions SET revoked_at=NULL,revocation_reason=NULL,absolute_expires_at=$2 WHERE session_id=$1`, session.String(), replayAt.Add(-time.Second))
+	if _, err := authority.ResolveGameplayBearer(ctx, first.Token, replayAt); !errors.Is(err, i4store.ErrGameplayBearerNotLive) {
+		t.Fatalf("expired superseded bearer classification: %v, want ErrGameplayBearerNotLive", err)
+	}
+	response = dispatcher.Dispatch(ctx, supersededRequest(first.Token, replayAt))
+	if response.HTTPStatus != http.StatusUnauthorized || response.Body["error_code"] != int64(20003) || response.Body["error_msg"] == "" {
+		t.Fatalf("expired superseded bearer reply: status=%d body=%v", response.HTTPStatus, response.Body)
 	}
 }

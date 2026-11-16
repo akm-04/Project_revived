@@ -33,16 +33,21 @@ JOIN accounts a ON a.account_id=c.account_id
 WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL`
 
 // classifySupersededGameplayBearer runs only after the live lookup found
-// nothing. It joins the same three identity rows without a liveness filter so a
-// bearer whose context a later selection ended is told apart from revoked,
-// expired and unknown ones (PASS413 CONTEXT_SUPERSEDED).
+// nothing. It joins the same three identity rows without the context-liveness
+// filter so a bearer whose context a later selection ended is told apart from
+// revoked, expired and unknown ones (PASS413 CONTEXT_SUPERSEDED). The session
+// expiry predicate matches identity.Session.Live (domain/identity/types.go:113)
+// and the live liveness fence above: U6 keeps expired sessions at 401 + 20003.
 const classifySupersededGameplayBearer = `
 SELECT EXISTS(
  SELECT 1
  FROM gameplay_context_credentials gc
  JOIN gameplay_contexts c ON c.context_id=gc.context_id
  JOIN account_sessions s ON s.session_id=c.session_id
- WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL)`
+ WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded'
+   AND s.revoked_at IS NULL
+   AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at)
+   AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))`
 
 const validateActorLiveness = `
 SELECT EXISTS(
@@ -139,7 +144,7 @@ func (a RealtimeAuthority) resolveGameplayBearer(ctx context.Context, q tx.Query
 	)
 	if err != nil {
 		if errors.Is(err, kernelstore.ErrNoRows) {
-			superseded, classifyErr := contextWasSuperseded(ctx, q, digest[:])
+			superseded, classifyErr := contextWasSuperseded(ctx, q, digest[:], now)
 			if classifyErr != nil {
 				return identity.ActorContext{}, classifyErr
 			}
@@ -218,9 +223,9 @@ func (a RealtimeAuthority) resolveGameplayBearer(ctx context.Context, q tx.Query
 // contextWasSuperseded classifies a digest whose live lookup found nothing. A
 // revoked session keeps the session-failure answer even when its context had
 // been superseded (user ruling U6).
-func contextWasSuperseded(ctx context.Context, q tx.Queryer, digest []byte) (bool, error) {
+func contextWasSuperseded(ctx context.Context, q tx.Queryer, digest []byte, now time.Time) (bool, error) {
 	var superseded bool
-	if err := q.QueryRow(ctx, classifySupersededGameplayBearer, digest).Scan(&superseded); err != nil {
+	if err := q.QueryRow(ctx, classifySupersededGameplayBearer, digest, now.UTC()).Scan(&superseded); err != nil {
 		return false, err
 	}
 	return superseded, nil
