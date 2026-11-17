@@ -22,9 +22,10 @@ type replyConsumerCallback struct {
 }
 
 type replyConsumerRecord struct {
-	Status    string                  `json:"status"`
-	Reason    string                  `json:"reason"`
-	Callbacks []replyConsumerCallback `json:"callbacks"`
+	Status    string                                      `json:"status"`
+	Reason    string                                      `json:"reason"`
+	Callbacks []replyConsumerCallback                     `json:"callbacks"`
+	Branches  map[string]map[string]replyConsumerCallback `json:"branches"`
 }
 
 type replyConsumerDocument struct {
@@ -47,7 +48,7 @@ func TestEveryServedMIDHasReplyConsumers(t *testing.T) {
 			missing = append(missing, mid)
 			continue
 		}
-		if record.Status != "UNKNOWN" && !hasUnknownCallback(record) {
+		if record.Status != "UNKNOWN" && !hasUnknownBucket(record) {
 			checked = append(checked, mid)
 			continue
 		}
@@ -110,6 +111,35 @@ func hasUnknownCallback(record replyConsumerRecord) bool {
 		}
 	}
 	return false
+}
+
+func hasUnknownBucket(record replyConsumerRecord) bool {
+	if hasUnknownCallback(record) {
+		return true
+	}
+	for _, values := range record.Branches {
+		for _, branch := range values {
+			if branch.Status == "UNKNOWN" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// An UNKNOWN branch bucket is an unattributed consumer population: the row must
+// count as UNKNOWN even when every callback resolved.
+func TestReplyConsumerUnknownBranchBucketIsNotChecked(t *testing.T) {
+	record := replyConsumerRecord{
+		Status:    "CHECKED",
+		Callbacks: []replyConsumerCallback{{Status: "CHECKED"}},
+		Branches: map[string]map[string]replyConsumerCallback{
+			"table_id": {"unknown": {Status: "UNKNOWN", Reason: "unattributed site"}},
+		},
+	}
+	if !hasUnknownBucket(record) {
+		t.Fatal("a record with an UNKNOWN branch bucket was counted CHECKED")
+	}
 }
 
 func unknownIsReasoned(record replyConsumerRecord) bool {

@@ -27,9 +27,26 @@ def required_paths(payload, mid):
 
 def obligation_map(payload):
     return {
-        mid: {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in record["paths"]}
+        mid: {
+            "paths": {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in record["paths"]},
+            "branches": {
+                key: {
+                    value: {
+                        reply_consumers.path_name(entry): reply_consumers.path_requirement(entry)
+                        for entry in branch["paths"]
+                    }
+                    for value, branch in values.items()
+                }
+                for key, values in record.get("branches", {}).items()
+            },
+        }
         for mid, record in payload["mids"].items()
     }
+
+
+def branch_requirements(payload, mid, discriminator, value):
+    branch = payload["mids"][str(mid)]["branches"][discriminator][value]
+    return {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in branch["paths"]}
 
 
 def repeated_segment_names(path):
@@ -41,6 +58,11 @@ def repeated_segment_names(path):
             repeated.append(name)
         seen.add(name)
     return repeated
+
+
+def path_prefixes(path):
+    segments = path.split(".")
+    return {".".join(segments[:end]) for end in range(1, len(segments) + 1)}
 
 
 def normalised_access_names(line):
@@ -80,6 +102,137 @@ def fixture_payload():
     return reply_consumers.build(blobs, collapse=False)
 
 
+def event_consumer_blobs(*, callback=True):
+    callback_argument = (
+        ", function(arg_3_0, arg_3_1)\n"
+        "\t\tprint(arg_3_1.callback_only)\n"
+        "\tend"
+    ) if callback else ""
+    return {
+        "app/common/network/mid.lua": "xyd.mid.EVENTED = 9001\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": (
+            "function var_0_1.setupMidToEventNameMappings_(arg_19_0)\n"
+            "\targ_19_0.mid2EventNames_[xyd.mid.EVENTED] = xyd.event.EVENTED\n"
+            "end\n"
+        ),
+        "app/model/Evented.lua": (
+            'local var_0_0 = class("Evented")\n'
+            "function var_0_0.onRegister(arg_1_0)\n"
+            "\targ_1_0:registerEvent(xyd.event.EVENTED, handler(arg_1_0, arg_1_0.onEvented_))\n"
+            "end\n"
+            "function var_0_0.onEvented_(arg_2_0, arg_2_1)\n"
+            "\targ_2_0.value = arg_2_1.params.event_only\n"
+            "\targ_2_0.userdata = arg_2_1.userdata\n"
+            "end\n"
+        ),
+        "app/model/Caller.lua": (
+            'local var_0_0 = class("Caller")\n'
+            "function var_0_0.load(arg_4_0)\n"
+            f"\txyd.Backend.get():request(xyd.mid.EVENTED, {{}}{callback_argument})\n"
+            "end\n"
+        ),
+    }
+
+
+class EventConsumerTests(unittest.TestCase):
+    def test_the_mapped_event_is_a_consumer_even_with_an_explicit_callback(self):
+        with_callback = reply_consumers.build(event_consumer_blobs(), collapse=False)
+        self.assertEqual({"event_only", "callback_only"}, required_paths(with_callback, 9001))
+        without_callback = reply_consumers.build(event_consumer_blobs(callback=False), collapse=False)
+        self.assertEqual({"event_only"}, required_paths(without_callback, 9001))
+
+    def test_the_event_userdata_is_not_a_reply_path(self):
+        payload = reply_consumers.build(event_consumer_blobs(), collapse=False)
+        self.assertNotIn("userdata", required_paths(payload, 9001))
+
+
+def wrapper_owner_blobs(*, extra_window_call="", import_beta=True):
+    beta_import = 'local beta = import("app.model.Beta")\n' if import_beta else ""
+    return {
+        "app/common/network/mid.lua": "xyd.mid.ALPHA = 9001\nxyd.mid.BETA = 9002\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/model/Alpha.lua": (
+            'local var_0_0 = class("Alpha")\n'
+            "function var_0_0.loadInfo(arg_1_0, arg_1_1)\n"
+            "\txyd.Backend.get():request(xyd.mid.ALPHA, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\targ_1_1(arg_2_0, arg_2_1)\n"
+            "\tend)\n"
+            "end\n"
+        ),
+        "app/model/Beta.lua": (
+            'local var_0_0 = class("Beta")\n'
+            "function var_0_0.loadInfo(arg_1_0, arg_1_1)\n"
+            "\txyd.Backend.get():request(xyd.mid.BETA, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\targ_1_1(arg_2_0, arg_2_1)\n"
+            "\tend)\n"
+            "end\n"
+        ),
+        "app/windows/Probe.lua": (
+            'local var_0_0 = class("Probe")\n'
+            'local alpha = import("app.model.Alpha")\n'
+            f"{beta_import}"
+            "function var_0_0.show(arg_1_0)\n"
+            "\talpha:loadInfo(function(arg_2_0, arg_2_1)\n"
+            "\t\tprint(arg_2_1.alpha_only)\n"
+            "\tend)\n"
+            f"{extra_window_call}"
+            "end\n"
+        ),
+    }
+
+
+class WrapperOwnerIdentityTests(unittest.TestCase):
+    def test_two_models_with_one_wrapper_method_name_keep_their_own_replies(self):
+        blobs = wrapper_owner_blobs(
+            extra_window_call=(
+                "\tbeta:loadInfo(function(arg_3_0, arg_3_1)\n"
+                "\t\tprint(arg_3_1.beta_only)\n"
+                "\tend)\n"
+            )
+        )
+        payload = reply_consumers.build(blobs, collapse=False)
+        self.assertEqual({"alpha_only"}, required_paths(payload, 9001))
+        self.assertEqual({"beta_only"}, required_paths(payload, 9002))
+
+    def test_same_owner_forwarding_still_contributes_its_reply(self):
+        payload = reply_consumers.build(wrapper_owner_blobs(import_beta=False), collapse=False)
+        self.assertEqual({"alpha_only"}, required_paths(payload, 9001))
+
+    def test_inline_load_model_receiver_resolves_to_the_wrapper_owner(self):
+        blobs = wrapper_owner_blobs(import_beta=False)
+        blobs["app/common/enums.lua"] = "xyd.ModelType.ALPHA = 7\n"
+        blobs["data/tables/model_define.lua"] = '"7", "Alpha"\n'
+        blobs["app/windows/Probe.lua"] = (
+            'local var_0_0 = class("Probe")\n'
+            "function var_0_0.show(arg_1_0)\n"
+            "\txyd.ModelManager.get():loadModel(xyd.ModelType.ALPHA):loadInfo(function(arg_2_0, arg_2_1)\n"
+            "\t\tprint(arg_2_1.alpha_only)\n"
+            "\tend)\n"
+            "end\n"
+        )
+        payload = reply_consumers.build(blobs, collapse=False)
+        self.assertEqual({"alpha_only"}, required_paths(payload, 9001))
+
+    def test_unresolved_receiver_is_unknown_and_contributes_no_paths(self):
+        blobs = wrapper_owner_blobs(
+            import_beta=False,
+            extra_window_call=(
+                "\tlocal outsider = getModel()\n"
+                "\toutsider:loadInfo(function(arg_3_0, arg_3_1)\n"
+                "\t\tprint(arg_3_1.rogue_only)\n"
+                "\tend)\n"
+            ),
+        )
+        payload = reply_consumers.build(blobs, collapse=False)
+        self.assertNotIn("rogue_only", required_paths(payload, 9001))
+        unknown = [callback for callback in payload["mids"]["9001"]["callbacks"] if callback["status"] == "UNKNOWN"]
+        self.assertTrue(any("unresolved" in callback.get("reason", "") for callback in unknown))
+
+
 class StorageBindingCycleTests(unittest.TestCase):
     def test_a_storage_binding_is_followed_at_most_once_per_path(self):
         payload = fixture_payload()
@@ -112,6 +265,33 @@ class ReplyConsumerTests(unittest.TestCase):
         self.assertIn("list", required_paths(self.payload, 176))
         self.assertIn("player_id", required_paths(self.payload, 177))
         self.assertTrue({"player_info"} <= required_paths(self.payload, 185) or "list[].player_info" in required_paths(self.payload, 185))
+
+    def test_the_live_activities_event_requires_its_list(self):
+        self.assertIn("list", required_paths(self.payload, 229))
+        self.assertNotIn("params.list", required_paths(self.payload, 229))
+
+    def test_activity_obligations_are_split_by_the_selected_table_id(self):
+        record = self.payload["mids"]["234"]
+        self.assertEqual("table_id", next(iter(record["branches"])))
+        unconditional = required_paths(self.payload, 234)
+        self.assertNotIn("details.server_support", unconditional)
+        self.assertEqual("REQUIRED", branch_requirements(self.payload, 234, "table_id", "1129")["details.server_support"])
+        self.assertNotIn("1129", [path for path in unconditional])
+        unknown = record["branches"]["table_id"]["unknown"]
+        self.assertEqual("UNKNOWN", unknown["status"])
+        self.assertTrue(unknown["reason"])
+        self.assertTrue(unknown["paths"])
+
+    def test_every_mid_split_across_activity_windows_is_covered(self):
+        self.assertEqual([], reply_consumers.branch_coverage_problems(self.payload))
+        self.assertIn(234, reply_consumers.BRANCH_POLICIES)
+        self.assertIn(231, reply_consumers.BRANCH_POLICY_EXEMPTIONS)
+
+    def test_branch_sites_are_the_activity_window_selected_by_the_client(self):
+        branch = self.payload["mids"]["234"]["branches"]["table_id"]["1129"]
+        entry = next(entry for entry in branch["paths"] if reply_consumers.path_name(entry) == "details.server_support")
+        files = {self.payload["site_files"][site[0]] for site in entry[2]}
+        self.assertEqual({"app/windows/activities/Activity1129.lua"}, files)
 
     def test_site_collapse_keeps_every_obligation_and_output_under_five_megabytes(self):
         self.assertEqual(obligation_map(self.uncollapsed), obligation_map(self.payload))
@@ -149,14 +329,17 @@ class ReplyConsumerTests(unittest.TestCase):
 
     def test_every_repeated_segment_is_read_at_a_cited_site(self):
         for mid, record in self.payload["mids"].items():
-            for entry in record["paths"]:
-                path = reply_consumers.path_name(entry)
+            entries = {reply_consumers.path_name(entry): entry for entry in record["paths"]}
+            for path in entries:
                 repeated = repeated_segment_names(path)
                 if not repeated:
                     continue
+                # A repeated segment can be read on the line that reads its
+                # parent path, so the prefix entries are evidence too.
                 lines = [
                     self.blobs[self.payload["site_files"][site[0]]].splitlines()[site[1] - 1]
-                    for site in entry[2]
+                    for prefix in path_prefixes(path)
+                    for site in entries.get(prefix, (None, None, []))[2]
                 ]
                 accessed = set()
                 for line in lines:

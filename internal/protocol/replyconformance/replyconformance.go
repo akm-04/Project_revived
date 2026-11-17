@@ -6,6 +6,7 @@ package replyconformance
 import (
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -29,9 +30,19 @@ type obligation struct {
 	requirements map[string]int
 }
 
+// midObligations holds one MID's unconditional paths plus, when the generated
+// evidence names a discriminator, one obligation set per discriminator value.
+// A branch the extractor could not attribute is kept in its own UNKNOWN bucket
+// and is never selected by a reply.
+type midObligations struct {
+	unconditional obligation
+	discriminator string
+	branches      map[string]obligation
+}
+
 var (
 	loadOnce      sync.Once
-	requiredByMID map[uint16]obligation
+	requiredByMID map[uint16]midObligations
 	fieldIndexes  sync.Map
 )
 
@@ -46,10 +57,50 @@ func (Checker) Check(mid uint16, reply any) []string {
 		return nil
 	}
 	var violations []string
-	for index, steps := range record.steps {
-		walk(steps, reply, record.paths[index], record.requirements, &violations)
+	check(record.unconditional, reply, &violations)
+	if record.discriminator == "" {
+		return violations
 	}
+	value, present := discriminatorValue(reply, record.discriminator)
+	if !present {
+		return violations
+	}
+	branch, present := record.branches[value]
+	if !present {
+		return violations
+	}
+	check(branch, reply, &violations)
 	return violations
+}
+
+func check(record obligation, reply any, violations *[]string) {
+	for index, steps := range record.steps {
+		walk(steps, reply, record.paths[index], record.requirements, violations)
+	}
+}
+
+func discriminatorValue(reply any, key string) (string, bool) {
+	value, present := member(reply, key)
+	if !present || isNil(value) {
+		return "", false
+	}
+	switch typed := value.(type) {
+	case string:
+		return typed, true
+	case json.Number:
+		return typed.String(), true
+	case float64:
+		return strconv.FormatInt(int64(typed), 10), true
+	case float32:
+		return strconv.FormatInt(int64(typed), 10), true
+	case int:
+		return strconv.Itoa(typed), true
+	case int8, int16, int32, int64:
+		return fmt.Sprintf("%d", typed), true
+	case uint, uint8, uint16, uint32, uint64:
+		return fmt.Sprintf("%d", typed), true
+	}
+	return "", false
 }
 
 // Reporter is the part of *testing.T the test helper needs, so production
@@ -67,46 +118,67 @@ func Check(t Reporter, mid uint16, body any) {
 	}
 }
 
+type branchRecord struct {
+	Status string            `json:"status"`
+	Paths  []json.RawMessage `json:"paths"`
+}
+
 func load() {
 	var document struct {
 		MIDs map[string]struct {
-			Paths []json.RawMessage `json:"paths"`
+			Paths    []json.RawMessage                  `json:"paths"`
+			Branches map[string]map[string]branchRecord `json:"branches"`
 		} `json:"mids"`
 	}
 	if err := json.Unmarshal(generated, &document); err != nil {
 		panic("replyconformance: embedded obligations: " + err.Error())
 	}
-	requiredByMID = make(map[uint16]obligation)
+	requiredByMID = make(map[uint16]midObligations)
 	for text, record := range document.MIDs {
 		number, err := strconv.ParseUint(text, 10, 16)
 		if err != nil {
 			continue
 		}
-		current := obligation{requirements: map[string]int{}}
-		var required []string
-		for _, raw := range record.Paths {
-			var entry []json.RawMessage
-			if err := json.Unmarshal(raw, &entry); err != nil || len(entry) < 2 {
-				continue
-			}
-			var path string
-			var requirement int
-			if json.Unmarshal(entry[0], &path) != nil || json.Unmarshal(entry[1], &requirement) != nil {
-				continue
-			}
-			current.requirements[path] = requirement
-			if requirement == requiredCode {
-				required = append(required, path)
+		entry := midObligations{unconditional: parseObligation(record.Paths)}
+		for discriminator, values := range record.Branches {
+			entry.discriminator = discriminator
+			entry.branches = make(map[string]obligation, len(values))
+			for value, branch := range values {
+				if branch.Status == "UNKNOWN" {
+					continue
+				}
+				entry.branches[value] = parseObligation(branch.Paths)
 			}
 		}
-		for _, path := range required {
-			current.paths = append(current.paths, path)
-			current.steps = append(current.steps, parsePath(path))
-		}
-		if len(current.paths) > 0 {
-			requiredByMID[uint16(number)] = current
+		if len(entry.unconditional.paths) > 0 || len(entry.branches) > 0 {
+			requiredByMID[uint16(number)] = entry
 		}
 	}
+}
+
+func parseObligation(rawPaths []json.RawMessage) obligation {
+	current := obligation{requirements: map[string]int{}}
+	var required []string
+	for _, raw := range rawPaths {
+		var entry []json.RawMessage
+		if err := json.Unmarshal(raw, &entry); err != nil || len(entry) < 2 {
+			continue
+		}
+		var path string
+		var requirement int
+		if json.Unmarshal(entry[0], &path) != nil || json.Unmarshal(entry[1], &requirement) != nil {
+			continue
+		}
+		current.requirements[path] = requirement
+		if requirement == requiredCode {
+			required = append(required, path)
+		}
+	}
+	for _, path := range required {
+		current.paths = append(current.paths, path)
+		current.steps = append(current.steps, parsePath(path))
+	}
+	return current
 }
 
 func parsePath(path string) []step {

@@ -2,6 +2,7 @@ package replyconformance
 
 import (
 	"encoding/json"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -56,6 +57,37 @@ func TestCheckerFollowsAnAbsentListParentsRequirement(t *testing.T) {
 	}
 }
 
+func TestCheckerAppliesOnlyTheSelectedActivityBranch(t *testing.T) {
+	worldBoss := map[string]any{"table_id": int64(1026), "details": map[string]any{"level": int64(48)}}
+	if violations := (Checker{}).Check(234, worldBoss); len(violations) != 0 {
+		t.Fatalf("world boss activity 1026 produced %#v", violations)
+	}
+	skinWarmUp := map[string]any{"table_id": int64(1129), "details": map[string]any{"base_info": map[string]any{"person_support": int64(1)}}}
+	got := (Checker{}).Check(234, skinWarmUp)
+	sort.Strings(got)
+	if strings.Join(got, ",") != "details.server_support" {
+		t.Fatalf("activity 1129 missing server_support produced %#v", got)
+	}
+	skinWarmUp["details"].(map[string]any)["server_support"] = int64(1)
+	if violations := (Checker{}).Check(234, skinWarmUp); len(violations) != 0 {
+		t.Fatalf("complete activity 1129 reply produced %#v", violations)
+	}
+	jsonNumber := map[string]any{"table_id": float64(1129), "details": map[string]any{"base_info": map[string]any{"person_support": int64(1)}}}
+	if got := (Checker{}).Check(234, jsonNumber); len(got) != 1 || got[0] != "details.server_support" {
+		t.Fatalf("float table_id 1129 produced %#v", got)
+	}
+}
+
+func TestCheckerReportsMappedEventConsumers(t *testing.T) {
+	missing := (Checker{}).Check(229, map[string]any{})
+	if !slices.Contains(missing, "list") {
+		t.Fatalf("MID 229 empty reply produced %#v; the mapped LOAD_ACTIVITIES listener reads list", missing)
+	}
+	if violations := (Checker{}).Check(229, map[string]any{"list": []any{}}); len(violations) != 0 {
+		t.Fatalf("MID 229 list reply produced %#v", violations)
+	}
+}
+
 func TestCheckerIgnoresMIDsWithoutObligations(t *testing.T) {
 	if violations := (Checker{}).Check(20480, nil); len(violations) != 0 {
 		t.Fatalf("violations %#v", violations)
@@ -65,11 +97,27 @@ func TestCheckerIgnoresMIDsWithoutObligations(t *testing.T) {
 // provenRepeatedPaths are the only generated paths allowed to repeat a segment;
 // each is read as a nested key at the client line cited in the extractor test.
 var provenRepeatedPaths = map[string]bool{
-	"301:rank_list[].rank_info.rank_info":      true,
-	"1362:report.report":                       true,
-	"2411:hero_stat[].hero_stat.stay_pos":      true,
-	"2411:info.hero_stat[].hero_stat":          true,
-	"2411:info.hero_stat[].hero_stat.stay_pos": true,
+	"301:rank_list[].rank_info.rank_info":           true,
+	"1572:report.report":                            true,
+	"2362:hero_stat[].hero_stat":                    true,
+	"2362:hero_stat[].hero_stat.stay_pos":           true,
+	"2362:info.hero_stat[].hero_stat":               true,
+	"2362:info.hero_stat[].hero_stat.stay_pos":      true,
+	"35:item.item":                                  true,
+	"35:item.item.star":                             true,
+	"35:item.item.table_id":                         true,
+	"370:mail_list.mail_list":                       true,
+	"370:mail_list.mail_list[]":                     true,
+	"802:self_info.self_info":                       true,
+	"802:self_info.self_info[]":                     true,
+	"185:player_info[].player_info":                 true,
+	"185:player_info[].player_info.avatar_frame_id": true,
+	"185:player_info[].player_info.avatar_id":       true,
+	"185:player_info[].player_info.conquer_lev":     true,
+	"185:player_info[].player_info.conquer_loop_id": true,
+	"185:player_info[].player_info.lev":             true,
+	"185:player_info[].player_info.player_id":       true,
+	"185:player_info[].player_info.player_name":     true,
 }
 
 func repeatedSegment(path string) string {
@@ -93,7 +141,10 @@ func repeatedSegment(path string) string {
 func TestGeneratedObligationsHaveNoUnprovenRepeatedPath(t *testing.T) {
 	var document struct {
 		MIDs map[string]struct {
-			Paths []json.RawMessage `json:"paths"`
+			Paths    []json.RawMessage `json:"paths"`
+			Branches map[string]map[string]struct {
+				Paths []json.RawMessage `json:"paths"`
+			} `json:"branches"`
 		} `json:"mids"`
 	}
 	if err := json.Unmarshal(generated, &document); err != nil {
@@ -101,19 +152,27 @@ func TestGeneratedObligationsHaveNoUnprovenRepeatedPath(t *testing.T) {
 	}
 	found := map[string]bool{}
 	for mid, record := range document.MIDs {
-		for _, raw := range record.Paths {
-			var entry []json.RawMessage
-			if err := json.Unmarshal(raw, &entry); err != nil || len(entry) < 2 {
-				continue
+		grouped := [][]json.RawMessage{record.Paths}
+		for _, values := range record.Branches {
+			for _, branch := range values {
+				grouped = append(grouped, branch.Paths)
 			}
-			var path string
-			if json.Unmarshal(entry[0], &path) != nil {
-				continue
+		}
+		for _, paths := range grouped {
+			for _, raw := range paths {
+				var entry []json.RawMessage
+				if err := json.Unmarshal(raw, &entry); err != nil || len(entry) < 2 {
+					continue
+				}
+				var path string
+				if json.Unmarshal(entry[0], &path) != nil {
+					continue
+				}
+				if repeatedSegment(path) == "" {
+					continue
+				}
+				found[mid+":"+path] = true
 			}
-			if repeatedSegment(path) == "" {
-				continue
-			}
-			found[mid+":"+path] = true
 		}
 	}
 	for key := range found {
