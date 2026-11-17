@@ -1,5 +1,6 @@
 """Self-check of the strict gate's classification rules and parallel units. Run: python3 -B tools/test_strict_gate.py"""
 import collections
+import hashlib
 import json
 import signal
 import stat
@@ -199,7 +200,11 @@ def fake_gate():
     instance.input_hashes = {}
     instance.code_cache = {}
     instance.template_cache = {}
+    instance.runtime_cache = {}
     instance._go_version = None
+    # The toolchain's own manifest is the bundle identity; a path alone never proves which tools a unit receives.
+    (directory / 'TOOLCHAIN_MANIFEST.json').write_text('{"bundle": "self-check"}\n')
+    (directory / 'SHA256SUMS').write_text('self-check\n')
     return instance, log
 
 
@@ -414,6 +419,7 @@ def refingerprint(instance, unit=None):
     instance.code_cache.clear()
     instance.input_hashes.clear()
     instance.template_cache.clear()
+    instance.runtime_cache.clear()
     return instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, unit or fake_unit(), {}, None)[0]
 
 
@@ -449,6 +455,59 @@ instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeout_minutes=25)
 assert refingerprint(instance) != base, 'class 6 timeout default'
 instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeouts={'internal/fake': 30})
 assert refingerprint(instance) != base, 'class 6 timeout override'
+
+# A-094: a non-test helper's runtime read and the bytes of the toolchain the unit receives are inputs too.
+instance, _ = fingerprint_gate()
+(instance.source / 'internal/fake/helper.go').write_text(
+    'package fake\n\nimport "os"\n\nfunc checkGolden() {\n\tos.ReadFile("helper/input.json")\n}\n')
+(instance.source / 'internal/fake/helper').mkdir()
+(instance.source / 'internal/fake/helper/input.json').write_text('ok\n')
+(instance.toolchain / 'bin/luajit').write_bytes(b'first runtime')
+instance.environment['GXB_LUAJIT'] = str(instance.toolchain / 'bin/luajit')
+helper_base = refingerprint(instance)
+assert refingerprint(instance) == helper_base, 'unchanged inputs stay stable'
+assert altered(instance, instance.source / 'internal/fake/helper/input.json', b'changed\n') != helper_base, \
+    'a non-test helper runtime input'
+assert altered(instance, instance.toolchain / 'bin/luajit', b'different runtime') != helper_base, \
+    'the toolchain executable bytes at the same path'
+assert altered(instance, instance.toolchain / 'SHA256SUMS', b'changed bundle\n') != helper_base, \
+    'the toolchain bundle manifest bytes'
+
+# A-101: the synthetic test main's per-cache absolute name is a stable logical name; its bytes are its identity.
+inputs_root = Path(tempfile.mkdtemp(prefix='gate-code-inputs-'))
+inputs_source = inputs_root / 'source'
+inputs_package = inputs_source / 'internal/fake'
+inputs_package.mkdir(parents=True)
+test_mains = []
+for cache_root in ('run0', 'run1'):
+    test_main = inputs_root / cache_root / 'go-build/aa/same-d'
+    test_main.parent.mkdir(parents=True)
+    test_main.write_bytes(b'generated test main')
+    test_mains.append(test_main)
+
+
+def code_records(path, import_path='example.com/mod/internal/fake.test', fields=None):
+    document = dict(Dir=str(inputs_package), ImportPath=import_path, GoFiles=[str(path)], **(fields or {}))
+    return gate_pool.code_inputs(json.dumps(document), inputs_source)
+
+
+assert code_records(test_mains[0]) == code_records(test_mains[1]), 'the cache root must not be identity'
+assert code_records(test_mains[0])[0]['files'] == [
+    ['generated_testmain.go', hashlib.sha256(b'generated test main').hexdigest()]], code_records(test_mains[0])
+test_mains[1].write_bytes(b'changed test main')
+assert code_records(test_mains[0]) != code_records(test_mains[1]), 'the generated content is identity'
+other_absolute = inputs_root / 'other-input.bin'
+other_absolute.write_bytes(b'other input')
+assert code_records(other_absolute, 'example.com/mod/internal/fake')[0]['files'][0][0] == str(other_absolute), \
+    'an unrelated absolute input keeps its name'
+
+# A-102: any compiler-input field outside the hashed set declines reuse, naming the field.
+for unsupported in gate_pool.UNSUPPORTED_COMPILER_FIELDS:
+    try:
+        code_records(other_absolute, 'example.com/mod/internal/fake', {unsupported: ['input']})
+        raise AssertionError(f'go list {unsupported} must decline reuse')
+    except gate_pool.NotReusable as failure:
+        assert unsupported in str(failure), failure
 
 # S2: both database suites clone the river-provisioned template, so a package whose compiled files are equal under the two
 # tag sets hashes equal across the suite labels; a changed file still changes the code input (class 1).

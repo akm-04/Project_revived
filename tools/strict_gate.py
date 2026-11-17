@@ -79,6 +79,9 @@ def suite_fixtures(source):
 
 
 TOOLS = ['go', 'gofmt', 'goose', 'luajit', 'initdb', 'pg_ctl', 'createdb', 'psql', 'pg_dump', 'pg_restore', 'zig-cc', 'zig-c++']
+# A toolchain path names a location; its bundle manifest, file hashes and the executables the unit receives identify it.
+TOOLCHAIN_MANIFEST_FILES = ('TOOLCHAIN_MANIFEST.json', 'SHA256SUMS')
+EXECUTABLE_ENVIRONMENT_VARIABLES = ('CC', 'CXX', 'GXB_LUAJIT')
 ACCEPTED35_COMMIT = '52b31f6cb83b89eda2085635b205591ca4a72e7f'
 ACCEPTED35_REVISION = '66dddbab1c548555e244c670bc994e9a17c604ba5462e38eb6610c956943b3af'
 PREVIOUS_PRODUCT_COMMIT = '79d1a26a413dd27e14f9d7557cfaf184785d17cb'
@@ -172,6 +175,7 @@ class Gate:
         self.input_hashes = {}
         self.code_cache = {}
         self.template_cache = {}
+        self.runtime_cache = {}
         self.built_templates = set()
         self._go_version = None
         self.max_connections = 900 if self.mode == 'parallel' else 300
@@ -645,11 +649,9 @@ class Gate:
     def unit_fingerprint(self, suite, tags, unit, extra, skip):
         """The sha256 of every input that can change this unit's outcome; raises NotReusable when one is unknown."""
         package = gate_pool.normalize_package(unit['package'])
-        package_directory = self.source / package
         inputs = dict(
             code=self.code_inputs(tags, package),
-            runtime=gate_pool.runtime_file_inputs(self.source, package_directory,
-                                                  sorted(package_directory.glob('*_test.go')), self.input_hashes),
+            runtime=self.runtime_inputs(tags, package),
             fixtures=self.fixture_inputs(),
             external=self.external_inputs(),
             database=self.database_inputs(suite, package),
@@ -679,6 +681,29 @@ class Gate:
         self.code_cache[key] = records
         return records
 
+    def runtime_inputs(self, tags, package):
+        """Every repo file the closure's Go source names by literal path; an unresolved path declines reuse by file:line."""
+        records = {}
+        for record in self.code_inputs(tags, package):
+            # The synthetic test main is generated in the build cache and reads no repo file by literal path.
+            if record['package'].endswith('.test') and not record['sources']:
+                continue
+            directory = self.source / record['directory']
+            for name in record['sources']:
+                key = (str(directory), name)
+                scanned = self.runtime_cache.get(key)
+                if scanned is None:
+                    try:
+                        scanned = gate_pool.runtime_file_inputs(self.source, directory, [directory / name],
+                                                                self.input_hashes)
+                    except gate_pool.NotReusable as failure:
+                        scanned = str(failure)
+                    self.runtime_cache[key] = scanned
+                if isinstance(scanned, str):
+                    raise gate_pool.NotReusable(scanned)
+                records.update(dict(scanned))
+        return [[name, records[name]] for name in sorted(records)]
+
     def fixture_inputs(self):
         records = []
         for name, path in sorted(suite_fixtures(self.source).items()):
@@ -692,8 +717,31 @@ class Gate:
             tools[path.name] = gate_pool.sha256_file(path, self.input_hashes)
         return dict(go_sum=gate_pool.sha256_file(self.source / 'go.sum', self.input_hashes),
                     go_mod=gate_pool.sha256_file(self.source / 'go.mod', self.input_hashes),
-                    go_version=self.go_version(), toolchain=str(self.toolchain), tools=tools,
+                    go_version=self.go_version(), toolchain=self.toolchain_inputs(),
+                    executables=self.executable_inputs(), tools=tools,
                     lists=dict(sorted(self.list_hashes.items())))
+
+    def toolchain_inputs(self):
+        """The bundle's own manifest and file hashes; a path alone cannot establish which toolchain a unit receives."""
+        records = {name: gate_pool.sha256_file(self.toolchain / name, self.input_hashes)
+                   for name in TOOLCHAIN_MANIFEST_FILES if (self.toolchain / name).is_file()}
+        if not records:
+            raise gate_pool.NotReusable(f'toolchain {self.toolchain} has no manifest or file hashes')
+        return records
+
+    def executable_inputs(self):
+        """The content of every executable or bundle file the unit receives through its environment."""
+        records = []
+        for name, value in sorted(self.environment.items()):
+            if name not in EXECUTABLE_ENVIRONMENT_VARIABLES and not name.endswith('_BINARY'):
+                continue
+            if not value:
+                continue
+            path = Path(value)
+            if not path.is_file():
+                raise gate_pool.NotReusable(f'environment input {name} names no file: {value}')
+            records.append([self.normalized_value(value), gate_pool.sha256_file(path, self.input_hashes)])
+        return records
 
     def go_version(self):
         if self._go_version is None:
