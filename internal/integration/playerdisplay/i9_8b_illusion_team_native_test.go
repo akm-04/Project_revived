@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -177,9 +178,15 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatalf("member %d settlement count %d", member.PlayerID, n)
 		}
 	}
+	frozen := readTeamReport(t, content)
+	for _, table := range []int64{10001002, 10001003, 10001004, 10001005, 10001006, 10010001} {
+		if !frozen.heroes[table] {
+			t.Fatalf("team report is missing C5 hero %d", table)
+		}
+	}
 	accepted := scalar(t, p, `SELECT hurt FROM illusion_occurrence_results WHERE logical_server_id=$1 AND player_id=$2`, int64(server), int64(a.PlayerID))
-	if accepted <= 0 {
-		t.Fatal("team damage was not accepted")
+	if accepted != frozen.hurt {
+		t.Fatalf("team damage %d was not accepted: report carries %d", accepted, frozen.hurt)
 	}
 	for _, member := range []identity.ActorContext{a, b, c} {
 		if n := scalar(t, p, `SELECT hurt FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=(SELECT open_day FROM illusion_occurrences WHERE logical_server_id=$1) AND player_id=$2`, int64(server), int64(member.PlayerID)); n != accepted {
@@ -301,6 +308,42 @@ func reportContent(t *testing.T, body map[string]any) string {
 	}
 	content, _ := report[0]["content"].(string)
 	return content
+}
+
+// teamReport is C6's frozen report: its A-side harms (the accepted team
+// damage, clamped like the mode) and the C5 heroes the report actually fielded.
+type teamReport struct {
+	hurt   int64
+	heroes map[int64]bool
+}
+
+func readTeamReport(t *testing.T, content string) teamReport {
+	t.Helper()
+	var parsed struct {
+		Fighter map[string]struct {
+			Harms float64 `json:"harms"`
+			Hero  struct {
+				TableID int64 `json:"table_id"`
+			} `json:"hero"`
+		} `json:"fighter"`
+	}
+	if err := json.Unmarshal([]byte(content), &parsed); err != nil {
+		t.Fatal("team report", err)
+	}
+	out := teamReport{heroes: map[int64]bool{}}
+	total := 0.0
+	for key, fighter := range parsed.Fighter {
+		if !strings.HasPrefix(key, "A") {
+			continue
+		}
+		total += fighter.Harms
+		out.heroes[fighter.Hero.TableID] = true
+	}
+	out.hurt = int64(total)
+	if out.hurt > di.DamageCap {
+		out.hurt = di.DamageCap
+	}
+	return out
 }
 
 func TestI9_8BIllusionRoomPolicyNative(t *testing.T) {
