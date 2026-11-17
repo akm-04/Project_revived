@@ -1,14 +1,18 @@
 """Self-check of the strict gate's classification rules and parallel units. Run: python3 -B tools/test_strict_gate.py"""
 import collections
 import json
+import signal
 import stat
+import subprocess
 import sys
 import tempfile
 import threading
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gate_pool
+import strict_gate
 from strict_gate import LATENCY_DEFAULTS, LATENCY_DEFERRED, Gate, GateFailure
 
 DEBT = 'internal/a.TestDebt'
@@ -777,6 +781,76 @@ instance.census = {'binary': ['GXB_FAKE_API_BINARY']}
 instance.build_binaries()
 built = [json.loads(line) for line in log.read_text().splitlines()]
 assert built and all('-trimpath' in command for command in built), built
+
+# A unit that fails stops queued units on every pool thread, and a stopping gate starts no unit or clone.
+started = []
+
+
+def fail_first(unit):
+    started.append(unit)
+    if unit == 'first':
+        raise SystemExit(143)
+
+
+# A short switch interval widens the window between the failure and main's cancel (A-104 hit it 21 times in 500).
+interval = sys.getswitchinterval()
+sys.setswitchinterval(1e-6)
+try:
+    for attempt in range(500):
+        started.clear()
+        try:
+            gate_pool.run_pool(['first', 'queued'], 1, fail_first)
+        except SystemExit:
+            pass
+        assert started == ['first'], (attempt, started)
+finally:
+    sys.setswitchinterval(interval)
+gate_pool.STOPPING.set()
+try:
+    gate_pool.run_pool(['a', 'b'], 2, started.append)
+    assert started == ['first'], started
+    try:
+        gate_pool.clone_database('createdb', 1, 'tpl', 'db', {})
+        raise AssertionError('a stopping gate cloned a database')
+    except gate_pool.PoolError:
+        pass
+finally:
+    gate_pool.STOPPING.clear()
+
+# A start interrupted after the server launched still stops the cluster; init alone leaves nothing to stop.
+actions = []
+instance, log = fake_gate()
+
+
+def interrupted_start(action):
+    actions.append(action)
+    if action == 'start':
+        (instance.work / 'cluster/pgdata').mkdir(parents=True)
+        (instance.work / 'cluster/pgdata/postmaster.pid').write_text('1\n')
+        raise SystemExit(143)
+
+
+instance.cluster = interrupted_start
+try:
+    instance.clustered(lambda: None)
+    raise AssertionError('interrupted start did not propagate')
+except SystemExit:
+    pass
+assert actions == ['init', 'start', 'stop'], actions
+
+# A child that ignores TERM is killed after the grace; a process outside the snapshot is left alone.
+stubborn = subprocess.Popen(['sh', '-c', 'trap "" TERM; sleep 60'])
+later = subprocess.Popen(['sleep', '60'])
+try:
+    time.sleep(0.2)
+    members = {member for member in strict_gate.group_members() if member[0] == stubborn.pid}
+    assert len(members) == 1, members
+    strict_gate.kill_survivors(members, 0)
+    assert stubborn.wait(timeout=5) == -signal.SIGKILL
+    assert later.poll() is None
+finally:
+    later.kill()
+    later.wait()
 
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}

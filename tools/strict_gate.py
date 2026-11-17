@@ -902,6 +902,7 @@ class Gate:
                 environment = self.unit_environment(name, unit, extra)
                 arguments = gate_pool.go_test_command(self.tool('go'), tags, [unit['package']], run=unit['run'], skip=skip,
                                                       timeout_minutes=gate_pool.unit_timeout(self.parallel, unit['package']))
+                gate_pool.require_running()
                 with stream.open('w') as output:
                     code = subprocess.run(arguments, cwd=self.source, env=environment, stdout=output,
                                           stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
@@ -1384,19 +1385,27 @@ class Gate:
             if self.parallel.get('timeouts'):
                 self.validate_timeout_packages(self.existing_packages())
         self.build_binaries()
+        self.clustered(self.sections)
+
+    def sections(self):
+        if self.section in ('general', 'both'):
+            self.general_section()
+        if self.section in ('latency', 'both'):
+            try:
+                self.latency_section()
+            except (GateFailure, subprocess.CalledProcessError, gate_pool.PoolError) as failure:
+                self.latency_red.append(f'latency: {failure}')
+                self.latency_verdict = 'RED'
+
+    def clustered(self, body):
         self.cluster('init')
-        self.cluster('start')
         try:
-            if self.section in ('general', 'both'):
-                self.general_section()
-            if self.section in ('latency', 'both'):
-                try:
-                    self.latency_section()
-                except (GateFailure, subprocess.CalledProcessError, gate_pool.PoolError) as failure:
-                    self.latency_red.append(f'latency: {failure}')
-                    self.latency_verdict = 'RED'
+            self.cluster('start')
+            body()
         finally:
-            self.cluster('stop')
+            # An interrupted or failed start may already have launched the server (pg_ctl gives it its own session).
+            if (self.work / 'cluster/pgdata/postmaster.pid').exists():
+                self.cluster('stop')
 
     def general_section(self):
         self.guarded('format', self.format)
@@ -1527,10 +1536,43 @@ class Gate:
         return verdict in ('GREEN', 'PARTIAL_GREEN')
 
 
+STOP_GRACE_SECONDS = 30
+
+
+def group_members():
+    """{(pid, start time)} of every other process in this process group (Linux /proc)."""
+    members, own, group = set(), os.getpid(), os.getpgrp()
+    for entry in os.listdir('/proc'):
+        if not entry.isdigit() or int(entry) == own:
+            continue
+        try:
+            # After the parenthesised command name: state, ppid, pgrp, ...; start time is field 22 of stat.
+            fields = Path(f'/proc/{entry}/stat').read_text().rsplit(')', 1)[1].split()
+        except OSError:
+            continue
+        if int(fields[2]) == group:
+            members.add((int(entry), fields[19]))
+    return members
+
+
+def kill_survivors(members, grace):
+    """SIGKILL the given processes still alive after grace seconds; the start time guards against a reused pid."""
+    time.sleep(grace)
+    for pid, _ in members & group_members():
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+
+
 def stop_on_signal(number, frame):
     del frame
     signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    gate_pool.STOPPING.set()
+    # Only the processes alive now are escalated, never the pg_ctl stop that cleanup starts later.
+    members = group_members()
     os.killpg(0, signal.SIGTERM)
+    threading.Thread(target=kill_survivors, args=(members, STOP_GRACE_SECONDS), daemon=True).start()
     sys.exit(128 + number)
 
 
@@ -1556,8 +1598,9 @@ def main():
         parser.error('--jobs must be positive')
     if arguments.reuse and arguments.mode != 'parallel':
         parser.error('--reuse requires --mode parallel; serial mode never reads the store')
-    # SystemExit unwinds through run()'s finally, so a stopped gate still stops its cluster (pg_ctl gives it its own
-    # session). Pool threads keep starting units, so the gate leads a process group and stops its go test runs first.
+    # SystemExit unwinds through clustered()'s finally, so a stopped gate still stops its cluster (pg_ctl gives it its
+    # own session). The gate leads a process group: TERM, then SIGKILL after a grace, ends its go test runs and the
+    # pool starts nothing more, so the unwinding reaches the cluster stop.
     if os.getpgrp() != os.getpid():
         os.setpgrp()
     signal.signal(signal.SIGTERM, stop_on_signal)

@@ -10,6 +10,7 @@ import json
 import os
 import re
 import subprocess
+import threading
 from pathlib import Path
 
 TEST_VARIABLE = re.compile(r'os\.(?:Getenv|LookupEnv)\("([A-Z0-9_]+)"\)')
@@ -187,7 +188,17 @@ def build_units(packages, shard_counts, list_tests, serial_tests=()):
     return units
 
 
+# Set by a stopping gate: from then on no unit and no unit child process starts.
+STOPPING = threading.Event()
+
+
+def require_running():
+    if STOPPING.is_set():
+        raise PoolError('the gate is stopping')
+
+
 def clone_database(createdb, port, template, name, environment):
+    require_running()
     completed = subprocess.run([str(createdb), '-p', str(port), '-T', template, name], env=environment,
                                capture_output=True, text=True, stdin=subprocess.DEVNULL)
     if completed.returncode != 0:
@@ -197,9 +208,21 @@ def clone_database(createdb, port, template, name, environment):
 def run_pool(units, jobs, action):
     if jobs < 1:
         raise PoolError(f'jobs {jobs} must be positive')
+    failed = threading.Event()
+
+    def guarded(unit):
+        if failed.is_set() or STOPPING.is_set():
+            return
+        try:
+            action(unit)
+        except BaseException:
+            # Set in the failing thread, before main sees the failure, so no queued unit starts in between.
+            failed.set()
+            raise
+
     pool = concurrent.futures.ThreadPoolExecutor(max_workers=jobs)
     try:
-        futures = [pool.submit(action, unit) for unit in units]
+        futures = [pool.submit(guarded, unit) for unit in units]
         for future in concurrent.futures.as_completed(futures):
             future.result()
     finally:
