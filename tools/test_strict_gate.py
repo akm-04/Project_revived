@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gate_pool
-from strict_gate import Gate, GateFailure
+from strict_gate import LATENCY_DEFAULTS, LATENCY_DEFERRED, Gate, GateFailure
 
 DEBT = 'internal/a.TestDebt'
 HELPER = 'internal/a.TestHelper'
@@ -499,6 +499,104 @@ try:
     raise AssertionError('an unresolvable runtime path must make the unit NOT_REUSABLE')
 except gate_pool.NotReusable as failure:
     assert 'internal/fake/fake_test.go:5' in str(failure) and 'cannot resolve os.ReadFile' in str(failure), failure
+
+LATENCY_TEST = 'internal/a.TestLatency'
+
+# A dedicated latency test skips in the general section with an allowlisted latency_deferred entry, and that is not RED.
+instance, _ = fake_gate()
+instance.select = None
+instance.section = 'general'
+instance.latency_runs = {}
+instance.allowlist = {LATENCY_TEST: dict(test=LATENCY_TEST, kind=LATENCY_DEFERRED, owner='latency:')}
+instance.runs = {'suite:x': {LATENCY_TEST: 'skip'}}
+assert not instance.classify() or instance.red == [], instance.red
+assert not instance.red, instance.red
+
+
+def clean_reading():
+    return dict(at='self-check', load_average=(0.1,), temperatures_celsius={'k10temp:Tctl': 40.0},
+                baseline_sha256_64mib_seconds=LATENCY_DEFAULTS['benchmark_reference_seconds'],
+                worker_clusters=[], go_test_processes=[], breaches=[])
+
+
+def latency_gate(breach_after=(), members=None):
+    instance, log = fake_gate()
+    import itertools
+    counter = itertools.count()
+
+    def reading():
+        current = clean_reading()
+        if next(counter) in breach_after:
+            current['breaches'] = ['planted load']
+        return current
+
+    instance.select = None
+    instance.blocked = {}
+    instance.section = 'both'
+    instance.latency_runs = {}
+    instance.latency_red = []
+    instance.latency_conditions = []
+    instance.latency_verdict = None
+    instance.latency = dict(LATENCY_DEFAULTS, cooldown_seconds=0, check_interval_seconds=0.001, wait_minutes=0,
+                            members=members or [{'package': './internal/fake', 'test': 'TestAlpha', 'tags': ''}])
+    instance.acquire_quiet_lock = lambda: object()
+    instance.release_quiet_lock = lambda handle: None
+    instance.latency_reading = reading
+    return instance, log
+
+
+# Quiet conditions run every member with GXB_LATENCY_SECTION=1 and give a GREEN latency section.
+instance, log = latency_gate()
+instance.latency_section()
+assert instance.latency_verdict == 'GREEN', (instance.latency_verdict, instance.latency_red)
+only = [row for row in instance.latency_runs.values()][0]
+assert only == {'internal/fake.TestAlpha': 'pass'}, instance.latency_runs
+commands = [json.loads(line) for line in log.read_text().splitlines()]
+latency_test_command = [command for command in commands if command[:2] == ['test', '-json']][0]
+assert latency_test_command[latency_test_command.index('-run') + 1] == '^(TestAlpha)$', latency_test_command
+assert instance.overall_verdict() == 'GREEN', instance.overall_verdict()
+assert instance.sections_report()['latency']['verdict'] == 'GREEN'
+
+# A member that never reports an outcome makes the latency section RED.
+instance, _ = latency_gate(members=[{'package': './internal/fake', 'test': 'TestGamma', 'tags': ''}])
+instance.latency_section()
+assert instance.latency_verdict == 'RED', instance.latency_verdict
+assert any('TestGamma' in line and 'did not run' in line for line in instance.latency_red), instance.latency_red
+
+# A latency_deferred allowlist entry that names no member is RED: the population and the allowlist cannot drift apart.
+instance, _ = latency_gate()
+instance.allowlist = {'internal/a.TestGhost': dict(test='internal/a.TestGhost', kind=LATENCY_DEFERRED, owner='latency:')}
+instance.latency_section()
+assert instance.latency_verdict == 'RED', instance.latency_verdict
+assert any('names no latency-population member' in line for line in instance.latency_red), instance.latency_red
+
+# Planted load keeps the conditions from ever holding: latency is NOT_RUN, never GREEN.
+instance, _ = latency_gate(breach_after=(0,))
+instance.latency_section()
+assert instance.latency_verdict == 'NOT_RUN', instance.latency_verdict
+assert instance.overall_verdict() == 'NOT_RUN', instance.overall_verdict()
+assert not instance.report('self-check'), 'a NOT_RUN section must not exit green'
+report = json.loads((instance.work / 'STRICT_GATE.json').read_text())
+assert report['sections']['latency']['verdict'] == 'NOT_RUN', report['sections']
+
+# A breach sampled during the run makes the section NOT_RUN even when every member passed.
+instance, _ = latency_gate(breach_after=(1,))
+original = instance.run_latency_members
+def slow_members():
+    original()
+    threading.Event().wait(0.05)
+instance.run_latency_members = slow_members
+instance.latency_section()
+assert instance.latency_verdict == 'NOT_RUN', (instance.latency_verdict, instance.latency_red)
+
+# A general-only report has no latency section; a combined report carries both.
+instance, _ = fake_gate()
+instance.section = 'general'
+instance.latency_verdict = None
+assert 'latency' not in instance.sections_report() and instance.overall_verdict() == 'PARTIAL_GREEN'
+instance.section = 'latency'
+instance.latency_verdict = 'GREEN'
+assert 'general' not in instance.sections_report() and instance.overall_verdict() == 'PARTIAL_GREEN'
 
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}

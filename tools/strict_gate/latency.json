@@ -1,0 +1,23 @@
+{
+ "contract": "GATE_LATENCY_SECTION_V1",
+ "benchmark_reference_seconds": 0.0426,
+ "benchmark_tolerance": 0.1,
+ "check_interval_seconds": 30,
+ "cooldown_seconds": 300,
+ "general_ceiling_factor": 10,
+ "load_average_max": 1.5,
+ "temperature_celsius_max": 65,
+ "wait_minutes": 60,
+ "members": [
+  {"package": "./internal/adapters/combatworker", "test": "TestResolverLatencyGate", "tags": ""},
+  {"package": "./internal/adapters/combatworker", "test": "TestSaturatedPoolRefusesThenAdmits", "tags": ""},
+  {"package": "./internal/adapters/stockruntime", "test": "TestR3BAbsoluteHandshakeDeadlineSlowloris", "tags": ""},
+  {"package": "./internal/adapters/stockruntime", "test": "TestSocialSlowWriterBoundedAndReplacementFence", "tags": ""},
+  {"package": "./internal/integration/playerdisplay", "test": "TestI9_10MarchNativeLatencyBudget", "tags": "postgres"},
+  {"package": "./internal/integration/socialactivation", "test": "TestChatA18GlobalMessageWorkerOverflowAndShutdown", "tags": "postgres socialintegration channelintegration"},
+  {"package": "./internal/integration/socialactivation", "test": "TestChatB18WiredOwnerActivatesProductionConstructor", "tags": "postgres socialintegration channelintegration"},
+  {"package": "./internal/integration/socialactivation", "test": "TestChatB19RealReadOwnerSameTxDBTimeAndPrivateUnknown", "tags": "postgres socialintegration channelintegration"},
+  {"package": "./internal/integration/socialactivation", "test": "TestChatB15StructuredReadRetainsGuildJoinIncarnation", "tags": "postgres socialintegration channelintegration"},
+  {"package": "./internal/adapters/river/retentionworker", "test": "TestRetentionSweepReceiptThroughput", "tags": "postgres river"}
+ ]
+}

@@ -12,10 +12,21 @@
   },
   {
    "test": "internal/adapters/combatworker.TestResolverLatencyGate",
-   "kind": "reference_host",
-   "owner": "reference-host:latency",
-   "reason": "I8-2B M3: host-dependent p95 bound; the gate runs it once, serially, on the reference host",
-   "excluded_from_suites": true
+   "kind": "latency_deferred",
+   "owner": "latency:",
+   "reason": "dedicated latency member; the latency section runs it under checked host conditions"
+  },
+  {
+   "test": "internal/integration/playerdisplay.TestI9_10MarchNativeLatencyBudget",
+   "kind": "latency_deferred",
+   "owner": "latency:",
+   "reason": "dedicated latency member; the latency section runs it under checked host conditions"
+  },
+  {
+   "test": "internal/adapters/river/retentionworker.TestRetentionSweepReceiptThroughput",
+   "kind": "latency_deferred",
+   "owner": "latency:",
+   "reason": "dedicated latency member; the latency section runs it under checked host conditions"
   },
   {
    "test": "internal/adapters/river.TestPreparePublicationRiver",
