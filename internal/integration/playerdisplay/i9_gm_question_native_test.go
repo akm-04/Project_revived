@@ -215,7 +215,7 @@ func TestGMQuestionForcedOverlapDifferentMessagesConflicts(t *testing.T) {
 		t.Fatal("insert barrier timeout")
 	}
 	go func() { _, err := second.Ask(ctx, player, "different same operation", current); secondResult <- err }()
-	deadline := time.NewTimer(2 * time.Second)
+	deadline := time.NewTimer(eventWaitTimeout)
 	defer deadline.Stop()
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
