@@ -456,7 +456,9 @@ class Gate:
             command, tags = BINARY_COMMANDS[variable.removesuffix('_BINARY').rsplit('_', 1)[-1]]
             output = self.work / 'binaries' / command
             if not output.exists():
-                self.step(f'build-binary:{command}', [self.tool('go'), 'build', '-buildvcs=false', '-tags', tags, '-o', output, './cmd/' + command])
+                # The source is a per-run export: without -trimpath its path lands in the binary, so every unit
+                # fingerprint (which hashes the binaries) changed on each run and nothing was ever reused.
+                self.step(f'build-binary:{command}', [self.tool('go'), 'build', '-buildvcs=false', '-trimpath', '-tags', tags, '-o', output, './cmd/' + command])
             self.environment[variable] = str(output)
 
     def suite_skip_pattern(self):
@@ -1431,6 +1433,13 @@ class Gate:
         return verdict in ('GREEN', 'PARTIAL_GREEN')
 
 
+def stop_on_signal(number, frame):
+    del frame
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    os.killpg(0, signal.SIGTERM)
+    sys.exit(128 + number)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     for name in ['--toolchain', '--cache', '--work', '--populated59-dump']:
@@ -1453,8 +1462,11 @@ def main():
         parser.error('--jobs must be positive')
     if arguments.reuse and arguments.mode != 'parallel':
         parser.error('--reuse requires --mode parallel; serial mode never reads the store')
-    # SystemExit unwinds through run()'s finally, so a stopped gate still stops its cluster.
-    signal.signal(signal.SIGTERM, lambda number, frame: sys.exit(128 + number))
+    # SystemExit unwinds through run()'s finally, so a stopped gate still stops its cluster (pg_ctl gives it its own
+    # session). Pool threads keep starting units, so the gate leads a process group and stops its go test runs first.
+    if os.getpgrp() != os.getpid():
+        os.setpgrp()
+    signal.signal(signal.SIGTERM, stop_on_signal)
     started = datetime.datetime.now(datetime.timezone.utc).isoformat()
     gate = Gate(arguments)
     try:
