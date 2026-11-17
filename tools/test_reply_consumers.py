@@ -27,9 +27,26 @@ def required_paths(payload, mid):
 
 def obligation_map(payload):
     return {
-        mid: {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in record["paths"]}
+        mid: {
+            "paths": {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in record["paths"]},
+            "branches": {
+                key: {
+                    value: {
+                        reply_consumers.path_name(entry): reply_consumers.path_requirement(entry)
+                        for entry in branch["paths"]
+                    }
+                    for value, branch in values.items()
+                }
+                for key, values in record.get("branches", {}).items()
+            },
+        }
         for mid, record in payload["mids"].items()
     }
+
+
+def branch_requirements(payload, mid, discriminator, value):
+    branch = payload["mids"][str(mid)]["branches"][discriminator][value]
+    return {reply_consumers.path_name(entry): reply_consumers.path_requirement(entry) for entry in branch["paths"]}
 
 
 def repeated_segment_names(path):
@@ -112,6 +129,24 @@ class ReplyConsumerTests(unittest.TestCase):
         self.assertIn("list", required_paths(self.payload, 176))
         self.assertIn("player_id", required_paths(self.payload, 177))
         self.assertTrue({"player_info"} <= required_paths(self.payload, 185) or "list[].player_info" in required_paths(self.payload, 185))
+
+    def test_activity_obligations_are_split_by_the_selected_table_id(self):
+        record = self.payload["mids"]["234"]
+        self.assertEqual("table_id", next(iter(record["branches"])))
+        unconditional = required_paths(self.payload, 234)
+        self.assertNotIn("details.server_support", unconditional)
+        self.assertEqual("REQUIRED", branch_requirements(self.payload, 234, "table_id", "1129")["details.server_support"])
+        self.assertNotIn("1129", [path for path in unconditional])
+        unknown = record["branches"]["table_id"]["unknown"]
+        self.assertEqual("UNKNOWN", unknown["status"])
+        self.assertTrue(unknown["reason"])
+        self.assertTrue(unknown["paths"])
+
+    def test_branch_sites_are_the_activity_window_selected_by_the_client(self):
+        branch = self.payload["mids"]["234"]["branches"]["table_id"]["1129"]
+        entry = next(entry for entry in branch["paths"] if reply_consumers.path_name(entry) == "details.server_support")
+        files = {self.payload["site_files"][site[0]] for site in entry[2]}
+        self.assertEqual({"app/windows/activities/Activity1129.lua"}, files)
 
     def test_site_collapse_keeps_every_obligation_and_output_under_five_megabytes(self):
         self.assertEqual(obligation_map(self.uncollapsed), obligation_map(self.payload))

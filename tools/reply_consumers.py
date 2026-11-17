@@ -33,6 +33,12 @@ WAIVERS.json when it is absent (it is hand edited afterwards).
 Sites are collapsed to one entry per (file, line) and encoded compactly:
 ``site_files`` interns every client path and a site row is
 ``[site_files index, line, guarded (0/1), sorted via values]``.
+
+A MID in BRANCH_POLICIES keeps one obligation set per discriminator value: a
+consumer site belongs to the value named by its Activity<table_id> window (the
+client's own selection, ActivitiesWindow.lua:749-759) or by its request's static
+activity id. Sites the extractor cannot attribute go to a branch marked
+UNKNOWN, which the checker never selects.
 """
 from __future__ import annotations
 
@@ -113,6 +119,7 @@ class Taint:
     path: tuple[str, ...] = ()
     wrapper: str | None = None
     followed: frozenset[str] = frozenset()
+    branch: str | None = None
 
 
 @dataclass(frozen=True)
@@ -121,6 +128,26 @@ class Site:
     line: int
     via: str
     guarded: bool
+    branch: str | None = None
+
+
+# A reply whose consumer depends on a client-side discriminator (the selected
+# activity window, or a request field naming the entity) carries one obligation
+# set per discriminator value instead of one union for the whole MID.
+# Sol's A-091 evidence: ActivitiesWindow.lua:749-759 imports Activity<table_id>,
+# so each Activity<id>.lua window consumes only its own activity reply.
+@dataclass(frozen=True)
+class BranchPolicy:
+    reply_key: str
+    request_keys: tuple[str, ...]
+    window_pattern: str = r"app/windows/activities/Activity(\d+)\.lua"
+
+
+BRANCH_POLICIES = {
+    234: BranchPolicy(reply_key="table_id", request_keys=("activity_id", "table_id")),
+}
+UNKNOWN_BRANCH = "unknown"
+BRANCH_UNKNOWN_REASON = "the consumer site is neither inside an Activity<table_id> window nor reachable from a request with a static activity id"
 
 
 @dataclass
@@ -388,13 +415,13 @@ def extend_taint(taint: Taint, segments: list[tuple[str, str]]) -> Taint:
                 parts.append("[]")
         else:
             break
-    return Taint(tuple(parts), taint.wrapper, taint.followed)
+    return Taint(tuple(parts), taint.wrapper, taint.followed, taint.branch)
 
 
 def element(taint: Taint) -> Taint:
     if taint.path and taint.path[-1] == "[]":
         return taint
-    return Taint(taint.path + ("[]",), taint.wrapper, taint.followed)
+    return Taint(taint.path + ("[]",), taint.wrapper, taint.followed, taint.branch)
 
 
 def path_parts(taint: Taint, segments: list[tuple[str, str]]) -> list[tuple[str, ...]]:
@@ -437,13 +464,14 @@ class Extractor:
     def __init__(self, blobs: dict[str, str]):
         self.blobs = blobs
         self.mid_symbols = parse_mid_symbols(blobs.get(MID_LUA, ""))
+        self.activity_symbols = parse_activity_symbols(blobs.get(ENUMS_LUA, ""))
         self.model_types = parse_model_types(blobs.get(ENUMS_LUA, ""))
         self.model_classes = parse_model_define(blobs.get(MODEL_DEFINE_LUA, ""))
         self.classes = parse_classes(blobs)
         self.file_indexes: dict[str, FunctionIndex] = {}
         self.file_aliases: dict[str, dict[str, str]] = {}
         self.class_files: dict[tuple[str, str | None], list[str]] = {}
-        self.paths: dict[str, dict[str, dict[tuple[str, int, str, bool], Site]]] = {}
+        self.paths: dict[str, dict[str, dict[tuple[str, int, str, bool, str | None], Site]]] = {}
         self.callbacks: dict[str, list[dict]] = {}
         self.stores: dict[tuple[str, str | None, tuple[tuple[str, str], ...]], dict[Taint, set[int]]] = {}
         self.file_stores: dict[tuple[str, tuple[tuple[str, str], ...]], dict[Taint, set[int]]] = {}
@@ -534,7 +562,16 @@ class Extractor:
         if not path or path.startswith("[]") or path.endswith("[]."):
             return
         sites = self.paths.setdefault(str(mid), {}).setdefault(path, {})
-        sites[(site.file, site.line, site.via, site.guarded)] = site
+        sites[(site.file, site.line, site.via, site.guarded, site.branch)] = site
+
+    def branch_for_site(self, mid: int, file: str, branch: str | None) -> str | None:
+        policy = BRANCH_POLICIES.get(mid)
+        if policy is None:
+            return None
+        match = re.fullmatch(policy.window_pattern, file)
+        if match:
+            return match.group(1)
+        return branch
 
     def collect_requests(self) -> None:
         for file in sorted(self.blobs):
@@ -560,24 +597,25 @@ class Extractor:
         if tokens[callback_start].value == "nil":
             self.analyze_event_reply(mid, file, line)
             return
+        branch = self.argument_branch(mid, file, tokens, arguments[1], position)
         if tokens[callback_start].value == "function" and tokens[callback_start].kind == "kw":
             parsed = self.index(file).by_start.get(callback_start)
             if parsed is None:
                 self.record_callback(mid, _unknown(file, line, "unterminated inline callback"))
                 return
             self.record_callback(mid, _checked(file, line))
-            self.analyze_reply(mid, file, parsed, Taint(), "callback")
+            self.analyze_reply(mid, file, parsed, Taint(branch=branch), "callback")
             enclosing = parsed.parent
             if enclosing is not None and enclosing.name and _forwards_reply(tokens, parsed, enclosing):
-                for caller_file, caller_function, body in resolve_wrapper_callbacks(self, enclosing.name):
-                    self.analyze_reply(mid, caller_file, caller_function, Taint(), f"{enclosing.name} call site", body)
+                for caller_file, caller_function, body, caller_branch in resolve_wrapper_callbacks(self, mid, enclosing.name):
+                    self.analyze_reply(mid, caller_file, caller_function, Taint(branch=caller_branch), f"{enclosing.name} call site", body)
             return
         if callback_end - callback_start == 1 and tokens[callback_start].kind == "name":
             name = tokens[callback_start].value
             parsed = self.index(file).by_name.get(name)
             if parsed is not None:
                 self.record_callback(mid, _checked(file, line))
-                self.analyze_reply(mid, file, parsed, Taint(), "callback")
+                self.analyze_reply(mid, file, parsed, Taint(branch=branch), "callback")
                 return
             enclosing = self.index(file).innermost[callback_start]
             if enclosing is not None and name in enclosing.params:
@@ -589,7 +627,7 @@ class Extractor:
         wrapped = _wrapper_callback(tokens, callback_start, callback_end)
         if wrapped is not None:
             self.record_callback(mid, _checked(file, line, "wrapper callback"))
-            self.analyze_reply(mid, file, wrapped, Taint(), "callback")
+            self.analyze_reply(mid, file, wrapped, Taint(branch=branch), "callback")
             return
         self.record_callback(mid, _unknown(file, line, f"callback expression {expression[:80]!r} is not resolvable statically"))
 
@@ -612,13 +650,90 @@ class Extractor:
         if not method:
             self.record_callback(mid, _unknown(file, line, f"callback forwards to parameter {parameter} of an unnamed function"))
             return
-        callbacks = resolve_wrapper_callbacks(self, method)
+        callbacks = resolve_wrapper_callbacks(self, mid, method)
         if not callbacks:
             self.record_callback(mid, _unknown(file, line, f"callback forwards to parameter {parameter}; no {method} call site resolves"))
             return
         self.record_callback(mid, _checked(file, line, f"forwarded to {method} call sites"))
-        for caller_file, caller_function, body in callbacks:
-            self.analyze_reply(mid, caller_file, caller_function, Taint(), f"{method} call site", body)
+        for caller_file, caller_function, body, branch in callbacks:
+            self.analyze_reply(mid, caller_file, caller_function, Taint(branch=branch), f"{method} call site", body)
+
+    def call_branch(self, mid, file, tokens, arguments, position) -> str | None:
+        policy = BRANCH_POLICIES.get(mid)
+        if policy is None:
+            return None
+        for argument in arguments:
+            value = self.expression_branch(policy, file, tokens, argument, position)
+            if value is not None:
+                return value
+        return UNKNOWN_BRANCH
+
+    def argument_branch(self, mid, file, tokens, argument, position) -> str | None:
+        policy = BRANCH_POLICIES.get(mid)
+        if policy is None:
+            return None
+        expression = self.expression_branch(policy, file, tokens, argument, position)
+        if expression is None:
+            return UNKNOWN_BRANCH
+        return expression
+
+    def expression_branch(self, policy, file, tokens, argument, position, depth=0) -> str | None:
+        if depth > 2:
+            return None
+        start, end = argument
+        if start >= end:
+            return None
+        if tokens[start].value == "{":
+            return self.table_branch(policy, file, tokens, start, position, depth)
+        if tokens[start].kind == "number" and end - start == 1:
+            return tokens[start].value
+        if end - start == 1 and tokens[start].kind == "name":
+            return self.local_branch(policy, file, tokens, tokens[start].value, position, depth)
+        return None
+
+    def table_branch(self, policy, file, tokens, open_index, position, depth) -> str | None:
+        close = matching_close(tokens, open_index)
+        cursor = open_index + 1
+        while cursor + 2 < close:
+            if tokens[cursor].kind == "name" and tokens[cursor].value in policy.request_keys and tokens[cursor + 1].value == "=":
+                value_end = _expression_end(tokens, cursor + 2, close)
+                return self.scalar_branch(policy, file, tokens, cursor + 2, value_end, position, depth)
+            cursor += 1
+        return None
+
+    def scalar_branch(self, policy, file, tokens, start, end, position, depth) -> str | None:
+        if start >= end or depth > 2:
+            return None
+        if tokens[start].kind == "number" and end - start == 1:
+            return tokens[start].value
+        values = [token.value for token in tokens[start:end]]
+        if len(values) == 5 and values[:4] == ["xyd", ".", "Activities", "."]:
+            value = self.activity_symbols.get(values[4])
+            return str(value) if value is not None else None
+        if end - start == 1 and tokens[start].kind == "name":
+            return self.local_branch(policy, file, tokens, tokens[start].value, position, depth + 1)
+        return None
+
+    def local_branch(self, policy, file, tokens, name, position, depth) -> str | None:
+        """Resolve a local table or scalar defined earlier in the same function."""
+        index = self.index(file)
+        function = index.innermost[position]
+        start = function.body_start if function is not None else 0
+        value_start = None
+        cursor = start
+        while cursor < position:
+            token = tokens[cursor]
+            if token.kind == "name" and token.value == name:
+                previous = tokens[cursor - 1].value if cursor > start else ""
+                if previous not in (".", ":"):
+                    found = _assignment_value_start(tokens, cursor, position)
+                    if found is not None:
+                        value_start = found
+            cursor += 1
+        if value_start is None:
+            return None
+        value_end = _expression_end(tokens, value_start, position)
+        return self.expression_branch(policy, file, tokens, (value_start, value_end), position, depth + 1)
 
     def analyze_event_reply(self, mid, file, line) -> None:
         if mid & 36864 == 32768:
@@ -717,7 +832,7 @@ class Extractor:
                 continue
             guarded = fallback or parts in guards
             for mid in mids:
-                self.add_site(mid, path, Site(file, line, via, guarded))
+                self.add_site(mid, path, Site(file, line, via, guarded, self.branch_for_site(mid, file, taint.branch)))
 
     # ------------------------------------------------------------- statements
     def handle_local(self, file, position, end, bindings, seeds) -> int:
@@ -946,7 +1061,7 @@ class Extractor:
                 continue
             found = self.expression_taint(file, position + 2, bindings, seeds)
             if found is not None:
-                return Taint(found[0].path, wrapper=tokens[position].value), found[1]
+                return Taint(found[0].path, wrapper=tokens[position].value, followed=found[0].followed, branch=found[0].branch), found[1]
         return None
 
     # ------------------------------------------------------- stored field pass
@@ -963,6 +1078,7 @@ class Extractor:
 
     def scan_field_accesses(self, file, kind, owner, owner_file, store_path, taints) -> None:
         binding = _binding_id(owner_file or owner, store_path)
+        ambiguous = len({stored.branch for stored in taints}) > 1
         index = self.index(file)
         tokens = index.tokens
         aliases = self.aliases(file)
@@ -991,7 +1107,8 @@ class Extractor:
                     continue
                 seed = extend_taint(stored, remainder)
                 followed = seed.followed | {binding}
-                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed), frozenset(mids), "stored field"))
+                branch = UNKNOWN_BRANCH if ambiguous else seed.branch
+                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch), frozenset(mids), "stored field"))
         if not seeds:
             return
         for function in index.functions:
@@ -1039,6 +1156,7 @@ class Extractor:
         self_parameter = function.params[0]
         seeds: dict[int, list[tuple[Taint, frozenset[int], str]]] = {}
         binding = _binding_id(class_file or class_name, store_path)
+        ambiguous = len({stored.branch for stored in taints}) > 1
         for position in range(function.body_start, function.end):
             if tokens[position].kind != "name" or tokens[position].value != self_parameter:
                 continue
@@ -1052,7 +1170,8 @@ class Extractor:
                     continue
                 seed = extend_taint(stored, remainder)
                 followed = seed.followed | {binding}
-                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed), frozenset(mids), "returned rows"))
+                branch = UNKNOWN_BRANCH if ambiguous else seed.branch
+                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch), frozenset(mids), "returned rows"))
         return seeds
 
     def apply_return_call_sites(self, file, class_name, class_file, method, returned) -> None:
@@ -1072,11 +1191,13 @@ class Extractor:
             if receiver != class_name:
                 continue
             binding = f"call:{class_file or class_name}:{method}"
+            ambiguous = len({taint.branch for taint in returned}) > 1
             for taint, mids in returned.items():
                 if binding in taint.followed:
                     continue
                 followed = taint.followed | {binding}
-                seeds.setdefault(position, []).append((Taint(taint.path, taint.wrapper, followed), frozenset(mids), f"{class_name}:{method} return"))
+                branch = UNKNOWN_BRANCH if ambiguous else taint.branch
+                seeds.setdefault(position, []).append((Taint(taint.path, taint.wrapper, followed, branch), frozenset(mids), f"{class_name}:{method} return"))
         if not seeds:
             return
         for function in index.functions:
@@ -1088,8 +1209,8 @@ class Extractor:
                       frozenset(), local_seeds, None)
 
 
-def resolve_wrapper_callbacks(extractor: Extractor, method: str) -> list[tuple[str, Function, tuple[int, int]]]:
-    found: list[tuple[str, Function, tuple[int, int]]] = []
+def resolve_wrapper_callbacks(extractor: Extractor, mid: int, method: str) -> list[tuple[str, Function, tuple[int, int], str | None]]:
+    found: list[tuple[str, Function, tuple[int, int], str | None]] = []
     for candidate in sorted(extractor.blobs):
         if not candidate.startswith("app/") or ":" + method not in extractor.blobs[candidate]:
             continue
@@ -1109,7 +1230,8 @@ def resolve_wrapper_callbacks(extractor: Extractor, method: str) -> list[tuple[s
             start, end = callback
             parsed = index.by_start.get(start) or index.by_name.get(tokens[start].value)
             if parsed is not None:
-                found.append((candidate, parsed, (start + 1 if tokens[start].value == "function" else parsed.body_start, end)))
+                branch = extractor.call_branch(mid, candidate, tokens, arguments, position)
+                found.append((candidate, parsed, (start + 1 if tokens[start].value == "function" else parsed.body_start, end), branch))
     return found
 
 
@@ -1399,7 +1521,7 @@ def mid_set(mid: int) -> frozenset[int]:
 def normalise_store_rows(stores) -> None:
     for taints in stores.values():
         for container in [taint for taint in taints if not taint.path or taint.path[-1] != "[]"]:
-            rows = Taint(container.path + ("[]",), container.wrapper)
+            rows = Taint(container.path + ("[]",), container.wrapper, container.followed, container.branch)
             if rows not in taints:
                 continue
             taints[rows].update(taints.pop(container))
@@ -1427,6 +1549,30 @@ def _unknown(file: str, line: int, reason: str) -> dict:
 
 
 # ------------------------------------------------------------------- parsing
+def parse_activity_symbols(text: str) -> dict[str, int]:
+    return {
+        match.group(1): int(match.group(2))
+        for match in re.finditer(r"xyd\.Activities\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(\d+)", text)
+    }
+
+
+def _expression_end(tokens, start, limit) -> int:
+    if start >= limit:
+        return start
+    if tokens[start].value == "{":
+        return min(matching_close(tokens, start) + 1, limit)
+    if tokens[start].kind == "name":
+        _, _, after = chain_at(tokens, start)
+        return min(after, limit)
+    return min(start + 1, limit)
+
+
+def _assignment_value_start(tokens, name_index, limit) -> int | None:
+    if name_index + 1 >= limit or tokens[name_index + 1].value != "=":
+        return None
+    return name_index + 2
+
+
 def parse_mid_symbols(text: str) -> dict[str, int]:
     return {
         match.group(1): int(match.group(2))
@@ -1531,25 +1677,59 @@ def parse_mid_events(text: str) -> dict[int, str]:
 
 
 # -------------------------------------------------------------------- output
+def site_entries(sites_by_path: dict) -> list[dict]:
+    path_entries = []
+    for path, sites in sorted(sites_by_path.items()):
+        ordered_sites = sorted(sites.values(), key=lambda item: (item.file, item.line, item.via))
+        site_list = [
+            {"file": site.file, "line": site.line, "via": site.via, "guarded": site.guarded}
+            for site in ordered_sites
+        ]
+        requirement = "OPTIONAL" if all(site.guarded for site in ordered_sites) else "REQUIRED"
+        path_entries.append({"path": path, "requirement": requirement, "sites": site_list})
+    return path_entries
+
+
+def split_branches(sites_by_path: dict) -> tuple[dict, dict]:
+    unconditional: dict = {}
+    branches: dict = {}
+    for path, sites in sites_by_path.items():
+        for site in sites.values():
+            if site.branch is None:
+                unconditional.setdefault(path, {})[(site.file, site.line, site.via, site.guarded)] = site
+            else:
+                branches.setdefault(site.branch, {}).setdefault(path, {})[(site.file, site.line, site.via, site.guarded)] = site
+    return unconditional, branches
+
+
+def branch_record(sites_by_path: dict, policy: BranchPolicy) -> dict:
+    _, branches = split_branches(sites_by_path)
+    values = {}
+    for value in sorted(branches, key=lambda item: (item == UNKNOWN_BRANCH, item)):
+        record = {"status": "UNKNOWN" if value == UNKNOWN_BRANCH else "CHECKED", "paths": site_entries(branches[value])}
+        if value == UNKNOWN_BRANCH:
+            record["reason"] = BRANCH_UNKNOWN_REASON
+        values[value] = record
+    return {policy.reply_key: values}
+
+
 def build(blobs: dict[str, str], collapse: bool = True) -> dict:
     extractor = Extractor(blobs)
     extractor.run()
     mids: dict[str, dict] = {}
     for mid, callbacks in sorted(extractor.callbacks.items(), key=lambda item: int(item[0])):
-        path_entries = []
-        for path, sites in sorted(extractor.paths.get(mid, {}).items()):
-            ordered_sites = sorted(sites.values(), key=lambda item: (item.file, item.line, item.via))
-            site_list = [
-                {"file": site.file, "line": site.line, "via": site.via, "guarded": site.guarded}
-                for site in ordered_sites
-            ]
-            requirement = "OPTIONAL" if all(site.guarded for site in ordered_sites) else "REQUIRED"
-            path_entries.append({"path": path, "requirement": requirement, "sites": site_list})
-        mids[mid] = {
+        sites_by_path = extractor.paths.get(mid, {})
+        policy = BRANCH_POLICIES.get(int(mid))
+        record = {
             "name": mid_name(extractor, int(mid)),
             "callbacks": sorted(callbacks, key=lambda entry: (entry["file"], entry["line"], entry["status"])),
-            "paths": path_entries,
         }
+        if policy is None:
+            record["paths"] = site_entries(sites_by_path)
+        else:
+            record["paths"] = site_entries(split_branches(sites_by_path)[0])
+            record["branches"] = branch_record(sites_by_path, policy)
+        mids[mid] = record
     for mid in served_mid_numbers():
         if str(mid) in mids:
             continue
@@ -1561,40 +1741,61 @@ def build(blobs: dict[str, str], collapse: bool = True) -> dict:
             "reason": NO_CLIENT_REQUEST_REASON,
         }
     unknown = sum(1 for entry in mids.values() for callback in entry["callbacks"] if callback["status"] == "UNKNOWN")
+    unknown_branches = sum(
+        1
+        for record in mids.values()
+        for values in record.get("branches", {}).values()
+        for branch in values.values()
+        if branch.get("status") == "UNKNOWN"
+    )
     payload = {
-        "schema_version": 2,
+        "schema_version": 3,
         "source": "current src_64 Lua reply callbacks",
         "source_archive_sha256": archive_sha(),
         "status": "UNKNOWN" if unknown else "CHECKED",
         "unknown_callbacks": unknown,
+        "unknown_branches": unknown_branches,
         "mid_count": len(mids),
         "mids": mids,
     }
     return compact_payload(collapse_sites(payload)) if collapse else payload
 
 
+def collapse_path_entries(paths: list[dict]) -> list[dict]:
+    collapsed_entries = []
+    for entry in paths:
+        groups: dict[tuple[str, int], dict] = {}
+        for site in entry["sites"]:
+            group = groups.setdefault(
+                (site["file"], site["line"]),
+                {"file": site["file"], "line": site["line"], "guarded": True, "via": set()},
+            )
+            group["guarded"] = group["guarded"] and site["guarded"]
+            group["via"].add(site["via"])
+        sites = [
+            {"file": key[0], "line": key[1], "guarded": group["guarded"], "via": sorted(group["via"])}
+            for key, group in sorted(groups.items())
+        ]
+        collapsed = {"path": entry["path"], "requirement": entry["requirement"], "sites": sites}
+        if "waiver" in entry:
+            collapsed["waiver"] = entry["waiver"]
+        collapsed_entries.append(collapsed)
+    return collapsed_entries
+
+
 def collapse_sites(payload: dict) -> dict:
     mids: dict[str, dict] = {}
     for mid, record in payload["mids"].items():
-        paths = []
-        for entry in record["paths"]:
-            groups: dict[tuple[str, int], dict] = {}
-            for site in entry["sites"]:
-                group = groups.setdefault(
-                    (site["file"], site["line"]),
-                    {"file": site["file"], "line": site["line"], "guarded": True, "via": set()},
-                )
-                group["guarded"] = group["guarded"] and site["guarded"]
-                group["via"].add(site["via"])
-            sites = [
-                {"file": key[0], "line": key[1], "guarded": group["guarded"], "via": sorted(group["via"])}
-                for key, group in sorted(groups.items())
-            ]
-            collapsed = {"path": entry["path"], "requirement": entry["requirement"], "sites": sites}
-            if "waiver" in entry:
-                collapsed["waiver"] = entry["waiver"]
-            paths.append(collapsed)
-        mids[mid] = row_with_optional_status(record, paths)
+        row = row_with_optional_status(record, collapse_path_entries(record["paths"]))
+        if "branches" in record:
+            row["branches"] = {
+                key: {
+                    value: {**branch, "paths": collapse_path_entries(branch["paths"])}
+                    for value, branch in values.items()
+                }
+                for key, values in record["branches"].items()
+            }
+        mids[mid] = row
     return {**payload, "mids": mids}
 
 
@@ -1606,11 +1807,28 @@ def row_with_optional_status(record: dict, paths: list, callbacks=None) -> dict:
     return row
 
 
+def branch_path_lists(record: dict) -> list[list[dict]]:
+    return [branch["paths"] for values in record.get("branches", {}).values() for branch in values.values()]
+
+
+def compact_paths(entries: list[dict], index: dict[str, int]) -> list[list]:
+    paths = []
+    for entry in entries:
+        sites = [[index[site["file"]], site["line"], 1 if site["guarded"] else 0, list(site["via"])]
+                 for site in entry["sites"]]
+        path = [entry["path"], REQUIREMENT_CODES[entry["requirement"]], sites]
+        if "waiver" in entry:
+            path.append(entry["waiver"])
+        paths.append(path)
+    return paths
+
+
 def compact_payload(payload: dict) -> dict:
     files = sorted({
         site["file"]
         for record in payload["mids"].values()
-        for entry in record["paths"]
+        for paths in [record["paths"], *branch_path_lists(record)]
+        for entry in paths
         for site in entry["sites"]
     } | {
         callback["file"]
@@ -1628,15 +1846,16 @@ def compact_payload(payload: dict) -> dict:
             if "detail" in callback:
                 row["detail"] = callback["detail"]
             callbacks.append(row)
-        paths = []
-        for entry in record["paths"]:
-            sites = [[index[site["file"]], site["line"], 1 if site["guarded"] else 0, list(site["via"])]
-                     for site in entry["sites"]]
-            path = [entry["path"], REQUIREMENT_CODES[entry["requirement"]], sites]
-            if "waiver" in entry:
-                path.append(entry["waiver"])
-            paths.append(path)
-        mids[mid] = row_with_optional_status(record, paths, callbacks)
+        row = row_with_optional_status(record, compact_paths(record["paths"], index), callbacks)
+        if "branches" in record:
+            row["branches"] = {
+                key: {
+                    value: {**branch, "paths": compact_paths(branch["paths"], index)}
+                    for value, branch in values.items()
+                }
+                for key, values in record["branches"].items()
+            }
+        mids[mid] = row
     return {
         **payload,
         "site_encoding": "site = [site_files index, line, guarded (0/1), sorted via values]; callbacks use the same file index",
