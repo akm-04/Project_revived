@@ -196,7 +196,7 @@ class Gate:
         self.latency_runs = {}
         self.latency_conditions = []
         self.latency_verdict = None
-        self.latency_reused = set()
+        self.latency_reused = []
         cache = Path(arguments.cache).resolve()
         go_root = self.only(self.toolchain.glob('opt/go-*'))
         postgres_root = self.only(self.toolchain.glob('opt/postgresql-*'))
@@ -267,24 +267,28 @@ class Gate:
         return directory / (unit_name.replace(':', '_') + '.txt')
 
     def recorded_latency_tests(self):
-        """The "<import path> <root test name>" lines the helper wrote, module-relative like test outcomes."""
-        recorded = set(getattr(self, 'latency_reused', ()))
+        """The "<import path> <root test name>" lines the helper wrote, module-relative like test outcomes, plus the lines
+        stored with reused units. Returns (recorded, malformed lines)."""
+        lines = list(self.latency_reused)
         directory = self.work / 'latency_records'
-        if not directory.is_dir():
-            return recorded
-        for path in sorted(directory.glob('*.txt')):
-            for line in path.read_text().splitlines():
-                parts = line.split()
-                if len(parts) != 2:
-                    continue
-                recorded.add(f'{parts[0].removeprefix(self.module + "/")}.{parts[1]}')
-        return recorded
+        if directory.is_dir():
+            for path in sorted(directory.glob('*.txt')):
+                lines += path.read_text().splitlines()
+        recorded, malformed = set(), []
+        for line in lines:
+            parts = line.split()
+            if len(parts) != 2:
+                malformed.append(line)
+                continue
+            recorded.add(f'{parts[0].removeprefix(self.module + "/")}.{parts[1]}')
+        return recorded, malformed
 
     def check_latency_records(self):
         """Section 6: the helper's record, not a hand-maintained list, proves the general section's latency population."""
         members = {f'{gate_pool.normalize_package(member["package"])}.{member["test"]}'
                    for member in self.latency_settings()['members']}
-        recorded = self.recorded_latency_tests()
+        recorded, malformed = self.recorded_latency_tests()
+        self.red += [f'latency record line {line!r} is not "<import path> <root test name>"' for line in malformed]
         ran = {test for outcomes in self.runs.values() for test in outcomes}
         self.red += [f'{test}: a latency helper caller is absent from latency.json members'
                      for test in sorted(recorded - members)]
@@ -752,15 +756,19 @@ class Gate:
             source = {name: document[name] for name in ('commit', 'report', 'started')}
             if not all(isinstance(value, str) for value in source.values()):
                 raise ValueError('commit, report and started must be strings')
+            # A unit stored before the population record has no proof of its latency callers: run it again.
+            latency_record = document.get('latency_record')
+            if not isinstance(latency_record, list) or not all(isinstance(line, str) for line in latency_record):
+                raise ValueError('no latency_record list of lines')
         except (OSError, ValueError, KeyError, TypeError) as failure:
             message = f'reuse: ignoring store file {path}: {failure}'
             self.reuse_ignored.append(message)
             print(message, flush=True)
             return None
-        return {**source, 'outcomes': outcomes}
+        return {**source, 'outcomes': outcomes, 'latency_record': latency_record}
 
-    def store_unit(self, fingerprint, inputs, started, outcomes):
-        document = dict(fingerprint=fingerprint, inputs=inputs, commit=self.commit,
+    def store_unit(self, fingerprint, inputs, started, outcomes, latency_record):
+        document = dict(fingerprint=fingerprint, inputs=inputs, commit=self.commit, latency_record=latency_record,
                         report=str(self.work / 'STRICT_GATE.json'), started=started, outcomes=outcomes)
         self.reuse_store.mkdir(parents=True, exist_ok=True)
         path = self.reuse_store / f'{fingerprint}.json'
@@ -776,7 +784,7 @@ class Gate:
 
     def record_reuse(self, name, unit, source, began):
         outcomes = source['outcomes']
-        self.latency_reused.update(outcomes)
+        self.latency_reused.extend(source['latency_record'])
         self.merge_unit_outcomes(f'suite:{name}', unit['unit'], outcomes, set())
         row = dict(name=f'unit:{name}:{unit["unit"]}', exit=0, tests=len(outcomes),
                    reused_from=dict(commit=source['commit'], report=source['report'], started=source['started']),
@@ -809,7 +817,8 @@ class Gate:
                 first = holder['outcomes']
                 if first is not None:
                     self.record_reuse(name, unit, dict(commit=self.commit, report=str(self.work / 'STRICT_GATE.json'),
-                                                       started=holder['started'], outcomes=first), began)
+                                                       started=holder['started'], outcomes=first,
+                                                       latency_record=[]), began)
                     return
         storable_outcomes = None
         try:
@@ -840,7 +849,9 @@ class Gate:
                 self.run_units += 1
             print(f'{row["name"]} {code} {dict(collections.Counter(outcomes.values()))}', flush=True)
             if fingerprint is not None and self.storable(code, outcomes, failed_packages - failing_packages):
-                self.store_unit(fingerprint, inputs, started, outcomes)
+                record_path = self.latency_record_path(f'{name}_{unit["unit"]}')
+                latency_record = record_path.read_text().splitlines() if record_path.is_file() else []
+                self.store_unit(fingerprint, inputs, started, outcomes, latency_record)
                 storable_outcomes = outcomes
         finally:
             if holder is not None:

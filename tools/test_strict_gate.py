@@ -163,7 +163,7 @@ def fake_gate():
     instance.previous = None
     instance.jobs = 1
     instance.parallel = gate_pool.EMPTY_PARALLEL
-    instance.latency_reused = set()
+    instance.latency_reused = []
     instance.dsn_by_package = {}
     instance.environment = {'PATH': '/usr/bin:/bin', 'GATE_FAKE_LOG': str(log), 'GATE_FAKE_SOURCE': str(source)}
     instance.database = lambda name, cwd=None, migrate=('up',), deploy=True: f'postgres://self-check/{name}'
@@ -489,7 +489,7 @@ for mode in ('fail', 'incomplete'):
 # Serial mode with a populated store still runs every unit.
 instance, log = fingerprint_gate()
 fingerprint, inputs = instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, fake_unit(), {}, None)
-instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'})
+instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [])
 instance.reuse = True
 instance.suite('unit', '')
 assert len(test_commands(log)) == 1, test_commands(log)
@@ -634,12 +634,35 @@ instance.suite_parallel('unit', '')
 instance.check_latency_records()
 assert not instance.red, instance.red
 
-# A reused unit ran nothing, so its stored outcomes count as recorded.
+# A reused unit ran nothing, so the record lines stored with it stand in for the run, never its outcomes.
 instance, _ = record_gate(['TestAlpha', 'TestBeta'])
-instance.latency_reused = {'internal/fake.TestAlpha', 'internal/fake.TestBeta'}
+instance.latency_reused = ['example.com/mod/internal/fake TestAlpha', 'example.com/mod/internal/fake TestBeta']
 instance.runs = {'suite:unit': {'internal/fake.TestAlpha': 'pass', 'internal/fake.TestBeta': 'pass'}}
 instance.check_latency_records()
 assert not instance.red, instance.red
+
+instance, _ = record_gate(['TestAlpha', 'TestBeta'])
+instance.latency_reused = ['example.com/mod/internal/fake TestAlpha']
+instance.runs = {'suite:unit': {'internal/fake.TestAlpha': 'pass', 'internal/fake.TestBeta': 'pass'}}
+instance.check_latency_records()
+assert any('TestBeta' in line and 'without recording' in line for line in instance.red), instance.red
+
+# A record line the gate cannot read (empty import path) is RED, not dropped.
+instance, _ = record_gate([])
+instance.latency_reused = [' TestAlpha']
+instance.check_latency_records()
+assert any('is not "<import path> <root test name>"' in line for line in instance.red), instance.red
+
+# A store file without latency_record (stored before the population record) is ignored: the unit runs again.
+instance, log = fingerprint_gate()
+fingerprint, inputs = instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
+instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [])
+path = instance.reuse_store / f'{fingerprint}.json'
+document = json.loads(path.read_text())
+assert instance.stored_unit(fingerprint)['latency_record'] == []
+del document['latency_record']
+path.write_text(json.dumps(document))
+assert instance.stored_unit(fingerprint) is None and 'latency_record' in instance.reuse_ignored[-1], instance.reuse_ignored
 
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}
