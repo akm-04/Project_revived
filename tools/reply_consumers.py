@@ -14,6 +14,11 @@ storage in a module or instance field, and rows a model method returns from
 such a field.  It never guesses: a callback it cannot resolve is UNKNOWN with
 the reason and contributes no paths.
 
+Every MID the gxb-api dispatcher table serves must also appear, because the
+archguard coverage test fails on a served MID with no row.  A served MID that
+has no stock-client request site is recorded ``"status": "UNKNOWN"`` with the
+reason; it is never reported as checked.
+
 REPAIR_PROGRAM R1 promised this checker as evidence, not as a schema.  A
 confirmed REQUIRED path becomes a golden assertion in the MID's test; a false
 positive or a path required only on one branch goes in WAIVERS.json with a
@@ -49,6 +54,8 @@ WAIVERS_PATH = OUTPUT_DIRECTORY / "WAIVERS.json"
 EMBED_PATH = ROOT / "internal/protocol/replyconformance/reply_consumers.json"
 LOCK_PATH = ROOT / "oracles.lock.json"
 DEFAULT_ARCHIVE = ROOT / "inputs/assets/Older/all-assest-rechecked-1.zip"
+SERVED_MIDS_PATH = ROOT / "docs/architecture/system_map/MID_CLASSES.json"
+NO_CLIENT_REQUEST_REASON = "the stock client has no request site for this served MID"
 
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
 MID_LUA = "app/common/network/mid.lua"
@@ -1543,6 +1550,16 @@ def build(blobs: dict[str, str], collapse: bool = True) -> dict:
             "callbacks": sorted(callbacks, key=lambda entry: (entry["file"], entry["line"], entry["status"])),
             "paths": path_entries,
         }
+    for mid in served_mid_numbers():
+        if str(mid) in mids:
+            continue
+        mids[str(mid)] = {
+            "name": mid_name(extractor, mid),
+            "callbacks": [],
+            "paths": [],
+            "status": "UNKNOWN",
+            "reason": NO_CLIENT_REQUEST_REASON,
+        }
     unknown = sum(1 for entry in mids.values() for callback in entry["callbacks"] if callback["status"] == "UNKNOWN")
     payload = {
         "schema_version": 2,
@@ -1577,8 +1594,16 @@ def collapse_sites(payload: dict) -> dict:
             if "waiver" in entry:
                 collapsed["waiver"] = entry["waiver"]
             paths.append(collapsed)
-        mids[mid] = {"name": record["name"], "callbacks": record["callbacks"], "paths": paths}
+        mids[mid] = row_with_optional_status(record, paths)
     return {**payload, "mids": mids}
+
+
+def row_with_optional_status(record: dict, paths: list, callbacks=None) -> dict:
+    row = {"name": record["name"], "callbacks": record["callbacks"] if callbacks is None else callbacks, "paths": paths}
+    for field in ("status", "reason"):
+        if field in record:
+            row[field] = record[field]
+    return row
 
 
 def compact_payload(payload: dict) -> dict:
@@ -1611,7 +1636,7 @@ def compact_payload(payload: dict) -> dict:
             if "waiver" in entry:
                 path.append(entry["waiver"])
             paths.append(path)
-        mids[mid] = {"name": record["name"], "callbacks": callbacks, "paths": paths}
+        mids[mid] = row_with_optional_status(record, paths, callbacks)
     return {
         **payload,
         "site_encoding": "site = [site_files index, line, guarded (0/1), sorted via values]; callbacks use the same file index",
@@ -1624,6 +1649,15 @@ def compact_payload(payload: dict) -> dict:
 def mid_name(extractor: Extractor, mid: int) -> str:
     names = sorted(symbol for symbol, number in extractor.mid_symbols.items() if number == mid)
     return names[0] if names else ""
+
+
+def served_mid_numbers(path: Path = SERVED_MIDS_PATH) -> list[int]:
+    """The dispatcher table's registered MIDs, as the system map classifies them."""
+    document = json.loads(path.read_text(encoding="utf-8"))
+    rows = document.get("mids")
+    if not isinstance(rows, list):
+        raise SystemExit("served MID classes have no mids: %s" % path)
+    return sorted({row["mid"] for row in rows if isinstance(row.get("mid"), int)})
 
 
 def archive_sha() -> str:
