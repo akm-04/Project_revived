@@ -450,7 +450,7 @@ func Test6B_G30_G36FairKeysetAndBoundedWorkers(t *testing.T) {
 	cancel()
 	select {
 	case <-done:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("workers unjoined")
 	}
 	if v.active.Load() != 0 || v.peak.Load() > 5 {

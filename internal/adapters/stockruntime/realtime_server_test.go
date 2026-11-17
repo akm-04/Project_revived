@@ -43,7 +43,7 @@ func TestRealtimeTCPLoginAckAndHeartbeatNoEcho(t *testing.T) {
 		t.Fatal(err)
 	}
 	buf := make([]byte, 1024)
-	_ = client.SetReadDeadline(time.Now().Add(time.Second))
+	_ = client.SetReadDeadline(time.Now().Add(eventWaitTimeout))
 	n, err := client.Read(buf)
 	if err != nil {
 		t.Fatal(err)
@@ -67,7 +67,7 @@ func TestRealtimeTCPLoginAckAndHeartbeatNoEcho(t *testing.T) {
 	_ = client.Close()
 	select {
 	case <-done:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("server did not exit")
 	}
 }

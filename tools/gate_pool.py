@@ -7,14 +7,18 @@ import collections
 import concurrent.futures
 import hashlib
 import json
+import os
 import re
 import subprocess
+from pathlib import Path
 
 TEST_VARIABLE = re.compile(r'os\.(?:Getenv|LookupEnv)\("([A-Z0-9_]+)"\)')
 # go test -list prints Example and Fuzz functions as well; the serial suite runs them too.
 TEST_NAME = re.compile(r'^(Test|Example|Fuzz)\w*$')
 EMPTY_PARALLEL = {'serial': [], 'shards': {}, 'serial_tests': [], 'known_flaky': []}
 MAXIMUM_DATABASE_BYTES = 63
+DEFAULT_TIMEOUT_MINUTES = 20
+SERIAL_TIMEOUT_MINUTES = 150
 
 
 class PoolError(Exception):
@@ -61,9 +65,16 @@ def normalize_package(package):
     return package.removeprefix('./')
 
 
-def go_test_command(go_binary, tags, packages, run=None, skip=None, package_limit=True):
+def unit_timeout(parallel, package):
+    """The unit's timeout: its package override, else parallel.json's default."""
+    overrides = {normalize_package(key): minutes for key, minutes in (parallel.get('timeouts') or {}).items()}
+    return overrides.get(normalize_package(package), parallel.get('timeout_minutes', DEFAULT_TIMEOUT_MINUTES))
+
+
+def go_test_command(go_binary, tags, packages, run=None, skip=None, package_limit=True,
+                    timeout_minutes=SERIAL_TIMEOUT_MINUTES):
     """The serial suite's command shape; parallel units pass one package with a shard pattern."""
-    arguments = [str(go_binary), 'test', '-json', '-count=1', '-timeout=150m', '-tags', tags]
+    arguments = [str(go_binary), 'test', '-json', '-count=1', f'-timeout={timeout_minutes}m', '-tags', tags]
     if package_limit:
         arguments.append('-p=1')
     if run:
@@ -161,3 +172,335 @@ def run_pool(units, jobs, action):
         futures = [pool.submit(action, unit) for unit in units]
         for future in concurrent.futures.as_completed(futures):
             future.result()
+
+
+class NotReusable(Exception):
+    """A unit input cannot be established, so its result must never be reused."""
+
+
+IDENTIFIER = re.compile(r'[A-Za-z_]\w*')
+ASSIGNMENT = re.compile(r'^\s*([A-Za-z_]\w*)\s*(?:,\s*[A-Za-z_]\w*\s*)*:?=(?!=)\s*(.*)$')
+DECLARATION = re.compile(r'^\s*(?:var|const)\s+([A-Za-z_]\w*)(?:\s+[^=\s]+)?\s*=(?!=)\s*(.*)$')
+GO_KEYWORDS = {'break', 'case', 'chan', 'const', 'continue', 'default', 'defer', 'else', 'fallthrough', 'for', 'func',
+               'go', 'goto', 'if', 'import', 'interface', 'map', 'package', 'range', 'return', 'select', 'struct',
+               'switch', 'type', 'var'}
+PATH_CALLS = ('os.ReadFile', 'os.Open')
+SCRATCH_MARKERS = ('t.TempDir()', 'os.MkdirTemp(', 'os.CreateTemp(', 'os.Getenv(', 'os.LookupEnv(', 't.Name()', 'os.TempDir()')
+EMBED_DIRECTIVE = re.compile(r'^[ \t]*//go:embed[ \t]+(.+)$', re.M)
+
+
+def canonical_json(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
+
+
+def sha256_file(path, cache=None):
+    key = str(Path(path))
+    if cache is not None and key in cache:
+        return cache[key]
+    try:
+        digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    except OSError as failure:
+        raise NotReusable(f'missing input {key}: {failure}') from failure
+    if cache is not None:
+        cache[key] = digest
+    return digest
+
+
+def directory_files(directory, cache=None):
+    root = Path(directory)
+    if not root.is_dir():
+        raise NotReusable(f'missing input directory {root}')
+    return [[str(path.relative_to(root)), sha256_file(path, cache)] for path in sorted(root.rglob('*')) if path.is_file()]
+
+
+def parse_json_stream(text):
+    decoder = json.JSONDecoder()
+    index = 0
+    documents = []
+    while index < len(text):
+        while index < len(text) and text[index].isspace():
+            index += 1
+        if index >= len(text):
+            break
+        try:
+            document, index = decoder.raw_decode(text, index)
+        except ValueError as failure:
+            raise NotReusable(f'go list emitted invalid JSON: {failure}') from failure
+        documents.append(document)
+    return documents
+
+
+def code_inputs(go_list_stdout, source, cache=None):
+    """The code closure record: every module package go list -deps -test named, with its file hashes."""
+    root = Path(source).resolve()
+    records = []
+    for document in parse_json_stream(go_list_stdout):
+        directory = document.get('Dir') or ''
+        if not directory:
+            continue
+        resolved = Path(directory)
+        if not resolved.is_relative_to(root):
+            continue
+        files = []
+        for field in ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'EmbedFiles'):
+            for name in sorted(document.get(field) or ()):
+                files.append([name, sha256_file(resolved / name, cache)])
+        testdata = []
+        if (resolved / 'testdata').is_dir():
+            testdata = directory_files(resolved / 'testdata', cache)
+        records.append(dict(package=document.get('ImportPath', ''), files=files, testdata=testdata))
+    records.sort(key=lambda record: record['package'])
+    if not records:
+        raise NotReusable('go list named no package inside the module')
+    return records
+
+
+def mask_go_source(text):
+    """Blank comments and string contents so call sites can be found without parsing them; offsets and newlines stay."""
+    characters = list(text)
+    index, length = 0, len(text)
+    while index < length:
+        character = text[index]
+        if character == '/' and index + 1 < length and text[index + 1] == '/':
+            while index < length and text[index] != '\n':
+                characters[index] = ' '
+                index += 1
+            continue
+        if character == '/' and index + 1 < length and text[index + 1] == '*':
+            characters[index] = characters[index + 1] = ' '
+            index += 2
+            while index < length and not (text[index] == '*' and index + 1 < length and text[index + 1] == '/'):
+                if text[index] != '\n':
+                    characters[index] = ' '
+                index += 1
+            if index < length:
+                characters[index] = characters[index + 1] = ' '
+                index += 2
+            continue
+        if character in '"\'':
+            quote = character
+            index += 1
+            while index < length and text[index] != quote:
+                if text[index] == '\\' and index + 1 < length:
+                    characters[index] = ' '
+                    index += 1
+                if text[index] != '\n':
+                    characters[index] = ' '
+                index += 1
+            index += 1
+            continue
+        if character == '`':
+            index += 1
+            while index < length and text[index] != '`':
+                if text[index] != '\n':
+                    characters[index] = ' '
+                index += 1
+            index += 1
+            continue
+        index += 1
+    return ''.join(characters)
+
+
+def matching_parenthesis(masked, open_index):
+    depth = 0
+    for index in range(open_index, len(masked)):
+        if masked[index] == '(':
+            depth += 1
+        elif masked[index] == ')':
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def split_arguments(masked, original):
+    arguments, depth, start = [], 0, 0
+    for index, character in enumerate(masked):
+        if character in '([{':
+            depth += 1
+        elif character in ')]}':
+            depth -= 1
+        elif character == ',' and depth == 0:
+            arguments.append(original[start:index])
+            start = index + 1
+    arguments.append(original[start:])
+    return arguments
+
+
+def call_sites(masked, original, name):
+    pattern = re.compile(re.escape(name) + r'\s*\(')
+    for match in pattern.finditer(masked):
+        open_index = masked.index('(', match.start())
+        close_index = matching_parenthesis(masked, open_index)
+        if close_index is None:
+            continue
+        body_masked = masked[open_index + 1:close_index]
+        body_original = original[open_index + 1:close_index]
+        yield match.start(), split_arguments(body_masked, body_original)
+
+
+def first_call_arguments(expression, name):
+    masked = mask_go_source(expression)
+    for _, arguments in call_sites(masked, expression, name):
+        return arguments
+    return None
+
+
+def go_string_literal(expression):
+    if len(expression) >= 2 and expression[0] == '`' and expression[-1] == '`':
+        return expression[1:-1]
+    match = re.fullmatch(r'"((?:[^"\\\n]|\\.)*)"', expression)
+    if not match:
+        return None
+    try:
+        return json.loads(expression)
+    except ValueError:
+        return None
+
+
+def is_scratch_expression(expression):
+    return any(marker in expression for marker in SCRATCH_MARKERS)
+
+
+def resolve_join(arguments, package_directory, known):
+    """Resolve filepath.Join to ('path', p), ('directory', p) when only a directory prefix is known, or None."""
+    parts = [argument.strip() for argument in arguments]
+    if any(is_scratch_expression(part) for part in parts):
+        return ('scratch', None)
+    prefix = Path(package_directory)
+    for position, part in enumerate(parts):
+        literal = go_string_literal(part)
+        if literal is not None:
+            prefix = Path(os.path.normpath(str(prefix / literal)))
+            continue
+        if IDENTIFIER.fullmatch(part):
+            classification = known.get(part)
+            if classification is not None:
+                kind, value = classification
+                if kind == 'scratch':
+                    return ('scratch', None)
+                if kind in ('path', 'directory'):
+                    candidate = Path(value)
+                    prefix = candidate if candidate.is_absolute() else Path(os.path.normpath(str(prefix / candidate)))
+                    continue
+        elif part.startswith('filepath.Join'):
+            inner = first_call_arguments(part, 'filepath.Join')
+            nested = resolve_join(inner, package_directory, known) if inner is not None else None
+            if nested is not None and nested[0] == 'scratch':
+                return ('scratch', None)
+            if nested is not None:
+                prefix = Path(nested[1])
+                continue
+        if position == 0:
+            return None
+        return ('directory', str(prefix))
+    return ('path', str(prefix))
+
+
+def resolve_path_expression(expression, package_directory, known):
+    expression = expression.strip()
+    if is_scratch_expression(expression):
+        return ('scratch', None)
+    literal = go_string_literal(expression)
+    if literal is not None:
+        return ('path', str(Path(package_directory) / literal))
+    if IDENTIFIER.fullmatch(expression):
+        classification = known.get(expression)
+        if classification is None:
+            return None
+        kind, value = classification
+        if kind == 'scratch':
+            return ('scratch', None)
+        if kind in ('path', 'directory'):
+            return ('path', value)
+        return None
+    if expression.startswith('filepath.Join'):
+        inner = first_call_arguments(expression, 'filepath.Join')
+        return resolve_join(inner, package_directory, known) if inner is not None else None
+    return None
+
+
+def classify_expression(expression, package_directory, known):
+    expression = expression.strip()
+    if is_scratch_expression(expression):
+        return ('scratch', None)
+    literal = go_string_literal(expression)
+    if literal is not None:
+        return ('path', str(Path(package_directory) / literal))
+    if IDENTIFIER.fullmatch(expression):
+        return known.get(expression, ('unknown', None))
+    if expression.startswith('filepath.Join'):
+        inner = first_call_arguments(expression, 'filepath.Join')
+        resolved = resolve_join(inner, package_directory, known) if inner is not None else None
+        if resolved is not None and resolved[0] in ('path', 'directory'):
+            return ('path', resolved[1])
+        if resolved is not None and resolved[0] == 'scratch':
+            return ('scratch', None)
+    return ('unknown', None)
+
+
+def assignment_classifications(text, masked, package_directory):
+    """Per-file, per-name path classification; a name assigned two different ways becomes unknown (never guessed)."""
+    known = {}
+    for original, masked_line in zip(text.split('\n'), masked.split('\n')):
+        match = DECLARATION.match(masked_line) or ASSIGNMENT.match(masked_line)
+        if not match:
+            continue
+        name = match.group(1)
+        if name in GO_KEYWORDS:
+            continue
+        classification = classify_expression(original[match.start(2):], package_directory, known)
+        existing = known.get(name)
+        if existing is None:
+            known[name] = classification
+        elif existing != classification:
+            known[name] = ('unknown', None)
+    return known
+
+
+def add_resolved_path(records, source, result, cache):
+    kind, value = result
+    if kind == 'scratch':
+        return
+    path = Path(os.path.normpath(str(value)))
+    if not path.is_relative_to(source):
+        return
+    if path.is_dir():
+        for child in sorted(path.rglob('*')):
+            if child.is_file():
+                records[str(child.relative_to(source))] = sha256_file(child, cache)
+        return
+    relative = str(path.relative_to(source))
+    records[relative] = sha256_file(path, cache) if path.is_file() else 'absent'
+
+
+def runtime_file_inputs(source, package_directory, test_files, cache=None):
+    """Repo files the package's tests name by literal path; an unresolvable path is NotReusable with its file:line."""
+    root = Path(source).resolve()
+    directory = Path(package_directory)
+    records = {}
+    for path in test_files:
+        text = path.read_text()
+        masked = mask_go_source(text)
+        known = assignment_classifications(text, masked, directory)
+        relative = str(Path(path).relative_to(root))
+        for call_name in (*PATH_CALLS, 'filepath.Join'):
+            for position, arguments in call_sites(masked, text, call_name):
+                if call_name == 'filepath.Join':
+                    result = resolve_join(arguments, directory, known)
+                else:
+                    result = resolve_path_expression(arguments[0] if arguments else '', directory, known)
+                if result is None:
+                    line = text.count('\n', 0, position) + 1
+                    raise NotReusable(f'{relative}:{line}: cannot resolve {call_name} path')
+                add_resolved_path(records, root, result, cache)
+        for match in EMBED_DIRECTIVE.finditer(text):
+            for pattern in match.group(1).split():
+                paths = sorted(directory.glob(pattern))
+                if not paths:
+                    target = Path(os.path.normpath(str(directory / pattern)))
+                    if target.is_relative_to(root):
+                        records[str(target.relative_to(root))] = 'absent'
+                for embedded in paths:
+                    add_resolved_path(records, root, ('path', str(embedded)), cache)
+    return [[name, records[name]] for name in sorted(records)]

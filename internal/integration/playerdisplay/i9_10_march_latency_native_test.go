@@ -9,6 +9,7 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	app "gxb.local/backend/v2/internal/application/march"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 func marchPopulatedActor(t *testing.T, p *pg.Pool, rev string, server identity.LogicalServerID, level, heroes int) identity.ActorContext {
@@ -29,6 +30,7 @@ func marchPopulatedActor(t *testing.T, p *pg.Pool, rev string, server identity.L
 // one is judged, so unrelated host load does not decide the budget; a real
 // regression raises every sample.
 func TestI9_10MarchNativeLatencyBudget(t *testing.T) {
+	latency.Require(t, latency.Dedicated)
 	p := pool(t)
 	rev := installed(t, p)
 	server := marchNewServer(t, p)
@@ -62,9 +64,7 @@ func TestI9_10MarchNativeLatencyBudget(t *testing.T) {
 			}
 		}
 		t.Logf("%s best %v (budget %v)", name, best, budget)
-		if best > budget {
-			t.Fatalf("%s best %v exceeds budget %v", name, best, budget)
-		}
+		latency.Enforce(t, latency.Dedicated, best, budget)
 	}
 	measure("LOAD 336", time.Second, func(requester identity.ActorContext) error {
 		body, err := s.Load(ctx, requester, op())

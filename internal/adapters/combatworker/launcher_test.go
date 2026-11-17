@@ -16,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/content/combatcorpus"
 	d "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 var workerBinary string
@@ -214,7 +215,7 @@ func TestSaturatedPoolRefusesThenAdmits(t *testing.T) {
 	if !errors.Is(err, app.ErrWorkerSaturated) || !errors.Is(err, d.ErrResolverRetryable) {
 		t.Fatal("saturated pool admitted or misclassified", err)
 	}
-	if waited := time.Since(began); waited > 2*time.Second {
+	if waited := time.Since(began); !latency.Within(t, latency.Incidental, waited, 2*time.Second) {
 		t.Fatal("refusal took", waited)
 	}
 	if err = <-busy; err != nil {

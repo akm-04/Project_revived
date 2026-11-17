@@ -53,7 +53,7 @@ func TestEstablishedGuildSocketFailsLivenessAfterJoinIncarnationChanges(t *testi
 		t.Fatal(err)
 	}
 	buf := make([]byte, 1024)
-	_ = client.SetReadDeadline(time.Now().Add(time.Second))
+	_ = client.SetReadDeadline(time.Now().Add(eventWaitTimeout))
 	if _, err := client.Read(buf); err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestEstablishedGuildSocketFailsLivenessAfterJoinIncarnationChanges(t *testi
 		if !errors.Is(err, app.ErrGuildBindingStale) {
 			t.Fatalf("err=%v", err)
 		}
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("stale GUILD socket survived liveness interval")
 	}
 }

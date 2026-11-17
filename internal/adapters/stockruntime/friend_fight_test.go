@@ -132,7 +132,7 @@ func TestFriendFightNoticePublishesThroughLiveWorldSocket(t *testing.T) {
 		}
 	case err := <-failures:
 		t.Fatal(err)
-	case <-time.After(2 * time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("invite not delivered")
 	}
 	handler.Delivery.Authority = deliveryAuthority{bad: true}

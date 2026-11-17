@@ -23,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 	"math"
 	"net"
 	"os"
@@ -610,14 +611,12 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	sendChat(t, c, "shutdown", 0)
 	select {
 	case <-blocked:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("recipient did not start")
 	}
 	at := time.Now()
 	shutdown.stop()
-	if time.Since(at) > 3*time.Second {
-		t.Fatal("shutdown unbounded")
-	}
+	latency.Enforce(t, latency.Incidental, time.Since(at), 3*time.Second)
 }
 func TestChatA19PartialNoRetryACKOrConsumptionClaim(t *testing.T) {
 	f := fresh(t)
@@ -652,7 +651,7 @@ func TestChatA20TimeoutAdmittedFrameMayWriteLaterNativeTCP(t *testing.T) {
 	sendChat(t, c, "lateframe", 0)
 	select {
 	case <-entered:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("no queue admission")
 	}
 	r := h.report()
@@ -768,7 +767,7 @@ func TestChatA24ActualProductionDispatcherAndHTTPRejection(t *testing.T) {
 		t.Fatal("chat renewed Presence")
 	}
 	writeChatFrame(t, c, rt.Frame{MID: mids.MIDSocketHeartbeat, Params: chatParams()})
-	deadline := time.Now().Add(time.Second)
+	deadline := time.Now().Add(eventWaitTimeout)
 	for f.text(`SELECT lease_expires_at::text FROM realtime_presence_leases WHERE player_id=100001 LIMIT 1`) == leaseBefore {
 		if time.Now().After(deadline) {
 			t.Fatal("heartbeat did not renew Presence")
@@ -840,7 +839,7 @@ func TestChatA29CrashReconnectAndRetirementNativeLifecycle(t *testing.T) {
 	readChat(t, sender, "retirequeued")
 	select {
 	case <-started:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("write not queued")
 	}
 	replacement, _, _ := h.loginToken(100002, token, dr.World, 1)

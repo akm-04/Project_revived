@@ -185,7 +185,7 @@ func TestHTTPPollSendWakesHeldPoll(t *testing.T) {
 	if status, _ := sendChat(t, handler, betaSession, "world", 2, "wake up"); status != http.StatusOK {
 		t.Fatalf("beta send status=%d", status)
 	}
-	result := awaitPollResult(t, held, time.Second)
+	result := awaitPollResult(t, held, eventWaitTimeout)
 	if result.status != http.StatusOK {
 		t.Fatalf("held poll status=%d", result.status)
 	}
@@ -212,7 +212,7 @@ func TestHTTPPollSecondPollReplacesHeldPoll(t *testing.T) {
 	first := startPollRequest(t, handler, pollRequest{SessionID: alphaSession, Ack: alphaSequence, Hold: true})
 	waitForHeldPoll(t, server, alphaSession)
 	second := startPollRequest(t, handler, pollRequest{SessionID: alphaSession, Ack: alphaSequence, Hold: true})
-	replaced := awaitPollResult(t, first, time.Second)
+	replaced := awaitPollResult(t, first, eventWaitTimeout)
 	if replaced.status != http.StatusOK || len(replaced.reply.Frames) != 0 {
 		t.Fatalf("replaced poll status=%d frames=%d", replaced.status, len(replaced.reply.Frames))
 	}
@@ -220,7 +220,7 @@ func TestHTTPPollSecondPollReplacesHeldPoll(t *testing.T) {
 	if status, _ := sendChat(t, handler, betaSession, "world", 2, "second poll"); status != http.StatusOK {
 		t.Fatalf("beta send status=%d", status)
 	}
-	result := awaitPollResult(t, second, time.Second)
+	result := awaitPollResult(t, second, eventWaitTimeout)
 	if result.status != http.StatusOK || len(result.reply.Frames) != 1 {
 		t.Fatalf("replacement poll status=%d frames=%d", result.status, len(result.reply.Frames))
 	}

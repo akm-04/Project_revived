@@ -158,9 +158,10 @@ def clone_unit_databases(unit, database, host, port, dsn_by_package, clone_envir
     return assignments
 
 
-def run_unit(unit, environment, stream, skip, tree, module):
+def run_unit(unit, environment, stream, skip, tree, module, timeout_minutes):
     began = time.perf_counter()
-    command = gate_pool.go_test_command('go', strict_gate.FULL_TAGS, [unit['package']], run=unit['run'], skip=skip)
+    command = gate_pool.go_test_command('go', strict_gate.FULL_TAGS, [unit['package']], run=unit['run'], skip=skip,
+                                        timeout_minutes=timeout_minutes)
     with stream.open('w') as output:
         code = subprocess.run(command, cwd=tree, env=environment, stdout=output, stderr=subprocess.STDOUT,
                               stdin=subprocess.DEVNULL).returncode
@@ -283,7 +284,8 @@ def main():
                                                    clone_environment)
                 run_environment = unit_environment(environment, tree, scratch, unit, assignments)
                 code, outcomes, failed_packages, seconds = run_unit(
-                    unit, run_environment, runs / f'{unit["unit"]}.jsonl', gate.unit_skip(unit, suite_skip), tree, module)
+                    unit, run_environment, runs / f'{unit["unit"]}.jsonl', gate.unit_skip(unit, suite_skip), tree, module,
+                    gate_pool.unit_timeout(parallel, unit['package']))
             except (gate_pool.PoolError, OSError) as failure:
                 with unit_lock:
                     red.append(f'{unit["unit"]}: {failure}')

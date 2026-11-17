@@ -90,7 +90,7 @@ func Test6B_G32LateAdmittedFrameCannotBecomePositive(t *testing.T) {
 	go func() { done <- d.DeliverIntent(c, i.ID) }()
 	select {
 	case <-entered:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("writer not queued")
 	}
 	cancel()

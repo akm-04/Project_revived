@@ -87,7 +87,7 @@ func (structuredFixtureCamp) AuthorizeCampRecipientTx(_ context.Context, _ tx.Tx
 	return nil
 }
 func structuredFixtureRead(c net.Conn) (rt.Frame, error) {
-	c.SetReadDeadline(time.Now().Add(time.Second))
+	c.SetReadDeadline(time.Now().Add(eventWaitTimeout))
 	d, _ := rt.NewStreamDecoder(limits.Default())
 	buf := make([]byte, 16384)
 	for {
