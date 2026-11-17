@@ -196,6 +196,7 @@ class Gate:
         self.latency_runs = {}
         self.latency_conditions = []
         self.latency_verdict = None
+        self.latency_reused = set()
         cache = Path(arguments.cache).resolve()
         go_root = self.only(self.toolchain.glob('opt/go-*'))
         postgres_root = self.only(self.toolchain.glob('opt/postgresql-*'))
@@ -260,6 +261,36 @@ class Gate:
     def latency_settings(self):
         return {**LATENCY_DEFAULTS, **(self.latency or {})}
 
+    def latency_record_path(self, unit_name):
+        directory = self.work / 'latency_records'
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory / (unit_name.replace(':', '_') + '.txt')
+
+    def recorded_latency_tests(self):
+        """The "<import path> <root test name>" lines the helper wrote, module-relative like test outcomes."""
+        recorded = set(getattr(self, 'latency_reused', ()))
+        directory = self.work / 'latency_records'
+        if not directory.is_dir():
+            return recorded
+        for path in sorted(directory.glob('*.txt')):
+            for line in path.read_text().splitlines():
+                parts = line.split()
+                if len(parts) != 2:
+                    continue
+                recorded.add(f'{parts[0].removeprefix(self.module + "/")}.{parts[1]}')
+        return recorded
+
+    def check_latency_records(self):
+        """Section 6: the helper's record, not a hand-maintained list, proves the general section's latency population."""
+        members = {f'{gate_pool.normalize_package(member["package"])}.{member["test"]}'
+                   for member in self.latency_settings()['members']}
+        recorded = self.recorded_latency_tests()
+        ran = {test for outcomes in self.runs.values() for test in outcomes}
+        self.red += [f'{test}: a latency helper caller is absent from latency.json members'
+                     for test in sorted(recorded - members)]
+        self.red += [f'{test}: a latency member ran in the general section without recording'
+                     for test in sorted((ran & members) - recorded)]
+
     @staticmethod
     def validate_parallel(document):
         require(isinstance(document.get('serial'), list), 'parallel.json serial must be a list')
@@ -322,9 +353,12 @@ class Gate:
     def go_test(self, label, tags, packages, extra=None, run=None, skip=None, cwd=None, serial=True, record=True):
         stream = self.work / 'runs' / (label.replace(':', '_') + '.jsonl')
         arguments = gate_pool.go_test_command(self.tool('go'), tags, packages, run=run, skip=skip, package_limit=serial)
+        environment = {**self.environment, **(extra or {})}
+        if record:
+            environment['GXB_LATENCY_RECORD'] = str(self.latency_record_path(label))
         began = time.perf_counter()
         with stream.open('w') as output:
-            code = subprocess.run(arguments, cwd=cwd or self.source, env={**self.environment, **(extra or {})},
+            code = subprocess.run(arguments, cwd=cwd or self.source, env=environment,
                                   stdout=output, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
         outcomes, failed_packages = gate_pool.parse_go_test_json(stream, self.module)
         failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
@@ -553,6 +587,7 @@ class Gate:
         asset_root = self.work / 'media' / unit['unit']
         asset_root.mkdir(mode=0o700, exist_ok=True)
         environment['GXB_I7B5B_ASSET_ROOT'] = str(asset_root)
+        environment['GXB_LATENCY_RECORD'] = str(self.latency_record_path(f'{name}_{unit["unit"]}'))
         if name == 'unit':
             return environment
         template_name = self.suite_template(name)
@@ -741,6 +776,7 @@ class Gate:
 
     def record_reuse(self, name, unit, source, began):
         outcomes = source['outcomes']
+        self.latency_reused.update(outcomes)
         self.merge_unit_outcomes(f'suite:{name}', unit['unit'], outcomes, set())
         row = dict(name=f'unit:{name}:{unit["unit"]}', exit=0, tests=len(outcomes),
                    reused_from=dict(commit=source['commit'], report=source['report'], started=source['started']),
@@ -1271,6 +1307,7 @@ class Gate:
             print('reply-conformance: no --api-logs given; e2e/VC log scan skipped', flush=True)
         for name, recipe in self.recipes():
             self.guarded(f'recipe:{name}', recipe, name)
+        self.check_latency_records()
 
     def classify(self):
         seen = collections.defaultdict(dict)
@@ -1357,10 +1394,16 @@ class Gate:
             return 'PARTIAL_GREEN'
         return 'GREEN'
 
+    def tool_hashes(self):
+        """The gate scripts' own hashes; a paired general and latency report must come from the same tooling."""
+        return {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in (Path(__file__).resolve(), Path(gate_pool.__file__).resolve())}
+
     def report(self, started):
         tests = self.classify()
         verdict = self.overall_verdict()
-        report = dict(contract='I85_STRICT_GATE_V1', verdict=verdict, commit=self.commit, toolchain=str(self.toolchain), started=started,
+        report = dict(contract='I85_STRICT_GATE_V1', verdict=verdict, commit=self.commit,
+                      tools=self.tool_hashes(), toolchain=str(self.toolchain), started=started,
                       finished=datetime.datetime.now(datetime.timezone.utc).isoformat(), mode=self.mode, jobs=self.jobs,
                       sections=self.sections_report(),
                       lists=self.list_hashes, selection=self.select.pattern if self.select else None,

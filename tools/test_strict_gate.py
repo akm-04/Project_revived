@@ -118,6 +118,10 @@ elif '-json' in arguments:
             continue
         if skip is not None and re.search(skip, name):
             continue
+        record = os.environ.get('GXB_LATENCY_RECORD')
+        if record and os.environ.get('GATE_FAKE_RECORD') != 'none':
+            with open(record, 'a') as output:
+                output.write('example.com/mod/internal/fake ' + name + '\\n')
         print(json.dumps({'Action': 'run', 'Package': package, 'Test': name}))
         if mode == 'incomplete':
             continue
@@ -159,6 +163,7 @@ def fake_gate():
     instance.previous = None
     instance.jobs = 1
     instance.parallel = gate_pool.EMPTY_PARALLEL
+    instance.latency_reused = set()
     instance.dsn_by_package = {}
     instance.environment = {'PATH': '/usr/bin:/bin', 'GATE_FAKE_LOG': str(log), 'GATE_FAKE_SOURCE': str(source)}
     instance.database = lambda name, cwd=None, migrate=('up',), deploy=True: f'postgres://self-check/{name}'
@@ -597,6 +602,44 @@ assert 'latency' not in instance.sections_report() and instance.overall_verdict(
 instance.section = 'latency'
 instance.latency_verdict = 'GREEN'
 assert 'general' not in instance.sections_report() and instance.overall_verdict() == 'PARTIAL_GREEN'
+
+# GATE_LATENCY_SECTION_V1 section 6: the helper's record, not a hand-maintained list, proves the general population.
+def record_gate(member_tests, recording=True):
+    instance, log = fake_gate()
+    instance.section = 'general'
+    instance.latency = dict(LATENCY_DEFAULTS,
+                            members=[{'package': './internal/fake', 'test': test, 'tags': ''} for test in member_tests])
+    instance.packages = ['./internal/fake']
+    instance.parallel = dict(gate_pool.EMPTY_PARALLEL, shards={'internal/fake': 2},
+                             serial_tests=['internal/fake.TestAlpha'])
+    if not recording:
+        instance.environment['GATE_FAKE_RECORD'] = 'none'
+    return instance, log
+
+
+instance, _ = record_gate(['TestAlpha'])
+instance.suite_parallel('unit', '')
+instance.check_latency_records()
+assert any('TestBeta' in line and 'absent from latency.json members' in line for line in instance.red), instance.red
+assert not any('TestAlpha' in line for line in instance.red), instance.red
+
+instance, _ = record_gate(['TestAlpha', 'TestBeta'], recording=False)
+instance.suite_parallel('unit', '')
+instance.check_latency_records()
+assert any('TestAlpha' in line and 'without recording' in line for line in instance.red), instance.red
+assert any('TestBeta' in line and 'without recording' in line for line in instance.red), instance.red
+
+instance, _ = record_gate(['TestAlpha', 'TestBeta'])
+instance.suite_parallel('unit', '')
+instance.check_latency_records()
+assert not instance.red, instance.red
+
+# A reused unit ran nothing, so its stored outcomes count as recorded.
+instance, _ = record_gate(['TestAlpha', 'TestBeta'])
+instance.latency_reused = {'internal/fake.TestAlpha', 'internal/fake.TestBeta'}
+instance.runs = {'suite:unit': {'internal/fake.TestAlpha': 'pass', 'internal/fake.TestBeta': 'pass'}}
+instance.check_latency_records()
+assert not instance.red, instance.red
 
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}
