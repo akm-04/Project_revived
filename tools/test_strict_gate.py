@@ -420,6 +420,15 @@ assert refingerprint(instance) != base, 'class 6 timeout default'
 instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeouts={'internal/fake': 30})
 assert refingerprint(instance) != base, 'class 6 timeout override'
 
+# S2: both database suites clone the river-provisioned template, so a package whose compiled files are equal under the two
+# tag sets hashes equal across the suite labels; a changed file still changes the code input (class 1).
+RIVER_FINGERPRINT_TAGS = 'postgres river socialintegration channelintegration'
+instance, _ = fingerprint_gate()
+instance.dsn_by_package = {'internal/fake': frozenset({'GXB_FAKE_DSN'})}
+postgres_suite = instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, fake_unit(), {}, None)[0]
+river_suite = instance.unit_fingerprint('river', RIVER_FINGERPRINT_TAGS, fake_unit(), {}, None)[0]
+assert postgres_suite == river_suite, 'equally compiled units must hash equal across the shared-template suites'
+
 # In-run reuse: equal fingerprints run once, the second records reused_from the first.
 instance, log = fingerprint_gate()
 (instance.work / 'runs' / 'suite_postgres').mkdir()

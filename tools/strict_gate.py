@@ -41,6 +41,9 @@ LISTS = REPOSITORY / 'tools/strict_gate'
 DEFAULT_REUSE_STORE = WORKSPACE / 'tmp/gate_results'
 TAG_SETS = {'unit': '', 'postgres': 'postgres socialintegration channelintegration',
             'river': 'postgres river socialintegration channelintegration'}
+# The 2026-11-17 measurement found tpl_postgres_pub and tpl_river_pub identical (schema, table set, row counts and data
+# up to build timestamps; the deploy already runs the river migrations), so both database suites clone the river one.
+SHARED_TEMPLATE_SUITE = 'river'
 BUILD_ONLY_TAG_SETS = {'chi': 'chi'}
 FULL_TAGS = TAG_SETS['river']
 BINARY_COMMANDS = {'API': ('gxb-api', 'postgres,river'), 'REALTIME': ('gxb-realtime', 'postgres'),
@@ -154,6 +157,7 @@ class Gate:
         self.input_hashes = {}
         self.code_cache = {}
         self.template_cache = {}
+        self.built_templates = set()
         self._go_version = None
         self.max_connections = 900 if self.mode == 'parallel' else 300
         self.populated59 = Path(arguments.populated59_dump).resolve()
@@ -396,8 +400,7 @@ class Gate:
         self.step(f'vet:{name}', [self.tool('go'), 'vet', *tag_arguments, './...'])
         extra = suite_fixtures(self.source)
         if name != 'unit':
-            self.database(f'tpl_{name}')
-            self.prepared_template(name, tags, extra)
+            self.ensure_template(self.suite_template(name), extra)
         serial_packages = {gate_pool.normalize_package(package) for package in self.parallel['serial']}
         shard_counts = {gate_pool.normalize_package(package): count for package, count in self.parallel['shards'].items()
                         if gate_pool.normalize_package(package) not in serial_packages}
@@ -486,6 +489,18 @@ class Gate:
         document = json.loads(self.previous.read_text())
         return {row['name']: row.get('seconds', 0) for row in document.get('steps', [])}
 
+    @staticmethod
+    def suite_template(name):
+        """Both database suites clone the river-provisioned template (measurement, GATE_SPEEDUP_V1 section 2)."""
+        return SHARED_TEMPLATE_SUITE if name in ('postgres', 'river') else name
+
+    def ensure_template(self, suite, extra):
+        if suite in self.built_templates:
+            return
+        self.database(f'tpl_{suite}')
+        self.prepared_template(suite, TAG_SETS[suite], extra)
+        self.built_templates.add(suite)
+
     def unit_environment(self, name, unit, extra):
         environment = {**self.environment, **extra}
         asset_root = self.work / 'media' / unit['unit']
@@ -493,9 +508,10 @@ class Gate:
         environment['GXB_I7B5B_ASSET_ROOT'] = str(asset_root)
         if name == 'unit':
             return environment
+        template_name = self.suite_template(name)
         variables = self.dsn_by_package.get(gate_pool.normalize_package(unit['package']), frozenset())
         for variable in sorted(variables):
-            template = f'tpl_{name}_pub' if variable in PREPARED_VARIABLES else f'tpl_{name}'
+            template = f'tpl_{template_name}_pub' if variable in PREPARED_VARIABLES else f'tpl_{template_name}'
             database = gate_pool.database_name(name, unit['unit'], variable)
             gate_pool.clone_database(self.tool('createdb'), self.port, template, database, self.environment)
             environment[variable] = self.dsn(database)
@@ -511,9 +527,9 @@ class Gate:
                                                   sorted(package_directory.glob('*_test.go')), self.input_hashes),
             fixtures=self.fixture_inputs(),
             external=self.external_inputs(),
-            database=self.database_inputs(suite, tags, package),
+            database=self.database_inputs(suite, package),
             binaries=self.binary_inputs(),
-            unit=self.unit_inputs(tags, unit, extra, skip))
+            unit=self.unit_inputs(suite, tags, unit, extra, skip))
         return hashlib.sha256(gate_pool.canonical_json(inputs).encode()).hexdigest(), inputs
 
     def code_inputs(self, tags, package):
@@ -562,11 +578,11 @@ class Gate:
             self._go_version = completed.stdout.strip()
         return self._go_version
 
-    def database_inputs(self, suite, tags, package):
+    def database_inputs(self, suite, package):
         # The unit suite creates no databases, so its units receive no DSN and the template is not an input.
         if suite == 'unit' or not self.dsn_by_package.get(package):
             return None
-        return dict(template=self.template_key(tags))
+        return dict(template=self.template_key(TAG_SETS[self.suite_template(suite)]))
 
     def template_key(self, tags):
         cached = self.template_cache.get(tags)
@@ -598,12 +614,18 @@ class Gate:
             records.append([variable, self.normalized_value(path), gate_pool.sha256_file(path, self.input_hashes)])
         return records
 
-    def unit_inputs(self, tags, unit, extra, skip):
+    def unit_inputs(self, suite, tags, unit, extra, skip):
         package = gate_pool.normalize_package(unit['package'])
-        return dict(tags=tags, run=unit.get('run'), skip=skip, shard=unit.get('shard'),
+        return dict(tags=self.build_tags(suite, tags), run=unit.get('run'), skip=skip, shard=unit.get('shard'),
                     shard_count=self.shard_count(package, unit),
                     timeout=gate_pool.unit_timeout(self.parallel, unit['package']),
                     environment=self.normalized_environment(package, extra))
+
+    def build_tags(self, suite, tags):
+        """A shared template's tags; -tags itself only selects files, which the code input already hashes."""
+        if suite == 'unit':
+            return tags
+        return TAG_SETS[self.suite_template(suite)]
 
     def shard_count(self, package, unit):
         if unit.get('shard') is None:
