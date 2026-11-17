@@ -26,6 +26,8 @@ def gate(runs, package_failures=None, known_debt=(DEBT,), blocked=None):
     instance.package_failures = collections.defaultdict(list, package_failures or {})
     instance.known_debt = {test: {} for test in known_debt}
     instance.blocked = blocked or {}
+    instance.pending_stores = []
+    instance.unit_lock = threading.Lock()
     instance.allowlist = {HELPER: dict(test=HELPER, kind='child_helper', owners=[PARENT]),
                           SEEDED: dict(test=SEEDED, kind='recipe', owner='recipe:seed'),
                           OPERATOR: dict(test=OPERATOR, kind='operator', reason='manual proof')}
@@ -99,12 +101,17 @@ if arguments[0] == 'version':
     print('go version go1.27.3 linux/amd64')
 elif arguments[0] == 'list':
     package = arguments[-1]
+    if package.endswith('/...'):
+        package = './internal/fake'
     relative = package.removeprefix('./')
     directory = os.path.join(os.environ.get('GATE_FAKE_SOURCE', '.'), relative)
-    go_files = [name for name in directory_files(directory, '.go') if not name.endswith('_test.go')]
-    test_files = [name for name in directory_files(directory, '.go') if name.endswith('_test.go')]
-    print(json.dumps({'ImportPath': 'example.com/mod/' + relative, 'Dir': directory, 'GoFiles': go_files,
-                      'TestGoFiles': test_files, 'XTestGoFiles': [], 'CgoFiles': [], 'EmbedFiles': []}))
+    if option('-f') == '{{.ImportPath}}':
+        print('example.com/mod/' + relative)
+    else:
+        go_files = [name for name in directory_files(directory, '.go') if not name.endswith('_test.go')]
+        test_files = [name for name in directory_files(directory, '.go') if name.endswith('_test.go')]
+        print(json.dumps({'ImportPath': 'example.com/mod/' + relative, 'Dir': directory, 'GoFiles': go_files,
+                          'TestGoFiles': test_files, 'XTestGoFiles': [], 'CgoFiles': [], 'EmbedFiles': []}))
 elif '-list' in arguments:
     print('TestAlpha')
     print('TestBeta')
@@ -114,6 +121,10 @@ elif '-json' in arguments:
     run, skip = option('-run'), option('-skip')
     mode = os.environ.get('GATE_FAKE_MODE', 'pass')
     for name in ('TestAlpha', 'TestBeta'):
+        if mode == 'empty':
+            continue
+        if mode == 'partial' and name != 'TestAlpha':
+            continue
         if run is not None and not re.search(run, name):
             continue
         if skip is not None and re.search(skip, name):
@@ -158,6 +169,9 @@ def fake_gate():
     instance.census = {'dsn': ['GXB_FAKE_DSN']}
     instance.allowlist = {}
     instance.known_debt = {}
+    instance.pending_stores = []
+    instance.blocked = {}
+    instance.section = 'general'
     instance.test_functions = {}
     instance.packages = None
     instance.previous = None
@@ -168,6 +182,7 @@ def fake_gate():
     instance.environment = {'PATH': '/usr/bin:/bin', 'GATE_FAKE_LOG': str(log), 'GATE_FAKE_SOURCE': str(source)}
     instance.database = lambda name, cwd=None, migrate=('up',), deploy=True: f'postgres://self-check/{name}'
     instance.mode = 'parallel'
+    instance.select = None
     instance.commit = 'self-check'
     instance.list_hashes = {'known_debt': 'self-check', 'skip_allowlist': 'self-check', 'parallel': 'self-check'}
     instance.reuse = False
@@ -247,6 +262,8 @@ expected = [
     ['vet', '-tags', tags, './...'],
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', tags, '-p=1',
      '-run', '^(TestPreparePublicationProcess|TestPreparePublicationRiver)$', './internal/integration/publication'],
+    ['list', '-tags', tags, '-f', '{{.ImportPath}}', './...'],
+    ['test', '-list', '.*', '-tags', tags, './internal/fake'],
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', tags, '-p=1', './...'],
 ]
 assert commands == expected, commands
@@ -257,9 +274,12 @@ commands = [json.loads(line) for line in log.read_text().splitlines()]
 expected = [
     ['build', '-buildvcs=false', '-tags', '', './...'],
     ['vet', '-tags', '', './...'],
+    ['list', '-tags', '', '-f', '{{.ImportPath}}', './...'],
+    ['test', '-list', '.*', '-tags', '', './internal/fake'],
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', '', './...'],
 ]
 assert commands == expected, commands
+assert not instance.red, instance.red
 
 # Serial runs keep 150m; a parallel unit takes parallel.json's default, else the package override.
 def parallel_test_commands(log):
@@ -382,7 +402,8 @@ def fingerprint_gate():
 
 
 def fake_unit(name='alpha'):
-    return dict(package='./internal/fake', unit=name, tests=None, run=None, shard=None, serial=False)
+    return dict(package='./internal/fake', unit=name, tests=['TestAlpha', 'TestBeta'],
+                run='^(TestAlpha|TestBeta)$', shard=None, serial=False)
 
 
 def refingerprint(instance, unit=None):
@@ -452,6 +473,8 @@ instance, log = fingerprint_gate()
 (instance.work / 'runs' / 'suite_postgres').mkdir()
 instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
 assert len(test_commands(log)) == 1, test_commands(log)
+assert not list(instance.reuse_store.glob('*.json')), 'nothing is stored before classification'
+instance.classify()
 assert len(list(instance.reuse_store.glob('*.json'))) == 1, list(instance.reuse_store.iterdir())
 instance.reuse = True
 instance.reuse_in_run = {}
@@ -478,22 +501,77 @@ instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
 assert len(test_commands(log)) == 3, 'a tampered store entry must not be used'
 assert any('ignoring store file' in line for line in instance.reuse_ignored), instance.reuse_ignored
 
-# Store: a failing or incomplete unit is never stored.
-for mode in ('fail', 'incomplete'):
+# Store: a failing, incomplete, package-only or partial stream is never stored, even after classification.
+for mode in ('fail', 'incomplete', 'empty', 'partial'):
     instance, log = fingerprint_gate()
     (instance.work / 'runs' / 'suite_postgres').mkdir()
     instance.environment['GATE_FAKE_MODE'] = mode
-    instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
+    unit = fake_unit('alpha')
+    if mode == 'partial':
+        unit = dict(unit, tests=['TestAlpha', 'TestBeta'], run='^(TestAlpha|TestBeta)$', shard=0)
+    instance.run_unit('postgres', FINGERPRINT_TAGS, unit, {}, None)
+    instance.classify()
     assert not list(instance.reuse_store.glob('*.json')), mode
+
+# A package-only success stream is RED: the planned tests never reported.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.environment['GATE_FAKE_MODE'] = 'empty'
+instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
+assert any('did not report planned test' in line for line in instance.red), instance.red
+
+# A shard planned for Alpha and Beta that only reports Alpha is RED.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.environment['GATE_FAKE_MODE'] = 'partial'
+instance.run_unit('postgres', FINGERPRINT_TAGS,
+                  dict(fake_unit('alpha'), tests=['TestAlpha', 'TestBeta'], run='^(TestAlpha|TestBeta)$', shard=0), {}, None)
+assert any('did not report planned test' in line and 'TestBeta' in line for line in instance.red), instance.red
+
+# An outcome outside the planned population is RED too, and never stored.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.run_unit('postgres', FINGERPRINT_TAGS, dict(fake_unit('alpha'), tests=['TestAlpha'], run=None), {}, None)
+assert any('outside its planned population' in line and 'TestBeta' in line for line in instance.red), instance.red
+instance.classify()
+assert not list(instance.reuse_store.glob('*.json'))
+
+# A stale allowlisted pass is RED after classification and its outcome is never written to the store.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.allowlist = {'internal/fake.TestAlpha': dict(test='internal/fake.TestAlpha', kind='operator', reason='manual proof')}
+instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
+assert not list(instance.reuse_store.glob('*.json')), 'a unit is stored only after classification'
+instance.classify()
+assert any('STALE_ALLOWLIST' in line for line in instance.red), instance.red
+assert not list(instance.reuse_store.glob('*.json')), 'an outcome with findings is never stored'
 
 # Serial mode with a populated store still runs every unit.
 instance, log = fingerprint_gate()
 fingerprint, inputs = instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, fake_unit(), {}, None)
-instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [])
+instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [],
+                    ['internal/fake.TestAlpha'])
 instance.reuse = True
 instance.suite('unit', '')
 assert len(test_commands(log)) == 1, test_commands(log)
 assert instance.reused_units == 0 and not any('reused_from' in row for row in instance.steps), instance.steps
+
+# A package whose enumeration proved it has no test is explicitly test-free; an empty stream alone never proves it.
+units = gate_pool.build_units(['./internal/fake'], {}, lambda package: [])
+assert len(units) == 1 and units[0]['tests'] == [] and gate_pool.unit_population(units[0], None) == [], units
+unproven = gate_pool.build_units(['./internal/fake'], {}, lambda package: None)
+assert unproven[0]['tests'] is None and gate_pool.unit_population(unproven[0], None) is None, unproven
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.environment['GATE_FAKE_MODE'] = 'empty'
+instance.run_unit('postgres', FINGERPRINT_TAGS, dict(fake_unit('alpha'), tests=[], run=None), {}, None)
+assert not instance.red, instance.red
+instance.classify()
+entries = list(instance.reuse_store.glob('*.json'))
+assert len(entries) == 1, entries
+document = json.loads(entries[0].read_text())
+assert document['population'] == [] and document['test_free'] is True, document
+assert instance.stored_unit(document['fingerprint'])['outcomes'] == {}, document
 
 # An unresolvable runtime path makes the package NOT_REUSABLE, naming its file:line.
 instance, log = fingerprint_gate()
@@ -656,13 +734,26 @@ assert any('is not "<import path> <root test name>"' in line for line in instanc
 # A store file without latency_record (stored before the population record) is ignored: the unit runs again.
 instance, log = fingerprint_gate()
 fingerprint, inputs = instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
-instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [])
+population = ['internal/fake.TestAlpha', 'internal/fake.TestBeta']
+instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00',
+                    {'internal/fake.TestAlpha': 'pass', 'internal/fake.TestBeta': 'pass'}, [], population)
 path = instance.reuse_store / f'{fingerprint}.json'
 document = json.loads(path.read_text())
 assert instance.stored_unit(fingerprint)['latency_record'] == []
 del document['latency_record']
 path.write_text(json.dumps(document))
 assert instance.stored_unit(fingerprint) is None and 'latency_record' in instance.reuse_ignored[-1], instance.reuse_ignored
+
+# An entry written before the population proof existed is never reused; neither is one whose outcomes omit a planned test.
+document['latency_record'] = []
+del document['population']
+path.write_text(json.dumps(document))
+assert instance.stored_unit(fingerprint) is None and 'population' in instance.reuse_ignored[-1], instance.reuse_ignored
+document['population'] = population
+document['test_free'] = False
+document['outcomes'].pop('internal/fake.TestBeta')
+path.write_text(json.dumps(document))
+assert instance.stored_unit(fingerprint) is None and 'population' in instance.reuse_ignored[-1], instance.reuse_ignored
 
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}
