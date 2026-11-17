@@ -168,10 +168,14 @@ def clone_database(createdb, port, template, name, environment):
 def run_pool(units, jobs, action):
     if jobs < 1:
         raise PoolError(f'jobs {jobs} must be positive')
-    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=jobs)
+    try:
         futures = [pool.submit(action, unit) for unit in units]
         for future in concurrent.futures.as_completed(futures):
             future.result()
+    finally:
+        # A stopped or failed gate must not go on to start the units still queued.
+        pool.shutdown(wait=True, cancel_futures=True)
 
 
 class NotReusable(Exception):
