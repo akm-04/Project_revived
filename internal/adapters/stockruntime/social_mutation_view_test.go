@@ -11,6 +11,7 @@ import (
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type relationMutationProbe struct{ result sr.Result }
@@ -49,12 +50,14 @@ func TestSocialMutationRepliesCarryProjectedPlayer(t *testing.T) {
 
 	// MID 177: SendRequestPlayers populates a NonFriendPlayer from the reply's top-level row.
 	request := mutationResponse(t, 177, result)
+	replyconformance.Check(t, 177, request)
 	if request["player_id"] != float64(target) || request["player_name"] != "peer" || request["lev"] != float64(9) {
 		t.Fatalf("177 row %#v", request)
 	}
 
 	// MID 185: PersonDisplayWindow inserts reply.player_info into its open blacklist.
 	blocked := mutationResponse(t, 185, result)
+	replyconformance.Check(t, 185, blocked)
 	playerInfo, ok := blocked["player_info"].(map[string]any)
 	if !ok || playerInfo["player_id"] != float64(target) || playerInfo["player_name"] != "peer" || playerInfo["lev"] != float64(9) || playerInfo["avatar_id"] != float64(4) || playerInfo["avatar_frame_id"] != float64(5) || playerInfo["conquer_lev"] == nil || playerInfo["conquer_loop_id"] == nil || playerInfo["is_online"] == nil || playerInfo["last_time"] == nil {
 		t.Fatalf("185 player_info %#v", blocked)

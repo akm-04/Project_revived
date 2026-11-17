@@ -152,6 +152,7 @@ import (
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"gxb.local/backend/v2/internal/protocol/limits"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 func main() {
@@ -886,6 +887,7 @@ func main() {
 		Limits: limits.Default(), Admission: admission, Decoding: decoding,
 		Operations: operation.Factory{Clock: clock.System{}}, Router: router, Journal: journal,
 		Undelivered: undeliveredMarks, Metrics: txMetrics,
+		Conformance: replyconformance.Checker{},
 		QueueBudget: time.Duration(envPositiveInt("GXB_HTTP_QUEUE_BUDGET_SECONDS", int(httpedge.DefaultQueueBudget/time.Second))) * time.Second,
 		QueueWait:   transactionAdmission,
 	}

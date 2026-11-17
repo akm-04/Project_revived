@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gate_pool
-from strict_gate import Gate
+from strict_gate import Gate, GateFailure
 
 DEBT = 'internal/a.TestDebt'
 HELPER = 'internal/a.TestHelper'
@@ -228,6 +228,33 @@ try:
 except gate_pool.PoolError:
     pass
 assert gate_pool.TEST_NAME.match('ExampleShard') and gate_pool.TEST_NAME.match('FuzzShard'), 'go test -list names'
+
+instance, _ = fake_gate()
+logs = instance.work / 'logs'
+(logs / 'api.log').write_text('boot ok\nreply_conformance_violation mid=18 path=regions[].region_id\n')
+try:
+    instance.reply_conformance_scan(logs)
+    raise AssertionError('a reply_conformance_violation line must make the scan RED')
+except GateFailure as failure:
+    assert 'api.log:2' in str(failure) and 'regions[].region_id' in str(failure), failure
+(logs / 'api.log').write_text('boot ok\n')
+nested = logs / 'runs' / 'one'
+nested.mkdir(parents=True)
+(nested / 'api.log').write_text('all replies conform\n')
+instance.reply_conformance_scan(logs)
+(nested / 'api.log').write_text('reply_conformance_violation mid=1 path=a\n')
+try:
+    instance.reply_conformance_scan(logs)
+    raise AssertionError('a violation in a nested gxb-api log must make the scan RED')
+except GateFailure as failure:
+    assert 'runs/one/api.log:1' in str(failure), failure
+empty = instance.work / 'empty-logs'
+empty.mkdir()
+try:
+    instance.reply_conformance_scan(empty)
+    raise AssertionError('a scan without gxb-api logs must be refused')
+except GateFailure as failure:
+    assert 'no gxb-api logs' in str(failure), failure
 
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}

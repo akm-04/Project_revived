@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -30,7 +31,16 @@ func (s *adventureStub) List(context.Context, identity.ActorContext, operation.C
 }
 func (s *adventureStub) Info(_ context.Context, _ identity.ActorContext, tableID int64, _ operation.Context) (map[string]any, error) {
 	s.tableID = tableID
-	return map[string]any{"detail": map[string]any{}}, s.err
+	return map[string]any{"detail": map[string]any{
+		"challenge_times":  []any{},
+		"monster_statuses": []any{},
+		"pos_statuses":     []any{},
+		"room_info": map[string]any{
+			"campaign_id": int64(0),
+			"members":     []any{},
+			"room_id":     int64(0),
+		},
+	}}, s.err
 }
 func (s *adventureStub) BuyShop(_ context.Context, _ identity.ActorContext, tableID int64, _ operation.Context) (app.Response, error) {
 	s.tableID = tableID
@@ -122,6 +132,8 @@ func TestAdventureDispatcherRoutesAndDuplicates(t *testing.T) {
 	}
 	if response := dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)})); response.Body == nil || stub.tableID != 10004 {
 		t.Fatalf("2417 %+v", response)
+	} else {
+		replyconformance.Check(t, 2417, response.Body)
 	}
 	stub.duplicate = true
 	response := dispatcher.Dispatch(context.Background(), adventureRequest(2418, map[string]any{"table_id": int64(1001)}))
