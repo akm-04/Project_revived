@@ -255,6 +255,56 @@ expected = [
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', '', './...'],
 ]
 assert commands == expected, commands
+
+# Serial runs keep 150m; a parallel unit takes parallel.json's default, else the package override.
+def parallel_test_commands(log):
+    return [command for command in (json.loads(line) for line in log.read_text().splitlines())
+            if command[:2] == ['test', '-json']]
+
+
+def timeout_of(command):
+    return next(argument for argument in command if argument.startswith('-timeout=')).removeprefix('-timeout=')
+
+
+instance, log = fake_gate()
+instance.packages = ['./internal/fake']
+instance.suite_parallel('unit', '')
+assert [timeout_of(command) for command in parallel_test_commands(log)] == ['20m'], log.read_text()
+
+instance, log = fake_gate()
+instance.packages = ['./internal/fake']
+instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeout_minutes=25)
+instance.suite_parallel('unit', '')
+assert [timeout_of(command) for command in parallel_test_commands(log)] == ['25m'], log.read_text()
+
+instance, log = fake_gate()
+instance.packages = ['./internal/fake']
+instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeout_minutes=25, timeouts={'./internal/fake': 40})
+instance.suite_parallel('unit', '')
+assert [timeout_of(command) for command in parallel_test_commands(log)] == ['40m'], log.read_text()
+
+Gate.validate_parallel(dict(gate_pool.EMPTY_PARALLEL))
+for document in (dict(gate_pool.EMPTY_PARALLEL, timeout_minutes=0),
+                 dict(gate_pool.EMPTY_PARALLEL, timeout_minutes='20'),
+                 dict(gate_pool.EMPTY_PARALLEL, timeouts=[]),
+                 dict(gate_pool.EMPTY_PARALLEL, timeouts={'internal/fake': 0}),
+                 dict(gate_pool.EMPTY_PARALLEL, timeouts={'internal/fake': '5'})):
+    try:
+        Gate.validate_parallel(document)
+    except GateFailure:
+        continue
+    raise AssertionError(f'parallel.json must refuse {document}')
+
+instance, _ = fake_gate()
+instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeouts={'./internal/fake': 30})
+instance.validate_timeout_packages(['./internal/fake'])
+instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeouts={'internal/missing': 30})
+try:
+    instance.validate_timeout_packages(['./internal/fake'])
+    raise AssertionError('a timeout for a package that does not exist must be refused')
+except GateFailure as failure:
+    assert 'internal/missing' in str(failure), failure
+
 try:
     gate_pool.build_units(['./internal/fake'], {'internal/fake': 6}, lambda package: [])
     raise AssertionError('a sharded package with no tests must be refused')
@@ -365,6 +415,10 @@ assert refingerprint(instance) != base, 'class 6 environment'
 instance.environment['GATE_SELF_CHECK_VARIABLE'] = 'one'
 assert refingerprint(instance) == base, 'fingerprint is stable'
 assert refingerprint(instance, dict(fake_unit(), run='^(TestAlpha)$')) != base, 'class 6 run pattern'
+instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeout_minutes=25)
+assert refingerprint(instance) != base, 'class 6 timeout default'
+instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeouts={'internal/fake': 30})
+assert refingerprint(instance) != base, 'class 6 timeout override'
 
 # In-run reuse: equal fingerprints run once, the second records reused_from the first.
 instance, log = fingerprint_gate()

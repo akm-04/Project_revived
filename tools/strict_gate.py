@@ -221,6 +221,22 @@ class Gate:
         require(all(isinstance(key, str) and '.' in key for key in serial_tests),
                 'parallel.json serial_tests entries must be package.TestName')
         require(isinstance(document.get('known_flaky'), list), 'parallel.json known_flaky must be a list')
+        timeout_minutes = document.get('timeout_minutes', gate_pool.DEFAULT_TIMEOUT_MINUTES)
+        require(isinstance(timeout_minutes, int) and timeout_minutes >= 1,
+                'parallel.json timeout_minutes must be a positive integer')
+        timeouts = document.get('timeouts', {})
+        require(isinstance(timeouts, dict), 'parallel.json timeouts must be an object')
+        require(all(isinstance(package, str) for package in timeouts),
+                'parallel.json timeout keys must be package paths')
+        require(all(isinstance(minutes, int) and minutes >= 1 for minutes in timeouts.values()),
+                'parallel.json timeout values must be positive integers')
+
+    def validate_timeout_packages(self, packages):
+        """Every timeout names a package the candidate contains, or the list is wrong."""
+        known = {gate_pool.normalize_package(package) for package in packages}
+        missing = sorted(package for package in self.parallel.get('timeouts', {})
+                         if gate_pool.normalize_package(package) not in known)
+        require(not missing, f'parallel.json timeouts names package(s) the candidate does not contain: {missing}')
 
     def selected(self, unit):
         return self.select is None or bool(self.select.search(unit))
@@ -427,11 +443,21 @@ class Gate:
     def parallel_packages(self, tags):
         if self.packages:
             return list(self.packages)
+        return self.all_packages(tags)
+
+    def all_packages(self, tags):
         completed = subprocess.run([self.tool('go'), 'list', '-tags', tags, '-f', '{{.ImportPath}}', './...'],
                                    cwd=self.source, env=self.environment, capture_output=True, text=True, stdin=subprocess.DEVNULL)
         require(completed.returncode == 0, f'go list failed: {(completed.stdout + completed.stderr).strip()[-2000:]}')
         prefix = self.module + '/'
         return ['./' + line.removeprefix(prefix) for line in completed.stdout.split() if line.startswith(prefix)]
+
+    def existing_packages(self):
+        """Every package the candidate lists under any suite tag set; a timeout may name any of them."""
+        packages = set()
+        for tags in TAG_SETS.values():
+            packages.update(self.all_packages(tags))
+        return sorted(packages)
 
     def test_lister(self, name, tags):
         def list_tests(package):
@@ -576,6 +602,7 @@ class Gate:
         package = gate_pool.normalize_package(unit['package'])
         return dict(tags=tags, run=unit.get('run'), skip=skip, shard=unit.get('shard'),
                     shard_count=self.shard_count(package, unit),
+                    timeout=gate_pool.unit_timeout(self.parallel, unit['package']),
                     environment=self.normalized_environment(package, extra))
 
     def shard_count(self, package, unit):
@@ -683,7 +710,8 @@ class Gate:
         try:
             try:
                 environment = self.unit_environment(name, unit, extra)
-                arguments = gate_pool.go_test_command(self.tool('go'), tags, [unit['package']], run=unit['run'], skip=skip)
+                arguments = gate_pool.go_test_command(self.tool('go'), tags, [unit['package']], run=unit['run'], skip=skip,
+                                                      timeout_minutes=gate_pool.unit_timeout(self.parallel, unit['package']))
                 with stream.open('w') as output:
                     code = subprocess.run(arguments, cwd=self.source, env=environment, stdout=output,
                                           stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
@@ -966,6 +994,8 @@ class Gate:
         if self.mode == 'parallel':
             self.red += [f'parallel: serial test {key} names no test function'
                          for key in self.parallel.get('serial_tests', []) if key not in test_locations]
+            if self.parallel.get('timeouts'):
+                self.validate_timeout_packages(self.existing_packages())
         self.build_binaries()
         self.cluster('init')
         self.cluster('start')

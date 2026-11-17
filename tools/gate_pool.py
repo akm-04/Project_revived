@@ -17,6 +17,8 @@ TEST_VARIABLE = re.compile(r'os\.(?:Getenv|LookupEnv)\("([A-Z0-9_]+)"\)')
 TEST_NAME = re.compile(r'^(Test|Example|Fuzz)\w*$')
 EMPTY_PARALLEL = {'serial': [], 'shards': {}, 'serial_tests': [], 'known_flaky': []}
 MAXIMUM_DATABASE_BYTES = 63
+DEFAULT_TIMEOUT_MINUTES = 20
+SERIAL_TIMEOUT_MINUTES = 150
 
 
 class PoolError(Exception):
@@ -63,9 +65,16 @@ def normalize_package(package):
     return package.removeprefix('./')
 
 
-def go_test_command(go_binary, tags, packages, run=None, skip=None, package_limit=True):
+def unit_timeout(parallel, package):
+    """The unit's timeout: its package override, else parallel.json's default."""
+    overrides = {normalize_package(key): minutes for key, minutes in (parallel.get('timeouts') or {}).items()}
+    return overrides.get(normalize_package(package), parallel.get('timeout_minutes', DEFAULT_TIMEOUT_MINUTES))
+
+
+def go_test_command(go_binary, tags, packages, run=None, skip=None, package_limit=True,
+                    timeout_minutes=SERIAL_TIMEOUT_MINUTES):
     """The serial suite's command shape; parallel units pass one package with a shard pattern."""
-    arguments = [str(go_binary), 'test', '-json', '-count=1', '-timeout=150m', '-tags', tags]
+    arguments = [str(go_binary), 'test', '-json', '-count=1', f'-timeout={timeout_minutes}m', '-tags', tags]
     if package_limit:
         arguments.append('-p=1')
     if run:
