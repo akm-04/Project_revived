@@ -2,15 +2,19 @@ package archguard
 
 import (
 	"encoding/json"
+	"fmt"
 	"go/ast"
+	"go/importer"
 	"go/parser"
 	"go/token"
+	"go/types"
 	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -107,9 +111,24 @@ func itoa(value int) string {
 	return string(out)
 }
 
+type latencyCheckedPackage struct {
+	fset  *token.FileSet
+	files map[string]*ast.File
+	info  *types.Info
+}
+
+type latencyCheckedDirectory struct {
+	packages map[string]*latencyCheckedPackage
+	files    map[string]string
+}
+
+var (
+	latencyStdlibImporter = importer.Default()
+	latencyDirectories    sync.Map
+)
+
 func latencyViolationLines(path string) ([]int, error) {
-	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, path, nil, 0)
+	checked, file, err := latencyCheckedFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -119,12 +138,78 @@ func latencyViolationLines(path string) ([]int, error) {
 		if !ok || function.Body == nil {
 			continue
 		}
-		lines = append(lines, inspectLatencyBlock(fset, function.Body, map[string]bool{})...)
+		lines = append(lines, inspectLatencyBlock(checked.fset, function.Body, map[string]bool{}, checked.info)...)
 	}
 	return lines, nil
 }
 
-func inspectLatencyBlock(fset *token.FileSet, block *ast.BlockStmt, tainted map[string]bool) []int {
+// latencyCheckedFile type-checks the file together with its package and siblings
+// so an operand's declared type is known; syntax taint stays as the fallback for
+// imports the standard-library importer cannot resolve.
+func latencyCheckedFile(path string) (*latencyCheckedPackage, *ast.File, error) {
+	absolute, err := filepath.Abs(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	directory := filepath.Dir(absolute)
+	loaded, known := latencyDirectories.Load(directory)
+	if !known {
+		checked, loadErr := loadLatencyDirectory(directory)
+		if loadErr != nil {
+			return nil, nil, loadErr
+		}
+		actual, _ := latencyDirectories.LoadOrStore(directory, checked)
+		loaded = actual
+	}
+	entry := loaded.(*latencyCheckedDirectory)
+	name, present := entry.files[absolute]
+	if !present {
+		_, parseErr := parser.ParseFile(token.NewFileSet(), absolute, nil, 0)
+		if parseErr == nil {
+			parseErr = fmt.Errorf("%s: no parsed package", absolute)
+		}
+		return nil, nil, parseErr
+	}
+	checked := entry.packages[name]
+	return checked, checked.files[absolute], nil
+}
+
+func loadLatencyDirectory(directory string) (*latencyCheckedDirectory, error) {
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		return nil, err
+	}
+	fset := token.NewFileSet()
+	groups := map[string][]*ast.File{}
+	names := map[string]string{}
+	for _, entry := range entries {
+		name := entry.Name()
+		if entry.IsDir() || !strings.HasSuffix(name, ".go") {
+			continue
+		}
+		absolute := filepath.Join(directory, name)
+		file, parseErr := parser.ParseFile(fset, absolute, nil, 0)
+		if parseErr != nil {
+			continue
+		}
+		groups[file.Name.Name] = append(groups[file.Name.Name], file)
+		names[absolute] = file.Name.Name
+	}
+	checked := &latencyCheckedDirectory{packages: map[string]*latencyCheckedPackage{}, files: names}
+	for name, files := range groups {
+		info := &types.Info{Types: map[ast.Expr]types.TypeAndValue{}}
+		config := types.Config{Importer: latencyStdlibImporter, Error: func(error) {}, FakeImportC: true}
+		_, _ = config.Check(directory+"/"+name, fset, files, info)
+		filesByName := map[string]*ast.File{}
+		for _, file := range files {
+			filesByName[fset.Position(file.Pos()).Filename] = file
+		}
+		checked.packages[name] = &latencyCheckedPackage{fset: fset, files: filesByName, info: info}
+	}
+	return checked, nil
+}
+
+func inspectLatencyBlock(fset *token.FileSet, block *ast.BlockStmt, tainted map[string]bool, info *types.Info) []int {
 	var found []int
 	for _, statement := range block.List {
 		switch current := statement.(type) {
@@ -143,7 +228,7 @@ func inspectLatencyBlock(fset *token.FileSet, block *ast.BlockStmt, tainted map[
 				tainted[name.Name] = latencyDerived(value, tainted)
 			}
 			for _, right := range current.Rhs {
-				found = append(found, inspectLatencyExpression(fset, right, tainted)...)
+				found = append(found, inspectLatencyExpression(fset, right, tainted, info)...)
 			}
 		case *ast.DeclStmt:
 			declaration, ok := current.Decl.(*ast.GenDecl)
@@ -178,46 +263,46 @@ func inspectLatencyBlock(fset *token.FileSet, block *ast.BlockStmt, tainted map[
 					}
 				}
 			}
-			found = append(found, latencyConditionViolation(fset, current.Cond, current.Body, tainted)...)
-			found = append(found, inspectLatencyBlock(fset, current.Body, tainted)...)
+			found = append(found, latencyConditionViolation(fset, current.Cond, current.Body, tainted, info)...)
+			found = append(found, inspectLatencyBlock(fset, current.Body, tainted, info)...)
 			if current.Else != nil {
-				found = append(found, inspectLatencyStatement(fset, current.Else, tainted)...)
+				found = append(found, inspectLatencyStatement(fset, current.Else, tainted, info)...)
 			}
 		case *ast.ForStmt:
-			found = append(found, latencyConditionViolation(fset, current.Cond, current.Body, tainted)...)
-			found = append(found, inspectLatencyBlock(fset, current.Body, tainted)...)
+			found = append(found, latencyConditionViolation(fset, current.Cond, current.Body, tainted, info)...)
+			found = append(found, inspectLatencyBlock(fset, current.Body, tainted, info)...)
 		case *ast.RangeStmt:
-			found = append(found, inspectLatencyBlock(fset, current.Body, tainted)...)
+			found = append(found, inspectLatencyBlock(fset, current.Body, tainted, info)...)
 		case *ast.SwitchStmt:
-			found = append(found, inspectLatencyBlock(fset, current.Body, tainted)...)
+			found = append(found, inspectLatencyBlock(fset, current.Body, tainted, info)...)
 		case *ast.TypeSwitchStmt:
-			found = append(found, inspectLatencyBlock(fset, current.Body, tainted)...)
+			found = append(found, inspectLatencyBlock(fset, current.Body, tainted, info)...)
 		case *ast.SelectStmt:
-			found = append(found, inspectLatencyBlock(fset, current.Body, tainted)...)
+			found = append(found, inspectLatencyBlock(fset, current.Body, tainted, info)...)
 		case *ast.BlockStmt:
-			found = append(found, inspectLatencyBlock(fset, current, tainted)...)
+			found = append(found, inspectLatencyBlock(fset, current, tainted, info)...)
 		case *ast.ExprStmt:
-			found = append(found, inspectLatencyExpression(fset, current.X, tainted)...)
+			found = append(found, inspectLatencyExpression(fset, current.X, tainted, info)...)
 		case *ast.ReturnStmt:
 			for _, result := range current.Results {
-				found = append(found, inspectLatencyExpression(fset, result, tainted)...)
+				found = append(found, inspectLatencyExpression(fset, result, tainted, info)...)
 			}
 		}
 	}
 	return found
 }
 
-func inspectLatencyStatement(fset *token.FileSet, statement ast.Stmt, tainted map[string]bool) []int {
+func inspectLatencyStatement(fset *token.FileSet, statement ast.Stmt, tainted map[string]bool, info *types.Info) []int {
 	switch current := statement.(type) {
 	case *ast.BlockStmt:
-		return inspectLatencyBlock(fset, current, tainted)
+		return inspectLatencyBlock(fset, current, tainted, info)
 	case *ast.IfStmt:
-		return inspectLatencyBlock(fset, &ast.BlockStmt{List: []ast.Stmt{current}}, tainted)
+		return inspectLatencyBlock(fset, &ast.BlockStmt{List: []ast.Stmt{current}}, tainted, info)
 	}
 	return nil
 }
 
-func latencyConditionViolation(fset *token.FileSet, condition ast.Expr, body *ast.BlockStmt, tainted map[string]bool) []int {
+func latencyConditionViolation(fset *token.FileSet, condition ast.Expr, body *ast.BlockStmt, tainted map[string]bool, info *types.Info) []int {
 	if condition == nil || !failsTheTest(body) {
 		return nil
 	}
@@ -227,7 +312,9 @@ func latencyConditionViolation(fset *token.FileSet, condition ast.Expr, body *as
 		if !ok || !isOrdering(comparison.Op) {
 			return true
 		}
-		if latencyDerived(comparison.X, tainted) || latencyDerived(comparison.Y, tainted) {
+		measured := latencyDerived(comparison.X, tainted) || latencyDerived(comparison.Y, tainted)
+		typed := durationOperand(comparison.X, info) || durationOperand(comparison.Y, info)
+		if measured || typed {
 			found = append(found, fset.Position(comparison.OpPos).Line)
 		}
 		return true
@@ -235,7 +322,22 @@ func latencyConditionViolation(fset *token.FileSet, condition ast.Expr, body *as
 	return found
 }
 
-func inspectLatencyExpression(fset *token.FileSet, expression ast.Expr, tainted map[string]bool) []int {
+func durationOperand(expression ast.Expr, info *types.Info) bool {
+	if info == nil || expression == nil {
+		return false
+	}
+	value, ok := info.Types[expression]
+	if !ok {
+		return false
+	}
+	named, ok := types.Unalias(value.Type).(*types.Named)
+	if !ok || named.Obj().Pkg() == nil {
+		return false
+	}
+	return named.Obj().Pkg().Path() == "time" && named.Obj().Name() == "Duration"
+}
+
+func inspectLatencyExpression(fset *token.FileSet, expression ast.Expr, tainted map[string]bool, info *types.Info) []int {
 	if expression == nil {
 		return nil
 	}
@@ -243,7 +345,7 @@ func inspectLatencyExpression(fset *token.FileSet, expression ast.Expr, tainted 
 	if literal, ok := expression.(*ast.FuncLit); ok && literal.Body != nil {
 		inner := map[string]bool{}
 		maps.Copy(inner, tainted)
-		found = append(found, inspectLatencyBlock(fset, literal.Body, inner)...)
+		found = append(found, inspectLatencyBlock(fset, literal.Body, inner, info)...)
 	}
 	return found
 }
@@ -396,6 +498,14 @@ import ("testing"; "time")
 func TestPlanted(t *testing.T) {
 	var b testing.B
 	if b.Elapsed() > time.Second {
+		t.Fatal("too slow")
+	}
+}`,
+		"typed Duration return": `package planted
+import ("testing"; "time")
+func elapsed() time.Duration { return time.Second * 2 }
+func TestPlanted(t *testing.T) {
+	if elapsed() > time.Second {
 		t.Fatal("too slow")
 	}
 }`,
