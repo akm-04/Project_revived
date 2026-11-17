@@ -11,12 +11,14 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/retentionstore"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 // U2/A-039: the sweep must delete replay-only receipts faster than the 200 per
 // second the API can create at full load. Seed 50 000 aged receipts and require
 // at least 400 deletes per second.
 func TestRetentionSweepReceiptThroughput(t *testing.T) {
+	latency.Require(t, latency.Dedicated)
 	dsn := os.Getenv("GXB_R8_4C_DSN")
 	if dsn == "" {
 		t.Skip("GXB_R8_4C_DSN with a migrated disposable database is required")
@@ -65,7 +67,5 @@ FROM (SELECT gen_random_uuid() AS operation_id FROM generate_series(1,50000)) o`
 	if deleted != before {
 		t.Fatalf("deleted %d of %d seeded receipts", deleted, before)
 	}
-	if rate < 400 {
-		t.Fatalf("throughput %.0f receipts per second is below the required 400", rate)
-	}
+	latency.EnforceRate(t, latency.Dedicated, rate, 400)
 }

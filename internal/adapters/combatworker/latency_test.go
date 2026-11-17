@@ -14,6 +14,7 @@ import (
 
 	"gxb.local/backend/v2/internal/content/combatcorpus"
 	d "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 func templateActor(t *testing.T, kind d.ActorKind, table string, tableID int64, star, level, color int) d.Actor {
@@ -41,9 +42,7 @@ func templateActor(t *testing.T, kind d.ActorKind, table string, tableID int64, 
 // host. GXB_I8_LATENCY_REPETITIONS repeats the rounds; the p95 of the pooled
 // absolute samples decides, never a host-normalized figure.
 func TestResolverLatencyGate(t *testing.T) {
-	if os.Getenv("GXB_I8_LATENCY_GATE") != "1" {
-		t.Skip("set GXB_I8_LATENCY_GATE=1 on the reference machine")
-	}
+	latency.Require(t, latency.Dedicated)
 	const rounds, cadence = 5, 3 * time.Second
 	bound := 6500 * time.Millisecond
 	if value := os.Getenv("GXB_I8_LATENCY_BOUND"); value != "" {
@@ -139,7 +138,5 @@ func TestResolverLatencyGate(t *testing.T) {
 	}
 	p95 := percentile95(samples)
 	t.Logf("p95 %s max %s over %d attempts", p95, slices.Max(samples), len(samples))
-	if p95 > bound {
-		t.Fatalf("p95 %s exceeds %s", p95, bound)
-	}
+	latency.Enforce(t, latency.Dedicated, p95, bound)
 }

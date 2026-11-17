@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 type runtimeAuthority struct {
@@ -113,9 +114,7 @@ func TestR3BAbsoluteHandshakeDeadlineSlowloris(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected handshake timeout")
 		}
-		if time.Since(start) > 180*time.Millisecond {
-			t.Fatalf("deadline was extended: %v", time.Since(start))
-		}
+		latency.Enforce(t, latency.Incidental, time.Since(start), 180*time.Millisecond)
 	case <-time.After(250 * time.Millisecond):
 		t.Fatal("slowloris did not hit absolute handshake deadline")
 	}

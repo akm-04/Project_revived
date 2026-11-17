@@ -23,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 	"math"
 	"net"
 	"os"
@@ -615,9 +616,7 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	}
 	at := time.Now()
 	shutdown.stop()
-	if time.Since(at) > 3*time.Second {
-		t.Fatal("shutdown unbounded")
-	}
+	latency.Enforce(t, latency.Incidental, time.Since(at), 3*time.Second)
 }
 func TestChatA19PartialNoRetryACKOrConsumptionClaim(t *testing.T) {
 	f := fresh(t)

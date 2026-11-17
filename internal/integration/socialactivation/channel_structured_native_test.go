@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 	"os"
 	"strings"
 	"testing"
@@ -57,7 +58,7 @@ func (o *nativeArenaOwner) ReadArenaTx(c context.Context, t tx.Tx, a ar.Admissio
 	if e := t.QueryRow(c, `SELECT clock_timestamp(),current_setting('transaction_read_only'),current_setting('transaction_isolation')`).Scan(&now, &ro, &iso); e != nil {
 		return cc.Owned[cc.Arena]{}, e
 	}
-	if ro != "on" || iso != "repeatable read" || now.Before(at) || now.Sub(at) > time.Second {
+	if ro != "on" || iso != "repeatable read" || now.Before(at) || !latency.Within(latency.Incidental, now.Sub(at), time.Second) {
 		return cc.Owned[cc.Arena]{}, errors.New("wrong DB-time/options")
 	}
 	if o.write {
