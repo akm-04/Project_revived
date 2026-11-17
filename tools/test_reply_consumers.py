@@ -60,6 +60,11 @@ def repeated_segment_names(path):
     return repeated
 
 
+def path_prefixes(path):
+    segments = path.split(".")
+    return {".".join(segments[:end]) for end in range(1, len(segments) + 1)}
+
+
 def normalised_access_names(line):
     return {
         (first or second).replace("_", "").lower()
@@ -95,6 +100,52 @@ def fixture_payload():
         ),
     }
     return reply_consumers.build(blobs, collapse=False)
+
+
+def event_consumer_blobs(*, callback=True):
+    callback_argument = (
+        ", function(arg_3_0, arg_3_1)\n"
+        "\t\tprint(arg_3_1.callback_only)\n"
+        "\tend"
+    ) if callback else ""
+    return {
+        "app/common/network/mid.lua": "xyd.mid.EVENTED = 9001\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": (
+            "function var_0_1.setupMidToEventNameMappings_(arg_19_0)\n"
+            "\targ_19_0.mid2EventNames_[xyd.mid.EVENTED] = xyd.event.EVENTED\n"
+            "end\n"
+        ),
+        "app/model/Evented.lua": (
+            'local var_0_0 = class("Evented")\n'
+            "function var_0_0.onRegister(arg_1_0)\n"
+            "\targ_1_0:registerEvent(xyd.event.EVENTED, handler(arg_1_0, arg_1_0.onEvented_))\n"
+            "end\n"
+            "function var_0_0.onEvented_(arg_2_0, arg_2_1)\n"
+            "\targ_2_0.value = arg_2_1.params.event_only\n"
+            "\targ_2_0.userdata = arg_2_1.userdata\n"
+            "end\n"
+        ),
+        "app/model/Caller.lua": (
+            'local var_0_0 = class("Caller")\n'
+            "function var_0_0.load(arg_4_0)\n"
+            f"\txyd.Backend.get():request(xyd.mid.EVENTED, {{}}{callback_argument})\n"
+            "end\n"
+        ),
+    }
+
+
+class EventConsumerTests(unittest.TestCase):
+    def test_the_mapped_event_is_a_consumer_even_with_an_explicit_callback(self):
+        with_callback = reply_consumers.build(event_consumer_blobs(), collapse=False)
+        self.assertEqual({"event_only", "callback_only"}, required_paths(with_callback, 9001))
+        without_callback = reply_consumers.build(event_consumer_blobs(callback=False), collapse=False)
+        self.assertEqual({"event_only"}, required_paths(without_callback, 9001))
+
+    def test_the_event_userdata_is_not_a_reply_path(self):
+        payload = reply_consumers.build(event_consumer_blobs(), collapse=False)
+        self.assertNotIn("userdata", required_paths(payload, 9001))
 
 
 def wrapper_owner_blobs(*, extra_window_call="", import_beta=True):
@@ -215,6 +266,10 @@ class ReplyConsumerTests(unittest.TestCase):
         self.assertIn("player_id", required_paths(self.payload, 177))
         self.assertTrue({"player_info"} <= required_paths(self.payload, 185) or "list[].player_info" in required_paths(self.payload, 185))
 
+    def test_the_live_activities_event_requires_its_list(self):
+        self.assertIn("list", required_paths(self.payload, 229))
+        self.assertNotIn("params.list", required_paths(self.payload, 229))
+
     def test_activity_obligations_are_split_by_the_selected_table_id(self):
         record = self.payload["mids"]["234"]
         self.assertEqual("table_id", next(iter(record["branches"])))
@@ -274,14 +329,17 @@ class ReplyConsumerTests(unittest.TestCase):
 
     def test_every_repeated_segment_is_read_at_a_cited_site(self):
         for mid, record in self.payload["mids"].items():
-            for entry in record["paths"]:
-                path = reply_consumers.path_name(entry)
+            entries = {reply_consumers.path_name(entry): entry for entry in record["paths"]}
+            for path in entries:
                 repeated = repeated_segment_names(path)
                 if not repeated:
                     continue
+                # A repeated segment can be read on the line that reads its
+                # parent path, so the prefix entries are evidence too.
                 lines = [
                     self.blobs[self.payload["site_files"][site[0]]].splitlines()[site[1] - 1]
-                    for site in entry[2]
+                    for prefix in path_prefixes(path)
+                    for site in entries.get(prefix, (None, None, []))[2]
                 ]
                 accessed = set()
                 for line in lines:

@@ -150,7 +150,9 @@ BRANCH_POLICIES = {
 # A MID consumed by more than one Activity<table_id> window that needs no branch
 # split, with the evidence. branch_coverage_problems fails on a new split MID.
 BRANCH_POLICY_EXEMPTIONS = {
+    1: "RETRIEVE_TOKEN's detail is a per-MID map: Activity windows read their own entry and the request carries no activity discriminator, so the union is the batch model, not a selectable branch",
     231: "request-discriminated by activity_id at getActivityReward call sites; the reply carries no discriminator the edge checker can select, and the MID is inactive (fallback only)",
+    629: "the NIAN_BOSS reply is one shape (the request carries no discriminator); Activity1038 and Activity1065 read the same shared NianBoss model fields, so their union is required and no per-branch set exists",
 }
 UNKNOWN_BRANCH = "unknown"
 BRANCH_UNKNOWN_REASON = "the consumer site is neither inside an Activity<table_id> window nor reachable from a request with a static activity id"
@@ -431,18 +433,28 @@ def element(taint: Taint) -> Taint:
 
 
 def path_parts(taint: Taint, segments: list[tuple[str, str]]) -> list[tuple[str, ...]]:
+    """A taint with a wrapper names a field of the value it is bound to (the
+    event's params, or a table argument's field).  Only an access that reaches
+    that field reads the reply; the field itself is not part of the path."""
     parts = list(taint.path)
     wrapper = taint.wrapper
+    if wrapper is not None:
+        stripped = False
+        if parts and parts[0] == wrapper:
+            parts = parts[1:]
+            stripped = True
+        if segments and segments[0] == ("field", wrapper):
+            segments = segments[1:]
+            stripped = True
+        if not stripped:
+            return []
     out: list[tuple[str, ...]] = []
 
-    def visible() -> tuple[str, ...]:
-        shown = list(parts)
-        if wrapper and shown and shown[0] == wrapper:
-            shown = shown[1:]
-        return tuple(shown)
+    def emit() -> None:
+        if parts:
+            out.append(tuple(parts))
 
-    if visible():
-        out.append(visible())
+    emit()
     for kind, name in segments:
         if kind == "field":
             parts.append(name)
@@ -451,8 +463,7 @@ def path_parts(taint: Taint, segments: list[tuple[str, str]]) -> list[tuple[str,
                 parts.append("[]")
         else:
             break
-        if visible():
-            out.append(visible())
+        emit()
     return out
 
 
@@ -484,8 +495,8 @@ class Extractor:
         self.stores: dict[tuple[str, str | None, tuple[tuple[str, str], ...]], dict[Taint, set[int]]] = {}
         self.file_stores: dict[tuple[str, tuple[tuple[str, str], ...]], dict[Taint, set[int]]] = {}
         self.return_methods: dict[tuple[str, str | None, str], dict[Taint, set[int]]] = {}
-        self.event_handlers = parse_event_handlers(blobs)
-        self.mid_events = parse_mid_events(blobs.get(BACKEND_LUA, ""))
+        self.event_handlers, self.event_handler_unresolved = parse_event_handlers(blobs)
+        self.mid_events = parse_mid_events(blobs.get(BACKEND_LUA, ""), self.mid_symbols)
         self.replay: set[tuple] = set()
 
     # ---------------------------------------------------------------- indexes
@@ -635,13 +646,13 @@ class Extractor:
         if mid is None:
             return
         line = tokens[position].line
-        if len(arguments) < 3:
-            self.analyze_event_reply(mid, file, line)
-            return
+        callback_present = len(arguments) >= 3 and tokens[arguments[2][0]].value != "nil"
+        if callback_present:
+            self.analyze_callback(mid, file, tokens, arguments, position, line)
+        self.analyze_event_reply(mid, file, line, callback_present)
+
+    def analyze_callback(self, mid, file, tokens, arguments, position, line) -> None:
         callback_start, callback_end = arguments[2]
-        if tokens[callback_start].value == "nil":
-            self.analyze_event_reply(mid, file, line)
-            return
         branch = self.argument_branch(mid, file, tokens, arguments[1], position)
         if tokens[callback_start].value == "function" and tokens[callback_start].kind == "kw":
             parsed = self.index(file).by_start.get(callback_start)
@@ -787,19 +798,24 @@ class Extractor:
         value_end = _expression_end(tokens, value_start, position)
         return self.expression_branch(policy, file, tokens, (value_start, value_end), position, depth + 1)
 
-    def analyze_event_reply(self, mid, file, line) -> None:
+    def analyze_event_reply(self, mid, file, line, callback_present: bool = False) -> None:
         if mid & 36864 == 32768:
-            self.record_callback(mid, _unknown(file, line, "chat-room transport: reply is a socket push, not an HTTP reply"))
+            if not callback_present:
+                self.record_callback(mid, _unknown(file, line, "chat-room transport: reply is a socket push, not an HTTP reply"))
             return
         event = self.mid_events.get(mid)
         if event is None:
-            self.record_callback(mid, _unknown(file, line, "no callback and no mid-to-event mapping"))
+            if not callback_present:
+                self.record_callback(mid, _unknown(file, line, "no callback and no mid-to-event mapping"))
             return
         handlers = self.event_handlers.get(event, [])
-        if not handlers:
-            self.record_callback(mid, _unknown(file, line, f"dispatch of xyd.event.{event} has no resolvable handler"))
-            return
-        self.record_callback(mid, _checked(file, line, f"dispatched as xyd.event.{event}"))
+        unresolved = self.event_handler_unresolved.get(event, [])
+        if unresolved:
+            self.record_callback(mid, _unknown(file, line, f"dispatch of xyd.event.{event} has an unresolvable listener: {unresolved[0]}"))
+        elif handlers:
+            self.record_callback(mid, _checked(file, line, f"dispatched as xyd.event.{event}"))
+        else:
+            self.record_callback(mid, _checked(file, line, f"dispatched as xyd.event.{event}; the client registers no listener"))
         for handler_file, handler in handlers:
             self.analyze_reply(mid, handler_file, handler, Taint(wrapper="params"), f"event {event}")
 
@@ -933,7 +949,9 @@ class Extractor:
         taint, mids = found
         store_path = tuple(segments)
         if taint.wrapper is not None:
-            return
+            if not taint.path or taint.path[0] != taint.wrapper:
+                return
+            taint = Taint(taint.path[1:], None, taint.followed, taint.branch)
         owner = None
         owner_file = None
         if function.params and receiver_root == function.params[0]:
@@ -1135,7 +1153,7 @@ class Extractor:
         tokens = index.tokens
         aliases = self.aliases(file)
         file_class = self.file_class(file)
-        seeds: dict[int, list[tuple[Taint, frozenset[int], str]]] = {}
+        reads: list[tuple[int, list[tuple[str, str]]]] = []
         for position, token in enumerate(tokens):
             if token.kind != "name" or position + 2 >= len(tokens):
                 continue
@@ -1153,22 +1171,24 @@ class Extractor:
                 receiver = self.field_receiver_class(file_class, aliases, index, position, root, segments, match)
                 if receiver != owner:
                     continue
-            remainder = segments[match + len(store_path):]
-            for stored, mids in taints.items():
-                if binding in stored.followed:
-                    continue
+            reads.append((position, segments[match + len(store_path):]))
+        # One scan per stored taint: a read that two models both feed must
+        # contribute every model's reply paths, not just the largest one.
+        for stored, mids in list(taints.items()):
+            if binding in stored.followed:
+                continue
+            seeds: dict[int, list[tuple[Taint, frozenset[int], str]]] = {}
+            for position, remainder in reads:
                 seed = extend_taint(stored, remainder)
                 followed = seed.followed | {binding}
                 branch = UNKNOWN_BRANCH if ambiguous else seed.branch
                 seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch), frozenset(mids), "stored field"))
-        if not seeds:
-            return
-        for function in index.functions:
-            local_seeds = {position: value for position, value in seeds.items()
-                           if function.body_start <= position <= function.end}
-            if not local_seeds:
-                continue
-            self.scan(0, file, function, function.body_start, function.end, {}, "stored field", frozenset(), local_seeds, None)
+            for function in index.functions:
+                local_seeds = {position: value for position, value in seeds.items()
+                               if function.body_start <= position <= function.end}
+                if not local_seeds:
+                    continue
+                self.scan(0, file, function, function.body_start, function.end, {}, "stored field", frozenset(), local_seeds, None)
 
     def field_receiver_class(self, file_class, aliases, index, position, root, segments, match) -> str | None:
         if match >= 1:
@@ -1185,15 +1205,16 @@ class Extractor:
             if file is None or not _store_field_in_text(self.blobs[file], store_path):
                 continue
             index = self.index(file)
-            for function in index.functions:
-                if function.parent is not None or not function.name:
-                    continue
-                returned: list[tuple[Taint, frozenset[int]]] = []
-                seeds = self.field_seeds(file, function, class_name, class_file, store_path, taints)
-                if seeds:
-                    self.scan(0, file, function, function.body_start, function.end, {}, "return", frozenset(), seeds, returned)
-                for taint, mids in returned:
-                    self.return_methods.setdefault((class_name, file, function.name), {}).setdefault(taint, set()).update(mids)
+            for stored, mids in list(taints.items()):
+                for function in index.functions:
+                    if function.parent is not None or not function.name:
+                        continue
+                    returned: list[tuple[Taint, frozenset[int]]] = []
+                    seeds = self.field_seeds(file, function, class_name, class_file, store_path, {stored: mids})
+                    if seeds:
+                        self.scan(0, file, function, function.body_start, function.end, {}, "return", frozenset(), seeds, returned)
+                    for taint, returned_mids in returned:
+                        self.return_methods.setdefault((class_name, file, function.name), {}).setdefault(taint, set()).update(returned_mids)
         for (class_name, class_file, method), retrieved in sorted(self.return_methods.items()):
             for file in self.files_for_class(class_name, class_file):
                 if ":" + method not in self.blobs[file]:
@@ -1244,12 +1265,15 @@ class Extractor:
                 continue
             binding = f"call:{class_file or class_name}:{method}"
             ambiguous = len({taint.branch for taint in returned}) > 1
+            close = matching_close(tokens, after)
+            indexed = close + 1 < len(tokens) and tokens[close + 1].value == "["
             for taint, mids in returned.items():
                 if binding in taint.followed:
                     continue
                 followed = taint.followed | {binding}
                 branch = UNKNOWN_BRANCH if ambiguous else taint.branch
-                seeds.setdefault(position, []).append((Taint(taint.path, taint.wrapper, followed, branch), frozenset(mids), f"{class_name}:{method} return"))
+                seed = element(taint) if indexed else taint
+                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch), frozenset(mids), f"{class_name}:{method} return"))
         if not seeds:
             return
         for function in index.functions:
@@ -1790,15 +1814,19 @@ def _alias_receiver_class(root: str, segments: list[tuple[str, str]], aliases: d
     return None
 
 
-def parse_event_handlers(blobs: dict[str, str]) -> dict[str, list[tuple[str, Function]]]:
+def parse_event_handlers(blobs: dict[str, str]) -> tuple[dict[str, list[tuple[str, Function]]], dict[str, list[str]]]:
+    """Every registered xyd.event listener, plus the registrations that cannot
+    be resolved.  BaseModel:registerEvent and the dispatcher's addEventListener
+    are the only two ways the client subscribes to an xyd.event."""
     handlers: dict[str, list[tuple[str, Function]]] = {}
+    unresolved: dict[str, list[str]] = {}
     for file in sorted(blobs):
-        if "registerEvent" not in blobs[file]:
+        if "registerEvent" not in blobs[file] and "addEventListener" not in blobs[file]:
             continue
         tokens = Tokenizer(blobs[file]).tokens()
         index = index_functions(file, tokens)
         for position, token in enumerate(tokens):
-            if token.kind != "name" or token.value != "registerEvent":
+            if token.kind != "name" or token.value not in ("registerEvent", "addEventListener"):
                 continue
             if position + 1 >= len(tokens) or tokens[position + 1].value != "(":
                 continue
@@ -1806,10 +1834,14 @@ def parse_event_handlers(blobs: dict[str, str]) -> dict[str, list[tuple[str, Fun
             if len(arguments) < 2:
                 continue
             event = _event_name(tokens, arguments[0])
-            handler = _handler_method(tokens, arguments[1])
-            if event and handler and index.by_name.get(handler):
-                handlers.setdefault(event, []).append((file, index.by_name[handler]))
-    return handlers
+            if not event:
+                continue
+            handler = _registered_handler(tokens, arguments[1], index)
+            if handler is None:
+                unresolved.setdefault(event, []).append(f"{file}:{tokens[arguments[1][0]].line}")
+                continue
+            handlers.setdefault(event, []).append((file, handler))
+    return handlers, unresolved
 
 
 def _event_name(tokens, argument) -> str | None:
@@ -1820,24 +1852,30 @@ def _event_name(tokens, argument) -> str | None:
     return None
 
 
+def _registered_handler(tokens, argument, index: FunctionIndex) -> Function | None:
+    start, _ = argument
+    if tokens[start].kind == "kw" and tokens[start].value == "function":
+        return index.by_start.get(start)
+    method = _handler_method(tokens, argument)
+    if method is None:
+        return None
+    return index.by_name.get(method)
+
+
 def _handler_method(tokens, argument) -> str | None:
     start, end = argument
     values = [token.value for token in tokens[start:end]]
     if len(values) >= 3 and values[-2] == "." and tokens[end - 1].kind == "name":
         return values[-1]
-    if len(values) >= 3 and values[-2] == "," and tokens[end - 1].kind == "name":
-        return values[-1]
+    if len(values) >= 6 and values[-1] == ")" and values[-3] == "." and tokens[end - 2].kind == "name":
+        return values[-2]
     return None
 
 
-def parse_mid_events(text: str) -> dict[int, str]:
-    body = re.search(r"setupMidToEventNameMappings_\(.*?\nend", text, re.S)
-    if not body:
-        return {}
-    symbols = parse_mid_symbols(text)
+def parse_mid_events(text: str, symbols: dict[str, int]) -> dict[int, str]:
     return {
         symbols[match.group(1)]: match.group(2)
-        for match in re.finditer(r"mid2EventNames_\[xyd\.mid\.([A-Za-z0-9_]+)\]\s*=\s*xyd\.event\.([A-Za-z0-9_]+)", body.group(0))
+        for match in re.finditer(r"mid2EventNames_\[xyd\.mid\.([A-Za-z0-9_]+)\]\s*=\s*xyd\.event\.([A-Za-z0-9_]+)", text)
         if match.group(1) in symbols
     }
 
@@ -1918,7 +1956,7 @@ def build(blobs: dict[str, str], collapse: bool = True) -> dict:
         "schema_version": 3,
         "source": "current src_64 Lua reply callbacks",
         "source_archive_sha256": archive_sha(),
-        "status": "UNKNOWN" if unknown else "CHECKED",
+        "status": "UNKNOWN" if unknown or unknown_branches else "CHECKED",
         "unknown_callbacks": unknown,
         "unknown_branches": unknown_branches,
         "mid_count": len(mids),
