@@ -4,7 +4,8 @@ Exports one commit and runs, against a private PostgreSQL cluster:
   - every build tag set (unit, postgres, river) with its own freshly migrated and deployed databases for every test DSN, plus a
     build-only chi set; go build, go vet and go test -json for each;
   - the LuaJIT differential oracle (GXB_LUAJIT) inside the suites and the latency gate once, serially (this host is the reference host);
-  - every upgrade/restore/seed-compare orchestration recipe on its own databases.
+  - every upgrade/restore/seed-compare orchestration recipe on its own databases;
+  - after the suites, the e2e/VC gxb-api logs under --api-logs contain zero reply_conformance_violation lines.
 Every test outcome is classified against tools/strict_gate/known_debt.json and tools/strict_gate/skip_allowlist.json. Strict: a
 missing tool, fixture, binary or database, a test environment variable nobody provisions, a failure outside the known debt, a skip
 outside the allowlist, a repaid debt entry and a stale allowlist entry all make the gate RED. Writes <work>/STRICT_GATE.json.
@@ -12,6 +13,7 @@ outside the allowlist, a repaid debt entry and a stale allowlist entry all make 
 Usage: strict_gate.py --toolchain <self-contained tool root> --cache <go/zig cache root> --work <new directory>
                       --populated59-dump <I7C3B F2_RECOVERY_EVIDENCE.dump> [--commit HEAD] [--port 55561] [--select REGEX]
                       [--mode serial|parallel] [--jobs N] [--package PATH ...] [--previous STRICT_GATE.json]
+                      [--api-logs DIR]
 """
 import argparse
 import collections
@@ -89,6 +91,7 @@ TEST_FUNCTION = re.compile(r'^func (Test\w+)\(t \*testing\.T\)', re.M)
 
 LATENCY_REPETITIONS = 3
 BASELINE_WORK = b'\0' * (64 << 20)
+REPLY_CONFORMANCE_VIOLATION = 'reply_conformance_violation '
 
 
 def host_conditions():
@@ -138,6 +141,7 @@ class Gate:
         self.mode = arguments.mode
         self.jobs = arguments.jobs
         self.previous = Path(arguments.previous).resolve() if arguments.previous else None
+        self.api_logs = Path(arguments.api_logs).resolve() if arguments.api_logs else None
         self.max_connections = 900 if self.mode == 'parallel' else 300
         self.populated59 = Path(arguments.populated59_dump).resolve()
         self.red = []
@@ -683,6 +687,19 @@ class Gate:
         unformatted = (self.work / 'logs/format.log').read_text().split()
         require(not unformatted, f'gofmt -l lists {unformatted}')
 
+    def reply_conformance_scan(self, directory):
+        """The e2e/VC gxb-api logs must contain no reply_conformance_violation line (C3 item 5)."""
+        root = Path(directory).resolve()
+        logs = sorted(path for path in root.rglob('*.log') if path.is_file())
+        require(logs, f'reply-conformance: no gxb-api logs under {root}')
+        violations = []
+        for path in logs:
+            for number, line in enumerate(path.read_text(errors='replace').splitlines(), 1):
+                if REPLY_CONFORMANCE_VIOLATION in line:
+                    violations.append(f'{path.relative_to(root)}:{number}: {line.strip()}')
+        require(not violations, f'reply-conformance: {len(violations)} violation line(s): ' + ' | '.join(violations[:10]))
+        print(f'reply-conformance: {len(logs)} gxb-api log(s), zero violations', flush=True)
+
     def latency(self):
         """Absolute pooled p95 decides; host conditions are recorded beside it to explain a failure, never to rescale it."""
         began = time.perf_counter()
@@ -739,6 +756,10 @@ class Gate:
                     self.guarded(f'suite:{name}', self.suite_parallel, name, tags)
                 else:
                     self.guarded(f'suite:{name}', self.suite, name, tags)
+            if self.api_logs:
+                self.guarded('reply-conformance', self.reply_conformance_scan, self.api_logs)
+            else:
+                print('reply-conformance: no --api-logs given; e2e/VC log scan skipped', flush=True)
             for name, recipe in self.recipes():
                 self.guarded(f'recipe:{name}', recipe, name)
         finally:
@@ -829,6 +850,7 @@ def main():
     parser.add_argument('--jobs', type=int, default=4)
     parser.add_argument('--package', action='append')
     parser.add_argument('--previous')
+    parser.add_argument('--api-logs', help='directory holding the e2e/VC gxb-api *.log files to scan for reply_conformance_violation')
     arguments = parser.parse_args()
     if arguments.jobs < 1:
         parser.error('--jobs must be positive')
