@@ -97,6 +97,91 @@ def fixture_payload():
     return reply_consumers.build(blobs, collapse=False)
 
 
+def wrapper_owner_blobs(*, extra_window_call="", import_beta=True):
+    beta_import = 'local beta = import("app.model.Beta")\n' if import_beta else ""
+    return {
+        "app/common/network/mid.lua": "xyd.mid.ALPHA = 9001\nxyd.mid.BETA = 9002\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/model/Alpha.lua": (
+            'local var_0_0 = class("Alpha")\n'
+            "function var_0_0.loadInfo(arg_1_0, arg_1_1)\n"
+            "\txyd.Backend.get():request(xyd.mid.ALPHA, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\targ_1_1(arg_2_0, arg_2_1)\n"
+            "\tend)\n"
+            "end\n"
+        ),
+        "app/model/Beta.lua": (
+            'local var_0_0 = class("Beta")\n'
+            "function var_0_0.loadInfo(arg_1_0, arg_1_1)\n"
+            "\txyd.Backend.get():request(xyd.mid.BETA, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\targ_1_1(arg_2_0, arg_2_1)\n"
+            "\tend)\n"
+            "end\n"
+        ),
+        "app/windows/Probe.lua": (
+            'local var_0_0 = class("Probe")\n'
+            'local alpha = import("app.model.Alpha")\n'
+            f"{beta_import}"
+            "function var_0_0.show(arg_1_0)\n"
+            "\talpha:loadInfo(function(arg_2_0, arg_2_1)\n"
+            "\t\tprint(arg_2_1.alpha_only)\n"
+            "\tend)\n"
+            f"{extra_window_call}"
+            "end\n"
+        ),
+    }
+
+
+class WrapperOwnerIdentityTests(unittest.TestCase):
+    def test_two_models_with_one_wrapper_method_name_keep_their_own_replies(self):
+        blobs = wrapper_owner_blobs(
+            extra_window_call=(
+                "\tbeta:loadInfo(function(arg_3_0, arg_3_1)\n"
+                "\t\tprint(arg_3_1.beta_only)\n"
+                "\tend)\n"
+            )
+        )
+        payload = reply_consumers.build(blobs, collapse=False)
+        self.assertEqual({"alpha_only"}, required_paths(payload, 9001))
+        self.assertEqual({"beta_only"}, required_paths(payload, 9002))
+
+    def test_same_owner_forwarding_still_contributes_its_reply(self):
+        payload = reply_consumers.build(wrapper_owner_blobs(import_beta=False), collapse=False)
+        self.assertEqual({"alpha_only"}, required_paths(payload, 9001))
+
+    def test_inline_load_model_receiver_resolves_to_the_wrapper_owner(self):
+        blobs = wrapper_owner_blobs(import_beta=False)
+        blobs["app/common/enums.lua"] = "xyd.ModelType.ALPHA = 7\n"
+        blobs["data/tables/model_define.lua"] = '"7", "Alpha"\n'
+        blobs["app/windows/Probe.lua"] = (
+            'local var_0_0 = class("Probe")\n'
+            "function var_0_0.show(arg_1_0)\n"
+            "\txyd.ModelManager.get():loadModel(xyd.ModelType.ALPHA):loadInfo(function(arg_2_0, arg_2_1)\n"
+            "\t\tprint(arg_2_1.alpha_only)\n"
+            "\tend)\n"
+            "end\n"
+        )
+        payload = reply_consumers.build(blobs, collapse=False)
+        self.assertEqual({"alpha_only"}, required_paths(payload, 9001))
+
+    def test_unresolved_receiver_is_unknown_and_contributes_no_paths(self):
+        blobs = wrapper_owner_blobs(
+            import_beta=False,
+            extra_window_call=(
+                "\tlocal outsider = getModel()\n"
+                "\toutsider:loadInfo(function(arg_3_0, arg_3_1)\n"
+                "\t\tprint(arg_3_1.rogue_only)\n"
+                "\tend)\n"
+            ),
+        )
+        payload = reply_consumers.build(blobs, collapse=False)
+        self.assertNotIn("rogue_only", required_paths(payload, 9001))
+        unknown = [callback for callback in payload["mids"]["9001"]["callbacks"] if callback["status"] == "UNKNOWN"]
+        self.assertTrue(any("unresolved" in callback.get("reason", "") for callback in unknown))
+
+
 class StorageBindingCycleTests(unittest.TestCase):
     def test_a_storage_binding_is_followed_at_most_once_per_path(self):
         payload = fixture_payload()

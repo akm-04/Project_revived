@@ -93,6 +93,7 @@ SEED_PATHS = (
 )
 REQUIREMENT_CODES = {"REQUIRED": 1, "OPTIONAL": 0, "WAIVED": 2}
 REQUIREMENT_NAMES = {code: name for name, code in REQUIREMENT_CODES.items()}
+LUA_STANDARD_LIBRARIES = frozenset({"coroutine", "debug", "io", "math", "os", "package", "string", "table", "utf8"})
 
 
 @dataclass(frozen=True)
@@ -475,6 +476,8 @@ class Extractor:
         self.classes = parse_classes(blobs)
         self.file_indexes: dict[str, FunctionIndex] = {}
         self.file_aliases: dict[str, dict[str, str]] = {}
+        self.file_imports: dict[str, dict[str, str]] = {}
+        self.file_lazy_models: dict[str, dict[str, str]] = {}
         self.class_files: dict[tuple[str, str | None], list[str]] = {}
         self.paths: dict[str, dict[str, dict[tuple[str, int, str, bool, str | None], Site]]] = {}
         self.callbacks: dict[str, list[dict]] = {}
@@ -500,6 +503,43 @@ class Extractor:
             cached = parse_aliases(self.blobs[file], self.model_types, self.model_classes)
             self.file_aliases[file] = cached
         return cached
+
+    def import_aliases(self, file: str) -> dict[str, str]:
+        cached = self.file_imports.get(file)
+        if cached is None:
+            cached = parse_import_aliases(self.blobs[file])
+            self.file_imports[file] = cached
+        return cached
+
+    def lazy_model_aliases(self, file: str) -> dict[str, str]:
+        cached = self.file_lazy_models.get(file)
+        if cached is None:
+            cached = parse_lazy_model_aliases(self.blobs[file], self.model_types, self.model_classes)
+            self.file_lazy_models[file] = cached
+        return cached
+
+    def wrapper_receiver_class(self, file: str, function: Function | None, root: str,
+                               segments: list[tuple[str, str]]) -> str | None:
+        resolved = _alias_receiver_class(root, segments, self.aliases(file), self.import_aliases(file),
+                                         self.lazy_model_aliases(file))
+        if resolved is not None:
+            return resolved
+        seen = {self.file_class(file)}
+        parent = self.class_parent(self.file_class(file))
+        while parent and parent not in seen:
+            seen.add(parent)
+            parent_file = self.class_file(parent)
+            if parent_file and parent_file != file:
+                resolved = _alias_receiver_class(root, segments, self.aliases(parent_file),
+                                                 self.import_aliases(parent_file), self.lazy_model_aliases(parent_file))
+                if resolved is not None:
+                    return resolved
+            parent = self.class_parent(parent)
+        if not segments:
+            return enclosing_self_class(self.file_class(file), function, root)
+        if root == "var_0_0" and segments[0] == ("field", "super"):
+            return self.class_parent(self.file_class(file))
+        return None
 
     def files_for_class(self, class_name: str, definition_file: str | None = None) -> list[str]:
         cache_key = (class_name, definition_file)
@@ -612,8 +652,11 @@ class Extractor:
             self.analyze_reply(mid, file, parsed, Taint(branch=branch), "callback")
             enclosing = parsed.parent
             if enclosing is not None and enclosing.name and _forwards_reply(tokens, parsed, enclosing):
-                for caller_file, caller_function, body, caller_branch in resolve_wrapper_callbacks(self, mid, enclosing.name):
+                callbacks, unresolved = resolve_wrapper_callbacks(self, mid, enclosing.name, file, enclosing)
+                for caller_file, caller_function, body, caller_branch in callbacks:
                     self.analyze_reply(mid, caller_file, caller_function, Taint(branch=caller_branch), f"{enclosing.name} call site", body)
+                if unresolved:
+                    self.record_callback(mid, _unknown(file, line, _unresolved_receiver_reason(enclosing.name, unresolved)))
             return
         if callback_end - callback_start == 1 and tokens[callback_start].kind == "name":
             name = tokens[callback_start].value
@@ -655,11 +698,15 @@ class Extractor:
         if not method:
             self.record_callback(mid, _unknown(file, line, f"callback forwards to parameter {parameter} of an unnamed function"))
             return
-        callbacks = resolve_wrapper_callbacks(self, mid, method)
+        callbacks, unresolved = resolve_wrapper_callbacks(self, mid, method, file, enclosing)
         if not callbacks:
-            self.record_callback(mid, _unknown(file, line, f"callback forwards to parameter {parameter}; no {method} call site resolves"))
+            reason = _unresolved_receiver_reason(method, unresolved) if unresolved else f"no {method} call site resolves"
+            self.record_callback(mid, _unknown(file, line, f"callback forwards to parameter {parameter}; {reason}"))
             return
-        self.record_callback(mid, _checked(file, line, f"forwarded to {method} call sites"))
+        if unresolved:
+            self.record_callback(mid, _unknown(file, line, _unresolved_receiver_reason(method, unresolved)))
+        else:
+            self.record_callback(mid, _checked(file, line, f"forwarded to {method} call sites"))
         for caller_file, caller_function, body, branch in callbacks:
             self.analyze_reply(mid, caller_file, caller_function, Taint(branch=branch), f"{method} call site", body)
 
@@ -1214,8 +1261,12 @@ class Extractor:
                       frozenset(), local_seeds, None)
 
 
-def resolve_wrapper_callbacks(extractor: Extractor, mid: int, method: str) -> list[tuple[str, Function, tuple[int, int], str | None]]:
+def resolve_wrapper_callbacks(
+        extractor: Extractor, mid: int, method: str, owner_file: str, owner_function: Function
+) -> tuple[list[tuple[str, Function, tuple[int, int], str | None]], list[tuple[str, int]]]:
     found: list[tuple[str, Function, tuple[int, int], str | None]] = []
+    unresolved: list[tuple[str, int]] = []
+    owner = (owner_file, owner_function.start)
     for candidate in sorted(extractor.blobs):
         if not candidate.startswith("app/") or ":" + method not in extractor.blobs[candidate]:
             continue
@@ -1232,12 +1283,89 @@ def resolve_wrapper_callbacks(extractor: Extractor, mid: int, method: str) -> li
             callback = _callback_argument(tokens, arguments)
             if callback is None:
                 continue
+            receiver = _receiver_chain(tokens, position)
+            if receiver is not None and receiver[1] in LUA_STANDARD_LIBRARIES:
+                continue
+            if receiver is not None and _is_function_name(tokens, receiver[0]):
+                continue
+            enclosing = index.innermost[position]
+            target = None
+            if enclosing is not None:
+                receiver_class = _receiver_class_at(extractor, candidate, tokens, position, enclosing, receiver)
+                target = extractor.resolve_method(receiver_class, method)
+            if target is None:
+                unresolved.append((candidate, tokens[position].line))
+                continue
+            if (target[0], target[1].start) != owner:
+                continue
             start, end = callback
             parsed = index.by_start.get(start) or index.by_name.get(tokens[start].value)
             if parsed is not None:
                 branch = extractor.call_branch(mid, candidate, tokens, arguments, position)
                 found.append((candidate, parsed, (start + 1 if tokens[start].value == "function" else parsed.body_start, end), branch))
-    return found
+    return found, unresolved
+
+
+def _receiver_chain(tokens, method_position) -> tuple[int, str, list[tuple[str, str]]] | None:
+    end = method_position - 2
+    if end < 0 or tokens[end].kind != "name":
+        return None
+    start = end
+    while start >= 2 and tokens[start - 1].value in (".", ":") and tokens[start - 2].kind == "name":
+        start -= 2
+    root, segments, _ = chain_at(tokens, start)
+    if not segments or segments[-1][1] != tokens[method_position].value or segments[-1][0] not in ("field", "method"):
+        return None
+    return start, root, segments[:-1]
+
+
+def _is_function_name(tokens, start: int) -> bool:
+    return start > 0 and tokens[start - 1].kind == "kw" and tokens[start - 1].value == "function"
+
+
+def _receiver_class_at(extractor: Extractor, file: str, tokens, position: int,
+                       enclosing: Function, receiver) -> str | None:
+    if receiver is not None:
+        _, root, segments = receiver
+        receiver_class = extractor.wrapper_receiver_class(file, enclosing, root, segments)
+        if receiver_class is not None:
+            return receiver_class
+    return _load_model_receiver_class(extractor, tokens, position)
+
+
+def _load_model_receiver_class(extractor: Extractor, tokens, method_position: int) -> str | None:
+    close = method_position - 2
+    if close < 0 or tokens[close].value != ")":
+        return None
+    open_index = _matching_open(tokens, close)
+    if open_index is None or open_index < 1 or tokens[open_index - 1].value != "loadModel":
+        return None
+    arguments, _ = split_arguments(tokens, open_index)
+    if len(arguments) != 1:
+        return None
+    start, end = arguments[0]
+    values = [token.value for token in tokens[start:end]]
+    if len(values) != 5 or values[:4] != ["xyd", ".", "ModelType", "."]:
+        return None
+    type_number = extractor.model_types.get(values[4])
+    return extractor.model_classes.get(type_number) if type_number is not None else None
+
+
+def _matching_open(tokens, close_index: int) -> int | None:
+    depth = 0
+    for index in range(close_index, -1, -1):
+        if tokens[index].value == ")":
+            depth += 1
+        elif tokens[index].value == "(":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def _unresolved_receiver_reason(method: str, unresolved: list[tuple[str, int]]) -> str:
+    first = unresolved[0]
+    return f"{len(unresolved)} {method} call site(s) have an unresolved owner; first at {first[0]}:{first[1]}"
 
 
 def _callback_argument(tokens, arguments):
@@ -1627,6 +1755,39 @@ def parse_aliases(text: str, model_types: dict[str, int], model_classes: dict[in
     for match in re.finditer(r'([A-Za-z0-9_]+)\s*=\s*import\(\s*"([^"]+)"\s*\)\.new\(\)', text):
         aliases[match.group(1).split(".")[-1]] = match.group(2).split(".")[-1]
     return aliases
+
+
+def parse_import_aliases(text: str) -> dict[str, str]:
+    return {
+        match.group(1): match.group(2).split(".")[-1]
+        for match in re.finditer(r'([A-Za-z0-9_]+)\s*=\s*import\(\s*"([^"]+)"\s*\)', text)
+    }
+
+
+def parse_lazy_model_aliases(text: str, model_types: dict[str, int], model_classes: dict[int, str]) -> dict[str, str]:
+    aliases: dict[str, str] = {}
+    pattern = r"([A-Za-z0-9_.]+)\s*=\s*(?:[A-Za-z0-9_.]+\s+or\s+)?xyd\.ModelManager\.get\(\):loadModel\(xyd\.ModelType\.([A-Za-z0-9_]+)\)"
+    for match in re.finditer(pattern, text):
+        type_number = model_types.get(match.group(2))
+        class_name = model_classes.get(type_number) if type_number is not None else None
+        if class_name:
+            aliases[match.group(1).split(".")[-1]] = class_name
+    return aliases
+
+
+def _alias_receiver_class(root: str, segments: list[tuple[str, str]], aliases: dict[str, str],
+                          imports: dict[str, str], lazy_models: dict[str, str]) -> str | None:
+    for kind, name in reversed(segments):
+        if kind == "field" and name in aliases:
+            return aliases[name]
+    if root in aliases:
+        return aliases[root]
+    for kind, name in reversed(segments):
+        if kind == "field" and (name in imports or name in lazy_models):
+            return imports.get(name) or lazy_models.get(name)
+    if root in imports or root in lazy_models:
+        return imports.get(root) or lazy_models.get(root)
+    return None
 
 
 def parse_event_handlers(blobs: dict[str, str]) -> dict[str, list[tuple[str, Function]]]:
