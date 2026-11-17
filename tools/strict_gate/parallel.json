@@ -7,5 +7,5 @@
  "timeout_minutes": 20,
  "timeouts": {"internal/adapters/combatresolver": 40,
               "internal/integration/playerdisplay": 50,
-              "internal/integration/socialactivation": 305,
+              "internal/integration/socialactivation": 50,
               "internal/integration/socialrelation": 45}}
