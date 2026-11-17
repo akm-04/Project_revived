@@ -68,5 +68,40 @@ class UnitEnvironmentTests(unittest.TestCase):
             self.assertEqual(environment['GXB_SOCIAL_CATALOG_PATH'], str(generated / 'social_input_catalog.json'))
 
 
+class SelectionTests(unittest.TestCase):
+    """ACCEPTANCE_V2_DESIGN section 3 on a synthetic `go list -deps -test -json` output."""
+    module = 'example.local/backend'
+
+    def record(self, path, deps=(), **extra):
+        directory = path.split(' ')[0].removesuffix('.test').removesuffix('_test').removeprefix(self.module + '/')
+        return {'ImportPath': path, 'Dir': f'/tree/{directory}', 'Deps': [self.module + '/' + dep for dep in deps], **extra}
+
+    def graph(self):
+        records = [
+            {'ImportPath': 'fmt', 'Dir': '/goroot/fmt', 'Standard': True},
+            self.record(f'{self.module}/internal/core', Module={'Path': self.module, 'Main': True}),
+            self.record(f'{self.module}/internal/app', ['internal/core']),
+            self.record(f'{self.module}/internal/integration/flow'),
+            # The integration test imports app only from its external test package: the test binary carries the edge.
+            self.record(f'{self.module}/internal/integration/flow_test [{self.module}/internal/integration/flow.test]',
+                        ['internal/app', 'internal/core'], ForTest=f'{self.module}/internal/integration/flow'),
+            self.record(f'{self.module}/internal/integration/flow.test', ['internal/integration/flow_test', 'internal/app', 'internal/core']),
+            self.record(f'{self.module}/internal/lonely'),
+        ]
+        return gate_preflight.package_graph(records, Path('/tree'))
+
+    def test_importers_through_test_imports_are_selected_with_reasons(self):
+        selected = gate_preflight.impacted_packages(['internal/core/data/table.json'], self.graph())
+        self.assertEqual(selected, {'./internal/core': 'changed', './internal/app': 'imports internal/core',
+                                    './internal/integration/flow': 'imports internal/core'})
+
+    def test_files_outside_internal_and_cmd_select_nothing(self):
+        self.assertEqual(gate_preflight.impacted_packages(['docs/x.md', 'tools/strict_gate.py'], self.graph()), {})
+
+    def test_triggers_name_their_gate(self):
+        found = gate_preflight.triggers(['migrations/00158_x.sql', 'tools/strict_gate.py', 'cmd/gxb-api/main.go', 'internal/app/a.go'])
+        self.assertEqual([line.split(':')[0] for line in found], ['trigger T1 schema', 'trigger T3 gate or toolchain', 'trigger T4 composition'])
+
+
 if __name__ == '__main__':
     unittest.main()

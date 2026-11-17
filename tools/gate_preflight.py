@@ -3,15 +3,19 @@
 Applies the strict gate's own rules (tools/strict_gate.py, known_debt.json, skip_allowlist.json, parallel.json) to a tree:
   - census: every os.Getenv/LookupEnv in a *_test.go must be provisioned, recipe-owned or set by a parent test (static, seconds);
   - format: gofmt -l over the changed Go files;
-  - packages: every changed package becomes units through tools/gate_pool.py, split like the strict gate's parallel mode. Each
+  - selection (ACCEPTANCE_V2_DESIGN section 3): the packages holding a changed file under internal/ or cmd/ (Go or embedded
+    data) plus every package whose build or test imports reach one, from `go list -deps -test`, each printed with its reason;
+    --changed-only keeps only the packages with changed Go files. Trigger paths (T1-T4) are printed with the gate they need;
+  - packages: every selected package becomes units through tools/gate_pool.py, split like the strict gate's parallel mode. Each
     unit runs with the gate's full tag set, -p=1 and its own databases cloned from one migrated template, so cross-test pollution
     and unlisted skips show up here. Outcomes are judged like the gate: a failure outside known debt is NEW_FAILURE, a skip
     outside the allowlist is UNLISTED_SKIP. Packages in parallel.json `serial` and the `serial_tests` run after the pool.
-It does not run recipes, the latency gate or untouched packages; a green preflight is a precondition for the gate, not a substitute.
+It does not run recipes, the latency gate or unselected packages; a green preflight is a precondition for the gate, not a substitute.
+The report's verdict is PARTIAL_GREEN or PARTIAL_RED, and it names `commit` only when the tree was clean.
 
 Usage (after `export GXB_BACKEND=<tree>; source ops/testing/goenv.sh`):
-  gate_preflight.py --base <ref> [--tree PATH] [--database <name>] [--jobs N] [--package ./internal/x ...] [--static-only]
-                    [--plan]
+  gate_preflight.py --base <ref> [--tree PATH] [--database <name>] [--jobs N] [--package ./internal/x ... | --changed-only]
+                    [--static-only] [--plan]
 The lists are read from PATH/tools/strict_gate/ when present, else from this tool's tools/strict_gate/, and the file used is
 printed. Writes tmp/gate_preflight/<database>.json under the workspace and exits 1 when anything is red.
 """
@@ -75,6 +79,67 @@ def changed_files(base, tree):
 def changed_packages(files, tree):
     directories = {str(Path(name).parent) for name in files if name.endswith('.go') and (tree / name).exists()}
     return sorted('./' + directory for directory in directories if not directory.startswith(('virtualclient', 'tools')))
+
+
+def go_list_records(tree):
+    text = subprocess.check_output(['go', 'list', '-deps', '-test', '-json', '-tags', strict_gate.FULL_TAGS, './...'], cwd=tree, text=True)
+    decoder, index, records = json.JSONDecoder(), 0, []
+    while True:
+        while index < len(text) and text[index].isspace():
+            index += 1
+        if index == len(text):
+            return records
+        record, index = decoder.raw_decode(text, index)
+        records.append(record)
+
+
+def package_graph(records, tree):
+    """{directory: dependencies} per module package; a package's test binary (`<path>.test`) adds its test imports."""
+    module = next(record['Module']['Path'] for record in records if record.get('Module', {}).get('Main'))
+    directory_of, dependencies = {}, collections.defaultdict(set)
+    for record in records:
+        if record.get('Standard') or not record['ImportPath'].startswith(module):
+            continue
+        path = record['ImportPath'].split(' ')[0].removesuffix('.test').removesuffix('_test')
+        if path == record['ImportPath']:
+            directory_of[path] = str(Path(record['Dir']).relative_to(tree))
+        dependencies[path].update(dependency.split(' ')[0] for dependency in record.get('Deps', ()))
+    return {directory_of[path]: {directory_of[dependency] for dependency in found if dependency in directory_of}
+            for path, found in dependencies.items() if path in directory_of}
+
+
+def impacted_packages(files, graph):
+    """ACCEPTANCE_V2_DESIGN section 3: a changed file under internal/ or cmd/ (Go or embedded data) marks the nearest package
+    above it; every package whose build or test imports reach a marked one is selected too. {'./dir': reason}."""
+    changed = set()
+    for name in files:
+        if not name.startswith(('internal/', 'cmd/')):
+            continue
+        directory = Path(name).parent
+        while str(directory) not in graph and directory != Path('.'):
+            directory = directory.parent
+        if str(directory) in graph:
+            changed.add(str(directory))
+    selected = {}
+    for directory, dependencies in sorted(graph.items()):
+        if directory in changed:
+            selected['./' + directory] = 'changed'
+        elif dependencies & changed:
+            selected['./' + directory] = 'imports ' + min(dependencies & changed)
+    return selected
+
+
+TRIGGERS = (('T1 schema: migration gate', ('migrations/',)),
+            ('T2 shared transaction or reply core: full level-2 gate',
+             ('internal/foundation/tx/', 'internal/foundation/receipt/', 'internal/adapters/stockruntime/failure.go',
+              'internal/protocol/httpedge/')),
+            ('T3 gate or toolchain: full level-2 gate', ('tools/strict_gate', 'tools/gate_preflight.py', 'go.mod', 'go.sum', '.toolchain/')),
+            ('T4 composition: full level-2 gate', ('cmd/',)))
+
+
+def triggers(files):
+    """ACCEPTANCE_V2_DESIGN section 2: paths whose change needs a gate the preflight never replaces."""
+    return [f'trigger {name} ({file})' for file in files for name, prefixes in TRIGGERS if file.startswith(prefixes)]
 
 
 def unformatted(files, tree):
@@ -215,6 +280,7 @@ def main():
     parser.add_argument('--jobs', type=int, default=4, help='parallel units (default 4)')
     parser.add_argument('--package', action='append', help='package to run instead of the changed set (repeatable)')
     parser.add_argument('--static-only', action='store_true', help='census and gofmt only')
+    parser.add_argument('--changed-only', action='store_true', help='only the packages holding changed Go files (no importers)')
     parser.add_argument('--plan', action='store_true', help='print the units and exit without touching PostgreSQL')
     arguments = parser.parse_args()
     if arguments.jobs < 1:
@@ -228,10 +294,21 @@ def main():
     classes = gate.census
     red = [f'census: {variable} is neither provisioned, recipe-owned nor set by a parent test' for variable in classes.get('unclassified', [])]
     red += [f'format: {name} needs gofmt' for name in unformatted(files, tree)]
-    packages = arguments.package or changed_packages(files, tree)
+    if arguments.package:
+        selection = {package: 'named' for package in arguments.package}
+    elif arguments.changed_only:
+        selection = {package: 'changed' for package in changed_packages(files, tree)}
+    else:
+        selection = impacted_packages(files, package_graph(go_list_records(tree), tree))
+    packages = sorted(selection)
+    for package, reason in sorted(selection.items()):
+        print(f'preflight select {package} {reason}', flush=True)
+    trigger_lines = triggers(files)
+    for line in trigger_lines:
+        print(line, flush=True)
     scratch = WORKSPACE / 'tmp/gate_preflight' / arguments.database
     scratch.mkdir(parents=True, exist_ok=True)
-    results = {}
+    results, merged = {}, {}
 
     if arguments.plan:
         paths = list_paths(tree)
@@ -275,7 +352,7 @@ def main():
         runs = scratch / 'runs'
         runs.mkdir(parents=True, exist_ok=True)
         results = {package: collections.Counter() for package in packages}
-        merged, unit_lock = {}, threading.Lock()
+        unit_lock = threading.Lock()
         suite_skip = gate.suite_skip_pattern()
 
         def action(unit):
@@ -320,10 +397,14 @@ def main():
         red += judge(merged, known_debt, allowlist)
 
     results = {package: dict(counter) for package, counter in results.items()}
-    report = dict(base=arguments.base, head=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=tree, text=True).strip(),
-                  packages=results, census=classes, red=red, verdict='RED' if red else 'GREEN')
+    head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=tree, text=True).strip()
+    # A run over uncommitted files is no evidence for HEAD, so only a clean tree names the commit gate_evidence.py checks.
+    clean = not subprocess.check_output(['git', 'status', '--porcelain'], cwd=tree, text=True).strip()
+    report = dict(base=arguments.base, head=head, commit=head if clean else None, selection=selection, triggers=trigger_lines,
+                  packages=results, tests=merged, census=classes, red=red, verdict='PARTIAL_RED' if red else 'PARTIAL_GREEN')
     (scratch.parent / f'{arguments.database}.json').write_text(json.dumps(report, indent=1) + '\n')
-    print(f"GATE_PREFLIGHT {report['verdict']} red={len(red)}")
+    # fleet_queue.py reads this line; the report's PARTIAL_ verdict says it covers the selected packages only.
+    print(f"GATE_PREFLIGHT {'RED' if red else 'GREEN'} red={len(red)}")
     for line in red:
         print('  ' + line)
     sys.exit(1 if red else 0)
