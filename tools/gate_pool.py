@@ -119,12 +119,38 @@ def database_name(suite, unit, variable):
     return name
 
 
+def selected_test_names(names, run=None, skip=None):
+    """The enumerated tests a unit's run and skip patterns select; the planned root-test population."""
+    selected = []
+    for name in names:
+        if run is not None and not re.search(run, name):
+            continue
+        if skip is not None and re.search(skip, name):
+            continue
+        selected.append(name)
+    return selected
+
+
+def unit_population(unit, skip):
+    """The outcome keys `<package>.<test>` a unit must observe: its enumerated names with run and skip applied.
+
+    Returns None when the package's tests were never enumerated, so the caller can never mistake an unproven
+    population for an empty one.
+    """
+    if unit.get('tests') is None:
+        return None
+    package = normalize_package(unit['package'])
+    return sorted(f'{package}.{name}' for name in selected_test_names(unit['tests'], unit.get('run'), skip))
+
+
 def build_units(packages, shard_counts, list_tests, serial_tests=()):
     """One unit per package; a package in shard_counts becomes one unit per non-empty shard.
 
-    list_tests returns the package's test names, or None when the listing failed (the package then runs whole).
-    A `package.Test` entry in serial_tests is left out of the package's shards and becomes one `_serial` unit that the
-    caller runs after the pool; together the shards and the serial unit must cover the package's whole listed set.
+    list_tests returns the package's test names, or None when the listing failed (the package then runs whole, without a
+    provable population). Every unit carries its enumerated names in `tests`; an empty list is a package proven to have no
+    test under these tags, never an absence inferred from a run. A `package.Test` entry in serial_tests is left out of the
+    package's shards and becomes one `_serial` unit that the caller runs after the pool; together the shards and the serial
+    unit must cover the package's whole listed set.
     """
     serial_by_package = collections.defaultdict(list)
     for key in serial_tests:
@@ -135,12 +161,15 @@ def build_units(packages, shard_counts, list_tests, serial_tests=()):
         name = unit_slug(package)
         serial = sorted(serial_by_package.get(normalize_package(package), ()))
         count = shard_counts.get(normalize_package(package), 0)
-        names = list_tests(package) if count else None
+        names = list_tests(package)
         if serial:
             units.append(dict(package=package, unit=f'{name}_serial', tests=serial,
                               run='^(' + '|'.join(serial) + ')$', shard=None, serial=True))
-        if not count or names is None:
+        if names is None:
             units.append(dict(package=package, unit=name, tests=None, run=None, shard=None, serial=False))
+            continue
+        if not count:
+            units.append(dict(package=package, unit=name, tests=names, run=None, shard=None, serial=False))
             continue
         if not names:
             raise PoolError(f'{package} is sharded but go test -list found no test in it')
