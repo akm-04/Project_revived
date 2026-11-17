@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Self-check of preflight v2's units, ordering, list fallback and fixture environment. Fakes only: no PostgreSQL."""
+import os
 import tempfile
 import threading
 import unittest
@@ -66,6 +67,26 @@ class UnitEnvironmentTests(unittest.TestCase):
             self.assertEqual(environment['GXB_BOOK_COMPILER_PAYLOAD'], str(generated / 'book_input_catalog.json'))
             self.assertEqual(environment['GXB_I9_10A_SCRATCH_JSON'], str(generated / 'workshop_input_catalog.json'))
             self.assertEqual(environment['GXB_SOCIAL_CATALOG_PATH'], str(generated / 'social_input_catalog.json'))
+
+    def test_binaries_left_by_an_earlier_run_are_rebuilt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            tools = root / 'bin'
+            tools.mkdir()
+            fake_go = tools / 'go'
+            fake_go.write_text('#!/bin/sh\nwhile [ "$1" != "-o" ]; do shift; done\necho fresh > "$2"\n')
+            fake_go.chmod(0o755)
+            stale = root / 'scratch/binaries/gxb-api'
+            stale.parent.mkdir(parents=True)
+            stale.write_text('stale\n')
+            path = os.environ['PATH']
+            os.environ['PATH'] = f'{tools}:{path}'
+            try:
+                environment = gate_preflight.base_environment({'binary': ['GXB_API_BINARY']}, root, root / 'scratch')
+            finally:
+                os.environ['PATH'] = path
+            self.assertEqual(environment['GXB_API_BINARY'], str(stale))
+            self.assertEqual(stale.read_text(), 'fresh\n')
 
 
 class SelectionTests(unittest.TestCase):

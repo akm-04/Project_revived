@@ -233,6 +233,106 @@ class WrapperOwnerIdentityTests(unittest.TestCase):
         self.assertTrue(any("unresolved" in callback.get("reason", "") for callback in unknown))
 
 
+def guarded_item_blobs():
+    return {
+        "app/common/network/mid.lua": "xyd.mid.NOTICES = 9001\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/model/Notices.lua": (
+            'local var_0_0 = class("Notices")\n'
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.NOTICES, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\tfor iter_2_0, iter_2_1 in ipairs(arg_2_1.list) do\n"
+            "\t\t\tprint(iter_2_1.player_info)\n"
+            "\t\t\tif iter_2_1.kind == xyd.NoticeType.GIFT then\n"
+            "\t\t\t\tprint(iter_2_1.fund_id)\n"
+            "\t\t\telseif iter_2_1.kind == 2 or iter_2_1.kind == 3 then\n"
+            "\t\t\t\tprint(iter_2_1.chapter_id)\n"
+            "\t\t\telse\n"
+            "\t\t\t\tprint(iter_2_1.table_id)\n"
+            "\t\t\tend\n"
+            "\t\t\tif iter_2_1.room_id then\n"
+            "\t\t\t\tprint(iter_2_1.room_id)\n"
+            "\t\t\tend\n"
+            "\t\tend\n"
+            "\t\targ_1_0.info = arg_2_1\n"
+            "\t\targ_1_0.teams[arg_2_1.team.team_id] = arg_2_1.team\n"
+            "\t\targ_1_0.single = arg_2_1.one\n"
+            "\t\tlocal function var_2_9(arg_9_0)\n"
+            "\t\t\treturn arg_9_0.helper_only\n"
+            "\t\tend\n"
+            "\t\tif arg_2_1.stage == 0 then\n"
+            "\t\t\tprint(arg_2_1.stage_only)\n"
+            "\t\tend\n"
+            "\t\tif arg_1_0.flag then\n"
+            "\t\t\tprint(arg_2_1.flag)\n"
+            "\t\tend\n"
+            "\t\tif arg_1_0.mode == 1 then\n"
+            "\t\t\tprint(arg_2_1.mode_only)\n"
+            "\t\tend\n"
+            "\tend)\n"
+            "end\n"
+            "function var_0_0.keep(arg_5_0, arg_5_1)\n"
+            "\tif arg_5_1.saved then\n"
+            "\t\targ_5_0.info.saved = arg_5_1.saved\n"
+            "\tend\n"
+            "end\n"
+            "function var_0_0.cell(arg_4_0, arg_4_1)\n"
+            "\tlocal var_4_0 = arg_4_0.teams[arg_4_1]\n"
+            "\tif var_4_0.need_time == 0 then\n"
+            "\t\tprint(var_4_0.idle_only)\n"
+            "\telse\n"
+            "\t\tprint(var_4_0.award)\n"
+            "\tend\n"
+            "\tif arg_4_0.single.need_time == 0 then\n"
+            "\t\tprint(arg_4_0.single.award)\n"
+            "\tend\n"
+            "end\n"
+            "function var_0_0.show(arg_3_0)\n"
+            "\tif arg_3_0.info.dialog then\n"
+            "\t\tprint(arg_3_0.info.dialog)\n"
+            "\tend\n"
+            "end\n"
+        ),
+    }
+
+
+class GuardResolutionTests(unittest.TestCase):
+    def setUp(self):
+        self.requirements = obligation_map(reply_consumers.build(guarded_item_blobs(), collapse=False))["9001"]["paths"]
+
+    def test_a_nil_guard_on_an_item_guards_the_item_path(self):
+        self.assertEqual("OPTIONAL", self.requirements["list[].room_id"])
+
+    def test_reads_under_a_reply_value_branch_are_optional(self):
+        for path in ("list[].fund_id", "list[].chapter_id", "list[].table_id"):
+            self.assertEqual("OPTIONAL", self.requirements[path], path)
+        self.assertEqual("REQUIRED", self.requirements["list[].player_info"])
+
+    def test_a_nil_guard_on_a_stored_reply_guards_the_read(self):
+        self.assertEqual("OPTIONAL", self.requirements["dialog"])
+
+    def test_writing_a_stored_field_is_not_a_read(self):
+        self.assertNotEqual("REQUIRED", self.requirements.get("saved"))
+
+    def test_a_named_local_helper_parameter_is_not_the_reply(self):
+        self.assertNotIn("helper_only", self.requirements)
+
+    def test_a_top_level_value_branch_keeps_its_reads_required(self):
+        self.assertEqual("REQUIRED", self.requirements["stage_only"])
+
+    def test_a_value_branch_on_a_keyed_stored_record_is_optional(self):
+        # TreasureWindow stores each team_info reply as teams[team_id] and reads award only when need_time ~= 0.
+        for path in ("team.idle_only", "team.award"):
+            self.assertEqual("OPTIONAL", self.requirements[path], path)
+        self.assertEqual("REQUIRED", self.requirements["one.award"])
+
+    def test_a_guard_on_a_non_reply_value_guards_nothing(self):
+        self.assertEqual("REQUIRED", self.requirements["flag"])
+        self.assertEqual("REQUIRED", self.requirements["mode_only"])
+
+
 class StorageBindingCycleTests(unittest.TestCase):
     def test_a_storage_binding_is_followed_at_most_once_per_path(self):
         payload = fixture_payload()

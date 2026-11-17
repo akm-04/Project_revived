@@ -755,6 +755,29 @@ document['outcomes'].pop('internal/fake.TestBeta')
 path.write_text(json.dumps(document))
 assert instance.stored_unit(fingerprint) is None and 'population' in instance.reuse_ignored[-1], instance.reuse_ignored
 
+# A stopped or failed pool starts none of its queued units.
+started = []
+
+
+def stop_at_first(unit):
+    started.append(unit)
+    raise SystemExit(143)
+
+
+try:
+    gate_pool.run_pool(['first', 'queued'], 1, stop_at_first)
+except SystemExit:
+    pass
+assert started == ['first'], started
+
+# Binaries are built with -trimpath, so the per-run export path never reaches their bytes or the unit fingerprints.
+instance, log = fake_gate()
+instance.census = {'binary': ['GXB_FAKE_API_BINARY']}
+(instance.work / 'binaries').mkdir()
+instance.build_binaries()
+built = [json.loads(line) for line in log.read_text().splitlines()]
+assert built and all('-trimpath' in command for command in built), built
+
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}
 dropped = {'pkg.TestA': dict(status='PASS', runs={'recipe:x': 'pass'})}
