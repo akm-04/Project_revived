@@ -87,10 +87,10 @@ func TestCheckerIgnoresMIDsWithoutObligations(t *testing.T) {
 // each is read as a nested key at the client line cited in the extractor test.
 var provenRepeatedPaths = map[string]bool{
 	"301:rank_list[].rank_info.rank_info":      true,
-	"1362:report.report":                       true,
-	"2411:hero_stat[].hero_stat.stay_pos":      true,
-	"2411:info.hero_stat[].hero_stat":          true,
-	"2411:info.hero_stat[].hero_stat.stay_pos": true,
+	"1572:report.report":                       true,
+	"2362:hero_stat[].hero_stat.stay_pos":      true,
+	"2362:info.hero_stat[].hero_stat":          true,
+	"2362:info.hero_stat[].hero_stat.stay_pos": true,
 }
 
 func repeatedSegment(path string) string {
