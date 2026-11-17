@@ -123,6 +123,8 @@ class Taint:
     branch: str | None = None
     # Length of the path prefix the client keeps as one entry of a keyed table (teams[team_id] = team_info).
     record: int | None = None
+    # STATE_BRANCH guards the value was stored under (self.data = self.friendlist under windowState == FriendList).
+    states: frozenset = frozenset()
 
 
 @dataclass(frozen=True)
@@ -166,6 +168,10 @@ VALUE_BRANCH = "<value branch>"
 # path (the variable is seeded only at its later reads): it guards reads of the
 # same local variable and field path, never a same-named field of another one.
 LOCAL_GUARD = "<local>"
+# Guard marker for `self.field == CONSTANT` (SocialSystemWindow's windowState): a
+# value stored under one constant never reaches a branch on another constant of
+# the same field, so self.data's friend rows do not reach the notice builder.
+STATE_BRANCH = "<state>"
 UNKNOWN_BRANCH = "unknown"
 BRANCH_UNKNOWN_REASON = "the consumer site is neither inside an Activity<table_id> window nor reachable from a request with a static activity id"
 
@@ -949,7 +955,7 @@ class Extractor:
         found = self.expression_taint(file, value_start, bindings, seeds)
         if any(kind == "field" for kind, _ in segments):
             if found is not None:
-                self.record_store(mid, file, function, root, segments, found)
+                self.record_store(mid, file, function, root, segments, found, guards)
             return value_start
         previous = bindings.get(root)
         if found is None:
@@ -968,13 +974,16 @@ class Extractor:
         self.record_read(file, tokens[value_start].line, previous[0], rhs_segments, via, guards, previous[1], fallback)
         return rhs_end
 
-    def record_store(self, mid, file, function, receiver_root, segments, found) -> None:
+    def record_store(self, mid, file, function, receiver_root, segments, found, guards) -> None:
         taint, mids = found
+        states = frozenset(guard for guard in guards if guard[0] == STATE_BRANCH)
+        if states:
+            taint = replace(taint, states=taint.states | states)
         store_path = tuple(segments)
         if taint.wrapper is not None:
             if not taint.path or taint.path[0] != taint.wrapper:
                 return
-            taint = Taint(taint.path[1:], None, taint.followed, taint.branch)
+            taint = replace(taint, path=taint.path[1:], wrapper=None, record=None)
         owner = None
         owner_file = None
         if function.params and receiver_root == function.params[0]:
@@ -994,7 +1003,7 @@ class Extractor:
         self.file_stores.setdefault((file, store_path), {}).setdefault(taint, set()).update(mids)
 
     def handle_insert(self, mid, file, function, position, after, bindings, via, guards, seeds) -> None:
-        del position, guards
+        del position
         tokens = self.index(file).tokens
         arguments, _ = split_arguments(tokens, after)
         if len(arguments) < 2:
@@ -1007,7 +1016,7 @@ class Extractor:
         if container_start < len(tokens) and tokens[container_start].kind == "name":
             root, segments, _ = chain_at(tokens, container_start)
             if any(kind == "field" for kind, _ in segments):
-                self.record_store(mid, file, function, root, segments, (element(taint), mids))
+                self.record_store(mid, file, function, root, segments, (element(taint), mids), guards)
             else:
                 bindings[root] = (element(taint), mids)
         del via
@@ -1058,7 +1067,9 @@ class Extractor:
             positive, negative = (self.reply_paths(chains, bindings, seeds) for chains in condition_paths(tokens, *condition))
             branch_guards = guards | (negative if kind == "else" else positive)
             branch_guards = branch_guards | value_branch
-            self.scan(mid, file, function, body_start, body_end, bindings, via, frozenset(branch_guards), seeds, None)
+            states = frozenset() if kind == "else" else state_guards(tokens, *condition, file, function)
+            branch_seeds = seeds_for_states(seeds, states, body_start, body_end)
+            self.scan(mid, file, function, body_start, body_end, bindings, via, frozenset(branch_guards | states), branch_seeds, None)
             if kind != "else":
                 exiting.append((kind, positive, negative))
         has_else = any(kind == "else" for kind, _, _, _ in branches)
@@ -1190,7 +1201,7 @@ class Extractor:
                 continue
             found = self.expression_taint(file, position + 2, bindings, seeds)
             if found is not None:
-                return Taint(found[0].path, wrapper=tokens[position].value, followed=found[0].followed, branch=found[0].branch), found[1]
+                return replace(found[0], wrapper=tokens[position].value, record=None), found[1]
         return None
 
     # ------------------------------------------------------- stored field pass
@@ -1243,7 +1254,7 @@ class Extractor:
                 seed = extend_taint(stored, remainder)
                 followed = seed.followed | {binding}
                 branch = UNKNOWN_BRANCH if ambiguous else seed.branch
-                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch, record), frozenset(mids), "stored field"))
+                seeds.setdefault(position, []).append((replace(seed, followed=followed, branch=branch, record=record), frozenset(mids), "stored field"))
             for function in index.functions:
                 local_seeds = {position: value for position, value in seeds.items()
                                if function.body_start <= position <= function.end}
@@ -1307,7 +1318,7 @@ class Extractor:
                 followed = seed.followed | {binding}
                 branch = UNKNOWN_BRANCH if ambiguous else seed.branch
                 record = len(stored.path) if keyed else None
-                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch, record), frozenset(mids), "returned rows"))
+                seeds.setdefault(position, []).append((replace(seed, followed=followed, branch=branch, record=record), frozenset(mids), "returned rows"))
         return seeds
 
     def apply_return_call_sites(self, file, class_name, class_file, method, returned) -> None:
@@ -1688,6 +1699,46 @@ def _compared_chains(tokens, start, end) -> set:
     return chains
 
 
+def state_guards(tokens, start, end, file, function) -> frozenset[tuple[str, ...]]:
+    """`self.field == CONSTANT` comparisons a branch condition implies (none
+    under `or` or `not`); the constant is file-local text, so the guard names
+    the file."""
+    if not function.params or any(tokens[position].value in ("or", "not") for position in range(start, end)):
+        return frozenset()
+    found = set()
+    for position, root, segments in _compared_chains(tokens, start, end):
+        if root != function.params[0] or not segments or any(kind != "field" for kind, _ in segments):
+            continue
+        _, _, after = chain_at(tokens, position)
+        if tokens[after].value != "==" or tokens[after + 1].kind not in ("name", "string", "number"):
+            continue
+        if tokens[after + 1].kind == "name":
+            constant_root, constant_segments, _ = chain_at(tokens, after + 1)
+            constant = ".".join([constant_root] + [name for _, name in constant_segments])
+        else:
+            constant = tokens[after + 1].value
+        found.add((STATE_BRANCH, file, ".".join(name for _, name in segments), constant))
+    return frozenset(found)
+
+
+def seeds_for_states(seeds, states, start, end):
+    """Drops seeds stored under another constant of a field this branch fixes."""
+    if not seeds or not states:
+        return seeds
+    fixed = {guard[:3]: guard[3] for guard in states}
+
+    def reaches(taint) -> bool:
+        return all(fixed.get(state[:3], state[3]) == state[3] for state in taint.states)
+
+    filtered = {}
+    for position, entries in seeds.items():
+        if start <= position < end:
+            entries = [entry for entry in entries if reaches(entry[0])]
+        if entries:
+            filtered[position] = entries
+    return filtered
+
+
 def _segment_parts(segments) -> tuple[str, ...]:
     parts = []
     for kind, name in segments:
@@ -1759,7 +1810,7 @@ def mid_set(mid: int) -> frozenset[int]:
 def normalise_store_rows(stores) -> None:
     for taints in stores.values():
         for container in [taint for taint in taints if not taint.path or taint.path[-1] != "[]"]:
-            rows = Taint(container.path + ("[]",), container.wrapper, container.followed, container.branch)
+            rows = replace(container, path=container.path + ("[]",), record=None)
             if rows not in taints:
                 continue
             taints[rows].update(taints.pop(container))
