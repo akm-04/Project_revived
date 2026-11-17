@@ -94,7 +94,7 @@ func Test6A_G24LateAdmittedFrameAfterPrivacySuppression(t *testing.T) {
 	go func() { done <- d.DeliverRecipient(c, 200001) }()
 	select {
 	case <-entered:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("writer not admitted")
 	}
 	cancel()
@@ -138,7 +138,7 @@ func Test6A_G29QueueSaturationPreservesPending(t *testing.T) {
 		if i == 0 {
 			select {
 			case <-entered:
-			case <-time.After(time.Second):
+			case <-time.After(eventWaitTimeout):
 				t.Fatal("writer not blocked")
 			}
 		}
@@ -239,7 +239,7 @@ func Test6A_G33FairKeysetAndBoundedWorkers(t *testing.T) {
 	cancel()
 	select {
 	case <-done:
-	case <-time.After(2 * time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("reconcile workers not joined")
 	}
 	if visits.peak.Load() > 8 {
