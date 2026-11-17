@@ -166,6 +166,7 @@ class Gate:
         self.reuse_in_run = {}
         self.reuse_lock = threading.Lock()
         self.reuse_ignored = []
+        self.pending_stores = []
         self.reused_units = 0
         self.run_units = 0
         self.input_hashes = {}
@@ -354,7 +355,8 @@ class Gate:
     def dsn(self, database):
         return f'postgres://{self.user}@127.0.0.1:{self.port}/{database}?sslmode=disable'
 
-    def go_test(self, label, tags, packages, extra=None, run=None, skip=None, cwd=None, serial=True, record=True):
+    def go_test(self, label, tags, packages, extra=None, run=None, skip=None, cwd=None, serial=True, record=True,
+                expected=None):
         stream = self.work / 'runs' / (label.replace(':', '_') + '.jsonl')
         arguments = gate_pool.go_test_command(self.tool('go'), tags, packages, run=run, skip=skip, package_limit=serial)
         environment = {**self.environment, **(extra or {})}
@@ -365,6 +367,15 @@ class Gate:
             code = subprocess.run(arguments, cwd=cwd or self.source, env=environment,
                                   stdout=output, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
         outcomes, failed_packages = gate_pool.parse_go_test_json(stream, self.module)
+        if expected is not None:
+            if code != 0 and not outcomes and not failed_packages:
+                self.red.append(f'{label}: exited {code} without test events')
+            missing = [key for key in expected if key not in outcomes]
+            extra = sorted(set(outcomes) - set(expected))
+            for key in missing:
+                outcomes[key] = 'incomplete'
+            self.red += [f'{label}: did not report planned test(s) {missing}'] if missing else []
+            self.red += [f'{label}: reported test(s) outside its planned population {extra}'] if extra else []
         failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
         if record:
             self.package_failures[label] = sorted(failed_packages - failing_packages)
@@ -477,7 +488,10 @@ class Gate:
             packages = ['./internal/integration/publication'] + ['./internal/adapters/river'] * ('river' in tags.split())
             self.go_test(f'provision:{name}:publication', tags, packages, {**extra, 'GXB_I7A9_PREPARE_PROCESS': '1'},
                          run='^(TestPreparePublicationProcess|TestPreparePublicationRiver)$')
-        self.go_test(f'suite:{name}', tags, self.packages or ['./...'], extra, skip=self.suite_skip_pattern(), serial=name != 'unit')
+        packages = self.packages or ['./...']
+        skip = self.suite_skip_pattern()
+        self.go_test(f'suite:{name}', tags, packages, extra, skip=skip, serial=name != 'unit',
+                     expected=self.expected_suite_outcomes(name, tags, packages, skip))
 
     def suite_parallel(self, name, tags):
         tag_arguments = ['-tags', tags]
@@ -539,6 +553,29 @@ class Gate:
         require(completed.returncode == 0, f'go list failed: {(completed.stdout + completed.stderr).strip()[-2000:]}')
         prefix = self.module + '/'
         return ['./' + line.removeprefix(prefix) for line in completed.stdout.split() if line.startswith(prefix)]
+
+    def expanded_packages(self, tags, packages):
+        """Concrete packages for a suite argument list: a `./...` entry expands the way the suite's run will."""
+        expanded = []
+        for package in packages:
+            if package.endswith('/...'):
+                expanded += self.all_packages(tags)
+            else:
+                expanded.append(package)
+        return expanded
+
+    def expected_suite_outcomes(self, name, tags, packages, skip):
+        """The serial suite's planned root-test population, enumerated per package; None when it cannot be proven."""
+        expected = set()
+        for package in self.expanded_packages(tags, packages):
+            try:
+                names = gate_pool.test_names(self.tool('go'), self.environment, self.source, tags, package)
+            except gate_pool.PoolError as failure:
+                self.red.append(f'suite:{name}: {failure}')
+                return None
+            normalized = gate_pool.normalize_package(package)
+            expected.update(f'{normalized}.{test}' for test in gate_pool.selected_test_names(names, None, skip))
+        return sorted(expected)
 
     def existing_packages(self):
         """Every package the candidate lists under any suite tag set; a timeout may name any of them."""
@@ -753,6 +790,19 @@ class Gate:
             outcomes = document['outcomes']
             if not isinstance(outcomes, dict) or not all(isinstance(outcome, str) for outcome in outcomes.values()):
                 raise ValueError('outcomes are not a test-to-outcome object')
+            population = document.get('population')
+            if not isinstance(population, list) or not all(isinstance(test, str) for test in population):
+                raise ValueError('no population list of expected test names')
+            if len(set(population)) != len(population):
+                raise ValueError('population repeats a test name')
+            test_free = document.get('test_free')
+            if not isinstance(test_free, bool) or test_free != (not population):
+                raise ValueError('test_free does not match the population')
+            if set(outcomes) != set(population):
+                raise ValueError(f'outcomes cover {len(outcomes)} tests of the stored population {len(population)}')
+            if not all(outcome == 'pass' or (outcome == 'skip' and test in self.allowlist)
+                       for test, outcome in outcomes.items()):
+                raise ValueError('a stored outcome is neither a pass nor an allowlisted skip')
             source = {name: document[name] for name in ('commit', 'report', 'started')}
             if not all(isinstance(value, str) for value in source.values()):
                 raise ValueError('commit, report and started must be strings')
@@ -767,20 +817,38 @@ class Gate:
             return None
         return {**source, 'outcomes': outcomes, 'latency_record': latency_record}
 
-    def store_unit(self, fingerprint, inputs, started, outcomes, latency_record):
+    def store_unit(self, fingerprint, inputs, started, outcomes, latency_record, population):
         document = dict(fingerprint=fingerprint, inputs=inputs, commit=self.commit, latency_record=latency_record,
-                        report=str(self.work / 'STRICT_GATE.json'), started=started, outcomes=outcomes)
+                        report=str(self.work / 'STRICT_GATE.json'), started=started, outcomes=outcomes,
+                        population=sorted(population), test_free=not population)
         self.reuse_store.mkdir(parents=True, exist_ok=True)
         path = self.reuse_store / f'{fingerprint}.json'
         temporary = self.reuse_store / f'.{fingerprint}.{threading.get_ident()}.tmp'
         temporary.write_text(json.dumps(document, indent=1, sort_keys=True) + '\n')
         temporary.replace(path)
 
-    def storable(self, code, outcomes, broken_packages):
-        if code != 0 or broken_packages:
+    @staticmethod
+    def population_matches(planned, outcomes):
+        """A stored or in-run outcome set is reusable only when it proves the same enumerated population."""
+        return planned is not None and set(planned) == set(outcomes)
+
+    def storable(self, code, outcomes, broken_packages, complete):
+        if code != 0 or broken_packages or not complete:
             return False
         return all(outcome == 'pass' or (outcome == 'skip' and test in self.allowlist)
                    for test, outcome in outcomes.items())
+
+    def write_pending_stores(self, tests):
+        """Store units only after classification: an outcome set with any finding is never reusable evidence."""
+        with self.unit_lock:
+            pending, self.pending_stores = self.pending_stores, []
+        for entry in pending:
+            findings = [finding for test in entry['outcomes'] for finding in tests.get(test, {}).get('findings', [])]
+            if findings:
+                print(f'reuse: not storing {entry["fingerprint"]}: {" | ".join(findings)}', flush=True)
+                continue
+            self.store_unit(entry['fingerprint'], entry['inputs'], entry['started'], entry['outcomes'],
+                            entry['latency_record'], entry['population'])
 
     def record_reuse(self, name, unit, source, began):
         outcomes = source['outcomes']
@@ -801,6 +869,7 @@ class Gate:
         started = datetime.datetime.now(datetime.timezone.utc).isoformat()
         fingerprint = inputs = None
         holder, runner = None, False
+        planned = gate_pool.unit_population(unit, skip)
         try:
             fingerprint, inputs = self.unit_fingerprint(name, tags, unit, extra, skip)
         except (gate_pool.NotReusable, OSError) as failure:
@@ -808,19 +877,24 @@ class Gate:
         if fingerprint is not None:
             if self.reuse:
                 stored = self.stored_unit(fingerprint)
-                if stored is not None:
+                if stored is not None and self.population_matches(planned, stored['outcomes']):
                     self.record_reuse(name, unit, stored, began)
                     return
+                if stored is not None:
+                    print(f'reuse: unit {unit["unit"]} stored outcomes do not match its enumerated population; running it', flush=True)
             holder, runner = self.reserve_fingerprint(fingerprint, started)
             if not runner:
                 holder['event'].wait()
                 first = holder['outcomes']
-                if first is not None:
+                if first is not None and self.population_matches(planned, first):
                     self.record_reuse(name, unit, dict(commit=self.commit, report=str(self.work / 'STRICT_GATE.json'),
                                                        started=holder['started'], outcomes=first,
                                                        latency_record=[]), began)
                     return
+                if first is not None:
+                    print(f'reuse: unit {unit["unit"]} in-run outcomes do not match its enumerated population; running it', flush=True)
         storable_outcomes = None
+        complete = False
         try:
             try:
                 environment = self.unit_environment(name, unit, extra)
@@ -840,6 +914,22 @@ class Gate:
                 # A unit killed without events (OOM, SIGKILL) would otherwise drop its tests silently.
                 with self.unit_lock:
                     self.red.append(f'{label}: unit {unit["unit"]} exited {code} without test events')
+            if planned is None:
+                with self.unit_lock:
+                    self.red.append(f'{label}: unit {unit["unit"]} has no enumerated test population; its outcomes are unproven')
+            else:
+                observed = set(outcomes)
+                missing = [key for key in planned if key not in observed]
+                extra = sorted(observed - set(planned))
+                for key in missing:
+                    outcomes[key] = 'incomplete'
+                complete = not missing and not extra
+                if missing:
+                    with self.unit_lock:
+                        self.red.append(f'{label}: unit {unit["unit"]} did not report planned test(s) {missing}')
+                if extra:
+                    with self.unit_lock:
+                        self.red.append(f'{label}: unit {unit["unit"]} reported test(s) outside its planned population {extra}')
             failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
             self.merge_unit_outcomes(label, unit['unit'], outcomes, failed_packages - failing_packages)
             row = dict(name=f'unit:{name}:{unit["unit"]}', exit=code, stream=str(stream.relative_to(self.work)),
@@ -848,10 +938,13 @@ class Gate:
                 self.steps.append(row)
                 self.run_units += 1
             print(f'{row["name"]} {code} {dict(collections.Counter(outcomes.values()))}', flush=True)
-            if fingerprint is not None and self.storable(code, outcomes, failed_packages - failing_packages):
+            if fingerprint is not None and self.storable(code, outcomes, failed_packages - failing_packages, complete):
                 record_path = self.latency_record_path(f'{name}_{unit["unit"]}')
                 latency_record = record_path.read_text().splitlines() if record_path.is_file() else []
-                self.store_unit(fingerprint, inputs, started, outcomes, latency_record)
+                with self.unit_lock:
+                    self.pending_stores.append(dict(fingerprint=fingerprint, inputs=inputs, started=started,
+                                                    outcomes=outcomes, latency_record=latency_record,
+                                                    population=planned))
                 storable_outcomes = outcomes
         finally:
             if holder is not None:
@@ -1354,6 +1447,7 @@ class Gate:
                 self.red.append(f'{test}: known-debt entry names a test no run saw')
         for label, packages in self.package_failures.items():
             self.red += [f'{label}: package {package} failed without a failing test (build, TestMain or panic)' for package in packages]
+        self.write_pending_stores(tests)
         return tests
 
     def finding(self, test, label, outcome, entry, seen):
