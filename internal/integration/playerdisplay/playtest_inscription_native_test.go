@@ -13,7 +13,8 @@ func TestPlaytestInscriptionExchangeWithoutCertificateRows(t *testing.T) {
 	a, _, service := inscriptionFixture(t, p)
 	exec(t, p, `DELETE FROM player_currency_balances WHERE player_id=$1 AND resource_key IN ('degree_cer','graduate_cer','patent_cer')`, int64(a.PlayerID))
 	exec(t, p, `DELETE FROM player_item_stacks WHERE player_id=$1 AND item_id IN (50001344,50001345,50001346)`, int64(a.PlayerID))
-	dispatcher := stockruntime.InscriptionDispatcher{Authority: playtestAuthority{a}, Service: service}
+	// Production registers 1407 behind router.Wrap; the decorator writes economy_ from the owner's reported balances.
+	dispatcher := stockruntime.Decorated{Next: stockruntime.InscriptionDispatcher{Authority: playtestAuthority{a}, Service: service}}
 	response := dispatcher.Dispatch(ctx, playtestRequest(a, 1407, map[string]any{}))
 	if response.HTTPStatus != 200 {
 		t.Fatalf("exchange after a committed change answered %+v", response)

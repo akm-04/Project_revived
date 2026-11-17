@@ -502,9 +502,20 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 		}
 		return (channelchatread.Reader{}).ReadTx(c, tr, a, b)
 	}}
-	h := chatHarness(t, f, channelHarnessOptions{db: p, reader: reader, decorate: func(c net.Conn) net.Conn {
-		return &gatedChatWrite{Conn: c, gate: writeGate, entered: entered, active: &active, peak: &peak}
-	}})
+	drain := func(cs []net.Conn, frames int) *sync.WaitGroup {
+		var done sync.WaitGroup
+		done.Add(len(cs))
+		for _, conn := range cs {
+			go func(c net.Conn) {
+				defer done.Done()
+				for i := 0; i < frames; i++ {
+					frameRead(t, c, mids.MIDChatMessage)
+				}
+			}(conn)
+		}
+		return &done
+	}
+	h := chatHarness(t, f, channelHarnessOptions{db: p, reader: reader})
 	conns := make([]net.Conn, 17)
 	for i := range conns {
 		conns[i], _, _ = h.login(100001, dr.World, 1)
@@ -525,22 +536,34 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 		t.Fatal(r)
 	}
 	noChat(t, conns[16])
-	var drain sync.WaitGroup
-	drain.Add(17)
-	for _, conn := range conns {
-		go func(c net.Conn) {
-			defer drain.Done()
-			for i := 0; i < 16; i++ {
-				frameRead(t, c, mids.MIDChatMessage)
-			}
-		}(conn)
-	}
+	read := drain(conns, 16)
 	close(prepGate)
-	for i := 0; i < 8; i++ {
+	for i := 0; i < 16; i++ {
+		r := h.report()
+		if r.Outcomes[stockruntime.ChatTransportWriteRecorded] != 17 {
+			t.Fatal(r)
+		}
+	}
+	read.Wait()
+	// Global socket-write bound. Each connection has one writer, so a job queued behind a gated write holds its global
+	// slot without reaching the socket; with several messages in flight two slots can wait on one socket and the
+	// probe stalls until the publication budget. One message gives every recipient exactly one job, and a global
+	// bound below the local one is then the only thing that can stop the fifth write.
+	bounded := stockruntime.DefaultChannelChatPolicy(2048)
+	bounded.GlobalWorkers = 4
+	g := chatHarness(t, f, channelHarnessOptions{db: p, policy: &bounded, decorate: func(c net.Conn) net.Conn {
+		return &gatedChatWrite{Conn: c, gate: writeGate, entered: entered, active: &active, peak: &peak}
+	}})
+	targets := make([]net.Conn, 17)
+	for i := range targets {
+		targets[i], _, _ = g.login(100001, dr.World, 1)
+	}
+	sendChat(t, targets[0], "bounded", 0)
+	for i := 0; i < bounded.GlobalWorkers; i++ {
 		select {
 		case <-entered:
 		case <-time.After(occupancyWait):
-			t.Fatal("8 socket write slots not occupied")
+			t.Fatal("global socket write slots not occupied")
 		}
 	}
 	select {
@@ -548,17 +571,16 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 		t.Fatal("global worker bound exceeded for socket writes")
 	case <-time.After(150 * time.Millisecond):
 	}
-	if peak.Load() != 8 {
+	if peak.Load() != int64(bounded.GlobalWorkers) {
 		t.Fatal("global worker bound", peak.Load())
 	}
+	delivered := drain(targets, 1)
 	releaseWrites()
-	for i := 0; i < 16; i++ {
-		r := h.report()
-		if r.Outcomes[stockruntime.ChatTransportWriteRecorded] != 17 {
-			t.Fatal(r)
-		}
+	if r := g.report(); r.Outcomes[stockruntime.ChatTransportWriteRecorded] != 17 {
+		t.Fatal(r)
 	}
-	drain.Wait()
+	delivered.Wait()
+	g.stop()
 	// Bound snapshot before enqueuing: both actual admitted sockets exceed a smaller test limit.
 	h.stop()
 	pol := stockruntime.DefaultChannelChatPolicy(1)
