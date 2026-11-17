@@ -154,6 +154,16 @@ BRANCH_POLICY_EXEMPTIONS = {
     231: "request-discriminated by activity_id at getActivityReward call sites; the reply carries no discriminator the edge checker can select, and the MID is inactive (fallback only)",
     629: "the NIAN_BOSS reply is one shape (the request carries no discriminator); Activity1038 and Activity1065 read the same shared NianBoss model fields, so their union is required and no per-branch set exists",
 }
+# Guard marker prefix for a body entered only when a field of a list element
+# compares equal (or unequal) to something: elements are tagged records
+# (createNoticeItemContent's notice_type), so that element's reads in the body
+# are conditional. A top-level comparison (1292 `stage == 0`) marks nothing: the
+# R1 crash A_pet_info sits under one.
+VALUE_BRANCH = "<value branch>"
+# Guard marker prefix for a condition chain this scan cannot resolve to a reply
+# path (the variable is seeded only at its later reads): it guards reads of the
+# same local variable and field path, never a same-named field of another one.
+LOCAL_GUARD = "<local>"
 UNKNOWN_BRANCH = "unknown"
 BRANCH_UNKNOWN_REASON = "the consumer site is neither inside an Activity<table_id> window nor reachable from a request with a static activity id"
 
@@ -843,8 +853,11 @@ class Extractor:
         while position < end:
             token = tokens[position]
             if seeds and position in seeds:
-                for taint, mids, via_seed in seeds[position]:
-                    self.record_read(file, token.line, taint, [], via_seed, guards, mids)
+                local = chain_at(tokens, position) if token.kind == "name" else None
+                # A stored field seeded at an assignment target is written, not read.
+                assigned = local is not None and local[2] < end and tokens[local[2]].value == "="
+                for taint, mids, via_seed in [] if assigned else seeds[position]:
+                    self.record_read(file, token.line, taint, [], via_seed, guards, mids, local=local[:2] if local else None)
             if token.kind == "kw":
                 if token.value == "local":
                     position = self.handle_local(file, position, end, bindings, seeds)
@@ -859,7 +872,7 @@ class Extractor:
                     parsed = index.by_start.get(position)
                     if parsed is not None and parsed.end < end:
                         inner = dict(bindings)
-                        if parsed.params:
+                        if parsed.params and parsed.name is None:
                             inner[parsed.params[0]] = (Taint(), mid_set(mid))
                         self.scan(mid, file, parsed, parsed.body_start, parsed.end, inner, via, guards, seeds, returned)
                         position = parsed.end + 1
@@ -890,15 +903,23 @@ class Extractor:
             if root in bindings:
                 taint, mids = bindings[root]
                 fallback = after < end and tokens[after].value == "or"
-                self.record_read(file, token.line, taint, segments, via, guards, mids, fallback)
+                self.record_read(file, token.line, taint, segments, via, guards, mids, fallback, (root, segments))
             position = after
 
-    def record_read(self, file, line, taint, segments, via, guards, mids, fallback=False) -> None:
-        for parts in path_parts(taint, segments):
+    def record_read(self, file, line, taint, segments, via, guards, mids, fallback=False, local=None) -> None:
+        emitted = path_parts(taint, segments)
+        local_guards: set[tuple[str, ...]] = set()
+        base = 0
+        if local is not None and emitted:
+            local_guards = {guard[2:] for guard in guards if guard[:2] == (LOCAL_GUARD, local[0])}
+            base = len(emitted[-1]) - len(_segment_parts(local[1]))
+        for parts in emitted:
             path = path_string(parts)
             if not path:
                 continue
-            guarded = fallback or parts in guards
+            guarded = fallback or parts in guards or base >= 0 and parts[base:] in local_guards or any(
+                guard[0] == VALUE_BRANCH and parts[:len(guard) - 1] == guard[1:] for guard in guards
+            )
             for mid in mids:
                 self.add_site(mid, path, Site(file, line, via, guarded, self.branch_for_site(mid, file, taint.branch)))
 
@@ -1022,12 +1043,16 @@ class Extractor:
         if not branches:
             return position + 1
         exiting: list[tuple[str, frozenset[tuple[str, ...]], frozenset[tuple[str, ...]]]] = []
+        value_branch = frozenset(
+            (VALUE_BRANCH,) + path[:len(path) - path[::-1].index("[]")]
+            for kind, condition, _, _ in branches if kind != "else"
+            for path in self.reply_paths(_compared_chains(tokens, *condition), bindings, seeds)
+            if "[]" in path and path[0] != LOCAL_GUARD
+        )
         for kind, condition, body_start, body_end in branches:
-            positive, negative = condition_paths(tokens, *condition)
-            if kind == "else":
-                branch_guards = guards | negative
-            else:
-                branch_guards = guards | positive
+            positive, negative = (self.reply_paths(chains, bindings, seeds) for chains in condition_paths(tokens, *condition))
+            branch_guards = guards | (negative if kind == "else" else positive)
+            branch_guards = branch_guards | value_branch
             self.scan(mid, file, function, body_start, body_end, bindings, via, frozenset(branch_guards), seeds, None)
             if kind != "else":
                 exiting.append((kind, positive, negative))
@@ -1038,6 +1063,21 @@ class Extractor:
                     guards = guards | negative
                     break
         return if_end + 1
+
+    @staticmethod
+    def reply_paths(chains, bindings, seeds) -> frozenset[tuple[str, ...]]:
+        """A condition names a reply path only through a variable bound to the
+        reply or a seeded stored-field read (self.info.dialog); a same-named
+        field of anything else (self.flag) guards nothing."""
+        resolved = []
+        for position, root, segments in chains:
+            if seeds and position in seeds:
+                resolved.extend(path_parts(taint, []) for taint, _, _ in seeds[position])
+            elif root in bindings:
+                resolved.append(path_parts(bindings[root][0], list(segments)))
+            else:
+                resolved.append([(LOCAL_GUARD, root) + _segment_parts(segments)])
+        return frozenset(parts[-1] for parts in resolved if parts)
 
     # ------------------------------------------------------------------- calls
     def handle_call(self, mid, file, function, position, root, segments, after, bindings, via, guards, seeds) -> None:
@@ -1060,14 +1100,15 @@ class Extractor:
                 bound[target_function.params[parameter]] = found
         if not bound:
             return
-        key = (target_file, target_function.start, tuple(sorted((name, value[0].path, value[0].wrapper or "") for name, value in bound.items())))
+        inherited = frozenset(guard for guard in guards if guard[:1] == (VALUE_BRANCH,))
+        key = (target_file, target_function.start, tuple(sorted((name, value[0].path, value[0].wrapper or "") for name, value in bound.items())), inherited)
         if key in self.replay:
             return
         self.replay.add(key)
         for taint, mids in bound.values():
             self.record_read(file, tokens[after].line, taint, [], via, guards, mids)
         self.scan(mid, target_file, target_function, target_function.body_start, target_function.end, bound,
-                  f"{root}:{segments[-1][1] if segments else target_function.name or ''}", frozenset(), None, None)
+                  f"{root}:{segments[-1][1] if segments else target_function.name or ''}", inherited, None, None)
 
     def resolve_callee(self, file, function, root, segments) -> tuple[str, Function, int] | None:
         if segments and segments[-1][0] == "method":
@@ -1562,9 +1603,11 @@ def branch_exits(tokens, start, end) -> bool:
     return False
 
 
-def condition_paths(tokens, start, end) -> tuple[frozenset[tuple[str, ...]], frozenset[tuple[str, ...]]]:
-    positive: set[tuple[str, ...]] = set()
-    negative: set[tuple[str, ...]] = set()
+def condition_paths(tokens, start, end) -> tuple[frozenset, frozenset]:
+    """Chains (root, segments) the condition proves present (positive) or that
+    its failure proves present (negative)."""
+    positive: set = set()
+    negative: set = set()
     if _has_top_level_or(tokens, start, end):
         return frozenset(), frozenset(_not_paths(tokens, start, end))
     for conjunct_start, conjunct_end in _split_top_level(tokens, start, end, "and"):
@@ -1583,7 +1626,7 @@ def _conjunct_paths(tokens, start, end, positive, negative) -> None:
         if root in LIBRARY_ROOTS:
             position += 1
             continue
-        parts = _segment_parts(segments)
+        parts = (position, root, tuple(segments))
         negated = position > start and tokens[position - 1].kind == "kw" and tokens[position - 1].value == "not"
         if after + 1 < end and tokens[after].value == "==" and tokens[after + 1].value == "nil":
             negative.add(parts)
@@ -1598,13 +1641,29 @@ def _conjunct_paths(tokens, start, end, positive, negative) -> None:
         position = max(after, position + 1)
 
 
-def _not_paths(tokens, start, end) -> set[tuple[str, ...]]:
-    paths: set[tuple[str, ...]] = set()
+def _not_paths(tokens, start, end) -> set:
+    paths = set()
     for position in range(start, end - 1):
         if tokens[position].kind == "kw" and tokens[position].value == "not" and tokens[position + 1].kind == "name":
-            _, segments, _ = chain_at(tokens, position + 1)
-            paths.add(_segment_parts(segments))
+            root, segments, _ = chain_at(tokens, position + 1)
+            paths.add((position + 1, root, tuple(segments)))
     return paths
+
+
+def _compared_chains(tokens, start, end) -> set:
+    """Chains compared (== or ~=) with anything but nil."""
+    chains = set()
+    position = start
+    while position < end:
+        token = tokens[position]
+        if token.kind != "name" or position > start and tokens[position - 1].value in (".", ":"):
+            position += 1
+            continue
+        root, segments, after = chain_at(tokens, position)
+        if after + 1 < end and tokens[after].value in ("==", "~=") and tokens[after + 1].value != "nil":
+            chains.add((position, root, tuple(segments)))
+        position = max(after, position + 1)
+    return chains
 
 
 def _segment_parts(segments) -> tuple[str, ...]:

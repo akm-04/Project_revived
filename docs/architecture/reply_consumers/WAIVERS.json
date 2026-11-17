@@ -92,30 +92,6 @@
    "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
   },
   {
-   "client": "app/model/AdventureEvent.lua:306",
-   "mid": 2425,
-   "path": "monster_statuses",
-   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
-  },
-  {
-   "client": "app/windows/AdventureDefenseWindow.lua:91",
-   "mid": 2425,
-   "path": "monster_statuses[]",
-   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
-  },
-  {
-   "client": "app/model/AdventureEvent.lua:302",
-   "mid": 2425,
-   "path": "pos_statuses[]",
-   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
-  },
-  {
-   "client": "app/windows/AdventureDefenseMonsterDetailWindow.lua:147",
-   "mid": 2425,
-   "path": "pos_statuses[].player_id",
-   "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; this path exists only on the Defense branch"
-  },
-  {
    "client": "app/windows/AdventureDefenseMonsterDetailWindow.lua:14",
    "mid": 2425,
    "path": "room_info.campaign_id",

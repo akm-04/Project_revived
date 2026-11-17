@@ -51,7 +51,8 @@ func TestCheckerFollowsAnAbsentListParentsRequirement(t *testing.T) {
 	base["boss_rank"] = []any{map[string]any{}}
 	got := (Checker{}).Check(276, base)
 	sort.Strings(got)
-	want := []string{"boss_rank[].infos", "boss_rank[].my_hurt"}
+	// my_hurt is read only when the element's my_rank is non-zero (Arena.lua:285-288).
+	want := []string{"boss_rank[].infos"}
 	if strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Fatalf("violations %#v, want %#v", got, want)
 	}
