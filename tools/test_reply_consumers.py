@@ -142,6 +142,11 @@ class ReplyConsumerTests(unittest.TestCase):
         self.assertTrue(unknown["reason"])
         self.assertTrue(unknown["paths"])
 
+    def test_every_mid_split_across_activity_windows_is_covered(self):
+        self.assertEqual([], reply_consumers.branch_coverage_problems(self.payload))
+        self.assertIn(234, reply_consumers.BRANCH_POLICIES)
+        self.assertIn(231, reply_consumers.BRANCH_POLICY_EXEMPTIONS)
+
     def test_branch_sites_are_the_activity_window_selected_by_the_client(self):
         branch = self.payload["mids"]["234"]["branches"]["table_id"]["1129"]
         entry = next(entry for entry in branch["paths"] if reply_consumers.path_name(entry) == "details.server_support")

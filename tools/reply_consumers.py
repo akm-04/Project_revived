@@ -146,6 +146,11 @@ class BranchPolicy:
 BRANCH_POLICIES = {
     234: BranchPolicy(reply_key="table_id", request_keys=("activity_id", "table_id")),
 }
+# A MID consumed by more than one Activity<table_id> window that needs no branch
+# split, with the evidence. branch_coverage_problems fails on a new split MID.
+BRANCH_POLICY_EXEMPTIONS = {
+    231: "request-discriminated by activity_id at getActivityReward call sites; the reply carries no discriminator the edge checker can select, and the MID is inactive (fallback only)",
+}
 UNKNOWN_BRANCH = "unknown"
 BRANCH_UNKNOWN_REASON = "the consumer site is neither inside an Activity<table_id> window nor reachable from a request with a static activity id"
 
@@ -1917,6 +1922,33 @@ def seed_problems(payload: dict) -> list[str]:
     return problems
 
 
+def branch_coverage_problems(payload: dict) -> list[str]:
+    """Every MID whose reply is consumed by two or more Activity<table_id>
+    windows must carry a branch policy or a reasoned exemption, so a new
+    discriminator-split MID cannot stay folded into one union obligation set."""
+    names = payload.get("site_files")
+    if names is None:
+        return []
+    pattern = re.compile(BRANCH_POLICIES[234].window_pattern)
+    problems = []
+    for mid, record in payload.get("mids", {}).items():
+        entries = list(record.get("paths", []))
+        for values in record.get("branches", {}).values():
+            for branch in values.values():
+                entries.extend(branch.get("paths", []))
+        windows = set()
+        for entry in entries:
+            for site in entry[2]:
+                match = pattern.fullmatch(names[site[0]])
+                if match:
+                    windows.add(match.group(1))
+        if len(windows) >= 2 and int(mid) not in BRANCH_POLICIES and int(mid) not in BRANCH_POLICY_EXEMPTIONS:
+            problems.append(
+                f"MID {mid} is consumed by Activity windows {sorted(windows)} but has no branch policy or exemption"
+            )
+    return problems
+
+
 def validate_waivers(waivers: dict, payload: dict, blobs: dict[str, str]) -> list[str]:
     problems: list[str] = []
     known = {
@@ -2031,6 +2063,7 @@ def main(argv: list[str] | None = None) -> int:
         blobs = lua_blobs(bundle)
     payload = build(blobs)
     problems = seed_problems(payload)
+    problems.extend(branch_coverage_problems(payload))
     waivers = read_waivers()
     problems.extend(validate_waivers(waivers, payload, blobs))
     if problems:
