@@ -22,6 +22,7 @@ import fcntl
 import hashlib
 import io
 import json
+import math
 import os
 import re
 import signal
@@ -145,6 +146,11 @@ class BlockedByKnownDebt(Exception):
 def require(condition, message):
     if not condition:
         raise GateFailure(message)
+
+
+def finite_number(value):
+    """A measured finite number; booleans and NaN or infinite values are not measurements."""
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
 def free_address():
@@ -271,6 +277,19 @@ class Gate:
         directory.mkdir(parents=True, exist_ok=True)
         return directory / (unit_name.replace(':', '_') + '.txt')
 
+    def latency_run_record_path(self, label):
+        """A fresh file per latency go test invocation, kept apart from the general section's records."""
+        directory = self.work / 'latency_runs'
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory / (label.replace(':', '_') + '.txt')
+
+    def latency_record_key(self, line):
+        """One '<import path> <root test name>' helper line as a module-relative test key, or None when malformed."""
+        parts = line.split()
+        if len(parts) != 2:
+            return None
+        return f'{parts[0].removeprefix(self.module + "/")}.{parts[1]}'
+
     def recorded_latency_tests(self):
         """The "<import path> <root test name>" lines the helper wrote, module-relative like test outcomes, plus the lines
         stored with reused units. Returns (recorded, malformed lines)."""
@@ -281,11 +300,11 @@ class Gate:
                 lines += path.read_text().splitlines()
         recorded, malformed = set(), []
         for line in lines:
-            parts = line.split()
-            if len(parts) != 2:
+            key = self.latency_record_key(line)
+            if key is None:
                 malformed.append(line)
-                continue
-            recorded.add(f'{parts[0].removeprefix(self.module + "/")}.{parts[1]}')
+            else:
+                recorded.add(key)
         return recorded, malformed
 
     def check_latency_records(self):
@@ -1214,10 +1233,12 @@ class Gate:
 
     @staticmethod
     def cpu_temperature(temperatures):
-        for name, value in temperatures.items():
+        """The hottest finite CPU temperature reported, or None when no sensor gave one."""
+        readings = {name: value for name, value in temperatures.items() if finite_number(value)}
+        for name, value in readings.items():
             if name.endswith('Tctl'):
                 return value
-        return max(temperatures.values(), default=0.0)
+        return max(readings.values(), default=None)
 
     @staticmethod
     def running_worker_clusters():
@@ -1263,15 +1284,23 @@ class Gate:
     def latency_breaches(self, reading):
         settings = self.latency_settings()
         found = []
-        load = reading.get('load_average') or (0,)
-        if load[0] >= settings['load_average_max']:
-            found.append(f'load average {load[0]:.2f} >= {settings["load_average_max"]}')
-        temperature = self.cpu_temperature(reading.get('temperatures_celsius') or {})
-        if temperature >= settings['temperature_celsius_max']:
+        load_values = reading.get('load_average')
+        load = load_values[0] if isinstance(load_values, (list, tuple)) and load_values else None
+        if not finite_number(load):
+            found.append('load average unavailable: no finite 1-minute reading')
+        elif load >= settings['load_average_max']:
+            found.append(f'load average {load:.2f} >= {settings["load_average_max"]}')
+        temperatures = reading.get('temperatures_celsius')
+        temperature = self.cpu_temperature(temperatures) if isinstance(temperatures, dict) else None
+        if temperature is None:
+            found.append('temperature unavailable: no finite CPU sensor reading')
+        elif temperature >= settings['temperature_celsius_max']:
             found.append(f'temperature {temperature:.1f} C >= {settings["temperature_celsius_max"]} C')
         reference = settings['benchmark_reference_seconds']
         measured = reading.get('baseline_sha256_64mib_seconds')
-        if measured:
+        if not finite_number(measured) or measured <= 0:
+            found.append('benchmark unavailable: no positive finite single-thread measurement')
+        else:
             deviation = abs(measured - reference) / reference
             if deviation > settings['benchmark_tolerance']:
                 found.append(f'benchmark {measured}s differs from reference {reference}s by {deviation:.1%}')
@@ -1336,8 +1365,10 @@ class Gate:
             time.sleep(min(settings['check_interval_seconds'], remaining))
 
     def monitor_latency_conditions(self, stop, breaches):
+        """Retain every during-run reading; the first breach ends the monitor and makes the section NOT_RUN."""
         while not stop.wait(self.latency_settings()['check_interval_seconds']):
             reading = self.latency_reading()
+            self.latency_conditions.append(reading)
             if reading['breaches']:
                 breaches.append(reading)
                 return
@@ -1348,6 +1379,29 @@ class Gate:
         for member in self.latency_settings()['members']:
             groups.setdefault((member['package'], member['tags']), []).append(member['test'])
         return groups
+
+    def check_latency_run_record(self, label, path, expected):
+        """The fresh record of one quiet run must name exactly the members that ran in it; nothing cached can vouch for it."""
+        try:
+            text = path.read_text()
+        except OSError as failure:
+            self.latency_red.append(f'{label}: latency run record {path.name} is missing or unreadable: {failure}')
+            self.latency_red += [f'{key}: ran in the latency section without recording a helper call'
+                                 for key in sorted(expected)]
+            return
+        recorded, malformed = set(), []
+        for line in text.splitlines():
+            key = self.latency_record_key(line)
+            if key is None:
+                malformed.append(line)
+            else:
+                recorded.add(key)
+        self.latency_red += [f'{label}: latency record line {line!r} is not "<import path> <root test name>"'
+                             for line in malformed]
+        self.latency_red += [f'{label}: recorded helper call {key} is not a member of this run'
+                             for key in sorted(recorded - expected)]
+        self.latency_red += [f'{key}: ran in the latency section without recording a helper call'
+                             for key in sorted(expected - recorded)]
 
     def run_latency_members(self):
         settings = self.latency_settings()
@@ -1367,8 +1421,13 @@ class Gate:
             for variable in sorted(self.dsn_by_package.get(gate_pool.normalize_package(package), ())):
                 extra[variable] = self.database(gate_pool.database_name('latency', f'{index:02d}', variable))
             label = f'latency:{index}'
+            record_path = self.latency_run_record_path(label)
+            record_path.unlink(missing_ok=True)
+            extra['GXB_LATENCY_RECORD'] = str(record_path)
             outcomes = self.go_test(label, tags, [package], extra, run='^(' + '|'.join(tests) + ')$', record=False)
             self.latency_runs[label] = outcomes
+            expected = {f'{gate_pool.normalize_package(package)}.{test}' for test in tests}
+            self.check_latency_run_record(label, record_path, expected)
             for test in tests:
                 key = f'{gate_pool.normalize_package(package)}.{test}'
                 outcome = outcomes.get(key, 'did not run')
