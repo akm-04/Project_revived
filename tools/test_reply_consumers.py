@@ -333,6 +333,55 @@ class GuardResolutionTests(unittest.TestCase):
         self.assertEqual("REQUIRED", self.requirements["mode_only"])
 
 
+def window_state_blobs():
+    # SocialSystemWindow: self.data holds a different reply list per windowState, and the cell builder dispatches on it.
+    return {
+        "app/common/network/mid.lua": "xyd.mid.SOCIAL = 9001\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/model/Social.lua": (
+            'local var_0_0 = class("Social")\n'
+            "local var_0_4 = {FriendList = 1, NoticeMsg = 2}\n"
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.SOCIAL, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\targ_1_0.friendlist = arg_2_1.friend_list\n"
+            "\t\targ_1_0.noticelist = arg_2_1.notice_list\n"
+            "\tend)\n"
+            "end\n"
+            "function var_0_0.initData(arg_3_0)\n"
+            "\tif arg_3_0.windowState == var_0_4.FriendList then\n"
+            "\t\targ_3_0.data = arg_3_0.friendlist\n"
+            "\telseif arg_3_0.windowState == var_0_4.NoticeMsg then\n"
+            "\t\targ_3_0.data = arg_3_0.noticelist\n"
+            "\tend\n"
+            "end\n"
+            "function var_0_0.cell(arg_4_0, arg_4_1)\n"
+            "\tif arg_4_0.windowState == var_0_4.FriendList then\n"
+            "\t\targ_4_0:friendItem(arg_4_0.data[arg_4_1])\n"
+            "\telseif arg_4_0.windowState == var_0_4.NoticeMsg then\n"
+            "\t\targ_4_0:noticeItem(arg_4_0.data[arg_4_1])\n"
+            "\tend\n"
+            "end\n"
+            "function var_0_0.friendItem(arg_5_0, arg_5_1)\n"
+            "\tprint(arg_5_1.name)\n"
+            "end\n"
+            "function var_0_0.noticeItem(arg_6_0, arg_6_1)\n"
+            "\tprint(arg_6_1.player_info)\n"
+            "end\n"
+        ),
+    }
+
+
+class StateBranchTests(unittest.TestCase):
+    def test_a_stored_value_reaches_only_the_branch_of_its_own_state(self):
+        requirements = obligation_map(reply_consumers.build(window_state_blobs(), collapse=False))["9001"]["paths"]
+        self.assertEqual("REQUIRED", requirements["notice_list[].player_info"])
+        self.assertEqual("REQUIRED", requirements["friend_list[].name"])
+        self.assertNotIn("friend_list[].player_info", requirements)
+        self.assertNotIn("notice_list[].name", requirements)
+
+
 class StorageBindingCycleTests(unittest.TestCase):
     def test_a_storage_binding_is_followed_at_most_once_per_path(self):
         payload = fixture_payload()

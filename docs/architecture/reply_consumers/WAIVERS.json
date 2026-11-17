@@ -8,18 +8,6 @@
    "reason": "createListContent reads .name only on the visitWay == guild branch; the friend branch reads player_name at line 133"
   },
   {
-   "client": "app/windows/SocialSystemWindow.lua:259",
-   "mid": 176,
-   "path": "friend_list[].notice_id",
-   "reason": "SocialSystemWindow.data is one of four tab lists assigned at lines 249/253/259/263; notice_id is read only on the notice tab"
-  },
-  {
-   "client": "app/windows/SocialSystemWindow.lua:259",
-   "mid": 176,
-   "path": "request_list[].notice_id",
-   "reason": "same tab-discriminated data field; request rows carry request_msg/request_time, not notice_id"
-  },
-  {
    "client": "app/model/FriendPlayer.lua:15",
    "mid": 176,
    "path": "list[].social_time",
