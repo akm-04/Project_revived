@@ -163,7 +163,7 @@ func TestConnectionRegistryReplacementInterruptsBlockedOldWriteWithoutHoldingReg
 	}()
 	select {
 	case <-blocking.writeStarted:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("old writer did not enter blocked write")
 	}
 
@@ -179,7 +179,7 @@ func TestConnectionRegistryReplacementInterruptsBlockedOldWriteWithoutHoldingReg
 
 	// The new generation must become observable without waiting for the blocked
 	// old conn.Write, proving the registry mutex is not held during retirement.
-	deadline := time.Now().Add(250 * time.Millisecond)
+	deadline := time.Now().Add(eventWaitTimeout)
 	visible := false
 	for time.Now().Before(deadline) {
 		got := r.ByPlayerRole(100001, domainrt.World)
@@ -200,7 +200,7 @@ func TestConnectionRegistryReplacementInterruptsBlockedOldWriteWithoutHoldingReg
 		if replaceErr != nil {
 			t.Fatal(replaceErr)
 		}
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("replacement did not interrupt blocked old write")
 	}
 	select {
@@ -208,7 +208,7 @@ func TestConnectionRegistryReplacementInterruptsBlockedOldWriteWithoutHoldingReg
 		if err == nil {
 			t.Fatal("retired blocked send unexpectedly succeeded")
 		}
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("blocked old send did not terminate after retirement")
 	}
 	if err := h1.Send(context.Background(), wireRT.Frame{MID: mids.MIDChatRoomEntered, Params: &amf3.Object{}}, limits.Default()); !errors.Is(err, ErrRealtimeSessionRetired) {

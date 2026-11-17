@@ -71,7 +71,7 @@ func TestRealtimePublisherValidatesBeforeUsingExistingWriter(t *testing.T) {
 		}
 	case err := <-readErr:
 		t.Fatal(err)
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("publication not written")
 	}
 }
