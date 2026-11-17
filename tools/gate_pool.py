@@ -286,6 +286,20 @@ def parse_json_stream(text):
     return documents
 
 
+CODE_FILE_FIELDS = ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'EmbedFiles')
+SOURCE_FILE_FIELDS = ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles')
+UNSUPPORTED_COMPILER_FIELDS = ('SFiles', 'CFiles', 'CXXFiles', 'HFiles', 'SysoFiles', 'MFiles', 'FFiles',
+                               'SwigFiles', 'SwigCXXFiles')
+GENERATED_TESTMAIN = 'generated_testmain.go'
+
+
+def generated_input_name(import_path, name):
+    """go list names the synthetic test main by a per-cache absolute path; its bytes are its identity, not its location."""
+    if Path(name).is_absolute() and import_path.endswith('.test'):
+        return GENERATED_TESTMAIN
+    return name
+
+
 def code_inputs(go_list_stdout, source, cache=None):
     """The code closure record: every module package go list -deps -test named, with its file hashes."""
     root = Path(source).resolve()
@@ -297,14 +311,21 @@ def code_inputs(go_list_stdout, source, cache=None):
         resolved = Path(directory)
         if not resolved.is_relative_to(root):
             continue
+        import_path = document.get('ImportPath', '')
+        for field in UNSUPPORTED_COMPILER_FIELDS:
+            if document.get(field):
+                raise NotReusable(f'{import_path}: go list reports {field}, which the reuse fingerprint cannot establish')
         files = []
-        for field in ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'EmbedFiles'):
+        for field in CODE_FILE_FIELDS:
             for name in sorted(document.get(field) or ()):
-                files.append([name, sha256_file(resolved / name, cache)])
+                files.append([generated_input_name(import_path, name), sha256_file(resolved / name, cache)])
+        sources = sorted({name for field in SOURCE_FILE_FIELDS for name in document.get(field) or ()
+                          if not Path(name).is_absolute()})
         testdata = []
         if (resolved / 'testdata').is_dir():
             testdata = directory_files(resolved / 'testdata', cache)
-        records.append(dict(package=document.get('ImportPath', ''), files=files, testdata=testdata))
+        records.append(dict(package=import_path, directory=str(resolved.relative_to(root)), files=files,
+                            sources=sources, testdata=testdata))
     records.sort(key=lambda record: record['package'])
     if not records:
         raise NotReusable('go list named no package inside the module')
