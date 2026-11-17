@@ -10,6 +10,7 @@ import json
 import os
 import re
 import subprocess
+import threading
 from pathlib import Path
 
 TEST_VARIABLE = re.compile(r'os\.(?:Getenv|LookupEnv)\("([A-Z0-9_]+)"\)')
@@ -119,12 +120,38 @@ def database_name(suite, unit, variable):
     return name
 
 
+def selected_test_names(names, run=None, skip=None):
+    """The enumerated tests a unit's run and skip patterns select; the planned root-test population."""
+    selected = []
+    for name in names:
+        if run is not None and not re.search(run, name):
+            continue
+        if skip is not None and re.search(skip, name):
+            continue
+        selected.append(name)
+    return selected
+
+
+def unit_population(unit, skip):
+    """The outcome keys `<package>.<test>` a unit must observe: its enumerated names with run and skip applied.
+
+    Returns None when the package's tests were never enumerated, so the caller can never mistake an unproven
+    population for an empty one.
+    """
+    if unit.get('tests') is None:
+        return None
+    package = normalize_package(unit['package'])
+    return sorted(f'{package}.{name}' for name in selected_test_names(unit['tests'], unit.get('run'), skip))
+
+
 def build_units(packages, shard_counts, list_tests, serial_tests=()):
     """One unit per package; a package in shard_counts becomes one unit per non-empty shard.
 
-    list_tests returns the package's test names, or None when the listing failed (the package then runs whole).
-    A `package.Test` entry in serial_tests is left out of the package's shards and becomes one `_serial` unit that the
-    caller runs after the pool; together the shards and the serial unit must cover the package's whole listed set.
+    list_tests returns the package's test names, or None when the listing failed (the package then runs whole, without a
+    provable population). Every unit carries its enumerated names in `tests`; an empty list is a package proven to have no
+    test under these tags, never an absence inferred from a run. A `package.Test` entry in serial_tests is left out of the
+    package's shards and becomes one `_serial` unit that the caller runs after the pool; together the shards and the serial
+    unit must cover the package's whole listed set.
     """
     serial_by_package = collections.defaultdict(list)
     for key in serial_tests:
@@ -135,12 +162,15 @@ def build_units(packages, shard_counts, list_tests, serial_tests=()):
         name = unit_slug(package)
         serial = sorted(serial_by_package.get(normalize_package(package), ()))
         count = shard_counts.get(normalize_package(package), 0)
-        names = list_tests(package) if count else None
+        names = list_tests(package)
         if serial:
             units.append(dict(package=package, unit=f'{name}_serial', tests=serial,
                               run='^(' + '|'.join(serial) + ')$', shard=None, serial=True))
-        if not count or names is None:
+        if names is None:
             units.append(dict(package=package, unit=name, tests=None, run=None, shard=None, serial=False))
+            continue
+        if not count:
+            units.append(dict(package=package, unit=name, tests=names, run=None, shard=None, serial=False))
             continue
         if not names:
             raise PoolError(f'{package} is sharded but go test -list found no test in it')
@@ -158,7 +188,17 @@ def build_units(packages, shard_counts, list_tests, serial_tests=()):
     return units
 
 
+# Set by a stopping gate: from then on no unit and no unit child process starts.
+STOPPING = threading.Event()
+
+
+def require_running():
+    if STOPPING.is_set():
+        raise PoolError('the gate is stopping')
+
+
 def clone_database(createdb, port, template, name, environment):
+    require_running()
     completed = subprocess.run([str(createdb), '-p', str(port), '-T', template, name], env=environment,
                                capture_output=True, text=True, stdin=subprocess.DEVNULL)
     if completed.returncode != 0:
@@ -168,9 +208,21 @@ def clone_database(createdb, port, template, name, environment):
 def run_pool(units, jobs, action):
     if jobs < 1:
         raise PoolError(f'jobs {jobs} must be positive')
+    failed = threading.Event()
+
+    def guarded(unit):
+        if failed.is_set() or STOPPING.is_set():
+            return
+        try:
+            action(unit)
+        except BaseException:
+            # Set in the failing thread, before main sees the failure, so no queued unit starts in between.
+            failed.set()
+            raise
+
     pool = concurrent.futures.ThreadPoolExecutor(max_workers=jobs)
     try:
-        futures = [pool.submit(action, unit) for unit in units]
+        futures = [pool.submit(guarded, unit) for unit in units]
         for future in concurrent.futures.as_completed(futures):
             future.result()
     finally:
@@ -234,6 +286,20 @@ def parse_json_stream(text):
     return documents
 
 
+CODE_FILE_FIELDS = ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'EmbedFiles')
+SOURCE_FILE_FIELDS = ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles')
+UNSUPPORTED_COMPILER_FIELDS = ('SFiles', 'CFiles', 'CXXFiles', 'HFiles', 'SysoFiles', 'MFiles', 'FFiles',
+                               'SwigFiles', 'SwigCXXFiles')
+GENERATED_TESTMAIN = 'generated_testmain.go'
+
+
+def generated_input_name(import_path, name):
+    """go list names the synthetic test main by a per-cache absolute path; its bytes are its identity, not its location."""
+    if Path(name).is_absolute() and import_path.endswith('.test'):
+        return GENERATED_TESTMAIN
+    return name
+
+
 def code_inputs(go_list_stdout, source, cache=None):
     """The code closure record: every module package go list -deps -test named, with its file hashes."""
     root = Path(source).resolve()
@@ -245,14 +311,21 @@ def code_inputs(go_list_stdout, source, cache=None):
         resolved = Path(directory)
         if not resolved.is_relative_to(root):
             continue
+        import_path = document.get('ImportPath', '')
+        for field in UNSUPPORTED_COMPILER_FIELDS:
+            if document.get(field):
+                raise NotReusable(f'{import_path}: go list reports {field}, which the reuse fingerprint cannot establish')
         files = []
-        for field in ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'EmbedFiles'):
+        for field in CODE_FILE_FIELDS:
             for name in sorted(document.get(field) or ()):
-                files.append([name, sha256_file(resolved / name, cache)])
+                files.append([generated_input_name(import_path, name), sha256_file(resolved / name, cache)])
+        sources = sorted({name for field in SOURCE_FILE_FIELDS for name in document.get(field) or ()
+                          if not Path(name).is_absolute()})
         testdata = []
         if (resolved / 'testdata').is_dir():
             testdata = directory_files(resolved / 'testdata', cache)
-        records.append(dict(package=document.get('ImportPath', ''), files=files, testdata=testdata))
+        records.append(dict(package=import_path, directory=str(resolved.relative_to(root)), files=files,
+                            sources=sources, testdata=testdata))
     records.sort(key=lambda record: record['package'])
     if not records:
         raise NotReusable('go list named no package inside the module')

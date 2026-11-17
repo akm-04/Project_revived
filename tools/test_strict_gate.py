@@ -1,14 +1,19 @@
 """Self-check of the strict gate's classification rules and parallel units. Run: python3 -B tools/test_strict_gate.py"""
 import collections
+import hashlib
 import json
+import signal
 import stat
+import subprocess
 import sys
 import tempfile
 import threading
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gate_pool
+import strict_gate
 from strict_gate import LATENCY_DEFAULTS, LATENCY_DEFERRED, Gate, GateFailure
 
 DEBT = 'internal/a.TestDebt'
@@ -26,6 +31,8 @@ def gate(runs, package_failures=None, known_debt=(DEBT,), blocked=None):
     instance.package_failures = collections.defaultdict(list, package_failures or {})
     instance.known_debt = {test: {} for test in known_debt}
     instance.blocked = blocked or {}
+    instance.pending_stores = []
+    instance.unit_lock = threading.Lock()
     instance.allowlist = {HELPER: dict(test=HELPER, kind='child_helper', owners=[PARENT]),
                           SEEDED: dict(test=SEEDED, kind='recipe', owner='recipe:seed'),
                           OPERATOR: dict(test=OPERATOR, kind='operator', reason='manual proof')}
@@ -99,12 +106,17 @@ if arguments[0] == 'version':
     print('go version go1.27.3 linux/amd64')
 elif arguments[0] == 'list':
     package = arguments[-1]
+    if package.endswith('/...'):
+        package = './internal/fake'
     relative = package.removeprefix('./')
     directory = os.path.join(os.environ.get('GATE_FAKE_SOURCE', '.'), relative)
-    go_files = [name for name in directory_files(directory, '.go') if not name.endswith('_test.go')]
-    test_files = [name for name in directory_files(directory, '.go') if name.endswith('_test.go')]
-    print(json.dumps({'ImportPath': 'example.com/mod/' + relative, 'Dir': directory, 'GoFiles': go_files,
-                      'TestGoFiles': test_files, 'XTestGoFiles': [], 'CgoFiles': [], 'EmbedFiles': []}))
+    if option('-f') == '{{.ImportPath}}':
+        print('example.com/mod/' + relative)
+    else:
+        go_files = [name for name in directory_files(directory, '.go') if not name.endswith('_test.go')]
+        test_files = [name for name in directory_files(directory, '.go') if name.endswith('_test.go')]
+        print(json.dumps({'ImportPath': 'example.com/mod/' + relative, 'Dir': directory, 'GoFiles': go_files,
+                          'TestGoFiles': test_files, 'XTestGoFiles': [], 'CgoFiles': [], 'EmbedFiles': []}))
 elif '-list' in arguments:
     print('TestAlpha')
     print('TestBeta')
@@ -114,6 +126,10 @@ elif '-json' in arguments:
     run, skip = option('-run'), option('-skip')
     mode = os.environ.get('GATE_FAKE_MODE', 'pass')
     for name in ('TestAlpha', 'TestBeta'):
+        if mode == 'empty':
+            continue
+        if mode == 'partial' and name != 'TestAlpha':
+            continue
         if run is not None and not re.search(run, name):
             continue
         if skip is not None and re.search(skip, name):
@@ -158,6 +174,9 @@ def fake_gate():
     instance.census = {'dsn': ['GXB_FAKE_DSN']}
     instance.allowlist = {}
     instance.known_debt = {}
+    instance.pending_stores = []
+    instance.blocked = {}
+    instance.section = 'general'
     instance.test_functions = {}
     instance.packages = None
     instance.previous = None
@@ -168,6 +187,7 @@ def fake_gate():
     instance.environment = {'PATH': '/usr/bin:/bin', 'GATE_FAKE_LOG': str(log), 'GATE_FAKE_SOURCE': str(source)}
     instance.database = lambda name, cwd=None, migrate=('up',), deploy=True: f'postgres://self-check/{name}'
     instance.mode = 'parallel'
+    instance.select = None
     instance.commit = 'self-check'
     instance.list_hashes = {'known_debt': 'self-check', 'skip_allowlist': 'self-check', 'parallel': 'self-check'}
     instance.reuse = False
@@ -180,7 +200,11 @@ def fake_gate():
     instance.input_hashes = {}
     instance.code_cache = {}
     instance.template_cache = {}
+    instance.runtime_cache = {}
     instance._go_version = None
+    # The toolchain's own manifest is the bundle identity; a path alone never proves which tools a unit receives.
+    (directory / 'TOOLCHAIN_MANIFEST.json').write_text('{"bundle": "self-check"}\n')
+    (directory / 'SHA256SUMS').write_text('self-check\n')
     return instance, log
 
 
@@ -247,6 +271,8 @@ expected = [
     ['vet', '-tags', tags, './...'],
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', tags, '-p=1',
      '-run', '^(TestPreparePublicationProcess|TestPreparePublicationRiver)$', './internal/integration/publication'],
+    ['list', '-tags', tags, '-f', '{{.ImportPath}}', './...'],
+    ['test', '-list', '.*', '-tags', tags, './internal/fake'],
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', tags, '-p=1', './...'],
 ]
 assert commands == expected, commands
@@ -257,9 +283,12 @@ commands = [json.loads(line) for line in log.read_text().splitlines()]
 expected = [
     ['build', '-buildvcs=false', '-tags', '', './...'],
     ['vet', '-tags', '', './...'],
+    ['list', '-tags', '', '-f', '{{.ImportPath}}', './...'],
+    ['test', '-list', '.*', '-tags', '', './internal/fake'],
     ['test', '-json', '-count=1', '-timeout=150m', '-tags', '', './...'],
 ]
 assert commands == expected, commands
+assert not instance.red, instance.red
 
 # Serial runs keep 150m; a parallel unit takes parallel.json's default, else the package override.
 def parallel_test_commands(log):
@@ -382,13 +411,15 @@ def fingerprint_gate():
 
 
 def fake_unit(name='alpha'):
-    return dict(package='./internal/fake', unit=name, tests=None, run=None, shard=None, serial=False)
+    return dict(package='./internal/fake', unit=name, tests=['TestAlpha', 'TestBeta'],
+                run='^(TestAlpha|TestBeta)$', shard=None, serial=False)
 
 
 def refingerprint(instance, unit=None):
     instance.code_cache.clear()
     instance.input_hashes.clear()
     instance.template_cache.clear()
+    instance.runtime_cache.clear()
     return instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, unit or fake_unit(), {}, None)[0]
 
 
@@ -425,6 +456,59 @@ assert refingerprint(instance) != base, 'class 6 timeout default'
 instance.parallel = dict(gate_pool.EMPTY_PARALLEL, timeouts={'internal/fake': 30})
 assert refingerprint(instance) != base, 'class 6 timeout override'
 
+# A-094: a non-test helper's runtime read and the bytes of the toolchain the unit receives are inputs too.
+instance, _ = fingerprint_gate()
+(instance.source / 'internal/fake/helper.go').write_text(
+    'package fake\n\nimport "os"\n\nfunc checkGolden() {\n\tos.ReadFile("helper/input.json")\n}\n')
+(instance.source / 'internal/fake/helper').mkdir()
+(instance.source / 'internal/fake/helper/input.json').write_text('ok\n')
+(instance.toolchain / 'bin/luajit').write_bytes(b'first runtime')
+instance.environment['GXB_LUAJIT'] = str(instance.toolchain / 'bin/luajit')
+helper_base = refingerprint(instance)
+assert refingerprint(instance) == helper_base, 'unchanged inputs stay stable'
+assert altered(instance, instance.source / 'internal/fake/helper/input.json', b'changed\n') != helper_base, \
+    'a non-test helper runtime input'
+assert altered(instance, instance.toolchain / 'bin/luajit', b'different runtime') != helper_base, \
+    'the toolchain executable bytes at the same path'
+assert altered(instance, instance.toolchain / 'SHA256SUMS', b'changed bundle\n') != helper_base, \
+    'the toolchain bundle manifest bytes'
+
+# A-101: the synthetic test main's per-cache absolute name is a stable logical name; its bytes are its identity.
+inputs_root = Path(tempfile.mkdtemp(prefix='gate-code-inputs-'))
+inputs_source = inputs_root / 'source'
+inputs_package = inputs_source / 'internal/fake'
+inputs_package.mkdir(parents=True)
+test_mains = []
+for cache_root in ('run0', 'run1'):
+    test_main = inputs_root / cache_root / 'go-build/aa/same-d'
+    test_main.parent.mkdir(parents=True)
+    test_main.write_bytes(b'generated test main')
+    test_mains.append(test_main)
+
+
+def code_records(path, import_path='example.com/mod/internal/fake.test', fields=None):
+    document = dict(Dir=str(inputs_package), ImportPath=import_path, GoFiles=[str(path)], **(fields or {}))
+    return gate_pool.code_inputs(json.dumps(document), inputs_source)
+
+
+assert code_records(test_mains[0]) == code_records(test_mains[1]), 'the cache root must not be identity'
+assert code_records(test_mains[0])[0]['files'] == [
+    ['generated_testmain.go', hashlib.sha256(b'generated test main').hexdigest()]], code_records(test_mains[0])
+test_mains[1].write_bytes(b'changed test main')
+assert code_records(test_mains[0]) != code_records(test_mains[1]), 'the generated content is identity'
+other_absolute = inputs_root / 'other-input.bin'
+other_absolute.write_bytes(b'other input')
+assert code_records(other_absolute, 'example.com/mod/internal/fake')[0]['files'][0][0] == str(other_absolute), \
+    'an unrelated absolute input keeps its name'
+
+# A-102: any compiler-input field outside the hashed set declines reuse, naming the field.
+for unsupported in gate_pool.UNSUPPORTED_COMPILER_FIELDS:
+    try:
+        code_records(other_absolute, 'example.com/mod/internal/fake', {unsupported: ['input']})
+        raise AssertionError(f'go list {unsupported} must decline reuse')
+    except gate_pool.NotReusable as failure:
+        assert unsupported in str(failure), failure
+
 # S2: both database suites clone the river-provisioned template, so a package whose compiled files are equal under the two
 # tag sets hashes equal across the suite labels; a changed file still changes the code input (class 1).
 RIVER_FINGERPRINT_TAGS = 'postgres river socialintegration channelintegration'
@@ -452,6 +536,8 @@ instance, log = fingerprint_gate()
 (instance.work / 'runs' / 'suite_postgres').mkdir()
 instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
 assert len(test_commands(log)) == 1, test_commands(log)
+assert not list(instance.reuse_store.glob('*.json')), 'nothing is stored before classification'
+instance.classify()
 assert len(list(instance.reuse_store.glob('*.json'))) == 1, list(instance.reuse_store.iterdir())
 instance.reuse = True
 instance.reuse_in_run = {}
@@ -478,22 +564,77 @@ instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
 assert len(test_commands(log)) == 3, 'a tampered store entry must not be used'
 assert any('ignoring store file' in line for line in instance.reuse_ignored), instance.reuse_ignored
 
-# Store: a failing or incomplete unit is never stored.
-for mode in ('fail', 'incomplete'):
+# Store: a failing, incomplete, package-only or partial stream is never stored, even after classification.
+for mode in ('fail', 'incomplete', 'empty', 'partial'):
     instance, log = fingerprint_gate()
     (instance.work / 'runs' / 'suite_postgres').mkdir()
     instance.environment['GATE_FAKE_MODE'] = mode
-    instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
+    unit = fake_unit('alpha')
+    if mode == 'partial':
+        unit = dict(unit, tests=['TestAlpha', 'TestBeta'], run='^(TestAlpha|TestBeta)$', shard=0)
+    instance.run_unit('postgres', FINGERPRINT_TAGS, unit, {}, None)
+    instance.classify()
     assert not list(instance.reuse_store.glob('*.json')), mode
+
+# A package-only success stream is RED: the planned tests never reported.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.environment['GATE_FAKE_MODE'] = 'empty'
+instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
+assert any('did not report planned test' in line for line in instance.red), instance.red
+
+# A shard planned for Alpha and Beta that only reports Alpha is RED.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.environment['GATE_FAKE_MODE'] = 'partial'
+instance.run_unit('postgres', FINGERPRINT_TAGS,
+                  dict(fake_unit('alpha'), tests=['TestAlpha', 'TestBeta'], run='^(TestAlpha|TestBeta)$', shard=0), {}, None)
+assert any('did not report planned test' in line and 'TestBeta' in line for line in instance.red), instance.red
+
+# An outcome outside the planned population is RED too, and never stored.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.run_unit('postgres', FINGERPRINT_TAGS, dict(fake_unit('alpha'), tests=['TestAlpha'], run=None), {}, None)
+assert any('outside its planned population' in line and 'TestBeta' in line for line in instance.red), instance.red
+instance.classify()
+assert not list(instance.reuse_store.glob('*.json'))
+
+# A stale allowlisted pass is RED after classification and its outcome is never written to the store.
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.allowlist = {'internal/fake.TestAlpha': dict(test='internal/fake.TestAlpha', kind='operator', reason='manual proof')}
+instance.run_unit('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
+assert not list(instance.reuse_store.glob('*.json')), 'a unit is stored only after classification'
+instance.classify()
+assert any('STALE_ALLOWLIST' in line for line in instance.red), instance.red
+assert not list(instance.reuse_store.glob('*.json')), 'an outcome with findings is never stored'
 
 # Serial mode with a populated store still runs every unit.
 instance, log = fingerprint_gate()
 fingerprint, inputs = instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, fake_unit(), {}, None)
-instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [])
+instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [],
+                    ['internal/fake.TestAlpha'])
 instance.reuse = True
 instance.suite('unit', '')
 assert len(test_commands(log)) == 1, test_commands(log)
 assert instance.reused_units == 0 and not any('reused_from' in row for row in instance.steps), instance.steps
+
+# A package whose enumeration proved it has no test is explicitly test-free; an empty stream alone never proves it.
+units = gate_pool.build_units(['./internal/fake'], {}, lambda package: [])
+assert len(units) == 1 and units[0]['tests'] == [] and gate_pool.unit_population(units[0], None) == [], units
+unproven = gate_pool.build_units(['./internal/fake'], {}, lambda package: None)
+assert unproven[0]['tests'] is None and gate_pool.unit_population(unproven[0], None) is None, unproven
+instance, log = fingerprint_gate()
+(instance.work / 'runs' / 'suite_postgres').mkdir()
+instance.environment['GATE_FAKE_MODE'] = 'empty'
+instance.run_unit('postgres', FINGERPRINT_TAGS, dict(fake_unit('alpha'), tests=[], run=None), {}, None)
+assert not instance.red, instance.red
+instance.classify()
+entries = list(instance.reuse_store.glob('*.json'))
+assert len(entries) == 1, entries
+document = json.loads(entries[0].read_text())
+assert document['population'] == [] and document['test_free'] is True, document
+assert instance.stored_unit(document['fingerprint'])['outcomes'] == {}, document
 
 # An unresolvable runtime path makes the package NOT_REUSABLE, naming its file:line.
 instance, log = fingerprint_gate()
@@ -562,6 +703,27 @@ assert latency_test_command[latency_test_command.index('-run') + 1] == '^(TestAl
 assert instance.overall_verdict() == 'GREEN', instance.overall_verdict()
 assert instance.sections_report()['latency']['verdict'] == 'GREEN'
 
+# A-096: the quiet run must write its own fresh record; a general or cached record can never vouch for it.
+instance, _ = latency_gate()
+instance.latency_reused = ['example.com/mod/internal/fake TestAlpha']
+instance.runs = {'suite:unit': {'internal/fake.TestAlpha': 'pass'}}
+instance.check_latency_records()
+assert not instance.red, instance.red
+instance.environment['GATE_FAKE_RECORD'] = 'none'
+instance.latency_section()
+assert instance.latency_verdict == 'RED', (instance.latency_verdict, instance.latency_red)
+assert any('without recording a helper call' in line for line in instance.latency_red), instance.latency_red
+assert not list((instance.work / 'latency_runs').glob('*.txt')), 'the fake member wrote no record'
+
+# A-096: an unexpected record line in the fresh run record is RED too.
+instance, _ = latency_gate()
+instance.latency_runs = {}
+instance.latency_red = []
+record = instance.latency_run_record_path('latency:0')
+record.write_text('example.com/mod/internal/fake TestAlpha\nexample.com/mod/internal/fake TestGhost\n')
+instance.check_latency_run_record('latency:0', record, {'internal/fake.TestAlpha'})
+assert any('TestGhost' in line and 'not a member' in line for line in instance.latency_red), instance.latency_red
+
 # A member that never reports an outcome makes the latency section RED.
 instance, _ = latency_gate(members=[{'package': './internal/fake', 'test': 'TestGamma', 'tags': ''}])
 instance.latency_section()
@@ -583,6 +745,57 @@ assert instance.overall_verdict() == 'NOT_RUN', instance.overall_verdict()
 assert not instance.report('self-check'), 'a NOT_RUN section must not exit green'
 report = json.loads((instance.work / 'STRICT_GATE.json').read_text())
 assert report['sections']['latency']['verdict'] == 'NOT_RUN', report['sections']
+
+# A-097: an absent required reading is a breach with its reason, never a default zero.
+instance, _ = latency_gate()
+missing = instance.latency_breaches(dict(load_average=None, temperatures_celsius={'k10temp:Tctl': 40.0},
+                                         baseline_sha256_64mib_seconds=LATENCY_DEFAULTS['benchmark_reference_seconds'],
+                                         worker_clusters=[], go_test_processes=[]))
+assert any('load average unavailable' in reason for reason in missing), missing
+zero_benchmark = instance.latency_breaches(dict(load_average=(0.1,), temperatures_celsius={'k10temp:Tctl': 40.0},
+                                               baseline_sha256_64mib_seconds=0, worker_clusters=[],
+                                               go_test_processes=[]))
+assert any('benchmark unavailable' in reason for reason in zero_benchmark), zero_benchmark
+assert not instance.latency_breaches(clean_reading()), 'complete readings stay green'
+
+# A-097: no temperature sensor makes the section NOT_RUN, retaining the reason in the report's conditions.
+instance, _ = latency_gate()
+
+
+def unknown_temperature():
+    current = clean_reading()
+    current['temperatures_celsius'] = {}
+    current['breaches'] = instance.latency_breaches(current)
+    return current
+
+
+instance.latency_reading = unknown_temperature
+instance.latency_section()
+assert instance.latency_verdict == 'NOT_RUN', instance.latency_verdict
+assert any('temperature unavailable' in reason for current in instance.latency_conditions
+           for reason in current['breaches']), instance.latency_conditions
+
+# A-097: every during-run monitor sample and its reasons are retained in the report's conditions.
+class OneReading:
+    def __init__(self):
+        self.calls = 0
+
+    def wait(self, seconds):
+        self.calls += 1
+        return self.calls > 1
+
+
+instance, _ = latency_gate()
+instance.latency_conditions = [{'at': 'before', 'breaches': []}]
+instance.latency_reading = lambda: {**clean_reading(), 'at': 'during'}
+breaches = []
+instance.monitor_latency_conditions(OneReading(), breaches)
+assert any(current['at'] == 'during' for current in instance.latency_conditions), instance.latency_conditions
+instance.latency_reading = lambda: {**clean_reading(), 'at': 'during-breach', 'breaches': ['planted during load']}
+breaches = []
+instance.monitor_latency_conditions(OneReading(), breaches)
+assert breaches and any(current.get('at') == 'during-breach' and current['breaches'] == ['planted during load']
+                        for current in instance.latency_conditions), instance.latency_conditions
 
 # A breach sampled during the run makes the section NOT_RUN even when every member passed.
 instance, _ = latency_gate(breach_after=(1,))
@@ -656,13 +869,26 @@ assert any('is not "<import path> <root test name>"' in line for line in instanc
 # A store file without latency_record (stored before the population record) is ignored: the unit runs again.
 instance, log = fingerprint_gate()
 fingerprint, inputs = instance.unit_fingerprint('postgres', FINGERPRINT_TAGS, fake_unit('alpha'), {}, None)
-instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00', {'internal/fake.TestAlpha': 'pass'}, [])
+population = ['internal/fake.TestAlpha', 'internal/fake.TestBeta']
+instance.store_unit(fingerprint, inputs, '2026-01-01T00:00:00+00:00',
+                    {'internal/fake.TestAlpha': 'pass', 'internal/fake.TestBeta': 'pass'}, [], population)
 path = instance.reuse_store / f'{fingerprint}.json'
 document = json.loads(path.read_text())
 assert instance.stored_unit(fingerprint)['latency_record'] == []
 del document['latency_record']
 path.write_text(json.dumps(document))
 assert instance.stored_unit(fingerprint) is None and 'latency_record' in instance.reuse_ignored[-1], instance.reuse_ignored
+
+# An entry written before the population proof existed is never reused; neither is one whose outcomes omit a planned test.
+document['latency_record'] = []
+del document['population']
+path.write_text(json.dumps(document))
+assert instance.stored_unit(fingerprint) is None and 'population' in instance.reuse_ignored[-1], instance.reuse_ignored
+document['population'] = population
+document['test_free'] = False
+document['outcomes'].pop('internal/fake.TestBeta')
+path.write_text(json.dumps(document))
+assert instance.stored_unit(fingerprint) is None and 'population' in instance.reuse_ignored[-1], instance.reuse_ignored
 
 # A stopped or failed pool starts none of its queued units.
 started = []
@@ -686,6 +912,76 @@ instance.census = {'binary': ['GXB_FAKE_API_BINARY']}
 instance.build_binaries()
 built = [json.loads(line) for line in log.read_text().splitlines()]
 assert built and all('-trimpath' in command for command in built), built
+
+# A unit that fails stops queued units on every pool thread, and a stopping gate starts no unit or clone.
+started = []
+
+
+def fail_first(unit):
+    started.append(unit)
+    if unit == 'first':
+        raise SystemExit(143)
+
+
+# A short switch interval widens the window between the failure and main's cancel (A-104 hit it 21 times in 500).
+interval = sys.getswitchinterval()
+sys.setswitchinterval(1e-6)
+try:
+    for attempt in range(500):
+        started.clear()
+        try:
+            gate_pool.run_pool(['first', 'queued'], 1, fail_first)
+        except SystemExit:
+            pass
+        assert started == ['first'], (attempt, started)
+finally:
+    sys.setswitchinterval(interval)
+gate_pool.STOPPING.set()
+try:
+    gate_pool.run_pool(['a', 'b'], 2, started.append)
+    assert started == ['first'], started
+    try:
+        gate_pool.clone_database('createdb', 1, 'tpl', 'db', {})
+        raise AssertionError('a stopping gate cloned a database')
+    except gate_pool.PoolError:
+        pass
+finally:
+    gate_pool.STOPPING.clear()
+
+# A start interrupted after the server launched still stops the cluster; init alone leaves nothing to stop.
+actions = []
+instance, log = fake_gate()
+
+
+def interrupted_start(action):
+    actions.append(action)
+    if action == 'start':
+        (instance.work / 'cluster/pgdata').mkdir(parents=True)
+        (instance.work / 'cluster/pgdata/postmaster.pid').write_text('1\n')
+        raise SystemExit(143)
+
+
+instance.cluster = interrupted_start
+try:
+    instance.clustered(lambda: None)
+    raise AssertionError('interrupted start did not propagate')
+except SystemExit:
+    pass
+assert actions == ['init', 'start', 'stop'], actions
+
+# A child that ignores TERM is killed after the grace; a process outside the snapshot is left alone.
+stubborn = subprocess.Popen(['sh', '-c', 'trap "" TERM; sleep 60'])
+later = subprocess.Popen(['sleep', '60'])
+try:
+    time.sleep(0.2)
+    members = {member for member in strict_gate.group_members() if member[0] == stubborn.pid}
+    assert len(members) == 1, members
+    strict_gate.kill_survivors(members, 0)
+    assert stubborn.wait(timeout=5) == -signal.SIGKILL
+    assert later.poll() is None
+finally:
+    later.kill()
+    later.wait()
 
 import gate_compare  # noqa: E402
 pair = {'pkg.TestA': dict(status='PASS', runs={'suite:postgres': 'pass', 'recipe:x': 'pass'})}
