@@ -257,6 +257,8 @@ def guarded_item_blobs():
             "\t\t\tend\n"
             "\t\tend\n"
             "\t\targ_1_0.info = arg_2_1\n"
+            "\t\targ_1_0.teams[arg_2_1.team.team_id] = arg_2_1.team\n"
+            "\t\targ_1_0.single = arg_2_1.one\n"
             "\t\tlocal function var_2_9(arg_9_0)\n"
             "\t\t\treturn arg_9_0.helper_only\n"
             "\t\tend\n"
@@ -274,6 +276,17 @@ def guarded_item_blobs():
             "function var_0_0.keep(arg_5_0, arg_5_1)\n"
             "\tif arg_5_1.saved then\n"
             "\t\targ_5_0.info.saved = arg_5_1.saved\n"
+            "\tend\n"
+            "end\n"
+            "function var_0_0.cell(arg_4_0, arg_4_1)\n"
+            "\tlocal var_4_0 = arg_4_0.teams[arg_4_1]\n"
+            "\tif var_4_0.need_time == 0 then\n"
+            "\t\tprint(var_4_0.idle_only)\n"
+            "\telse\n"
+            "\t\tprint(var_4_0.award)\n"
+            "\tend\n"
+            "\tif arg_4_0.single.need_time == 0 then\n"
+            "\t\tprint(arg_4_0.single.award)\n"
             "\tend\n"
             "end\n"
             "function var_0_0.show(arg_3_0)\n"
@@ -308,6 +321,12 @@ class GuardResolutionTests(unittest.TestCase):
 
     def test_a_top_level_value_branch_keeps_its_reads_required(self):
         self.assertEqual("REQUIRED", self.requirements["stage_only"])
+
+    def test_a_value_branch_on_a_keyed_stored_record_is_optional(self):
+        # TreasureWindow stores each team_info reply as teams[team_id] and reads award only when need_time ~= 0.
+        for path in ("team.idle_only", "team.award"):
+            self.assertEqual("OPTIONAL", self.requirements[path], path)
+        self.assertEqual("REQUIRED", self.requirements["one.award"])
 
     def test_a_guard_on_a_non_reply_value_guards_nothing(self):
         self.assertEqual("REQUIRED", self.requirements["flag"])

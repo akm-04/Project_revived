@@ -50,7 +50,7 @@ import os
 import re
 import sys
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -121,6 +121,8 @@ class Taint:
     wrapper: str | None = None
     followed: frozenset[str] = frozenset()
     branch: str | None = None
+    # Length of the path prefix the client keeps as one entry of a keyed table (teams[team_id] = team_info).
+    record: int | None = None
 
 
 @dataclass(frozen=True)
@@ -433,13 +435,13 @@ def extend_taint(taint: Taint, segments: list[tuple[str, str]]) -> Taint:
                 parts.append("[]")
         else:
             break
-    return Taint(tuple(parts), taint.wrapper, taint.followed, taint.branch)
+    return replace(taint, path=tuple(parts))
 
 
 def element(taint: Taint) -> Taint:
     if taint.path and taint.path[-1] == "[]":
         return taint
-    return Taint(taint.path + ("[]",), taint.wrapper, taint.followed, taint.branch)
+    return replace(taint, path=taint.path + ("[]",))
 
 
 def path_parts(taint: Taint, segments: list[tuple[str, str]]) -> list[tuple[str, ...]]:
@@ -1048,6 +1050,9 @@ class Extractor:
             for kind, condition, _, _ in branches if kind != "else"
             for path in self.reply_paths(_compared_chains(tokens, *condition), bindings, seeds)
             if "[]" in path and path[0] != LOCAL_GUARD
+        ) | frozenset(
+            guard for kind, condition, _, _ in branches if kind != "else"
+            for guard in self.record_branches(_compared_chains(tokens, *condition), bindings, seeds)
         )
         for kind, condition, body_start, body_end in branches:
             positive, negative = (self.reply_paths(chains, bindings, seeds) for chains in condition_paths(tokens, *condition))
@@ -1063,6 +1068,19 @@ class Extractor:
                     guards = guards | negative
                     break
         return if_end + 1
+
+    @staticmethod
+    def record_branches(chains, bindings, seeds) -> frozenset[tuple[str, ...]]:
+        """A value comparison on an entry of a client keyed table branches per
+        entry, like one on a list element."""
+        taints = []
+        for position, root, _ in chains:
+            if seeds and position in seeds:
+                taints.extend(taint for taint, _, _ in seeds[position])
+            elif root in bindings:
+                taints.append(bindings[root][0])
+        return frozenset((VALUE_BRANCH,) + taint.path[:taint.record]
+                         for taint in taints if taint.record is not None and taint.wrapper is None)
 
     @staticmethod
     def reply_paths(chains, bindings, seeds) -> frozenset[tuple[str, ...]]:
@@ -1190,6 +1208,7 @@ class Extractor:
     def scan_field_accesses(self, file, kind, owner, owner_file, store_path, taints) -> None:
         binding = _binding_id(owner_file or owner, store_path)
         ambiguous = len({stored.branch for stored in taints}) > 1
+        keyed = store_path[-1][0] == "index"
         index = self.index(file)
         tokens = index.tokens
         aliases = self.aliases(file)
@@ -1219,11 +1238,12 @@ class Extractor:
             if binding in stored.followed:
                 continue
             seeds: dict[int, list[tuple[Taint, frozenset[int], str]]] = {}
+            record = len(stored.path) if keyed else None
             for position, remainder in reads:
                 seed = extend_taint(stored, remainder)
                 followed = seed.followed | {binding}
                 branch = UNKNOWN_BRANCH if ambiguous else seed.branch
-                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch), frozenset(mids), "stored field"))
+                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch, record), frozenset(mids), "stored field"))
             for function in index.functions:
                 local_seeds = {position: value for position, value in seeds.items()
                                if function.body_start <= position <= function.end}
@@ -1271,6 +1291,7 @@ class Extractor:
         seeds: dict[int, list[tuple[Taint, frozenset[int], str]]] = {}
         binding = _binding_id(class_file or class_name, store_path)
         ambiguous = len({stored.branch for stored in taints}) > 1
+        keyed = store_path[-1][0] == "index"
         for position in range(function.body_start, function.end):
             if tokens[position].kind != "name" or tokens[position].value != self_parameter:
                 continue
@@ -1285,7 +1306,8 @@ class Extractor:
                 seed = extend_taint(stored, remainder)
                 followed = seed.followed | {binding}
                 branch = UNKNOWN_BRANCH if ambiguous else seed.branch
-                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch), frozenset(mids), "returned rows"))
+                record = len(stored.path) if keyed else None
+                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch, record), frozenset(mids), "returned rows"))
         return seeds
 
     def apply_return_call_sites(self, file, class_name, class_file, method, returned) -> None:
@@ -1314,7 +1336,7 @@ class Extractor:
                 followed = taint.followed | {binding}
                 branch = UNKNOWN_BRANCH if ambiguous else taint.branch
                 seed = element(taint) if indexed else taint
-                seeds.setdefault(position, []).append((Taint(seed.path, seed.wrapper, followed, branch), frozenset(mids), f"{class_name}:{method} return"))
+                seeds.setdefault(position, []).append((replace(seed, followed=followed, branch=branch), frozenset(mids), f"{class_name}:{method} return"))
         if not seeds:
             return
         for function in index.functions:
