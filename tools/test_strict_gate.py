@@ -703,6 +703,27 @@ assert latency_test_command[latency_test_command.index('-run') + 1] == '^(TestAl
 assert instance.overall_verdict() == 'GREEN', instance.overall_verdict()
 assert instance.sections_report()['latency']['verdict'] == 'GREEN'
 
+# A-096: the quiet run must write its own fresh record; a general or cached record can never vouch for it.
+instance, _ = latency_gate()
+instance.latency_reused = ['example.com/mod/internal/fake TestAlpha']
+instance.runs = {'suite:unit': {'internal/fake.TestAlpha': 'pass'}}
+instance.check_latency_records()
+assert not instance.red, instance.red
+instance.environment['GATE_FAKE_RECORD'] = 'none'
+instance.latency_section()
+assert instance.latency_verdict == 'RED', (instance.latency_verdict, instance.latency_red)
+assert any('without recording a helper call' in line for line in instance.latency_red), instance.latency_red
+assert not list((instance.work / 'latency_runs').glob('*.txt')), 'the fake member wrote no record'
+
+# A-096: an unexpected record line in the fresh run record is RED too.
+instance, _ = latency_gate()
+instance.latency_runs = {}
+instance.latency_red = []
+record = instance.latency_run_record_path('latency:0')
+record.write_text('example.com/mod/internal/fake TestAlpha\nexample.com/mod/internal/fake TestGhost\n')
+instance.check_latency_run_record('latency:0', record, {'internal/fake.TestAlpha'})
+assert any('TestGhost' in line and 'not a member' in line for line in instance.latency_red), instance.latency_red
+
 # A member that never reports an outcome makes the latency section RED.
 instance, _ = latency_gate(members=[{'package': './internal/fake', 'test': 'TestGamma', 'tags': ''}])
 instance.latency_section()
@@ -724,6 +745,57 @@ assert instance.overall_verdict() == 'NOT_RUN', instance.overall_verdict()
 assert not instance.report('self-check'), 'a NOT_RUN section must not exit green'
 report = json.loads((instance.work / 'STRICT_GATE.json').read_text())
 assert report['sections']['latency']['verdict'] == 'NOT_RUN', report['sections']
+
+# A-097: an absent required reading is a breach with its reason, never a default zero.
+instance, _ = latency_gate()
+missing = instance.latency_breaches(dict(load_average=None, temperatures_celsius={'k10temp:Tctl': 40.0},
+                                         baseline_sha256_64mib_seconds=LATENCY_DEFAULTS['benchmark_reference_seconds'],
+                                         worker_clusters=[], go_test_processes=[]))
+assert any('load average unavailable' in reason for reason in missing), missing
+zero_benchmark = instance.latency_breaches(dict(load_average=(0.1,), temperatures_celsius={'k10temp:Tctl': 40.0},
+                                               baseline_sha256_64mib_seconds=0, worker_clusters=[],
+                                               go_test_processes=[]))
+assert any('benchmark unavailable' in reason for reason in zero_benchmark), zero_benchmark
+assert not instance.latency_breaches(clean_reading()), 'complete readings stay green'
+
+# A-097: no temperature sensor makes the section NOT_RUN, retaining the reason in the report's conditions.
+instance, _ = latency_gate()
+
+
+def unknown_temperature():
+    current = clean_reading()
+    current['temperatures_celsius'] = {}
+    current['breaches'] = instance.latency_breaches(current)
+    return current
+
+
+instance.latency_reading = unknown_temperature
+instance.latency_section()
+assert instance.latency_verdict == 'NOT_RUN', instance.latency_verdict
+assert any('temperature unavailable' in reason for current in instance.latency_conditions
+           for reason in current['breaches']), instance.latency_conditions
+
+# A-097: every during-run monitor sample and its reasons are retained in the report's conditions.
+class OneReading:
+    def __init__(self):
+        self.calls = 0
+
+    def wait(self, seconds):
+        self.calls += 1
+        return self.calls > 1
+
+
+instance, _ = latency_gate()
+instance.latency_conditions = [{'at': 'before', 'breaches': []}]
+instance.latency_reading = lambda: {**clean_reading(), 'at': 'during'}
+breaches = []
+instance.monitor_latency_conditions(OneReading(), breaches)
+assert any(current['at'] == 'during' for current in instance.latency_conditions), instance.latency_conditions
+instance.latency_reading = lambda: {**clean_reading(), 'at': 'during-breach', 'breaches': ['planted during load']}
+breaches = []
+instance.monitor_latency_conditions(OneReading(), breaches)
+assert breaches and any(current.get('at') == 'during-breach' and current['breaches'] == ['planted during load']
+                        for current in instance.latency_conditions), instance.latency_conditions
 
 # A breach sampled during the run makes the section NOT_RUN even when every member passed.
 instance, _ = latency_gate(breach_after=(1,))
