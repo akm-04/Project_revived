@@ -191,8 +191,9 @@ def base_environment(census_classes, tree, scratch):
         command, tags = strict_gate.BINARY_COMMANDS[variable.removesuffix('_BINARY').rsplit('_', 1)[-1]]
         output = scratch / 'binaries' / command
         output.parent.mkdir(parents=True, exist_ok=True)
-        if not output.exists():
-            subprocess.run(['go', 'build', '-buildvcs=false', '-tags', tags, '-o', str(output), './cmd/' + command], cwd=tree, check=True)
+        # Always rebuild: the scratch directory is named by --database and outlives the run, so a binary already
+        # there is from an older commit (go's build cache keeps the rebuild cheap).
+        subprocess.run(['go', 'build', '-buildvcs=false', '-tags', tags, '-o', str(output), './cmd/' + command], cwd=tree, check=True)
         environment[variable] = str(output)
     return environment
 
