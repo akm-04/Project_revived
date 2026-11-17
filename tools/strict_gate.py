@@ -13,7 +13,7 @@ outside the allowlist, a repaid debt entry and a stale allowlist entry all make 
 Usage: strict_gate.py --toolchain <self-contained tool root> --cache <go/zig cache root> --work <new directory>
                       --populated59-dump <I7C3B F2_RECOVERY_EVIDENCE.dump> [--commit HEAD] [--port 55561] [--select REGEX]
                       [--mode serial|parallel] [--jobs N] [--package PATH ...] [--previous STRICT_GATE.json]
-                      [--api-logs DIR]
+                      [--api-logs DIR] [--reuse] [--reuse-store DIR]
 """
 import argparse
 import collections
@@ -36,7 +36,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gate_pool  # noqa: E402
 
 REPOSITORY = Path(__file__).resolve().parents[1]
+WORKSPACE = Path('/home/akm/Chatgpt/EOL_Game')
 LISTS = REPOSITORY / 'tools/strict_gate'
+DEFAULT_REUSE_STORE = WORKSPACE / 'tmp/gate_results'
 TAG_SETS = {'unit': '', 'postgres': 'postgres socialintegration channelintegration',
             'river': 'postgres river socialintegration channelintegration'}
 BUILD_ONLY_TAG_SETS = {'chi': 'chi'}
@@ -142,6 +144,17 @@ class Gate:
         self.jobs = arguments.jobs
         self.previous = Path(arguments.previous).resolve() if arguments.previous else None
         self.api_logs = Path(arguments.api_logs).resolve() if arguments.api_logs else None
+        self.reuse = arguments.reuse
+        self.reuse_store = Path(arguments.reuse_store).resolve()
+        self.reuse_in_run = {}
+        self.reuse_lock = threading.Lock()
+        self.reuse_ignored = []
+        self.reused_units = 0
+        self.run_units = 0
+        self.input_hashes = {}
+        self.code_cache = {}
+        self.template_cache = {}
+        self._go_version = None
         self.max_connections = 900 if self.mode == 'parallel' else 300
         self.populated59 = Path(arguments.populated59_dump).resolve()
         self.red = []
@@ -462,34 +475,245 @@ class Gate:
             environment[variable] = self.dsn(database)
         return environment
 
+    def unit_fingerprint(self, suite, tags, unit, extra, skip):
+        """The sha256 of every input that can change this unit's outcome; raises NotReusable when one is unknown."""
+        package = gate_pool.normalize_package(unit['package'])
+        package_directory = self.source / package
+        inputs = dict(
+            code=self.code_inputs(tags, package),
+            runtime=gate_pool.runtime_file_inputs(self.source, package_directory,
+                                                  sorted(package_directory.glob('*_test.go')), self.input_hashes),
+            fixtures=self.fixture_inputs(),
+            external=self.external_inputs(),
+            database=self.database_inputs(suite, tags, package),
+            binaries=self.binary_inputs(),
+            unit=self.unit_inputs(tags, unit, extra, skip))
+        return hashlib.sha256(gate_pool.canonical_json(inputs).encode()).hexdigest(), inputs
+
+    def code_inputs(self, tags, package):
+        key = (tags, package)
+        cached = self.code_cache.get(key)
+        if isinstance(cached, str):
+            raise gate_pool.NotReusable(cached)
+        if cached is not None:
+            return cached
+        completed = subprocess.run([self.tool('go'), 'list', '-deps', '-test', '-json', '-tags', tags, './' + package],
+                                   cwd=self.source, env=self.environment, capture_output=True, text=True,
+                                   stdin=subprocess.DEVNULL)
+        if completed.returncode != 0:
+            reason = f'go list -deps -test failed for ./{package}: {(completed.stdout + completed.stderr).strip()[-500:]}'
+            self.code_cache[key] = reason
+            raise gate_pool.NotReusable(reason)
+        try:
+            records = gate_pool.code_inputs(completed.stdout, self.source, self.input_hashes)
+        except gate_pool.NotReusable as failure:
+            self.code_cache[key] = str(failure)
+            raise
+        self.code_cache[key] = records
+        return records
+
+    def fixture_inputs(self):
+        records = []
+        for name, path in sorted(suite_fixtures(self.source).items()):
+            records.append([name, str(Path(path).relative_to(self.source)),
+                            gate_pool.sha256_file(path, self.input_hashes)])
+        return records
+
+    def external_inputs(self):
+        tools = {}
+        for path in (Path(__file__).resolve(), Path(gate_pool.__file__).resolve()):
+            tools[path.name] = gate_pool.sha256_file(path, self.input_hashes)
+        return dict(go_sum=gate_pool.sha256_file(self.source / 'go.sum', self.input_hashes),
+                    go_mod=gate_pool.sha256_file(self.source / 'go.mod', self.input_hashes),
+                    go_version=self.go_version(), toolchain=str(self.toolchain), tools=tools,
+                    lists=dict(sorted(self.list_hashes.items())))
+
+    def go_version(self):
+        if self._go_version is None:
+            completed = subprocess.run([self.tool('go'), 'version'], cwd=self.source, env=self.environment,
+                                       capture_output=True, text=True, stdin=subprocess.DEVNULL)
+            require(completed.returncode == 0, f'go version failed: {(completed.stdout + completed.stderr).strip()[-500:]}')
+            self._go_version = completed.stdout.strip()
+        return self._go_version
+
+    def database_inputs(self, suite, tags, package):
+        # The unit suite creates no databases, so its units receive no DSN and the template is not an input.
+        if suite == 'unit' or not self.dsn_by_package.get(package):
+            return None
+        return dict(template=self.template_key(tags))
+
+    def template_key(self, tags):
+        cached = self.template_cache.get(tags)
+        if cached is not None:
+            if 'reason' in cached:
+                raise gate_pool.NotReusable(cached['reason'])
+            return cached['key']
+        try:
+            provision = ['internal/integration/publication']
+            if 'river' in tags.split():
+                provision.append('internal/adapters/river')
+            key = hashlib.sha256(gate_pool.canonical_json(dict(
+                migrations=gate_pool.directory_files(self.source / 'migrations', self.input_hashes),
+                content=gate_pool.directory_files(self.source / 'internal/content/builtin/generated', self.input_hashes),
+                provision=[hashlib.sha256(gate_pool.canonical_json(self.code_inputs(tags, package)).encode()).hexdigest()
+                           for package in provision])).encode()).hexdigest()
+        except gate_pool.NotReusable as failure:
+            self.template_cache[tags] = dict(reason=str(failure))
+            raise
+        self.template_cache[tags] = dict(key=key)
+        return key
+
+    def binary_inputs(self):
+        records = []
+        for variable in sorted(self.census.get('binary', ())):
+            path = self.environment.get(variable)
+            if not path:
+                continue
+            records.append([variable, self.normalized_value(path), gate_pool.sha256_file(path, self.input_hashes)])
+        return records
+
+    def unit_inputs(self, tags, unit, extra, skip):
+        package = gate_pool.normalize_package(unit['package'])
+        return dict(tags=tags, run=unit.get('run'), skip=skip, shard=unit.get('shard'),
+                    shard_count=self.shard_count(package, unit),
+                    environment=self.normalized_environment(package, extra))
+
+    def shard_count(self, package, unit):
+        if unit.get('shard') is None:
+            return 1
+        counts = {gate_pool.normalize_package(key): value for key, value in self.parallel.get('shards', {}).items()}
+        return counts.get(package, 1)
+
+    def normalized_environment(self, package, extra):
+        pairs = {**self.environment, **extra}
+        pairs['GXB_I7B5B_ASSET_ROOT'] = '<MEDIA_ROOT>'
+        for variable in sorted(self.dsn_by_package.get(package, ())):
+            pairs[variable] = '<DATABASE_DSN>'
+        return [[name, self.normalized_value(value)] for name, value in sorted(pairs.items())]
+
+    def normalized_value(self, value):
+        return str(value).replace(str(self.work), '<WORK>').replace(str(self.port), '<PORT>')
+
+    def reserve_fingerprint(self, fingerprint, started):
+        with self.reuse_lock:
+            holder = self.reuse_in_run.get(fingerprint)
+            if holder is not None:
+                return holder, False
+            holder = dict(event=threading.Event(), started=started, outcomes=None)
+            self.reuse_in_run[fingerprint] = holder
+            return holder, True
+
+    def stored_unit(self, fingerprint):
+        path = self.reuse_store / f'{fingerprint}.json'
+        if not path.is_file():
+            return None
+        try:
+            document = json.loads(path.read_text())
+            if not isinstance(document, dict):
+                raise ValueError('not a JSON object')
+            if document.get('fingerprint') != fingerprint:
+                raise ValueError('fingerprint field differs from the file name')
+            if hashlib.sha256(gate_pool.canonical_json(document['inputs']).encode()).hexdigest() != fingerprint:
+                raise ValueError('stored inputs do not hash to the file name')
+            outcomes = document['outcomes']
+            if not isinstance(outcomes, dict) or not all(isinstance(outcome, str) for outcome in outcomes.values()):
+                raise ValueError('outcomes are not a test-to-outcome object')
+            source = {name: document[name] for name in ('commit', 'report', 'started')}
+            if not all(isinstance(value, str) for value in source.values()):
+                raise ValueError('commit, report and started must be strings')
+        except (OSError, ValueError, KeyError, TypeError) as failure:
+            message = f'reuse: ignoring store file {path}: {failure}'
+            self.reuse_ignored.append(message)
+            print(message, flush=True)
+            return None
+        return {**source, 'outcomes': outcomes}
+
+    def store_unit(self, fingerprint, inputs, started, outcomes):
+        document = dict(fingerprint=fingerprint, inputs=inputs, commit=self.commit,
+                        report=str(self.work / 'STRICT_GATE.json'), started=started, outcomes=outcomes)
+        self.reuse_store.mkdir(parents=True, exist_ok=True)
+        path = self.reuse_store / f'{fingerprint}.json'
+        temporary = self.reuse_store / f'.{fingerprint}.{threading.get_ident()}.tmp'
+        temporary.write_text(json.dumps(document, indent=1, sort_keys=True) + '\n')
+        temporary.replace(path)
+
+    def storable(self, code, outcomes, broken_packages):
+        if code != 0 or broken_packages:
+            return False
+        return all(outcome == 'pass' or (outcome == 'skip' and test in self.allowlist)
+                   for test, outcome in outcomes.items())
+
+    def record_reuse(self, name, unit, source, began):
+        outcomes = source['outcomes']
+        self.merge_unit_outcomes(f'suite:{name}', unit['unit'], outcomes, set())
+        row = dict(name=f'unit:{name}:{unit["unit"]}', exit=0, tests=len(outcomes),
+                   reused_from=dict(commit=source['commit'], report=source['report'], started=source['started']),
+                   seconds=round(time.perf_counter() - began, 3))
+        with self.unit_lock:
+            self.steps.append(row)
+            self.reused_units += 1
+        print(f'{row["name"]} reused {dict(collections.Counter(outcomes.values()))}', flush=True)
+
     def run_unit(self, name, tags, unit, extra, skip):
         label = f'suite:{name}'
         stream = self.work / 'runs' / f'suite_{name}' / f'{unit["unit"]}.jsonl'
         began = time.perf_counter()
+        started = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        fingerprint = inputs = None
+        holder, runner = None, False
         try:
-            environment = self.unit_environment(name, unit, extra)
-            arguments = gate_pool.go_test_command(self.tool('go'), tags, [unit['package']], run=unit['run'], skip=skip)
-            with stream.open('w') as output:
-                code = subprocess.run(arguments, cwd=self.source, env=environment, stdout=output,
-                                      stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
-            outcomes, failed_packages = gate_pool.parse_go_test_json(stream, self.module)
-        except (gate_pool.PoolError, OSError) as failure:
+            fingerprint, inputs = self.unit_fingerprint(name, tags, unit, extra, skip)
+        except (gate_pool.NotReusable, OSError) as failure:
+            print(f'reuse: unit {unit["unit"]} NOT_REUSABLE: {failure}', flush=True)
+        if fingerprint is not None:
+            if self.reuse:
+                stored = self.stored_unit(fingerprint)
+                if stored is not None:
+                    self.record_reuse(name, unit, stored, began)
+                    return
+            holder, runner = self.reserve_fingerprint(fingerprint, started)
+            if not runner:
+                holder['event'].wait()
+                first = holder['outcomes']
+                if first is not None:
+                    self.record_reuse(name, unit, dict(commit=self.commit, report=str(self.work / 'STRICT_GATE.json'),
+                                                       started=holder['started'], outcomes=first), began)
+                    return
+        storable_outcomes = None
+        try:
+            try:
+                environment = self.unit_environment(name, unit, extra)
+                arguments = gate_pool.go_test_command(self.tool('go'), tags, [unit['package']], run=unit['run'], skip=skip)
+                with stream.open('w') as output:
+                    code = subprocess.run(arguments, cwd=self.source, env=environment, stdout=output,
+                                          stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
+                outcomes, failed_packages = gate_pool.parse_go_test_json(stream, self.module)
+            except (gate_pool.PoolError, OSError) as failure:
+                with self.unit_lock:
+                    self.red.append(f'{label}: unit {unit["unit"]}: {failure}')
+                    self.steps.append(dict(name=f'unit:{name}:{unit["unit"]}', exit=None, error=str(failure),
+                                           seconds=round(time.perf_counter() - began, 3)))
+                return
+            if code != 0 and not outcomes and not failed_packages:
+                # A unit killed without events (OOM, SIGKILL) would otherwise drop its tests silently.
+                with self.unit_lock:
+                    self.red.append(f'{label}: unit {unit["unit"]} exited {code} without test events')
+            failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
+            self.merge_unit_outcomes(label, unit['unit'], outcomes, failed_packages - failing_packages)
+            row = dict(name=f'unit:{name}:{unit["unit"]}', exit=code, stream=str(stream.relative_to(self.work)),
+                       tests=len(outcomes), seconds=round(time.perf_counter() - began, 3))
             with self.unit_lock:
-                self.red.append(f'{label}: unit {unit["unit"]}: {failure}')
-                self.steps.append(dict(name=f'unit:{name}:{unit["unit"]}', exit=None, error=str(failure),
-                                       seconds=round(time.perf_counter() - began, 3)))
-            return
-        if code != 0 and not outcomes and not failed_packages:
-            # A unit killed without events (OOM, SIGKILL) would otherwise drop its tests silently.
-            with self.unit_lock:
-                self.red.append(f'{label}: unit {unit["unit"]} exited {code} without test events')
-        failing_packages = {key.rsplit('.', 1)[0] for key, outcome in outcomes.items() if outcome in ('fail', 'incomplete')}
-        self.merge_unit_outcomes(label, unit['unit'], outcomes, failed_packages - failing_packages)
-        row = dict(name=f'unit:{name}:{unit["unit"]}', exit=code, stream=str(stream.relative_to(self.work)),
-                   tests=len(outcomes), seconds=round(time.perf_counter() - began, 3))
-        with self.unit_lock:
-            self.steps.append(row)
-        print(f'{row["name"]} {code} {dict(collections.Counter(outcomes.values()))}', flush=True)
+                self.steps.append(row)
+                self.run_units += 1
+            print(f'{row["name"]} {code} {dict(collections.Counter(outcomes.values()))}', flush=True)
+            if fingerprint is not None and self.storable(code, outcomes, failed_packages - failing_packages):
+                self.store_unit(fingerprint, inputs, started, outcomes)
+                storable_outcomes = outcomes
+        finally:
+            if holder is not None:
+                with self.reuse_lock:
+                    holder['outcomes'] = storable_outcomes
+                    holder['event'].set()
 
     def merge_unit_outcomes(self, label, unit_name, outcomes, broken_packages):
         with self.unit_lock:
@@ -830,6 +1054,8 @@ class Gate:
                       finished=datetime.datetime.now(datetime.timezone.utc).isoformat(), mode=self.mode, jobs=self.jobs,
                       lists=self.list_hashes, selection=self.select.pattern if self.select else None,
                       packages=self.packages,
+                      reuse=dict(reused_units=self.reused_units, run_units=self.run_units,
+                                 store=str(self.reuse_store), ignored=list(self.reuse_ignored)),
                       census=self.census, red=self.red, blocked_by_known_debt=self.blocked, steps=self.steps,
                       counts=dict(collections.Counter(row['status'] for row in tests.values())),
                       known_debt=dict(entries=len(self.known_debt), failing=sum(row['status'] == 'KNOWN_DEBT_FAILING' for row in tests.values())),
@@ -851,9 +1077,14 @@ def main():
     parser.add_argument('--package', action='append')
     parser.add_argument('--previous')
     parser.add_argument('--api-logs', help='directory holding the e2e/VC gxb-api *.log files to scan for reply_conformance_violation')
+    parser.add_argument('--reuse', action='store_true', help='parallel mode only: reuse stored unit results whose fingerprint matches')
+    parser.add_argument('--reuse-store', default=str(DEFAULT_REUSE_STORE),
+                        help='directory holding <fingerprint>.json unit results (default tmp/gate_results)')
     arguments = parser.parse_args()
     if arguments.jobs < 1:
         parser.error('--jobs must be positive')
+    if arguments.reuse and arguments.mode != 'parallel':
+        parser.error('--reuse requires --mode parallel; serial mode never reads the store')
     # SystemExit unwinds through run()'s finally, so a stopped gate still stops its cluster.
     signal.signal(signal.SIGTERM, lambda number, frame: sys.exit(128 + number))
     started = datetime.datetime.now(datetime.timezone.utc).isoformat()
