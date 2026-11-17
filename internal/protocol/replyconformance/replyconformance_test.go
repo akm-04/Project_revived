@@ -2,6 +2,7 @@ package replyconformance
 
 import (
 	"encoding/json"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -77,6 +78,16 @@ func TestCheckerAppliesOnlyTheSelectedActivityBranch(t *testing.T) {
 	}
 }
 
+func TestCheckerReportsMappedEventConsumers(t *testing.T) {
+	missing := (Checker{}).Check(229, map[string]any{})
+	if !slices.Contains(missing, "list") {
+		t.Fatalf("MID 229 empty reply produced %#v; the mapped LOAD_ACTIVITIES listener reads list", missing)
+	}
+	if violations := (Checker{}).Check(229, map[string]any{"list": []any{}}); len(violations) != 0 {
+		t.Fatalf("MID 229 list reply produced %#v", violations)
+	}
+}
+
 func TestCheckerIgnoresMIDsWithoutObligations(t *testing.T) {
 	if violations := (Checker{}).Check(20480, nil); len(violations) != 0 {
 		t.Fatalf("violations %#v", violations)
@@ -86,11 +97,27 @@ func TestCheckerIgnoresMIDsWithoutObligations(t *testing.T) {
 // provenRepeatedPaths are the only generated paths allowed to repeat a segment;
 // each is read as a nested key at the client line cited in the extractor test.
 var provenRepeatedPaths = map[string]bool{
-	"301:rank_list[].rank_info.rank_info":      true,
-	"1572:report.report":                       true,
-	"2362:hero_stat[].hero_stat.stay_pos":      true,
-	"2362:info.hero_stat[].hero_stat":          true,
-	"2362:info.hero_stat[].hero_stat.stay_pos": true,
+	"301:rank_list[].rank_info.rank_info":           true,
+	"1572:report.report":                            true,
+	"2362:hero_stat[].hero_stat":                    true,
+	"2362:hero_stat[].hero_stat.stay_pos":           true,
+	"2362:info.hero_stat[].hero_stat":               true,
+	"2362:info.hero_stat[].hero_stat.stay_pos":      true,
+	"35:item.item":                                  true,
+	"35:item.item.star":                             true,
+	"35:item.item.table_id":                         true,
+	"370:mail_list.mail_list":                       true,
+	"370:mail_list.mail_list[]":                     true,
+	"802:self_info.self_info":                       true,
+	"802:self_info.self_info[]":                     true,
+	"185:player_info[].player_info":                 true,
+	"185:player_info[].player_info.avatar_frame_id": true,
+	"185:player_info[].player_info.avatar_id":       true,
+	"185:player_info[].player_info.conquer_lev":     true,
+	"185:player_info[].player_info.conquer_loop_id": true,
+	"185:player_info[].player_info.lev":             true,
+	"185:player_info[].player_info.player_id":       true,
+	"185:player_info[].player_info.player_name":     true,
 }
 
 func repeatedSegment(path string) string {

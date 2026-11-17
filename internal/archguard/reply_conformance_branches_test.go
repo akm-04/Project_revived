@@ -27,7 +27,9 @@ var activityWindowFile = regexp.MustCompile(`^app/windows/activities/Activity\d+
 // branchPolicyExemptions are MIDs whose reply is split by an activity id but
 // whose branches the reply-only checker cannot select. Each needs its reason.
 var branchPolicyExemptions = map[int]string{
+	1:   "RETRIEVE_TOKEN's detail is a per-MID map: Activity windows read their own entry and the request carries no activity discriminator, so the union is the batch model, not a selectable branch",
 	231: "request-discriminated at getActivityReward call sites; the reply carries no selectable discriminator and the MID is inactive",
+	629: "the NIAN_BOSS reply is one shape (the request carries no discriminator); Activity1038 and Activity1065 read the same shared NianBoss model fields, so their union is required and no per-branch set exists",
 }
 
 // TestReplyConsumerActivityBranchesCoverSplitMIDs fails when a MID consumed by
