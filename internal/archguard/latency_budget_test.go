@@ -416,7 +416,7 @@ func TestPlanted(t *testing.T) {
 	allowed := `package planted
 import ("testing"; "time"; "gxb.local/backend/v2/internal/testsupport/latency")
 func TestPlanted(t *testing.T) {
-	if !latency.Within(latency.Incidental, time.Since(time.Now()), time.Second) {
+	if !latency.Within(t, latency.Incidental, time.Since(time.Now()), time.Second) {
 		t.Fatal("outside the helper")
 	}
 }`

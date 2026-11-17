@@ -215,7 +215,7 @@ func TestSaturatedPoolRefusesThenAdmits(t *testing.T) {
 	if !errors.Is(err, app.ErrWorkerSaturated) || !errors.Is(err, d.ErrResolverRetryable) {
 		t.Fatal("saturated pool admitted or misclassified", err)
 	}
-	if waited := time.Since(began); !latency.Within(latency.Incidental, waited, 2*time.Second) {
+	if waited := time.Since(began); !latency.Within(t, latency.Incidental, waited, 2*time.Second) {
 		t.Fatal("refusal took", waited)
 	}
 	if err = <-busy; err != nil {
