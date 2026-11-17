@@ -51,6 +51,8 @@ run python3 tools/test_system_map.py
 run go test ./tools/system_map_mids
 run python3 tools/system_map.py --check
 run python3 tools/mid_effects.py --check
+run python3 tools/reply_consumers.py --check
+run python3 tools/test_reply_consumers.py
 run python3 tools/generate_inactive_mids.py --check
 run python3 tools/test_tool_coverage.py
 run python3 tools/validate_foundation_trace.py
