@@ -10,11 +10,13 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/limits"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 type capturedJournal struct{ records []observability.RequestRecord }
@@ -144,6 +146,47 @@ func TestJournalKeepsRedactedMultipartEnvelopeOfUndecodableRequest(t *testing.T)
 	}
 	if len(record.Raw) > rawCaptureBytes {
 		t.Fatalf("envelope is not bounded: %d", len(record.Raw))
+	}
+}
+
+// A-110: every saturated admission is a SERVER_ERROR row; R2 keeps its error class and cause.
+func TestJournalRecordsSaturationWithCause(t *testing.T) {
+	saturations := map[string]func(*testing.T, *Handler){
+		"decoding limit": func(t *testing.T, handler *Handler) {
+			decoding := mustAdmission(t, 1)
+			if !decoding.TryAcquire() {
+				t.Fatal("acquire")
+			}
+			handler.Decoding = decoding
+		},
+		"in-flight limit": func(t *testing.T, handler *Handler) {
+			admission := mustAdmission(t, 1)
+			if !admission.TryAcquire() {
+				t.Fatal("acquire")
+			}
+			handler.Admission = admission
+		},
+		"queue budget": func(_ *testing.T, handler *Handler) {
+			handler.QueueWait = fixedQueueWait(time.Hour)
+			handler.QueueBudget = time.Second
+		},
+	}
+	for name, saturate := range saturations {
+		t.Run(name, func(t *testing.T) {
+			journal := &capturedJournal{}
+			handler := journalHandler(t, journal, func(context.Context, DispatchRequest) Response {
+				return Response{HTTPStatus: http.StatusOK}
+			})
+			saturate(t, &handler)
+			if response := post(handler, `{"mid":18}`); response.Code != http.StatusServiceUnavailable {
+				t.Fatalf("status=%d", response.Code)
+			}
+			record := journal.records[0]
+			var edgeError *wire.EdgeError
+			if record.HTTPStatus != http.StatusServiceUnavailable || !errors.As(record.Cause, &edgeError) || edgeError.Class != wire.ErrSaturated {
+				t.Fatalf("saturated record has no cause or class: %+v", record)
+			}
+		})
 	}
 }
 
