@@ -3,6 +3,7 @@
 package playerdisplay_test
 
 import (
+	"encoding/json"
 	"errors"
 	"slices"
 	"strconv"
@@ -252,6 +253,10 @@ func TestI9_10TopFloorTaskStaleOffersAndRevengeNative(t *testing.T) {
 	}))
 	if removedResponse.HTTPStatus != 409 || removedResponse.Body["error_code"] != int64(35026) {
 		t.Fatalf("removed task target response: %+v", removedResponse)
+	}
+	removedPreflight := dispatcher.Dispatch(ctx, playtestRequest(actor, 285, map[string]any{"enemy_id": json.Number(strconv.FormatInt(removed.Occupant.TableID(), 10))}))
+	if removedPreflight.HTTPStatus != 409 || removedPreflight.Body["error_code"] != int64(35026) {
+		t.Fatalf("removed task target preflight response: %+v", removedPreflight)
 	}
 
 	missingSnapshotTarget := view.Enemies[1]
