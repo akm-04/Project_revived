@@ -231,6 +231,33 @@ func TestBadUploadsAreQuarantinedUnattributedWhenNoOwnerIsProven(t *testing.T) {
 	}
 }
 
+// A-109: a malformed multipart upload keeps its raw body as the quarantine
+// record (I85_CLIENT_LOG_INGEST_V1 R4), including when the Content-Type carries
+// no boundary at all.
+func TestMalformedMultipartKeepsTheRawRecord(t *testing.T) {
+	f := newFixture(t)
+	body := "malformed-" + f.uid + "-body without multipart framing"
+	response, err := http.Post(f.logURL(t), "multipart/form-data", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	got := f.uploads(t, `account_uid=$1`, f.uid)
+	if len(got) != 1 || got[0].reason == nil || *got[0].reason != app.QuarantineMalformedMultipart || got[0].attachment != len(body) {
+		t.Fatalf("uploads=%+v", got)
+	}
+	var stored string
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT encode(attachment,'escape') FROM client_log_uploads WHERE account_uid=$1`, f.uid).Scan(&stored); err != nil {
+		t.Fatal(err)
+	}
+	if stored != body {
+		t.Fatalf("attachment=%q", stored)
+	}
+}
+
 // TestRequestJournalKeepsRedactedMultipartEnvelope drives the production edge,
 // journal and store: an undecodable multipart upload must persist an envelope
 // with its field names but no file body and no token value (I85_REQUEST_JOURNAL_V1 R3).

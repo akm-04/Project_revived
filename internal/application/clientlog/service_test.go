@@ -166,7 +166,7 @@ func TestBadInputIsQuarantinedAndAcknowledged(t *testing.T) {
 	cases := map[string]UploadRequest{
 		QuarantineBadCompression:     {Capability: capability, Kind: domain.KindErrorLog, Payload: []byte("plain")},
 		QuarantineBadRows:            {Capability: capability, Kind: domain.KindErrorLog, Payload: deflate(t, `"text"`)},
-		QuarantineMalformedMultipart: {Capability: capability, Malformed: QuarantineMalformedMultipart},
+		QuarantineMalformedMultipart: {Capability: capability, Malformed: QuarantineMalformedMultipart, RawBody: []byte("short malformed body")},
 	}
 	for reason, request := range cases {
 		store.uploads = nil
@@ -174,9 +174,24 @@ func TestBadInputIsQuarantinedAndAcknowledged(t *testing.T) {
 			t.Fatalf("%s status=%d", reason, status)
 		}
 		upload := store.uploads[0]
-		if upload.QuarantineReason != reason || upload.Class != domain.Anomaly || !bytes.Equal(upload.Attachment, request.Payload) {
+		raw := request.Payload
+		if request.Malformed != "" {
+			raw = request.RawBody
+		}
+		if upload.QuarantineReason != reason || upload.Class != domain.Anomaly || !bytes.Equal(upload.Attachment, raw) {
 			t.Errorf("%s upload=%+v", reason, upload)
 		}
+	}
+}
+
+// I85_CLIENT_LOG_INGEST_V1 R8: a malformed raw record is redacted like parsed rows.
+func TestMalformedRawRecordRedactsSecrets(t *testing.T) {
+	service, store, _ := newService()
+	capability := issue(t, service)
+	service.Ingest(context.Background(), UploadRequest{Capability: capability, Malformed: QuarantineMalformedMultipart, RawBody: []byte("token=abc123 log_url=" + capability)})
+	stored := string(store.uploads[0].Attachment)
+	if strings.Contains(stored, "abc123") || strings.Contains(stored, capability) {
+		t.Fatalf("raw record leaked a secret: %q", stored)
 	}
 }
 

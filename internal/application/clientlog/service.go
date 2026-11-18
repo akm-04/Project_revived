@@ -92,6 +92,9 @@ type UploadRequest struct {
 	AttachmentName string
 	Attachment     []byte
 	Malformed      string
+	// RawBody is the request body when the multipart framing failed; R4 keeps
+	// it as the quarantined raw record.
+	RawBody []byte
 }
 
 // Quarantine reasons (R4).
@@ -157,8 +160,12 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 	upload := Upload{ID: id, ReceivedAt: now, Kind: request.Kind, Owner: owner, Attribution: attribution, BodyBytes: request.BodyBytes,
 		AppVersion: request.AppVersion, Version: request.Version, AttachmentName: request.AttachmentName, Attachment: request.Attachment}
 	upload.QuarantineReason, upload.Rows = parseUpload(request)
-	if upload.QuarantineReason != "" && request.Kind == domain.KindErrorLog {
-		upload.Attachment, upload.AttachmentTruncated = boundedCopy(request.Payload, domain.MaxErrorLogBodyBytes)
+	if upload.QuarantineReason != "" {
+		raw := request.Payload
+		if request.Malformed != "" {
+			raw = redactedRawBody(request.RawBody, presentedCapability(request.Capability))
+		}
+		upload.Attachment, upload.AttachmentTruncated = boundedCopy(raw, domain.MaxErrorLogBodyBytes)
 	}
 	upload.Class = uploadClass(upload)
 	domain.ClassifyUploadRows(upload.Rows, upload.Owner != nil, upload.QuarantineReason != "")
@@ -253,6 +260,12 @@ func uploadClass(upload Upload) domain.RetentionClass {
 		return domain.Error
 	}
 	return domain.UploadClass(upload.Rows, attributed, quarantined)
+}
+
+// redactedRawBody keeps the malformed body as the quarantine record with the
+// same secret redaction parsed rows get (R8).
+func redactedRawBody(body []byte, capability string) []byte {
+	return []byte(redactCapability(observability.RedactText(string(body)), capability))
 }
 
 func boundedCopy(data []byte, limit int) ([]byte, bool) {
