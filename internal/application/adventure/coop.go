@@ -473,14 +473,24 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		if err != nil {
 			return err
 		}
+		// RESULT fans out over the roster START froze, not the room's present
+		// seats: a member who left keeps their settlement and mail, and a
+		// replacement seat neither gains value nor aborts the fan-out.
+		frozen, err := s.Combat.AttemptMembersTx(c, sc.Tx, started.Attempt.ID)
+		if err != nil {
+			return err
+		}
+		if len(frozen) == 0 {
+			return fmt.Errorf("%w: the attempt froze no members", d.ErrUnavailable)
+		}
 		_, lines := giftAwards(catalog, d.IllusionBaseGift)
-		for _, member := range room.Members() {
+		for _, member := range frozen {
 			if _, err = s.Combat.SettleMemberTx(c, sc.Tx, cb.MemberSettleRequest{Locator: coopLocator(*room), AttemptID: started.Attempt.ID,
 				Member: member, SemanticReceiptID: coopMemberReceipt(started.Attempt.ID, member), At: at}); err != nil {
 				return err
 			}
 		}
-		for _, member := range room.Members() {
+		for _, member := range frozen {
 			key := strconv.FormatInt(int64(member), 10)
 			state.Reports[key] = append([]byte(nil), report...)
 			if _, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: member, SourceKind: "ADVENTURE_ILLUSION",
@@ -490,8 +500,8 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 			}
 		}
 		state.AttemptID, state.ReportID, state.Phase, state.Damage = started.Attempt.ID.String(), started.Attempt.ID.String(), "DONE", damage
-		members := make([]int64, 0, len(room.Members()))
-		for _, member := range room.Members() {
+		members := make([]int64, 0, len(frozen))
+		for _, member := range frozen {
 			members = append(members, int64(member))
 		}
 		if err = s.Store.InsertReportTx(c, sc.Tx, state.ReportID, int64(room.LogicalServerID), room.ID, members, string(report), at); err != nil {
