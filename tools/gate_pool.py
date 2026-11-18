@@ -197,10 +197,27 @@ def require_running():
         raise PoolError('the gate is stopping')
 
 
-def clone_database(createdb, port, template, name, environment):
+def run_child(arguments, capture_output=False, **options):
+    """subprocess.run for unit work a stop must end. The stop handler sets STOPPING before it snapshots the process
+    group, so a child born after that snapshot sees STOPPING here once Popen returns, and is killed by its own launcher."""
     require_running()
-    completed = subprocess.run([str(createdb), '-p', str(port), '-T', template, name], env=environment,
-                               capture_output=True, text=True, stdin=subprocess.DEVNULL)
+    if capture_output:
+        options.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    with subprocess.Popen(arguments, **options) as process:
+        if STOPPING.is_set():
+            process.kill()
+        try:
+            stdout, stderr = process.communicate()
+        except BaseException:
+            process.kill()
+            raise
+    require_running()
+    return subprocess.CompletedProcess(arguments, process.returncode, stdout, stderr)
+
+
+def clone_database(createdb, port, template, name, environment):
+    completed = run_child([str(createdb), '-p', str(port), '-T', template, name], env=environment,
+                          capture_output=True, text=True, stdin=subprocess.DEVNULL)
     if completed.returncode != 0:
         raise PoolError(f'createdb -T {template} {name} failed: {completed.stderr.strip()}')
 

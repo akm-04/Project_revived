@@ -2,6 +2,7 @@
 import collections
 import hashlib
 import json
+import os
 import signal
 import stat
 import subprocess
@@ -818,11 +819,12 @@ def hot_reading(foreign=()):
 for foreign, expected in (((), 'GREEN'), (('4242: go test ./internal/other',), 'NOT_RUN')):
     instance, _ = latency_gate()
     quiet = Gate.latency_reading.__get__(instance)
-    instance.running_worker_clusters = lambda: []
+    instance.process_command_lines = lambda: ([], [])
+    instance.running_worker_clusters = lambda processes: []
     readings = iter([clean_reading()])
     original_conditions = strict_gate.host_conditions
     strict_gate.host_conditions = lambda: dict(next(readings, None) or hot_reading(foreign))
-    instance.other_go_test_processes = lambda: list(foreign) if instance.latency_runs else []
+    instance.other_go_test_processes = lambda processes: list(foreign) if instance.latency_runs else []
     instance.latency_reading = quiet
     try:
         instance.latency_section()
@@ -833,6 +835,27 @@ for foreign, expected in (((), 'GREEN'), (('4242: go test ./internal/other',), '
     assert any('temperature 72.8 C' in reason for reason in after['unjudged_own_load']), after
     assert bool(after['breaches']) == bool(foreign), after
 assert Gate.latency_breaches.__get__(instance)(hot_reading()), 'before the run a hot host is still a breach'
+
+# A-105: foreign test work is found under any toolchain name or as a test binary run directly, every PostgreSQL server
+# but the gate's own counts, and a process the scan cannot read makes the reading a breach, never a quiet host.
+instance, _ = latency_gate()
+own_data = str(instance.work / 'cluster/pgdata')
+foreign_processes = [(1, ['/usr/bin/go', 'test', './...']), (2, ['/opt/go-1.27.3', 'test', './x']),
+                     (3, ['/tmp/b001/audit.test', '-test.run=TestLatency']), (4, ['/tmp/renamed', '-test.v=test2json']),
+                     (5, ['/srv/bin/postgres', '-D', '/elsewhere/data']), (6, ['/srv/bin/postgres', '-D', own_data]),
+                     (7, ['/usr/bin/go', 'build', './...']), (8, ['postgres: akm gxb 127.0.0.1 idle']),
+                     (os.getpid(), ['/usr/bin/go', 'test', './own'])]
+instance.descendant_of_gate = lambda pid: pid == os.getpid()
+assert [found.split(':')[0] for found in instance.other_go_test_processes(foreign_processes)] == ['1', '2', '3', '4']
+assert [found.split(':')[0] for found in instance.running_worker_clusters(foreign_processes)] == ['5']
+instance.process_command_lines = lambda: ([], ['4242'])
+original_conditions = strict_gate.host_conditions
+strict_gate.host_conditions = clean_reading
+try:
+    unreadable = Gate.latency_reading.__get__(instance)(section_running=True)
+finally:
+    strict_gate.host_conditions = original_conditions
+assert any('process scan incomplete' in reason and '4242' in reason for reason in unreadable['breaches']), unreadable
 
 # A general-only report has no latency section; a combined report carries both.
 instance, _ = fake_gate()
@@ -974,6 +997,30 @@ try:
         pass
 finally:
     gate_pool.STOPPING.clear()
+
+# A-104: a unit child born after the stop handler's snapshot is killed by its own launcher, not left running.
+launched = []
+original_popen = subprocess.Popen
+
+
+class LateSpawn(original_popen):
+    def __init__(self, *arguments, **options):
+        gate_pool.STOPPING.set()
+        super().__init__(*arguments, **options)
+        launched.append(self)
+
+
+subprocess.Popen = LateSpawn
+try:
+    gate_pool.run_child(['sleep', '60'])
+    raise AssertionError('a child started after the stop ran on')
+except gate_pool.PoolError:
+    pass
+finally:
+    subprocess.Popen = original_popen
+    gate_pool.STOPPING.clear()
+assert launched and launched[0].returncode == -signal.SIGKILL, launched
+assert gate_pool.run_child(['true']).returncode == 0
 
 # A start interrupted after the server launched still stops the cluster; init alone leaves nothing to stop.
 actions = []

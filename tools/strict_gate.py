@@ -685,9 +685,9 @@ class Gate:
             raise gate_pool.NotReusable(cached)
         if cached is not None:
             return cached
-        completed = subprocess.run([self.tool('go'), 'list', '-deps', '-test', '-json', '-tags', tags, './' + package],
-                                   cwd=self.source, env=self.environment, capture_output=True, text=True,
-                                   stdin=subprocess.DEVNULL)
+        completed = gate_pool.run_child([self.tool('go'), 'list', '-deps', '-test', '-json', '-tags', tags, './' + package],
+                                        cwd=self.source, env=self.environment, capture_output=True, text=True,
+                                        stdin=subprocess.DEVNULL)
         if completed.returncode != 0:
             reason = f'go list -deps -test failed for ./{package}: {(completed.stdout + completed.stderr).strip()[-500:]}'
             self.code_cache[key] = reason
@@ -764,8 +764,8 @@ class Gate:
 
     def go_version(self):
         if self._go_version is None:
-            completed = subprocess.run([self.tool('go'), 'version'], cwd=self.source, env=self.environment,
-                                       capture_output=True, text=True, stdin=subprocess.DEVNULL)
+            completed = gate_pool.run_child([self.tool('go'), 'version'], cwd=self.source, env=self.environment,
+                                            capture_output=True, text=True, stdin=subprocess.DEVNULL)
             require(completed.returncode == 0, f'go version failed: {(completed.stdout + completed.stderr).strip()[-500:]}')
             self._go_version = completed.stdout.strip()
         return self._go_version
@@ -969,10 +969,9 @@ class Gate:
                 environment = self.unit_environment(name, unit, extra)
                 arguments = gate_pool.go_test_command(self.tool('go'), tags, [unit['package']], run=unit['run'], skip=skip,
                                                       timeout_minutes=gate_pool.unit_timeout(self.parallel, unit['package']))
-                gate_pool.require_running()
                 with stream.open('w') as output:
-                    code = subprocess.run(arguments, cwd=self.source, env=environment, stdout=output,
-                                          stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
+                    code = gate_pool.run_child(arguments, cwd=self.source, env=environment, stdout=output,
+                                               stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL).returncode
                 outcomes, failed_packages = gate_pool.parse_go_test_json(stream, self.module)
             except (gate_pool.PoolError, OSError) as failure:
                 with self.unit_lock:
@@ -1240,8 +1239,8 @@ class Gate:
                 return value
         return max(readings.values(), default=None)
 
-    @staticmethod
-    def running_worker_clusters():
+    def running_worker_clusters(self, processes):
+        """Every live PostgreSQL server but the gate's own: managed worker clusters and any server outside that root."""
         found = []
         for pid_file in (WORKSPACE / 'tmp/worker_clusters').glob('*/data/postmaster.pid'):
             try:
@@ -1250,6 +1249,11 @@ class Gate:
                 continue
             if Path(f'/proc/{pid}').exists():
                 found.append(str(pid_file))
+        own = (self.work / 'cluster/pgdata').resolve()
+        for pid, parts in processes:
+            if self.program_names(pid, parts) & {'postgres', 'postmaster'} and '-D' in parts[1:-1]:
+                if Path(parts[parts.index('-D') + 1]).resolve() != own and not self.descendant_of_gate(pid):
+                    found.append(f'{pid}: {" ".join(parts[:3])}')
         return found
 
     @staticmethod
@@ -1266,20 +1270,56 @@ class Gate:
             pid = self.process_parent(pid)
         return False
 
-    def other_go_test_processes(self):
-        found = []
+    def process_command_lines(self):
+        """(pid, argv) of every process, and the pids whose cmdline the gate may not read."""
+        found, invisible = [], []
         for command_line in Path('/proc').glob('[0-9]*/cmdline'):
             try:
                 pid = int(command_line.parent.name)
                 parts = [part.decode(errors='replace') for part in command_line.read_bytes().split(b'\0') if part]
+            except PermissionError:
+                invisible.append(command_line.parent.name)
+                continue
             except (OSError, ValueError):
                 continue
-            if len(parts) < 2 or Path(parts[0]).name != 'go' or 'test' not in parts[1:4]:
-                continue
-            if self.descendant_of_gate(pid):
-                continue
-            found.append(f'{pid}: {" ".join(parts[:4])}')
+            if parts:
+                found.append((pid, parts))
+        return found, invisible
+
+    @staticmethod
+    def program_names(pid, parts):
+        """argv[0]'s name and, when readable, the executable's: a renamed or symlinked binary keeps one of them."""
+        names = {Path(parts[0]).name}
+        try:
+            names.add(Path(os.readlink(f'/proc/{pid}/exe')).name)
+        except OSError:
+            pass
+        return names
+
+    @staticmethod
+    def go_test_command(names, parts):
+        """A go test driver under any toolchain name (go, go1.27, go-1.27.3), or a compiled test binary run directly."""
+        if any(name.endswith('.test') for name in names) or any(part.startswith('-test.') for part in parts[1:]):
+            return True
+        return any(re.fullmatch(r'go(-?\d[\w.]*)?', name) for name in names) and 'test' in parts[1:4]
+
+    def other_go_test_processes(self, processes):
+        found = []
+        for pid, parts in processes:
+            if self.go_test_command(self.program_names(pid, parts), parts) and not self.descendant_of_gate(pid):
+                found.append(f'{pid}: {" ".join(parts[:4])}')
         return found
+
+    @staticmethod
+    def hidden_process_mount():
+        """A /proc mounted with hidepid or subset hides other users' processes from every scan."""
+        for line in Path('/proc/mounts').read_text().splitlines():
+            fields = line.split()
+            if len(fields) > 3 and fields[1] == '/proc':
+                options = dict(option.partition('=')[::2] for option in fields[3].split(','))
+                if options.get('hidepid', '0') not in ('0', 'off') or 'subset' in options:
+                    return fields[3]
+        return None
 
     def latency_breaches(self, reading):
         return self.host_breaches(reading) + self.foreign_breaches(reading)
@@ -1316,14 +1356,21 @@ class Gate:
             found.append('worker cluster running: ' + ', '.join(reading['worker_clusters']))
         if reading.get('go_test_processes'):
             found.append('other go test process: ' + '; '.join(reading['go_test_processes']))
+        if reading.get('process_visibility'):
+            found.append('process scan incomplete: ' + reading['process_visibility'])
         return found
 
     def latency_reading(self, section_running=False):
         """While the section runs, its own go test and databases raise load and temperature: only foreign work is a
         breach then, and the host readings are kept unjudged. Before the run every condition is judged."""
         reading = host_conditions()
-        reading['worker_clusters'] = self.running_worker_clusters()
-        reading['go_test_processes'] = self.other_go_test_processes()
+        processes, invisible = self.process_command_lines()
+        reading['worker_clusters'] = self.running_worker_clusters(processes)
+        reading['go_test_processes'] = self.other_go_test_processes(processes)
+        hidden = self.hidden_process_mount()
+        if hidden or invisible:
+            reading['process_visibility'] = (f'/proc mounted {hidden}; ' if hidden else '') + \
+                (f'unreadable cmdline of pid {", ".join(invisible)}' if invisible else '')
         if not section_running:
             reading['breaches'] = self.latency_breaches(reading)
             return reading
