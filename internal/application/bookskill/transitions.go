@@ -226,9 +226,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 				return nil, book.ErrInvalid
 			}
 		} else {
-			if st.RecentSkill != 0 {
-				return nil, book.ErrInvalid
-			}
 			duration, co, e := c.ResearchPlan(st, cmd.SkillID)
 			if e != nil {
 				return nil, e
@@ -242,6 +239,9 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 				return nil, book.ErrInvalid
 			}
 			cost = co
+			// The completed research is an acknowledgement for the client, not a
+			// precondition; as with building Start, the next job absorbs it.
+			st.RecentSkill = 0
 			st.Research = &book.Job{Occurrence: d.Operation.ID.String(), Revision: d.ContentRevision, StartedAt: at, Duration: duration, Target: st.Skills[cmd.SkillID] + 1, Subject: cmd.SkillID, Cost: co}
 		}
 	case GiveUp:
@@ -361,6 +361,19 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			body[k] = v
 		}
 		body["type"] = cmd.Type
+		if cmd.Family == Speed {
+			// MID 1077's stock consumers include RecycleWindow, which indexes
+			// trash_info unconditionally after the paid speed-up; project it from
+			// the event-centre owner now the new level is written.
+			if s.RecycleInfo == nil {
+				return nil, ErrUnavailable
+			}
+			trash, e := s.RecycleInfo.RecycleInfoTx(ctx, t, a.PlayerID, d.ContentRevision, at)
+			if e != nil {
+				return nil, e
+			}
+			body["trash_info"] = trash
+		}
 	case Cancel:
 		body["building_info"] = book.BuildingWire(st.Buildings[cmd.Type])
 	case Learn, GiveUp, SpeedSkill:

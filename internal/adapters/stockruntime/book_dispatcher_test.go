@@ -23,8 +23,12 @@ func (s fakeBookService) Read(context.Context, identity.ActorContext, uint16, op
 	return nil, s.err
 }
 
+func (s fakeBookService) OwnsComposeItem(context.Context, int64, operation.Context) (bool, error) {
+	return false, s.err
+}
+
 func TestBookComposeRefusalIs409WithCode(t *testing.T) {
-	dispatcher := BookDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: fakeBookService{err: app.ErrRejected}}
+	dispatcher := ComposeDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Book: &composeBookFake{owned: true, commandErr: app.ErrRejected}, Equipment: &composeEquipmentFake{}}
 	got := dispatcher.Dispatch(context.Background(), heroReq(t, 83, map[string]any{"item_id": int64(1001)}))
 	if got.HTTPStatus != http.StatusConflict {
 		t.Fatalf("book compose refusal status=%d body=%#v", got.HTTPStatus, got.Body)
@@ -47,6 +51,7 @@ func TestBookFailureRowTable(t *testing.T) {
 		{"insufficient", economy.ErrInsufficientBalance, http.StatusConflict, unprovenRefusalCode},
 		{"book unqualified", book.ErrUnqualified, http.StatusConflict, unprovenRefusalCode},
 		{"book stale time", book.ErrStaleTime, http.StatusConflict, staleConflictCode},
+		{"application stale", app.ErrStale, http.StatusConflict, staleConflictCode},
 		{"event centre unqualified", ec.ErrUnqualified, http.StatusConflict, unprovenRefusalCode},
 		{"event centre stale time", ec.ErrStaleTime, http.StatusConflict, staleConflictCode},
 	}
@@ -70,6 +75,16 @@ func TestBookFailureRowTable(t *testing.T) {
 	fallback := failBook(anonymousFailure{})
 	if fallback.HTTPStatus != http.StatusInternalServerError || fallback.Body["error_code"] != unprovenRefusalCode || fallback.Body["error_msg"] != "" {
 		t.Fatalf("fallback=%+v", fallback)
+	}
+}
+
+func TestBookApplicationStaleOnReadIs409(t *testing.T) {
+	for _, mid := range []uint16{1056, 1059} {
+		dispatcher := BookDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: fakeBookService{err: app.ErrStale}}
+		got := dispatcher.Dispatch(context.Background(), heroReq(t, mid, nil))
+		if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != staleConflictCode {
+			t.Fatalf("MID %d status=%d body=%#v", mid, got.HTTPStatus, got.Body)
+		}
 	}
 }
 

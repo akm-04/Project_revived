@@ -16,6 +16,7 @@ import (
 type BookPort interface {
 	Command(context.Context, identity.ActorContext, app.Command, operation.Context) (app.Result, error)
 	Read(context.Context, identity.ActorContext, uint16, operation.Context) (map[string]any, error)
+	OwnsComposeItem(context.Context, int64, operation.Context) (bool, error)
 }
 type BookDispatcher struct {
 	Authority rt.GameplayAuthorityPort
@@ -45,9 +46,6 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		c.Family = map[uint16]string{1060: app.Learn, 1061: app.GiveUp, 1078: app.SpeedSkill}[mid]
 	case 1079:
 		c.Family = app.ConfirmSkill
-	case 83:
-		allowed = []string{"item_id", "item_num"}
-		c.Family = app.Compose
 	default:
 		return badHero("unsupported_book_mid")
 	}
@@ -69,15 +67,6 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		c.Type, e = requiredInt64(p, "type")
 	} else if c.Family == app.Learn || c.Family == app.GiveUp || c.Family == app.SpeedSkill {
 		c.SkillID, e = requiredInt64(p, "skill_id")
-	} else if c.Family == app.Compose {
-		c.ItemID, e = requiredInt64(p, "item_id")
-		if e == nil {
-			if _, ok := p["item_num"]; ok {
-				c.Amount, e = requiredInt64(p, "item_num")
-			} else {
-				c.Amount = 1
-			}
-		}
 	}
 	if e != nil || c.Validate() != nil {
 		return badHero("invalid_book_request")
@@ -93,6 +82,7 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 // eventcentre_dispatcher.go:182,184 so MID 1056/1059 agree with MID 1074.
 var bookFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},
 	{match: book.ErrInvalid, class: failureMalformed, detail: "book_command_rejected"},
 	{match: book.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
 	{match: book.ErrStaleTime, class: failureRefusal, code: staleConflictCode},

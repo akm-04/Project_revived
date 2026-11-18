@@ -608,7 +608,8 @@
   },
   "eventcentre": {
    "bookskill": [
-    "*MakeInfoTx"
+    "*MakeInfoTx",
+    "*RecycleInfoTx"
    ]
   },
   "frienddm": {
@@ -1109,6 +1110,7 @@
     "*ApplyHeroEquipmentResourceDebitTx",
     "*ApplyHeroPromotionResourcesTx",
     "*ApplyHeroSkillLevelCostTx",
+    "*ApplyMaterialExchangeTx",
     "*ApplyStrictRestorationTx",
     "*CommitAwakeningEquipmentTx",
     "*DebitHeroEvolutionTx",
@@ -1127,6 +1129,7 @@
     "*PrepareHeroEquipmentResourcesTx",
     "*PrepareHeroPromotionResourcesTx",
     "*PrepareHeroSkillLevelCostTx",
+    "*PrepareMaterialExchangeTx",
     "*PrepareStrictRestorationTx",
     "Blood",
     "Complete",
@@ -2468,7 +2471,8 @@
   },
   "bookskill": {
    "eventcentre": [
-    "*MakeInfoTx"
+    "*MakeInfoTx",
+    "*RecycleInfoTx"
    ],
    "generation": [
     "Bind",
@@ -2734,6 +2738,7 @@
     "*ApplyHeroEquipmentResourceDebitTx",
     "*ApplyHeroPromotionResourcesTx",
     "*ApplyHeroSkillLevelCostTx",
+    "*ApplyMaterialExchangeTx",
     "*ApplyStrictRestorationTx",
     "*CommitAwakeningEquipmentTx",
     "*DebitHeroEvolutionTx",
@@ -2752,6 +2757,7 @@
     "*PrepareHeroEquipmentResourcesTx",
     "*PrepareHeroPromotionResourcesTx",
     "*PrepareHeroSkillLevelCostTx",
+    "*PrepareMaterialExchangeTx",
     "*PrepareStrictRestorationTx",
     "Blood",
     "Complete",
@@ -6058,6 +6064,7 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "bookskill": [
+   "cmd/gxb-api/main_postgres.go",
    "internal/adapters/stockruntime/book_coalesced_read.go"
   ],
   "bootstrap": [
