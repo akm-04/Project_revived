@@ -175,7 +175,7 @@ func TestBadInputIsQuarantinedAndAcknowledged(t *testing.T) {
 		}
 		upload := store.uploads[0]
 		raw := request.Payload
-		if request.Malformed != "" {
+		if request.RawBody != nil {
 			raw = request.RawBody
 		}
 		if upload.QuarantineReason != reason || upload.Class != domain.Anomaly || !bytes.Equal(upload.Attachment, raw) {

@@ -92,8 +92,8 @@ type UploadRequest struct {
 	AttachmentName string
 	Attachment     []byte
 	Malformed      string
-	// RawBody is the request body when the multipart framing failed; R4 keeps
-	// it as the quarantined raw record.
+	// RawBody is nil when the multipart body parsed, else the request body R4
+	// keeps as the quarantined raw record.
 	RawBody []byte
 }
 
@@ -162,7 +162,7 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 	upload.QuarantineReason, upload.Rows = parseUpload(request)
 	if upload.QuarantineReason != "" {
 		raw := request.Payload
-		if request.Malformed != "" {
+		if request.RawBody != nil {
 			raw = redactedRawBody(request.RawBody, presentedCapability(request.Capability))
 		}
 		upload.Attachment, upload.AttachmentTruncated = boundedCopy(raw, domain.MaxErrorLogBodyBytes)

@@ -3,12 +3,15 @@ package stockruntime
 import (
 	"bytes"
 	"context"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/clientlog"
+	domain "gxb.local/backend/v2/internal/domain/clientlog"
 )
 
 type clientLogMemoryStore struct {
@@ -52,5 +55,27 @@ func TestMalformedMultipartKeepsTheQuarantinedRawRecord(t *testing.T) {
 	upload := store.uploads[0]
 	if upload.QuarantineReason != app.QuarantineMalformedMultipart || !bytes.Equal(upload.Attachment, body) {
 		t.Fatalf("reason=%q attachment=%q", upload.QuarantineReason, upload.Attachment)
+	}
+}
+
+// A well-framed errorlog over the payload cap still keeps its parsed payload as
+// the raw record rather than the whole body.
+func TestOversizedErrorLogKeepsThePayloadAsTheRawRecord(t *testing.T) {
+	store := &clientLogMemoryStore{}
+	service := &app.Service{Store: store, Clock: clientLogClock{}}
+	handler := ClientLogHandler{Ingest: service, BasePath: "/client-log"}
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	payload := strings.Repeat("x", domain.MaxErrorLogBodyBytes+1)
+	if err := writer.WriteField("payload", payload); err != nil {
+		t.Fatal(err)
+	}
+	writer.Close()
+	request := httptest.NewRequest(http.MethodPost, "/client-log", bytes.NewReader(body.Bytes()))
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	handler.ServeHTTP(httptest.NewRecorder(), request)
+	upload := store.uploads[0]
+	if upload.QuarantineReason != app.QuarantineOverCap || !upload.AttachmentTruncated || !bytes.Equal(upload.Attachment, []byte(payload[:domain.MaxErrorLogBodyBytes])) {
+		t.Fatalf("reason=%q truncated=%t attachmentLen=%d", upload.QuarantineReason, upload.AttachmentTruncated, len(upload.Attachment))
 	}
 }
