@@ -2,17 +2,6 @@
  "note": "These lists are leads for a reviewer, not verdicts. Confirm each entry against the source it cites.",
  "client_mids_not_live": [
   {
-   "mid": 3,
-   "name": "QUERY_SERVER_TIME",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 20,
    "name": "LOAD_SCROLLS",
    "files": [
@@ -296,17 +285,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 279,
-   "name": "ARENA_FIGHT_RESULT",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/scenes/BattleCreateReport.lua"
-   ],
-   "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 435,
    "name": "LOAD_GET_REQUEST_PLAYERS",
    "files": [
@@ -377,26 +355,6 @@
    "stage": "I9-10"
   },
   {
-   "mid": 1025,
-   "name": "MESSAGE_PUSH_ADD",
-   "files": [
-    "app/model/MessagePush.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 1026,
-   "name": "MESSAGE_PUSH_REMOVE",
-   "files": [
-    "app/model/MessagePush.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 1170,
    "name": "BROCAST_FINISH_JIGSAW",
    "files": [
@@ -405,16 +363,6 @@
    "family": "BROADCASTS",
    "disposition": "ACTIVE",
    "stage": "I9-10"
-  },
-  {
-   "mid": 1864,
-   "name": "FIRST_MAIN_TOUCH",
-   "files": [
-    "app/windows/MainSceneTouchWindow.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
   },
   {
    "mid": 2065,
@@ -698,13 +646,13 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 573,
-  "window_sender_mid_count": 140,
-  "non_window_sender_mid_count": 433,
+  "count": 569,
+  "window_sender_mid_count": 139,
+  "non_window_sender_mid_count": 430,
   "registration_status_counts": {
    "inactive_fallback": 540,
-   "no_registration": 31,
-   "unattributed_registration": 2,
+   "no_registration": 26,
+   "unattributed_registration": 3,
    "registration_without_dispatch_handler": 0
   },
   "runtime_reachability": "unknown from source-file references alone",
@@ -712,7 +660,7 @@
    {
     "mid": 3,
     "name": "QUERY_SERVER_TIME",
-    "registration_status": "no_registration",
+    "registration_status": "unattributed_registration",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -1331,19 +1279,6 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 279,
-    "name": "ARENA_FIGHT_RESULT",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/scenes/BattleCreateReport.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/scenes/BattleCreateReport.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 302,
     "name": "GET_TEST_REPORT",
     "registration_status": "inactive_fallback",
@@ -1879,32 +1814,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/Incubus.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1025,
-    "name": "MESSAGE_PUSH_ADD",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/MessagePush.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/MessagePush.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1026,
-    "name": "MESSAGE_PUSH_REMOVE",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/MessagePush.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/MessagePush.lua"
     ],
     "runtime_reachability": "unknown"
    },
@@ -3090,19 +2999,6 @@
      "app/model/Sakura.lua",
      "app/scenes/BattleCreate.lua"
     ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 1864,
-    "name": "FIRST_MAIN_TOUCH",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/windows/MainSceneTouchWindow.lua"
-    ],
-    "window_sender_files": [
-     "app/windows/MainSceneTouchWindow.lua"
-    ],
-    "non_window_sender_files": [],
     "runtime_reachability": "unknown"
    },
    {
@@ -9190,9 +9086,7 @@
    "kind": "code_1"
   }
  ],
- "systems_not_wired": [
-  "compat"
- ],
+ "systems_not_wired": [],
  "tables_locked_by_many": [
   {
    "table": "account_sessions",
@@ -9643,6 +9537,15 @@
    "mid": 2,
    "name": "",
    "client_files": [],
+   "reason": "no application package resolves from the dispatcher or its wiring"
+  },
+  {
+   "mid": 3,
+   "name": "QUERY_SERVER_TIME",
+   "client_files": [
+    "app/common/network/Backend.lua",
+    "app/model/SelfPlayer.lua"
+   ],
    "reason": "no application package resolves from the dispatcher or its wiring"
   },
   {

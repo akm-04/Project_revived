@@ -100,9 +100,11 @@ func TestInactiveSurfaceMIDsAnswerTheSharedRefusal(t *testing.T) {
 			t.Fatalf("MID %d is not on the generated inactive list: %v", mid, err)
 		}
 	}
-	routed, _ := router.Lookup(17)
-	response := routed.Dispatch(context.Background(), registrationRequest(17, time.Unix(100, 0).UTC()))
-	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(35028) || !response.Inactive {
-		t.Fatalf("inactive answer = %+v", response)
+	for _, mid := range []uint16{17, 80, 84, 85, 208, 209, 210, 211, 212, 213, 246, 1412} {
+		routed, _ := router.Lookup(mid)
+		response := routed.Dispatch(context.Background(), registrationRequest(mid, time.Unix(100, 0).UTC()))
+		if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(35028) || !response.Inactive {
+			t.Fatalf("MID %d inactive answer = %+v", mid, response)
+		}
 	}
 }

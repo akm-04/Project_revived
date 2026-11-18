@@ -7,7 +7,7 @@ CREATE TABLE content_compat_catalogs (
 -- owner: compat
 CREATE TABLE player_compat_preferences (
  player_id bigint PRIMARY KEY REFERENCES players(player_id) ON DELETE CASCADE,
- first_main_touch smallint NOT NULL DEFAULT 1 CHECK (first_main_touch IN (0, 1)),
+ first_main_touch smallint NOT NULL CHECK (first_main_touch IN (0, 1)),
  message_push_ids bigint[] NOT NULL DEFAULT '{}',
  state_version bigint NOT NULL DEFAULT 1 CHECK (state_version > 0),
  created_at timestamptz NOT NULL,

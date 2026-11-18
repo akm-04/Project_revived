@@ -6015,7 +6015,9 @@
   "commerceprivilege": [
    "cmd/gxb-api/main_postgres.go"
   ],
-  "compat": [],
+  "compat": [
+   "cmd/gxb-api/compat_postgres.go"
+  ],
   "conquerschool": [
    "cmd/gxb-api/top_floor_postgres.go"
   ],

@@ -28,9 +28,7 @@ func scan(row tx.Row) (d.Preferences, error) {
 		return d.Preferences{}, err
 	}
 	preferences := d.Preferences{FirstMainTouch: int64(firstMainTouch), MessagePushIDs: messagePushIDs, StateVersion: stateVersion}
-	if preferences.MessagePushIDs == nil {
-		preferences.MessagePushIDs = []int64{}
-	}
+	preferences.Normalize()
 	return preferences, preferences.Validate()
 }
 
@@ -62,7 +60,7 @@ func (Store) SaveTx(ctx context.Context, t tx.Tx, player identity.PlayerID, pref
 		return err
 	}
 	if tag.RowsAffected() != 1 {
-		return d.ErrUnavailable
+		return d.ErrStaleState
 	}
 	return nil
 }

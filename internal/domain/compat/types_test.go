@@ -48,6 +48,17 @@ func TestPreferencesValidateRejectsWireBreakingRows(t *testing.T) {
 	}
 }
 
+func TestPreferencesNormalizeOrdersAndDeduplicatesRestoredRows(t *testing.T) {
+	preferences := Preferences{StateVersion: 1, MessagePushIDs: []int64{9, 1, 9}}
+	preferences.Normalize()
+	if !slices.Equal(preferences.MessagePushIDs, []int64{1, 9}) {
+		t.Fatalf("normalized ids = %v, want [1 9]", preferences.MessagePushIDs)
+	}
+	if err := preferences.Validate(); err != nil {
+		t.Fatalf("normalized row rejected: %v", err)
+	}
+}
+
 func TestCompatLockRank(t *testing.T) {
 	if LockRank != 470 {
 		t.Fatalf("compat lock rank = %d, want 470", LockRank)

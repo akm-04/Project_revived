@@ -227,20 +227,75 @@ func TestMissingRowProjectsNewPlayerDefaults(t *testing.T) {
 	}
 }
 
-func TestBackfillMarksExistingPlayersTouched(t *testing.T) {
+// TestBackfillMigrationMarksExistingPlayersTouched applies 00176 itself over a
+// database that already holds players: the migration's INSERT ... SELECT is the
+// only thing that can mark them, because those players existed before the table.
+func TestBackfillMigrationMarksExistingPlayersTouched(t *testing.T) {
+	dsn, cleanup := compatDisposableDatabase(t, os.Getenv("GXB_I9_11D_DSN"))
+	t.Cleanup(cleanup)
+	ctx := context.Background()
+	compatRunTool(t, "goose", "-dir", compatMigrationsRoot(t), "postgres", dsn, "up-to", "00175")
+
+	before := compatOpenPool(t, dsn)
+	actor := compatActor(t, before, time.Now().UTC())
+	before.Close()
+
+	compatRunTool(t, "goose", "-dir", compatMigrationsRoot(t), "postgres", dsn, "up")
+	after := compatOpenPool(t, dsn)
+	defer after.Close()
+	var firstMainTouch int16
+	if err := after.Raw().QueryRow(ctx, `SELECT first_main_touch FROM player_compat_preferences WHERE player_id=$1`, int64(actor.PlayerID)).Scan(&firstMainTouch); err != nil {
+		t.Fatalf("backfilled row: %v", err)
+	}
+	if firstMainTouch != 1 {
+		t.Fatalf("existing player first_main_touch = %d, want 1", firstMainTouch)
+	}
+	// C1 declares no default: a row that omits the column must not look touched.
+	if _, err := after.Raw().Exec(ctx, `INSERT INTO player_compat_preferences(player_id,created_at,updated_at) VALUES($1,now(),now())`, int64(actor.PlayerID)+700000); err == nil {
+		t.Fatal("first_main_touch accepted a default; a new player would project as touched")
+	}
+}
+
+func TestRestoredOutOfOrderIdsAreNormalisedOnRead(t *testing.T) {
 	pool := compatPool(t)
 	ctx := context.Background()
 	now := time.Now().UTC().Truncate(time.Microsecond)
 	actor := compatActor(t, pool, now)
-	preferences, found, err := (compatstore.Store{}).ReadTx(ctx, pool, actor.PlayerID)
-	if err != nil || found {
-		t.Fatalf("precondition row found=%v err=%v", found, err)
-	}
-	if _, err := pool.Raw().Exec(ctx, `INSERT INTO player_compat_preferences(player_id,first_main_touch,created_at,updated_at) VALUES($1,1,now(),now())`, int64(actor.PlayerID)); err != nil {
+	if err := compatService(pool).FirstMainTouch(ctx, actor, compatOperation(t, now)); err != nil {
 		t.Fatal(err)
 	}
-	preferences, found, err = (compatstore.Store{}).ReadTx(ctx, pool, actor.PlayerID)
-	if err != nil || !found || preferences.FirstMainTouch != 1 {
-		t.Fatalf("backfilled row found=%v prefs=%+v err=%v", found, preferences, err)
+	if _, err := pool.Raw().Exec(ctx, `UPDATE player_compat_preferences SET message_push_ids='{9,1}' WHERE player_id=$1`, int64(actor.PlayerID)); err != nil {
+		t.Fatal(err)
+	}
+	preferences, found, err := (compatstore.Store{}).ReadTx(ctx, pool, actor.PlayerID)
+	if err != nil || !found {
+		t.Fatalf("restored row found=%v err=%v", found, err)
+	}
+	if !slices.Equal(preferences.MessagePushIDs, []int64{1, 9}) {
+		t.Fatalf("restored ids = %v, want [1 9]", preferences.MessagePushIDs)
+	}
+}
+
+func TestStaleSaveIsAConflictSentinel(t *testing.T) {
+	pool := compatPool(t)
+	ctx := context.Background()
+	now := time.Now().UTC().Truncate(time.Microsecond)
+	actor := compatActor(t, pool, now)
+	if err := compatService(pool).FirstMainTouch(ctx, actor, compatOperation(t, now)); err != nil {
+		t.Fatal(err)
+	}
+	preferences, _, err := (compatstore.Store{}).ReadTx(ctx, pool, actor.PlayerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	preferences.StateVersion++
+	transaction, err := pool.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer transaction.Rollback(ctx)
+	err = (compatstore.Store{}).SaveTx(ctx, transaction, actor.PlayerID, preferences, preferences.StateVersion-2, now)
+	if !errors.Is(err, d.ErrStaleState) {
+		t.Fatalf("stale save = %v, want ErrStaleState", err)
 	}
 }

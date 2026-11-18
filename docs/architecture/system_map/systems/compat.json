@@ -5,6 +5,10 @@
  ],
  "contracts": [
   {
+   "count": 3,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
    "count": 1,
    "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
   },
@@ -13,12 +17,26 @@
    "file": "docs/i9/I9_LIBRARY_V1.json"
   },
   {
+   "count": 3,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
    "count": 1,
    "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORLD_BOSS_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORLD_BOSS_V1.json"
   }
  ],
  "decorated_by": [],
- "dispatcher_files": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/compat_dispatcher.go"
+ ],
  "facts": {
   "consumers": {},
   "emits": [],
@@ -37,6 +55,9 @@
    "gameplay_contexts": [
     "i5store.FenceActorTx"
    ],
+   "player_compat_preferences": [
+    "compatstore.LockTx"
+   ],
    "players": [
     "i4store.LockPlayerRootsTx"
    ]
@@ -45,17 +66,45 @@
    "account_sessions",
    "accounts",
    "gameplay_contexts",
+   "player_compat_preferences",
    "players"
   ],
   "unresolved_methods": []
  },
  "login": [
+  "BootstrapProjection",
   "OverlayMID1"
  ],
- "mids": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/compat_dispatcher.go",
+    "line": 36
+   },
+   "mid": 1025,
+   "name": "MESSAGE_PUSH_ADD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/compat_dispatcher.go",
+    "line": 36
+   },
+   "mid": 1026,
+   "name": "MESSAGE_PUSH_REMOVE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/compat_dispatcher.go",
+    "line": 36
+   },
+   "mid": 1864,
+   "name": "FIRST_MAIN_TOUCH"
+  }
+ ],
  "name": "compat",
  "pushes": [],
  "stores": [
+  "internal/adapters/postgres/compatstore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store"
@@ -71,15 +120,20 @@
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_revisions",
+   "player_compat_preferences",
    "players"
   ],
-  "written": []
+  "written": [
+   "player_compat_preferences"
+  ]
  },
  "tests": {
   "integration": [
    "compat"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_11d_compat.json"
+  ],
   "unit": [
    "bootstrap_test.go",
    "service_test.go"

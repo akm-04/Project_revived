@@ -14,6 +14,7 @@ const LockRank uint16 = 470
 
 var (
 	ErrUnavailable        = errors.New("compat preferences unavailable")
+	ErrStaleState         = errors.New("compat preferences state version is stale")
 	ErrInvalidMessageType = errors.New("compat message type is not a stock notification")
 )
 
@@ -72,6 +73,18 @@ func (p *Preferences) MarkFirstMainTouch() bool {
 	return true
 }
 
+// Normalize orders and de-duplicates the enabled ids. A row can reach the store
+// out of order through an R8 restore; the wire readers require a strictly
+// ascending array, and a read must not fail a login over it.
+func (p *Preferences) Normalize() {
+	if len(p.MessagePushIDs) == 0 {
+		p.MessagePushIDs = []int64{}
+		return
+	}
+	slices.Sort(p.MessagePushIDs)
+	p.MessagePushIDs = slices.Compact(p.MessagePushIDs)
+}
+
 // Validate rejects a row or payload that the wire readers could not consume.
 func (p Preferences) Validate() error {
 	if p.FirstMainTouch != 0 && p.FirstMainTouch != 1 {
@@ -80,11 +93,13 @@ func (p Preferences) Validate() error {
 	if p.StateVersion < 1 {
 		return ErrUnavailable
 	}
-	for index, id := range p.MessagePushIDs {
+	for _, id := range p.MessagePushIDs {
 		if id <= 0 {
 			return ErrUnavailable
 		}
-		if index > 0 && p.MessagePushIDs[index-1] >= id {
+	}
+	for index := 1; index < len(p.MessagePushIDs); index++ {
+		if p.MessagePushIDs[index-1] >= p.MessagePushIDs[index] {
 			return ErrUnavailable
 		}
 	}

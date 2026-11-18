@@ -39,6 +39,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/compatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
@@ -90,6 +91,7 @@ import (
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
 	appsavedpreset "gxb.local/backend/v2/internal/application/charactersavedpreset"
+	appcompat "gxb.local/backend/v2/internal/application/compat"
 	appconquer "gxb.local/backend/v2/internal/application/conquerschool"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	appdir "gxb.local/backend/v2/internal/application/directorysync"
@@ -386,6 +388,7 @@ func main() {
 		ReceiptRead: kernelstore.Reader{Queryer: pool},
 	}
 	heroBootstrap := &characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
+	compatService := canonicalCompat(pool, runner, contentDB, i5db)
 	bootstrap := i4store.BootstrapService{
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,
@@ -394,7 +397,7 @@ func main() {
 		LoginTime:               postgres.AuthoritativeTime{Queryer: pool},
 		LoginReconcilers:        []appboot.CharacterLoginReconciler{i4store.PlayerLoginActivity{}, socialrecall.LoginReconciler{Owner: socialrecallstore.Store{}, Players: i4store.PlayerRootLocker{}}, appi5.MailExpiryLoginReconciler{Store: i5db}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}},
 		OperationBinder:         contentstore.Store{},
-		DetailContributors:      []appboot.MID1DetailContributor{appdorm.GlueBootstrap{Owner: dormstore.Store{}}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc, BackpackSort: heroDB}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, mentorstore.BootstrapProjection{Service: mentorSvc}, heroBootstrap, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}, Roster: heroBootstrap}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}},
+		DetailContributors:      []appboot.MID1DetailContributor{appdorm.GlueBootstrap{Owner: dormstore.Store{}}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc, BackpackSort: heroDB}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, mentorstore.BootstrapProjection{Service: mentorSvc}, heroBootstrap, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}, Roster: heroBootstrap}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}, appcompat.BootstrapProjection{Store: compatstore.Store{}}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
@@ -651,6 +654,15 @@ func main() {
 	mustRegister(30, stockruntime.FunctionClickDispatcher{Authority: authority})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
 	mustRegister(2754, lobbyD)
+	mustRegister(3, lobbyD)
+	compatD := stockruntime.CompatDispatcher{Authority: authority, Service: compatService}
+	for _, mid := range stockruntime.CompatMIDs {
+		mustRegister(mid, compatD)
+	}
+	arenaReportD := stockruntime.ArenaResultDispatcher{Authority: authority}
+	for _, mid := range stockruntime.ArenaFightResultMIDs {
+		mustRegister(mid, arenaReportD)
+	}
 	for _, mid := range stockruntime.SummonMIDs {
 		mustRegister(mid, stockruntime.SummonDispatcher{Authority: authority, Service: vending})
 	}

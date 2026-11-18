@@ -11,6 +11,10 @@
   },
   {
    "effect": "read",
+   "mid": 3
+  },
+  {
+   "effect": "read",
    "mid": 4
   },
   {
@@ -572,6 +576,10 @@
   {
    "effect": "state",
    "mid": 278
+  },
+  {
+   "effect": "read",
+   "mid": 279
   },
   {
    "effect": "state",
@@ -1392,6 +1400,14 @@
   {
    "effect": "unknown",
    "mid": 869
+  },
+  {
+   "effect": "state",
+   "mid": 1025
+  },
+  {
+   "effect": "state",
+   "mid": 1026
   },
   {
    "effect": "unknown",
@@ -2228,6 +2244,10 @@
   {
    "effect": "state",
    "mid": 1863
+  },
+  {
+   "effect": "state",
+   "mid": 1864
   },
   {
    "effect": "read",

@@ -4,6 +4,7 @@ package mids
 // readMIDs is the trace-backed read set of docs/protocol/MID_EFFECTS.json.
 // An unlisted MID counts as state-changing for undelivered-reply replay.
 var readMIDs = map[uint16]struct{}{
+	3:    {},
 	4:    {},
 	7:    {},
 	28:   {},
@@ -17,6 +18,7 @@ var readMIDs = map[uint16]struct{}{
 	229:  {},
 	234:  {},
 	276:  {},
+	279:  {},
 	290:  {},
 	294:  {},
 	298:  {},

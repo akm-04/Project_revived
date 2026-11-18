@@ -24,7 +24,8 @@
    "apppetcampaign.Mode",
    "appgodstrial.Mode",
    "appworldboss.Mode",
-   "appadventure.Mode"
+   "appadventure.Mode",
+   "appcompat.BootstrapProjection"
   ],
   "LoginReconcilers": [
    "i4store.PlayerLoginActivity",
@@ -40,6 +41,8 @@
   "mid_to_system": {
    "1": "bootstrap",
    "100": "playerdisplay",
+   "1025": "compat",
+   "1026": "compat",
    "1056": "bookskill",
    "1057": "bookskill",
    "1058": "bookskill",
@@ -191,6 +194,7 @@
    "1861": "mentor",
    "1862": "mentor",
    "1863": "mentor",
+   "1864": "compat",
    "187": "socialrelation",
    "1872": "arena",
    "1873": "arena",
@@ -339,6 +343,7 @@
    "278": "topfloor",
    "2784": "librarylocal",
    "2785": "librarylocal",
+   "279": "realtimeauth",
    "2790": "conquerschool",
    "28": "campaign",
    "280": "topfloor",
@@ -997,7 +1002,7 @@
   {
    "callees": 3,
    "callers": 0,
-   "mids": 0,
+   "mids": 3,
    "name": "compat",
    "path": "internal/application/compat",
    "purpose": "",
@@ -1447,7 +1452,7 @@
   {
    "callees": 2,
    "callers": 1,
-   "mids": 4,
+   "mids": 5,
    "name": "realtimeauth",
    "path": "internal/application/realtimeauth",
    "purpose": "orchestrates I3 gameplay-context authority for stock realtime discovery and admission",

@@ -47,7 +47,7 @@ func (o CompatDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		if !onlyStockGameplayParams(params, "message_type") {
 			return badCompat()
 		}
-		messageType, err := requiredInt64(params, "message_type")
+		messageType, err := compatMessageType(params)
 		if err != nil {
 			return badCompat()
 		}
@@ -76,9 +76,21 @@ func badCompat() httpedge.Response {
 	return failureReply(malformed("compat_invalid_parameter"))
 }
 
+// compatMessageType accepts the JSON number the stock client sends and refuses
+// a text encoding of the same digits (I9-11D C2).
+func compatMessageType(params map[string]any) (int64, error) {
+	if _, isText := params["message_type"].(string); isText {
+		return 0, errors.New("message_type is text")
+	}
+	return requiredInt64(params, "message_type")
+}
+
 func failCompat(err error) httpedge.Response {
 	if errors.Is(err, d.ErrInvalidMessageType) {
 		return badCompat()
+	}
+	if errors.Is(err, d.ErrStaleState) {
+		return failureReply(refusal(staleConflictCode))
 	}
 	return failureFromRows(nil, err)
 }

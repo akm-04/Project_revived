@@ -75,6 +75,8 @@ func TestCompatDispatchRejectsMalformedParams(t *testing.T) {
 	}{
 		{name: "missing message_type", mid: 1025},
 		{name: "non-integer message_type", mid: 1025, params: map[string]any{"message_type": "seven"}},
+		{name: "text digits message_type", mid: 1025, params: map[string]any{"message_type": "7"}},
+		{name: "fractional message_type", mid: 1025, params: map[string]any{"message_type": 7.5}},
 		{name: "extra toggle param", mid: 1026, params: map[string]any{"message_type": float64(7), "enabled": true}},
 		{name: "first touch body", mid: 1864, params: map[string]any{"count": float64(1)}},
 	}
@@ -106,6 +108,15 @@ func TestCompatDispatchRequiresABearer(t *testing.T) {
 	request.Envelope.Claims.Token = ""
 	if response := dispatcher.Dispatch(context.Background(), request); response.HTTPStatus != 401 {
 		t.Fatalf("missing bearer: %+v", response)
+	}
+}
+
+func TestCompatDispatchStaleStateIsAConflict(t *testing.T) {
+	dispatcher := NewCompatDispatcher(httpAuthority{actorForHTTP(t)}, &fakeCompatPort{err: d.ErrStaleState})
+	request := env(1864, nil, time.Unix(500, 0).UTC())
+	response := dispatcher.Dispatch(context.Background(), request)
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(40002) {
+		t.Fatalf("stale state: %+v", response)
 	}
 }
 
