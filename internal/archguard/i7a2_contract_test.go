@@ -140,6 +140,7 @@ var familyNoticeRoutes = []string{
 	"realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices}",
 	"realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices}",
 	"realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices}",
+	"realtimewakeup.Registration{Route: applibrary.PartnerLogNoticeRoute, Handler: libraryPartnerLogNotices}",
 }
 
 // allowedRegistrations is the identity allow-list for I7A-2 notice and direct
@@ -161,23 +162,24 @@ type allowedRegistration struct {
 }
 
 var allowedRegistrations = map[string]allowedRegistration{
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:AchievementNoticeType,Validate:ValidateAchievementNotice}":     {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:app.NoticeFinish,Validate:ValidateAdventureFinishNotice}":      {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:app.NoticeOccur,Validate:ValidateAdventureOccurNotice}":        {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:AdventureRoomNoticeType,Validate:ValidateAdventureRoomNotice}": {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:14,Validate:ValidateFriendFightNotice}":                        {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:15,Validate:ValidateFriendFightNotice}":                        {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:GuildApplyNoticeType,Validate:ValidateGuildApplyNotice}":       {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:OccultRoomNoticeType,Validate:ValidateOccultRoomNotice}":       {dormantRegistration, 1},
-	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:TournamentNoticeType,Validate:ValidateTournamentNotice}":       {dormantRegistration, 1},
-	"rt.DirectRegistration{MID:mids.MIDActivityBroadcast,Validate:ValidateActivityBroadcast}":                                                                           {dormantRegistration, 1},
-	"rt.DirectRegistration{MID:mids.MIDSystemBroadcast,Validate:ValidateSystemBroadcast}":                                                                               {dormantRegistration, 1},
-	"rt.DirectRegistration{MID:mids.MIDGuildFightNotice,Validate:ValidateGuildFightNotice}":                                                                             {dormantRegistration, 1},
-	"rt.DirectRegistration{MID:mids.MIDIllusionNotice,Validate:ValidateIllusionRoomNotice}":                                                                             {dormantRegistration, 1},
-	"DirectRegistration{MID:mids.MIDChatMessage,Validate:ValidateChannelChat}":                                                                                          {dormantRegistration, 1},
-	"rt.DirectRegistration{MID:mids.MIDChatFromPlayer,Validate:rt.ValidateGeneralDM}":                                                                                   {generalDMRegistration, 1},
-	"rt.DirectRegistration{MID:mids.MIDChatFromFriend,Validate:rt.ValidateFriendDM}":                                                                                    {friendDMRegistration, 3},
-	"rt.DirectRegistration{MID:mids.MIDForceReload,Validate:ValidateSocialReload}":                                                                                      {socialRegistration, 3},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:AchievementNoticeType,Validate:ValidateAchievementNotice}":             {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:app.NoticeFinish,Validate:ValidateAdventureFinishNotice}":              {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:app.NoticeOccur,Validate:ValidateAdventureOccurNotice}":                {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:AdventureRoomNoticeType,Validate:ValidateAdventureRoomNotice}":         {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:14,Validate:ValidateFriendFightNotice}":                                {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:15,Validate:ValidateFriendFightNotice}":                                {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:GuildApplyNoticeType,Validate:ValidateGuildApplyNotice}":               {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:OccultRoomNoticeType,Validate:ValidateOccultRoomNotice}":               {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:LibraryPartnerLogNoticeType,Validate:ValidateLibraryPartnerLogNotice}": {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:TournamentNoticeType,Validate:ValidateTournamentNotice}":               {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDActivityBroadcast,Validate:ValidateActivityBroadcast}":                                                                                   {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDSystemBroadcast,Validate:ValidateSystemBroadcast}":                                                                                       {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDGuildFightNotice,Validate:ValidateGuildFightNotice}":                                                                                     {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDIllusionNotice,Validate:ValidateIllusionRoomNotice}":                                                                                     {dormantRegistration, 1},
+	"DirectRegistration{MID:mids.MIDChatMessage,Validate:ValidateChannelChat}":                                                                                                  {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDChatFromPlayer,Validate:rt.ValidateGeneralDM}":                                                                                           {generalDMRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDChatFromFriend,Validate:rt.ValidateFriendDM}":                                                                                            {friendDMRegistration, 3},
+	"rt.DirectRegistration{MID:mids.MIDForceReload,Validate:ValidateSocialReload}":                                                                                              {socialRegistration, 3},
 }
 
 func genericWakeupRoutes(realtime string) int {

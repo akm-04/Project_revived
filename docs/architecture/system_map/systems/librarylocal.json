@@ -130,7 +130,6 @@
   "unresolved_methods": []
  },
  "login": [
-  "BootstrapProjection",
   "OverlayRosterTx"
  ],
  "mids": [
@@ -320,7 +319,20 @@
   }
  ],
  "name": "librarylocal",
- "pushes": [],
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/library_notice.go",
+   "kind": "notice",
+   "line": 58,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 24,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
  "stores": [
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
@@ -391,6 +403,7 @@
    "commands_log_test.go",
    "inputs_test.go",
    "journal_policy_native_test.go",
+   "notice_test.go",
    "roll_policy_test.go"
   ]
  }
