@@ -35,6 +35,18 @@ var ErrHeroSkillLevelProof = errors.New("character hero: invalid skill level pro
 var ErrHeroSkillLevelStaleTime = errors.New("character hero: stale skill level decision time")
 var ErrHeroSkillLevelInactive = errors.New("character hero: skill level content inactive")
 
+// HeroSkillLevelRefusal says why an accepted-shaped request did not commit, so
+// the dispatcher can apply D5 (C11) instead of guessing one code for every
+// unsuccessful result.
+type HeroSkillLevelRefusal string
+
+const (
+	HeroSkillLevelRefusalNone               HeroSkillLevelRefusal = ""
+	HeroSkillLevelRefusalInsufficientMana   HeroSkillLevelRefusal = "insufficient_mana"
+	HeroSkillLevelRefusalInsufficientPoints HeroSkillLevelRefusal = "insufficient_skill_points"
+	HeroSkillLevelRefusalNoChange           HeroSkillLevelRefusal = "no_change"
+)
+
 type HeroSkillLevelStore interface {
 	LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Hero, error)
 	ReadHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, error)
@@ -81,6 +93,7 @@ type HeroSkillLevelResult struct {
 	SkillTime       int64                  `json:"skill_time"`
 	Success         bool                   `json:"success"`
 	Changed         bool                   `json:"changed"`
+	RefusalReason   HeroSkillLevelRefusal  `json:"refusal_reason,omitempty"`
 	ContentRevision string                 `json:"content_revision"`
 	StateVersion    int64                  `json:"state_version"`
 	Changes         []HeroSkillLevelChange `json:"changes"`
@@ -392,6 +405,17 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 			ContentRevision: revision, StateVersion: hero.StateVersion, Changes: changes,
 			Account: string(actor.AccountUID), Context: actor.ContextID.UUID().String(), Server: int32(actor.LogicalServerID),
 			EntropySeed: op.EntropySeed, DecisionAt: at,
+		}
+		// C11: a refusal distinguishes the coin wallet from every other
+		// permanent cause. Coins win when both balances are short, matching the
+		// stock "Not enough coins" toast.
+		switch {
+		case !planValid:
+			result.RefusalReason = HeroSkillLevelRefusalNoChange
+		case prepared.ManaShort:
+			result.RefusalReason = HeroSkillLevelRefusalInsufficientMana
+		case prepared.PointsShort:
+			result.RefusalReason = HeroSkillLevelRefusalInsufficientPoints
 		}
 		if planValid && prepared.Affordable {
 			oldVersion := hero.StateVersion

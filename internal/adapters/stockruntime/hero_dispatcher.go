@@ -108,7 +108,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		body := map[string]any{"skill_point": result.SkillPoint, "skill_time": result.SkillTime}
 		if !result.Success {
-			return failureReply(refusalWithBody(unprovenRefusalCode, body))
+			return failureReply(refusalWithBody(heroSkillLevelRefusalCode(result), body))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 39:
@@ -134,7 +134,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		body := map[string]any{"skills": result.SkillString(), "is_success": result.SuccessValue(), "skill_point": result.SkillPoint, "skill_time": result.SkillTime}
 		if !result.Success {
-			return failureReply(refusalWithBody(unprovenRefusalCode, body))
+			return failureReply(refusalWithBody(heroSkillLevelRefusalCode(result), body))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 2144:
@@ -745,6 +745,16 @@ func failHeroSkillLevel(err error) httpedge.Response {
 		return failureReply(classified)
 	}
 	return failHero(err)
+}
+
+// heroSkillLevelRefusalCode applies D5 C11 to an unsuccessful skill-level
+// result: the coin wallet has its own code, every other permanent cause is
+// unproven.
+func heroSkillLevelRefusalCode(result apphero.HeroSkillLevelResult) int64 {
+	if result.RefusalReason == apphero.HeroSkillLevelRefusalInsufficientMana {
+		return insufficientCoinCode
+	}
+	return unprovenRefusalCode
 }
 
 // skillLevelRefusalBody fills the MID 39 fields the stock callback reads
