@@ -1282,6 +1282,9 @@ class Gate:
         return found
 
     def latency_breaches(self, reading):
+        return self.host_breaches(reading) + self.foreign_breaches(reading)
+
+    def host_breaches(self, reading):
         settings = self.latency_settings()
         found = []
         load_values = reading.get('load_average')
@@ -1304,17 +1307,28 @@ class Gate:
             deviation = abs(measured - reference) / reference
             if deviation > settings['benchmark_tolerance']:
                 found.append(f'benchmark {measured}s differs from reference {reference}s by {deviation:.1%}')
+        return found
+
+    @staticmethod
+    def foreign_breaches(reading):
+        found = []
         if reading.get('worker_clusters'):
             found.append('worker cluster running: ' + ', '.join(reading['worker_clusters']))
         if reading.get('go_test_processes'):
             found.append('other go test process: ' + '; '.join(reading['go_test_processes']))
         return found
 
-    def latency_reading(self):
+    def latency_reading(self, section_running=False):
+        """While the section runs, its own go test and databases raise load and temperature: only foreign work is a
+        breach then, and the host readings are kept unjudged. Before the run every condition is judged."""
         reading = host_conditions()
         reading['worker_clusters'] = self.running_worker_clusters()
         reading['go_test_processes'] = self.other_go_test_processes()
-        reading['breaches'] = self.latency_breaches(reading)
+        if not section_running:
+            reading['breaches'] = self.latency_breaches(reading)
+            return reading
+        reading['breaches'] = self.foreign_breaches(reading)
+        reading['unjudged_own_load'] = self.host_breaches(reading)
         return reading
 
     @staticmethod
@@ -1365,9 +1379,9 @@ class Gate:
             time.sleep(min(settings['check_interval_seconds'], remaining))
 
     def monitor_latency_conditions(self, stop, breaches):
-        """Retain every during-run reading; the first breach ends the monitor and makes the section NOT_RUN."""
+        """Retain every during-run reading; the first foreign-work breach ends the monitor and makes the section NOT_RUN."""
         while not stop.wait(self.latency_settings()['check_interval_seconds']):
-            reading = self.latency_reading()
+            reading = self.latency_reading(section_running=True)
             self.latency_conditions.append(reading)
             if reading['breaches']:
                 breaches.append(reading)
@@ -1450,7 +1464,7 @@ class Gate:
         finally:
             stop.set()
             monitor.join()
-            after = self.latency_reading()
+            after = self.latency_reading(section_running=True)
             self.latency_conditions.append(after)
             self.release_quiet_lock(handle)
         if breaches or after['breaches']:

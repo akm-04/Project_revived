@@ -670,7 +670,7 @@ def latency_gate(breach_after=(), members=None):
     import itertools
     counter = itertools.count()
 
-    def reading():
+    def reading(section_running=False):
         current = clean_reading()
         if next(counter) in breach_after:
             current['breaches'] = ['planted load']
@@ -762,7 +762,7 @@ assert not instance.latency_breaches(clean_reading()), 'complete readings stay g
 instance, _ = latency_gate()
 
 
-def unknown_temperature():
+def unknown_temperature(section_running=False):
     current = clean_reading()
     current['temperatures_celsius'] = {}
     current['breaches'] = instance.latency_breaches(current)
@@ -787,11 +787,12 @@ class OneReading:
 
 instance, _ = latency_gate()
 instance.latency_conditions = [{'at': 'before', 'breaches': []}]
-instance.latency_reading = lambda: {**clean_reading(), 'at': 'during'}
+instance.latency_reading = lambda section_running=False: {**clean_reading(), 'at': 'during'}
 breaches = []
 instance.monitor_latency_conditions(OneReading(), breaches)
 assert any(current['at'] == 'during' for current in instance.latency_conditions), instance.latency_conditions
-instance.latency_reading = lambda: {**clean_reading(), 'at': 'during-breach', 'breaches': ['planted during load']}
+instance.latency_reading = lambda section_running=False: {**clean_reading(), 'at': 'during-breach',
+                                                           'breaches': ['planted during load']}
 breaches = []
 instance.monitor_latency_conditions(OneReading(), breaches)
 assert breaches and any(current.get('at') == 'during-breach' and current['breaches'] == ['planted during load']
@@ -806,6 +807,32 @@ def slow_members():
 instance.run_latency_members = slow_members
 instance.latency_section()
 assert instance.latency_verdict == 'NOT_RUN', (instance.latency_verdict, instance.latency_red)
+
+# The section's own go test and databases heat the host: during and after the run, load, temperature and benchmark are
+# recorded unjudged, and only foreign work (another go test, a worker cluster) makes the section NOT_RUN.
+def hot_reading(foreign=()):
+    return dict(load_average=(1.73,), temperatures_celsius={'k10temp:Tctl': 72.8}, baseline_sha256_64mib_seconds=0.05,
+                worker_clusters=[], go_test_processes=list(foreign))
+
+
+for foreign, expected in (((), 'GREEN'), (('4242: go test ./internal/other',), 'NOT_RUN')):
+    instance, _ = latency_gate()
+    quiet = Gate.latency_reading.__get__(instance)
+    instance.running_worker_clusters = lambda: []
+    readings = iter([clean_reading()])
+    original_conditions = strict_gate.host_conditions
+    strict_gate.host_conditions = lambda: dict(next(readings, None) or hot_reading(foreign))
+    instance.other_go_test_processes = lambda: list(foreign) if instance.latency_runs else []
+    instance.latency_reading = quiet
+    try:
+        instance.latency_section()
+    finally:
+        strict_gate.host_conditions = original_conditions
+    assert instance.latency_verdict == expected, (foreign, instance.latency_verdict, instance.latency_conditions)
+    after = instance.latency_conditions[-1]
+    assert any('temperature 72.8 C' in reason for reason in after['unjudged_own_load']), after
+    assert bool(after['breaches']) == bool(foreign), after
+assert Gate.latency_breaches.__get__(instance)(hot_reading()), 'before the run a hot host is still a breach'
 
 # A general-only report has no latency section; a combined report carries both.
 instance, _ = fake_gate()
