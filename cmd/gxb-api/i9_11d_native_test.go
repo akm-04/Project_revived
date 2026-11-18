@@ -4,7 +4,12 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"os"
+	"path/filepath"
+	"reflect"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,7 +17,9 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/compatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/playerdatastore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	"gxb.local/backend/v2/internal/application/playerdata"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -204,6 +211,88 @@ func TestCompatRoutesReachTheServiceNatively(t *testing.T) {
 	preferences, _, _ = (compatstore.Store{}).ReadTx(ctx, pool, actor.PlayerID)
 	if preferences.StateVersion != versionAfterTouch || len(preferences.MessagePushIDs) != 0 {
 		t.Fatalf("refused toggles changed the row: %+v", preferences)
+	}
+}
+
+// nativeProductionInactiveRouter mirrors main_postgres.go:946-951: the shared
+// inactive dispatcher is registered last, only for unowned surface MIDs.
+func nativeProductionInactiveRouter(t *testing.T, actor identity.ActorContext) *httpedge.Router {
+	t.Helper()
+	router := httpedge.NewRouter()
+	inactive := stockruntime.InactiveModeDispatcher{Authority: registrationAuthority{actor: actor}}
+	for _, mid := range stockruntime.InactiveModeMIDs {
+		if _, owned := router.Lookup(mid); owned {
+			continue
+		}
+		if err := router.Register(mid, inactive); err != nil {
+			t.Fatalf("register inactive MID %d: %v", mid, err)
+		}
+	}
+	return router
+}
+
+func nativeBackendRoot(t *testing.T) string {
+	t.Helper()
+	directory, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(directory, "docs", "data", "PLAYER_RESTORE_PLAN.json")); err == nil {
+			return directory
+		}
+		parent := filepath.Dir(directory)
+		if parent == directory {
+			t.Fatal("backend root with docs/data/PLAYER_RESTORE_PLAN.json not found")
+		}
+		directory = parent
+	}
+}
+
+// nativePlayerSnapshot captures every row the restore plan selects for the
+// player, so a refusal or an inactive answer that writes anything is visible.
+func nativePlayerSnapshot(t *testing.T, pool *postgres.Pool, playerID int64) map[string]string {
+	t.Helper()
+	plan, _, err := playerdata.LoadPlan(filepath.Join(nativeBackendRoot(t), "docs", "data", "PLAYER_RESTORE_PLAN.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	snapshot := make(map[string]string, len(plan.Tables))
+	for _, table := range plan.Tables {
+		rows, err := (playerdatastore.Store{}).SelectRows(context.Background(), pool, table.Select, playerID)
+		if err != nil {
+			t.Fatalf("%s snapshot: %v", table.Table, err)
+		}
+		parts := make([]string, len(rows))
+		for index, row := range rows {
+			parts[index] = string(row)
+		}
+		snapshot[table.Table] = strings.Join(parts, "\n")
+	}
+	return snapshot
+}
+
+// TestInactiveMIDsAnswerThroughTheProductionRouterNatively drives C13: the
+// MIDs C5/C6 declare INACTIVE_SUPERSEDED answer the shared 409 terminal through
+// the same registration loop main_postgres.go uses and write no player row.
+func TestInactiveMIDsAnswerThroughTheProductionRouterNatively(t *testing.T) {
+	pool := nativeCompatPool(t)
+	now := time.Now().UTC().Truncate(time.Microsecond)
+	actor := nativeCompatActor(t, pool, now)
+	router := nativeProductionInactiveRouter(t, actor)
+	before := nativePlayerSnapshot(t, pool, int64(actor.PlayerID))
+	for _, mid := range []uint16{17, 80, 84, 85, 208, 209, 210, 211, 212, 213, 246, 1412} {
+		if !slices.Contains(stockruntime.InactiveModeMIDs, mid) {
+			t.Fatalf("MID %d is not on the generated inactive list", mid)
+		}
+		response := nativeCompatDispatch(t, router, mid, nil, now)
+		if response.HTTPStatus != http.StatusConflict || len(response.Body) != 2 || response.Body["error_code"] != int64(35028) || response.Body["error_msg"] != "" {
+			t.Fatalf("MID %d inactive answer = %+v", mid, response)
+		}
+	}
+	after := nativePlayerSnapshot(t, pool, int64(actor.PlayerID))
+	if !reflect.DeepEqual(before, after) {
+		t.Fatal("inactive MIDs wrote a player row")
 	}
 }
 
