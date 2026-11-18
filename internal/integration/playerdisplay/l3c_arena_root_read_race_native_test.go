@@ -37,7 +37,13 @@ func TestL3CArenaSeasonSettlementReadRaceNative(t *testing.T) {
 		t.Fatalf("latest closed season %d cannot be settled", closed)
 	}
 	// A shared package database may already hold this settlement; the race
-	// needs the season owed again.
+	// needs the season owed again. Tournament periods hang off the settlement;
+	// rooms and friend invitations point at each other, so one statement drops them.
+	exec(t, pool, `WITH rooms AS (SELECT room_id FROM arena_tournament_rooms WHERE season>=$1),
+entries AS (DELETE FROM arena_casual_entries WHERE room_id IN (SELECT room_id FROM rooms)),
+invitations AS (DELETE FROM arena_friend_invitations WHERE room_id IN (SELECT room_id FROM rooms)),
+dropped AS (DELETE FROM arena_tournament_rooms WHERE room_id IN (SELECT room_id FROM rooms))
+DELETE FROM arena_tournament_periods WHERE season>=$1`, closed)
 	exec(t, pool, `DELETE FROM arena_settlement_ranks WHERE season>=$1`, closed)
 	exec(t, pool, `DELETE FROM arena_settlements WHERE season>=$1`, closed)
 	// Earlier tests in a shared package database leave their participants in the

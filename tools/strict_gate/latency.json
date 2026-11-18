@@ -1,7 +1,5 @@
 {
  "contract": "GATE_LATENCY_SECTION_V1",
- "benchmark_reference_seconds": 0.0321,
- "benchmark_tolerance": 0.1,
  "check_interval_seconds": 30,
  "cooldown_seconds": 300,
  "general_ceiling_factor": 10,

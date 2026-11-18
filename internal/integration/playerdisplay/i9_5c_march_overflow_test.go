@@ -23,7 +23,10 @@ func TestI9_5CMarchChestOverflowMail(t *testing.T) {
 	if _, e := s.Start(ctx, a, app.Fight{Formation: team}, op()); e != nil {
 		t.Fatal(e)
 	}
-	if _, e := s.Result(ctx, a, marchReport(marchRecord(t, p, a), int64(a.PlayerID), team, true), op()); e != nil {
+	// The stage chest is drawn from the operation's entropy; a fixed seed keeps a stack item in it.
+	result := op()
+	result.EntropySeed = [32]byte{1}
+	if _, e := s.Result(ctx, a, marchReport(marchRecord(t, p, a), int64(a.PlayerID), team, true), result); e != nil {
 		t.Fatal(e)
 	}
 	var item, cap int64

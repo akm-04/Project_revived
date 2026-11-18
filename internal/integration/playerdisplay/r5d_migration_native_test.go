@@ -36,6 +36,27 @@ func r5dMigrationDatabase(t *testing.T, suffix string) (string, *pg.Pool) {
 	return dsn, p
 }
 
+// r5dRolledBackDatabase is a head database put through the R5D rollback
+// script, so fixtures written by the current binary meet the pre-00169 table
+// names and every later column.
+func r5dRolledBackDatabase(t *testing.T, suffix string) (string, *pg.Pool) {
+	t.Helper()
+	base := os.Getenv("GXB_I7B6A_DSN")
+	if base == "" {
+		t.Fatal("native DSN required")
+	}
+	dsn, cleanup := disposableNativeDatabase(t, base, suffix)
+	t.Cleanup(cleanup)
+	runTool(t, "goose", "-dir", migrationsRoot(t), "postgres", dsn, "up")
+	script := filepath.Join(filepath.Dir(migrationsRoot(t)), "tools", r5dRenameBackScriptName)
+	if output, err := osexec.Command("bash", script, dsn).CombinedOutput(); err != nil {
+		t.Fatalf("rename-back script failed: %v\n%s", err, output)
+	}
+	p := openNativePool(t, dsn)
+	t.Cleanup(p.Close)
+	return dsn, p
+}
+
 func r5dApplyRetireMigration(t *testing.T, dsn string) (string, error) {
 	t.Helper()
 	command := osexec.Command("psql", dsn, "-X", "-q", "-v", "ON_ERROR_STOP=1", "--single-transaction",
@@ -283,7 +304,7 @@ func TestR5DMigrationNative(t *testing.T) {
 	})
 
 	t.Run("world-boss-result-after-migration", func(t *testing.T) {
-		dsn, p := r5dMigrationDatabase(t, "worldboss")
+		dsn, p := r5dRolledBackDatabase(t, "worldboss")
 		server := rankingServer(t, p)
 		late, latePartner := worldBossActor(t, p, server)
 		advance, advancePartner := worldBossActor(t, p, server)
