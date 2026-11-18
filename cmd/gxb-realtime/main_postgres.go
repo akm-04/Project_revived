@@ -31,6 +31,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
@@ -52,6 +53,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
+	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	appoccult "gxb.local/backend/v2/internal/application/occult"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
@@ -291,6 +293,11 @@ func run() error {
 	}
 	achievementRuntime := &achievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Fresh: pool, Active: contentstore.Store{Queryer: pool}}
 	achievementNotices := stockruntime.AchievementNoticeHandler{Service: achievement.Service{Store: achievementstore.Store{}, Content: contentstore.Store{Queryer: pool}, Runtime: achievementRuntime}, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: achievementEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("achievement notice delivery degraded: %v", e) }}
+	libraryPartnerLogEvents, err := stockruntime.NewLibraryPartnerLogNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	libraryPartnerLogNotices := stockruntime.LibraryPartnerLogNoticeHandler{Service: applibrary.PartnerLogReader{Queryer: pool, Library: librarystore.Store{}}, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: libraryPartnerLogEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("library partner log notice delivery degraded: %v", e) }}
 	tournamentEvents, err := stockruntime.NewTournamentNoticeRegistry()
 	if err != nil {
 		log.Fatal(err)
@@ -367,7 +374,8 @@ func run() error {
 		realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices},
 		realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices},
 		realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices},
-		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices})
+		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices},
+		realtimewakeup.Registration{Route: applibrary.PartnerLogNoticeRoute, Handler: libraryPartnerLogNotices})
 	if err != nil {
 		log.Fatal(err)
 	}
