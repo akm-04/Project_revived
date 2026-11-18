@@ -1,19 +1,18 @@
 package contentstore
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"strconv"
 	"sync"
 
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
 	d "gxb.local/backend/v2/internal/domain/shop"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -35,6 +34,7 @@ func (s Store) shopCatalogTx(ctx context.Context, q tx.Queryer, revision string)
 		return out, d.ErrUnavailable
 	}
 	var manifest, raw string
+	var version int16
 	if err := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&manifest); err != nil {
 		return out, err
 	}
@@ -49,7 +49,7 @@ func (s Store) shopCatalogTx(ctx context.Context, q tx.Queryer, revision string)
 	if !good {
 		return out, fmt.Errorf("%w: content capability is not active", d.ErrUnavailable)
 	}
-	if err = q.QueryRow(ctx, `SELECT payload::text FROM content_shop_catalogs WHERE revision_id=$1`, revision).Scan(&raw); err != nil {
+	if err = q.QueryRow(ctx, `SELECT payload::text, payload_version FROM content_shop_catalogs WHERE revision_id=$1`, revision).Scan(&raw, &version); err != nil {
 		return out, err
 	}
 	var generic any
@@ -65,14 +65,8 @@ func (s Store) shopCatalogTx(ctx context.Context, q tx.Queryer, revision string)
 		return out, fmt.Errorf("%w: shop artifact hash drift", d.ErrUnavailable)
 	}
 	var dto builtin.ShopCatalog
-	dec := json.NewDecoder(bytes.NewBufferString(raw))
-	dec.DisallowUnknownFields()
-	if err = dec.Decode(&dto); err != nil {
+	if err = payload.Decode("content_shop_catalogs", version, []byte(raw), &dto); err != nil {
 		return out, err
-	}
-	var extra any
-	if dec.Decode(&extra) != io.EOF {
-		return out, d.ErrUnavailable
 	}
 	return shopCatalogDomain(dto, revision)
 }
@@ -138,7 +132,7 @@ func shopCatalogDomain(dto builtin.ShopCatalog, revision string) (d.Catalog, err
 
 // InsertShop stores the exact compiled bundle in the migration-00175 table.
 func (Store) InsertShop(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
-	tag, err := t.Exec(ctx, `INSERT INTO content_shop_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.ShopJSON()))
+	tag, err := t.Exec(ctx, `INSERT INTO content_shop_catalogs(revision_id,payload,payload_version)VALUES($1,$2::jsonb,$3)`, b.RevisionID(), string(b.ShopJSON()), payload.Current)
 	if err != nil {
 		return 0, err
 	}

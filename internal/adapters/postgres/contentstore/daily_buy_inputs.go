@@ -1,17 +1,16 @@
 package contentstore
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"io"
 	"sync"
 
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
 	itemsenergy "gxb.local/backend/v2/internal/domain/itemsenergy"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -29,6 +28,7 @@ func (s Store) dailyBuyInputsTx(ctx context.Context, q tx.Queryer, revision stri
 		return out, itemsenergy.ErrUnavailable
 	}
 	var manifest, raw string
+	var version int16
 	if err := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&manifest); err != nil {
 		return out, err
 	}
@@ -43,7 +43,7 @@ func (s Store) dailyBuyInputsTx(ctx context.Context, q tx.Queryer, revision stri
 	if !good {
 		return out, itemsenergy.ErrUnavailable
 	}
-	if err = q.QueryRow(ctx, `SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1`, revision).Scan(&raw); err != nil {
+	if err = q.QueryRow(ctx, `SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1`, revision).Scan(&raw, &version); err != nil {
 		return out, err
 	}
 	var generic any
@@ -59,14 +59,8 @@ func (s Store) dailyBuyInputsTx(ctx context.Context, q tx.Queryer, revision stri
 		return out, itemsenergy.ErrUnavailable
 	}
 	var dto builtin.DailyBuyInputCatalog
-	dec := json.NewDecoder(bytes.NewBufferString(raw))
-	dec.DisallowUnknownFields()
-	if err = dec.Decode(&dto); err != nil {
+	if err = payload.Decode("content_daily_buy_input_catalogs", version, []byte(raw), &dto); err != nil {
 		return out, err
-	}
-	var extra any
-	if dec.Decode(&extra) != io.EOF {
-		return out, itemsenergy.ErrUnavailable
 	}
 	return dailyBuyCatalogDomain(dto, revision)
 }
@@ -133,7 +127,7 @@ func dailyBuyCatalogDomain(dto builtin.DailyBuyInputCatalog, revision string) (i
 }
 
 func (Store) InsertDailyBuyInputs(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
-	tag, err := t.Exec(ctx, `INSERT INTO content_daily_buy_input_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.DailyBuyInputsJSON()))
+	tag, err := t.Exec(ctx, `INSERT INTO content_daily_buy_input_catalogs(revision_id,payload,payload_version)VALUES($1,$2::jsonb,$3)`, b.RevisionID(), string(b.DailyBuyInputsJSON()), payload.Current)
 	if err != nil {
 		return 0, err
 	}

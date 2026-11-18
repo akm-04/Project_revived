@@ -645,6 +645,25 @@
    "batch": 1
   },
   {
+   "table": "content_compat_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.CompatMessagePushCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/compat.go:61 payload.Decode by payload_version"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/compat.go:78 string(b.CompatMessagePushJSON()), payload.Current"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/compat.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
+   ],
+   "batch": 3
+  },
+  {
    "table": "content_conquer_input_catalogs",
    "column": "payload",
    "scope": "content",
@@ -702,6 +721,25 @@
     "internal/adapters/postgres/contentstore/course_inputs.go:56 sha256(canonicalized payload + newline) compared with the manifest artifact hash"
    ],
    "batch": 1
+  },
+  {
+   "table": "content_daily_buy_input_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.DailyBuyInputCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/daily_buy_inputs.go:62 payload.Decode by payload_version"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/daily_buy_inputs.go:130 string(b.DailyBuyInputsJSON()), payload.Current"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/daily_buy_inputs.go:57 sha256(canonicalized payload + 10) compared with the manifest artifact hash"
+   ],
+   "batch": 3
   },
   {
    "table": "content_dodgeball_catalogs",
@@ -1146,6 +1184,25 @@
     "internal/adapters/postgres/contentstore/public_showcase.go:71 sha256(canonicalized payload + 10) compared with manifest artifact hash"
    ],
    "batch": 4
+  },
+  {
+   "table": "content_shop_catalogs",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "builtin.ShopCatalog",
+   "decode_sites": [
+    "internal/adapters/postgres/contentstore/shop_catalog.go:68 payload.Decode by payload_version"
+   ],
+   "writers": [
+    "internal/adapters/postgres/contentstore/shop_catalog.go:135 string(b.ShopJSON()), payload.Current"
+   ],
+   "sql_paths": [],
+   "digest": true,
+   "digest_sites": [
+    "internal/adapters/postgres/contentstore/shop_catalog.go:63 sha256(canonicalized payload + 10) compared with the manifest artifact hash"
+   ],
+   "batch": 3
   },
   {
    "table": "content_social_gift_catalogs",

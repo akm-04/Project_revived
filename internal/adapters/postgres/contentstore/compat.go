@@ -1,18 +1,17 @@
 package contentstore
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"io"
 	"sync"
 
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
 	d "gxb.local/backend/v2/internal/domain/compat"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -31,6 +30,7 @@ func (s Store) messagePushCatalogTx(ctx context.Context, q tx.Queryer, revision 
 		return d.Catalog{}, d.ErrUnavailable
 	}
 	var manifest, raw string
+	var version int16
 	if err := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&manifest); err != nil {
 		return d.Catalog{}, err
 	}
@@ -42,7 +42,7 @@ func (s Store) messagePushCatalogTx(ctx context.Context, q tx.Queryer, revision 
 	if err != nil || !good {
 		return d.Catalog{}, d.ErrUnavailable
 	}
-	if err := q.QueryRow(ctx, `SELECT payload::text FROM content_compat_catalogs WHERE revision_id=$1`, revision).Scan(&raw); err != nil {
+	if err := q.QueryRow(ctx, `SELECT payload::text, payload_version FROM content_compat_catalogs WHERE revision_id=$1`, revision).Scan(&raw, &version); err != nil {
 		return d.Catalog{}, err
 	}
 	var generic any
@@ -58,14 +58,8 @@ func (s Store) messagePushCatalogTx(ctx context.Context, q tx.Queryer, revision 
 		return d.Catalog{}, d.ErrUnavailable
 	}
 	var dto builtin.CompatMessagePushCatalog
-	decoder := json.NewDecoder(bytes.NewBufferString(raw))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&dto); err != nil {
+	if err := payload.Decode("content_compat_catalogs", version, []byte(raw), &dto); err != nil {
 		return d.Catalog{}, err
-	}
-	var extra any
-	if decoder.Decode(&extra) != io.EOF {
-		return d.Catalog{}, d.ErrUnavailable
 	}
 	if err := dto.Validate(); err != nil {
 		return d.Catalog{}, d.ErrUnavailable
@@ -81,7 +75,7 @@ func (Store) InsertCompatMessagePush(ctx context.Context, t tx.Tx, b registry.Bu
 	if t == nil {
 		return 0, errors.New("content store: nil transaction")
 	}
-	tag, err := t.Exec(ctx, `INSERT INTO content_compat_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.CompatMessagePushJSON()))
+	tag, err := t.Exec(ctx, `INSERT INTO content_compat_catalogs(revision_id,payload,payload_version)VALUES($1,$2::jsonb,$3)`, b.RevisionID(), string(b.CompatMessagePushJSON()), payload.Current)
 	if err != nil {
 		return 0, err
 	}

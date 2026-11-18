@@ -884,13 +884,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -1222,13 +1222,13 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -1508,13 +1508,13 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
+     "line": 31,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
-     "statement": "SELECT payload::text FROM content_shop_catalogs WHERE revision_id=$1"
+     "line": 31,
+     "statement": "SELECT payload::text, payload_version FROM content_shop_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -1669,13 +1669,13 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
+     "line": 31,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
-     "statement": "SELECT payload::text FROM content_shop_catalogs WHERE revision_id=$1"
+     "line": 31,
+     "statement": "SELECT payload::text, payload_version FROM content_shop_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
@@ -1862,13 +1862,13 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
+     "line": 31,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
-     "statement": "SELECT payload::text FROM content_shop_catalogs WHERE revision_id=$1"
+     "line": 31,
+     "statement": "SELECT payload::text, payload_version FROM content_shop_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -2004,13 +2004,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
+     "line": 31,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
-     "statement": "SELECT payload::text FROM content_shop_catalogs WHERE revision_id=$1"
+     "line": 31,
+     "statement": "SELECT payload::text, payload_version FROM content_shop_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -2096,13 +2096,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
+     "line": 31,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
-     "statement": "SELECT payload::text FROM content_shop_catalogs WHERE revision_id=$1"
+     "line": 31,
+     "statement": "SELECT payload::text, payload_version FROM content_shop_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -6378,13 +6378,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -6983,13 +6983,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -7195,13 +7195,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -7577,13 +7577,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -7804,13 +7804,13 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -8043,13 +8043,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -8584,13 +8584,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -27590,13 +27590,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
+     "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
-     "line": 26,
-     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+     "line": 25,
+     "statement": "SELECT payload::text, payload_version FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -61936,13 +61936,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/compat.go",
-     "line": 29,
+     "line": 28,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/compat.go",
-     "line": 29,
-     "statement": "SELECT payload::text FROM content_compat_catalogs WHERE revision_id=$1"
+     "line": 28,
+     "statement": "SELECT payload::text, payload_version FROM content_compat_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -62024,13 +62024,13 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/compat.go",
-     "line": 29,
+     "line": 28,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/compat.go",
-     "line": 29,
-     "statement": "SELECT payload::text FROM content_compat_catalogs WHERE revision_id=$1"
+     "line": 28,
+     "statement": "SELECT payload::text, payload_version FROM content_compat_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -142970,13 +142970,13 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
+     "line": 31,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/shop_catalog.go",
-     "line": 32,
-     "statement": "SELECT payload::text FROM content_shop_catalogs WHERE revision_id=$1"
+     "line": 31,
+     "statement": "SELECT payload::text, payload_version FROM content_shop_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
