@@ -133,6 +133,9 @@ func (s Service) materializeHeroes(c context.Context, sc gen.TimedScope, pid ide
 			return err
 		}
 		wire["is_partner"] = true
+		// The client assigns one to a partner award itself; emit it for the
+		// shared awards[].item_num conformance path.
+		wire["item_num"] = int64(1)
 		*awards = append(*awards, wire)
 	}
 	return nil

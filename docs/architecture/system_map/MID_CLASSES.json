@@ -1166,6 +1166,11 @@
      "value": "UNKNOWN"
     },
     {
+     "file": "internal/application/characterhero/fumo_service.go",
+     "line": 266,
+     "value": "serializable"
+    },
+    {
      "file": "internal/application/itemsenergy/service.go",
      "line": 185,
      "value": "repeatable_read"
@@ -1176,6 +1181,11 @@
     {
      "file": "internal/application/campaign/sweep.go",
      "line": 172,
+     "value": "false"
+    },
+    {
+     "file": "internal/application/characterhero/fumo_service.go",
+     "line": 266,
      "value": "false"
     },
     {
@@ -1198,6 +1208,11 @@
      "value": "6"
     },
     {
+     "file": "internal/application/characterhero/fumo_service.go",
+     "line": 266,
+     "value": "3"
+    },
+    {
      "file": "internal/application/itemsenergy/service.go",
      "line": 185,
      "value": "6"
@@ -1207,6 +1222,7 @@
     "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/campaignstore/store.go:48",
     "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dailyconsumestore/store.go:38",
     "internal/adapters/postgres/dailyconsumestore/store.go:44",
@@ -1241,6 +1257,14 @@
      "retry": "6"
     },
     {
+     "file": "internal/application/characterhero/fumo_service.go",
+     "function": "Service.QuickFumo",
+     "isolation": "serializable",
+     "line": 266,
+     "read_only": "false",
+     "retry": "3"
+    },
+    {
      "file": "internal/application/itemsenergy/service.go",
      "function": "Service.execute",
      "isolation": "repeatable_read",
@@ -1254,6 +1278,11 @@
      "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
      "line": 184,
      "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/awakening.go",
+     "line": 11,
+     "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
@@ -1289,6 +1318,31 @@
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 160,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_equipment.go",
+     "line": 55,
+     "statement": "SELECT item_id,ordinary_eligible FROM gxb_content_hero_equipment WHERE revision_id=$1 AND hero_table_id=$2 AND color=$3 AND slot=$4"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
+     "line": 80,
+     "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 45,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 81,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 135,
+     "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
@@ -1358,6 +1412,21 @@
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 576,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 592,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by, COALESCE((SELECT schema_version FROM a),0)::integer AS schema_version, COALESCE((SELECT manifest::text FROM a),'{}') AS manifest_json"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 592,
+     "statement": "SELECT a.revision_id, a.activation_version, a.activated_at, a.activated_by, r.schema_version, r.manifest FROM gxb_content_activation a JOIN gxb_content_revisions r ON r.revision_id=a.revision_id WHERE a.slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 592,
      "statement": "WITH a AS ("
     },
     {
@@ -1438,6 +1507,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/fumo_service.go:270",
     "UNRESOLVED apply at internal/application/campaign/sweep.go:216",
     "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
@@ -2540,7 +2610,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {
@@ -2975,7 +3045,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {
@@ -4049,7 +4119,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {
@@ -4250,7 +4320,7 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/fumo_service.go",
-     "line": 273,
+     "line": 392,
      "value": "serializable"
     },
     {
@@ -4263,7 +4333,7 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/fumo_service.go",
-     "line": 273,
+     "line": 392,
      "value": "false"
     },
     {
@@ -4273,12 +4343,12 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/fumo_service.go:221"
+    "internal/application/characterhero/fumo_service.go:240"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/fumo_service.go",
-     "line": 273,
+     "line": 392,
      "value": "3"
     },
     {
@@ -4299,7 +4369,7 @@
      "file": "internal/application/characterhero/fumo_service.go",
      "function": "Service.FeedFumo",
      "isolation": "serializable",
-     "line": 273,
+     "line": 392,
      "read_only": "false",
      "retry": "3"
     },
@@ -4340,12 +4410,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 91,
+     "line": 113,
      "statement": "SELECT item_type,moneng FROM gxb_content_hero_fumo_materials WHERE revision_id=$1 AND item_id=$2"
     },
     {
@@ -4430,7 +4500,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/fumo_service.go:291",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/fumo_service.go:410",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -7542,7 +7612,7 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 267,
+     "line": 268,
      "value": "serializable"
     }
    ],
@@ -7550,17 +7620,17 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 267,
+     "line": 268,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/service.go:300"
+    "internal/application/characterhero/service.go:301"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 267,
+     "line": 268,
      "value": "3"
     }
    ],
@@ -7573,7 +7643,7 @@
      "file": "internal/application/characterhero/service.go",
      "function": "Service.SaveBackpackSortType",
      "isolation": "serializable",
-     "line": 267,
+     "line": 268,
      "read_only": "false",
      "retry": "3"
     }
@@ -7627,7 +7697,7 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 321,
+     "line": 322,
      "value": "serializable"
     }
    ],
@@ -7635,17 +7705,17 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 321,
+     "line": 322,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/service.go:354"
+    "internal/application/characterhero/service.go:355"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 321,
+     "line": 322,
      "value": "3"
     }
    ],
@@ -7658,7 +7728,7 @@
      "file": "internal/application/characterhero/service.go",
      "function": "Service.SaveSortType",
      "isolation": "serializable",
-     "line": 321,
+     "line": 322,
      "read_only": "false",
      "retry": "3"
     }
@@ -121312,7 +121382,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {
@@ -121698,7 +121768,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {
@@ -122084,7 +122154,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {
@@ -122470,7 +122540,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_fumo.go",
-     "line": 58,
+     "line": 80,
      "statement": "SELECT threshold_increments::text,total_cap,mana_per_fumo,stage_delta_by_attr::text FROM gxb_content_hero_fumo_targets WHERE revision_id=$1 AND item_id=$2"
     },
     {

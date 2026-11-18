@@ -39,6 +39,9 @@ func (c fumoOpContent) HeroFumoMaterialTx(_ context.Context, _ tx.Queryer, _ str
 	}
 	return v, nil
 }
+func (fumoOpContent) QuickFumoRuleTx(context.Context, tx.Queryer, string) (character.QuickFumoRule, error) {
+	return character.QuickFumoRule{CrystalCost: 20, FumoGrant: 150, DailyLimit: 1}, nil
+}
 
 func oneStageFumoTarget(id, cap, mana int64) character.HeroFumoTarget {
 	return character.HeroFumoTarget{ItemID: character.EquipmentTemplateID(id), ThresholdIncrements: []int64{cap}, TotalCap: cap, ManaPerFumo: mana, StageDeltaByAttr: []map[int64]string{{1: "6"}}}

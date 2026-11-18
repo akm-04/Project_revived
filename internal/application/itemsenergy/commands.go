@@ -309,14 +309,10 @@ func (s Service) goldenHand(c context.Context, actor identity.ActorContext, op o
 		if err = s.Facts.RecordTx(factContext, sc.Tx, sc.Operation.Operation(), objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "items-energy", SourceBusinessKey: sc.Operation.Operation().ID.String(), Kind: "GOLDEN_HAND_USED", Delta: 1}); err != nil {
 			return nil, err
 		}
-		balance, err := s.scalar(c, sc, actor.PlayerID, "mana")
-		if err != nil {
-			return nil, err
-		}
 		if tenfold {
-			return map[string]any{"cost": cost, "crit": crit, "mana": balance, "fumo": map[string]any{}, "trial_info": map[string]any{"left_times": int64(0)}}, nil
+			return map[string]any{"cost": cost, "crit": crit, "mana": mana, "fumo": map[string]any{}, "trial_info": map[string]any{"left_times": int64(0)}}, nil
 		}
-		return map[string]any{"cost": cost, "crit": crit, "mana": balance, "buy_mana_times": counters.Mana}, nil
+		return map[string]any{"cost": cost, "crit": crit, "mana": mana, "buy_mana_times": counters.Mana}, nil
 	})
 }
 

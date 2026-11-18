@@ -1,7 +1,8 @@
 {
  "background": [],
  "content": [
-  "content_awakening_catalogs"
+  "content_awakening_catalogs",
+  "content_daily_buy_input_catalogs"
  ],
  "contracts": [
   {
@@ -268,7 +269,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 27,
    "name": "USE_ENERGY_ITEM"
@@ -276,7 +277,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 28,
    "name": "DAILY_CONSUNME_LOAD"
@@ -284,7 +285,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 29,
    "name": "DAILY_CONSUNME"
@@ -468,7 +469,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 82,
    "name": "SELL_ITEM"
@@ -476,7 +477,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 86,
    "name": "SELL_ITEMS"
@@ -484,7 +485,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 87,
    "name": "USE_MAGIC_ITEMS"
@@ -516,7 +517,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 96,
    "name": "USE_GOLDEN_HAND"
@@ -524,7 +525,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 97,
    "name": "ADD_ENERGY"
@@ -540,7 +541,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
-    "line": 44
+    "line": 52
    },
    "mid": 241,
    "name": "EXCHAGE_CODE_HERO"
@@ -618,6 +619,7 @@
    "account_sessions",
    "accounts",
    "content_awakening_catalogs",
+   "content_daily_buy_input_catalogs",
    "gameplay_contexts",
    "gxb_content_activation",
    "gxb_content_appearance_live",

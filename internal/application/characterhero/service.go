@@ -91,6 +91,7 @@ type Service struct {
 	Equipment                 EquipmentOperationContent
 	EquipmentResources        appi5.TxHeroEquipmentResourceDebiter
 	Fumo                      FumoOperationContent
+	DailyConsume              QuickFumoCounters
 	Promotion                 HeroPromotionContent
 	PromotionResources        appi5.TxHeroPromotionResourceSettler
 	StrictRestoration         appi5.TxStrictRestorationSettler

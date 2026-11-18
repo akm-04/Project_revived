@@ -959,7 +959,7 @@
    "tables": 0
   },
   {
-   "callees": 26,
+   "callees": 27,
    "callers": 16,
    "mids": 41,
    "name": "characterhero",
@@ -1050,7 +1050,7 @@
   },
   {
    "callees": 1,
-   "callers": 3,
+   "callers": 4,
    "mids": 0,
    "name": "dailyconsume",
    "path": "internal/application/dailyconsume",

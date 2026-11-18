@@ -7,10 +7,15 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"time"
 
+	appconsume "gxb.local/backend/v2/internal/application/dailyconsume"
+	appgeneration "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -25,6 +30,7 @@ type FumoOperationContent interface {
 	HeroFumoRevision(context.Context, string) (bool, error)
 	HeroFumoTargetTx(context.Context, tx.Queryer, string, character.EquipmentTemplateID) (character.HeroFumoTarget, error)
 	HeroFumoMaterialTx(context.Context, tx.Queryer, string, character.EquipmentTemplateID) (character.HeroFumoMaterial, error)
+	QuickFumoRuleTx(context.Context, tx.Queryer, string) (character.QuickFumoRule, error)
 }
 
 type FumoResult struct {
@@ -33,6 +39,19 @@ type FumoResult struct {
 	Fumo      int64
 	Levels    character.HeroFumoSlots
 	Replayed  bool
+}
+
+// QuickFumoResult is MID 29 consume_id 2's client projection: the slot's raw
+// Fumo after the grant and the crystal cost charged.
+type QuickFumoResult struct {
+	Fumo int64
+	Cost int64
+}
+
+// QuickFumoCounters is the rank-450 daily_consume owner seam (id 2).
+type QuickFumoCounters interface {
+	LockBuyTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (appconsume.LockedCounters, appconsume.BuyCounters, error)
+	AdvanceDailyTx(context.Context, tx.Tx, identity.PlayerID, appconsume.LockedCounters, int64, int64) (int64, error)
 }
 
 type heroFumoReceipt struct {
@@ -220,6 +239,106 @@ func putHeroFumoReceipt(ctx context.Context, s Service, t tx.Tx, actor identity.
 	rr.PolicyVersion = "pass542-ca4-3a"
 	_, err = s.Receipts.PutTx(ctx, t, rr)
 	return err
+}
+
+func (s Service) validateQuickFumo() error {
+	if s.Timed.Runner.DB == nil || s.Timed.Binder.Time == nil || s.DailyConsume == nil || s.MaterialCosts == nil {
+		return errors.New("character hero: incomplete quick Fumo service")
+	}
+	return s.validateFumo()
+}
+
+// QuickFumo implements MID 29 consume_id 2: one crystal-priced fixed raw-Fumo
+// grant per game day. It is the fumo owner's transaction: hero lock, the shared
+// rank-450 daily counter, one I5 debit, then the hero state save.
+func (s Service) QuickFumo(ctx context.Context, actor identity.ActorContext, partnerID, equipIndex int64, op operation.Context) (QuickFumoResult, error) {
+	if err := s.validateQuickFumo(); err != nil {
+		return QuickFumoResult{}, ErrHeroFumoUnavailable
+	}
+	if !actor.PlayerID.Valid() || partnerID <= 0 || equipIndex < 1 || equipIndex > character.HeroEquipmentSlotCount {
+		return QuickFumoResult{}, errors.New("character hero: invalid quick Fumo operation")
+	}
+	bound, revision, err := s.bindFumoContent(ctx, op)
+	if err != nil {
+		return QuickFumoResult{}, err
+	}
+	var result QuickFumoResult
+	_, _, err = s.Timed.Run(ctx, bound, profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(txctx context.Context, scope appgeneration.TimedScope) error {
+		if err := s.Fencer.FenceActorTx(txctx, scope.Tx, actor, scope.Operation.DecisionAt()); err != nil {
+			return err
+		}
+		hero, err := s.ProgressionStore.LockHeroByPartnerIDTx(txctx, scope.Tx, actor.PlayerID, partnerID)
+		if err != nil {
+			return err
+		}
+		if err := validateNormalHeroForEquipment(txctx, s, scope.Tx, revision, hero); err != nil {
+			return err
+		}
+		pos, err := s.Equipment.HeroEquipmentPositionTx(txctx, scope.Tx, revision, hero.TableID, hero.Color, equipIndex)
+		if err != nil {
+			return err
+		}
+		baseItem := pos.ItemID
+		pos, err = s.AwakeningPositions.ResolveTx(txctx, scope.Tx, hero, revision, pos)
+		if err != nil {
+			return err
+		}
+		if hero.Equipment[equipIndex-1] == 0 && pos.ItemID == baseItem {
+			return ErrHeroFumoUnavailable
+		}
+		if !pos.ItemID.Valid() {
+			return ErrHeroFumoUnavailable
+		}
+		target, err := s.Fumo.HeroFumoTargetTx(txctx, scope.Tx, revision, pos.ItemID)
+		if err != nil {
+			return ErrHeroFumoUnavailable
+		}
+		current := hero.Fumo[equipIndex-1]
+		if current < 0 || current >= target.TotalCap {
+			return ErrHeroFumoUnavailable
+		}
+		rule, err := s.Fumo.QuickFumoRuleTx(txctx, scope.Tx, revision)
+		if err != nil {
+			return ErrHeroFumoUnavailable
+		}
+		locked, _, err := s.DailyConsume.LockBuyTx(txctx, scope.Tx, actor.PlayerID, modes.Day(scope.Operation.DecisionAt()), scope.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		credited := rule.FumoGrant
+		if remaining := target.TotalCap - current; credited > remaining {
+			credited = remaining
+		}
+		debit, err := s.MaterialCosts.DebitMaterialCostTx(txctx, scope.Tx, actor.PlayerID, appi5.MaterialCost{Scalars: []appi5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: rule.CrystalCost}}}, scope.Operation.Operation())
+		if err != nil {
+			return err
+		}
+		for _, balance := range debit.Scalars {
+			changes.Balance(txctx, balance.ResourceKey, balance.Amount)
+		}
+		if _, err = s.DailyConsume.AdvanceDailyTx(txctx, scope.Tx, actor.PlayerID, locked, 2, rule.DailyLimit); err != nil {
+			if errors.Is(err, appconsume.ErrRefused) {
+				return ErrHeroFumoUnavailable
+			}
+			return err
+		}
+		oldVersion := hero.StateVersion
+		hero.Fumo[equipIndex-1], err = checkedAdd64(current, credited)
+		if err != nil {
+			return err
+		}
+		hero.StateVersion++
+		hero.UpdatedAt = scope.Operation.DecisionAt().UTC()
+		if err := hero.ValidatePersistent(); err != nil {
+			return err
+		}
+		if err := s.ProgressionStore.SaveHeroStateTx(txctx, scope.Tx, hero, oldVersion); err != nil {
+			return err
+		}
+		result = QuickFumoResult{Fumo: hero.Fumo[equipIndex-1], Cost: rule.CrystalCost}
+		return nil
+	})
+	return result, err
 }
 
 func aggregateFumoMaterials(materials []int64) ([]int64, map[int64]int64, error) {

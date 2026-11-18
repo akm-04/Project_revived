@@ -16,6 +16,9 @@ func testCatalog() Catalog {
 			50000005: {ID: 50000005, Type: -1, Stack: 0},
 			50000006: {ID: 50000006, Type: 1, Stack: 0},
 			50000007: {ID: 50000007, Type: 4, SubType: 1, Stack: 999},
+			50000008: {ID: 50000008, Type: 24, Stack: 999999, Mana: 10000},
+			50000009: {ID: 50000009, Type: 4, SubType: 1, Stack: 99, Gifts: []int64{105}},
+			50000011: {ID: 50000011, Type: 4, SubType: 1, Stack: 99, Gifts: []int64{106}},
 		},
 		Gifts: map[int64]Gift{
 			100: {ID: 100, Items: []int64{50000002}, ItemNums: []int64{3}, Drops: []int64{200}, Crystal: 5},
@@ -23,10 +26,13 @@ func testCatalog() Catalog {
 			102: {ID: 102, Items: []int64{50000006}, ItemNums: []int64{1}},
 			103: {ID: 103, Items: []int64{50000007}, ItemNums: []int64{1}, LuckyCoin: 1},
 			104: {ID: 104, Items: []int64{50000007}, ItemNums: []int64{1}, Equip: "17001|1"},
+			105: {ID: 105, Items: []int64{50000008}, ItemNums: []int64{1}},
+			106: {ID: 106, Drops: []int64{202}},
 		},
 		Dropboxes: map[int64]Dropbox{
 			200: {ID: 200, Rolls: []DropRoll{{ID: 1, ItemID: 50000003, ItemNum: 2, Rate: 1, RollType: 1}}},
 			201: {ID: 201, Rolls: []DropRoll{{ID: 1, ItemID: 50000002, ItemNum: 1, Rate: 1, RollType: 1}, {ID: 2, ItemID: 50000003, ItemNum: 1, Rate: 3, RollType: 1}}},
+			202: {ID: 202, Rolls: []DropRoll{{ID: 1, ItemID: 50000008, ItemNum: 1, Rate: 1, RollType: 1}}},
 		},
 		VIP: map[int64]VIPRow{
 			0:  {Level: 0, NumEnergy: 1, NumMidas: 1},
@@ -105,6 +111,39 @@ func TestGoldenHandPipeline(t *testing.T) {
 	}
 }
 
+type advancingUniform struct {
+	values []uint64
+	index  int
+}
+
+func (u *advancingUniform) Uniform(n uint64) uint64 {
+	value := u.values[u.index]
+	u.index++
+	if value >= n {
+		value = n - 1
+	}
+	return value
+}
+
+// TestMidasFloatBoundsArePinned pins the exact floor and ceiling of the
+// contract's one-ceil pipeline from the source float/crit bounds, independent
+// of any wallet balance.
+func TestMidasFloatBoundsArePinned(t *testing.T) {
+	catalog := testCatalog()
+	low, crit, _, err := catalog.MidasMana(1, 1, 1, &advancingUniform{values: []uint64{0, 0}})
+	if err != nil || crit != 1 || low != 20100 {
+		t.Fatalf("lower bound = %d %d %v", low, crit, err)
+	}
+	high, crit, _, err := catalog.MidasMana(1, 1, 1, &advancingUniform{values: []uint64{9999, uint64(1)<<53 - 1}})
+	if err != nil || crit != 2 || high != 42210 {
+		t.Fatalf("upper bound = %d %d %v", high, crit, err)
+	}
+	tenfold, _, _, err := catalog.MidasMana(1, 1, 10, &advancingUniform{values: []uint64{9999, uint64(1)<<53 - 1}})
+	if err != nil || tenfold != 422100 {
+		t.Fatalf("tenfold upper bound = %d %v", tenfold, err)
+	}
+}
+
 func TestBoxResolutionAndFailClosed(t *testing.T) {
 	catalog := testCatalog()
 	plan, err := catalog.ResolveBox(50000001, 100, 2)
@@ -180,6 +219,32 @@ func TestBoxDrawScheduleIsUnitThenDropsOrder(t *testing.T) {
 	for index := range want {
 		if drawn[index].ItemID != want[index] {
 			t.Fatalf("draw %d = %d want %d (%+v)", index, drawn[index].ItemID, want[index], drawn)
+		}
+	}
+}
+
+// TestHorcruxRewardsRefuseBeforeMutation pins C11/B6: a type-24 horcrux row
+// refuses a fixed gift and a drawn drop, and a drawn refusal is deterministic
+// for the same stream (the draw is consumed before the refusal).
+func TestHorcruxRewardsRefuseBeforeMutation(t *testing.T) {
+	catalog := testCatalog()
+	if _, err := catalog.GiftRewards(catalog.Gifts[105], 1); !errors.Is(err, ErrRefused) {
+		t.Fatalf("fixed horcrux row was not refused: %v", err)
+	}
+	if _, err := catalog.ResolveBox(50000009, 105, 1); !errors.Is(err, ErrRefused) {
+		t.Fatalf("box with a fixed horcrux row was not refused: %v", err)
+	}
+	plan, err := catalog.ResolveBox(50000011, 106, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for attempt := 0; attempt < 2; attempt++ {
+		stream := &recordingUniform{script: []uint64{0}}
+		if _, err := catalog.RollBox(plan, stream); !errors.Is(err, ErrRefused) {
+			t.Fatalf("rolled horcrux attempt %d was not refused: %v", attempt, err)
+		}
+		if len(stream.calls) != 1 {
+			t.Fatalf("rolled horcrux attempt %d drew %d times, want the roll before the refusal", attempt, len(stream.calls))
 		}
 	}
 }

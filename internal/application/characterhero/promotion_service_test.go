@@ -35,6 +35,9 @@ func (c promotionFumoContent) HeroFumoTargetTx(_ context.Context, _ tx.Queryer, 
 func (promotionFumoContent) HeroFumoMaterialTx(context.Context, tx.Queryer, string, character.EquipmentTemplateID) (character.HeroFumoMaterial, error) {
 	return character.HeroFumoMaterial{}, errors.New("unexpected fumo material")
 }
+func (promotionFumoContent) QuickFumoRuleTx(context.Context, tx.Queryer, string) (character.QuickFumoRule, error) {
+	return character.QuickFumoRule{CrystalCost: 20, FumoGrant: 150, DailyLimit: 1}, nil
+}
 
 type promotionContent struct {
 	eligible map[int64]int64

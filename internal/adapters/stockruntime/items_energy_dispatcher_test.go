@@ -7,6 +7,7 @@ import (
 	"time"
 
 	campaign "gxb.local/backend/v2/internal/application/campaign"
+	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	app "gxb.local/backend/v2/internal/application/itemsenergy"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -55,6 +56,17 @@ func (f *itemsEnergyFake) TenfoldGoldenHand(context.Context, identity.ActorConte
 }
 func (f *itemsEnergyFake) ExchangeCode(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (map[string]any, error) {
 	return f.done("box")
+}
+
+type quickFumoFake struct {
+	calls  int
+	result apphero.QuickFumoResult
+	err    error
+}
+
+func (f *quickFumoFake) QuickFumo(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.QuickFumoResult, error) {
+	f.calls++
+	return f.result, f.err
 }
 
 type campaignFallbackFake struct {
@@ -127,6 +139,16 @@ func TestItemsEnergyDispatcherRoutesEveryMID(t *testing.T) {
 		if response.HTTPStatus != 200 || fake.calls[cell.call] != 1 {
 			t.Fatalf("MID %d routed to %v: %+v", cell.mid, fake.calls, response)
 		}
+	}
+	fumo := &quickFumoFake{result: apphero.QuickFumoResult{Fumo: 150, Cost: 20}}
+	dispatcher.Fumo = fumo
+	fumoResponse := dispatcher.Dispatch(context.Background(), itemsEnergyRequest(29, map[string]any{"consume_id": 2, "partner_id": 1, "equip_index": 1}, now))
+	if fumoResponse.HTTPStatus != 200 || fumo.calls != 1 || fumoResponse.Body["fumo"] != int64(150) ||
+		fumoResponse.Body["cost"] != int64(20) || fumoResponse.Body["trial_info"] == nil {
+		t.Fatalf("MID 29 id 2 was not handed to the fumo owner: %+v", fumoResponse)
+	}
+	if fallback.trials != 0 {
+		t.Fatalf("MID 29 id 2 reached campaign: %d", fallback.trials)
 	}
 	response := dispatcher.Dispatch(context.Background(), itemsEnergyRequest(29, map[string]any{"consume_id": 3}, now))
 	if response.HTTPStatus != 200 || fallback.trials != 1 {

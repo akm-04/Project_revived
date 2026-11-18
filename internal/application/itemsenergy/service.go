@@ -390,17 +390,6 @@ func (s Service) requireStacks(c context.Context, sc gen.TimedScope, pid identit
 	return nil
 }
 
-func (s Service) scalar(c context.Context, sc gen.TimedScope, pid identity.PlayerID, key string) (int64, error) {
-	state, exists, err := s.Balances.ReadScalarTx(c, sc.Tx, pid, key)
-	if err != nil {
-		return 0, err
-	}
-	if !exists {
-		return 0, nil
-	}
-	return state.Amount, nil
-}
-
 func rewardPlan(pid identity.PlayerID, name string, op operation.Context, lines []grant.Line) grant.Plan {
 	return grant.Plan{PlayerID: pid, Source: grant.SourceIdentity{Domain: "items-energy", Operation: name, BusinessKey: op.ID.String(), Occurrence: op.ID.String(), PolicyVersion: d.PolicyID}, Lines: lines}
 }

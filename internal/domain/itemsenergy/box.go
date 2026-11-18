@@ -199,6 +199,11 @@ func (c Catalog) itemOutput(itemID, amount int64) (Rewards, error) {
 	if !ok || item.ID != itemID || amount <= 0 {
 		return Rewards{}, ErrRefused
 	}
+	// Type 24 is the client's Horcrux row (item_type.lua:389); its owner is I10,
+	// so C11/B6 refuses the whole box before any mutation.
+	if item.Type == 24 {
+		return Rewards{}, ErrRefused
+	}
 	if item.Type == -1 && item.Stack == 0 {
 		return Rewards{Heroes: []int64{itemID}}, nil
 	}

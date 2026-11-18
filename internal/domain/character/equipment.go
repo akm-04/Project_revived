@@ -279,6 +279,21 @@ func (t HeroFumoTarget) Validate() error {
 	return nil
 }
 
+// QuickFumoRule is the daily_consume id 2 policy: one crystal-priced, fixed
+// raw-Fumo grant per game day (daily_consume.lua id 2 cost 20, value 150, num 1).
+type QuickFumoRule struct {
+	CrystalCost int64
+	FumoGrant   int64
+	DailyLimit  int64
+}
+
+func (r QuickFumoRule) Validate() error {
+	if r.CrystalCost <= 0 || r.FumoGrant <= 0 || r.DailyLimit <= 0 {
+		return errors.New("character equipment: invalid quick Fumo rule")
+	}
+	return nil
+}
+
 type HeroFumoMaterial struct {
 	ItemID   EquipmentTemplateID
 	ItemType int64
