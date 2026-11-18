@@ -509,17 +509,20 @@ func TestI9I11ANativeSkillUpgradeRefusalBodyAndFact107(t *testing.T) {
 	}
 	recorder.err = nil
 
+	exec(t, database, `UPDATE player_heroes SET raw_skill_1=2,state_version=state_version+1,updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
 	exec(t, database, `UPDATE player_currency_balances SET amount=0 WHERE player_id=$1 AND resource_key='mana'`, int64(actor.PlayerID))
 	noMana := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
-	i911aExpect(t, noMana, http.StatusConflict, unproven)
-	if noMana.Body["skills"] != "3|1|1|1|1|1" || noMana.Body["is_success"] != int64(0) || noMana.Body["skill_point"] != int64(8) || noMana.Body["skill_time"] != i911aSkillTime(t, database, actor) {
+	i911aExpect(t, noMana, http.StatusConflict, 20006)
+	if noMana.Body["skills"] != "2|1|1|1|1|1" || noMana.Body["is_success"] != int64(0) || noMana.Body["skill_point"] != int64(8) || noMana.Body["skill_time"] != i911aSkillTime(t, database, actor) {
 		t.Fatalf("insufficient-mana refusal body %#v", noMana.Body)
 	}
-	exec(t, database, `UPDATE player_currency_balances SET amount=1000000 WHERE player_id=$1 AND resource_key='mana'`, int64(actor.PlayerID))
 	exec(t, database, `UPDATE player_temporal_resources SET stored_amount=0 WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))
+	bothShort := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, bothShort, http.StatusConflict, 20006)
+	exec(t, database, `UPDATE player_currency_balances SET amount=1000000 WHERE player_id=$1 AND resource_key='mana'`, int64(actor.PlayerID))
 	noPoints := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
 	i911aExpect(t, noPoints, http.StatusConflict, unproven)
-	if noPoints.Body["skills"] != "3|1|1|1|1|1" || noPoints.Body["is_success"] != int64(0) || noPoints.Body["skill_point"] != int64(0) || noPoints.Body["skill_time"] != i911aSkillTime(t, database, actor) {
+	if noPoints.Body["skills"] != "2|1|1|1|1|1" || noPoints.Body["is_success"] != int64(0) || noPoints.Body["skill_point"] != int64(0) || noPoints.Body["skill_time"] != i911aSkillTime(t, database, actor) {
 		t.Fatalf("insufficient-points refusal body %#v", noPoints.Body)
 	}
 	exec(t, database, `UPDATE player_temporal_resources SET stored_amount=10 WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))

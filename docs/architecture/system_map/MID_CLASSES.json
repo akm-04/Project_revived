@@ -587,6 +587,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -912,6 +917,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
@@ -1241,6 +1251,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -1517,6 +1532,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -1661,6 +1681,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -1885,6 +1910,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -2223,17 +2253,17 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 215,
+     "line": 228,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 265,
+     "line": 278,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 317,
+     "line": 330,
      "value": "serializable"
     }
    ],
@@ -2241,39 +2271,39 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 215,
+     "line": 228,
      "value": "false"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 265,
+     "line": 278,
      "value": "false"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 317,
+     "line": 330,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/skill_level.go:446",
+    "internal/application/characterhero/skill_level.go:470",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 215,
+     "line": 228,
      "value": "1"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 265,
+     "line": 278,
      "value": "1"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 317,
+     "line": 330,
      "value": "3"
     }
    ],
@@ -2294,7 +2324,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.SkillLevelView",
      "isolation": "repeatable_read",
-     "line": 215,
+     "line": 228,
      "read_only": "false",
      "retry": "1"
     },
@@ -2302,7 +2332,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "repeatable_read",
-     "line": 265,
+     "line": 278,
      "read_only": "false",
      "retry": "1"
     },
@@ -2310,12 +2340,17 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "serializable",
-     "line": 317,
+     "line": 330,
      "read_only": "false",
      "retry": "3"
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -2438,7 +2473,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:337",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:350",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -2639,6 +2674,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -2903,6 +2943,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -3280,12 +3325,12 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 265,
+     "line": 278,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 317,
+     "line": 330,
      "value": "serializable"
     }
    ],
@@ -3293,29 +3338,29 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 265,
+     "line": 278,
      "value": "false"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 317,
+     "line": 330,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/skill_level.go:446",
+    "internal/application/characterhero/skill_level.go:470",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 265,
+     "line": 278,
      "value": "1"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 317,
+     "line": 330,
      "value": "3"
     }
    ],
@@ -3336,7 +3381,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "repeatable_read",
-     "line": 265,
+     "line": 278,
      "read_only": "false",
      "retry": "1"
     },
@@ -3344,12 +3389,17 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "serializable",
-     "line": 317,
+     "line": 330,
      "read_only": "false",
      "retry": "3"
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -3472,7 +3522,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:337",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:350",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -3957,6 +4007,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -5645,6 +5700,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -5880,6 +5940,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -6154,6 +6219,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -6476,6 +6546,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
@@ -6806,6 +6881,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -7082,6 +7162,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -7293,6 +7378,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
@@ -7622,7 +7712,7 @@
    "isolation": [
     {
      "file": "internal/application/heroassets/service.go",
-     "line": 138,
+     "line": 140,
      "value": "repeatable_read"
     }
    ],
@@ -7630,18 +7720,18 @@
    "read_only": [
     {
      "file": "internal/application/heroassets/service.go",
-     "line": 138,
+     "line": 140,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/heroassets/service.go:174",
+    "internal/application/heroassets/service.go:180",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/heroassets/service.go",
-     "line": 138,
+     "line": 140,
      "value": "6"
     }
    ],
@@ -7669,12 +7759,17 @@
      "file": "internal/application/heroassets/service.go",
      "function": "Service.execute",
      "isolation": "repeatable_read",
-     "line": 138,
+     "line": 140,
      "read_only": "false",
      "retry": "6"
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
@@ -7806,6 +7901,11 @@
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 25,
      "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
@@ -7818,7 +7918,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/heroassets/service.go:161",
+    "UNRESOLVED body at internal/application/heroassets/service.go:167",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
    ],
@@ -7907,6 +8007,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -8156,6 +8261,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
@@ -8441,6 +8551,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -8642,7 +8757,7 @@
    "isolation": [
     {
      "file": "internal/application/heroassets/service.go",
-     "line": 138,
+     "line": 140,
      "value": "repeatable_read"
     }
    ],
@@ -8650,18 +8765,18 @@
    "read_only": [
     {
      "file": "internal/application/heroassets/service.go",
-     "line": 138,
+     "line": 140,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/heroassets/service.go:174",
+    "internal/application/heroassets/service.go:180",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/heroassets/service.go",
-     "line": 138,
+     "line": 140,
      "value": "6"
     }
    ],
@@ -8691,12 +8806,17 @@
      "file": "internal/application/heroassets/service.go",
      "function": "Service.execute",
      "isolation": "repeatable_read",
-     "line": 138,
+     "line": 140,
      "read_only": "false",
      "retry": "6"
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
@@ -8828,6 +8948,11 @@
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 25,
      "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
@@ -8840,7 +8965,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/heroassets/service.go:161",
+    "UNRESOLVED body at internal/application/heroassets/service.go:167",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
    ],
@@ -8976,6 +9101,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -9351,6 +9481,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -9776,6 +9911,11 @@
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -10108,6 +10248,11 @@
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -10303,6 +10448,11 @@
      "file": "internal/adapters/postgres/campaignstore/store.go",
      "line": 96,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
@@ -10551,6 +10701,11 @@
      "file": "internal/adapters/postgres/campaignstore/store.go",
      "line": 96,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
@@ -10851,6 +11006,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -11396,6 +11556,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -11682,6 +11847,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -11970,6 +12140,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -12256,6 +12431,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -12544,6 +12724,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -12830,6 +13015,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -13118,6 +13308,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -13404,6 +13599,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -13692,6 +13892,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -13978,6 +14183,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -14317,6 +14527,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -14540,6 +14755,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -14873,6 +15093,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -15159,6 +15384,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -15447,6 +15677,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -15733,6 +15968,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -16021,6 +16261,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -16307,6 +16552,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -16595,6 +16845,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -16860,6 +17115,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -17124,6 +17384,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -17585,6 +17850,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -18180,6 +18450,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -18773,6 +19048,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -19368,6 +19648,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -19961,6 +20246,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -20556,6 +20846,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -21149,6 +21444,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -21744,6 +22044,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -22337,6 +22642,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -22932,6 +23242,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -23525,6 +23840,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -24120,6 +24440,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -24713,6 +25038,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -25308,6 +25638,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -25902,6 +26237,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -26272,6 +26612,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -26523,6 +26868,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
@@ -26860,6 +27210,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 237,
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -27343,6 +27698,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -27743,6 +28103,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
      "line": 26,
@@ -28200,6 +28565,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -28598,6 +28968,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -29368,6 +29743,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -29800,6 +30180,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -29963,6 +30348,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -30203,6 +30593,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -30541,6 +30936,11 @@
    "system": "topfloor",
    "transactions": [],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -30946,6 +31346,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -31419,6 +31824,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -31598,6 +32008,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -31709,6 +32124,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 237,
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -32095,6 +32515,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -32399,6 +32824,11 @@
    "system": "topfloor",
    "transactions": [],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -32742,6 +33172,11 @@
    "transactions": [],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -32957,6 +33392,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -33166,6 +33606,11 @@
    "system": "topfloor",
    "transactions": [],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -33637,6 +34082,11 @@
      "file": "internal/adapters/postgres/arenastore/store.go",
      "line": 257,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id,'star',CASE WHEN season=$1 THEN star ELSE 0 END,'point',CASE WHEN season=$1 THEN point ELSE 0 END,'star_at',star_at,'total_fight',CASE WHEN season=$1 THEN total_fight ELSE 0 END,'win_times',CASE WHEN season=$1 THEN win_times ELSE 0 END,'defended',jsonb_array_length(defense->'heroes')=5) ORDER BY player_id),'[]'::jsonb)::text FROM arena_players WHERE season<=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
@@ -34372,6 +34822,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -34587,6 +35042,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -34908,6 +35368,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -35264,6 +35729,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 264,
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -35633,6 +36103,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -36087,6 +36562,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -36508,6 +36988,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -36934,6 +37419,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -37460,6 +37950,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -37818,6 +38313,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -38041,6 +38541,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -38230,6 +38735,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
@@ -38537,6 +39047,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 237,
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -39136,6 +39651,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -39288,6 +39808,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
@@ -39477,6 +40002,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -39969,6 +40499,11 @@
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -40160,6 +40695,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
@@ -42988,6 +43528,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -43808,6 +44353,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 264,
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
@@ -44762,6 +45312,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -44952,6 +45507,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -45774,6 +46334,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -46029,6 +46594,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -46257,6 +46827,11 @@
      "file": "internal/adapters/postgres/arenastore/store.go",
      "line": 257,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id,'star',CASE WHEN season=$1 THEN star ELSE 0 END,'point',CASE WHEN season=$1 THEN point ELSE 0 END,'star_at',star_at,'total_fight',CASE WHEN season=$1 THEN total_fight ELSE 0 END,'win_times',CASE WHEN season=$1 THEN win_times ELSE 0 END,'defended',jsonb_array_length(defense->'heroes')=5) ORDER BY player_id),'[]'::jsonb)::text FROM arena_players WHERE season<=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -47137,6 +47712,11 @@
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -47612,6 +48192,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
@@ -48352,6 +48937,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 237,
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
@@ -49113,6 +49703,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -49730,6 +50325,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -50444,6 +51044,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -50579,6 +51184,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -50797,6 +51407,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -50962,6 +51577,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -51373,6 +51993,11 @@
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -51590,6 +52215,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -51700,6 +52330,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
@@ -51836,6 +52471,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -52084,6 +52724,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -52310,6 +52955,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -52476,6 +53126,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -52636,6 +53291,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -53385,6 +54045,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -53776,6 +54441,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -54169,6 +54839,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -54560,6 +55235,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -54953,6 +55633,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -55344,6 +56029,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -55737,6 +56427,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -56128,6 +56823,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -56521,6 +57221,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -56912,6 +57617,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -57305,6 +58015,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -57697,6 +58412,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -58088,6 +58808,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -58580,6 +59305,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('player',player_id,'server',logical_server_id,'star',CASE WHEN season=$1 THEN star ELSE 0 END,'point',CASE WHEN season=$1 THEN point ELSE 0 END,'star_at',star_at,'total_fight',CASE WHEN season=$1 THEN total_fight ELSE 0 END,'win_times',CASE WHEN season=$1 THEN win_times ELSE 0 END,'defended',jsonb_array_length(defense->'heroes')=5) ORDER BY player_id),'[]'::jsonb)::text FROM arena_players WHERE season<=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -58890,6 +59620,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -59283,6 +60018,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -59674,6 +60414,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -60067,6 +60812,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -60458,6 +61208,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -60851,6 +61606,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -61243,6 +62003,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -61582,6 +62347,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -62580,6 +63350,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -62922,6 +63697,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -63266,6 +64046,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -63608,6 +64393,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -63952,6 +64742,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -64294,6 +65089,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -64747,6 +65547,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -65403,6 +66208,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -66055,6 +66865,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -66711,6 +67526,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -67365,6 +68185,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -67908,6 +68733,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -68250,6 +69080,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -68594,6 +69429,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -68936,6 +69776,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -69389,6 +70234,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -70045,6 +70895,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -70697,6 +71552,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -71353,6 +72213,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -72005,6 +72870,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -72661,6 +73531,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -73313,6 +74188,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -73969,6 +74849,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -74621,6 +75506,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -75277,6 +76167,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -75929,6 +76824,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -78271,6 +79171,11 @@
      "statement": "WITH points(achievement_id,tier,points) AS (SELECT * FROM unnest($2::bigint[],$3::int[],$4::bigint[])), earned AS ("
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -78506,6 +79411,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -79322,6 +80232,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -79512,6 +80427,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -79914,6 +80834,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 264,
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
@@ -81350,6 +82275,11 @@
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -82435,6 +83365,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -82756,6 +83691,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -83079,6 +84019,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -83400,6 +84345,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -83723,6 +84673,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -84044,6 +84999,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -84367,6 +85327,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -84688,6 +85653,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -85587,6 +86557,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -85990,6 +86965,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 264,
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/conquer_inputs.go",
@@ -86812,6 +87792,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -87059,6 +88044,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -87294,6 +88284,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -87834,6 +88829,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -88313,6 +89313,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -88656,6 +89661,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -89029,6 +90039,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -89274,6 +90289,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -89462,6 +90482,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -89872,6 +90897,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -90045,6 +91075,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -90511,6 +91546,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -90699,6 +91739,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -91146,6 +92191,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -91970,6 +93020,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -92194,6 +93249,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -93473,6 +94533,11 @@
      "statement": "SELECT attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,''),trust_profile_id,trust_profile_version,replay_response,replay_error_code,COALESCE(supersedes_attempt_id::text,'') FROM combat_attempts WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 AND state<>'TERMINAL'"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -94007,6 +95072,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -94395,6 +95465,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
@@ -94785,6 +95860,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -95173,6 +96253,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
@@ -95563,6 +96648,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -95951,6 +97041,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
@@ -96341,6 +97436,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -96729,6 +97829,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
@@ -97119,6 +98224,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -97507,6 +98617,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
@@ -97897,6 +99012,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -98285,6 +99405,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
@@ -98675,6 +99800,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -99064,6 +100194,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -99452,6 +100587,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
@@ -100456,6 +101596,11 @@
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -100640,6 +101785,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -101085,6 +102235,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -101270,6 +102425,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -101742,6 +102902,11 @@
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -102053,6 +103218,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -102551,6 +103721,11 @@
      "statement": "SELECT r.canonical,b.report FROM combat_resolutions r JOIN combat_report_blobs b ON b.report_sha256=r.report_sha256 WHERE r.resolution_hash=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -102751,6 +103926,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -102993,6 +104173,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -105620,6 +106805,11 @@
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -106103,6 +107293,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -106646,6 +107841,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 357,
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -107194,6 +108394,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 357,
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -107847,6 +109052,11 @@
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -108393,6 +109603,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 357,
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -108943,6 +110158,11 @@
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -109489,6 +110709,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 357,
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -110366,6 +111591,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -110985,6 +112215,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 357,
      "statement": "SELECT semantic_receipt_id,settled_at FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -111702,6 +112937,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -112136,6 +113376,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -112655,6 +113900,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -113111,6 +114361,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -113535,6 +114790,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -113940,6 +115200,11 @@
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -114184,6 +115449,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
@@ -115271,6 +116541,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -115809,6 +117084,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -116233,6 +117513,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
@@ -117680,6 +118965,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -118181,6 +119471,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -118379,6 +119674,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -118644,6 +119944,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -118972,6 +120277,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -119299,6 +120609,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -119625,6 +120940,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,
@@ -121567,6 +122887,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/course_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -121942,6 +123267,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -122322,6 +123652,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -122700,6 +124035,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -123080,6 +124420,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -123458,6 +124803,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -123838,6 +125188,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -124216,6 +125571,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -124596,6 +125956,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -124974,6 +126339,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -125354,6 +126724,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -125732,6 +127107,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -126112,6 +127492,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -126490,6 +127875,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -126870,6 +128260,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -127248,6 +128643,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -127923,6 +129323,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -128766,6 +130171,11 @@
      "file": "internal/adapters/postgres/campaignstore/store.go",
      "line": 96,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
@@ -130441,6 +131851,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -130820,6 +132235,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -131198,6 +132618,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -131788,6 +133213,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
      "statement": "SELECT payload::text FROM content_awakening_catalogs WHERE revision_id=$1"
@@ -131986,6 +133416,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -132273,6 +133708,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/awakening.go",
      "line": 11,
@@ -132997,6 +134437,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -133389,6 +134834,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -133656,6 +135106,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/conquer_inputs.go",
      "line": 25,
@@ -133978,6 +135433,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
@@ -134622,6 +136082,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -135262,6 +136727,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
@@ -135906,6 +137376,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -136546,6 +138021,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
@@ -137190,6 +138670,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -137832,6 +139317,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -138472,6 +139962,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 323,
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
@@ -139483,6 +140978,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -139814,6 +141314,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -140147,6 +141652,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -140479,6 +141989,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -140810,6 +142325,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
@@ -142293,6 +143813,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -142697,6 +144222,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 264,
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -143187,6 +144717,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/achievement.go",
      "line": 25,
@@ -145130,6 +146665,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(member_player_id ORDER BY seat),'[]'::jsonb)::text FROM combat_attempt_members WHERE attempt_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/appearance.go",
      "line": 47,
      "statement": "SELECT hero_origin_table_id,skin_skill_id FROM gxb_content_appearance_skins WHERE revision_id=$1 AND model_id=$2"
@@ -145543,6 +147083,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 264,
      "statement": "SELECT package_policy,package_sha256,draws,canonical FROM combat_start_packages WHERE attempt_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
     },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
@@ -146399,6 +147944,11 @@
    ],
    "unbounded_read": [
     {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -146548,6 +148098,11 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
+     "line": 184,
+     "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/book_inputs.go",
      "line": 25,

@@ -224,11 +224,15 @@ func (s Charge) settle(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	}
 	now := at.Unix()
 	nextCards := cards.Extended(decided.Card, decided.CardDays, now)
+	privilegeSkillMax := catalog.PrivilegeSkillMax
+	if tuned {
+		privilegeSkillMax = tuning.PrivilegeSkillMaxValue(privilegeSkillMax)
+	}
 	if cards.PrivilegeActive(now) {
-		oldCap += catalog.PrivilegeSkillMax
+		oldCap += privilegeSkillMax
 	}
 	if nextCards.PrivilegeActive(now) {
-		newCap += catalog.PrivilegeSkillMax
+		newCap += privilegeSkillMax
 	}
 	if decided.Crystal > 0 {
 		current := sc.Operation.Operation()
@@ -274,14 +278,14 @@ func (s Charge) settle(c context.Context, sc gen.TimedScope, a identity.ActorCon
 // transition derives the next root and the VIP skill caps on either side of it;
 // the old root keeps its own content revision (a new revision cannot reinterpret it).
 func (s Charge) transition(c context.Context, q tx.Queryer, a identity.ActorContext, old d.State, rooted bool, xp int64, revision string, at time.Time) (d.State, int64, int64, error) {
-	catalog, e := s.Content.PrivilegeCatalogTx(c, q, revision)
+	catalog, _, _, e := tunedPrivilegeCatalog(c, s.Store, s.Content, q, revision)
 	if e != nil {
 		return d.State{}, 0, 0, e
 	}
 	next := d.State{PlayerID: a.PlayerID, LogicalServerID: a.LogicalServerID, Charge: xp, MonthlyState: d.MonthlyAbsent, ContentRevision: revision, PolicyVersion: d.TapPolicy, OriginClass: d.TapClass, Issuer: tapIssuer, Reason: tapReason, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 	oldCap := int64(10)
 	if rooted {
-		oldCatalog, e := s.Content.PrivilegeCatalogTx(c, q, old.ContentRevision)
+		oldCatalog, _, _, e := tunedPrivilegeCatalog(c, s.Store, s.Content, q, old.ContentRevision)
 		if e != nil {
 			return d.State{}, 0, 0, e
 		}

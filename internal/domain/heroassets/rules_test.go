@@ -15,13 +15,25 @@ func testCatalog() itemsenergy.Catalog {
 	for id := int64(3); id <= 330; id++ {
 		refresh[id] = itemsenergy.RefreshCost{ID: id, BuySkillCost: 300}
 	}
+	vip := map[int64]itemsenergy.VIPRow{
+		0:  {Level: 0, SkillBuy: 0, SkillMax: 10},
+		1:  {Level: 1, SkillBuy: 0, SkillMax: 10},
+		2:  {Level: 2, SkillBuy: 1, SkillMax: 10},
+		15: {Level: 15, SkillBuy: 1, SkillMax: 80},
+	}
 	return itemsenergy.Catalog{
-		VIP: map[int64]itemsenergy.VIPRow{
-			0:  {Level: 0, SkillBuy: 0, SkillMax: 10},
-			1:  {Level: 1, SkillBuy: 0, SkillMax: 10},
-			2:  {Level: 2, SkillBuy: 1, SkillMax: 10},
-			15: {Level: 15, SkillBuy: 1, SkillMax: 80},
+		Revision: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+		Gifts:    map[int64]itemsenergy.Gift{1: {ID: 1}},
+		Dropboxes: map[int64]itemsenergy.Dropbox{
+			1: {ID: 1},
 		},
+		DailyConsume: map[int64]itemsenergy.DailyConsume{
+			1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {}, 8: {}, 9: {}, 10: {},
+		},
+		VIP: vip,
+		Misc: itemsenergy.Misc{BuyEnergyNum: 120, EnergyMaxLimit: 500, MidasBase: 20000,
+			MidasLevelIncrease: 100, MidasFloatUpBasisPoints: 500,
+			MidasCritTypes: []int64{1}, MidasCritRates: []int64{100}},
 		RefreshCost: refresh,
 		Items: map[int64]itemsenergy.Item{
 			SkillPointItemID: {ID: SkillPointItemID, SubType: SkillPointItemSubType, SkillPoint: 10, Stack: 999},
@@ -63,6 +75,30 @@ func TestSkillBuyGateFollowsVIPTable(t *testing.T) {
 	}
 	if _, err := SkillBuyAllowed(catalog, 3); !errors.Is(err, ErrContentMissing) {
 		t.Fatalf("missing VIP row is not a permanent content refusal: %v", err)
+	}
+}
+
+func TestSkillPointRulesReadTheTunedCatalog(t *testing.T) {
+	catalog := testCatalog()
+	for level := int64(3); level < 15; level++ {
+		catalog.VIP[level] = itemsenergy.VIPRow{Level: level, SkillMax: 10}
+	}
+	tuned, err := catalog.Tune(itemsenergy.Tuning{
+		BuySkillCost:         []int64{77},
+		VipSkillBuy:          map[string]int64{"0": 1},
+		SkillPointItemAmount: 25,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cost, err := SkillPointBuyCost(tuned, 1); err != nil || cost != 77 {
+		t.Fatalf("tuned ordinal 1 = %d, %v", cost, err)
+	}
+	if allowed, err := SkillBuyAllowed(tuned, 0); err != nil || !allowed {
+		t.Fatalf("tuned VIP gate allowed=%v err=%v", allowed, err)
+	}
+	if gain, err := SkillPointItemGain(tuned, SkillPointItemID, 2); err != nil || gain != 50 {
+		t.Fatalf("tuned item gain = %d, %v", gain, err)
 	}
 }
 

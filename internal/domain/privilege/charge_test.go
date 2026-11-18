@@ -70,6 +70,63 @@ func TestChargeCatalogBindsVipAwards(t *testing.T) {
 	}
 }
 
+func TestPrivilegeSkillMaxOverlay(t *testing.T) {
+	source := int64(10)
+	if got := (ChargeTuning{}).PrivilegeSkillMaxValue(source); got != source {
+		t.Fatalf("absent overlay = %d", got)
+	}
+	tunedValue := int64(25)
+	tuned := ChargeTuning{Version: 1, Mode: TuningGrant, PrivilegeSkillMax: &tunedValue}
+	if got := tuned.PrivilegeSkillMaxValue(source); got != 25 {
+		t.Fatalf("tuned overlay = %d", got)
+	}
+	negative := int64(-1)
+	if err := (ChargeTuning{Version: 1, Mode: TuningGrant, PrivilegeSkillMax: &negative}).Validate(); err == nil {
+		t.Fatal("negative privilege skill max admitted")
+	}
+	invalid := ChargeTuning{Version: 0, Mode: TuningGrant, PrivilegeSkillMax: &tunedValue}
+	if got := invalid.PrivilegeSkillMaxValue(source); got != source {
+		t.Fatalf("invalid overlay applied %d", got)
+	}
+}
+
+func skillCapCatalog() Catalog {
+	catalog := Catalog{SchemaVersion: 1, PolicyID: CatalogPolicy, Rows: make([]Threshold, 16)}
+	for level := range catalog.Rows {
+		catalog.Rows[level] = Threshold{Level: int64(level), Charge: int64(level) * 100, SkillCap: 10}
+	}
+	return catalog
+}
+
+func TestVipSkillCapOverlay(t *testing.T) {
+	source := skillCapCatalog()
+	tuned := (ChargeTuning{Version: 1, Mode: TuningGrant, VipSkillCap: map[string]int64{"2": 7}}).TunedCatalog(source)
+	if got, e := tuned.SkillCap(2); e != nil || got != 7 {
+		t.Fatalf("tuned level 2 cap = %d e=%v", got, e)
+	}
+	if got, e := tuned.SkillCap(3); e != nil || got != 10 {
+		t.Fatalf("absent level 3 cap = %d e=%v", got, e)
+	}
+	if got, e := source.SkillCap(2); e != nil || got != 10 {
+		t.Fatalf("source catalog mutated: %d e=%v", got, e)
+	}
+	if got, e := (ChargeTuning{Version: 1, Mode: TuningGrant}).TunedCatalog(source).SkillCap(2); e != nil || got != 10 {
+		t.Fatalf("absent overlay = %d e=%v", got, e)
+	}
+	for name, tuning := range map[string]ChargeTuning{
+		"unknown level": {Version: 1, Mode: TuningGrant, VipSkillCap: map[string]int64{"16": 5}},
+		"not a number":  {Version: 1, Mode: TuningGrant, VipSkillCap: map[string]int64{"two": 5}},
+		"negative":      {Version: 1, Mode: TuningGrant, VipSkillCap: map[string]int64{"2": -1}},
+	} {
+		if tuning.Validate() == nil {
+			t.Fatalf("%s admitted", name)
+		}
+		if got, e := tuning.TunedCatalog(source).SkillCap(2); e != nil || got != 10 {
+			t.Fatalf("%s applied: %d e=%v", name, got, e)
+		}
+	}
+}
+
 func TestCardsStackDaysAndLeftDaysRoundUp(t *testing.T) {
 	const now = int64(1000000)
 	c := Cards{}.Extended(CardMonth, 30, now)

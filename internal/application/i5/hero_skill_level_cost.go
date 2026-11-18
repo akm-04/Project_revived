@@ -17,6 +17,10 @@ type PreparedHeroSkillLevelCost struct {
 	SkillPoint  int64
 	SkillTime   int64
 	Affordable  bool
+	// ManaShort and PointsShort say which balance blocked an unaffordable
+	// request; both may be set, and the D5 reply lets the coin wallet win.
+	ManaShort   bool
+	PointsShort bool
 }
 
 type HeroSkillLevelCostResult struct {
@@ -65,10 +69,12 @@ func (s Service) PrepareHeroSkillLevelCostTx(ctx context.Context, t tx.Tx, pid i
 		return nil, err
 	}
 	prepared := &PreparedHeroSkillLevelCost{
-		mana:       mana,
-		temporal:   points,
-		SkillPoint: materialized.Amount,
-		Affordable: manaExists && mana.Amount >= manaCost && materialized.Amount >= pointCost,
+		mana:        mana,
+		temporal:    points,
+		SkillPoint:  materialized.Amount,
+		Affordable:  manaExists && mana.Amount >= manaCost && materialized.Amount >= pointCost,
+		ManaShort:   !manaExists || mana.Amount < manaCost,
+		PointsShort: materialized.Amount < pointCost,
 	}
 	if materialized.State.RegenAnchorAt != nil {
 		prepared.SkillTime = materialized.State.RegenAnchorAt.UTC().Unix()

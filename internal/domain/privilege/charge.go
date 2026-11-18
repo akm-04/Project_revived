@@ -108,11 +108,26 @@ type ChargeTuning struct {
 	Version  int64                     `json:"version"`
 	Mode     string                    `json:"mode"`
 	Products map[string]ChargeOverride `json:"products"`
+	// PrivilegeSkillMax replaces the source monthly-privilege skill-point cap;
+	// nil keeps the source value.
+	PrivilegeSkillMax *int64 `json:"privilege_skill_max,omitempty"`
+	// VipSkillCap replaces the source skill cap of one VIP level; an absent
+	// level keeps the source row.
+	VipSkillCap map[string]int64 `json:"vip_skill_cap,omitempty"`
 }
 
 func (t ChargeTuning) Validate() error {
 	if t.Version < 1 || (t.Mode != TuningGrant && t.Mode != TuningDisabled) {
 		return ErrUnavailable
+	}
+	if t.PrivilegeSkillMax != nil && *t.PrivilegeSkillMax < 0 {
+		return ErrUnavailable
+	}
+	for rawLevel, value := range t.VipSkillCap {
+		level, err := strconv.ParseInt(rawLevel, 10, 64)
+		if err != nil || level < 0 || level > 15 || value < 0 {
+			return ErrUnavailable
+		}
 	}
 	for _, o := range t.Products {
 		for _, v := range []*int64{o.Crystal, o.VIPXP, o.CardDays} {
@@ -122,6 +137,33 @@ func (t ChargeTuning) Validate() error {
 		}
 	}
 	return nil
+}
+
+// PrivilegeSkillMaxValue applies the overlay's cap to the source value when the
+// overlay is valid and carries one.
+func (t ChargeTuning) PrivilegeSkillMaxValue(source int64) int64 {
+	if t.Validate() != nil || t.PrivilegeSkillMax == nil {
+		return source
+	}
+	return *t.PrivilegeSkillMax
+}
+
+// TunedCatalog applies the overlay's per-VIP skill caps. An invalid overlay, or
+// one the source catalog cannot represent, keeps the source catalog in force.
+func (t ChargeTuning) TunedCatalog(source Catalog) Catalog {
+	if t.Validate() != nil || len(t.VipSkillCap) == 0 {
+		return source
+	}
+	tuned := source
+	tuned.Rows = append([]Threshold(nil), source.Rows...)
+	for rawLevel, value := range t.VipSkillCap {
+		level, _ := strconv.ParseInt(rawLevel, 10, 64)
+		tuned.Rows[level].SkillCap = value
+	}
+	if tuned.Validate() != nil {
+		return source
+	}
+	return tuned
 }
 
 type ChargeGrant struct {

@@ -1229,7 +1229,7 @@
    "tables": 0
   },
   {
-   "callees": 7,
+   "callees": 8,
    "callers": 0,
    "mids": 0,
    "name": "heroassets",
@@ -1302,7 +1302,7 @@
   },
   {
    "callees": 8,
-   "callers": 1,
+   "callers": 2,
    "mids": 0,
    "name": "itemsenergy",
    "path": "internal/application/itemsenergy",

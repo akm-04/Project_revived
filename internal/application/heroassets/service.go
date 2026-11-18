@@ -13,6 +13,7 @@ import (
 	appconsume "gxb.local/backend/v2/internal/application/dailyconsume"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
+	appitemsenergy "gxb.local/backend/v2/internal/application/itemsenergy"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -74,6 +75,7 @@ type Service struct {
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
 	Content     Content
+	Tuning      appitemsenergy.Tuning
 	Fence       Fence
 	Players     Players
 	Counters    Counters
@@ -155,6 +157,10 @@ func (s Service) execute(c context.Context, a identity.ActorContext, op operatio
 		}
 		revision, _ := sc.Operation.Operation().Policies.Get("content")
 		catalog, err := s.Content.DailyBuyInputsTx(c, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		catalog, err = appitemsenergy.TunedCatalog(c, sc.Tx, s.Tuning, catalog)
 		if err != nil {
 			return err
 		}

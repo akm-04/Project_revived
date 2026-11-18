@@ -1623,6 +1623,9 @@
   "itemsenergy": {
    "dailyreset": [
     "*Counters"
+   ],
+   "heroassets": [
+    "TunedCatalog"
    ]
   },
   "libraryforum": {},
@@ -4227,6 +4230,9 @@
     "*ReadStackTx",
     "*ReadTemporalTx",
     "*SnapshotTx"
+   ],
+   "itemsenergy": [
+    "TunedCatalog"
    ],
    "store:contentstore": [
     "*ActiveRevision",

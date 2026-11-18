@@ -205,7 +205,7 @@ func (s Service) execute(c context.Context, a identity.ActorContext, op operatio
 		if err != nil {
 			return err
 		}
-		catalog, err = s.tuned(c, sc.Tx, catalog)
+		catalog, err = TunedCatalog(c, sc.Tx, s.Tuning, catalog)
 		if err != nil {
 			return err
 		}
@@ -298,17 +298,17 @@ func (s Service) day(sc gen.TimedScope) int64 {
 	return modes.Day(sc.Operation.DecisionAt())
 }
 
-// tuned applies the D476 singleton overlay. An absent, invalid or unreadable
-// overlay leaves the source catalog in force.
-func (s Service) tuned(c context.Context, q tx.Queryer, catalog d.Catalog) (d.Catalog, error) {
-	if s.Tuning == nil {
+// TunedCatalog applies the D476 singleton overlay. An absent, invalid or
+// unreadable overlay leaves the source catalog in force.
+func TunedCatalog(c context.Context, q tx.Queryer, tuning Tuning, catalog d.Catalog) (d.Catalog, error) {
+	if tuning == nil {
 		return catalog, nil
 	}
-	tuning, found, err := s.Tuning.TuningTx(c, q)
+	value, found, err := tuning.TuningTx(c, q)
 	if err != nil || !found {
 		return catalog, nil
 	}
-	tuned, err := catalog.Tune(tuning)
+	tuned, err := catalog.Tune(value)
 	if err != nil {
 		return catalog, nil
 	}

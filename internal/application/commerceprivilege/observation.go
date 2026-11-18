@@ -16,10 +16,29 @@ type Store interface {
 	SavePrivilegeTx(context.Context, tx.Tx, int64, d.State) error
 	ReadCardsTx(context.Context, tx.Queryer, identity.PlayerID) (d.Cards, error)
 	ReadVIPClaimedTx(context.Context, tx.Queryer, identity.PlayerID) ([]int64, error)
+	ChargeTuningTx(context.Context, tx.Queryer) (d.ChargeTuning, bool, error)
 }
 type Content interface {
 	PrivilegeCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	ChargeCatalogTx(context.Context, tx.Queryer, string) (d.ChargeCatalog, error)
+}
+
+// tunedPrivilegeCatalog reads the pinned catalog and applies the charge overlay
+// to its per-VIP skill caps. Callers that also read privilege_skill_max reuse
+// the returned overlay instead of reading it again.
+func tunedPrivilegeCatalog(c context.Context, store Store, content Content, q tx.Queryer, revision string) (d.Catalog, d.ChargeTuning, bool, error) {
+	catalog, e := content.PrivilegeCatalogTx(c, q, revision)
+	if e != nil {
+		return d.Catalog{}, d.ChargeTuning{}, false, e
+	}
+	tuning, tuned, e := store.ChargeTuningTx(c, q)
+	if e != nil {
+		return d.Catalog{}, d.ChargeTuning{}, false, e
+	}
+	if tuned {
+		catalog = tuning.TunedCatalog(catalog)
+	}
+	return catalog, tuning, tuned, nil
 }
 
 // Provider is shared by display and all existing VIP consumers. The old baseline
@@ -42,7 +61,7 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if s.Validate() != nil || s.PlayerID != pid || s.UpdatedAt.After(at) {
 		return out, true, d.ErrConflict
 	}
-	catalog, e := p.Content.PrivilegeCatalogTx(c, q, s.ContentRevision)
+	catalog, tuning, tuned, e := tunedPrivilegeCatalog(c, p.Store, p.Content, q, s.ContentRevision)
 	if e != nil {
 		return out, true, e
 	}
@@ -63,7 +82,11 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 		if e != nil {
 			return out, true, e
 		}
-		cap += chargeCatalog.PrivilegeSkillMax
+		privilegeSkillMax := chargeCatalog.PrivilegeSkillMax
+		if tuned {
+			privilegeSkillMax = tuning.PrivilegeSkillMaxValue(privilegeSkillMax)
+		}
+		cap += privilegeSkillMax
 	}
 	if revision == "" {
 		revision = s.ContentRevision
