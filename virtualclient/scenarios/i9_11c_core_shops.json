@@ -1,0 +1,40 @@
+{
+  "name": "i9_11c_core_shops",
+  "level": 100,
+  "grants": [
+    {"Kind": "SCALAR_CURRENCY", "ResourceKey": "crystal", "Amount": 1000000},
+    {"Kind": "STACK_ITEM", "ItemID": 50002072, "Amount": 100000}
+  ],
+  "steps": [
+    "wait:5",
+    "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.SHOP) _G.vcShop=m _G.vcList=nil m:loadShopList({},function(c) _G.vcList=c end)",
+    "wait:3",
+    "lua:if not vcList then error('vc-shop-list-no-reply') end if vcList~=xyd.error.OK then error('vc-shop-list-'..tostring(vcList)) end local open={} for _,t in ipairs(vcShop:getOpenList()) do open[t]=true end for _,t in ipairs({2,13,35}) do if not open[t] then error('vc-shop-list-missing-'..t) end end _G.vcOpen=open",
+    "lua:_G.vcLoad13=nil vcShop:loadShopInfo({shop_type=13},function(c) _G.vcLoad13=c end)",
+    "wait:3",
+    "lua:if vcLoad13~=xyd.error.OK then error('vc-shop-13-load-'..tostring(vcLoad13)) end local row=vcShop.items_[13][1] if not row then error('vc-shop-13-empty') end if row.isbuy~=0 then error('vc-shop-13-pre-sold') end _G.vc13={index=row.index,price=row.sell_price} _G.vcBuy13=nil vcShop:buy({shop_type=13,index=row.index,num=1,client_price=row.sell_price},function(c) _G.vcBuy13=c end)",
+    "wait:3",
+    "lua:if vcBuy13~=xyd.error.OK then error('vc-shop-13-buy-'..tostring(vcBuy13)) end local sold=false for _,row in ipairs(vcShop.items_[13]) do if row.index==vc13.index and row.isbuy==1 then sold=true end end if not sold then error('vc-shop-13-not-sold') end",
+    "lua:_G.vcLoad35=nil vcShop:loadShopInfo({shop_type=35},function(c) _G.vcLoad35=c end)",
+    "wait:3",
+    "lua:if vcLoad35~=xyd.error.OK then error('vc-shop-35-load-'..tostring(vcLoad35)) end local rows=vcShop.items_[35] if not rows or #rows<3 then error('vc-shop-35-slots') end _G.vc35={first=rows[1].index,second=rows[2].index,third=rows[3].index} _G.vcBuy35=nil vcShop:buy({shop_type=35,index=rows[1].index,num=1},function(c) _G.vcBuy35=c end)",
+    "wait:3",
+    "lua:if vcBuy35~=xyd.error.OK then error('vc-shop-35-buy-'..tostring(vcBuy35)) end _G.vcMulti35=nil vcShop:buyMulti({shop_type=35,list={vc35.second,vc35.third},client_prices={},nums={}},function(c) _G.vcMulti35=c end)",
+    "wait:3",
+    "lua:if vcMulti35~=xyd.error.OK then error('vc-shop-35-multi-'..tostring(vcMulti35)) end local bought={} for _,row in ipairs(vcShop.items_[35]) do bought[row.index]=row.isbuy end for _,i in ipairs({vc35.first,vc35.second,vc35.third}) do if bought[i]~=1 then error('vc-shop-35-unsold-'..i) end end",
+    "lua:local n=0 local results={} local function again() n=n+1 if n==6 then local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) _G.vcCrystal6=tonumber(p.crystal) end vcShop:refreshShop({shop_type=13},function(c) results[n]=c if n<6 then again() end end) end _G.vcRefresh=results again()",
+    "wait:10",
+    "lua:for i=1,6 do if vcRefresh[i]~=xyd.error.OK then error('vc-shop-13-refresh-'..i..'-'..tostring(vcRefresh[i])) end end if vcShop.refreshTimes_[13]~=6 then error('vc-shop-13-refresh-times-'..tostring(vcShop.refreshTimes_[13])) end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.crystal)~=vcCrystal6-100 then error('vc-shop-13-paid-refresh-'..tostring(p.crystal)) end",
+    "lua:_G.vcLoad2=nil vcShop:loadShopInfo({shop_type=2},function(c) _G.vcLoad2=c end)",
+    "wait:3",
+    "lua:if vcLoad2~=xyd.error.OK then error('vc-shop-2-load-'..tostring(vcLoad2)) end local row=vcShop.items_[2][1] if not row then error('vc-shop-2-empty') end _G.vcDeny=nil xyd.Backend.get():request(xyd.mid.BUY_SHOP,{shop_type=2,index=row.index,num=1},function(e,b) _G.vcDeny={e=e,b=b} end)",
+    "wait:3",
+    "lua:if not vcDeny then error('vc-shop-deny-no-reply') end if vcDeny.e==xyd.error.OK then error('vc-shop-deny-accepted') end local code=vcDeny.b and tonumber(vcDeny.b.error_code) if code~=35028 then error('vc-shop-deny-code-'..tostring(code)) end",
+    "lua:_G.vcLoad1=nil xyd.Backend.get():request(xyd.mid.LOAD_SHOP,{shop_type=1},function(e,b) _G.vcLoad1={e=e,b=b} end,{},false,true) _G.vcLoad30=nil xyd.Backend.get():request(xyd.mid.LOAD_SHOP,{shop_type=30},function(e,b) _G.vcLoad30={e=e,b=b} end,{},false,true)",
+    "wait:3",
+    "lua:for _,o in ipairs({vcLoad1,vcLoad30}) do if not o then error('vc-shop-gated-no-reply') end if o.e==xyd.error.OK then error('vc-shop-gated-accepted') end if not o.b or tonumber(o.b.error_code)~=35028 then error('vc-shop-gated-code-'..tostring(o.b and o.b.error_code)) end end"
+  ],
+  "settle_seconds": 10,
+  "expect_ok": [37, 32, 33, 2982, 34],
+  "note": "C17 vendors: MID 37 list, type 13 single buy with client_price, type 35 cube single and multi-buy, six type 13 refreshes (the sixth costs 100 crystal), an arena (mode) type 2 buy refused for the empty arena_coin balance, and type 1/30 direct loads refused 35028 while their function gates (function.lua 5 '2|200021', 69 '1|400') are unopened. Level 100 opens function gates 4/43/46/47/91; function.lua 5 needs the chapter-1 final clear and 69 needs level 400, which content never reaches, so the stock shop list omits types 1 and 30."
+}

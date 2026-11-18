@@ -12,8 +12,11 @@ import (
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	ach "gxb.local/backend/v2/internal/application/achievement"
+	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	il "gxb.local/backend/v2/internal/application/illusion"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -144,51 +147,77 @@ func TestI9_11E_MediumTenPullIsAHighWaterGirlCount(t *testing.T) {
 	}
 }
 
+// TestI9_11E_LoginDetailClaimsNoticesOnceAndSilencesThePush drives MID 1 through
+// the production bootstrap service: the login transaction claims the pending
+// notices, the detail carries the visible ids once, and a second login is silent.
 func TestI9_11E_LoginDetailClaimsNoticesOnceAndSilencesThePush(t *testing.T) {
 	p := pool(t)
 	a := bornActor(t, p)
 	rev := installed(t, p)
-	s := catalogAchievements(p, fixedCounts{})
+	secret := []byte("i9-11e-native-digest-key-0000001")
+	sidRaw := "i9-11e-sid-" + a.SessionID.UUID().String()
+	loginRaw := "i9-11e-login-" + a.SessionID.UUID().String()
+	exec(t, p, `UPDATE account_sessions SET auth_profile='SID_LOGIN_TOKEN_PAIR',last_activity_at=clock_timestamp() WHERE session_id=$1`, a.SessionID.UUID().String())
+	exec(t, p, `DELETE FROM gameplay_contexts WHERE session_id=$1`, a.SessionID.UUID().String())
+	for _, credential := range []struct{ kind, label, raw string }{
+		{"SID", "sid", sidRaw},
+		{"LOGIN_TOKEN", "login_token", loginRaw},
+	} {
+		digest, err := identity.DigestCredential(secret, credential.label, credential.raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		exec(t, p, `INSERT INTO account_session_credentials(credential_id,session_id,kind,digest,issued_at)VALUES($1,$2,$3,$4,clock_timestamp()-interval '1 hour')`,
+			uuid().String(), a.SessionID.UUID().String(), credential.kind, digest[:])
+	}
+
 	at := time.Now().UTC().Truncate(time.Microsecond)
 	exec(t, p, `INSERT INTO achievement_notices(player_id,achievement_id,tier,complete_time)VALUES($1,100013,1,$2),($1,100008,1,$2)`, int64(a.PlayerID), at)
-	projection := achievementstore.BootstrapProjection{Store: achievementstore.Store{}, Content: contentstore.Store{Queryer: p}, Active: contentstore.Store{Queryer: p}}
-	login := func(loginAt time.Time) []int64 {
+	clock := &i911cFixedClock{at: at}
+	content := contentstore.Store{Queryer: p}
+	service := i4store.BootstrapService{
+		Runner:                  tx.Runner{DB: p},
+		Receipts:                kernelstore.Store{},
+		ReceiptReader:           kernelstore.Reader{Queryer: p},
+		DigestSecret:            secret,
+		BearerSecret:            secret,
+		DerivationKeyID:         "i9-11e-native",
+		BootstrapProfileVersion: "i9-11e-native",
+		LoginTime:               clock,
+		LoginReconcilers:        []appboot.CharacterLoginReconciler{achievementstore.NoticeLoginReconciler{}},
+		DetailContributors:      []appboot.MID1DetailContributor{achievementstore.BootstrapProjection{Store: achievementstore.Store{}, Content: content, Active: content}},
+	}
+	login := func(loginAt time.Time, seed byte) []int64 {
 		t.Helper()
-		write, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
-		if e != nil {
-			t.Fatal(e)
+		clock.Set(loginAt)
+		result, err := service.MID1(ctx, appboot.RuntimeMID1Request{
+			Credentials: appboot.AccountCredentials{SID: sidRaw, LoginToken: loginRaw},
+			Region:      1,
+			Operation:   i911cFixedOperation(loginAt, seed),
+		})
+		if err != nil {
+			t.Fatalf("MID 1 at %s: %v", loginAt.Format(time.RFC3339Nano), err)
 		}
-		if e = (achievementstore.NoticeLoginReconciler{}).ReconcileCharacterLogin(ctx, write, a, op(), loginAt); e != nil {
-			t.Fatal(e)
-		}
-		if e = write.Commit(ctx); e != nil {
-			t.Fatal(e)
-		}
-		read, e := p.Begin(ctx, tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true})
-		if e != nil {
-			t.Fatal(e)
-		}
-		defer read.Rollback(ctx)
-		detail := map[string]any{}
-		if e = projection.OverlayMID1(ctx, read, a, false, loginAt, detail); e != nil {
-			t.Fatal(e)
-		}
-		ids, ok := detail["1304"].([]int64)
+		ids, ok := result.Detail["1304"].([]int64)
 		if !ok {
-			t.Fatalf("detail 1304 type %T", detail["1304"])
+			t.Fatalf("detail 1304 type %T", result.Detail["1304"])
 		}
 		return ids
 	}
-	ids := login(at)
+
+	ids := login(at, 1)
 	if len(ids) != 1 || ids[0] != 100013 {
 		t.Fatalf("login detail ids %v (hidden 100008 must stay silent)", ids)
 	}
-	// The notice-17 push reads pending notices; the login consumed them.
-	if taken, e := s.TakeNotices(ctx, a.PlayerID, opPinned(rev)); e != nil || len(taken) != 0 {
-		t.Fatalf("notices pushed after login: %+v, %v", taken, e)
+	if n := scalar(t, p, `SELECT count(*) FROM achievement_notices WHERE player_id=$1 AND delivered_at IS NOT NULL`, int64(a.PlayerID)); n != 2 {
+		t.Fatalf("delivered notices %d, want both rows claimed at login", n)
 	}
-	if again := login(at.Add(time.Second)); len(again) != 0 {
+	if again := login(at.Add(time.Second), 2); len(again) != 0 {
 		t.Fatalf("a second login re-showed %v", again)
+	}
+	// The notice-17 push reads pending notices; the login consumed them.
+	if taken, err := catalogAchievements(p, fixedCounts{}).TakeNotices(ctx, a.PlayerID, opPinned(rev)); err != nil || len(taken) != 0 {
+		t.Fatalf("notices pushed after login: %+v, %v", taken, err)
 	}
 	if n := scalar(t, p, `SELECT count(*) FROM achievement_notices WHERE player_id=$1 AND delivered_at IS NULL`, int64(a.PlayerID)); n != 0 {
 		t.Fatalf("pending notices %d", n)
