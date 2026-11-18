@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -35,6 +36,8 @@ const (
 	dungeonCoinResource = "team_dungeon_coin"
 	crystalResource     = "crystal"
 	duplicateResultCode = 30005
+	resultReceiptClass  = "I9_9C_GUILD_CAMPAIGN"
+	resultReceiptSchema = "gxb.guildcampaign.result.v1"
 	factKind            = "GUILD_ACTIVITY"
 	payoutSource        = "GUILD_CAMPAIGN_PAYOUT"
 	awardSource         = "GUILD_CAMPAIGN_AWARD"
@@ -317,6 +320,13 @@ type Content interface {
 	ChapterOfCopy(int64) (int64, bool)
 }
 
+// ResultReceipts is the receipt surface of one settled result: it stores the
+// complete answer and reads back the member's latest answer at a wave.
+type ResultReceipts interface {
+	PutTx(context.Context, tx.Tx, receipt.Receipt) (receipt.PutResult, error)
+	FindLatestTx(context.Context, tx.Queryer, receipt.LatestIdentity) (receipt.Receipt, bool, error)
+}
+
 // Mode is the Guild Campaign gameplay owner. Service keeps the lead-owned open,
 // reset and departure paths; Mode adds claim, fight, settle, awards and reads.
 type Mode struct {
@@ -336,6 +346,7 @@ type Mode struct {
 	Timed      gen.TimedRunner
 	Fresh      tx.Queryer
 	Revisions  ContentRevisions
+	Receipts   ResultReceipts
 }
 
 // ContentRevisions names the installed content a live request binds.
@@ -361,7 +372,7 @@ func (m Mode) BindContent(c context.Context, op operation.Context) (operation.Co
 }
 
 func (m Mode) ready() bool {
-	return m.ModeStore != nil && m.Content != nil && m.Combat != nil && m.Grants != nil && m.Facts != nil && m.Directory != nil && m.Mail != nil && m.Fence != nil && m.Players != nil
+	return m.ModeStore != nil && m.Content != nil && m.Combat != nil && m.Grants != nil && m.Facts != nil && m.Directory != nil && m.Mail != nil && m.Fence != nil && m.Players != nil && m.Receipts != nil
 }
 
 // TxProfile resolves one member's display row inside a transaction.

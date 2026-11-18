@@ -23,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -102,6 +103,7 @@ func newCampaignFixture(t *testing.T) campaignFixture {
 		Directory: i4store.PlayerDirectoryReader{}, Mail: mail,
 		Roster: characterstore.Store{Queryer: p}, Awakenings: characterstore.RawAwakeningStore{},
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p,
+		Receipts: kernelstore.Store{},
 	}
 	f.leaderHero = bornHero(t, p, f.leader, f.rev, genuineHeroTable, 1).PartnerID
 	f.secondHero = bornHero(t, p, f.second, f.rev, 10001002, 1).PartnerID
@@ -327,6 +329,85 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 // TestI9_9CEnemyHPRecordedForClientCarry guards DL-33b38484: a row that took
 // damage carries health 1 so the client applies the stored hp (BattleCreate.lua
 // 1106) and a later loss lowers the known HP.
+// TestI9_9CMemberReplaySurvivesAnotherMembersSameWaveSettlement guards A-134:
+// C8 replays a member's own last settled result at that wave even after another
+// member settled the same wave over the copy's single replay slot.
+func TestI9_9CMemberReplaySurvivesAnotherMembersSameWaveSettlement(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.copyID(t)
+	if _, err := f.mode.Claim(ctx, f.third, copyID, f.op()); err != nil {
+		t.Fatal("claim third", err)
+	}
+	thirdStart := f.start(t, f.third, chapterID, copyID, f.thirdHero)
+	thirdLoss := f.waveEnemies(t, thirdStart, 0, 1234, 77)
+	firstSettled, err := f.mode.Settle(ctx, f.third, thirdLoss, f.op())
+	if err != nil || firstSettled.Duplicate {
+		t.Fatalf("third loss %+v err=%v", firstSettled, err)
+	}
+	if _, err := f.mode.Claim(ctx, f.second, copyID, f.op()); err != nil {
+		t.Fatal("claim second", err)
+	}
+	secondStart := f.start(t, f.second, chapterID, copyID, f.secondHero)
+	secondLoss := f.waveEnemies(t, secondStart, 0, 4321, 33)
+	if _, err := f.mode.Settle(ctx, f.second, secondLoss, f.op()); err != nil {
+		t.Fatal("second loss", err)
+	}
+	before, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
+	if err != nil {
+		t.Fatal("detail before", err)
+	}
+	goldBefore := f.balance(t, f.third, "mana")
+	clearsBefore := f.memberClears(t, f.third, chapterID)
+	replayed, err := f.mode.Settle(ctx, f.third, thirdLoss, f.op())
+	if err != nil || !replayed.Duplicate || replayed.Body["error_code"] != int64(30005) {
+		t.Fatalf("third retry after another member settled %+v err=%v", replayed, err)
+	}
+	replayedAward := replayed.Body["rank_award"].(map[string]any)
+	storedAward := firstSettled.Body["rank_award"].(map[string]any)
+	if replayed.Body["coin_award"] != float64(firstSettled.Body["coin_award"].(int64)) ||
+		replayedAward["crystal"] != float64(storedAward["crystal"].(int64)) || replayedAward["guild_coin"] != float64(storedAward["guild_coin"].(int64)) {
+		t.Fatalf("replayed body %+v vs %+v", replayed.Body, firstSettled.Body)
+	}
+	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != goldBefore {
+		t.Fatalf("replay paid again: %d -> %d", goldBefore, goldAfter)
+	}
+	if clearsAfter := f.memberClears(t, f.third, chapterID); clearsAfter != clearsBefore {
+		t.Fatalf("replay changed member clears: %d -> %d", clearsBefore, clearsAfter)
+	}
+	after, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
+	if err != nil {
+		t.Fatal("detail after", err)
+	}
+	if after.CurrentIndex != before.CurrentIndex || fmt.Sprint(after.Waves) != fmt.Sprint(before.Waves) {
+		t.Fatalf("replay wrote the copy: %+v -> %+v", before, after)
+	}
+	// A later settlement by the same member at the same wave is the latest
+	// answer: the retry now replays that body and still pays nothing.
+	if _, err := f.mode.Claim(ctx, f.third, copyID, f.op()); err != nil {
+		t.Fatal("reclaim third", err)
+	}
+	thirdAgain := f.start(t, f.third, chapterID, copyID, f.thirdHero)
+	latestSettled, err := f.mode.Settle(ctx, f.third, f.waveEnemies(t, thirdAgain, 0, 7777, 11), f.op())
+	if err != nil || latestSettled.Duplicate {
+		t.Fatalf("third later loss %+v err=%v", latestSettled, err)
+	}
+	goldLatest := f.balance(t, f.third, "mana")
+	latestReplay, err := f.mode.Settle(ctx, f.third, thirdLoss, f.op())
+	if err != nil || !latestReplay.Duplicate || latestReplay.Body["error_code"] != int64(30005) {
+		t.Fatalf("retry after a later settlement %+v err=%v", latestReplay, err)
+	}
+	if latestReplay.Body["coin_award"] != float64(latestSettled.Body["coin_award"].(int64)) {
+		t.Fatalf("retry replayed a stale body %v vs %v", latestReplay.Body["coin_award"], latestSettled.Body["coin_award"])
+	}
+	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != goldLatest {
+		t.Fatalf("latest replay paid again: %d -> %d", goldLatest, goldAfter)
+	}
+}
+
 func TestI9_9CEnemyHPRecordedForClientCarry(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)

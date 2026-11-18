@@ -35,29 +35,28 @@ func (Store) LockCopyTx(ctx context.Context, t tx.Tx, guildID, chapterID, copyID
 }
 
 func readCopy(ctx context.Context, q tx.Queryer, guildID, chapterID, copyID int64, lock bool) (d.Copy, bool, error) {
-	query := `SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'')
+	query := `SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,'')
 		FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3`
 	if lock {
 		query += ` FOR UPDATE`
 	}
-	var waves, settledBody string
+	var waves string
 	copy := d.Copy{GuildID: guildID, ChapterID: chapterID, CopyID: copyID}
 	err := q.QueryRow(ctx, query, guildID, chapterID, copyID).
-		Scan(&copy.Run, &waves, &copy.CurrentIndex, &copy.Win, &copy.Percent, &copy.HolderID, &copy.HolderStage, &copy.LastFightTime, &copy.StartFightTime, &copy.AttemptGeneration, &copy.SettledBy, &copy.SettledIndex, &settledBody)
+		Scan(&copy.Run, &waves, &copy.CurrentIndex, &copy.Win, &copy.Percent, &copy.HolderID, &copy.HolderStage, &copy.LastFightTime, &copy.StartFightTime, &copy.AttemptGeneration)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Copy{}, false, nil
 	}
-	copy.Waves, copy.SettledBody = []byte(waves), []byte(settledBody)
+	copy.Waves = []byte(waves)
 	return copy, err == nil, err
 }
 
 func (Store) SaveCopyTx(ctx context.Context, t tx.Tx, copy d.Copy) error {
 	_, err := t.Exec(ctx, `UPDATE guild_campaign_copies SET waves=$4::jsonb,current_index=$5,is_win=$6,percent=$7,
-		holder_id=NULLIF($8,0),holder_stage=$9,last_fight_time=$10,start_fight_time=$11,attempt_generation=$12,
-		settled_by=NULLIF($13,0),settled_index=$14,settled_body=NULLIF($15,'')::jsonb
+		holder_id=NULLIF($8,0),holder_stage=$9,last_fight_time=$10,start_fight_time=$11,attempt_generation=$12
 		WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3`,
 		copy.GuildID, copy.ChapterID, copy.CopyID, string(copy.Waves), copy.CurrentIndex, copy.Win, copy.Percent,
-		copy.HolderID, copy.HolderStage, copy.LastFightTime, copy.StartFightTime, copy.AttemptGeneration, copy.SettledBy, copy.SettledIndex, string(copy.SettledBody))
+		copy.HolderID, copy.HolderStage, copy.LastFightTime, copy.StartFightTime, copy.AttemptGeneration)
 	return err
 }
 

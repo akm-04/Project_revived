@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -381,6 +382,10 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 	if err != nil {
 		return Settled{}, err
 	}
+	fingerprint, err := resultFingerprint(request)
+	if err != nil {
+		return Settled{}, err
+	}
 	var out Settled
 	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
@@ -416,8 +421,13 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 		if !found {
 			return ErrLate
 		}
-		if isRetry(copy, a.PlayerID, request.CurrentIndex) {
-			out, err = replayBody(copy.SettledBody)
+		prefix := resultReplayPrefix(request, copy.Run)
+		latest, found, err := m.Receipts.FindLatestTx(c, sc.Tx, resultReplayLatest(a, prefix))
+		if err != nil {
+			return err
+		}
+		if found && copy.HolderID != int64(a.PlayerID) {
+			out, err = replayBody(latest.ResultPayload)
 			return err
 		}
 		if chapter.Win || !holderLive(copy, m.Settings, at) || copy.HolderID != int64(a.PlayerID) || copy.HolderStage != d.StageFight {
@@ -444,7 +454,7 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 			return err
 		}
 		out = result
-		return nil
+		return m.recordResultAnswer(c, sc.Tx, sc.Operation, a, prefix, fingerprint, result.Body)
 	})
 	if err != nil {
 		return Settled{}, err
@@ -490,13 +500,49 @@ func summaryEnemies(enemies []ResultEnemy) []cd.EnemyStatus {
 	return out
 }
 
-// isRetry is C8's duplicate: the copy's last settled result is this member's at
-// this wave and this member has not started a new fight since, so the replay
-// writes nothing. Another member's claim or fight does not displace it. A loss
-// leaves the index unchanged, so the settled index is compared rather than the
-// current one.
-func isRetry(copy d.Copy, player identity.PlayerID, index int64) bool {
-	return copy.SettledBy == int64(player) && copy.SettledIndex == index && copy.HolderID != int64(player)
+// resultFingerprint identifies one settled RESULT request. A client retry
+// resends the same parameters (Backend.lua:493-524), so the fingerprint differs
+// only for a genuinely different result at the same wave.
+func resultFingerprint(request Result) ([32]byte, error) {
+	return receipt.FingerprintRequest(map[string]any{
+		"chapter_id": request.ChapterID, "copy_id": request.CopyID, "current_index": request.CurrentIndex,
+		"formation": request.Formation, "pet_id": request.PetID, "total_damage": request.TotalDamage,
+		"star": request.Star, "enemies": request.Enemies,
+	})
+}
+
+// resultReplayPrefix is C8's per-member answer family: one receipt per member,
+// run, copy and wave, with each settlement keeping its own key under it. Another
+// member's settlement of the same wave cannot displace it.
+func resultReplayPrefix(request Result, run int64) string {
+	return fmt.Sprintf("chapter=%d/copy=%d/run=%d/wave=%d/", request.ChapterID, request.CopyID, run, request.CurrentIndex)
+}
+
+func resultReplayLatest(a identity.ActorContext, prefix string) receipt.LatestIdentity {
+	return receipt.LatestIdentity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10),
+		Domain: "guildcampaign", Operation: "result", SemanticKeyPrefix: prefix}
+}
+
+func resultAnswerIdentity(a identity.ActorContext, prefix string, op operation.Context) receipt.Identity {
+	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10),
+		Domain: "guildcampaign", Operation: "result", SemanticKey: prefix + op.ID.String()}
+}
+
+// recordResultAnswer stores the complete 610 body atomically with the
+// settlement; a retry reads the member's latest answer back instead of paying
+// twice.
+func (m Mode) recordResultAnswer(c context.Context, t tx.Tx, op operation.Context, a identity.ActorContext, prefix string, fingerprint [32]byte, body map[string]any) error {
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	record, err := receipt.New(op, resultAnswerIdentity(a, prefix, op), resultReceiptClass, resultReceiptSchema, raw, fingerprint)
+	if err != nil {
+		return err
+	}
+	record.PolicyVersion, record.ActorAccountUID, record.ContextID = policyVersion, string(a.AccountUID), a.ContextID.UUID()
+	_, err = m.Receipts.PutTx(c, t, record)
+	return err
 }
 
 func replayBody(stored []byte) (Settled, error) {
@@ -553,8 +599,6 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 	copy.HolderStage = d.StageFree
 	copy.LastFightTime = &at
 	copy.StartFightTime = nil
-	copy.SettledBy = int64(a.PlayerID)
-	copy.SettledIndex = index
 	if err := m.ModeStore.SaveCopyTx(c, t, copy); err != nil {
 		return Settled{}, err
 	}
@@ -731,13 +775,6 @@ func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op
 	body := map[string]any{
 		"rank_award":  map[string]any{"crystal": recordCrystal, "guild_coin": recordBadge},
 		"normal_drop": []any{}, "guild_drop": []any{}, "coin_award": gold, "exps": []any{},
-	}
-	copy.SettledBody, err = json.Marshal(body)
-	if err != nil {
-		return Settled{}, err
-	}
-	if err := m.ModeStore.SaveCopyTx(c, t, copy); err != nil {
-		return Settled{}, err
 	}
 	return Settled{Body: body}, nil
 }

@@ -44,6 +44,7 @@ func TestI9_9CApplyRewardRequiresRegistration(t *testing.T) {
 				Directory: struct{ Directory }{},
 				Mail:      struct{ Mailer }{},
 				Settings:  Settings{ApplicationsPerDay: 4},
+				Receipts:  stubResultReceipts{},
 			}
 			_, err := mode.ApplyReward(context.Background(),
 				identity.ActorContext{PlayerID: 100001, LogicalServerID: 900}, 7, 20001091,

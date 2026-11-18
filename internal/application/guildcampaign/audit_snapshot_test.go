@@ -29,7 +29,7 @@ func TestAuditA059MembershipAndCampaignShareSnapshot(t *testing.T) {
 		ModeStore: auditCampaignStore{}, Content: struct{ Content }{},
 		Combat: struct{ ModeCombat }{}, Grants: struct{ Grants }{},
 		Facts: struct{ Facts }{}, Directory: struct{ Directory }{}, Mail: struct{ Mailer }{},
-		Tables: map[int64]ChapterInfo{7: {ChapterID: 7}},
+		Tables: map[int64]ChapterInfo{7: {ChapterID: 7}}, Receipts: stubResultReceipts{},
 	}
 	result, err := mode.GuildMap(context.Background(), identity.ActorContext{PlayerID: 100001},
 		operation.Context{ID: identifier, StartedAt: time.Now().UTC()})
