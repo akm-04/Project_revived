@@ -2719,6 +2719,25 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table, pet_artifact["templates"],
                                          build_robot_lineups(partner_keys, partner_rows, indexed_field))
     top_floor_artifact["task_modes"] = build_task_modes(blobs, parse_generated_lua_table, parse_base64_indexed_lua_table, indexed_field)
+    # A sell_type 7/15 shop roll is priced in the product's own stone item. The
+    # stone lives on the hero (partner.stone_id) or pet (pet.stone_id) source row.
+    stone_item_by_item: dict[int, int] = {}
+    for item in items:
+        item_id = parse_int(item.get("id", ""), label="item.id", allow_zero=False, allow_negative=False)
+        pet_id = parse_int(item.get("pet_id") or "0", label=f"item[{item_id}].pet_id", allow_negative=False)
+        partner_id = parse_int(item.get("partner_id") or "0", label=f"item[{item_id}].partner_id", allow_negative=False)
+        if pet_id > 0:
+            pet_row = pet_rows.get(pet_id)
+            if pet_row is None:
+                continue
+            stone = parse_int(indexed_field(pet_keys, pet_row, "stone_id", row_id=pet_id) or "0", label=f"pet[{pet_id}].stone_id", allow_negative=False)
+        elif partner_id > 0 and partner_id in partner_rows:
+            stone = parse_int(indexed_field(partner_keys, partner_rows[partner_id], "stone_id", row_id=partner_id) or "0", label=f"partner[{partner_id}].stone_id", allow_negative=False)
+        else:
+            continue
+        if stone > 0:
+            stone_item_by_item[item_id] = stone
+
     artifacts = {
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
         "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
@@ -2772,6 +2791,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
                 "team_shop19", "team_shop20", "team_shop21", "team_shop22")},
             dropbox_rows,
             refresh_cost_rows,
+            stone_item_by_item,
             CompileError,
         ),
         "emoticon_catalog.json": emoticon_artifact,

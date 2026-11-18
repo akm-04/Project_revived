@@ -39,12 +39,7 @@ func (c Catalog) Generate(shop Shop, playerLevel int64, stream *combat.Stream) (
 			SellType:  roll.SellType,
 			SellPrice: roll.SellPrice,
 			Discount:  roll.Discount,
-		}
-		switch SellType(roll.SellType) {
-		case SellStone:
-			slot.StoneID = c.Tunables.StoneCurrencyItem
-		case SellCube:
-			slot.StoneID = 0
+			StoneID:   roll.StoneID,
 		}
 		slots = append(slots, slot)
 	}

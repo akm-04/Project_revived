@@ -127,7 +127,8 @@ type SourceRow struct {
 	Slots []SourceSlot
 }
 
-// Roll is one dropbox row: the product and its price.
+// Roll is one dropbox row: the product, its price and, for a stone-priced row,
+// the stone item the source names as its currency.
 type Roll struct {
 	ItemID    int64
 	ItemNum   int64
@@ -135,11 +136,12 @@ type Roll struct {
 	SellPrice int64
 	Discount  int64
 	Rate      int64
+	StoneID   int64
 }
 
 // Tunables are the compiled private policy constants.
 type Tunables struct {
-	StoneCurrencyItem   int64
+	StoneSubstituteItem int64
 	CubeCurrencyItem    int64
 	DiscountMillionths  int64
 	MonthCardMillionths int64
@@ -291,7 +293,7 @@ func ValidateTuning(catalog Catalog, tuning Tuning) error {
 		if row.ItemNum != nil && *row.ItemNum <= 0 {
 			return ErrOverlayInvalid
 		}
-		if row.MaxBuys != nil && *row.MaxBuys != 1 {
+		if row.MaxBuys != nil && (*row.MaxBuys < 0 || *row.MaxBuys > 1) {
 			return ErrOverlayInvalid
 		}
 	}
@@ -311,6 +313,9 @@ func (c Catalog) TunedSlot(shopType int64, slot StockSlot) (StockSlot, bool) {
 		}
 		if row.ItemNum != nil {
 			slot.ItemNum = *row.ItemNum
+		}
+		if row.MaxBuys != nil && *row.MaxBuys < 1 {
+			disabled = true
 		}
 	}
 	return slot, disabled

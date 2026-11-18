@@ -85,7 +85,7 @@ func shopCatalogDomain(dto builtin.ShopCatalog, revision string) (d.Catalog, err
 		Groups:      make(map[int64][]d.Roll, len(dto.Groups)),
 		RefreshCost: make(map[string][]int64, len(dto.RefreshCost)),
 		Tunables: d.Tunables{
-			StoneCurrencyItem:   dto.Tunables.StoneCurrencyItem,
+			StoneSubstituteItem: dto.Tunables.StoneSubstituteItem,
 			CubeCurrencyItem:    dto.Tunables.CubeCurrencyItem,
 			DiscountMillionths:  dto.Tunables.DiscountMillionths,
 			MonthCardMillionths: dto.Tunables.MonthCardMillionths,
@@ -126,7 +126,7 @@ func shopCatalogDomain(dto builtin.ShopCatalog, revision string) (d.Catalog, err
 		}
 		converted := make([]d.Roll, 0, len(rolls))
 		for _, roll := range rolls {
-			converted = append(converted, d.Roll{ItemID: roll.ItemID, ItemNum: roll.ItemNum, SellType: roll.SellType, SellPrice: roll.SellPrice, Discount: roll.Discount, Rate: roll.Rate})
+			converted = append(converted, d.Roll{ItemID: roll.ItemID, ItemNum: roll.ItemNum, SellType: roll.SellType, SellPrice: roll.SellPrice, Discount: roll.Discount, Rate: roll.Rate, StoneID: roll.StoneID})
 		}
 		out.Groups[groupID] = converted
 	}

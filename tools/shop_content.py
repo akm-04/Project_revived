@@ -27,8 +27,9 @@ REFRESH_KEYS = (
 
 SELL_TYPES = (1, 2, 3, 4, 5, 6, 7, 10, 15, 16, 17, 22, 23, 24, 25, 32)
 
-STONE_CURRENCY_ITEM = 50001427
+SUBSTITUTE_ITEM = 50001427
 CUBE_CURRENCY_ITEM = 50002072
+STONE_SELL_TYPES = (7, 15)
 
 
 def _int(raw, label, error, *, allow_zero=True, allow_negative=False):
@@ -96,7 +97,7 @@ def _compile_stock(table, rows, dropbox_groups, error):
     return compiled_rows, referenced
 
 
-def build_shop_catalog(shop_config_rows, stock_rows_by_table, dropbox_rows, refresh_rows, error):
+def build_shop_catalog(shop_config_rows, stock_rows_by_table, dropbox_rows, refresh_rows, stone_item_by_item, error):
     shops_by_id = {}
     for index, row in enumerate(shop_config_rows, start=1):
         shop_id = _int(row.get("id", ""), f"shop_config[{index}].id", error, allow_zero=False)
@@ -155,13 +156,15 @@ def build_shop_catalog(shop_config_rows, stock_rows_by_table, dropbox_rows, refr
     for dropbox_id in referenced_ids:
         rolls = []
         for index, row in raw_dropbox_groups[dropbox_id]:
+            sell_type = _int(row.get("sell_type", ""), f"dropbox[{index}].sell_type", error, allow_zero=False)
             roll = {
                 "item_id": _int(row.get("item_id", ""), f"dropbox[{index}].item_id", error, allow_zero=False),
                 "item_num": _int(row.get("item_num", ""), f"dropbox[{index}].item_num", error, allow_zero=False),
-                "sell_type": _int(row.get("sell_type", ""), f"dropbox[{index}].sell_type", error, allow_zero=False),
+                "sell_type": sell_type,
                 "sell_price": _int(row.get("sell_price", ""), f"dropbox[{index}].sell_price", error, allow_zero=False),
                 "discount": _int(row.get("discount", ""), f"dropbox[{index}].discount", error),
                 "rate": _int(row.get("drop_rate", ""), f"dropbox[{index}].drop_rate", error),
+                "stone_id": 0,
             }
             if roll["sell_type"] not in SELL_TYPES:
                 raise error(f"dropbox[{index}] unqualified sell_type {roll['sell_type']}")
@@ -169,6 +172,11 @@ def build_shop_catalog(shop_config_rows, stock_rows_by_table, dropbox_rows, refr
                 raise error(f"dropbox[{index}] unqualified discount {roll['discount']}")
             if roll["rate"] < 0:
                 raise error(f"dropbox[{index}] negative drop_rate")
+            if sell_type in STONE_SELL_TYPES:
+                stone = stone_item_by_item.get(roll["item_id"])
+                if not stone:
+                    raise error(f"dropbox[{index}] item {roll['item_id']} has no source stone_id")
+                roll["stone_id"] = stone
             rolls.append(roll)
         rolls.sort(key=lambda roll: (roll["rate"], roll["item_id"], roll["item_num"], roll["sell_price"]))
         if not any(roll["rate"] > 0 for roll in rolls):
@@ -200,7 +208,7 @@ def build_shop_catalog(shop_config_rows, stock_rows_by_table, dropbox_rows, refr
         "groups": groups,
         "refresh_cost": refresh,
         "tunables": {
-            "stone_currency_item": STONE_CURRENCY_ITEM,
+            "stone_substitute_item": SUBSTITUTE_ITEM,
             "cube_currency_item": CUBE_CURRENCY_ITEM,
             "discount_millionths": 600000,
             "month_card_millionths": 550000,

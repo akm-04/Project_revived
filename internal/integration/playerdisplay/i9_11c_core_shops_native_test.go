@@ -20,6 +20,10 @@ import (
 )
 
 func i911cComposition(p *pg.Pool, a identity.ActorContext) stockruntime.ShopComposition {
+	return i911cCompositionAt(p, a, pg.AuthoritativeTime{Queryer: p})
+}
+
+func i911cCompositionAt(p *pg.Pool, a identity.ActorContext, authority gen.TimeAuthority) stockruntime.ShopComposition {
 	content := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
@@ -29,7 +33,7 @@ func i911cComposition(p *pg.Pool, a identity.ActorContext) stockruntime.ShopComp
 		Functions: appi5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{},
 		Backpack: values, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}}
 	return stockruntime.NewShopComposition(stockruntime.ShopDependencies{
-		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
+		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: authority}, Runner: runner},
 		Fresh:       p,
 		Content:     content,
 		Values:      values,
@@ -175,9 +179,13 @@ func TestI911CCoreShopsNative(t *testing.T) {
 		t.Fatalf("multi isbuy %#v", multi.Body["isbuy"])
 	}
 
+	crystalBeforeRefresh := i911cScalarAmount(t, p, a, "crystal")
 	refresh := i911cDispatch(t, dispatcher, a, 34, map[string]any{"shop_type": int64(1)})
 	if refresh.HTTPStatus != 200 || refresh.Body["refresh_times"] != int64(1) {
 		t.Fatalf("MID 34: %+v", refresh)
+	}
+	if after := i911cScalarAmount(t, p, a, "crystal"); after != crystalBeforeRefresh-50 {
+		t.Fatalf("refresh debit %d -> %d, want 50", crystalBeforeRefresh, after)
 	}
 	for _, item := range i911cItems(t, refresh) {
 		if item["isbuy"] != int64(0) {
@@ -195,9 +203,14 @@ func TestI911CCoreShopsNative(t *testing.T) {
 		t.Fatalf("MID 32 type 35: %+v", league)
 	}
 	cubeItem := i911cItems(t, league)[0]
+	cubeBefore := i911cStackAmount(t, p, a, 50002072)
+	cubePrice := cubeItem["sell_price"].(int64)
 	cubeBuy := i911cDispatch(t, dispatcher, a, 33, map[string]any{"shop_type": int64(35), "index": cubeItem["index"]})
 	if cubeBuy.HTTPStatus != 200 {
 		t.Fatalf("type 35 cube purchase: %+v", cubeBuy)
+	}
+	if after := i911cStackAmount(t, p, a, 50002072); after != cubeBefore-cubePrice {
+		t.Fatalf("type 35 cube debit %d -> %d, want %d", cubeBefore, after, cubePrice)
 	}
 
 	team := i911cDispatch(t, dispatcher, a, 32, map[string]any{"shop_type": int64(15)})
@@ -206,7 +219,7 @@ func TestI911CCoreShopsNative(t *testing.T) {
 	}
 
 	close := i911cDispatch(t, dispatcher, a, 38, map[string]any{"shop_type": int64(1)})
-	if close.HTTPStatus != 200 {
-		t.Fatalf("MID 38: %+v", close)
+	if close.HTTPStatus != 409 || close.Body["error_code"] != int64(35028) {
+		t.Fatalf("MID 38 closed a permanent shop: %+v", close)
 	}
 }

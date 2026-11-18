@@ -69,10 +69,11 @@ type ShopDropRoll struct {
 	SellPrice int64 `json:"sell_price"`
 	Discount  int64 `json:"discount"`
 	Rate      int64 `json:"rate"`
+	StoneID   int64 `json:"stone_id"`
 }
 
 type ShopTunables struct {
-	StoneCurrencyItem   int64 `json:"stone_currency_item"`
+	StoneSubstituteItem int64 `json:"stone_substitute_item"`
 	CubeCurrencyItem    int64 `json:"cube_currency_item"`
 	DiscountMillionths  int64 `json:"discount_millionths"`
 	MonthCardMillionths int64 `json:"month_card_millionths"`
@@ -93,7 +94,7 @@ func QualifyShopCatalog(c ShopCatalog) error {
 		counts.RefreshCostRows != 330 {
 		return errors.New("shop catalog: source row count drift")
 	}
-	if c.Tunables.StoneCurrencyItem != 50001427 || c.Tunables.CubeCurrencyItem != 50002072 ||
+	if c.Tunables.StoneSubstituteItem != 50001427 || c.Tunables.CubeCurrencyItem != 50002072 ||
 		c.Tunables.DiscountMillionths != 600000 || c.Tunables.MonthCardMillionths != 550000 ||
 		c.Tunables.LevelPoolRows != 100 {
 		return errors.New("shop catalog: tunable drift")
@@ -140,6 +141,10 @@ func QualifyShopCatalog(c ShopCatalog) error {
 			if roll.ItemID <= 0 || roll.ItemNum <= 0 || roll.SellPrice <= 0 || roll.Rate < 0 ||
 				(roll.Discount != 0 && roll.Discount != 1) {
 				return errors.New("shop catalog: unqualified drop roll")
+			}
+			stonePriced := roll.SellType == 7 || roll.SellType == 15
+			if stonePriced != (roll.StoneID > 0) {
+				return errors.New("shop catalog: stone_id does not match the sell type")
 			}
 			rate += roll.Rate
 		}

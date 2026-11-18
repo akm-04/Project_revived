@@ -70,14 +70,14 @@ func (s Service) List(c context.Context, actor identity.ActorContext, op operati
 	})
 }
 
-// CloseShop answers MID 38. No temporary merchant spawn exists in 11C, so an
-// open temporary shop can never be closed here (C11).
+// CloseShop answers MID 38. Only an open temporary merchant is closeable; no
+// spawn source exists in 11C (C11), so every close is a closed/gated refusal.
 func (s Service) CloseShop(c context.Context, actor identity.ActorContext, shopType int64, op operation.Context) (map[string]any, error) {
 	return s.run(c, actor, op, true, func(c context.Context, sc gen.TimedScope, catalog d.Catalog) (map[string]any, error) {
 		if _, ok := catalog.Shop(shopType); !ok {
 			return nil, d.ErrRefused
 		}
-		return map[string]any{}, nil
+		return nil, d.ErrRefused
 	})
 }
 
@@ -104,6 +104,9 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if disabled || stored.IsBuy != 0 {
 			return nil, d.ErrRefused
 		}
+		if shop.Type == 13 && request.ClientPrice == nil {
+			return nil, d.ErrInvalid
+		}
 		price, err := s.priceFor(c, sc, catalog, shop, slot, actor.PlayerID)
 		if err != nil {
 			return nil, err
@@ -111,21 +114,14 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err = s.checkClientPrice(shop.Type, price, request.ClientPrice); err != nil {
 			return nil, err
 		}
-		cost, err := s.buyCost(c, sc, catalog, slot, price, actor.PlayerID)
-		if err != nil {
+		bill := newSettlement()
+		if err = s.addCost(c, sc, catalog, slot, price, actor.PlayerID, bill); err != nil {
 			return nil, err
 		}
-		plan := s.rewardPlan(actor.PlayerID, "buy", sc.Operation.Operation(), []grant.Line{{Kind: grant.StackItem, ItemID: slot.ItemID, Amount: slot.ItemNum}})
-		prepared, err := s.Exchange.PrepareItemsEnergyExchangeTx(c, sc.Tx, actor, appi5.ItemsEnergyExchangeRequest{Cost: cost, Restoration: plan}, sc.Operation.Operation())
-		if err != nil {
-			return nil, err
-		}
+		bill.addProduct(slot.ItemID, slot.ItemNum)
+		cost, lines := bill.finalize()
 		setBought(&row, request.Index)
-		applied, err := s.Exchange.ApplyItemsEnergyExchangeTx(c, sc.Tx, prepared)
-		if err != nil {
-			return nil, err
-		}
-		if err = s.record(c, sc, actor.PlayerID, applied); err != nil {
+		if err = s.settle(c, sc, actor, "buy", cost, lines); err != nil {
 			return nil, err
 		}
 		if err = s.save(c, sc, row, insert); err != nil {
@@ -160,10 +156,10 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 		if err != nil {
 			return nil, err
 		}
-		var cost appi5.MaterialCost
-		var lines []grant.Line
-		scalars := map[string]int64{}
-		stacks := map[int64]int64{}
+		if shop.Type == 13 && len(request.ClientPrices) != len(request.List) {
+			return nil, d.ErrInvalid
+		}
+		bill := newSettlement()
 		for position, index := range request.List {
 			stored, found := row.FindSlot(index)
 			if !found {
@@ -185,26 +181,16 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 			if err = s.checkClientPrice(shop.Type, price, clientPrice); err != nil {
 				return nil, err
 			}
-			if err = s.addCost(c, sc, catalog, slot, price, actor.PlayerID, scalars, stacks); err != nil {
+			if err = s.addCost(c, sc, catalog, slot, price, actor.PlayerID, bill); err != nil {
 				return nil, err
 			}
-			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: slot.ItemID, Amount: slot.ItemNum})
+			bill.addProduct(slot.ItemID, slot.ItemNum)
 		}
-		cost.Scalars = scalarCosts(scalars)
-		cost.Stacks = stackCosts(stacks)
-		plan := s.rewardPlan(actor.PlayerID, "multi_buy", sc.Operation.Operation(), lines)
-		prepared, err := s.Exchange.PrepareItemsEnergyExchangeTx(c, sc.Tx, actor, appi5.ItemsEnergyExchangeRequest{Cost: cost, Restoration: plan}, sc.Operation.Operation())
-		if err != nil {
-			return nil, err
-		}
+		cost, lines := bill.finalize()
 		for _, index := range request.List {
 			setBought(&row, index)
 		}
-		applied, err := s.Exchange.ApplyItemsEnergyExchangeTx(c, sc.Tx, prepared)
-		if err != nil {
-			return nil, err
-		}
-		if err = s.record(c, sc, actor.PlayerID, applied); err != nil {
+		if err = s.settle(c, sc, actor, "multi_buy", cost, lines); err != nil {
 			return nil, err
 		}
 		if err = s.save(c, sc, row, insert); err != nil {
@@ -344,18 +330,79 @@ func (s Service) checkClientPrice(shopType, price int64, clientPrice *int64) err
 	}
 }
 
-func (s Service) buyCost(c context.Context, sc gen.TimedScope, catalog d.Catalog, slot d.StockSlot, price int64, pid identity.PlayerID) (appi5.MaterialCost, error) {
-	scalars := map[string]int64{}
-	stacks := map[int64]int64{}
-	if err := s.addCost(c, sc, catalog, slot, price, pid, scalars, stacks); err != nil {
-		return appi5.MaterialCost{}, err
+type settlement struct {
+	scalars  map[string]int64
+	stacks   map[int64]int64
+	products map[int64]int64
+	order    []int64
+}
+
+func newSettlement() *settlement {
+	return &settlement{scalars: map[string]int64{}, stacks: map[int64]int64{}, products: map[int64]int64{}}
+}
+
+func (s *settlement) addProduct(itemID, amount int64) {
+	if _, seen := s.products[itemID]; !seen {
+		s.order = append(s.order, itemID)
 	}
-	return appi5.MaterialCost{Scalars: scalarCosts(scalars), Stacks: stackCosts(stacks)}, nil
+	s.products[itemID] += amount
+}
+
+// finalize nets a product against the same stack item that pays for it. A
+// sell_type 7/15 row is priced in the product's own stone, so the final stack
+// quantity is price minus item_num; the I5 exchange must never see the item on
+// both sides (C5, C9).
+func (s *settlement) finalize() (appi5.MaterialCost, []grant.Line) {
+	lines := make([]grant.Line, 0, len(s.order))
+	for _, itemID := range s.order {
+		amount := s.products[itemID]
+		if amount <= 0 {
+			continue
+		}
+		if debit := s.stacks[itemID]; debit > 0 {
+			offset := min(debit, amount)
+			s.stacks[itemID] -= offset
+			amount -= offset
+		}
+		if amount > 0 {
+			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: itemID, Amount: amount})
+		}
+	}
+	return appi5.MaterialCost{Scalars: scalarCosts(s.scalars), Stacks: stackCosts(s.stacks)}, lines
+}
+
+// settle applies one command's cost and product grant inside the caller's
+// transaction. A settlement with no product line is a pure debit (C5: the
+// stone fallback and the pet stone net out their own product).
+func (s Service) settle(c context.Context, sc gen.TimedScope, actor identity.ActorContext, name string, cost appi5.MaterialCost, lines []grant.Line) error {
+	if len(lines) == 0 {
+		prepared, err := s.Debiter.PrepareMaterialDebitTx(c, sc.Tx, actor.PlayerID, cost, sc.Operation.Operation())
+		if err != nil {
+			return err
+		}
+		debit, err := s.Debiter.ApplyMaterialDebitTx(c, sc.Tx, prepared)
+		if err != nil {
+			return err
+		}
+		recordDebit(c, debit)
+		return nil
+	}
+	plan := s.rewardPlan(actor.PlayerID, name, sc.Operation.Operation(), lines)
+	prepared, err := s.Exchange.PrepareItemsEnergyExchangeTx(c, sc.Tx, actor, appi5.ItemsEnergyExchangeRequest{Cost: cost, Restoration: plan}, sc.Operation.Operation())
+	if err != nil {
+		return err
+	}
+	applied, err := s.Exchange.ApplyItemsEnergyExchangeTx(c, sc.Tx, prepared)
+	if err != nil {
+		return err
+	}
+	return s.record(c, sc, actor.PlayerID, applied)
 }
 
 // addCost adds one slot's authoritative debit. A stone price debits the
-// substitute voucher first, else the frozen stone (C5).
-func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog, slot d.StockSlot, price int64, pid identity.PlayerID, scalars map[string]int64, stacks map[int64]int64) error {
+// substitute voucher first when it covers the price, else the frozen stone
+// (C5). The pet-stone currency has no substitute (Shop.lua:168-180).
+func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog, slot d.StockSlot, price int64, pid identity.PlayerID, bill *settlement) error {
 	sellType := d.SellType(slot.SellType)
 	if key, ok := sellType.ScalarKey(); ok {
 		if sellType == d.SellSummonCoin {
@@ -367,30 +414,29 @@ func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog
 		} else if amount < price {
 			return economy.InsufficientBalance(key)
 		}
-		scalars[key] += price
+		bill.scalars[key] += price
 		return nil
 	}
 	switch sellType {
 	case d.SellStone:
-		voucher := catalog.Tunables.StoneCurrencyItem
-		available, err := s.stack(c, sc, pid, voucher)
+		if slot.StoneID <= 0 {
+			return d.ErrRefused
+		}
+		substitute := catalog.Tunables.StoneSubstituteItem
+		available, err := s.stack(c, sc, pid, substitute)
 		if err != nil {
 			return err
 		}
 		if available >= price {
-			stacks[voucher] += price
+			bill.stacks[substitute] += price
 			return nil
 		}
-		if slot.StoneID > 0 && slot.StoneID != voucher {
-			if amount, err := s.stack(c, sc, pid, slot.StoneID); err == nil && amount >= price {
-				stacks[slot.StoneID] += price
-				return nil
-			}
-		}
-		return d.ErrRefused
+		return s.addStoneDebit(c, sc, pid, slot.StoneID, price, bill)
 	case d.SellPetStone:
-		// The pet-stone currency is not named by the client data (UNKNOWN).
-		return d.ErrRefused
+		if slot.StoneID <= 0 {
+			return d.ErrRefused
+		}
+		return s.addStoneDebit(c, sc, pid, slot.StoneID, price, bill)
 	case d.SellCube:
 		cube := catalog.Tunables.CubeCurrencyItem
 		available, err := s.stack(c, sc, pid, cube)
@@ -400,10 +446,22 @@ func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog
 		if available < price {
 			return d.ErrRefused
 		}
-		stacks[cube] += price
+		bill.stacks[cube] += price
 		return nil
 	}
 	return d.ErrRefused
+}
+
+func (s Service) addStoneDebit(c context.Context, sc gen.TimedScope, pid identity.PlayerID, stoneID, price int64, bill *settlement) error {
+	amount, err := s.stack(c, sc, pid, stoneID)
+	if err != nil {
+		return err
+	}
+	if amount < price {
+		return d.ErrRefused
+	}
+	bill.stacks[stoneID] += price
+	return nil
 }
 
 func scalarCosts(values map[string]int64) []appi5.ScalarMaterialCost {

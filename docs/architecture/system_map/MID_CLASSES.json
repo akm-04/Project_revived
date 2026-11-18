@@ -1527,8 +1527,8 @@
    "unknown": [
     "UNRESOLVED body at internal/application/shop/service.go:238",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:85",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:97",
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:92",
     "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:228",
     "transaction isolation not statically decidable at internal/application/shop/service.go:228"
    ],
@@ -1745,8 +1745,8 @@
     "UNRESOLVED body at internal/application/shop/service.go:178",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:85",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:97"
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:92"
    ],
    "writes": "state"
   },
@@ -1901,8 +1901,8 @@
    "unknown": [
     "UNRESOLVED body at internal/application/shop/service.go:178",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:85",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:97"
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:92"
    ],
    "writes": "state"
   },
@@ -142186,8 +142186,8 @@
     "UNRESOLVED body at internal/application/shop/service.go:178",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:85",
-    "UNRESOLVED weight at internal/domain/shop/rolls.go:97"
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
+    "UNRESOLVED weight at internal/domain/shop/rolls.go:92"
    ],
    "writes": "state"
   },
