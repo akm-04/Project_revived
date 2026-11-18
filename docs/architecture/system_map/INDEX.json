@@ -1167,7 +1167,7 @@
   },
   {
    "callees": 10,
-   "callers": 3,
+   "callers": 4,
    "mids": 14,
    "name": "guildcampaign",
    "path": "internal/application/guildcampaign",
@@ -1526,7 +1526,7 @@
    "tables": 2
   },
   {
-   "callees": 7,
+   "callees": 8,
    "callers": 0,
    "mids": 0,
    "name": "shop",

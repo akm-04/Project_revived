@@ -228,6 +228,7 @@
    "operator_tunable": "I11"
   },
   "guild_log_retention_days": 30,
+  "chapter_versions": {},
   "source": "misc.lua:1330-1436; translation.lua:2348-2349; retention and mail PRIVATE_POLICY"
  }
 }

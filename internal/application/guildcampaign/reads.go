@@ -163,7 +163,7 @@ func (m Mode) lists(c context.Context, a identity.ActorContext, op operation.Con
 			if err != nil {
 				return err
 			}
-			row := ChapterRow{ChapterID: info.ChapterID, OpenCost: info.OpenCost, ChapterVersion: 1}
+			row := ChapterRow{ChapterID: info.ChapterID, OpenCost: info.OpenCost, ChapterVersion: m.Settings.ChapterVersion(info.ChapterID)}
 			if open {
 				row.IsOpen = true
 				row.IsWin = chapter.Win

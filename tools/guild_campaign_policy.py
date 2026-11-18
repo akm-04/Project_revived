@@ -67,6 +67,14 @@ def build(archive: Path) -> dict:
         raise SystemExit('boss damage rank multiplier must be 2')
     if campaign['guild_log_retention_days'] <= 0:
         raise SystemExit('guild log retention must be positive')
+    versions = campaign.get('chapter_versions')
+    if not isinstance(versions, dict):
+        raise SystemExit('chapter_versions must be an object')
+    for chapter_id, version in versions.items():
+        if not chapter_id.isdigit() or int(chapter_id) <= 0:
+            raise SystemExit(f'chapter_versions has an invalid chapter id: {chapter_id}')
+        if type(version) is not int or version not in (1, 2):
+            raise SystemExit(f'chapter_versions[{chapter_id}] must be 1 or 2')
     return {
         'policy_id': doc['policy_id'],
         'policy_version': doc['version'],
@@ -86,6 +94,7 @@ def build(archive: Path) -> dict:
             'reset_body': notice['reset_body'],
         },
         'guild_log_retention_days': campaign['guild_log_retention_days'],
+        'chapter_versions': versions,
         'source_misc_sha256': MISC_SHA,
     }
 

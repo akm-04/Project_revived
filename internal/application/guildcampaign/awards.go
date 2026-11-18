@@ -57,6 +57,11 @@ func (m Mode) AwardRead(c context.Context, a identity.ActorContext, chapterID in
 	if chapterID <= 0 {
 		return AwardBody{}, d.ErrRefused
 	}
+	// C14: the award-apply queue serves chapter_version 1; a v2 chapter's
+	// reward button opens its team shop instead.
+	if m.Settings.ChapterVersion(chapterID) != 1 {
+		return AwardBody{}, d.ErrRefused
+	}
 	var out AwardBody
 	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
@@ -80,6 +85,9 @@ func (m Mode) ApplyReward(c context.Context, a identity.ActorContext, chapterID,
 		return AwardBody{}, ErrUnavailable
 	}
 	if chapterID <= 0 || awardID <= 0 {
+		return AwardBody{}, d.ErrRefused
+	}
+	if m.Settings.ChapterVersion(chapterID) != 1 {
 		return AwardBody{}, d.ErrRefused
 	}
 	guildID, err := m.guildOf(c, a)

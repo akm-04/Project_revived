@@ -25,6 +25,7 @@ type ShopDependencies struct {
 	Receipts     kernelstore.Store
 	ReceiptRead  kernelstore.Reader
 	Authority    rt.GameplayAuthorityPort
+	TeamShops    app.TeamShops
 	Achievements app.Achievements
 }
 
@@ -44,11 +45,12 @@ func NewShopComposition(deps ShopDependencies) ShopComposition {
 		Players:      i4store.PlayerRootLocker{},
 		Exchange:     deps.I5,
 		Debiter:      appi5.MaterialCostDebiter{Store: deps.Values, Content: deps.Content},
-		Achievements: deps.Achievements,
 		Balances:     deps.Values,
 		Privileges:   deps.Privileges,
 		Progression:  deps.Values,
 		Functions:    deps.Values,
+		TeamShops:    deps.TeamShops,
+		Achievements: deps.Achievements,
 		Receipts:     deps.Receipts,
 		ReceiptRead:  deps.ReceiptRead,
 	}

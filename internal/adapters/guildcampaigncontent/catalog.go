@@ -33,6 +33,7 @@ func Settings(policy guildcampaignpolicy.Policy, settings guildcampaigncatalog.S
 		RecordRewardBadge:     settings.FirstRewardCoin,
 		LastStrikeCoin:        policy.LastStrikeCoin,
 		MaxFightDamage:        policy.MaxFightDamage,
+		ChapterVersions:       policy.ChapterVersions,
 	}
 }
 

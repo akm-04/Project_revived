@@ -60,6 +60,15 @@ type Settings struct {
 	RecordRewardBadge     int64
 	LastStrikeCoin        int64
 	MaxFightDamage        int64
+	ChapterVersions       map[int64]int64
+}
+
+// ChapterVersion is the chapter's emitted chapter_version; an absent entry is 1.
+func (s Settings) ChapterVersion(chapterID int64) int64 {
+	if version, known := s.ChapterVersions[chapterID]; known {
+		return version
+	}
+	return 1
 }
 
 func (s Settings) InRestWindow(secondsOfDay int64) bool {

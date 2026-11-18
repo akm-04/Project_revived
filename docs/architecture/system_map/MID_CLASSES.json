@@ -1480,7 +1480,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "UNKNOWN"
     }
    ],
@@ -1488,7 +1488,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "UNKNOWN"
     }
    ],
@@ -1496,7 +1496,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "6"
     }
    ],
@@ -1510,7 +1510,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 235,
+     "line": 243,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -1562,6 +1562,11 @@
      "statement": "WITH a AS ("
     },
     {
+     "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
+     "line": 19,
+     "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -1583,12 +1588,12 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:245",
+    "UNRESOLVED body at internal/application/shop/service.go:253",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:92",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:235",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:235"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:243",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:243"
    ],
    "writes": "state"
   },
@@ -1597,7 +1602,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "read_committed"
     }
    ],
@@ -1605,18 +1610,18 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/shop/service.go:204"
+    "internal/application/shop/service.go:212"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "6"
     }
    ],
@@ -1650,7 +1655,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 164,
+     "line": 172,
      "read_only": "false",
      "retry": "6"
     }
@@ -1772,6 +1777,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
+     "line": 19,
+     "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -1819,7 +1829,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/shop/service.go:185",
+    "UNRESOLVED body at internal/application/shop/service.go:193",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:332",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
@@ -1833,7 +1843,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "read_committed"
     }
    ],
@@ -1841,17 +1851,17 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/shop/service.go:204"
+    "internal/application/shop/service.go:212"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "6"
     }
    ],
@@ -1869,7 +1879,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 164,
+     "line": 172,
      "read_only": "false",
      "retry": "6"
     }
@@ -1946,6 +1956,11 @@
      "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
+     "line": 19,
+     "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -1977,7 +1992,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:185",
+    "UNRESOLVED body at internal/application/shop/service.go:193",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:92"
@@ -2019,7 +2034,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "UNKNOWN"
     }
    ],
@@ -2027,7 +2042,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "UNKNOWN"
     }
    ],
@@ -2035,7 +2050,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "6"
     }
    ],
@@ -2046,7 +2061,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 235,
+     "line": 243,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2078,6 +2093,11 @@
      "statement": "WITH a AS ("
     },
     {
+     "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
+     "line": 19,
+     "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -2099,10 +2119,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:245",
+    "UNRESOLVED body at internal/application/shop/service.go:253",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:235",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:235"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:243",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:243"
    ],
    "writes": "UNKNOWN"
   },
@@ -2111,7 +2131,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "UNKNOWN"
     }
    ],
@@ -2119,7 +2139,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "UNKNOWN"
     }
    ],
@@ -2127,7 +2147,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 235,
+     "line": 243,
      "value": "6"
     }
    ],
@@ -2138,7 +2158,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 235,
+     "line": 243,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2191,10 +2211,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:245",
+    "UNRESOLVED body at internal/application/shop/service.go:253",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:235",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:235"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:243",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:243"
    ],
    "writes": "UNKNOWN"
   },
@@ -43239,7 +43259,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 61,
+     "line": 66,
      "value": "repeatable_read"
     }
    ],
@@ -43247,7 +43267,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 61,
+     "line": 66,
      "value": "true"
     }
    ],
@@ -43255,7 +43275,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 61,
+     "line": 66,
      "value": "1"
     }
    ],
@@ -43266,7 +43286,7 @@
      "file": "internal/application/guildcampaign/awards.go",
      "function": "Mode.AwardRead",
      "isolation": "repeatable_read",
-     "line": 61,
+     "line": 66,
      "read_only": "true",
      "retry": "1"
     }
@@ -43320,7 +43340,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 90,
+     "line": 98,
      "value": "serializable"
     }
    ],
@@ -43328,7 +43348,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 90,
+     "line": 98,
      "value": "false"
     }
    ],
@@ -43336,7 +43356,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 90,
+     "line": 98,
      "value": "3"
     }
    ],
@@ -43350,7 +43370,7 @@
      "file": "internal/application/guildcampaign/awards.go",
      "function": "Mode.ApplyReward",
      "isolation": "serializable",
-     "line": 90,
+     "line": 98,
      "read_only": "false",
      "retry": "3"
     }
@@ -44307,7 +44327,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 222,
+     "line": 230,
      "value": "repeatable_read"
     }
    ],
@@ -44315,7 +44335,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 222,
+     "line": 230,
      "value": "true"
     }
    ],
@@ -44323,7 +44343,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/awards.go",
-     "line": 222,
+     "line": 230,
      "value": "1"
     }
    ],
@@ -44334,7 +44354,7 @@
      "file": "internal/application/guildcampaign/awards.go",
      "function": "Mode.DistributeRecord",
      "isolation": "repeatable_read",
-     "line": 222,
+     "line": 230,
      "read_only": "true",
      "retry": "1"
     }
@@ -143038,7 +143058,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "read_committed"
     }
    ],
@@ -143046,18 +143066,18 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:717",
-    "internal/application/shop/service.go:204"
+    "internal/application/shop/service.go:212"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 164,
+     "line": 172,
      "value": "6"
     }
    ],
@@ -143091,7 +143111,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 164,
+     "line": 172,
      "read_only": "false",
      "retry": "6"
     }
@@ -143213,6 +143233,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
+     "line": 19,
+     "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -143260,7 +143285,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/shop/service.go:185",
+    "UNRESOLVED body at internal/application/shop/service.go:193",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:332",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",

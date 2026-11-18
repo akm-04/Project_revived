@@ -124,6 +124,7 @@ import (
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/roominvite"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
+	appshop "gxb.local/backend/v2/internal/application/shop"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
 	"gxb.local/backend/v2/internal/application/socialexchange"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
@@ -427,18 +428,6 @@ func main() {
 		Authority:   authority,
 	})
 	bootstrap.DetailContributors = append(bootstrap.DetailContributors, heroAssets.Bootstrap)
-	shopComposition := stockruntime.NewShopComposition(stockruntime.ShopDependencies{
-		Timed:        heroSvc.Timed,
-		Fresh:        pool,
-		Content:      contentDB,
-		Values:       i5db,
-		Privileges:   privileges,
-		I5:           i5svc,
-		Receipts:     receipts,
-		ReceiptRead:  kernelstore.Reader{Queryer: pool},
-		Authority:    authority,
-		Achievements: achievements,
-	})
 	realtime := apprealtime.Service{
 		Authority: authority,
 		Guilds:    guildprojection.RealtimeMembership{Queryer: pool},
@@ -493,10 +482,6 @@ func main() {
 	for _, mid := range stockruntime.ItemsEnergyMIDs {
 		mustRegister(mid, energyDispatcher)
 	}
-	shopDispatcher := stockruntime.ShopDispatcher{Authority: authority, Service: shopComposition.Service}
-	for _, mid := range stockruntime.ShopMIDs {
-		mustRegister(mid, shopDispatcher)
-	}
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
 	heroRecommend := canonicalHeroRecommend(pool, runner, contentDB, owners, publicStats)
@@ -539,6 +524,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("I9-9C Guild Campaign policy: %v", err)
 	}
+	var teamShops appshop.TeamShops
 	if fightReady {
 		campaignMode, _ := canonicalGuildCampaign(pool, runner, contentDB, guildDB, i5db, i5svc, guildcampaigncontent.Catalog{Installed: campaignCatalog.Catalog}, campaignPolicy.Policy, fight)
 		campaignMode.Metrics = txMetrics
@@ -552,6 +538,24 @@ func main() {
 			mustRegister(mid, campaignD)
 		}
 		go runReconcile(ctx, pool, appguildcampaign.Reconciler{Mode: campaignMode})
+		teamShops = campaignMode
+	}
+	shopComposition := stockruntime.NewShopComposition(stockruntime.ShopDependencies{
+		Timed:        heroSvc.Timed,
+		Fresh:        pool,
+		Content:      contentDB,
+		Values:       i5db,
+		Privileges:   privileges,
+		I5:           i5svc,
+		Receipts:     receipts,
+		ReceiptRead:  kernelstore.Reader{Queryer: pool},
+		Authority:    authority,
+		TeamShops:    teamShops,
+		Achievements: achievements,
+	})
+	shopDispatcher := stockruntime.ShopDispatcher{Authority: authority, Service: shopComposition.Service}
+	for _, mid := range stockruntime.ShopMIDs {
+		mustRegister(mid, shopDispatcher)
 	}
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements, Guilds: guildView}
 	var roomChat stockruntime.RoomChatSender

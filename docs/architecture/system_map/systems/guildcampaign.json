@@ -367,6 +367,7 @@
    "awards_registration_test.go",
    "commands_test.go",
    "notice_policy_native_test.go",
+   "settings_test.go",
    "start_choice_conformance_test.go"
   ]
  }
