@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/jackc/pgx/v5/pgconn"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	dm "gxb.local/backend/v2/internal/application/generaldm"
@@ -26,9 +27,24 @@ func one(c context.Context, t tx.Tx, sql string, args ...any) error {
 	}
 	return nil
 }
+
+// lockIntent takes the rank-381 owner key in the caller transaction. A new
+// intent has no row to lock, so the canonical key is a transaction advisory
+// lock; the unique operation UUID remains the creation fence.
+func lockIntent(c context.Context, t tx.Tx, id string) error {
+	key, e := dm.LockKey(id)
+	if e != nil {
+		return e
+	}
+	_, e = t.Exec(c, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, fmt.Sprintf("gxb.%d.%s:%s", key.DomainRank, key.OwnerKind, string(key.Identity.Raw())))
+	return e
+}
 func (Store) InsertTx(c context.Context, t tx.Tx, i dm.Intent) error {
 	if t == nil || i.Validate() != nil {
 		return dm.ErrInvalid
+	}
+	if e := lockIntent(c, t, i.ID); e != nil {
+		return e
 	}
 	raw, version, e := payload.Encode(i)
 	if e != nil {

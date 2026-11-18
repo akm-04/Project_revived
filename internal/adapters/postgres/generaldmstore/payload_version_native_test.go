@@ -5,6 +5,7 @@ package generaldmstore_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -57,6 +58,14 @@ VALUES(11,'payload-version-generaldm',NULL,false,false,false,1125003,1199999,1,n
 	if err := (generaldmstore.Store{}).InsertTx(ctx, transaction, written); err != nil {
 		t.Fatal(err)
 	}
+	ownerKey := fmt.Sprintf("gxb.%d.personal-dm.intent:%s", dm.LockRank, operationID.String())
+	var keyFree bool
+	if err := pool.Raw().QueryRow(ctx, `SELECT pg_try_advisory_xact_lock(hashtextextended($1,0))`, ownerKey).Scan(&keyFree); err != nil {
+		t.Fatal(err)
+	}
+	if keyFree {
+		t.Fatalf("rank-%d owner key %q is not held by the insert transaction", dm.LockRank, ownerKey)
+	}
 
 	var storedText string
 	var version int16
@@ -90,5 +99,14 @@ VALUES(11,'payload-version-generaldm',NULL,false,false,false,1125003,1199999,1,n
 	}
 	if !reflect.DeepEqual(found, written) {
 		t.Fatalf("Find=%#v want=%#v", found, written)
+	}
+	if err := transaction.Rollback(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err := pool.Raw().QueryRow(ctx, `SELECT pg_try_advisory_xact_lock(hashtextextended($1,0))`, ownerKey).Scan(&keyFree); err != nil {
+		t.Fatal(err)
+	}
+	if !keyFree {
+		t.Fatalf("rank-%d owner key %q was not released", dm.LockRank, ownerKey)
 	}
 }
