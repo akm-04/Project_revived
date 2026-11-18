@@ -298,6 +298,44 @@ def guarded_item_blobs():
     }
 
 
+def condition_read_blobs():
+    return {
+        "app/common/network/mid.lua": "xyd.mid.CONDITIONS = 9001\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/model/Conditions.lua": (
+            'local var_0_0 = class("Conditions")\n'
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.CONDITIONS, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\tif arg_2_1.compared == 1 then\n"
+            "\t\t\tprint(arg_2_0.compared)\n"
+            "\t\tend\n"
+            "\t\tif arg_2_1.left and arg_2_1.right then\n"
+            "\t\t\tprint(arg_2_0.left)\n"
+            "\t\tend\n"
+            "\t\tif not arg_2_1.negated then\n"
+            "\t\t\tprint(arg_2_0.negated)\n"
+            "\t\tend\n"
+            "\t\tif (arg_2_1.nested or arg_2_1.alternate) then\n"
+            "\t\t\tprint(arg_2_0.nested)\n"
+            "\t\tend\n"
+            "\tend)\n"
+            "end\n"
+        ),
+    }
+
+
+class ConditionReadTests(unittest.TestCase):
+    def test_a_field_read_only_in_a_condition_is_a_consumer(self):
+        paths = {
+            reply_consumers.path_name(entry)
+            for entry in reply_consumers.build(condition_read_blobs(), collapse=False)["mids"]["9001"]["paths"]
+        }
+        for field in ("compared", "left", "right", "negated", "nested", "alternate"):
+            self.assertIn(field, paths, field)
+
+
 class GuardResolutionTests(unittest.TestCase):
     def setUp(self):
         self.requirements = obligation_map(reply_consumers.build(guarded_item_blobs(), collapse=False))["9001"]["paths"]

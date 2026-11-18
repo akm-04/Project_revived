@@ -39,6 +39,7 @@ func (s *adventureStub) Info(_ context.Context, _ identity.ActorContext, tableID
 			"campaign_id": int64(0),
 			"members":     []any{},
 			"room_id":     int64(0),
+			"table_id":    d.EventDefense,
 		},
 	}}, s.err
 }

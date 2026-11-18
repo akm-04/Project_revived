@@ -1065,6 +1065,8 @@ class Extractor:
         )
         for kind, condition, body_start, body_end in branches:
             positive, negative = (self.reply_paths(chains, bindings, seeds) for chains in condition_paths(tokens, *condition))
+            self.scan(mid, file, function, condition[0], condition[1], bindings, via,
+                      guards | positive | negative, seeds, None)
             branch_guards = guards | (negative if kind == "else" else positive)
             branch_guards = branch_guards | value_branch
             states = frozenset() if kind == "else" else state_guards(tokens, *condition, file, function)
