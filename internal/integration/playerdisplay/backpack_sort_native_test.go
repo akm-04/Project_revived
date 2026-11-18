@@ -14,6 +14,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 func TestBackpackSortMID88PersistsProjectsAndLeavesHeroSort(t *testing.T) {
@@ -68,6 +69,7 @@ func TestBackpackSortMID88PersistsProjectsAndLeavesHeroSort(t *testing.T) {
 	if load.HTTPStatus != 200 {
 		t.Fatalf("MID81=%+v", load)
 	}
+	replyconformance.Check(t, 81, load.Body)
 	if load.Body["sort_type"] != int64(4) {
 		t.Fatalf("MID81 sort_type=%#v", load.Body["sort_type"])
 	}
