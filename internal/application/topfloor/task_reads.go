@@ -163,7 +163,7 @@ func (service Service) TaskPreFight(requestContext context.Context, actor identi
 		return domain.ErrRefused
 	}
 	display, err := service.taskDisplay(requestContext, service.Fresh, catalog, period, occupant, at)
-	if err != nil {
+	if err = taskOfferError(err, false); err != nil {
 		return err
 	}
 	rank, _, err := service.Store.TaskRankOfTx(requestContext, service.Fresh, actor.LogicalServerID, period.Rotation.Number, domain.Occupant{Player: actor.PlayerID})

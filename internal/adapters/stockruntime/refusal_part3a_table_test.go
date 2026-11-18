@@ -176,6 +176,7 @@ func TestPart3APetFailureRows(t *testing.T) {
 		{"promotion inactive", petFail(characterpet.ErrPetPromotionContentInactive), http.StatusConflict, unprovenRefusalCode, ""},
 		{"appearance inactive", petFail(characterpet.ErrPetAppearanceContentInactive), http.StatusConflict, unprovenRefusalCode, ""},
 		{"provider unavailable", petFail(characterpet.ErrPetAwakeningProviderUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
+		{"awakening provider ineligible", petFail(objective.ErrAwakeningRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"not found", petFail(characterpet.ErrPetNotFound), http.StatusConflict, unprovenRefusalCode, ""},
 		{"incubating", petFail(characterpet.ErrPetStillIncubating), http.StatusConflict, unprovenRefusalCode, ""},
 		{"not shown", petFail(characterpet.ErrPetNotShown), http.StatusConflict, unprovenRefusalCode, ""},

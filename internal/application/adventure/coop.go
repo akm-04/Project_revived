@@ -475,6 +475,12 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		}
 		_, lines := giftAwards(catalog, d.IllusionBaseGift)
 		for _, member := range room.Members() {
+			if _, err = s.Combat.SettleMemberTx(c, sc.Tx, cb.MemberSettleRequest{Locator: coopLocator(*room), AttemptID: started.Attempt.ID,
+				Member: member, SemanticReceiptID: coopMemberReceipt(started.Attempt.ID, member), At: at}); err != nil {
+				return err
+			}
+		}
+		for _, member := range room.Members() {
 			key := strconv.FormatInt(int64(member), 10)
 			state.Reports[key] = append([]byte(nil), report...)
 			if _, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: member, SourceKind: "ADVENTURE_ILLUSION",
@@ -675,6 +681,13 @@ func coopLocator(room sharedroom.Room) cd.Locator {
 
 func coopGeneration(room sharedroom.Room) string {
 	return fmt.Sprintf("ADVENTURE_ILLUSION_TEAM/%d", room.ID)
+}
+
+// coopMemberReceipt is one member's settlement receipt under the shared
+// attempt's single terminal (D24); the member is part of the key so a replayed
+// RESULT replays each member instead of colliding.
+func coopMemberReceipt(attemptID ids.UUID, member identity.PlayerID) string {
+	return fmt.Sprintf("adventure-illusion-team:%s:%d", attemptID.String(), member)
 }
 
 // coopStart is the co-op START identity: the room is the stage; the picks are

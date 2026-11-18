@@ -1,10 +1,25 @@
 package topfloor
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	domain "gxb.local/backend/v2/internal/domain/topfloor"
 )
+
+func TestTaskOfferErrorClassifiesVanishedTarget(t *testing.T) {
+	if err := taskOfferError(fmt.Errorf("display: %w", errTaskOccupantNotRanked), false); !errors.Is(err, domain.ErrOfferStale) {
+		t.Fatalf("vanished selected target must be stale: %v", err)
+	}
+	if err := taskOfferError(errTaskOccupantNotRanked, true); !errors.Is(err, errTaskOccupantNotRanked) {
+		t.Fatalf("revenge opponent keeps its own refusal: %v", err)
+	}
+	if err := taskOfferError(domain.ErrRefused, false); !errors.Is(err, domain.ErrRefused) {
+		t.Fatalf("unrelated refusal changed: %v", err)
+	}
+}
 
 func TestTaskFingerprintIsStageOnly(t *testing.T) {
 	player := identity.PlayerID(7)

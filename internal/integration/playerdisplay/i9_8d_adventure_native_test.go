@@ -484,6 +484,11 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_ILLUSION' AND source_key=$1`, state.ReportID); mails != 3 {
 		t.Fatalf("coop mail %d", mails)
 	}
+	for _, member := range []identity.ActorContext{a, b, c} {
+		if settlements := scalar(t, p, `SELECT count(*) FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2`, state.ReportID, int64(member.PlayerID)); settlements != 1 {
+			t.Fatalf("Adventure co-op member %d settlements=%d, want 1 (I8-MULTI-PARTICIPANT)", member.PlayerID, settlements)
+		}
+	}
 	notice, found, err := mode.ReadRoomNotice(ctx, fmt.Sprint(coopID))
 	if err != nil || !found {
 		t.Fatal("room notice", found, err)
