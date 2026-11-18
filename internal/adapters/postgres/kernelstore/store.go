@@ -65,11 +65,27 @@ func (Store) FindTx(ctx context.Context, q tx.Queryer, id receipt.Identity) (rec
 	if err := id.Validate(); err != nil {
 		return receipt.Receipt{}, false, err
 	}
+	return readReceipt(q.QueryRow(ctx, kernelqueries.FindOperationReceipt, id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, id.SemanticKey))
+}
+
+// FindLatestTx returns the most recently started receipt of a semantic-key
+// family; the owner decides what the prefix identifies.
+func (Store) FindLatestTx(ctx context.Context, q tx.Queryer, id receipt.LatestIdentity) (receipt.Receipt, bool, error) {
+	if q == nil {
+		return receipt.Receipt{}, false, errors.New("nil queryer")
+	}
+	if err := id.Validate(); err != nil {
+		return receipt.Receipt{}, false, err
+	}
+	return readReceipt(q.QueryRow(ctx, kernelqueries.FindLatestOperationReceipt, id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, id.SemanticKeyPrefix))
+}
+
+func readReceipt(row tx.Row) (receipt.Receipt, bool, error) {
 	var rid, operationID, ownerKind, ownerKey, domain, operation, semanticKey, class, fpHex, schema, resultPayload, policyVersion, policyRefsJSON, actor, contextID string
 	var started, recorded, retain time.Time
 	var hasRetain bool
 	var payloadVersion int16
-	err := q.QueryRow(ctx, kernelqueries.FindOperationReceipt, id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, id.SemanticKey).Scan(
+	err := row.Scan(
 		&rid, &operationID, &ownerKind, &ownerKey, &domain, &operation, &semanticKey, &class, &fpHex, &schema, &resultPayload, &started, &policyVersion, &policyRefsJSON, &actor, &contextID, &recorded, &hasRetain, &retain, &payloadVersion,
 	)
 	if err != nil {
