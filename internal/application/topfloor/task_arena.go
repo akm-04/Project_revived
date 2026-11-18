@@ -157,6 +157,16 @@ func (service Service) requireTaskDefense(requestContext context.Context, query 
 
 var errTaskOccupantNotRanked = errors.New("topfloor: task occupant is not ranked")
 
+// taskOfferError answers a vanished selected-target rank as the stock stale-offer
+// refusal, so preflight and START classify the same condition alike. A revenge
+// opponent is not an offer and keeps its own refusal.
+func taskOfferError(err error, avenge bool) error {
+	if err != nil && !avenge && errors.Is(err, errTaskOccupantNotRanked) {
+		return domain.ErrOfferStale
+	}
+	return err
+}
+
 func (service Service) taskDisplay(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, occupant domain.Occupant, at time.Time) (domain.Display, error) {
 	rank, found, err := service.Store.TaskRankOfTx(requestContext, query, period.Ladder.Server, period.Rotation.Number, occupant)
 	if err != nil {

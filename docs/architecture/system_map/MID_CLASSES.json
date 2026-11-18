@@ -26813,7 +26813,7 @@
    "isolation": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 278,
+     "line": 288,
      "value": "repeatable_read"
     },
     {
@@ -26826,7 +26826,7 @@
    "read_only": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 278,
+     "line": 288,
      "value": "false"
     },
     {
@@ -26839,7 +26839,7 @@
    "retry": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 278,
+     "line": 288,
      "value": "6"
     },
     {
@@ -26866,7 +26866,7 @@
      "file": "internal/application/topfloor/task_arena.go",
      "function": "Service.LoadTask",
      "isolation": "repeatable_read",
-     "line": 278,
+     "line": 288,
      "read_only": "false",
      "retry": "6"
     },
@@ -27053,7 +27053,7 @@
    "isolation": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 278,
+     "line": 288,
      "value": "repeatable_read"
     },
     {
@@ -27066,7 +27066,7 @@
    "read_only": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 278,
+     "line": 288,
      "value": "false"
     },
     {
@@ -27079,7 +27079,7 @@
    "retry": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 278,
+     "line": 288,
      "value": "6"
     },
     {
@@ -27106,7 +27106,7 @@
      "file": "internal/application/topfloor/task_arena.go",
      "function": "Service.LoadTask",
      "isolation": "repeatable_read",
-     "line": 278,
+     "line": 288,
      "read_only": "false",
      "retry": "6"
     },
@@ -27293,7 +27293,7 @@
    "isolation": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 325,
+     "line": 335,
      "value": "repeatable_read"
     },
     {
@@ -27306,7 +27306,7 @@
    "read_only": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 325,
+     "line": 335,
      "value": "false"
     },
     {
@@ -27319,7 +27319,7 @@
    "retry": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 325,
+     "line": 335,
      "value": "6"
     },
     {
@@ -27346,7 +27346,7 @@
      "file": "internal/application/topfloor/task_arena.go",
      "function": "Service.SaveTaskDefense",
      "isolation": "repeatable_read",
-     "line": 325,
+     "line": 335,
      "read_only": "false",
      "retry": "6"
     },
@@ -27631,12 +27631,12 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 314,
+     "line": 311,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 419,
+     "line": 416,
      "value": "repeatable_read"
     },
     {
@@ -27669,12 +27669,12 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 314,
+     "line": 311,
      "value": "false"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 419,
+     "line": 416,
      "value": "false"
     },
     {
@@ -27710,12 +27710,12 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 314,
+     "line": 311,
      "value": "6"
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 419,
+     "line": 416,
      "value": "6"
     },
     {
@@ -27797,7 +27797,7 @@
      "file": "internal/application/topfloor/task_battle.go",
      "function": "Service.settleTask",
      "isolation": "repeatable_read",
-     "line": 314,
+     "line": 311,
      "read_only": "false",
      "retry": "6"
     },
@@ -27805,7 +27805,7 @@
      "file": "internal/application/topfloor/task_battle.go",
      "function": "Service.closeTask",
      "isolation": "repeatable_read",
-     "line": 419,
+     "line": 416,
      "read_only": "false",
      "retry": "6"
     },
@@ -30373,7 +30373,7 @@
    "isolation": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 348,
+     "line": 358,
      "value": "repeatable_read"
     }
    ],
@@ -30381,7 +30381,7 @@
    "read_only": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 348,
+     "line": 358,
      "value": "true"
     }
    ],
@@ -30389,7 +30389,7 @@
    "retry": [
     {
      "file": "internal/application/topfloor/task_arena.go",
-     "line": 348,
+     "line": 358,
      "value": "1"
     }
    ],
@@ -30400,7 +30400,7 @@
      "file": "internal/application/topfloor/task_arena.go",
      "function": "Service.TaskSchedule",
      "isolation": "repeatable_read",
-     "line": 348,
+     "line": 358,
      "read_only": "true",
      "retry": "1"
     }
