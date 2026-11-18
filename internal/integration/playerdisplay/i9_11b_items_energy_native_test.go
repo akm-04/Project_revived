@@ -499,6 +499,54 @@ func TestI911BBoxScheduleAndReplay(t *testing.T) {
 	}
 }
 
+// TestI911BBoxHorcruxRefusesBeforeMutation pins stock box 50002145: every roll
+// of its gift's only drop group is a type-24 horcrux, so C11/B6 refuses the whole
+// open as 409+35028 with the input stack and stack rows unchanged, the same way
+// for the same operation seed.
+func TestI911BBoxHorcruxRefusesBeforeMutation(t *testing.T) {
+	database := pool(t)
+	a, _, catalog := i911bFixture(t, database)
+	dispatcher := itemsEnergyComposition(database, database, a).Dispatcher
+	const itemID, giftID = int64(50002145), int64(90040414)
+	plan, err := catalog.ResolveBox(itemID, giftID, 1)
+	if err != nil {
+		t.Fatalf("stock horcrux box does not resolve: %v", err)
+	}
+	if len(plan.Units) != 1 || len(plan.Units[0]) != 1 || len(plan.Units[0][0].Rolls) == 0 {
+		t.Fatalf("stock horcrux box plan %+v", plan)
+	}
+	for _, roll := range plan.Units[0][0].Rolls {
+		item, err := catalog.Item(roll.ItemID)
+		if err != nil || item.Type != 24 {
+			t.Fatalf("drop row %d is not a horcrux: %+v %v", roll.ID, item, err)
+		}
+	}
+	i911bStack(t, database, a, itemID, 1)
+	var stackRowsBefore int64
+	if err := database.QueryRow(ctx, `SELECT count(*) FROM player_item_stacks WHERE player_id=$1`, int64(a.PlayerID)).Scan(&stackRowsBefore); err != nil {
+		t.Fatal(err)
+	}
+	seed := [32]byte{0x24, 0x11, 0x05}
+	for attempt := 0; attempt < 2; attempt++ {
+		fixed := op()
+		fixed.EntropySeed = seed
+		response := dispatcher.Dispatch(ctx, i911bRequest(a, 241, map[string]any{"item_id": itemID, "gift_id": giftID, "num": int64(1)}, fixed))
+		if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(35028) || response.Body["error_msg"] != "" {
+			t.Fatalf("horcrux attempt %d status %d body %#v", attempt, response.HTTPStatus, response.Body)
+		}
+	}
+	if i911bStackQuantity(t, database, a, itemID) != 1 {
+		t.Fatalf("horcrux refusal debited the input stack: %d", i911bStackQuantity(t, database, a, itemID))
+	}
+	var stackRowsAfter int64
+	if err := database.QueryRow(ctx, `SELECT count(*) FROM player_item_stacks WHERE player_id=$1`, int64(a.PlayerID)).Scan(&stackRowsAfter); err != nil {
+		t.Fatal(err)
+	}
+	if stackRowsAfter != stackRowsBefore {
+		t.Fatalf("horcrux refusal granted stacks: %d -> %d", stackRowsBefore, stackRowsAfter)
+	}
+}
+
 func TestI911BBoxHeroDuplicateToStone(t *testing.T) {
 	database := pool(t)
 	a, rev, catalog := i911bFixture(t, database)
