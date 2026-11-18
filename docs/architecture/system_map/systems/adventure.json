@@ -306,6 +306,7 @@
    "i9_8d_adventure.json"
   ],
   "unit": [
+   "coop_test.go",
    "observer_test.go",
    "reads_test.go",
    "room_service_test.go",

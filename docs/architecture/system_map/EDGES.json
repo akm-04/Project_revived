@@ -350,6 +350,7 @@
   "clientlog": {},
   "combat": {
    "adventure": [
+    "*AttemptMembersTx",
     "*AttestSummaryTx",
     "*CloseTx",
     "*CurrentAttemptTx",
@@ -2307,6 +2308,7 @@
     "*AwardStoryPartnerTx"
    ],
    "combat": [
+    "*AttemptMembersTx",
     "*AttestSummaryTx",
     "*CloseTx",
     "*CurrentAttemptTx",
