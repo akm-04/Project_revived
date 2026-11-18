@@ -44,7 +44,8 @@ func (f Factory) New(policies policy.Set) (Context, error) {
 	if _, err = io.ReadFull(r, seed[:]); err != nil {
 		return Context{}, err
 	}
-	return Context{ID: id, StartedAt: f.Clock.Now().UTC(), EntropySeed: seed, Policies: policies}, nil
+	// Owners persist StartedAt in microsecond timestamps; the sampled instant must survive that round trip exactly.
+	return Context{ID: id, StartedAt: f.Clock.Now().UTC().Truncate(time.Microsecond), EntropySeed: seed, Policies: policies}, nil
 }
 
 // Derive returns deterministic retry-stable entropy. A domain must use a stable

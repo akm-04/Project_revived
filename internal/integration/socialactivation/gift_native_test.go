@@ -22,6 +22,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"reflect"
 	"sync"
@@ -91,6 +92,40 @@ func Test7A_SendClaimCanonicalKnownReplay(t *testing.T) {
 	}
 	t.Log("REAL_PG natural uniqueness, typed reciprocal notice, dedup order, one named scalar grant, complete known replay, no duplicate credit")
 }
+func Test7A_FactorySampledOperationRecoversCommittedGift(t *testing.T) {
+	for _, claim := range []bool{false, true} {
+		t.Run(map[bool]string{true: "claim", false: "send"}[claim], func(t *testing.T) {
+			f, s, a, b := giftFixture(t)
+			var ids []socialinbox.NoticeID
+			if claim {
+				r, e := s.Send(ctx, a, b.PlayerID, f.op())
+				if e != nil {
+					t.Fatal(e)
+				}
+				ids = r.NoticeIDs
+			}
+			op, e := (operation.Factory{Clock: clock.Fixed{T: time.Date(2026, 11, 18, 12, 0, 0, 123456789, time.UTC)}}).New(policy.Set{})
+			if e != nil {
+				t.Fatal(e)
+			}
+			first, e := s.Send(ctx, a, b.PlayerID, op)
+			if claim {
+				first, e = s.Claim(ctx, b, ids, op)
+			}
+			if e != nil {
+				t.Fatal(e)
+			}
+			again, e := s.Send(ctx, a, b.PlayerID, op)
+			if claim {
+				again, e = s.Claim(ctx, b, ids, op)
+			}
+			if e != nil || !reflect.DeepEqual(first, again) {
+				t.Fatal(again, e)
+			}
+		})
+	}
+}
+
 func Test7A_UnknownCommitNeverBlindReplay(t *testing.T) {
 	for _, send := range []bool{true, false} {
 		for _, commit := range []bool{true, false} {
