@@ -6,6 +6,7 @@ import (
 
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -73,6 +74,29 @@ func (s Service) ObserveMediumTenPullTx(c context.Context, t tx.Tx, player ident
 	}
 	return s.observePlayerTx(c, t, d.MediumTenPullID, player, revision, at, func(current d.Streak) (d.Streak, bool, error) {
 		return current.ObserveHighWater(catalog, girls, at)
+	})
+}
+
+// ObserveShopPurchaseTx is the 11C C15 port: one accepted shop purchase
+// request increments today's 100011 counter inside the shop's settling
+// transaction. Reads, refusals and receipt replays never reach it.
+func (s Service) ObserveShopPurchaseTx(c context.Context, t tx.Tx, player identity.PlayerID, revision string, at time.Time) error {
+	if t == nil || s.Store == nil || s.Content == nil || !player.Valid() || !d.RevisionValid(revision) || at.Unix() <= 0 {
+		return d.ErrUnavailable
+	}
+	catalog, e := s.Content.AchievementCatalogTx(c, t, revision)
+	if e != nil {
+		return e
+	}
+	if e = s.ensureRootTx(c, t, player, revision, at); e != nil {
+		return e
+	}
+	count, e := s.Store.IncrementDailyCountTx(c, t, player, d.GreatCustomerID, modes.Day(at))
+	if e != nil {
+		return e
+	}
+	return s.observePlayerTx(c, t, d.GreatCustomerID, player, revision, at, func(current d.Streak) (d.Streak, bool, error) {
+		return current.ObserveDailyCount(catalog, count, at)
 	})
 }
 
