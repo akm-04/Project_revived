@@ -29,7 +29,11 @@ var (
 	ErrStaleState      = errors.New("hero-assets: stale stack state")
 	ErrVipRequired     = errors.New("hero-assets: VIP skill purchase locked")
 	ErrUnsupportedItem = errors.New("hero-assets: unsupported skill-point item")
-	ErrUnavailable     = errors.New("hero-assets: content unavailable")
+	// ErrContentMissing is a permanent content gap: the pinned revision has no
+	// row for a capability the command needs, so retrying cannot succeed (D5).
+	ErrContentMissing = errors.New("hero-assets: content row missing")
+	// ErrUnavailable is a transient dependency fault only.
+	ErrUnavailable = errors.New("hero-assets: content unavailable")
 )
 
 // BuyOrdinal is today's buy count plus one. A negative stored count is treated
@@ -61,7 +65,7 @@ func CostOrdinal(ordinal, rows int64) int64 {
 func SkillBuyAllowed(catalog itemsenergy.Catalog, vipLevel int64) (bool, error) {
 	row, ok := catalog.VIP[vipLevel]
 	if !ok {
-		return false, ErrUnavailable
+		return false, ErrContentMissing
 	}
 	return row.SkillBuy != 0, nil
 }
@@ -70,7 +74,7 @@ func SkillBuyAllowed(catalog itemsenergy.Catalog, vipLevel int64) (bool, error) 
 func SkillPointBuyCost(catalog itemsenergy.Catalog, ordinal int64) (int64, error) {
 	row, ok := catalog.Refresh(CostOrdinal(ordinal, int64(len(catalog.RefreshCost))))
 	if !ok || row.BuySkillCost <= 0 {
-		return 0, ErrUnavailable
+		return 0, ErrContentMissing
 	}
 	return row.BuySkillCost, nil
 }

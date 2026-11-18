@@ -5,11 +5,13 @@ package playerdisplay_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"testing"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -19,6 +21,8 @@ import (
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/missioninputs"
+	d "gxb.local/backend/v2/internal/domain/heroassets"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
@@ -27,7 +31,15 @@ import (
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
+type i911aClock struct{ at time.Time }
+
+func (c *i911aClock) Now(context.Context) (time.Time, error) { return c.at.UTC(), nil }
+
 func i911aComposition(p *postgres.Pool, a identity.ActorContext) stockruntime.HeroAssetsComposition {
+	return i911aCompositionAt(p, a, postgres.AuthoritativeTime{Queryer: p})
+}
+
+func i911aCompositionAt(p *postgres.Pool, a identity.ActorContext, authority gen.TimeAuthority) stockruntime.HeroAssetsComposition {
 	cs := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
@@ -35,7 +47,7 @@ func i911aComposition(p *postgres.Pool, a identity.ActorContext) stockruntime.He
 	privileges := privilegeProvider(p)
 	i5svc := appi5.Service{Runner: runner, Store: values, Content: cs, Privileges: privileges, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}}
 	return stockruntime.NewHeroAssetsComposition(stockruntime.HeroAssetsDependencies{
-		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: runner},
+		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: authority}, Runner: runner},
 		Fresh:       p,
 		Content:     cs,
 		Values:      values,
@@ -82,6 +94,18 @@ func i911aSkillPoint(t *testing.T, p *postgres.Pool, a identity.ActorContext) in
 	return amount
 }
 
+func i911aSkillTime(t *testing.T, p *postgres.Pool, a identity.ActorContext) int64 {
+	t.Helper()
+	var anchor *time.Time
+	if err := p.QueryRow(ctx, `SELECT regen_anchor_at FROM player_temporal_resources WHERE player_id=$1 AND resource_key='skill_point'`, int64(a.PlayerID)).Scan(&anchor); err != nil {
+		t.Fatal(err)
+	}
+	if anchor == nil {
+		return 0
+	}
+	return anchor.UTC().Unix()
+}
+
 func i911aSetBuySkillCounter(t *testing.T, p *postgres.Pool, a identity.ActorContext, period, used int64) {
 	t.Helper()
 	exec(t, p, `INSERT INTO daily_consumption_players(player_id,counts,updated_at)VALUES($1,jsonb_build_object('1003',jsonb_build_object('Period',$2::bigint,'Used',$3::bigint)),clock_timestamp()) ON CONFLICT(player_id) DO UPDATE SET counts=excluded.counts,updated_at=excluded.updated_at`, int64(a.PlayerID), period, used)
@@ -113,7 +137,7 @@ func i911aBody(t *testing.T, body map[string]any) string {
 func i911aExpect(t *testing.T, response httpedge.Response, status int, code int64) {
 	t.Helper()
 	if response.HTTPStatus != status {
-		t.Fatalf("status %d want %d body %#v", response.HTTPStatus, status, response.Body)
+		t.Fatalf("status %d want %d body %#v cause %v", response.HTTPStatus, status, response.Body, response.Cause)
 	}
 	if code != 0 && response.Body["error_code"] != code {
 		t.Fatalf("code %v want %d body %#v", response.Body["error_code"], code, response.Body)
@@ -209,6 +233,87 @@ func TestI9I11ANativeSkillPointBuyOrdinalResetClampAndRefusals(t *testing.T) {
 	i911aExpect(t, i911aDispatch(t, noVIPDispatcher, noVIP, 99, map[string]any{}, op()), http.StatusConflict, unproven)
 }
 
+func i911aCounterRow(t *testing.T, p *postgres.Pool, a identity.ActorContext) (string, time.Time) {
+	t.Helper()
+	var counts string
+	var updated time.Time
+	if err := p.QueryRow(ctx, `SELECT counts::text,updated_at FROM daily_consumption_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&counts, &updated); err != nil {
+		t.Fatal(err)
+	}
+	return counts, updated
+}
+
+func TestI9I11ANativeSkillPointBuyResetBoundaryAndReadDoesNotWrite(t *testing.T) {
+	database := pool(t)
+	revision := installed(t, database)
+	actor := privilegeActor(t, database, revision)
+	if _, err := privilegeService(database, database).ImportManual(ctx, authority(), importQ(actor, uuid().String(), 300), op()); err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := (contentstore.Store{Queryer: database}).DailyBuyInputsTx(ctx, database, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	costTen, err := d.SkillPointBuyCost(catalog, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	costOne, err := d.SkillPointBuyCost(catalog, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// The frozen decision times must not precede the privilege row this test
+	// just imported, so the compared boundary lies ahead of the wall clock.
+	currentDay := modes.Day(time.Now().UTC())
+	offset := int64(2)
+	for modes.DayBegins(currentDay + offset).Add(-time.Minute).Before(time.Now().UTC().Add(time.Minute)) {
+		offset++
+	}
+	boundary := modes.DayBegins(currentDay + offset)
+	clock := &i911aClock{at: boundary.Add(-time.Minute)}
+	composition := i911aCompositionAt(database, actor, clock)
+	dispatcher := composition.Dispatcher
+	i911aSetScalar(t, database, actor, "crystal", 100000)
+	i911aSetSkillPoint(t, database, actor, 10)
+	i911aSetBuySkillCounter(t, database, actor, modes.Day(clock.at), 9)
+
+	before := i911aDispatch(t, dispatcher, actor, 99, map[string]any{}, op())
+	i911aExpect(t, before, http.StatusOK, 0)
+	if before.Body["buy_skill_times"] != int64(10) || i911aScalar(t, database, actor, "crystal") != 100000-costTen {
+		t.Fatalf("04:59 reply %#v crystal %d, want ordinal 10 and cost %d", before.Body, i911aScalar(t, database, actor, "crystal"), costTen)
+	}
+	countsBeforeRead, updatedBeforeRead := i911aCounterRow(t, database, actor)
+	detailBefore := map[string]any{"17": map[string]any{}}
+	if err := composition.Bootstrap.OverlayMID1(ctx, database, actor, false, clock.at, detailBefore); err != nil {
+		t.Fatal(err)
+	}
+	if detailBefore["17"].(map[string]any)["buy_skill_times"] != int64(10) {
+		t.Fatalf("MID 17 at 04:59 projected %#v", detailBefore)
+	}
+	if counts, updated := i911aCounterRow(t, database, actor); counts != countsBeforeRead || !updated.Equal(updatedBeforeRead) {
+		t.Fatalf("MID 17 read wrote the counter row: %q %v -> %q %v", countsBeforeRead, updatedBeforeRead, counts, updated)
+	}
+
+	clock.at = boundary
+	after := i911aDispatch(t, dispatcher, actor, 99, map[string]any{}, op())
+	i911aExpect(t, after, http.StatusOK, 0)
+	if after.Body["buy_skill_times"] != int64(1) || i911aScalar(t, database, actor, "crystal") != 100000-costTen-costOne {
+		t.Fatalf("05:00 reply %#v crystal %d, want ordinal 1 and cost %d", after.Body, i911aScalar(t, database, actor, "crystal"), costOne)
+	}
+	countsAfterRead, updatedAfterRead := i911aCounterRow(t, database, actor)
+	detailAfter := map[string]any{"17": map[string]any{}}
+	if err := composition.Bootstrap.OverlayMID1(ctx, database, actor, false, clock.at, detailAfter); err != nil {
+		t.Fatal(err)
+	}
+	if detailAfter["17"].(map[string]any)["buy_skill_times"] != int64(1) {
+		t.Fatalf("MID 17 at 05:00 projected %#v", detailAfter)
+	}
+	if counts, updated := i911aCounterRow(t, database, actor); counts != countsAfterRead || !updated.Equal(updatedAfterRead) {
+		t.Fatalf("MID 17 read wrote the counter row: %q %v -> %q %v", countsAfterRead, updatedAfterRead, counts, updated)
+	}
+}
+
 func TestI9I11ANativeSkillPointItemOverCapStackAndReplay(t *testing.T) {
 	database := pool(t)
 	revision := installed(t, database)
@@ -264,7 +369,7 @@ func (r *i911aFactRecorder) ObserveTx(_ context.Context, _ tx.Tx, _ operation.Co
 	return nil
 }
 
-func i911aHeroSkillService(database *postgres.Pool, recorder appi5.FactObserver) apphero.HeroSkillLevelService {
+func i911aHeroSkillService(database *postgres.Pool, facts appi5.ObjectiveFacts) apphero.HeroSkillLevelService {
 	runner := tx.Runner{DB: database}
 	characters := characterstore.Store{Queryer: database}
 	content := contentstore.Store{Queryer: database}
@@ -277,9 +382,37 @@ func i911aHeroSkillService(database *postgres.Pool, recorder appi5.FactObserver)
 		Content: content, Players: i4store.PlayerRootLocker{}, Fence: inventory, Receipts: kernelstore.Store{},
 		Resources:           appi5.Service{Runner: runner, Store: inventory, Content: content, Privileges: privilegeProvider(database)},
 		Points:              inventory,
-		Facts:               appi5.ObjectiveFacts{Owner: appi5.Service{Store: inventory, Receipts: kernelstore.Store{}}, Open: inventory, Observer: recorder},
+		Facts:               facts,
 		DiscountBasisPoints: 10000,
 	}
+}
+
+// i911aMissionFacts is the production objective-fact port with the real I5
+// mission consumer behind it, as main_postgres wires it.
+func i911aMissionFacts(database *postgres.Pool) appi5.ObjectiveFacts {
+	characters := characterstore.Store{Queryer: database}
+	content := contentstore.Store{Queryer: database}
+	inventory := i5store.Store{Queryer: database}
+	privileges := privilegeProvider(database)
+	owner := appi5.Service{Runner: tx.Runner{DB: database}, Store: inventory, Content: content, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: database}}
+	owner.Missions = &appi5.MissionMaterializer{Store: inventory, Catalog: content, Activity: content,
+		Observations: missioninputs.Reader{Spending: inventory, Heroes: characters, Progression: inventory,
+			Campaigns: campaignstore.Store{}, Privileges: privileges, Books: bookService(database, database)}}
+	return appi5.ObjectiveFacts{Owner: owner, Open: inventory}
+}
+
+func i911aMissionProgress(t *testing.T, p *postgres.Pool, a identity.ActorContext, objectiveID int64) (int64, bool, bool) {
+	t.Helper()
+	var progress int64
+	var complete bool
+	err := p.QueryRow(ctx, `SELECT progress,completed_at IS NOT NULL FROM player_mission_instances WHERE player_id=$1 AND objective_id=$2 AND definition_revision='I9_MISSIONS_V1'`, int64(a.PlayerID), objectiveID).Scan(&progress, &complete)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return 0, false, false
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	return progress, complete, true
 }
 
 func i911aHeroService(database *postgres.Pool) apphero.Service {
@@ -290,18 +423,60 @@ func i911aHeroService(database *postgres.Pool) apphero.Service {
 		Fencer: i5store.Store{Queryer: database}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: database}}
 }
 
+func TestI9I11ANativeSkillUpgradeAdvancesMission10007(t *testing.T) {
+	database := pool(t)
+	revision := installed(t, database)
+	actor := heroSkillLevelFixture(t, database, revision, 1000000, 10, time.Now().UTC().Add(-time.Hour))
+	exec(t, database, `UPDATE player_progression SET level=10 WHERE player_id=$1`, int64(actor.PlayerID))
+	exec(t, database, `UPDATE player_heroes SET level=90 WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
+	exec(t, database, `UPDATE player_temporal_resources SET regen_anchor_at=NULL WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))
+	dispatcher := stockruntime.HeroDispatcher{Authority: playtestAuthority{actor}, Service: i911aHeroService(database), SkillLevels: i911aHeroSkillService(database, i911aMissionFacts(database))}
+	params := map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "3"}
+
+	upgradeOp := op()
+	upgrade := i911aDispatch(t, dispatcher, actor, 39, params, upgradeOp)
+	i911aExpect(t, upgrade, http.StatusOK, 0)
+	if progress, complete, exists := i911aMissionProgress(t, database, actor, 10007); !exists || progress != 3 || !complete {
+		t.Fatalf("mission 10007 after N=3: progress %d complete %v exists %v", progress, complete, exists)
+	}
+
+	replay := i911aDispatch(t, dispatcher, actor, 39, params, upgradeOp)
+	if replay.HTTPStatus != http.StatusOK {
+		t.Fatalf("R6 replay status %d body %#v", replay.HTTPStatus, replay.Body)
+	}
+	if progress, _, _ := i911aMissionProgress(t, database, actor, 10007); progress != 3 {
+		t.Fatalf("R6 replay advanced mission 10007 to %d", progress)
+	}
+
+	exec(t, database, `UPDATE player_heroes SET updated_at=clock_timestamp()+interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
+	stale := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, stale, http.StatusConflict, 40002)
+	if progress, _, _ := i911aMissionProgress(t, database, actor, 10007); progress != 3 {
+		t.Fatalf("stale refusal advanced mission 10007 to %d", progress)
+	}
+
+	exec(t, database, `UPDATE player_heroes SET raw_skill_1=150,state_version=state_version+1,updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
+	noChange := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, noChange, http.StatusConflict, unproven)
+	if progress, _, _ := i911aMissionProgress(t, database, actor, 10007); progress != 3 {
+		t.Fatalf("N=0 plan advanced mission 10007 to %d", progress)
+	}
+}
+
 func TestI9I11ANativeSkillUpgradeRefusalBodyAndFact107(t *testing.T) {
 	database := pool(t)
 	revision := installed(t, database)
 	actor := heroSkillLevelFixture(t, database, revision, 1000000, 10, time.Now().UTC().Add(-time.Hour))
 	recorder := &i911aFactRecorder{}
-	service := i911aHeroSkillService(database, recorder)
+	inventory := i5store.Store{Queryer: database}
+	facts := appi5.ObjectiveFacts{Owner: appi5.Service{Store: inventory, Receipts: kernelstore.Store{}}, Open: inventory, Observer: recorder}
+	service := i911aHeroSkillService(database, facts)
 	dispatcher := stockruntime.HeroDispatcher{Authority: playtestAuthority{actor}, Service: i911aHeroService(database), SkillLevels: service}
 	exec(t, database, `UPDATE player_temporal_resources SET regen_anchor_at=NULL WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))
 
 	exec(t, database, `UPDATE player_heroes SET updated_at=clock_timestamp()+interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
 	stale := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
-	i911aExpect(t, stale, http.StatusConflict, unproven)
+	i911aExpect(t, stale, http.StatusConflict, 40002)
 	if stale.Body["skills"] != "1|1|1|1|1|1" || stale.Body["is_success"] != int64(0) || stale.Body["skill_point"] != int64(10) || stale.Body["skill_time"] != int64(0) {
 		t.Fatalf("MID 39 refusal body %#v", stale.Body)
 	}
@@ -331,5 +506,28 @@ func TestI9I11ANativeSkillUpgradeRefusalBodyAndFact107(t *testing.T) {
 	}
 	if levels := skillRead(t, database, actor, 1).RawSkills.Levels; levels != [6]int64{3, 1, 1, 1, 1, 1} {
 		t.Fatalf("rollback kept levels %v", levels)
+	}
+	recorder.err = nil
+
+	exec(t, database, `UPDATE player_currency_balances SET amount=0 WHERE player_id=$1 AND resource_key='mana'`, int64(actor.PlayerID))
+	noMana := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, noMana, http.StatusConflict, unproven)
+	if noMana.Body["skills"] != "3|1|1|1|1|1" || noMana.Body["is_success"] != int64(0) || noMana.Body["skill_point"] != int64(8) || noMana.Body["skill_time"] != i911aSkillTime(t, database, actor) {
+		t.Fatalf("insufficient-mana refusal body %#v", noMana.Body)
+	}
+	exec(t, database, `UPDATE player_currency_balances SET amount=1000000 WHERE player_id=$1 AND resource_key='mana'`, int64(actor.PlayerID))
+	exec(t, database, `UPDATE player_temporal_resources SET stored_amount=0 WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))
+	noPoints := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, noPoints, http.StatusConflict, unproven)
+	if noPoints.Body["skills"] != "3|1|1|1|1|1" || noPoints.Body["is_success"] != int64(0) || noPoints.Body["skill_point"] != int64(0) || noPoints.Body["skill_time"] != i911aSkillTime(t, database, actor) {
+		t.Fatalf("insufficient-points refusal body %#v", noPoints.Body)
+	}
+	exec(t, database, `UPDATE player_temporal_resources SET stored_amount=10 WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))
+	exec(t, database, `UPDATE player_heroes SET raw_skill_1=150,state_version=state_version+1,updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
+	noChange := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, noChange, http.StatusConflict, unproven)
+	// 10 is the VIP0 natural cap, so the materialized regen anchor is paused (0).
+	if noChange.Body["skills"] != "150|1|1|1|1|1" || noChange.Body["is_success"] != int64(0) || noChange.Body["skill_point"] != int64(10) || noChange.Body["skill_time"] != int64(0) {
+		t.Fatalf("no-change refusal body %#v", noChange.Body)
 	}
 }

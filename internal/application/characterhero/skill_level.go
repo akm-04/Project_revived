@@ -60,6 +60,17 @@ type HeroSkillLevelChange struct {
 	Count int64 `json:"count"`
 }
 
+// HeroSkillLevelView is the committed state a MID 39 refusal reply may carry
+// (C2). Each known flag states that its owner read succeeded, so a partial read
+// never fills a field with an invented value.
+type HeroSkillLevelView struct {
+	SkillLevels      [6]int64
+	SkillLevelsKnown bool
+	SkillPoint       int64
+	SkillPointKnown  bool
+	SkillTime        int64
+}
+
 type HeroSkillLevelResult struct {
 	Schema          string                 `json:"schema"`
 	Family          string                 `json:"family"`
@@ -191,37 +202,47 @@ func (s HeroSkillLevelService) factsReady() bool {
 }
 
 // SkillLevelView reads the committed hero skills and skill-point state without
-// writing. C2 uses it to fill the four fields the stock MID 39 callback indexes
-// even on a refusal.
-func (s HeroSkillLevelService) SkillLevelView(ctx context.Context, actor identity.ActorContext, partner int64, op operation.Context) (HeroSkillLevelResult, error) {
+// writing. C2 uses it to fill the fields the stock MID 39 callback indexes even
+// on a refusal; each part is reported only when its own read succeeded, and an
+// error is returned only when neither part could be read.
+func (s HeroSkillLevelService) SkillLevelView(ctx context.Context, actor identity.ActorContext, partner int64, op operation.Context) (HeroSkillLevelView, error) {
 	if partner <= 0 || !actor.PlayerID.Valid() || s.Reads.DB == nil || s.Store == nil || s.Points == nil {
-		return HeroSkillLevelResult{}, ErrHeroSkillLevelRequest
+		return HeroSkillLevelView{}, ErrHeroSkillLevelRequest
 	}
-	var view HeroSkillLevelResult
+	var view HeroSkillLevelView
+	var heroErr error
+	var pointErr error
 	_, err := s.Reads.Run(ctx, op, profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
 		hero, err := s.Store.ReadHeroByPartnerIDTx(ctx, scope.Tx, actor.PlayerID, partner)
-		if err != nil {
-			return err
-		}
-		if hero.ValidatePersistent() != nil || hero.PartnerID != partner {
-			return ErrHeroSkillLevelRequest
+		switch {
+		case err != nil:
+			heroErr = err
+		case hero.ValidatePersistent() != nil || hero.PartnerID != partner:
+			heroErr = ErrHeroSkillLevelRequest
+		default:
+			view.SkillLevels = hero.RawSkills.Levels
+			view.SkillLevelsKnown = true
 		}
 		points, exists, err := s.Points.ReadTemporalTx(ctx, scope.Tx, actor.PlayerID, "skill_point")
-		if err != nil {
-			return err
-		}
-		if !exists {
-			return economy.ErrUnknownResource
-		}
-		view.SkillLevels = hero.RawSkills.Levels
-		view.SkillPoint = points.StoredAmount
-		if points.RegenAnchorAt != nil {
-			view.SkillTime = points.RegenAnchorAt.UTC().Unix()
+		switch {
+		case err != nil:
+			pointErr = err
+		case !exists:
+			pointErr = economy.ErrUnknownResource
+		default:
+			view.SkillPoint = points.StoredAmount
+			view.SkillPointKnown = true
+			if points.RegenAnchorAt != nil {
+				view.SkillTime = points.RegenAnchorAt.UTC().Unix()
+			}
 		}
 		return nil
 	})
 	if err != nil {
-		return HeroSkillLevelResult{}, err
+		return HeroSkillLevelView{}, err
+	}
+	if heroErr != nil && pointErr != nil {
+		return HeroSkillLevelView{}, heroErr
 	}
 	return view, nil
 }

@@ -44,8 +44,8 @@ func TestSkillPointBuyCostClampsToLastRow(t *testing.T) {
 			t.Fatalf("ordinal %d = %d, %v; want %d", tc.ordinal, got, err, tc.want)
 		}
 	}
-	if _, err := SkillPointBuyCost(itemsenergy.Catalog{}, 1); !errors.Is(err, ErrUnavailable) {
-		t.Fatalf("empty catalog did not refuse: %v", err)
+	if _, err := SkillPointBuyCost(itemsenergy.Catalog{}, 1); !errors.Is(err, ErrContentMissing) {
+		t.Fatalf("missing refresh row is not a permanent content refusal: %v", err)
 	}
 }
 
@@ -61,8 +61,8 @@ func TestSkillBuyGateFollowsVIPTable(t *testing.T) {
 			t.Fatalf("VIP %d allowed=%v err=%v", level, allowed, err)
 		}
 	}
-	if _, err := SkillBuyAllowed(catalog, 3); !errors.Is(err, ErrUnavailable) {
-		t.Fatalf("unknown VIP row did not refuse: %v", err)
+	if _, err := SkillBuyAllowed(catalog, 3); !errors.Is(err, ErrContentMissing) {
+		t.Fatalf("missing VIP row is not a permanent content refusal: %v", err)
 	}
 }
 

@@ -1,0 +1,38 @@
+{
+  "name": "i9_11_hero_skill",
+  "level": 10,
+  "heroes": [
+    10001001
+  ],
+  "grants": [
+    {
+      "Kind": "SCALAR_CURRENCY",
+      "ResourceKey": "mana",
+      "Amount": 100000
+    }
+  ],
+  "steps": [
+    "wait:5",
+    "fixture:strong_team",
+    "wait:2",
+    "relogin",
+    "wait:5",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local partner=nil for _,h in pairs(p:getHeros()) do local id=h:getHeroID() if id and id>0 then partner=id break end end if not partner then error('vc-skill-no-hero') end _G.vcPartner=partner _G.vcSkillPoint0=tonumber(p.skillPoint) if not _G.vcSkillPoint0 then error('vc-skill-point-missing') end _G.vcSkillReply=nil xyd.Backend.get():request(xyd.mid.SET_ALL_SKILL_LEVEL,{partner_id=partner,skill_colors='1',skill_counts='3'},function(e,b) _G.vcSkillReply={e=e,b=b} end,{},true,true)",
+    "wait:3",
+    "lua:if not vcSkillReply then error('vc-skill-no-reply') end if vcSkillReply.e~=xyd.error.OK then error('vc-skill-refused-'..tostring(vcSkillReply.e)) end local b=vcSkillReply.b if not b or tonumber(b.is_success)~=1 then error('vc-skill-success-'..tostring(b and b.is_success)) end local levels=xyd.splitToNumber(b.skills,'|') if levels[1]~=4 then error('vc-skill-level-'..tostring(levels[1])) end if tonumber(b.skill_point)~=vcSkillPoint0-3 then error('vc-skill-point-'..tostring(b.skill_point)) end if tonumber(b.skill_time)==nil then error('vc-skill-time-missing') end _G.vcSkillLevels=b.skills _G.vcMissionRead=nil local t=xyd.ModelManager.get():loadModel(xyd.ModelType.TASK) t:loadTaskByType(xyd.TaskType.DAILY,function(code) _G.vcMissionRead={code=code,row=t.tasks[xyd.TaskType.DAILY][10007]} end,true)",
+    "wait:5",
+    "lua:if not vcMissionRead then error('vc-mission-no-reply') end if vcMissionRead.code~=xyd.error.OK then error('vc-mission-read-'..tostring(vcMissionRead.code)) end local r=vcMissionRead.row if not r then error('vc-mission-10007-missing') end if tonumber(r.count)~=3 then error('vc-mission-count-'..tostring(r.count)) end if tonumber(r.is_complete)~=1 then error('vc-mission-complete-'..tostring(r.is_complete)) end",
+    "fixture:hero_skill_stale",
+    "wait:1",
+    "lua:_G.vcStaleReply=nil xyd.Backend.get():request(xyd.mid.SET_ALL_SKILL_LEVEL,{partner_id=vcPartner,skill_colors='1',skill_counts='1'},function(e,b) _G.vcStaleReply={e=e,b=b} end,{},true,true)",
+    "wait:3",
+    "lua:if not vcStaleReply then error('vc-stale-no-reply') end local b=vcStaleReply.b if not b then error('vc-stale-no-body') end if vcStaleReply.e==xyd.error.OK then error('vc-stale-accepted') end if tonumber(b.error_code)~=40002 then error('vc-stale-code-'..tostring(b.error_code)) end if b.skills~=vcSkillLevels then error('vc-stale-skills-'..tostring(b.skills)) end if tonumber(b.is_success)~=0 then error('vc-stale-success-'..tostring(b.is_success)) end if tonumber(b.skill_point)~=vcSkillPoint0-3 then error('vc-stale-point-'..tostring(b.skill_point)) end if tonumber(b.skill_time)==nil then error('vc-stale-time-missing') end"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    39,
+    1,
+    2736
+  ],
+  "note": "Stock player model path for MID39 SET_ALL_SKILL_LEVEL: after the declared prior progression (strong_team at player level 10, so mission 10007's level-7 gate opens), one request that commits three skill levels proves the success reply, the skill-point debit, and mission 10007 (target 3) reaching target through the real I5 mission consumer. The stale fixture then declares a hero write one hour after every client request, so the same request answers the C2 stale-time refusal 40002 with skills, is_success:0, skill_point and skill_time present; a bodyless 409 would raise a stock callback Lua error."
+}

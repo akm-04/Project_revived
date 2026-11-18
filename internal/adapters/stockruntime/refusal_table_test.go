@@ -70,7 +70,7 @@ func TestHeroSkillLevelFailureRowTable(t *testing.T) {
 	}{
 		{"invalid request", apphero.ErrHeroSkillLevelRequest, http.StatusBadRequest, 0, "invalid_hero_skill_level"},
 		{"content inactive", apphero.ErrHeroSkillLevelInactive, http.StatusConflict, unprovenRefusalCode, ""},
-		{"stale time", apphero.ErrHeroSkillLevelStaleTime, http.StatusConflict, unprovenRefusalCode, ""},
+		{"stale time", apphero.ErrHeroSkillLevelStaleTime, http.StatusConflict, staleConflictCode, ""},
 	}
 	for _, row := range cases {
 		t.Run(row.name, func(t *testing.T) {

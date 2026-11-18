@@ -65,6 +65,7 @@ var heroAssetsFailureRows = []failureRow{
 	{match: d.ErrVipRequired, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrUnsupportedItem, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrStaleState, class: failureRefusal, code: staleConflictCode},
+	{match: d.ErrContentMissing, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: d.ErrUnavailable, class: failureUnavailable},
 }

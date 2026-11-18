@@ -62,6 +62,7 @@ func TestHeroAssetsMIDsWireSuccessAndRefusal(t *testing.T) {
 	}{
 		{d.ErrVipRequired, unprovenRefusalCode},
 		{d.ErrUnsupportedItem, unprovenRefusalCode},
+		{d.ErrContentMissing, unprovenRefusalCode},
 		{d.ErrStaleState, staleConflictCode},
 		{economy.InsufficientBalance("crystal"), insufficientDiamondCode},
 	} {

@@ -1452,17 +1452,17 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 201,
+     "line": 215,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 244,
+     "line": 265,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 296,
+     "line": 317,
      "value": "serializable"
     }
    ],
@@ -1470,39 +1470,39 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 201,
+     "line": 215,
      "value": "false"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 244,
+     "line": 265,
      "value": "false"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 296,
+     "line": 317,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/skill_level.go:425",
+    "internal/application/characterhero/skill_level.go:446",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 201,
+     "line": 215,
      "value": "1"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 244,
+     "line": 265,
      "value": "1"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 296,
+     "line": 317,
      "value": "3"
     }
    ],
@@ -1523,7 +1523,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.SkillLevelView",
      "isolation": "repeatable_read",
-     "line": 201,
+     "line": 215,
      "read_only": "false",
      "retry": "1"
     },
@@ -1531,7 +1531,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "repeatable_read",
-     "line": 244,
+     "line": 265,
      "read_only": "false",
      "retry": "1"
     },
@@ -1539,7 +1539,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "serializable",
-     "line": 296,
+     "line": 317,
      "read_only": "false",
      "retry": "3"
     }
@@ -1667,7 +1667,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:316",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:337",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -2480,12 +2480,12 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 244,
+     "line": 265,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 296,
+     "line": 317,
      "value": "serializable"
     }
    ],
@@ -2493,29 +2493,29 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 244,
+     "line": 265,
      "value": "false"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 296,
+     "line": 317,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/skill_level.go:425",
+    "internal/application/characterhero/skill_level.go:446",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 244,
+     "line": 265,
      "value": "1"
     },
     {
      "file": "internal/application/characterhero/skill_level.go",
-     "line": 296,
+     "line": 317,
      "value": "3"
     }
    ],
@@ -2536,7 +2536,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "repeatable_read",
-     "line": 244,
+     "line": 265,
      "read_only": "false",
      "retry": "1"
     },
@@ -2544,7 +2544,7 @@
      "file": "internal/application/characterhero/skill_level.go",
      "function": "HeroSkillLevelService.change",
      "isolation": "serializable",
-     "line": 296,
+     "line": 317,
      "read_only": "false",
      "retry": "3"
     }
@@ -2672,7 +2672,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:316",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/skill_level.go:337",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
