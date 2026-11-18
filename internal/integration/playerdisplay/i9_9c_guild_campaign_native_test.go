@@ -283,6 +283,19 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	}
 	heroSecond := f.secondHero
 	second := f.start(t, f.second, chapterID, copyID, heroSecond)
+	// The same retry still replays as 30005 while another member holds the
+	// copy: the stored body exists and the replay writes and pays nothing.
+	thirdGoldBefore := f.balance(t, f.third, "mana")
+	heldRetry, err := f.mode.Settle(ctx, f.third, loss, f.op())
+	if err != nil || !heldRetry.Duplicate || heldRetry.Body["error_code"] != int64(30005) {
+		t.Fatalf("retry while held %+v err=%v", heldRetry, err)
+	}
+	if detail, err = f.mode.MapDetail(ctx, f.third, copyID, f.op()); err != nil || detail.CurrentIndex != 1 || detail.Waves[1][0].HP != 77 {
+		t.Fatalf("retry while held wrote the copy: %+v err=%v", detail, err)
+	}
+	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != thirdGoldBefore {
+		t.Fatalf("retry while held paid again: %d -> %d", thirdGoldBefore, goldAfter)
+	}
 	win := f.waveEnemies(t, second, 3, 5000, 0)
 	win.Formation = strconv.FormatInt(heroSecond, 10)
 	settled, err := f.mode.Settle(ctx, f.second, win, f.op())
