@@ -207,6 +207,49 @@ func TestI911CCoreShopsStoneSettlementNative(t *testing.T) {
 	}
 }
 
+// C5 in a multi-buy: a slot pays with the substitute only when what is left of
+// it after the earlier slots of the same request covers the price, as the
+// client removes each slot's currency in turn (Shop.lua:166-180).
+func TestI911CCoreShopsMultiBuyStoneFallbackNative(t *testing.T) {
+	p := pool(t)
+	revision := installed(t, p)
+	at := time.Date(2026, 11, 18, 12, 0, 0, 0, time.UTC)
+	clock := &i911cFixedClock{at: at}
+	const substitute = int64(50001427)
+	a := i911cPlayer(t, p, revision)
+	dispatcher := i911cCompositionAt(p, a, clock).Dispatcher
+	var stoneSlots []map[string]any
+	for _, item := range i911cLoad(t, dispatcher, a, 8, at, 9) {
+		if item["sell_type"] == int64(7) {
+			stoneSlots = append(stoneSlots, item)
+		}
+	}
+	if len(stoneSlots) < 2 {
+		t.Fatalf("type 8 drew %d sell_type 7 slots, want 2", len(stoneSlots))
+	}
+	first, second := stoneSlots[0], stoneSlots[1]
+	firstPrice, secondPrice := first["sell_price"].(int64), second["sell_price"].(int64)
+	stones := map[int64]int64{}
+	stones[first["stone_id"].(int64)] += firstPrice
+	stones[second["stone_id"].(int64)] += secondPrice
+	for stone, amount := range stones {
+		i911cStack(t, p, a, stone, amount)
+	}
+	covers := max(firstPrice, secondPrice)
+	i911cStack(t, p, a, substitute, covers)
+	multi := i911cDispatchAt(t, dispatcher, a, 2982, map[string]any{
+		"shop_type": int64(8),
+		"list":      []any{first["index"], second["index"]},
+		"nums":      map[string]any{},
+	}, at, 9)
+	if multi.HTTPStatus != 200 {
+		t.Fatalf("multi-buy with the substitute covering one slot: %+v", multi)
+	}
+	if got := i911cStackAmount(t, p, a, substitute); got >= covers {
+		t.Fatalf("substitute after = %d, want it spent on one slot", got)
+	}
+}
+
 // C8: the game day starts at 05:00 GMT+8 and a read rerolls only when a source
 // mark passed; crossing midnight inside the game day rerolls nothing.
 func TestI911CCoreShopsScheduleNative(t *testing.T) {

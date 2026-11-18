@@ -401,7 +401,9 @@ func (s Service) settle(c context.Context, sc gen.TimedScope, actor identity.Act
 
 // addCost adds one slot's authoritative debit. A stone price debits the
 // substitute voucher first when it covers the price, else the frozen stone
-// (C5). The pet-stone currency has no substitute (Shop.lua:168-180).
+// (C5). The pet-stone currency has no substitute (Shop.lua:168-180). Every
+// balance check counts what the earlier slots of the same request already
+// billed, as the client removes each slot's currency in turn.
 func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog, slot d.StockSlot, price int64, pid identity.PlayerID, bill *settlement) error {
 	sellType := d.SellType(slot.SellType)
 	if key, ok := sellType.ScalarKey(); ok {
@@ -411,7 +413,7 @@ func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog
 		}
 		if amount, err := s.scalarBalance(c, sc, pid, key); err != nil {
 			return err
-		} else if amount < price {
+		} else if amount-bill.scalars[key] < price {
 			return economy.InsufficientBalance(key)
 		}
 		bill.scalars[key] += price
@@ -427,7 +429,7 @@ func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog
 		if err != nil {
 			return err
 		}
-		if available >= price {
+		if available-bill.stacks[substitute] >= price {
 			bill.stacks[substitute] += price
 			return nil
 		}
@@ -443,7 +445,7 @@ func (s Service) addCost(c context.Context, sc gen.TimedScope, catalog d.Catalog
 		if err != nil {
 			return err
 		}
-		if available < price {
+		if available-bill.stacks[cube] < price {
 			return d.ErrRefused
 		}
 		bill.stacks[cube] += price
@@ -457,7 +459,7 @@ func (s Service) addStoneDebit(c context.Context, sc gen.TimedScope, pid identit
 	if err != nil {
 		return err
 	}
-	if amount < price {
+	if amount-bill.stacks[stoneID] < price {
 		return d.ErrRefused
 	}
 	bill.stacks[stoneID] += price
