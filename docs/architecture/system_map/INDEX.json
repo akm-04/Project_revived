@@ -932,7 +932,7 @@
   },
   {
    "callees": 26,
-   "callers": 15,
+   "callers": 16,
    "mids": 24,
    "name": "characterhero",
    "path": "internal/application/characterhero",
@@ -986,7 +986,7 @@
   },
   {
    "callees": 8,
-   "callers": 16,
+   "callers": 17,
    "mids": 3,
    "name": "commerceprivilege",
    "path": "internal/application/commerceprivilege",
@@ -1013,7 +1013,7 @@
   },
   {
    "callees": 1,
-   "callers": 1,
+   "callers": 2,
    "mids": 0,
    "name": "dailyconsume",
    "path": "internal/application/dailyconsume",
@@ -1021,7 +1021,7 @@
    "tables": 0
   },
   {
-   "callees": 0,
+   "callees": 1,
    "callers": 0,
    "mids": 0,
    "name": "dailyreset",
@@ -1094,7 +1094,7 @@
   },
   {
    "callees": 5,
-   "callers": 60,
+   "callers": 61,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1220,7 +1220,7 @@
   },
   {
    "callees": 13,
-   "callers": 57,
+   "callers": 58,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1253,6 +1253,15 @@
    "path": "internal/application/inscription",
    "purpose": "",
    "tables": 4
+  },
+  {
+   "callees": 8,
+   "callers": 1,
+   "mids": 0,
+   "name": "itemsenergy",
+   "path": "internal/application/itemsenergy",
+   "purpose": "settles the stock item-use, sell, energy-buy, golden-hand and exchange-code commands",
+   "tables": 0
   },
   {
    "callees": 8,

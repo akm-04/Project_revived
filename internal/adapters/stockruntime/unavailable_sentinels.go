@@ -34,6 +34,7 @@ import (
 	unavailabledomaingodstrial "gxb.local/backend/v2/internal/domain/godstrial"
 	unavailabledomainherorecommend "gxb.local/backend/v2/internal/domain/herorecommend"
 	unavailabledomainillusion "gxb.local/backend/v2/internal/domain/illusion"
+	unavailabledomainitemsenergy "gxb.local/backend/v2/internal/domain/itemsenergy"
 	unavailabledomainmarch "gxb.local/backend/v2/internal/domain/march"
 	unavailabledomainmemoir "gxb.local/backend/v2/internal/domain/memoir"
 	unavailabledomainoccult "gxb.local/backend/v2/internal/domain/occult"
@@ -84,6 +85,7 @@ var unavailableSentinels = []error{
 	unavailabledomaingodstrial.ErrUnavailable,
 	unavailabledomainherorecommend.ErrUnavailable,
 	unavailabledomainillusion.ErrUnavailable,
+	unavailabledomainitemsenergy.ErrUnavailable,
 	unavailabledomainmarch.ErrUnavailable,
 	unavailabledomainmemoir.ErrUnavailable,
 	unavailabledomainoccult.ErrUnavailable,

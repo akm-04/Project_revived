@@ -44,6 +44,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "buy_counters_test.go"
+  ]
  }
 }

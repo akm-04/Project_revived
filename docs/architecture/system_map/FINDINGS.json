@@ -8278,15 +8278,6 @@
    ]
   },
   {
-   "fact": "GOLDEN_HAND_USED",
-   "missions": [
-    101
-   ],
-   "stages": [
-    "I9-11"
-   ]
-  },
-  {
    "fact": "HERO_PROMOTED",
    "missions": [
     2
@@ -9224,6 +9215,7 @@
     "identitylifecycle",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "march",
@@ -9280,6 +9272,7 @@
     "identitylifecycle",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "march",
@@ -9336,6 +9329,7 @@
     "identitylifecycle",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "march",
@@ -9451,6 +9445,7 @@
     "i5",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "mentor",
