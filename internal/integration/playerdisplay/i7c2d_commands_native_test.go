@@ -160,6 +160,37 @@ func TestI7C2DBookComposeResearchSpeedReplayInputs(t *testing.T) {
 		t.Fatal(inp, e)
 	}
 }
+
+// A research that finished by its own deadline needs no MID 1079 before the next Learn.
+func TestA130NaturallyCompletedResearchAllowsNextLearn(t *testing.T) {
+	p := pool(t)
+	a, _, s := bookFixture(t, p)
+	bookCmd(t, s, a, app.Command{Family: app.Compose, ItemID: 130001001, Amount: 1})
+	bookCmd(t, s, a, app.Command{Family: app.Learn, SkillID: 10010001})
+	research := bookRoot(t, p, a)
+	if research.Facts.Research == nil || research.Facts.Research.Subject != 10010001 {
+		t.Fatalf("fixture research: %#v", research.Facts.Research)
+	}
+	at := research.Facts.Research.StartedAt.Add(60 * time.Second)
+	s.Timed.Binder.Time = fixedBookReadTime{at: at}
+
+	bookCmd(t, s, a, app.Command{Family: app.Learn, SkillID: 10010004})
+
+	root := bookRoot(t, p, a)
+	if root.Facts.Skills[10010001] != 1 {
+		t.Fatalf("completed skill applied %d times", root.Facts.Skills[10010001])
+	}
+	if root.Facts.RecentSkill != 0 {
+		t.Fatalf("completed research still gates Learn: %d", root.Facts.RecentSkill)
+	}
+	if root.Facts.Research == nil || root.Facts.Research.Subject != 10010004 {
+		t.Fatalf("next research not admitted: %#v", root.Facts.Research)
+	}
+	if _, e := s.Command(ctx, a, app.Command{Family: app.Learn, SkillID: 10010001}, op()); !errors.Is(e, app.ErrRejected) {
+		t.Fatalf("another skill admitted while 10010004 runs: %v", e)
+	}
+}
+
 func TestI7C2DBookPrerequisitesBuildingLadderAndRefund(t *testing.T) {
 	p := pool(t)
 	a, _, s := bookFixture(t, p)
