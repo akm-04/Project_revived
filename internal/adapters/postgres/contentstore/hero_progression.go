@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/contentqueries"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -256,6 +257,33 @@ func (Store) HeroAcquisitionByItemTx(ctx context.Context, q tx.Queryer, revision
 		return character.HeroAcquisitionTemplate{}, errors.New("content store: invalid Hero acquisition mapping")
 	}
 	return out, nil
+}
+
+// HeroScrollSXByItemTx reports the source partner is_sx flag for an
+// acquisition scroll item. The compiled Vending catalog carries the partner
+// table's is_sx; the caller-pinned revision is immutable.
+func (s Store) HeroScrollSXByItemTx(ctx context.Context, q tx.Queryer, revision string, itemID int64) (bool, error) {
+	if q == nil || len(revision) != 64 || itemID <= 0 {
+		return false, errors.New("content store: invalid Hero scroll SX lookup")
+	}
+	catalog, err := s.SummonCatalogTx(ctx, q, revision)
+	if err != nil {
+		return false, err
+	}
+	sx, found := heroScrollSX(catalog, itemID)
+	if !found {
+		return false, errors.New("content store: scroll item has no source partner")
+	}
+	return sx, nil
+}
+
+func heroScrollSX(catalog summon.Catalog, itemID int64) (sx, found bool) {
+	for _, hero := range catalog.Heroes {
+		if hero.StoneItemID == itemID {
+			return hero.SX, true
+		}
+	}
+	return false, false
 }
 
 func (Store) HeroNormalSummonTx(ctx context.Context, q tx.Queryer, revision string, tableID int64) (character.HeroNormalSummonPolicy, error) {

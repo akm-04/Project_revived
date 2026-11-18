@@ -555,7 +555,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -1363,7 +1363,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -1521,12 +1521,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -1769,22 +1769,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -2004,27 +2004,27 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 150,
+     "line": 151,
      "statement": "SELECT evolve_fragment_count,evolve_mana FROM gxb_content_hero_normal_star WHERE revision_id=$1 AND target_star=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 165,
+     "line": 166,
      "statement": "SELECT fragment_count,mana,need_hero_num,effective_client_reachable FROM gxb_content_hero_super_star WHERE revision_id=$1 AND target_star=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 179,
+     "line": 180,
      "statement": "SELECT COALESCE(jsonb_agg(prerequisite_origin_table_id ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_super_hero_prerequisites WHERE revision_id=$1 AND super_table_id=$2"
     },
     {
@@ -2353,17 +2353,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -2517,17 +2517,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 91,
+     "line": 92,
      "statement": "SELECT exp_value FROM gxb_content_hero_exp_items WHERE revision_id=$1 AND item_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
@@ -2790,32 +2790,32 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 91,
+     "line": 92,
      "statement": "SELECT exp_value FROM gxb_content_hero_exp_items WHERE revision_id=$1 AND item_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -3081,17 +3081,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -3261,12 +3261,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -3429,7 +3429,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -3555,7 +3555,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -3709,27 +3709,27 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 91,
+     "line": 92,
      "statement": "SELECT exp_value FROM gxb_content_hero_exp_items WHERE revision_id=$1 AND item_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -3868,17 +3868,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 91,
+     "line": 92,
      "statement": "SELECT exp_value FROM gxb_content_hero_exp_items WHERE revision_id=$1 AND item_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
@@ -4023,7 +4023,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 214,
+     "line": 215,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('item_id',r.item_id,'origin_table_id',r.partner_id) ORDER BY r.item_id),'[]'::jsonb)::text FROM gxb_content_resource_definitions r WHERE r.revision_id=$1 AND r.partner_id IS NOT NULL"
     },
     {
@@ -4155,7 +4155,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -4291,7 +4291,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -4447,12 +4447,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -4967,7 +4967,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -5391,7 +5391,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -5884,7 +5884,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -6211,7 +6211,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -6652,12 +6652,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -7015,12 +7015,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -7544,7 +7544,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -7787,7 +7787,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -8086,7 +8086,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -8620,7 +8620,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -8907,7 +8907,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -9194,7 +9194,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -9481,7 +9481,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -9768,7 +9768,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10055,7 +10055,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10342,7 +10342,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10629,7 +10629,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10916,7 +10916,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -11203,7 +11203,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -11541,7 +11541,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -11785,12 +11785,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -12102,12 +12102,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -12384,12 +12384,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -12666,12 +12666,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -12948,12 +12948,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -13230,12 +13230,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -13512,12 +13512,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -13794,7 +13794,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -14059,7 +14059,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -14324,12 +14324,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -14790,7 +14790,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -15384,7 +15384,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -15978,7 +15978,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -16572,7 +16572,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -17166,7 +17166,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -17760,7 +17760,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -18354,7 +18354,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -18948,7 +18948,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -19542,7 +19542,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -20136,7 +20136,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -20730,7 +20730,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -21324,7 +21324,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -21918,7 +21918,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -22512,7 +22512,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -23106,7 +23106,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -23456,7 +23456,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -24046,7 +24046,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -24527,7 +24527,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -25237,12 +25237,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -25636,12 +25636,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -26386,12 +26386,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -27956,12 +27956,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -28709,12 +28709,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -29093,12 +29093,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -29398,12 +29398,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -30165,12 +30165,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -30652,12 +30652,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -30995,12 +30995,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -31148,22 +31148,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 80,
+     "line": 81,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 179,
+     "line": 180,
      "statement": "SELECT COALESCE(jsonb_agg(prerequisite_origin_table_id ORDER BY ordinal),'[]'::jsonb)::text FROM gxb_content_super_hero_prerequisites WHERE revision_id=$1 AND super_table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 277,
+     "line": 305,
      "statement": "SELECT required_level FROM gxb_content_function_gates WHERE revision_id=$1 AND function_id=88 AND gate_kind='PURE_LEVEL' AND required_level IS NOT NULL"
     },
     {
@@ -31315,7 +31315,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -31586,12 +31586,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -31907,12 +31907,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -32264,12 +32264,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -32642,22 +32642,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -33095,12 +33095,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -33517,22 +33517,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -33943,22 +33943,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -34398,12 +34398,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -34751,7 +34751,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -34974,7 +34974,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -35472,7 +35472,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -36472,12 +36472,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -36887,7 +36887,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -39981,12 +39981,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -40737,7 +40737,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -41946,12 +41946,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -42701,7 +42701,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -42946,7 +42946,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -43176,7 +43176,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -44079,7 +44079,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -44621,17 +44621,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -45291,7 +45291,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -46030,7 +46030,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -46658,7 +46658,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -47507,7 +47507,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -47956,12 +47956,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -48300,7 +48300,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -48769,7 +48769,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -49011,7 +49011,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -49630,12 +49630,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -50327,7 +50327,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -50719,7 +50719,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -51111,7 +51111,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -51503,7 +51503,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -51895,7 +51895,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -52287,7 +52287,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -52679,7 +52679,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -53071,7 +53071,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -53463,7 +53463,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -53855,7 +53855,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -54247,7 +54247,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -54639,7 +54639,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -55031,7 +55031,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -55497,7 +55497,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -55833,7 +55833,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -56225,7 +56225,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -56617,7 +56617,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -57009,7 +57009,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -57401,7 +57401,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -57793,7 +57793,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -58185,7 +58185,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -58576,12 +58576,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -58875,7 +58875,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -59331,7 +59331,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -59669,7 +59669,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -60007,7 +60007,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -60345,7 +60345,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -60683,7 +60683,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -61021,7 +61021,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -61535,17 +61535,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -62189,17 +62189,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -62843,17 +62843,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -63497,17 +63497,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -64151,17 +64151,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -64629,7 +64629,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -64967,7 +64967,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -65305,7 +65305,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -65643,7 +65643,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -66157,17 +66157,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -66811,17 +66811,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -67465,17 +67465,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -68119,17 +68119,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -68773,17 +68773,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -69427,17 +69427,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -70081,17 +70081,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -70735,17 +70735,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -71389,17 +71389,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -72043,17 +72043,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -72697,17 +72697,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -75208,7 +75208,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -76280,12 +76280,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -76826,12 +76826,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -77229,12 +77229,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -77644,12 +77644,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -78116,12 +78116,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -79126,7 +79126,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -79448,7 +79448,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -79770,7 +79770,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -80092,7 +80092,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -80414,7 +80414,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -80736,7 +80736,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -81058,7 +81058,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -81380,7 +81380,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -82353,12 +82353,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -82693,7 +82693,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -83240,7 +83240,7 @@
    "isolation": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 177,
+     "line": 178,
      "value": "repeatable_read"
     }
    ],
@@ -83248,7 +83248,7 @@
    "read_only": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 177,
+     "line": 178,
      "value": "true"
     }
    ],
@@ -83256,7 +83256,7 @@
    "retry": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 177,
+     "line": 178,
      "value": "1"
     }
    ],
@@ -83267,7 +83267,7 @@
      "file": "internal/application/guildtea/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 177,
+     "line": 178,
      "read_only": "true",
      "retry": "1"
     }
@@ -83305,7 +83305,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/guildtea/service.go:178"
+    "UNRESOLVED body at internal/application/guildtea/service.go:179"
    ],
    "writes": "UNKNOWN"
   },
@@ -83314,7 +83314,7 @@
    "isolation": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "serializable"
     }
    ],
@@ -83322,7 +83322,7 @@
    "read_only": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "false"
     }
    ],
@@ -83330,7 +83330,7 @@
    "retry": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "3"
     }
    ],
@@ -83345,7 +83345,7 @@
      "file": "internal/application/guildtea/service.go",
      "function": "Service.command",
      "isolation": "serializable",
-     "line": 184,
+     "line": 185,
      "read_only": "false",
      "retry": "3"
     }
@@ -83353,8 +83353,18 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -83403,7 +83413,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/guildtea/service.go:188"
+    "UNRESOLVED body at internal/application/guildtea/service.go:189"
    ],
    "writes": "state"
   },
@@ -83412,7 +83422,7 @@
    "isolation": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "serializable"
     }
    ],
@@ -83420,7 +83430,7 @@
    "read_only": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "false"
     }
    ],
@@ -83432,7 +83442,7 @@
    "retry": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "3"
     }
    ],
@@ -83470,7 +83480,7 @@
      "file": "internal/application/guildtea/service.go",
      "function": "Service.command",
      "isolation": "serializable",
-     "line": 184,
+     "line": 185,
      "read_only": "false",
      "retry": "3"
     }
@@ -83503,7 +83513,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -83659,7 +83669,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/guildtea/service.go:188",
+    "UNRESOLVED body at internal/application/guildtea/service.go:189",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -83669,7 +83679,7 @@
    "isolation": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "serializable"
     }
    ],
@@ -83677,7 +83687,7 @@
    "read_only": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "false"
     }
    ],
@@ -83687,7 +83697,7 @@
    "retry": [
     {
      "file": "internal/application/guildtea/service.go",
-     "line": 184,
+     "line": 185,
      "value": "3"
     }
    ],
@@ -83717,7 +83727,7 @@
      "file": "internal/application/guildtea/service.go",
      "function": "Service.command",
      "isolation": "serializable",
-     "line": 184,
+     "line": 185,
      "read_only": "false",
      "retry": "3"
     }
@@ -83740,7 +83750,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -83871,7 +83881,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/guildtea/service.go:188",
+    "UNRESOLVED body at internal/application/guildtea/service.go:189",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -84071,12 +84081,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -84595,12 +84605,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -85074,12 +85084,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -85418,12 +85428,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -86239,12 +86249,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -86822,12 +86832,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -87828,17 +87838,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -88651,7 +88661,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -88876,7 +88886,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -89633,7 +89643,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -89757,7 +89767,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -89855,7 +89865,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -90092,7 +90102,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -90591,7 +90601,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -90980,7 +90990,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -91369,7 +91379,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -91758,7 +91768,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -92147,7 +92157,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -92536,7 +92546,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -92925,7 +92935,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -93314,7 +93324,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -93703,7 +93713,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -94092,7 +94102,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -94481,7 +94491,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -94870,7 +94880,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -95259,7 +95269,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -95648,7 +95658,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -96037,7 +96047,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -97000,7 +97010,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -97250,12 +97260,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -97629,7 +97639,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -97880,12 +97890,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -98286,7 +98296,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -98674,17 +98684,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -99095,7 +99105,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -99296,7 +99306,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -99614,12 +99624,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -100764,12 +100774,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -101069,12 +101079,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -101498,12 +101508,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -101809,12 +101819,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -102239,17 +102249,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -102725,17 +102735,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -103268,17 +103278,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -103817,17 +103827,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -104469,17 +104479,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -105018,17 +105028,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -105567,17 +105577,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -106116,17 +106126,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -106932,7 +106942,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -107613,12 +107623,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -108328,22 +108338,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -108763,22 +108773,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -109281,17 +109291,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -109737,22 +109747,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -110161,12 +110171,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -110491,7 +110501,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -110811,22 +110821,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -111292,12 +111302,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -111897,22 +111907,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -112435,22 +112445,22 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 261,
+     "line": 289,
      "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
     },
     {
@@ -112861,12 +112871,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -114316,12 +114326,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -115206,7 +115216,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -115533,7 +115543,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -115860,7 +115870,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -116187,7 +116197,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -116532,17 +116542,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -116918,17 +116928,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -117304,17 +117314,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -117690,17 +117700,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -118128,7 +118138,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -118494,17 +118504,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -118873,17 +118883,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -119252,17 +119262,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -119631,17 +119641,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -120010,17 +120020,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -120389,17 +120399,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -120768,17 +120778,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -121147,17 +121157,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -121526,17 +121536,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -121905,17 +121915,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -122284,17 +122294,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -122663,17 +122673,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -123042,17 +123052,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -123421,17 +123431,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -123800,17 +123810,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -124485,12 +124495,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -125324,7 +125334,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -126987,17 +126997,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -127366,17 +127376,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -127745,17 +127755,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 109,
+     "line": 110,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('level',level,'total_exp',total_exp) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_hero_exp WHERE revision_id=$1 AND level <= $2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -128334,7 +128344,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -128543,12 +128553,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -128825,12 +128835,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -129558,7 +129568,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -129950,7 +129960,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -130601,17 +130611,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -131243,17 +131253,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -131885,17 +131895,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -132527,17 +132537,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -133169,17 +133179,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -133811,17 +133821,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -134453,17 +134463,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -135095,17 +135105,17 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -136034,7 +136044,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -136366,7 +136376,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -136698,7 +136708,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -137030,7 +137040,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -137362,7 +137372,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -138904,12 +138914,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -139235,7 +139245,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -139557,7 +139567,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -141500,12 +141510,12 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 44,
+     "line": 45,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 134,
+     "line": 135,
      "statement": "SELECT kind,origin_table_id,fragment_item_id,initial_star FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=$2"
     },
     {
@@ -141850,7 +141860,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -142854,7 +142864,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
@@ -144396,7 +144406,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
-     "line": 245,
+     "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
