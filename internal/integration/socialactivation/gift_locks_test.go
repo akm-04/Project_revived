@@ -104,7 +104,8 @@ func Test7A_CompleteLockPlanSameCallerTx(t *testing.T) {
 	s.Privacy = sr.FriendDMPrivacyProvider{Store: dmRelationTrace{s.Relations, w}}
 	s.Store = giftLockStore{s.Store, w}
 	s.Inbox.Store = giftLockInbox{s.Inbox.Store, w}
-	r, e := s.Send(ctx, a, b.PlayerID, f.op())
+	op := f.op()
+	r, e := s.Send(ctx, a, b.PlayerID, op)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -112,7 +113,13 @@ func Test7A_CompleteLockPlanSameCallerTx(t *testing.T) {
 	for _, k := range w.keys {
 		ranks = append(ranks, k.DomainRank)
 	}
-	if !reflect.DeepEqual(ranks, []uint16{315, 315, 360, 360, 361, 363, 370, 371, 371, 372}) {
+	wantSend := []uint16{315, 315, 360, 360, 361, 363, 370, 371, 371, 372}
+	// Between 00:00 and 05:00 GMT+8 the legacy midnight day differs from the
+	// 05:00 game day, so each absent epoch row is also looked up under it.
+	if legacyDayDiffers(t, op.StartedAt) {
+		wantSend = []uint16{315, 315, 360, 360, 361, 363, 370, 371, 371, 371, 371, 372}
+	}
+	if !reflect.DeepEqual(ranks, wantSend) {
 		t.Fatal(ranks)
 	}
 	s = f.gift()
@@ -135,4 +142,17 @@ func Test7A_CompleteLockPlanSameCallerTx(t *testing.T) {
 		t.Fatal(ranks)
 	}
 	t.Log("REAL_PG canonical315/360/361/363/370/371/372 and claim700/720 before mutation, accepted same-key scalar recheck, same callerTx, no late lower lock")
+}
+
+func legacyDayDiffers(t *testing.T, at time.Time) bool {
+	t.Helper()
+	day, e := sg.Day(at)
+	if e != nil {
+		t.Fatal(e)
+	}
+	legacy, e := sg.LegacyDay(at)
+	if e != nil {
+		t.Fatal(e)
+	}
+	return day != legacy
 }
