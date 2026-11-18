@@ -258,6 +258,9 @@ func TestI9_10TopFloorTaskStaleOffersAndRevengeNative(t *testing.T) {
 	if removedPreflight.HTTPStatus != 409 || removedPreflight.Body["error_code"] != int64(35026) {
 		t.Fatalf("removed task target preflight response: %+v", removedPreflight)
 	}
+	if scalar(t, database, `SELECT (payload->'player'->>'TicketsLeft')::bigint FROM top_floor_task_players WHERE player_id=$1 AND period_number=$2`, int64(actor.PlayerID), view.Rotation.Number) != 5 {
+		t.Fatal("stale task preflight spent a ticket")
+	}
 
 	missingSnapshotTarget := view.Enemies[1]
 	taskCommand := func(enemy d.Display, avenge bool) application.TaskStartCommand {
