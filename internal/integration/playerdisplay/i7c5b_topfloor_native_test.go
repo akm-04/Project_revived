@@ -193,6 +193,9 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	}
 	enemy := viewA.Enemies[0]
 	command := app.StartCommand{Formation: []int64{refA.PartnerID}, Enemy: enemy.Occupant.TableID()}
+	// The replay window is one minute; a loaded gate machine can take longer than that between the two STARTs.
+	authoritative := s.Timed.Binder.Time
+	s.Timed.Binder.Time = &workplaceTime{at: time.Now().UTC()}
 	fight, err := s.Start(ctx, a, command, op())
 	if err != nil {
 		t.Fatal(err)
@@ -204,6 +207,7 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	if err != nil || string(replay.Report) != string(fight.Report) || replay.Win != fight.Win {
 		t.Fatal("identical START must replay the recorded result", err)
 	}
+	s.Timed.Binder.Time = authoritative
 	rankA := scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(a.PlayerID))
 	wantRank := int64(d.RobotTeams + 1)
 	if fight.Win {
