@@ -7,8 +7,10 @@ import (
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
+	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -37,11 +39,24 @@ type fantasyCall struct {
 	revision      string
 }
 
-type settleAchievements struct{ calls []fantasyCall }
+type settleAchievements struct {
+	calls  []fantasyCall
+	events *[]string
+}
 
 func (s *settleAchievements) ObserveFantasyTx(_ context.Context, _ tx.Tx, revision string, player identity.PlayerID, campaign, day, rank, hurt int64, _ time.Time) error {
 	s.calls = append(s.calls, fantasyCall{player: player, campaign: campaign, day: day, rank: rank, hurt: hurt, revision: revision})
+	if s.events != nil {
+		*s.events = append(*s.events, "achievement")
+	}
 	return nil
+}
+
+type settleMail struct{ events *[]string }
+
+func (m settleMail) DeliverTx(context.Context, tx.Tx, appi5.SettlementMailRequest) (mail.Record, bool, error) {
+	*m.events = append(*m.events, "mail")
+	return mail.Record{}, true, nil
 }
 
 func TestSettleAttachesTheFrozenBoardPositionAndHurt(t *testing.T) {
@@ -50,8 +65,9 @@ func TestSettleAttachesTheFrozenBoardPositionAndHurt(t *testing.T) {
 		{PlayerID: 12, Hurt: 5000000, CostTime: 4},
 		{PlayerID: 21, Hurt: 4999999, CostTime: 5},
 	}
-	achievements := &settleAchievements{}
-	mode := Mode{Store: settleStore{ranks: ranks}, Guilds: settleGuilds{}, Achievements: achievements}
+	events := []string{}
+	achievements := &settleAchievements{events: &events}
+	mode := Mode{Store: settleStore{ranks: ranks}, Guilds: settleGuilds{}, Mail: settleMail{events: &events}, Achievements: achievements}
 	at := time.Unix(1700000000, 0).UTC()
 	refs, err := policy.NewSet(policy.Ref{Name: "content", Version: strings.Repeat("a", 64)})
 	if err != nil {
@@ -66,7 +82,8 @@ func TestSettleAttachesTheFrozenBoardPositionAndHurt(t *testing.T) {
 		t.Fatal(err)
 	}
 	occurrence := d.NewOccurrence(1, 100001, 5)
-	if err = mode.settle(context.Background(), gen.TimedScope{Operation: timed}, occurrence, d.Catalog{}, at); err != nil {
+	catalog := d.Catalog{PersonRewards: []d.PersonReward{{Range: 3, Coin: 10}}, RewardPercentHundredths: 20}
+	if err = mode.settle(context.Background(), gen.TimedScope{Operation: timed}, occurrence, catalog, at); err != nil {
 		t.Fatal(err)
 	}
 	if len(achievements.calls) != len(ranks) {
@@ -77,6 +94,27 @@ func TestSettleAttachesTheFrozenBoardPositionAndHurt(t *testing.T) {
 		if call.player != identity.PlayerID(want.PlayerID) || call.rank != int64(index+1) || call.hurt != want.Hurt || call.campaign != occurrence.CampaignID || call.day != occurrence.OpenDay || call.revision != strings.Repeat("a", 64) {
 			t.Fatalf("call %d = %+v, rank row %+v", index, call, want)
 		}
+	}
+	// C4 order: every rank reward mail is delivered before the achievement rows
+	// are locked and observed.
+	seenAchievement := false
+	for _, event := range events {
+		if event == "achievement" {
+			seenAchievement = true
+			continue
+		}
+		if seenAchievement {
+			t.Fatalf("mail after an achievement observation: %v", events)
+		}
+	}
+	mailEvents := 0
+	for _, event := range events {
+		if event == "mail" {
+			mailEvents++
+		}
+	}
+	if mailEvents != len(ranks) {
+		t.Fatalf("mail events %d for %d ranks: %v", mailEvents, len(ranks), events)
 	}
 }
 

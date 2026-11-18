@@ -79,8 +79,9 @@ func (Store) SaveRootTx(c context.Context, t tx.Tx, r d.Root, old int64) error {
 	return nil
 }
 
-// PutBossFactTx records one qualified Fantasy fact once. The caller learns
-// whether the row is new, so a settlement retry does no further work.
+// PutBossFactTx records one qualified Fantasy fact once; a settlement retry
+// inserts nothing. Progress is the row count, which the caller recounts and
+// observes idempotently, so it does not need the "new row" flag.
 func (Store) PutBossFactTx(c context.Context, t tx.Tx, pid identity.PlayerID, achievementID, campaignID, occurrenceDay int64, at time.Time) (bool, error) {
 	if t == nil || !pid.Valid() || achievementID != d.FantasyTopRankID && achievementID != d.FantasyDamageID || campaignID < 1 || occurrenceDay < 1 || at.Unix() <= 0 {
 		return false, d.ErrUnavailable

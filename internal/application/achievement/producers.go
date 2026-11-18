@@ -35,6 +35,9 @@ func (s Service) ObserveFantasyTx(c context.Context, t tx.Tx, revision string, p
 	if e != nil {
 		return e
 	}
+	if e = s.ensureRootTx(c, t, player, revision, at); e != nil {
+		return e
+	}
 	for _, fact := range facts {
 		if !fact.qualified {
 			continue
@@ -65,7 +68,21 @@ func (s Service) ObserveMediumTenPullTx(c context.Context, t tx.Tx, player ident
 	if e != nil {
 		return e
 	}
+	if e = s.ensureRootTx(c, t, player, revision, at); e != nil {
+		return e
+	}
 	return s.observePlayerTx(c, t, d.MediumTenPullID, player, revision, at, func(current d.Streak) (d.Streak, bool, error) {
 		return current.ObserveHighWater(catalog, girls, at)
 	})
+}
+
+// ensureRootTx gives a legacy character its achievement root at the first fact,
+// as the owned-state observation does (C4F_LEGACY_STATE_BACKFILL_V1); without it
+// observePlayerTx would drop the fact for a player who never loaded 1302.
+func (s Service) ensureRootTx(c context.Context, t tx.Tx, player identity.PlayerID, revision string, at time.Time) error {
+	_, tracked, err := s.Store.ReadRootTx(c, t, player, true)
+	if err != nil || tracked {
+		return err
+	}
+	return s.Store.InitFreshTx(c, t, player, revision, at)
 }

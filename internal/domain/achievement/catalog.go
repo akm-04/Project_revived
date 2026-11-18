@@ -33,7 +33,6 @@ const (
 const (
 	FantasyTopRankID       int64 = 100006
 	FantasyDamageID        int64 = 100007
-	GreatCustomerID        int64 = 100011
 	MediumTenPullID        int64 = 100012
 	FantasyTopRank         int64 = 3
 	FantasyDamageThreshold int64 = 5000000

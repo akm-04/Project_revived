@@ -264,12 +264,13 @@ func (s Mode) Summon(c context.Context, a identity.ActorContext, q Pull, op oper
 const (
 	mediumPullType     int64 = 2
 	mediumTenPullIndex int64 = 2
+	mediumTenPullCount int64 = 10
 )
 
 // isMediumTenPull selects only the medium paid "buy 10"; the one-pull medium,
 // free-crystal medium, tickets and SX never advance 100012.
 func isMediumTenPull(b d.Button) bool {
-	return b.Type == mediumPullType && b.Index == mediumTenPullIndex
+	return b.Type == mediumPullType && b.Index == mediumTenPullIndex && b.Family == d.MediumPaid && b.Pulls == mediumTenPullCount
 }
 
 // girlResultCount counts the result rows the girl animation plays for: a new

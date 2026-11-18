@@ -12,6 +12,8 @@ func TestOnlyTheMediumTenPullButtonAdvancesTheAchievement(t *testing.T) {
 	}
 	for _, button := range []d.Button{
 		{Type: 2, Index: 1, Family: d.MediumPaid, Pulls: 1},
+		{Type: 2, Index: 2, Family: d.MediumPaid, Pulls: 1},
+		{Type: 2, Index: 2, Family: d.Small, Pulls: 10},
 		{Type: 1, Index: 1, Family: d.Small, Pulls: 1},
 		{Type: 3, Index: 2, Family: d.MediumFree, Pulls: 10},
 		{Type: 4, Index: 1, Family: d.SX, Pulls: 1},
