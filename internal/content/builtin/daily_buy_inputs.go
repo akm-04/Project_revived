@@ -92,6 +92,8 @@ type DailyBuyVIP struct {
 	Level     int64 `json:"level"`
 	NumEnergy int64 `json:"num_energy"`
 	NumMidas  int64 `json:"num_midas"`
+	SkillBuy  int64 `json:"skill_buy"`
+	SkillMax  int64 `json:"skill_max"`
 }
 
 type DailyBuyMonthlyPrivilege struct {
@@ -103,6 +105,7 @@ type DailyBuyRefreshCost struct {
 	ID                     int64 `json:"id"`
 	BuyEnergyCost          int64 `json:"buy_energy_cost"`
 	BuyManaCost            int64 `json:"buy_mana_cost"`
+	BuySkillCost           int64 `json:"buy_skill_cost"`
 	BuyManaRatioMillionths int64 `json:"buy_mana_ratio_millionths"`
 }
 
@@ -150,13 +153,26 @@ func (c DailyBuyInputCatalog) QualifyDailyBuyInputs() error {
 		return errors.New("daily buy inputs: monthly privilege drift")
 	}
 	if c.VIP[0].Level != 0 || c.VIP[0].NumEnergy != 1 || c.VIP[0].NumMidas != 1 ||
-		c.VIP[15].Level != 15 || c.VIP[15].NumEnergy != 16 || c.VIP[15].NumMidas != 300 {
+		c.VIP[0].SkillBuy != 0 || c.VIP[0].SkillMax != 10 || c.VIP[1].SkillBuy != 0 ||
+		c.VIP[2].SkillBuy != 1 || c.VIP[2].SkillMax != 10 ||
+		c.VIP[15].Level != 15 || c.VIP[15].NumEnergy != 16 || c.VIP[15].NumMidas != 300 ||
+		c.VIP[15].SkillBuy != 1 || c.VIP[15].SkillMax != 80 {
 		return errors.New("daily buy inputs: VIP ladder drift")
 	}
 	if c.RefreshCost[0].ID != 1 || c.RefreshCost[0].BuyEnergyCost != 50 || c.RefreshCost[0].BuyManaCost != 10 ||
-		c.RefreshCost[0].BuyManaRatioMillionths != 1000000 ||
-		c.RefreshCost[len(c.RefreshCost)-1].ID != 330 {
+		c.RefreshCost[0].BuySkillCost != 10 || c.RefreshCost[0].BuyManaRatioMillionths != 1000000 ||
+		c.RefreshCost[len(c.RefreshCost)-1].ID != 330 || c.RefreshCost[len(c.RefreshCost)-1].BuySkillCost != 300 {
 		return errors.New("daily buy inputs: refresh cost ladder drift")
+	}
+	for _, level := range c.VIP {
+		if level.SkillBuy < 0 || level.SkillBuy > 1 || level.SkillMax < 0 {
+			return errors.New("daily buy inputs: VIP skill tunable out of range")
+		}
+	}
+	for _, cost := range c.RefreshCost {
+		if cost.BuySkillCost <= 0 {
+			return errors.New("daily buy inputs: refresh cost lacks buy_skill_cost")
+		}
 	}
 	if c.DailyConsume[0].ID != 1 || c.DailyConsume[0].Cost != 50 || c.DailyConsume[0].Num != 1 || c.DailyConsume[0].Value != 10 {
 		return errors.New("daily buy inputs: daily consume row drift")

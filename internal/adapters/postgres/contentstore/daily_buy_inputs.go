@@ -112,11 +112,11 @@ func dailyBuyCatalogDomain(dto builtin.DailyBuyInputCatalog, revision string) (i
 		out.Dropboxes[row.ID] = row
 	}
 	for _, vip := range dto.VIP {
-		out.VIP[vip.Level] = itemsenergy.VIPRow{Level: vip.Level, NumEnergy: vip.NumEnergy, NumMidas: vip.NumMidas}
+		out.VIP[vip.Level] = itemsenergy.VIPRow{Level: vip.Level, NumEnergy: vip.NumEnergy, NumMidas: vip.NumMidas, SkillBuy: vip.SkillBuy, SkillMax: vip.SkillMax}
 	}
 	out.Monthly = itemsenergy.MonthlyPrivilege{NumEnergy: dto.MonthlyPrivilege.NumEnergy, NumMidas: dto.MonthlyPrivilege.NumMidas}
 	for _, cost := range dto.RefreshCost {
-		out.RefreshCost[cost.ID] = itemsenergy.RefreshCost{ID: cost.ID, BuyEnergyCost: cost.BuyEnergyCost, BuyManaCost: cost.BuyManaCost, BuyManaRatioMillionths: cost.BuyManaRatioMillionths}
+		out.RefreshCost[cost.ID] = itemsenergy.RefreshCost{ID: cost.ID, BuyEnergyCost: cost.BuyEnergyCost, BuyManaCost: cost.BuyManaCost, BuySkillCost: cost.BuySkillCost, BuyManaRatioMillionths: cost.BuyManaRatioMillionths}
 	}
 	out.Misc = itemsenergy.Misc{
 		BuyEnergyNum: dto.Misc.BuyEnergyNum, EnergyMaxLimit: dto.Misc.EnergyMaxLimit,

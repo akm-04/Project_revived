@@ -570,14 +570,23 @@
       "revision_id": "e0f3fb07877d9375937058291110ca64cb6294c9263926c2900fa83155fd464e",
       "scope": "New daily_buy_input_catalog.json artifact and DAILY_BUY_INPUTS_I9_11B capability from the exact archive: all stock item rows, referenced gift rows and their dropbox groups, VIP/monthly/refresh_cost/misc/daily_consume tunables; every existing artifact byte-identical.",
       "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 74,
+      "stage": "I9-11A Hero Assets",
+      "compiler_version": "i9-11a-hero-assets",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "585dc763dc513a6416718194d8363c61e50d1c1c26d46a85fdb3e568d7a11987",
+      "scope": "daily_buy_input_catalog.json gains vip.skill_buy/skill_max and refresh_cost.buy_skill_cost from the same exact archive for the I9-11A skill-point buy and cap rules; every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
     }
   ],
   "current": {
-    "stage": "I9-11B Items and Energy",
-    "compiler_version": "i9-11b-items-energy",
+    "stage": "I9-11A Hero Assets",
+    "compiler_version": "i9-11a-hero-assets",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "e0f3fb07877d9375937058291110ca64cb6294c9263926c2900fa83155fd464e",
-    "scope": "New daily_buy_input_catalog.json artifact and DAILY_BUY_INPUTS_I9_11B capability from the exact archive: all stock item rows, referenced gift rows and their dropbox groups, VIP/monthly/refresh_cost/misc/daily_consume tunables; every existing artifact byte-identical.",
+    "revision_id": "585dc763dc513a6416718194d8363c61e50d1c1c26d46a85fdb3e568d7a11987",
+    "scope": "daily_buy_input_catalog.json gains vip.skill_buy/skill_max and refresh_cost.buy_skill_cost from the same exact archive for the I9-11A skill-point buy and cap rules; every other artifact byte-identical.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }
