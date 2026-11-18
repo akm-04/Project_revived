@@ -193,16 +193,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 120,
-   "name": "GET_COMMENT_AWARD",
-   "files": [
-    "app/windows/CommentWindow.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 144,
    "name": "LOAD_BUILDING",
    "files": [
@@ -417,17 +407,6 @@
    "stage": "I9-10"
   },
   {
-   "mid": 1304,
-   "name": "GET_OFFLINE_INFO",
-   "files": [
-    "app/model/Achievement.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 1864,
    "name": "FIRST_MAIN_TOUCH",
    "files": [
@@ -494,36 +473,6 @@
     "app/model/SelfPlayer.lua"
    ],
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 2560,
-   "name": "RED_POINT",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 2568,
-   "name": "SEND_BARRAGE_MESSAGE",
-   "files": [
-    "app/windows/ChatWindow.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 2657,
-   "name": "CV_LINK_ANSWER",
-   "files": [
-    "app/model/CvLink.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "stage": "I9-11"
   },
@@ -753,8 +702,8 @@
   "window_sender_mid_count": 140,
   "non_window_sender_mid_count": 433,
   "registration_status_counts": {
-   "inactive_fallback": 536,
-   "no_registration": 35,
+   "inactive_fallback": 540,
+   "no_registration": 31,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -1075,7 +1024,7 @@
    {
     "mid": 120,
     "name": "GET_COMMENT_AWARD",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/windows/CommentWindow.lua"
     ],
@@ -2458,7 +2407,7 @@
    {
     "mid": 1304,
     "name": "GET_OFFLINE_INFO",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/Achievement.lua"
     ],
@@ -4940,7 +4889,7 @@
    {
     "mid": 2568,
     "name": "SEND_BARRAGE_MESSAGE",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/windows/ChatWindow.lua"
     ],
@@ -5557,7 +5506,7 @@
    {
     "mid": 2657,
     "name": "CV_LINK_ANSWER",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/CvLink.lua"
     ],
@@ -8369,8 +8318,9 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 593,
+  "count": 599,
   "mids": [
+   6,
    17,
    31,
    35,
@@ -8380,6 +8330,7 @@
    80,
    84,
    85,
+   120,
    162,
    208,
    209,
@@ -8502,6 +8453,7 @@
    1298,
    1299,
    1300,
+   1304,
    1328,
    1329,
    1330,
@@ -8699,9 +8651,11 @@
    2551,
    2552,
    2553,
+   2560,
    2562,
    2566,
    2567,
+   2568,
    2569,
    2570,
    2571,
@@ -8748,6 +8702,7 @@
    2654,
    2655,
    2656,
+   2657,
    2672,
    2673,
    2674,
@@ -8971,6 +8926,11 @@
   {
    "mid": 2,
    "name": "",
+   "system": ""
+  },
+  {
+   "mid": 6,
+   "name": "LOAD_REGIONS",
    "system": ""
   },
   {

@@ -20,13 +20,13 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 196,
-   "ACTIVE": 403,
-   "INACTIVE_SUPERSEDED": 76,
-   "LATER": 496,
+   "ACTIVE": 397,
+   "INACTIVE_SUPERSEDED": 81,
+   "LATER": 497,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
-   "I9-11": 54,
+   "I9-11": 48,
    "I9-10": 118,
    "I9-3": 17,
    "I9-4": 7,
@@ -79,10 +79,11 @@
    "mid": 6,
    "name": "LOAD_REGIONS",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11F C2: no sender; region directory is MID 18"
   },
   {
    "mid": 7,
@@ -732,10 +733,11 @@
    "mid": 120,
    "name": "GET_COMMENT_AWARD",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 V2 11F C3: iOS app-store review window, client defaults closed"
   },
   {
    "mid": 121,
@@ -4380,10 +4382,11 @@
    "mid": 1304,
    "name": "GET_OFFLINE_INFO",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 V2 11F C4: no standalone caller; served as the MID 1 detail by achievement"
   },
   {
    "mid": 1312,
@@ -7978,10 +7981,11 @@
    "mid": 2560,
    "name": "RED_POINT",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "DISPATCHER_METHOD"
+   "v1": "DISPATCHER_METHOD",
+   "note": "I9-11 V2 11F C5: no standalone sender; served as the MID 1 detail by I5 missions"
   },
   {
    "mid": 2561,
@@ -8050,10 +8054,11 @@
    "mid": 2568,
    "name": "SEND_BARRAGE_MESSAGE",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11F C6: current client never sends barrage"
   },
   {
    "mid": 2569,
@@ -8500,10 +8505,11 @@
    "mid": 2657,
    "name": "CV_LINK_ANSWER",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "target": "I9-11",
+   "disposition": "LATER",
+   "target": "I10",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11F C7: needs dated activity 1170 provider"
   },
   {
    "mid": 2672,
