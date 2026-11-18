@@ -370,8 +370,8 @@ func (s Mode) roomChange(c context.Context, a identity.ActorContext, op operatio
 	return body, nil
 }
 
-// Prepare answers 2371: the campaign's event fires once, and an auto pass
-// clears the campaign without a fight.
+// Prepare answers 2371: the campaign's prepare event fires once, and an auto
+// pass clears the campaign without a fight. Clear-result events wait for 2372.
 func (s Mode) Prepare(c context.Context, a identity.ActorContext, campaignID, subID int64, op operation.Context) (map[string]any, error) {
 	return s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		campaign, err := reachableCampaign(view, campaignID)
@@ -393,15 +393,14 @@ func (s Mode) Prepare(c context.Context, a identity.ActorContext, campaignID, su
 	})
 }
 
-// fireCampaignEvent applies the campaign's event once, logs it, and reports
-// whether the campaign passes without a fight.
+// fireCampaignEvent applies the campaign's prepare event once, logs it, and
+// reports whether the campaign passes without a fight.
 func (s Mode) fireCampaignEvent(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign) (bool, error) {
 	outcomes := view.state.TriggerEvent(view.catalog, campaign)
 	if len(outcomes) == 0 {
 		return false, nil
 	}
-	view.state.RecordEvents(outcomes)
-	if err := s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, eventLogType, a.PlayerID, mustJSON(logEntry(view.at, eventLogType, campaign.ID, a.PlayerID)), view.at); err != nil {
+	if err := s.recordEventOutcomes(c, sc, a, view, campaign.ID, outcomes); err != nil {
 		return false, err
 	}
 	autoPass := false
@@ -409,6 +408,32 @@ func (s Mode) fireCampaignEvent(c context.Context, sc gen.TimedScope, a identity
 		autoPass = autoPass || outcome.Type == d.EventAutoPass
 	}
 	return autoPass, nil
+}
+
+// applyClearEvents consumes the campaign's clear-result event with the accepted
+// final result.
+func (s Mode) applyClearEvents(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign, finalTeam []d.CampaignHero) error {
+	outcomes := view.state.ClearEvents(view.catalog, campaign, finalTeam)
+	if len(outcomes) == 0 {
+		return nil
+	}
+	return s.recordEventOutcomes(c, sc, a, view, campaign.ID, outcomes)
+}
+
+// recordEventOutcomes keeps the event for the room's EVENT push and in the
+// affair log.
+func (s Mode) recordEventOutcomes(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaignID int64, outcomes []d.EventOutcome) error {
+	view.state.RecordEvents(outcomes)
+	return s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, eventLogType, a.PlayerID, mustJSON(logEntry(view.at, eventLogType, campaignID, a.PlayerID)), view.at)
+}
+
+// soloCampaignHeroes is the frozen formation of one accepted solo result.
+func soloCampaignHeroes(playerID int64, formation []int64) []d.CampaignHero {
+	heroes := make([]d.CampaignHero, 0, len(formation))
+	for _, heroID := range formation {
+		heroes = append(heroes, d.CampaignHero{PlayerID: playerID, HeroID: heroID})
+	}
+	return heroes
 }
 
 // StartFight answers 2379: the stage is held by the player. A player holds one
@@ -495,11 +520,16 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		if err != nil {
 			return nil, err
 		}
+		finalTeam := soloCampaignHeroes(int64(a.PlayerID), request.Formation)
+		view.state.RecordCampaignHeroes(campaign.ID, finalTeam)
 		if err = s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, battleLogType, a.PlayerID, mustJSON(logEntry(view.at, battleLogType, campaign.ID, a.PlayerID)), view.at); err != nil {
 			return nil, err
 		}
 		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeSingleFight, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
 		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeFightStatus, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
+		if err = s.applyClearEvents(c, sc, a, view, campaign, finalTeam); err != nil {
+			return nil, err
+		}
 		baseScore := view.state.ChapterScore(view.catalog, int64(a.PlayerID), view.at.Unix(), 0)
 		view.state.Points = baseScore + view.state.ExtraPoints
 		body := map[string]any{"award_info": map[string]any{"awards": []map[string]any{}}}
