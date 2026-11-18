@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/itemsenergy"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"gxb.local/backend/v2/internal/protocol/wire"
@@ -134,6 +135,27 @@ func TestItemsEnergyDispatcherRoutesEveryMID(t *testing.T) {
 	response = dispatcher.Dispatch(context.Background(), itemsEnergyRequest(28, map[string]any{}, now))
 	if response.HTTPStatus != 200 || response.Body["buy_times"] == nil {
 		t.Fatalf("MID 28 fallback failed: %+v", response)
+	}
+}
+
+func TestItemsEnergyDecoratedReplyCarriesEconomy(t *testing.T) {
+	now := time.Now().UTC()
+	fake := newItemsEnergyFake()
+	fake.body = map[string]any{"energy": int64(220), "buy_energy_times": int64(1)}
+	dispatcher := ItemsEnergyDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: fake}
+	next := httpedge.DispatcherFunc(func(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
+		changes.Balance(ctx, "energy", 220)
+		return dispatcher.Dispatch(ctx, req)
+	})
+	response := Decorated{Next: next}.Dispatch(context.Background(), itemsEnergyRequest(97, map[string]any{}, now))
+	economy, _ := response.Body["economy_"].(map[string]any)
+	if economy["energy"] != int64(220) {
+		t.Fatalf("decorated economy_ %#v", response.Body)
+	}
+	fake.err = d.ErrRefused
+	refusal := Decorated{Next: next}.Dispatch(context.Background(), itemsEnergyRequest(97, map[string]any{}, now))
+	if refusal.HTTPStatus != 409 || refusal.Body["economy_"] != nil {
+		t.Fatalf("refusal was decorated: %+v", refusal)
 	}
 }
 
