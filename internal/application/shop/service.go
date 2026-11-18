@@ -219,8 +219,13 @@ func (s Service) run(c context.Context, a identity.ActorContext, op operation.Co
 	if !a.PlayerID.Valid() {
 		return nil, d.ErrInvalid
 	}
+	// C1-3: a handler that writes nothing runs one REPEATABLE READ READ ONLY snapshot.
+	isolation := tx.ReadCommitted
+	if readOnly {
+		isolation = tx.RepeatableRead
+	}
 	var out map[string]any
-	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.ReadCommitted, ReadOnly: readOnly}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: isolation, ReadOnly: readOnly}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
 		if !readOnly {
 			if err := s.begin(c, sc, a); err != nil {
 				return err

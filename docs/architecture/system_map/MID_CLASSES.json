@@ -1422,15 +1422,15 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
-     "value": "read_committed"
+     "line": 228,
+     "value": "UNKNOWN"
     }
    ],
    "mid": 32,
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
+     "line": 228,
      "value": "UNKNOWN"
     }
    ],
@@ -1438,7 +1438,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
+     "line": 228,
      "value": "6"
     }
    ],
@@ -1451,8 +1451,8 @@
     {
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
-     "isolation": "read_committed",
-     "line": 223,
+     "isolation": "UNKNOWN",
+     "line": 228,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -1525,11 +1525,12 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:233",
+    "UNRESOLVED body at internal/application/shop/service.go:238",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:85",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:97",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:223"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:228",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:228"
    ],
    "writes": "state"
   },
@@ -1940,15 +1941,15 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
-     "value": "read_committed"
+     "line": 228,
+     "value": "UNKNOWN"
     }
    ],
    "mid": 37,
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
+     "line": 228,
      "value": "UNKNOWN"
     }
    ],
@@ -1956,7 +1957,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
+     "line": 228,
      "value": "6"
     }
    ],
@@ -1966,8 +1967,8 @@
     {
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
-     "isolation": "read_committed",
-     "line": 223,
+     "isolation": "UNKNOWN",
+     "line": 228,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2020,9 +2021,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:233",
+    "UNRESOLVED body at internal/application/shop/service.go:238",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:223"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:228",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:228"
    ],
    "writes": "UNKNOWN"
   },
@@ -2031,15 +2033,15 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
-     "value": "read_committed"
+     "line": 228,
+     "value": "UNKNOWN"
     }
    ],
    "mid": 38,
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
+     "line": 228,
      "value": "UNKNOWN"
     }
    ],
@@ -2047,7 +2049,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 223,
+     "line": 228,
      "value": "6"
     }
    ],
@@ -2057,8 +2059,8 @@
     {
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
-     "isolation": "read_committed",
-     "line": 223,
+     "isolation": "UNKNOWN",
+     "line": 228,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2111,9 +2113,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:233",
+    "UNRESOLVED body at internal/application/shop/service.go:238",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:223"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:228",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:228"
    ],
    "writes": "UNKNOWN"
   },
