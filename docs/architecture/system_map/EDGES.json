@@ -500,6 +500,9 @@
    "guildrental": [
     "*SnapshotTx"
    ],
+   "heroassets": [
+    "*SnapshotTx"
+   ],
    "i5": [
     "*SnapshotTx"
    ],
@@ -576,6 +579,11 @@
     "*BuyTrialTx",
     "*ReadTx",
     "Pipe"
+   ],
+   "heroassets": [
+    "*AdvanceBuyTx",
+    "*LockBuyTx",
+    "*ReadBuyTx"
    ],
    "itemsenergy": [
     "*AdvanceBuyTx",
@@ -763,6 +771,11 @@
    ],
    "guildtea": [
     "NewTimedOperation"
+   ],
+   "heroassets": [
+    "DecisionAt",
+    "Operation",
+    "Run"
    ],
    "heroevolution": [
     "Bind",
@@ -1020,6 +1033,7 @@
   },
   "guildtea": {},
   "guildview": {},
+  "heroassets": {},
   "heroevolution": {
    "publicstats": [
     "*CoherentHeroInputsTx"
@@ -1132,13 +1146,16 @@
     "*PrepareHeroSkillLevelCostTx",
     "*PrepareMaterialExchangeTx",
     "*PrepareStrictRestorationTx",
+    "*ReadTemporalTx",
     "Blood",
     "Complete",
     "ItemID",
     "Mana",
     "PlanPromotionRestoration",
     "PlayerLevel",
+    "PrepareTx",
     "PreparedStackItemIDs",
+    "RecordTx",
     "StackQuantity",
     "Validate"
    ],
@@ -1308,6 +1325,15 @@
     "*RecordTx",
     "*SettleGrantTx",
     "DefaultProfile"
+   ],
+   "heroassets": [
+    "*ApplyItemsEnergyExchangeTx",
+    "*FenceActorTx",
+    "*PrepareItemsEnergyExchangeTx",
+    "*ReadScalarTx",
+    "*ReadStackTx",
+    "*ReadTemporalTx",
+    "*SnapshotTx"
    ],
    "heroevolution": [
     "*ApplyMaterialDebitTx",
@@ -2761,13 +2787,16 @@
     "*PrepareHeroSkillLevelCostTx",
     "*PrepareMaterialExchangeTx",
     "*PrepareStrictRestorationTx",
+    "*ReadTemporalTx",
     "Blood",
     "Complete",
     "ItemID",
     "Mana",
     "PlanPromotionRestoration",
     "PlayerLevel",
+    "PrepareTx",
     "PreparedStackItemIDs",
+    "RecordTx",
     "StackQuantity",
     "Validate"
    ],
@@ -2820,6 +2849,7 @@
    ],
    "interface:characterhero.HeroSkillLevelStore": [
     "*LockHeroByPartnerIDTx",
+    "*ReadHeroByPartnerIDTx",
     "*SaveHeroSkillLevelsTx"
    ],
    "interface:characterhero.ProgressionStore": [
@@ -4120,6 +4150,41 @@
    ],
    "store:i4store": [
     "*Profile"
+   ]
+  },
+  "heroassets": {
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "dailyconsume": [
+    "*AdvanceBuyTx",
+    "*LockBuyTx",
+    "*ReadBuyTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyItemsEnergyExchangeTx",
+    "*FenceActorTx",
+    "*PrepareItemsEnergyExchangeTx",
+    "*ReadScalarTx",
+    "*ReadStackTx",
+    "*ReadTemporalTx",
+    "*SnapshotTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*DailyBuyInputsTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "heroevolution": {
@@ -6150,6 +6215,7 @@
    "cmd/gxb-api/main_postgres.go"
   ],
   "guildview": [],
+  "heroassets": [],
   "heroevolution": [
    "cmd/gxb-api/main_postgres.go"
   ],

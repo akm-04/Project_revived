@@ -465,6 +465,8 @@ func (run run) step(virtual *client.Client, step string) error {
 			return provision.GuildJoinSeedFixture(context.Background(), run.databaseURL, run.account)
 		case "mentor_terminate_ready":
 			return provision.MentorTerminateReadyFixture(context.Background(), run.databaseURL, run.account)
+		case "hero_skill_stale":
+			return provision.HeroSkillStaleFixture(context.Background(), run.databaseURL, run.account)
 		}
 		return fmt.Errorf("unknown fixture %q", argument)
 	case "wait":

@@ -88,6 +88,8 @@ type VIPRow struct {
 	Level     int64
 	NumEnergy int64
 	NumMidas  int64
+	SkillBuy  int64
+	SkillMax  int64
 }
 
 type MonthlyPrivilege struct {
@@ -99,6 +101,7 @@ type RefreshCost struct {
 	ID                     int64
 	BuyEnergyCost          int64
 	BuyManaCost            int64
+	BuySkillCost           int64
 	BuyManaRatioMillionths int64
 }
 

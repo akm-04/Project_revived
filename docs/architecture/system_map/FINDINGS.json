@@ -100,32 +100,12 @@
    "stage": "I9-11"
   },
   {
-   "mid": 90,
-   "name": "USE_SKILL_POINT_ITEM",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 91,
    "name": "OPEN_ACT_ITEM",
    "files": [
     "app/model/SelfPlayer.lua"
    ],
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 99,
-   "name": "BUY_SKILL_POINT",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "stage": "I9-11"
   },
@@ -622,12 +602,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 566,
+  "count": 564,
   "window_sender_mid_count": 139,
-  "non_window_sender_mid_count": 427,
+  "non_window_sender_mid_count": 425,
   "registration_status_counts": {
    "inactive_fallback": 540,
-   "no_registration": 24,
+   "no_registration": 22,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -829,34 +809,8 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 90,
-    "name": "USE_SKILL_POINT_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 91,
     "name": "OPEN_ACT_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 99,
-    "name": "BUY_SKILL_POINT",
     "registration_status": "no_registration",
     "senders": [
      "app/model/SelfPlayer.lua"
@@ -8114,15 +8068,6 @@
    ]
   },
   {
-   "fact": "HERO_SKILL_UPGRADED",
-   "missions": [
-    107
-   ],
-   "stages": [
-    "I9-11"
-   ]
-  },
-  {
    "fact": "PET_FED",
    "missions": [
     121
@@ -8961,7 +8906,7 @@
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-   "line": 383,
+   "line": 384,
    "code": 30001,
    "kind": "stock_code"
   },
@@ -9037,6 +8982,7 @@
     "guildcore",
     "guildrental",
     "guildtea",
+    "heroassets",
     "heroevolution",
     "i5",
     "identitylifecycle",
@@ -9094,6 +9040,7 @@
     "guildcore",
     "guildrental",
     "guildtea",
+    "heroassets",
     "heroevolution",
     "i5",
     "identitylifecycle",
@@ -9151,6 +9098,7 @@
     "guildcore",
     "guildrental",
     "guildtea",
+    "heroassets",
     "heroevolution",
     "i5",
     "identitylifecycle",
@@ -9268,6 +9216,7 @@
     "guildinvitetarget",
     "guildrental",
     "guildtea",
+    "heroassets",
     "heroevolution",
     "i5",
     "illusion",

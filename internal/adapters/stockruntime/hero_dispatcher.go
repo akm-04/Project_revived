@@ -64,6 +64,7 @@ type HeroSkillChoicePort interface {
 type HeroSkillLevelPort interface {
 	SetSkillLevel(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.HeroSkillLevelResult, error)
 	SetAllSkillLevels(context.Context, identity.ActorContext, int64, []apphero.HeroSkillLevelChange, operation.Context) (apphero.HeroSkillLevelResult, error)
+	SkillLevelView(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroSkillLevelView, error)
 }
 type HeroRosterBodyPort interface {
 	Read(context.Context, identity.ActorContext, operation.Context, uint16, int64) (map[string]any, error)
@@ -129,7 +130,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		result, err := d.SkillLevels.SetAllSkillLevels(ctx, actor, partner, changes, req.Envelope.Operation)
 		if err != nil {
-			return failHeroSkillLevel(err)
+			return d.skillLevelRefusalBody(ctx, actor, partner, req.Envelope.Operation, failHeroSkillLevel(err))
 		}
 		body := map[string]any{"skills": result.SkillString(), "is_success": result.SuccessValue(), "skill_point": result.SkillPoint, "skill_time": result.SkillTime}
 		if !result.Success {
@@ -736,7 +737,7 @@ var heroFailureRows = []failureRow{
 var heroSkillLevelFailureRows = []failureRow{
 	{match: apphero.ErrHeroSkillLevelRequest, class: failureMalformed, detail: "invalid_hero_skill_level"},
 	{match: apphero.ErrHeroSkillLevelInactive, class: failureRefusal, code: unprovenRefusalCode},
-	{match: apphero.ErrHeroSkillLevelStaleTime, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroSkillLevelStaleTime, class: failureRefusal, code: staleConflictCode},
 }
 
 func failHeroSkillLevel(err error) httpedge.Response {
@@ -744,6 +745,33 @@ func failHeroSkillLevel(err error) httpedge.Response {
 		return failureReply(classified)
 	}
 	return failHero(err)
+}
+
+// skillLevelRefusalBody fills the MID 39 fields the stock callback reads
+// unconditionally (C2/A-126). A 400 malformed reply stays bodyless; every other
+// non-200 reply is enriched from the player's committed state. When one owner
+// read fails only the parts that could be read are written, and when nothing can
+// be read the error class is kept as it arrived.
+func (d HeroDispatcher) skillLevelRefusalBody(ctx context.Context, actor identity.ActorContext, partner int64, op operation.Context, refusal httpedge.Response) httpedge.Response {
+	if refusal.HTTPStatus == http.StatusBadRequest || refusal.Body == nil || d.SkillLevels == nil {
+		return refusal
+	}
+	if _, written := refusal.Body["skills"]; written {
+		return refusal
+	}
+	view, err := d.SkillLevels.SkillLevelView(ctx, actor, partner, op)
+	if err != nil {
+		return refusal
+	}
+	if view.SkillLevelsKnown {
+		refusal.Body["skills"] = apphero.HeroSkillLevelResult{SkillLevels: view.SkillLevels}.SkillString()
+	}
+	refusal.Body["is_success"] = int64(0)
+	if view.SkillPointKnown {
+		refusal.Body["skill_point"] = view.SkillPoint
+		refusal.Body["skill_time"] = view.SkillTime
+	}
+	return refusal
 }
 
 func badHero(code string) httpedge.Response {

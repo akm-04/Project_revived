@@ -18,7 +18,9 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -35,7 +37,12 @@ var ErrHeroSkillLevelInactive = errors.New("character hero: skill level content 
 
 type HeroSkillLevelStore interface {
 	LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Hero, error)
+	ReadHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, error)
 	SaveHeroSkillLevelsTx(context.Context, tx.Tx, character.Hero, int64) error
+}
+
+type HeroSkillPointReader interface {
+	ReadTemporalTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.TemporalState, bool, error)
 }
 
 type HeroSkillLevelBooks interface {
@@ -51,6 +58,17 @@ type HeroSkillLevelContent interface {
 type HeroSkillLevelChange struct {
 	Slot  int64 `json:"slot"`
 	Count int64 `json:"count"`
+}
+
+// HeroSkillLevelView is the committed state a MID 39 refusal reply may carry
+// (C2). Each known flag states that its owner read succeeded, so a partial read
+// never fills a field with an invented value.
+type HeroSkillLevelView struct {
+	SkillLevels      [6]int64
+	SkillLevelsKnown bool
+	SkillPoint       int64
+	SkillPointKnown  bool
+	SkillTime        int64
 }
 
 type HeroSkillLevelResult struct {
@@ -83,6 +101,8 @@ type HeroSkillLevelService struct {
 	Fence               ActorFencer
 	Receipts            receipt.Store
 	Resources           appi5.TxHeroSkillLevelCost
+	Points              HeroSkillPointReader
+	Facts               appi5.ObjectiveFacts
 	DiscountBasisPoints int64
 }
 
@@ -177,6 +197,56 @@ func (r heroSkillLevelResolver) ResolveTimed(ctx context.Context, request gen.Ti
 	return tx.Resolution{State: tx.ResolutionCommitted, Evidence: result}, nil
 }
 
+func (s HeroSkillLevelService) factsReady() bool {
+	return s.Facts.Open != nil && s.Facts.Owner.Store != nil && s.Facts.Owner.Receipts != nil
+}
+
+// SkillLevelView reads the committed hero skills and skill-point state without
+// writing. C2 uses it to fill the fields the stock MID 39 callback indexes even
+// on a refusal; each part is reported only when its own read succeeded, and an
+// error is returned only when neither part could be read.
+func (s HeroSkillLevelService) SkillLevelView(ctx context.Context, actor identity.ActorContext, partner int64, op operation.Context) (HeroSkillLevelView, error) {
+	if partner <= 0 || !actor.PlayerID.Valid() || s.Reads.DB == nil || s.Store == nil || s.Points == nil {
+		return HeroSkillLevelView{}, ErrHeroSkillLevelRequest
+	}
+	var view HeroSkillLevelView
+	var heroErr error
+	var pointErr error
+	_, err := s.Reads.Run(ctx, op, profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		hero, err := s.Store.ReadHeroByPartnerIDTx(ctx, scope.Tx, actor.PlayerID, partner)
+		switch {
+		case err != nil:
+			heroErr = err
+		case hero.ValidatePersistent() != nil || hero.PartnerID != partner:
+			heroErr = ErrHeroSkillLevelRequest
+		default:
+			view.SkillLevels = hero.RawSkills.Levels
+			view.SkillLevelsKnown = true
+		}
+		points, exists, err := s.Points.ReadTemporalTx(ctx, scope.Tx, actor.PlayerID, "skill_point")
+		switch {
+		case err != nil:
+			pointErr = err
+		case !exists:
+			pointErr = economy.ErrUnknownResource
+		default:
+			view.SkillPoint = points.StoredAmount
+			view.SkillPointKnown = true
+			if points.RegenAnchorAt != nil {
+				view.SkillTime = points.RegenAnchorAt.UTC().Unix()
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return HeroSkillLevelView{}, err
+	}
+	if heroErr != nil && pointErr != nil {
+		return HeroSkillLevelView{}, heroErr
+	}
+	return view, nil
+}
+
 func (s HeroSkillLevelService) SetSkillLevel(ctx context.Context, actor identity.ActorContext, partner, slot int64, op operation.Context) (HeroSkillLevelResult, error) {
 	return s.change(ctx, actor, partner, "set_skill_level", []HeroSkillLevelChange{{Slot: slot, Count: 1}}, op)
 }
@@ -187,7 +257,7 @@ func (s HeroSkillLevelService) SetAllSkillLevels(ctx context.Context, actor iden
 
 func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorContext, partner int64, family string, changes []HeroSkillLevelChange, op operation.Context) (HeroSkillLevelResult, error) {
 	changes, err := normalizeHeroSkillLevelChanges(changes)
-	if err != nil || partner <= 0 || partner > 9007199254740991 || !actor.PlayerID.Valid() || !actor.LogicalServerID.Valid() || !actor.AccountUID.Valid() || actor.ContextID.UUID().IsZero() || op.ID.IsZero() || op.StartedAt.IsZero() || s.Timed.Binder.Time == nil || s.Timed.Runner.DB == nil || s.Reads.DB == nil || s.Store == nil || s.Books == nil || s.Content == nil || s.Players == nil || s.Fence == nil || s.Receipts == nil || s.Resources == nil || s.DiscountBasisPoints < 1 || s.DiscountBasisPoints > 10000 {
+	if err != nil || partner <= 0 || partner > 9007199254740991 || !actor.PlayerID.Valid() || !actor.LogicalServerID.Valid() || !actor.AccountUID.Valid() || actor.ContextID.UUID().IsZero() || op.ID.IsZero() || op.StartedAt.IsZero() || s.Timed.Binder.Time == nil || s.Timed.Runner.DB == nil || s.Reads.DB == nil || s.Store == nil || s.Books == nil || s.Content == nil || s.Players == nil || s.Fence == nil || s.Receipts == nil || s.Resources == nil || s.Points == nil || !s.factsReady() || s.DiscountBasisPoints < 1 || s.DiscountBasisPoints > 10000 {
 		return HeroSkillLevelResult{}, ErrHeroSkillLevelRequest
 	}
 	var known HeroSkillLevelResult
@@ -308,6 +378,10 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 		if pointCost < 1 {
 			pointCost = 1
 		}
+		factContext, err := s.Facts.PrepareTx(ctx, scope.Tx, actor.PlayerID, scope.Operation)
+		if err != nil {
+			return err
+		}
 		prepared, err := s.Resources.PrepareHeroSkillLevelCostTx(ctx, scope.Tx, actor.PlayerID, manaCost, pointCost, op)
 		if err != nil {
 			return err
@@ -340,6 +414,18 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 			result.StateVersion = hero.StateVersion
 			result.Success = true
 			result.Changed = true
+			// C3: exactly one fact per accepted request; the receipt replay path
+			// returns above and never reaches this code.
+			changedLevels := int64(0)
+			for _, change := range changes {
+				changedLevels += change.Count
+			}
+			if changedLevels > 0 {
+				fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "character-hero", SourceBusinessKey: op.ID.String(), Kind: "HERO_SKILL_UPGRADED", Delta: changedLevels}
+				if err := s.Facts.RecordTx(factContext, scope.Tx, scope.Operation.Operation(), fact); err != nil {
+					return err
+				}
+			}
 		}
 		payload, err := json.Marshal(result)
 		if err != nil {

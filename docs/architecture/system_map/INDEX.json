@@ -574,9 +574,11 @@
    "87": "characterhero",
    "88": "characterhero",
    "89": "characterhero",
+   "90": "characterhero",
    "96": "characterhero",
    "97": "characterhero",
-   "98": "playerdisplay"
+   "98": "playerdisplay",
+   "99": "characterhero"
   },
   "table_to_system": {
    "account_provider_bindings": "bootstrap",
@@ -941,7 +943,7 @@
   {
    "callees": 26,
    "callers": 16,
-   "mids": 33,
+   "mids": 35,
    "name": "characterhero",
    "path": "internal/application/characterhero",
    "purpose": "",
@@ -994,7 +996,7 @@
   },
   {
    "callees": 8,
-   "callers": 17,
+   "callers": 18,
    "mids": 3,
    "name": "commerceprivilege",
    "path": "internal/application/commerceprivilege",
@@ -1021,7 +1023,7 @@
   },
   {
    "callees": 1,
-   "callers": 2,
+   "callers": 3,
    "mids": 0,
    "name": "dailyconsume",
    "path": "internal/application/dailyconsume",
@@ -1102,7 +1104,7 @@
   },
   {
    "callees": 5,
-   "callers": 61,
+   "callers": 62,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1200,6 +1202,15 @@
    "tables": 0
   },
   {
+   "callees": 7,
+   "callers": 0,
+   "mids": 0,
+   "name": "heroassets",
+   "path": "internal/application/heroassets",
+   "purpose": "settles the I9-11A skill-point purchase (MID 99) and the skill-point item (MID 90)",
+   "tables": 0
+  },
+  {
    "callees": 13,
    "callers": 1,
    "mids": 2,
@@ -1228,7 +1239,7 @@
   },
   {
    "callees": 13,
-   "callers": 58,
+   "callers": 59,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",

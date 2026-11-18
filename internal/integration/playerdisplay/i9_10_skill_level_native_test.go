@@ -35,6 +35,8 @@ func heroSkillLevelService(database *pg.Pool) apphero.HeroSkillLevelService {
 		Books:   appbook.Service{Heroes: characterstore.LibraryHeroPort{Store: characters}, Owner: bookstore.Store{}, Content: content},
 		Content: content, Players: i4store.PlayerRootLocker{}, Fence: inventory, Receipts: kernelstore.Store{},
 		Resources: appi5.Service{Runner: runner, Store: inventory, Content: content, Privileges: privilegeProvider(database)}, DiscountBasisPoints: 10000,
+		Points: inventory,
+		Facts:  appi5.ObjectiveFacts{Owner: appi5.Service{Store: inventory, Receipts: kernelstore.Store{}}, Open: inventory},
 	}
 }
 

@@ -147,6 +147,8 @@ def build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_row
             "level": level,
             "num_energy": _int(row.get("num_energy", ""), f"vip[{level}].num_energy", error, allow_negative=False),
             "num_midas": _int(row.get("num_midas", ""), f"vip[{level}].num_midas", error, allow_negative=False),
+            "skill_buy": _int(row.get("skill_buy", ""), f"vip[{level}].skill_buy", error, allow_negative=False),
+            "skill_max": _int(row.get("skill_max", ""), f"vip[{level}].skill_max", error, allow_negative=False),
         })
     vip.sort(key=lambda row: row["level"])
     if [row["level"] for row in vip] != list(range(16)):
@@ -167,6 +169,7 @@ def build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_row
             "id": row_id,
             "buy_energy_cost": _int(row.get("buy_energy_cost", ""), f"refresh_cost[{row_id}].buy_energy_cost", error, allow_zero=False),
             "buy_mana_cost": _int(row.get("buy_mana_cost", ""), f"refresh_cost[{row_id}].buy_mana_cost", error, allow_zero=False),
+            "buy_skill_cost": _int(row.get("buy_skill_cost", ""), f"refresh_cost[{row_id}].buy_skill_cost", error, allow_zero=False),
             "buy_mana_ratio_millionths": _millionths(row.get("buy_mana_ratio", ""), f"refresh_cost[{row_id}].buy_mana_ratio", error),
         })
     refresh.sort(key=lambda row: row["id"])

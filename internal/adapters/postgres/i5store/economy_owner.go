@@ -75,11 +75,17 @@ func (c EconomyOwnerBootstrapContributor) PersistCharacterBootstrap(ctx context.
 		if err := pol.Validate(); err != nil {
 			return err
 		}
+		// C4: a new player starts with a full skill-point bar; the amount is the
+		// resolved natural cap (VIP + privilege), never a hardcoded number.
+		amount := seed.amount
+		if seed.key == "skill_point" {
+			amount = pol.NaturalCap
+		}
 		var anchor any
-		if !seed.paused {
+		if !seed.paused && amount < pol.NaturalCap {
 			anchor = now
 		}
-		if _, err := t.Exec(ctx, insertBootstrapTemporal, int64(b.PlayerID), seed.key, seed.amount, anchor, revision, revision, now); err != nil {
+		if _, err := t.Exec(ctx, insertBootstrapTemporal, int64(b.PlayerID), seed.key, amount, anchor, revision, revision, now); err != nil {
 			return fmt.Errorf("bootstrap %s persist: %w", seed.key, err)
 		}
 	}

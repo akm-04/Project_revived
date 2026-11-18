@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"reflect"
 	"testing"
@@ -9,11 +10,15 @@ import (
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 type heroSkillLevelDispatchStub struct {
 	singleResult  apphero.HeroSkillLevelResult
 	bulkResult    apphero.HeroSkillLevelResult
+	bulkErr       error
+	view          apphero.HeroSkillLevelView
+	viewErr       error
 	partnerID     int64
 	skillIndex    int64
 	bulkPartnerID int64
@@ -29,7 +34,21 @@ func (stub *heroSkillLevelDispatchStub) SetSkillLevel(_ context.Context, _ ident
 func (stub *heroSkillLevelDispatchStub) SetAllSkillLevels(_ context.Context, _ identity.ActorContext, partnerID int64, changes []apphero.HeroSkillLevelChange, _ operation.Context) (apphero.HeroSkillLevelResult, error) {
 	stub.bulkPartnerID = partnerID
 	stub.changes = changes
-	return stub.bulkResult, nil
+	return stub.bulkResult, stub.bulkErr
+}
+
+func (stub *heroSkillLevelDispatchStub) SkillLevelView(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroSkillLevelView, error) {
+	return stub.view, stub.viewErr
+}
+
+func heroSkillLevelRefusalFields(t *testing.T, response httpedge.Response, wantStatus int, wantCode int64) {
+	t.Helper()
+	if response.HTTPStatus != wantStatus || response.Body["error_code"] != wantCode {
+		t.Fatalf("refusal status %d code %v, want %d/%d: %#v", response.HTTPStatus, response.Body["error_code"], wantStatus, wantCode, response.Body)
+	}
+	if response.Body["skills"] != "3|2|1|1|1|1" || response.Body["is_success"] != int64(0) || response.Body["skill_point"] != int64(6) || response.Body["skill_time"] != int64(1700000100) {
+		t.Fatalf("MID 39 refusal lost its C2 fields: %#v", response.Body)
+	}
 }
 
 func TestHeroSkillLevelMIDsWireSuccessAndPrivateRefusal(t *testing.T) {
@@ -65,5 +84,46 @@ func TestHeroSkillLevelMIDsWireSuccessAndPrivateRefusal(t *testing.T) {
 	invalid := dispatcher.Dispatch(context.Background(), heroReq(t, 39, map[string]any{"partner_id": int64(9), "skill_colors": "2|", "skill_counts": "1|2"}))
 	if invalid.HTTPStatus != http.StatusBadRequest {
 		t.Fatal("invalid MID 39 pipe accepted", invalid)
+	}
+	if _, present := invalid.Body["skills"]; present {
+		t.Fatalf("malformed 400 must stay bodyless: %#v", invalid.Body)
+	}
+}
+
+func TestHeroSkillLevelMID39EveryNon400RefusalCarriesCommittedFields(t *testing.T) {
+	stub := &heroSkillLevelDispatchStub{
+		view: apphero.HeroSkillLevelView{SkillLevels: [6]int64{3, 2, 1, 1, 1, 1}, SkillLevelsKnown: true, SkillPoint: 6, SkillPointKnown: true, SkillTime: 1700000100},
+	}
+	dispatcher := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, SkillLevels: stub}
+	params := map[string]any{"partner_id": int64(9), "skill_colors": "2|1", "skill_counts": "1|2"}
+	for _, tc := range []struct {
+		name       string
+		err        error
+		wantStatus int
+		wantCode   int64
+	}{
+		{"stale time", apphero.ErrHeroSkillLevelStaleTime, http.StatusConflict, staleConflictCode},
+		{"inactive content", apphero.ErrHeroSkillLevelInactive, http.StatusConflict, unprovenRefusalCode},
+		{"defect", errors.New("boom"), http.StatusInternalServerError, unprovenRefusalCode},
+		{"transient", context.DeadlineExceeded, http.StatusServiceUnavailable, serverBusyCode},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			stub.bulkErr = tc.err
+			heroSkillLevelRefusalFields(t, dispatcher.Dispatch(context.Background(), heroReq(t, 39, params)), tc.wantStatus, tc.wantCode)
+		})
+	}
+	stub.bulkErr = apphero.ErrHeroSkillLevelInactive
+	stub.view = apphero.HeroSkillLevelView{SkillPoint: 6, SkillPointKnown: true, SkillTime: 1700000100}
+	partial := dispatcher.Dispatch(context.Background(), heroReq(t, 39, params))
+	if partial.HTTPStatus != http.StatusConflict || partial.Body["is_success"] != int64(0) || partial.Body["skill_point"] != int64(6) || partial.Body["skill_time"] != int64(1700000100) {
+		t.Fatalf("partial read lost its readable fields: %#v", partial.Body)
+	}
+	if _, present := partial.Body["skills"]; present {
+		t.Fatalf("unreadable skills were invented: %#v", partial.Body)
+	}
+	stub.viewErr = errors.New("read failed")
+	unreadable := dispatcher.Dispatch(context.Background(), heroReq(t, 39, params))
+	if unreadable.HTTPStatus != http.StatusConflict || unreadable.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("unreadable state changed the error class: %#v", unreadable)
 	}
 }

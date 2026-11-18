@@ -1118,6 +1118,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-11b-items-energy" {
 		expectedSources, expectedArtifacts = 566, 59
 	}
+	if manifest.CompilerVersion == "i9-11a-hero-assets" {
+		expectedSources, expectedArtifacts = 566, 59
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
