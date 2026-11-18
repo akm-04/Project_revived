@@ -1,6 +1,32 @@
 package guildcampaign
 
-import "testing"
+import (
+	"testing"
+
+	d "gxb.local/backend/v2/internal/domain/guildcampaign"
+	"gxb.local/backend/v2/internal/domain/identity"
+)
+
+func TestIsRetryReplaysWhileAnotherMemberHoldsTheCopy(t *testing.T) {
+	copy := d.Copy{HolderID: 2, HolderStage: d.StageFight, SettledBy: 1, SettledIndex: 2}
+	if !isRetry(copy, identity.PlayerID(1), 2) {
+		t.Fatal("retry of the member's last settled wave stopped while another member holds the copy")
+	}
+	if isRetry(copy, identity.PlayerID(2), 2) {
+		t.Fatal("another member's result replayed as the holder's")
+	}
+	if isRetry(copy, identity.PlayerID(1), 1) {
+		t.Fatal("a different wave replayed")
+	}
+	copy.HolderID = 1
+	if isRetry(copy, identity.PlayerID(1), 2) {
+		t.Fatal("a new fight by the same member replayed the last result")
+	}
+	copy.HolderID = 0
+	if !isRetry(copy, identity.PlayerID(1), 2) {
+		t.Fatal("retry of the member's last settled wave stopped on a free copy")
+	}
+}
 
 func TestClampWavesMarksRecordedRowsAndKeepsDead(t *testing.T) {
 	waves := map[int64][]EnemyRow{1: {
