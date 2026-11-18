@@ -385,7 +385,10 @@ func TestI7C5FLeagueCutoffRollbackUnknownCommitNative(t *testing.T) {
 	leagueFight(t, s, a, b, ha)
 	at, _ := clock.Now(ctx)
 	season := cat.SeasonAt(at)
-	clock.Set(season.ClosesAt)
+	// A fight past its budget finishes in a detached goroutine that runs Due with the working recipient on the clock it
+	// holds; moving that shared clock to the close let it settle the season before the injected failure could run.
+	clock = &leagueClock{at: season.ClosesAt}
+	s.Timed.Binder.Time = clock
 	good := s.Recipient
 	s.Recipient = leagueRecipientFailure{good}
 	if e := s.Due(ctx, op(), 100); e == nil {
