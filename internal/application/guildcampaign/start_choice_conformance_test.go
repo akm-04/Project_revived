@@ -105,6 +105,7 @@ func startChoiceMode(at time.Time, combat *startChoiceCombat) Mode {
 		Mail:       startChoiceMail{},
 		Timed:      gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}},
 		Fresh:      startChoiceTx{},
+		Receipts:   stubResultReceipts{},
 	}
 }
 

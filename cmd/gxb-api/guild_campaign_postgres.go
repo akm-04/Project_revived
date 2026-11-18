@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -46,6 +47,7 @@ func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, revisions contentstore
 		Timed:     gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
 		Fresh:     p,
 		Revisions: revisions,
+		Receipts:  kernelstore.Store{},
 	}
 	return mode, payout
 }

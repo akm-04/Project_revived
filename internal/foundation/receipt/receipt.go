@@ -66,6 +66,18 @@ type PutResult struct {
 	Receipt  Receipt
 	Inserted bool
 }
+
+// LatestIdentity names the receipts sharing a semantic-key prefix; the newest
+// one under it is the family's last committed answer.
+type LatestIdentity struct{ OwnerKind, OwnerKey, Domain, Operation, SemanticKeyPrefix string }
+
+func (i LatestIdentity) Validate() error {
+	if i.OwnerKind == "" || i.OwnerKey == "" || i.Domain == "" || i.Operation == "" || i.SemanticKeyPrefix == "" {
+		return errors.New("incomplete semantic receipt prefix")
+	}
+	return nil
+}
+
 type Store interface {
 	PutTx(context.Context, tx.Tx, Receipt) (PutResult, error)
 	FindTx(context.Context, tx.Queryer, Identity) (Receipt, bool, error)

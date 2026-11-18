@@ -41720,7 +41720,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 64,
+     "line": 63,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -41833,7 +41833,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 64,
+     "line": 63,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -41954,7 +41954,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 64,
+     "line": 63,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -41980,7 +41980,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 254,
+     "line": 255,
      "value": "serializable"
     }
    ],
@@ -41988,7 +41988,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 254,
+     "line": 255,
      "value": "false"
     }
    ],
@@ -41999,7 +41999,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 254,
+     "line": 255,
      "value": "3"
     }
    ],
@@ -42011,7 +42011,7 @@
     "internal/adapters/postgres/combatstore/store.go:256",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:310",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:123",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:122",
     "internal/adapters/postgres/guildcampaignstore/mode.go:54",
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
@@ -42032,7 +42032,7 @@
      "file": "internal/application/guildcampaign/commands.go",
      "function": "Mode.Start",
      "isolation": "serializable",
-     "line": 254,
+     "line": 255,
      "read_only": "false",
      "retry": "3"
     }
@@ -42326,7 +42326,7 @@
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
      "line": 37,
-     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
+     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/store.go",
@@ -42450,7 +42450,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 280,
+     "line": 279,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('award_id',award_id,'remaining',remaining,'expires',EXTRACT(EPOCH FROM expires_at)::bigint,'next',EXTRACT(EPOCH FROM next_slot)::bigint) ORDER BY award_id),'[]'::jsonb)::text FROM guild_campaign_awards WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
@@ -42497,8 +42497,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/guildcampaignstore/mode.go:369",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:385"
+    "internal/adapters/postgres/guildcampaignstore/mode.go:368",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:384"
    ],
    "system": "guildcampaign",
    "transactions": [
@@ -42534,7 +42534,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 280,
+     "line": 279,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('award_id',award_id,'remaining',remaining,'expires',EXTRACT(EPOCH FROM expires_at)::bigint,'next',EXTRACT(EPOCH FROM next_slot)::bigint) ORDER BY award_id),'[]'::jsonb)::text FROM guild_campaign_awards WHERE guild_id=$1 AND chapter_id=$2 AND run=$3"
     },
     {
@@ -42691,7 +42691,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 236,
+     "line": 235,
      "statement": "SELECT first_player_id,first_guild_id,first_at,fastest_guild_id,fastest_seconds FROM guild_campaign_server_kills WHERE logical_server_id=$1 AND copy_id=$2"
     },
     {
@@ -42793,7 +42793,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 385,
+     "line": 390,
      "value": "serializable"
     }
    ],
@@ -42801,11 +42801,12 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 385,
+     "line": 390,
      "value": "false"
     }
    ],
    "receipt_writes": [
+    "internal/application/guildcampaign/commands.go:544",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -42813,7 +42814,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 385,
+     "line": 390,
      "value": "3"
     }
    ],
@@ -42824,13 +42825,13 @@
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:123",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:135",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:141",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:147",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:185",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:224",
-    "internal/adapters/postgres/guildcampaignstore/mode.go:269",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:122",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:134",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:140",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:146",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:184",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:223",
+    "internal/adapters/postgres/guildcampaignstore/mode.go:268",
     "internal/adapters/postgres/guildcampaignstore/mode.go:54",
     "internal/adapters/postgres/guildcampaignstore/store.go:121",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -42858,7 +42859,7 @@
      "file": "internal/application/guildcampaign/commands.go",
      "function": "Mode.Settle",
      "isolation": "serializable",
-     "line": 385,
+     "line": 390,
      "read_only": "false",
      "retry": "3"
     }
@@ -43012,21 +43013,21 @@
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
      "line": 37,
-     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
+     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 64,
+     "line": 63,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 194,
+     "line": 193,
      "statement": "SELECT COALESCE(MAX(damage),0) FROM guild_campaign_server_records WHERE logical_server_id=$1 AND copy_id=$2"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 236,
+     "line": 235,
      "statement": "SELECT first_player_id,first_guild_id,first_at,fastest_guild_id,fastest_seconds FROM guild_campaign_server_kills WHERE logical_server_id=$1 AND copy_id=$2"
     },
     {
@@ -43183,7 +43184,7 @@
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
-     "line": 64,
+     "line": 63,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'copy_id',copy_id,'current_index',current_index,'is_win',is_win,'percent',percent, 'holder_id',COALESCE(holder_id,0),'stage',holder_stage, 'last_fight',COALESCE(EXTRACT(EPOCH FROM last_fight_time)::bigint,0), 'start_fight',COALESCE(EXTRACT(EPOCH FROM start_fight_time)::bigint,0)) ORDER BY copy_id),'[]'::jsonb)::text FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2"
     },
     {
@@ -43354,7 +43355,7 @@
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
      "line": 37,
-     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
+     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -43379,7 +43380,7 @@
    "isolation": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 178,
+     "line": 179,
      "value": "serializable"
     }
    ],
@@ -43387,7 +43388,7 @@
    "read_only": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 178,
+     "line": 179,
      "value": "false"
     }
    ],
@@ -43395,7 +43396,7 @@
    "retry": [
     {
      "file": "internal/application/guildcampaign/commands.go",
-     "line": 178,
+     "line": 179,
      "value": "3"
     }
    ],
@@ -43408,7 +43409,7 @@
      "file": "internal/application/guildcampaign/commands.go",
      "function": "Mode.Claim",
      "isolation": "serializable",
-     "line": 178,
+     "line": 179,
      "read_only": "false",
      "retry": "3"
     }
@@ -43432,7 +43433,7 @@
     {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
      "line": 37,
-     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
+     "statement": "SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,'') FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3 FOR UPDATE"
     },
     {
      "file": "internal/adapters/postgres/guildcampaignstore/store.go",

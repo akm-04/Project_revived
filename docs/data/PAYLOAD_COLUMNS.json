@@ -1433,14 +1433,10 @@
    "table": "guild_campaign_copies",
    "column": "settled_body",
    "scope": "guild",
-   "decode": "raw",
-   "decode_type": "[]byte",
-   "decode_sites": [
-    "internal/adapters/postgres/guildcampaignstore/mode.go:50 copy.SettledBody = []byte(settledBody)"
-   ],
-   "writers": [
-    "internal/adapters/postgres/guildcampaignstore/mode.go:55-60 string(copy.SettledBody) -> UPDATE settled_body"
-   ],
+   "decode": "none",
+   "decode_type": "",
+   "decode_sites": [],
+   "writers": [],
    "sql_paths": [],
    "digest": false,
    "digest_sites": [],

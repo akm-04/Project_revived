@@ -290,7 +290,8 @@
   "internal/adapters/postgres/guildcampaignstore",
   "internal/adapters/postgres/guildstore",
   "internal/adapters/postgres/i4store",
-  "internal/adapters/postgres/i5store"
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
  ],
  "tables": {
   "owned": [
@@ -327,6 +328,7 @@
    "guild_memberships",
    "guilds",
    "gxb_content_activation",
+   "gxb_operation_receipts",
    "player_directory_profiles",
    "player_guild_activity_days",
    "player_hero_raw_awakening",
@@ -348,6 +350,7 @@
    "guild_campaign_server_kills",
    "guild_campaign_server_records",
    "guilds",
+   "gxb_operation_receipts",
    "player_guild_activity_days"
   ]
  },

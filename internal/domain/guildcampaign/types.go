@@ -52,7 +52,4 @@ type Copy struct {
 	LastFightTime     *time.Time
 	StartFightTime    *time.Time
 	AttemptGeneration string
-	SettledBy         int64
-	SettledIndex      int64
-	SettledBody       json.RawMessage
 }

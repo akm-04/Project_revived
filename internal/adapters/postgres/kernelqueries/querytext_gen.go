@@ -2,7 +2,7 @@
 package kernelqueries
 
 // SourceSHA256 is the exact owner query-source hash.
-const SourceSHA256 = "0fb970ddcf0e3bf9ac35dd9c11d7dc61827803878fd109fbebbc49b0085643c4"
+const SourceSHA256 = "7ce8c1c4a347d6b2bdff25c31aec97238a3e61c14873c0fbc8abff556098ffe3"
 
 const InsertOperationReceipt = `WITH ins AS (
     INSERT INTO gxb_operation_receipts (
@@ -48,6 +48,36 @@ WHERE owner_kind = $1
   AND domain = $3
   AND operation = $4
   AND semantic_key = $5;`
+
+const FindLatestOperationReceipt = `SELECT
+    receipt_id::text,
+    COALESCE(operation_id::text, '') AS operation_id,
+    owner_kind,
+    owner_key,
+    domain,
+    operation,
+    semantic_key,
+    operation_class,
+    encode(request_fingerprint, 'hex') AS request_fingerprint_hex,
+    result_schema,
+    result_payload::text,
+    operation_started_at,
+    COALESCE(policy_version, '') AS policy_version,
+    operation_policy_refs::text,
+    COALESCE(actor_account_uid, '') AS actor_account_uid,
+    COALESCE(context_id::text, '') AS context_id,
+    recorded_at,
+    retain_until IS NOT NULL AS has_retain_until,
+    COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until,
+    payload_version
+FROM gxb_operation_receipts
+WHERE owner_kind = $1
+  AND owner_key = $2
+  AND domain = $3
+  AND operation = $4
+  AND starts_with(semantic_key, $5)
+ORDER BY operation_started_at DESC, recorded_at DESC, receipt_id DESC
+LIMIT 1;`
 
 const ListOperationReceiptIdentities = `SELECT COALESCE(jsonb_agg(jsonb_build_object('OwnerKind',owner_kind,'OwnerKey',owner_key,'Domain',domain,'Operation',operation,'SemanticKey',semantic_key) ORDER BY semantic_key,owner_key),'[]'::jsonb)::text
 FROM (SELECT owner_kind,owner_key,domain,operation,semantic_key FROM gxb_operation_receipts

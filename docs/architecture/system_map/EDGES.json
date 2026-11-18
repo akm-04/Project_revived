@@ -3855,6 +3855,10 @@
    "store:i4store": [
     "*LockPlayerRootsTx",
     "*ProfileTx"
+   ],
+   "store:kernelstore": [
+    "*FindLatestTx",
+    "*PutTx"
    ]
   },
   "guildcore": {
