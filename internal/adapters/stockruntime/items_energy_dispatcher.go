@@ -169,6 +169,7 @@ func itemsEnergyMalformed() httpedge.Response {
 	return failureReply(malformed("items_energy_invalid_parameter"))
 }
 
+// 35031 is the only message-backed refusal of this leaf: B4's stamina cap.
 var itemsEnergyFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "items_energy_invalid_parameter"},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},

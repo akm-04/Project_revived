@@ -37,6 +37,9 @@ type TxItemsEnergyExchange interface {
 
 var _ TxItemsEnergyExchange = Service{}
 
+// A box restoration mixes stack items, scalars, temporal energy and player exp,
+// so this pair accepts those four kinds; entity and specialized lines stay with
+// their own owners and are refused here.
 func validateItemsEnergyRestoration(plan grant.Plan) error {
 	if err := plan.Validate(); err != nil {
 		return err

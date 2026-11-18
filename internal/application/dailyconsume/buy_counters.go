@@ -44,9 +44,10 @@ func (s Service) ReadBuyTx(c context.Context, q tx.Queryer, p identity.PlayerID,
 	return buyCounters(counts, day), nil
 }
 
-// IncrementBuyTx is the one shared locked increment of a named buy counter. It
-// lazily starts a new game day, enforces the caller's allowance and saves the
-// whole counter map; a read path never calls it.
+// The counter row is rank 450, so callers advance it before the I5 exchange
+// closes ranks 700+. This is the one shared locked increment of a named buy
+// counter: it lazily starts a new game day, enforces the caller's allowance and
+// saves the whole counter map; a read path never calls it.
 func (s Service) IncrementBuyTx(c context.Context, t tx.Tx, p identity.PlayerID, day, id, limit int64, at time.Time) (BuyCounters, error) {
 	if s.Store == nil {
 		return BuyCounters{}, errors.New("daily consumption: unavailable")
