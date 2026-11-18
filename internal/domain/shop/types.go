@@ -256,8 +256,10 @@ type Tuning struct {
 	Rows     []TuningRow
 }
 
-// TuningRow may only disable, reprice, requantity or lower the one-buy cap of a
-// known (shop type, index) row.
+// TuningRow may only disable, reprice, requantity, re-stone or lower the one-buy
+// cap of a known (shop type, index) row. StoneID only applies to a slot that is
+// already stone-priced (sell_type 7/15); the source prices those in the
+// product's own stone.
 type TuningRow struct {
 	ShopType  int64  `json:"shop_type"`
 	Index     int64  `json:"index"`
@@ -265,6 +267,7 @@ type TuningRow struct {
 	SellPrice *int64 `json:"sell_price,omitempty"`
 	ItemNum   *int64 `json:"item_num,omitempty"`
 	MaxBuys   *int64 `json:"max_buys,omitempty"`
+	StoneID   *int64 `json:"stone_id,omitempty"`
 }
 
 // MarketTuning is the stored overlay document.
@@ -296,6 +299,9 @@ func ValidateTuning(catalog Catalog, tuning Tuning) error {
 		if row.MaxBuys != nil && (*row.MaxBuys < 0 || *row.MaxBuys > 1) {
 			return ErrOverlayInvalid
 		}
+		if row.StoneID != nil && *row.StoneID <= 0 {
+			return ErrOverlayInvalid
+		}
 	}
 	return nil
 }
@@ -316,6 +322,9 @@ func (c Catalog) TunedSlot(shopType int64, slot StockSlot) (StockSlot, bool) {
 		}
 		if row.MaxBuys != nil && *row.MaxBuys < 1 {
 			disabled = true
+		}
+		if row.StoneID != nil && slot.StoneID > 0 {
+			slot.StoneID = *row.StoneID
 		}
 	}
 	return slot, disabled

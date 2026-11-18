@@ -689,3 +689,63 @@ func TestI911CCoreShopsCatalogDriftNative(t *testing.T) {
 		t.Fatal("installed catalog has no stone-priced roll")
 	}
 }
+
+// D476 owner ruling 2026-11-18: an operator may move a stone-priced slot to
+// another price stone; the reply names it and the buy debits it.
+func TestI911CCoreShopsTuningStoneNative(t *testing.T) {
+	p := pool(t)
+	revision := installed(t, p)
+	a := i911cPlayer(t, p, revision)
+	at := time.Date(2026, 11, 18, 12, 0, 0, 0, time.UTC)
+	clock := &i911cFixedClock{at: at}
+	dispatcher := i911cCompositionAt(p, a, clock).Dispatcher
+	items := i911cLoad(t, dispatcher, a, 8, at, 9)
+	slot := i911cFind(items, 7)
+	if slot == nil {
+		t.Fatal("type 8 has no sell_type 7 slot")
+	}
+	sourceStone := slot["stone_id"].(int64)
+	var operatorStone int64
+	for _, item := range items {
+		if id := item["item_id"].(int64); id != sourceStone {
+			operatorStone = id
+			break
+		}
+	}
+	if operatorStone == 0 {
+		t.Fatal("type 8 has no second item to use as a price stone")
+	}
+	overlay := fmt.Sprintf(`{"revision":1,"rows":[{"shop_type":8,"index":%d,"stone_id":%d}]}`, slot["index"], operatorStone)
+	exec(t, p, `INSERT INTO shop_tuning(singleton,payload,payload_version,revision,updated_at)VALUES(true,$1::jsonb,1,1,$2)`, overlay, at)
+	t.Cleanup(func() {
+		exec(t, p, `DELETE FROM shop_tuning`)
+	})
+
+	tuned := i911cLoad(t, dispatcher, a, 8, at, 9)
+	var tunedSlot map[string]any
+	for _, item := range tuned {
+		if item["index"] == slot["index"] {
+			tunedSlot = item
+		}
+	}
+	if tunedSlot == nil || tunedSlot["stone_id"] != operatorStone {
+		t.Fatalf("reply stone_id = %#v, want %d", tunedSlot, operatorStone)
+	}
+	price := tunedSlot["sell_price"].(int64)
+	i911cStack(t, p, a, 50001427, 0)
+	i911cStack(t, p, a, operatorStone, price)
+	i911cStack(t, p, a, sourceStone, price)
+	if buy := i911cDispatchAt(t, dispatcher, a, 33, map[string]any{"shop_type": int64(8), "index": slot["index"]}, at, 9); buy.HTTPStatus != 200 {
+		t.Fatalf("operator-stone buy: %+v", buy)
+	}
+	if got := i911cStackAmount(t, p, a, operatorStone); got != 0 {
+		t.Fatalf("operator stone after = %d, want 0", got)
+	}
+	wantSource := price
+	if slot["item_id"].(int64) == sourceStone {
+		wantSource += slot["item_num"].(int64)
+	}
+	if got := i911cStackAmount(t, p, a, sourceStone); got != wantSource {
+		t.Fatalf("source stone after = %d, want %d (not debited)", got, wantSource)
+	}
+}

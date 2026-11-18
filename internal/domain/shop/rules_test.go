@@ -210,4 +210,15 @@ func TestValidateTuningRefusesUnknownAndInvalidRows(t *testing.T) {
 	if _, disabled := catalog.TunedSlot(1, StockSlot{Index: 2}); disabled {
 		t.Fatal("max_buys 0 disabled another row")
 	}
+	if err := ValidateTuning(testCatalog(), Tuning{Rows: []TuningRow{{ShopType: 1, Index: 1, StoneID: &zero}}}); err != ErrOverlayInvalid {
+		t.Fatal("non-positive stone_id accepted")
+	}
+	stone := int64(50001427)
+	catalog.Tuning = Tuning{Rows: []TuningRow{{ShopType: 1, Index: 2, StoneID: &stone}}}
+	if slot, _ := catalog.TunedSlot(1, StockSlot{Index: 2, SellType: 7, StoneID: 40001096}); slot.StoneID != stone {
+		t.Fatalf("stone_id override not applied: %d", slot.StoneID)
+	}
+	if slot, _ := catalog.TunedSlot(1, StockSlot{Index: 2, SellType: 1}); slot.StoneID != 0 {
+		t.Fatal("stone_id override made a scalar-priced slot stone-priced")
+	}
 }
