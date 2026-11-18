@@ -35,8 +35,14 @@ func TestI9_11OneOnOneTitleNoticeNative(t *testing.T) {
 	week := catalog.LatestPromotion(now)
 	exec(t, p, `UPDATE one_on_one_competitions SET settled_through=$1,opened_through=$2,closed_through=$2,state_version=state_version+1`, sunday-1, week)
 
-	if settled, err := s.Due(ctx, op()); err != nil || settled != 1 {
-		t.Fatalf("Sunday settlement: settled=%d err=%v", settled, err)
+	// From Wednesday 22:00 GMT+8 the following Wednesday settlement is owed as
+	// well; it awards no title, so the notice counts below are unchanged.
+	settlementsOwed := 1
+	if catalog.LatestSettlement(now) > sunday {
+		settlementsOwed = 2
+	}
+	if settled, err := s.Due(ctx, op()); err != nil || settled != settlementsOwed {
+		t.Fatalf("Sunday settlement: settled=%d want %d err=%v", settled, settlementsOwed, err)
 	}
 	sourceKey := strconv.FormatInt(sunday, 10)
 	countNotice := func() int64 {
@@ -58,11 +64,11 @@ func TestI9_11OneOnOneTitleNoticeNative(t *testing.T) {
 	}
 
 	// Replay the same settlement: the source dedup reuses the notice.
-	exec(t, p, `DELETE FROM one_on_one_settlement_ranks WHERE day=$1`, sunday)
-	exec(t, p, `DELETE FROM one_on_one_settlements WHERE day=$1`, sunday)
+	exec(t, p, `DELETE FROM one_on_one_settlement_ranks WHERE day>=$1`, sunday)
+	exec(t, p, `DELETE FROM one_on_one_settlements WHERE day>=$1`, sunday)
 	exec(t, p, `UPDATE one_on_one_competitions SET settled_through=$1,state_version=state_version+1`, sunday-1)
-	if settled, err := s.Due(ctx, op()); err != nil || settled != 1 {
-		t.Fatalf("settlement replay: settled=%d err=%v", settled, err)
+	if settled, err := s.Due(ctx, op()); err != nil || settled != settlementsOwed {
+		t.Fatalf("settlement replay: settled=%d want %d err=%v", settled, settlementsOwed, err)
 	}
 	if countNotice() != 1 {
 		t.Fatalf("a replayed settlement added a second title notice: %d", countNotice())
