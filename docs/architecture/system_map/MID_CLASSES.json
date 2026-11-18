@@ -35784,7 +35784,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/generaldmstore/store.go:29"
+    "internal/adapters/postgres/generaldmstore/store.go:42"
    ],
    "system": "generaldm",
    "transactions": [
@@ -35800,7 +35800,12 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/generaldmstore/store.go",
-     "line": 70,
+     "line": 34,
+     "statement": "SELECT pg_advisory_xact_lock(hashtextextended($1,0))"
+    },
+    {
+     "file": "internal/adapters/postgres/generaldmstore/store.go",
+     "line": 86,
      "statement": "SELECT i.operation_id::text,i.operation_digest,i.sender_id,i.recipient_id,i.accepted_at,i.expires_at,i.block_version,i.payload_binding_digest,p.payload,COALESCE(p.payload_version,0),d.status,d.state_version,d.claim_generation,d.owner_fence,d.lease_expires_at,d.last_observed_at,d.attempt_committed_at,d.completion_upper_at FROM personal_dm_intents i JOIN personal_dm_delivery d USING(operation_id) LEFT JOIN personal_dm_payloads p USING(operation_id) WHERE i.operation_id=$1::uuid FOR UPDATE OF d"
     },
     {

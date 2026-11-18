@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -20,6 +21,15 @@ const (
 	MaxMessageRunes        = 140
 	MaxBindings            = 64
 )
+
+// LockKey names the rank-381 PersonalDM owner key. The operation UUID is the
+// canonical identity, so string order is UUID string order.
+func LockKey(id string) (lockkey.Key, error) {
+	if id == "" {
+		return lockkey.Key{}, ErrInvalid
+	}
+	return lockkey.New(LockRank, "personal-dm.intent", lockkey.String(id))
+}
 
 var (
 	ErrInvalid            = errors.New("general dm invalid request or state")
