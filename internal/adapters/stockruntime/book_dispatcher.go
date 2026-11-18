@@ -93,6 +93,7 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 // eventcentre_dispatcher.go:182,184 so MID 1056/1059 agree with MID 1074.
 var bookFailureRows = []failureRow{
 	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},
 	{match: book.ErrInvalid, class: failureMalformed, detail: "book_command_rejected"},
 	{match: book.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
 	{match: book.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
