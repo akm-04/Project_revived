@@ -299,7 +299,7 @@ func seedPopulatedRows(t *testing.T, pool *pg.Pool, player exportedPlayer) {
 	t.Helper()
 	now := time.Now().UTC().Add(-time.Hour)
 	var revision string
-	if err := pool.QueryRow(context.Background(), `SELECT revision_id FROM gxb_content_revisions WHERE revision_id='6dae1539f42d3c6d26bb550be2d6d8fd68a03f4bbc024b696f6d42dc7216d838'`).Scan(&revision); err != nil {
+	if err := pool.QueryRow(context.Background(), `SELECT revision_id FROM gxb_content_activation WHERE slot='content'`).Scan(&revision); err != nil {
 		t.Fatal(err)
 	}
 	statements := []struct {
