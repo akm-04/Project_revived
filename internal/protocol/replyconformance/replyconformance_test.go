@@ -63,7 +63,7 @@ func TestCheckerAppliesOnlyTheSelectedActivityBranch(t *testing.T) {
 	if violations := (Checker{}).Check(234, worldBoss); len(violations) != 0 {
 		t.Fatalf("world boss activity 1026 produced %#v", violations)
 	}
-	skinWarmUp := map[string]any{"table_id": int64(1129), "details": map[string]any{"base_info": map[string]any{"person_support": int64(1)}}}
+	skinWarmUp := map[string]any{"table_id": int64(1129), "details": map[string]any{"base_info": map[string]any{"person_support": int64(1), "is_awards": []any{}}}}
 	got := (Checker{}).Check(234, skinWarmUp)
 	sort.Strings(got)
 	if strings.Join(got, ",") != "details.server_support" {
@@ -73,7 +73,7 @@ func TestCheckerAppliesOnlyTheSelectedActivityBranch(t *testing.T) {
 	if violations := (Checker{}).Check(234, skinWarmUp); len(violations) != 0 {
 		t.Fatalf("complete activity 1129 reply produced %#v", violations)
 	}
-	jsonNumber := map[string]any{"table_id": float64(1129), "details": map[string]any{"base_info": map[string]any{"person_support": int64(1)}}}
+	jsonNumber := map[string]any{"table_id": float64(1129), "details": map[string]any{"base_info": map[string]any{"person_support": int64(1), "is_awards": []any{}}}}
 	if got := (Checker{}).Check(234, jsonNumber); len(got) != 1 || got[0] != "details.server_support" {
 		t.Fatalf("float table_id 1129 produced %#v", got)
 	}
@@ -109,6 +109,7 @@ var provenRepeatedPaths = map[string]bool{
 	"35:item.item.table_id":                    true,
 	"370:mail_list.mail_list":                  true,
 	"370:mail_list.mail_list[]":                true,
+	"370:mail_list.mail_list[].category":       true,
 	"802:self_info.self_info":                  true,
 	"802:self_info.self_info[]":                true,
 }
