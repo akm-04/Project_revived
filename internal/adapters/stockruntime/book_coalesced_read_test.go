@@ -34,6 +34,10 @@ func (s *countingBookRead) Read(_ context.Context, actor identity.ActorContext, 
 	return map[string]any{"building_list": map[string]any{}}, nil
 }
 
+func (s *countingBookRead) OwnsComposeItem(context.Context, int64, operation.Context) (bool, error) {
+	return false, nil
+}
+
 func (s *countingBookRead) count(player identity.PlayerID) int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -102,6 +106,10 @@ func (s *sharedBodyBookRead) Read(ctx context.Context, _ identity.ActorContext, 
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
+}
+
+func (s *sharedBodyBookRead) OwnsComposeItem(context.Context, int64, operation.Context) (bool, error) {
+	return false, nil
 }
 
 func TestBookCoalescedReadReturnsIndependentBodies(t *testing.T) {

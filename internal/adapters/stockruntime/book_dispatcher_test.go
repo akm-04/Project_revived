@@ -23,8 +23,12 @@ func (s fakeBookService) Read(context.Context, identity.ActorContext, uint16, op
 	return nil, s.err
 }
 
+func (s fakeBookService) OwnsComposeItem(context.Context, int64, operation.Context) (bool, error) {
+	return false, s.err
+}
+
 func TestBookComposeRefusalIs409WithCode(t *testing.T) {
-	dispatcher := BookDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: fakeBookService{err: app.ErrRejected}}
+	dispatcher := ComposeDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Book: &composeBookFake{owned: true, commandErr: app.ErrRejected}, Equipment: &composeEquipmentFake{}}
 	got := dispatcher.Dispatch(context.Background(), heroReq(t, 83, map[string]any{"item_id": int64(1001)}))
 	if got.HTTPStatus != http.StatusConflict {
 		t.Fatalf("book compose refusal status=%d body=%#v", got.HTTPStatus, got.Body)

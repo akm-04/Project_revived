@@ -27,6 +27,10 @@ func (c *coalescedBookRead) Command(ctx context.Context, actor identity.ActorCon
 	return c.Service.Command(ctx, actor, command, op)
 }
 
+func (c *coalescedBookRead) OwnsComposeItem(ctx context.Context, itemID int64, op operation.Context) (bool, error) {
+	return c.Service.OwnsComposeItem(ctx, itemID, op)
+}
+
 func (c *coalescedBookRead) Read(ctx context.Context, actor identity.ActorContext, mid uint16, op operation.Context) (map[string]any, error) {
 	// The flight fences only its leader, so callers share it only with the same fence inputs.
 	key := fmt.Sprintf("%d:%d:%s:%s:%d:%d:%d", int64(actor.PlayerID), mid, actor.ContextID.UUID(), actor.SessionID.UUID(),

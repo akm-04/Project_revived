@@ -271,6 +271,45 @@ func (s Service) lockPlan(ctx context.Context, t tx.Tx, a identity.ActorContext,
 	_, e = s.Owner.LockRootTx(ctx, t, a.PlayerID)
 	return e
 }
+
+// OwnsComposeItem answers MID 83 category routing before any owner command. It
+// reads only the pinned or active Book catalog and writes no admission.
+func (s Service) OwnsComposeItem(ctx context.Context, itemID int64, op operation.Context) (bool, error) {
+	if s.Content == nil || s.Reads.DB == nil || itemID <= 0 {
+		return false, ErrUnavailable
+	}
+	revision, pinned := op.Policies.Get("content")
+	if !pinned {
+		active, on, err := s.Content.BookInputsActive(ctx)
+		if err != nil {
+			return false, err
+		}
+		if !on {
+			return false, nil
+		}
+		revision = active
+	}
+	var owned bool
+	outcome, err := s.Reads.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc tx.Scope) error {
+		catalog, err := s.Content.BookCatalogTx(ctx, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		_, owned = catalog.Books[itemID]
+		return nil
+	})
+	if errors.Is(err, book.ErrUnqualified) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if outcome.Outcome != tx.DefiniteCommit {
+		return false, ErrUnavailable
+	}
+	return owned, nil
+}
+
 func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command, op operation.Context) (Result, error) {
 	if !s.complete() || c.Validate() != nil || op.ID.IsZero() || op.StartedAt.IsZero() {
 		return Result{}, book.ErrUnqualified

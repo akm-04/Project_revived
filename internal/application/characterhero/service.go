@@ -84,6 +84,7 @@ type Service struct {
 	AcquisitionStore          AcquisitionStore
 	Acquisition               AcquisitionContent
 	MaterialCosts             appi5.TxMaterialCostDebiter
+	Exchange                  appi5.TxMaterialExchange
 	PlayerLevel               appi5.TxPlayerLevelReader
 	CollectionAdmission       CollectionAdmissionAuthorizer
 	Capacity                  CapacityAuthorizer

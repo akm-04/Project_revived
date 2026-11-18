@@ -81,6 +81,9 @@ func TestR4NilCollaboratorsAnswerDefect(t *testing.T) {
 		{"book", func() httpedge.Response {
 			return BookDispatcher{Authority: authority}.Dispatch(context.Background(), request)
 		}},
+		{"compose", func() httpedge.Response {
+			return ComposeDispatcher{Authority: authority}.Dispatch(context.Background(), request)
+		}},
 		{"campaign", func() httpedge.Response {
 			return CampaignDispatcher{Authority: authority}.Dispatch(context.Background(), request)
 		}},
