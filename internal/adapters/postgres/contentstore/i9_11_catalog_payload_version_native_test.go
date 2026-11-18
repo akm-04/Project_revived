@@ -31,7 +31,7 @@ func TestI911CatalogPayloadVersionNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer p.Close()
+	t.Cleanup(func() { p.Close() })
 
 	bundle, err := registry.LoadBuiltinBundle()
 	if err != nil {
@@ -62,14 +62,15 @@ func TestI911CatalogPayloadVersionNative(t *testing.T) {
 	}
 
 	// A version 0 row predates the column; the readers must decode it leniently.
-	for _, statement := range []string{
-		`UPDATE content_daily_buy_input_catalogs SET payload_version=0 WHERE revision_id=$1`,
-		`UPDATE content_compat_catalogs SET payload_version=0 WHERE revision_id=$1`,
-		`UPDATE content_shop_catalogs SET payload_version=0 WHERE revision_id=$1`,
-	} {
-		if _, err := p.Raw().Exec(ctx, statement, bundle.RevisionID()); err != nil {
+	for _, table := range []string{"content_daily_buy_input_catalogs", "content_compat_catalogs", "content_shop_catalogs"} {
+		if _, err := p.Raw().Exec(ctx, `UPDATE `+table+` SET payload_version=0 WHERE revision_id=$1`, bundle.RevisionID()); err != nil {
 			t.Fatal(err)
 		}
+		t.Cleanup(func() {
+			if _, err := p.Raw().Exec(ctx, `UPDATE `+table+` SET payload_version=$2 WHERE revision_id=$1`, bundle.RevisionID(), payload.Current); err != nil {
+				t.Errorf("%s payload_version restore: %v", table, err)
+			}
+		})
 	}
 	revision := bundle.RevisionID()
 	if _, err := store.DailyBuyInputsTx(ctx, p, revision); err != nil {
