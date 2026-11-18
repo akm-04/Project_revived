@@ -81,8 +81,8 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 			return refusal(34016)
 		}
 		plan, err := domain.PlanApplication(domain.ApplicationFacts{
-			Applicant:         domain.PlayerState{PlayerID: actor.PlayerID, LogicalServerID: actor.LogicalServerID, AcademyLevel: actorLevel},
-			Recipient:         domain.PlayerState{PlayerID: target, LogicalServerID: actor.LogicalServerID, AcademyLevel: targetProfile.Level},
+			Applicant:         playerStateFromRelations(actorRelations, actor.PlayerID, actorLevel, actor.LogicalServerID),
+			Recipient:         playerStateFromRelations(targetRelations, target, targetProfile.Level, actor.LogicalServerID),
 			ApplicantGateOpen: applicantGate, RecipientGateOpen: recipientGate, Seeking: domain.Slot(relationType),
 		}, rules)
 		if err != nil {
@@ -92,7 +92,6 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 			}
 			return applicationRefusal(err, studentLevel, rules)
 		}
-		_ = targetRelations
 		application, exists, err := service.Store.LockApplicationTx(ctx, t, actor.PlayerID, target)
 		if err != nil {
 			return err
@@ -489,6 +488,21 @@ func friendshipRefusal(err error, actor identity.PlayerID) error {
 	default:
 		return err
 	}
+}
+
+// playerStateFromRelations carries the locked active relations into the pair
+// facts, so PlanApplication sees each side's slot occupancy.
+func playerStateFromRelations(relations []domain.Relationship, player identity.PlayerID, level int64, server identity.LogicalServerID) domain.PlayerState {
+	state := domain.PlayerState{PlayerID: player, LogicalServerID: server, AcademyLevel: level}
+	for _, relation := range relations {
+		if relation.Student == player {
+			state.HasMentor, state.MentorID = true, relation.Mentor
+		}
+		if relation.Mentor == player {
+			state.HasStudent, state.StudentID = true, relation.Student
+		}
+	}
+	return state
 }
 
 func hasSlot(relations []domain.Relationship, player identity.PlayerID, slot domain.Slot) bool {

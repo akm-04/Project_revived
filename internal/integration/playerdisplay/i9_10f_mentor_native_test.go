@@ -259,6 +259,62 @@ func TestI9_10FMentorDailyApplicationLimit(t *testing.T) {
 	expectMentorRefusal(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(targets[3].PlayerID), "relation_type": int64(1), "msg": ""}), 1857, 34008)
 }
 
+// A-114 / C2: a teacher who already has a student occupies the recipient slot,
+// so another student's application is refused 34005 before any request row or
+// daily application count is written.
+func TestI9_10FMentorApplyRefusesFilledTeacherSlot(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	server := rankingServer(t, p)
+	teacher := mentorActorOn(t, p, server, 60)
+	student := mentorActorOn(t, p, server, 20)
+	applicant := mentorActorOn(t, p, server, 20)
+	apply := func(actor identity.ActorContext, target identity.PlayerID, relationType int64) httpedge.Response {
+		t.Helper()
+		return mentorCall(t, service, actor, 1857, map[string]any{"to_player_id": int64(target), "relation_type": relationType, "msg": ""})
+	}
+	expectMentorOK(t, apply(student, teacher.PlayerID, 1), 1857)
+	expectMentorOK(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859)
+
+	expectMentorRefusal(t, apply(applicant, teacher.PlayerID, 1), 1857, 34005)
+	var applications int64
+	if err := p.QueryRow(ctx, `SELECT count(*) FROM mentor_applications WHERE applicant_id=$1 AND target_id=$2`, int64(applicant.PlayerID), int64(teacher.PlayerID)).Scan(&applications); err != nil || applications != 0 {
+		t.Fatalf("refused application was written: %d %v", applications, err)
+	}
+	// The refusal must not spend one of the applicant's three daily applications.
+	for index := 0; index < 3; index++ {
+		other := mentorActorOn(t, p, server, 60)
+		expectMentorOK(t, apply(applicant, other.PlayerID, 1), 1857)
+	}
+}
+
+// A-114 / C2 mirror: a student who already has a mentor occupies the recipient
+// slot, so a teacher's application is refused 34005 before any row is written.
+func TestI9_10FMentorApplyRefusesFilledStudentSlot(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	server := rankingServer(t, p)
+	mentor := mentorActorOn(t, p, server, 60)
+	student := mentorActorOn(t, p, server, 20)
+	teacher := mentorActorOn(t, p, server, 60)
+	requireApply := func(actor identity.ActorContext, target identity.PlayerID, relationType int64) {
+		t.Helper()
+		expectMentorOK(t, mentorCall(t, service, actor, 1857, map[string]any{"to_player_id": int64(target), "relation_type": relationType, "msg": ""}), 1857)
+	}
+	requireApply(student, mentor.PlayerID, 1)
+	expectMentorOK(t, mentorCall(t, service, mentor, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859)
+
+	expectMentorRefusal(t, mentorCall(t, service, teacher, 1857, map[string]any{"to_player_id": int64(student.PlayerID), "relation_type": int64(2), "msg": ""}), 1857, 34005)
+	var applications int64
+	if err := p.QueryRow(ctx, `SELECT count(*) FROM mentor_applications WHERE applicant_id=$1 AND target_id=$2`, int64(teacher.PlayerID), int64(student.PlayerID)).Scan(&applications); err != nil || applications != 0 {
+		t.Fatalf("refused application was written: %d %v", applications, err)
+	}
+	var count int64
+	if err := p.QueryRow(ctx, `SELECT COALESCE((SELECT apply_count_student FROM mentor_states WHERE player_id=$1),0)`, int64(teacher.PlayerID)).Scan(&count); err != nil || count != 0 {
+		t.Fatalf("refused application spent the daily count: %d %v", count, err)
+	}
+}
+
 func TestI9_10FMentorGraduationExamAndClaim(t *testing.T) {
 	p := pool(t)
 	service := mentorService(p)
