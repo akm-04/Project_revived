@@ -14,6 +14,7 @@ import (
 	approominvite "gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -187,6 +188,9 @@ var sharedFailureRows = []failureRow{
 	{match: apppet.ErrPetPromotionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apppet.ErrPetAppearanceContentInactive, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apppractice.ErrContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	// An awakening refusal raised by an I5 provider (present but ineligible) is
+	// an operation rejection; only the absent provider is transient (D5).
+	{match: objective.ErrAwakeningRefused, class: failureRefusal, code: unprovenRefusalCode},
 	// A room invite over its PRIVATE_POLICY sender rate is a permanent refusal.
 	{match: approominvite.ErrSenderLimited, class: failureRefusal, code: unprovenRefusalCode},
 }

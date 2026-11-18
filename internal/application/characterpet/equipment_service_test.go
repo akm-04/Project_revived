@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -114,6 +115,16 @@ func TestPetEquipItemCrossRequestAlreadyEquippedIs30001SemanticResult(t *testing
 	}
 }
 
+type refusingAwakeningEquipment struct{}
+
+func (refusingAwakeningEquipment) PrepareAwakeningEquipmentTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, int64, int64, string) (*appi5.AwakeningEquipmentPermit, error) {
+	return nil, objective.ErrAwakeningRefused
+}
+
+func (refusingAwakeningEquipment) CommitAwakeningEquipmentTx(context.Context, tx.Tx, *appi5.AwakeningEquipmentPermit) (map[string]any, error) {
+	return nil, objective.ErrAwakeningRefused
+}
+
 func TestPetEquipItemAwakeningGateAndCommittedFact(t *testing.T) {
 	t.Run("unawakened-fails-closed", func(t *testing.T) {
 		svc, st, mat, rec, _ := petEquipmentFixture(t, character.PetEquipmentAwakening, false)
@@ -124,6 +135,18 @@ func TestPetEquipItemAwakeningGateAndCommittedFact(t *testing.T) {
 		}
 		if mat.calls != 0 || st.byID[1] != before || len(rec.m) != 0 {
 			t.Fatalf("unawakened path mutated state: calls=%d pet=%+v receipts=%d", mat.calls, st.byID[1], len(rec.m))
+		}
+	})
+	t.Run("present-provider-ineligibility-is-operation-rejection", func(t *testing.T) {
+		svc, st, mat, rec, _ := petEquipmentFixture(t, character.PetEquipmentAwakening, false)
+		svc.AwakeningEquipment = refusingAwakeningEquipment{}
+		before := st.byID[1]
+		_, err := svc.EquipItem(context.Background(), caActor(t), 1, 1, caOp(t, "50505050-5050-4050-8050-505050505050", 3004))
+		if !errors.Is(err, objective.ErrAwakeningRefused) {
+			t.Fatalf("err=%v", err)
+		}
+		if mat.calls != 0 || st.byID[1] != before || len(rec.m) != 0 {
+			t.Fatalf("ineligible path mutated state: calls=%d pet=%+v receipts=%d", mat.calls, st.byID[1], len(rec.m))
 		}
 	})
 	t.Run("already-awakened-succeeds-and-exposes-fact", func(t *testing.T) {
