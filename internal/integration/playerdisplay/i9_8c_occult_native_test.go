@@ -534,7 +534,8 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 		}
 	}
 	var best, finished int64
-	if err = p.QueryRow(ctx, `SELECT (scores->>'2')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 1480 {
+	// 1480 battle score plus campaign 20014's event 6 bonus (2000), granted at its clear (A-127).
+	if err = p.QueryRow(ctx, `SELECT (scores->>'2')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 3480 {
 		t.Fatalf("best score %d %v", best, err)
 	}
 	if err = p.QueryRow(ctx, `SELECT count(*) FROM occult_runs WHERE room_id=$1 AND finished_at IS NOT NULL`, roomID).Scan(&finished); err != nil || finished != 1 {
