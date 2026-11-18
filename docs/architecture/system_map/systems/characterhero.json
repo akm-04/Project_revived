@@ -5,19 +5,23 @@
  ],
  "contracts": [
   {
-   "count": 20,
+   "count": 25,
    "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
   },
   {
-   "count": 33,
+   "count": 39,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
   },
   {
    "count": 2,
    "file": "docs/i9/GUILD_NAME_LENGTH_POLICY_V1.json"
   },
   {
-   "count": 13,
+   "count": 16,
    "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
   },
   {
@@ -29,7 +33,7 @@
    "file": "docs/i9/I9_10D_RANKBOARDS_PRIVATE_POLICY_V1.json"
   },
   {
-   "count": 13,
+   "count": 15,
    "file": "docs/i9/I9_10F_MENTOR_V1.json"
   },
   {
@@ -45,15 +49,19 @@
    "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
   },
   {
+   "count": 1,
+   "file": "docs/i9/I9_4C_RESEARCH_PLAN.md"
+  },
+  {
    "count": 2,
    "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
   },
   {
-   "count": 1,
+   "count": 4,
    "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
   },
   {
-   "count": 1,
+   "count": 4,
    "file": "docs/i9/I9_ADVENTURE_V1.json"
   },
   {
@@ -67,6 +75,10 @@
   {
    "count": 1,
    "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_DORM_SOCIAL_GLUE_RANKING_V1.json"
   },
   {
    "count": 1,
@@ -89,7 +101,7 @@
    "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
   },
   {
-   "count": 1,
+   "count": 2,
    "file": "docs/i9/I9_GUILD_POLICY_V1.json"
   },
   {
@@ -105,7 +117,7 @@
    "file": "docs/i9/I9_ILLUSION_V1.json"
   },
   {
-   "count": 5,
+   "count": 6,
    "file": "docs/i9/I9_LIBRARY_V1.json"
   },
   {
@@ -129,15 +141,15 @@
    "file": "docs/i9/I9_MISSIONS_V1.json"
   },
   {
-   "count": 20,
+   "count": 25,
    "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
   },
   {
-   "count": 20,
+   "count": 25,
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
-   "count": 33,
+   "count": 39,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -145,12 +157,16 @@
    "file": "docs/i9/I9_OCCULT_POLICY_V1.json"
   },
   {
-   "count": 2,
+   "count": 3,
    "file": "docs/i9/I9_OCCULT_V1.json"
   },
   {
    "count": 1,
    "file": "docs/i9/I9_PET_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_PVP_RESIDUAL_HANDOFF_V1.json"
   },
   {
    "count": 2,
@@ -170,7 +186,8 @@
  ],
  "dispatcher_files": [
   "internal/adapters/stockruntime/hero_dispatcher.go",
-  "internal/adapters/stockruntime/items_energy_dispatcher.go"
+  "internal/adapters/stockruntime/items_energy_dispatcher.go",
+  "internal/adapters/stockruntime/shop_dispatcher.go"
  ],
  "facts": {
   "consumers": {},
@@ -255,6 +272,46 @@
    },
    "mid": 29,
    "name": "DAILY_CONSUNME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 38
+   },
+   "mid": 32,
+   "name": "LOAD_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 38
+   },
+   "mid": 33,
+   "name": "BUY_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 38
+   },
+   "mid": 34,
+   "name": "REFRESH_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 38
+   },
+   "mid": 37,
+   "name": "LOAD_SHOP_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 38
+   },
+   "mid": 38,
+   "name": "CLOSE_SHOP"
   },
   {
    "handler": {
@@ -487,6 +544,14 @@
    },
    "mid": 2979,
    "name": "USE_ILLUSION_SKIN_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 38
+   },
+   "mid": 2982,
+   "name": "BUY_SHOP_MULTI"
   },
   {
    "handler": {

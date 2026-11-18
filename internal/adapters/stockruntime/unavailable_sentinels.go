@@ -41,6 +41,7 @@ import (
 	unavailabledomainoneonone "gxb.local/backend/v2/internal/domain/oneonone"
 	unavailabledomainpetcampaign "gxb.local/backend/v2/internal/domain/petcampaign"
 	unavailabledomainprivilege "gxb.local/backend/v2/internal/domain/privilege"
+	unavailabledomainshop "gxb.local/backend/v2/internal/domain/shop"
 	unavailabledomainspirit "gxb.local/backend/v2/internal/domain/spirit"
 	unavailabledomainsummon "gxb.local/backend/v2/internal/domain/summon"
 	unavailabledomaintopfloor "gxb.local/backend/v2/internal/domain/topfloor"
@@ -92,6 +93,7 @@ var unavailableSentinels = []error{
 	unavailabledomainoneonone.ErrUnavailable,
 	unavailabledomainpetcampaign.ErrUnavailable,
 	unavailabledomainprivilege.ErrUnavailable,
+	unavailabledomainshop.ErrUnavailable,
 	unavailabledomainspirit.ErrUnavailable,
 	unavailabledomainsummon.ErrUnavailable,
 	unavailabledomaintopfloor.ErrUnavailable,

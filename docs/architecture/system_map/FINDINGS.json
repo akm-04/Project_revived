@@ -35,60 +35,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 32,
-   "name": "LOAD_SHOP",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/Shop.lua"
-   ],
-   "family": "SHOP",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 33,
-   "name": "BUY_SHOP",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/Shop.lua"
-   ],
-   "family": "SHOP",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 34,
-   "name": "REFRESH_SHOP",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/Shop.lua"
-   ],
-   "family": "SHOP",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 37,
-   "name": "LOAD_SHOP_LIST",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/Shop.lua"
-   ],
-   "family": "SHOP",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 38,
-   "name": "CLOSE_SHOP",
-   "files": [
-    "app/model/Shop.lua"
-   ],
-   "family": "SHOP",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 65,
    "name": "LOAD_COLLECTED_HEROS",
    "files": [
@@ -401,17 +347,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 2982,
-   "name": "BUY_SHOP_MULTI",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/Shop.lua"
-   ],
-   "family": "SHOP",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 4096,
    "name": "ACTIVITY_BROADCAST",
    "files": [
@@ -622,12 +557,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 566,
+  "count": 560,
   "window_sender_mid_count": 139,
-  "non_window_sender_mid_count": 427,
+  "non_window_sender_mid_count": 421,
   "registration_status_counts": {
    "inactive_fallback": 540,
-   "no_registration": 24,
+   "no_registration": 18,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -699,45 +634,6 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 32,
-    "name": "LOAD_SHOP",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/Shop.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/Shop.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 33,
-    "name": "BUY_SHOP",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/Shop.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/Shop.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 34,
-    "name": "REFRESH_SHOP",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/Shop.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/Shop.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 35,
     "name": "SHOP_MAGIC_UNLOCK",
     "registration_status": "inactive_fallback",
@@ -760,32 +656,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/Market.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 37,
-    "name": "LOAD_SHOP_LIST",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/Shop.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/Shop.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 38,
-    "name": "CLOSE_SHOP",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/Shop.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/Shop.lua"
     ],
     "runtime_reachability": "unknown"
    },
@@ -7208,19 +7078,6 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 2982,
-    "name": "BUY_SHOP_MULTI",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/Shop.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/Shop.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 2984,
     "name": "BATTLE_PASS_GET_INFO",
     "registration_status": "inactive_fallback",
@@ -9056,6 +8913,7 @@
     "publicprofile",
     "ranking",
     "sharedroom",
+    "shop",
     "socialexchange",
     "socialgift",
     "socialinvite",
@@ -9113,6 +8971,7 @@
     "publicprofile",
     "ranking",
     "sharedroom",
+    "shop",
     "socialexchange",
     "socialgift",
     "socialinvite",
@@ -9170,6 +9029,7 @@
     "publicprofile",
     "ranking",
     "sharedroom",
+    "shop",
     "socialexchange",
     "socialgift",
     "socialinvite",
@@ -9285,6 +9145,7 @@
     "ranking",
     "roominvite",
     "sharedroom",
+    "shop",
     "socialdismiss",
     "socialexchange",
     "socialgift",

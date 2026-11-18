@@ -411,6 +411,17 @@ func main() {
 		Authority:   authority,
 	})
 	bootstrap.DetailContributors = append(bootstrap.DetailContributors, itemsEnergy.MID1)
+	shopComposition := stockruntime.NewShopComposition(stockruntime.ShopDependencies{
+		Timed:       heroSvc.Timed,
+		Fresh:       pool,
+		Content:     contentDB,
+		Values:      i5db,
+		Privileges:  privileges,
+		I5:          i5svc,
+		Receipts:    receipts,
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+		Authority:   authority,
+	})
 	realtime := apprealtime.Service{
 		Authority: authority,
 		Guilds:    guildprojection.RealtimeMembership{Queryer: pool},
@@ -464,6 +475,10 @@ func main() {
 	}
 	for _, mid := range stockruntime.ItemsEnergyMIDs {
 		mustRegister(mid, energyDispatcher)
+	}
+	shopDispatcher := stockruntime.ShopDispatcher{Authority: authority, Service: shopComposition.Service}
+	for _, mid := range stockruntime.ShopMIDs {
+		mustRegister(mid, shopDispatcher)
 	}
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)

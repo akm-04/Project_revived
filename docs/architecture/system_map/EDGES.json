@@ -520,6 +520,9 @@
    "playerdisplay": [
     "*ReadCosmeticPrivilegeTx"
    ],
+   "shop": [
+    "*SnapshotTx"
+   ],
    "summon": [
     "*SnapshotTx"
    ],
@@ -863,6 +866,11 @@
     "Run"
    ],
    "sharedroom": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "shop": [
     "DecisionAt",
     "Operation",
     "Run"
@@ -1460,6 +1468,18 @@
    "sharedroom": [
     "*FenceActorTx"
    ],
+   "shop": [
+    "*ApplyItemsEnergyExchangeTx",
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareItemsEnergyExchangeTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*ReadScalarTx",
+    "*ReadStackTx",
+    "*SnapshotTx"
+   ],
    "socialexchange": [
     "*ApplyMaterialExchangeTx",
     "*FenceActorTx",
@@ -1878,6 +1898,7 @@
     "Update"
    ]
   },
+  "shop": {},
   "socialdismiss": {},
   "socialexchange": {
    "socialinvite": [
@@ -5430,6 +5451,39 @@
     "*LockPlayerRootsTx"
    ]
   },
+  "shop": {
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyItemsEnergyExchangeTx",
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareItemsEnergyExchangeTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadFunctionEligibilityTx",
+    "*ReadProgressionTx",
+    "*ReadScalarTx",
+    "*ReadStackTx",
+    "*SnapshotTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*ShopCatalogTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ]
+  },
   "socialdismiss": {
    "generation": [
     "DecisionAt",
@@ -6213,6 +6267,7 @@
   "realtimewakeup": [],
   "roominvite": [],
   "sharedroom": [],
+  "shop": [],
   "socialdismiss": [],
   "socialexchange": [
    "cmd/gxb-api/main_postgres.go"

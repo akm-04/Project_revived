@@ -805,6 +805,13 @@ func (r repo) InsertDailyBuyInputs(_ context.Context, x tx.Tx, b Bundle) (int64,
 	t.installed[b.RevisionID()] = v
 	return 1, nil
 }
+func (r repo) InsertShop(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.ShopCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
 func (r repo) InsertElementInputs(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]
