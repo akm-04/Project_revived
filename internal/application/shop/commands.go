@@ -127,6 +127,9 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err = s.save(c, sc, row, insert); err != nil {
 			return nil, err
 		}
+		if err = s.observePurchase(c, sc, actor.PlayerID); err != nil {
+			return nil, err
+		}
 		return map[string]any{"shop_type": shop.Type, "index": request.Index, "isbuy": int64(1), "isBuy": int64(1), "buy_times": int64(1)}, nil
 	})
 }
@@ -194,6 +197,9 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 			return nil, err
 		}
 		if err = s.save(c, sc, row, insert); err != nil {
+			return nil, err
+		}
+		if err = s.observePurchase(c, sc, actor.PlayerID); err != nil {
 			return nil, err
 		}
 		isBuy := make([]int64, len(request.List))

@@ -21,6 +21,9 @@
    "publicprofile": [
     "*TrophyCountTx"
    ],
+   "shop": [
+    "*ObserveShopPurchaseTx"
+   ],
    "summon": [
     "*ObserveMediumTenPullTx"
    ],
@@ -5554,6 +5557,9 @@
    ]
   },
   "shop": {
+   "achievement": [
+    "*ObserveShopPurchaseTx"
+   ],
    "commerceprivilege": [
     "*SnapshotTx"
    ],

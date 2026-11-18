@@ -43,7 +43,7 @@ func (s Service) TakeNotices(c context.Context, p identity.PlayerID, parent oper
 		if e != nil {
 			return e
 		}
-		view, e := s.viewTx(c, sc.Tx, catalog, p)
+		view, e := s.viewTx(c, sc.Tx, catalog, p, sc.Operation.DecisionAt())
 		if e != nil {
 			return e
 		}

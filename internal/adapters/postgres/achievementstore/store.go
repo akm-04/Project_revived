@@ -105,6 +105,48 @@ func (Store) CountBossFactsTx(c context.Context, q tx.Queryer, pid identity.Play
 	return count, nil
 }
 
+// IncrementDailyCountTx locks the (player, achievement) counter and returns the
+// new count; a stored day other than day restarts at 1. day is a modes.Day
+// number, stored as the date of its 05:00 GMT+8 boundary (1970-01-01 + day), so
+// no server session timezone takes part.
+func (Store) IncrementDailyCountTx(c context.Context, t tx.Tx, pid identity.PlayerID, achievementID, day int64) (int64, error) {
+	var count, storedDay int64
+	if t == nil || !pid.Valid() || achievementID != d.GreatCustomerID || day != int64(int32(day)) {
+		return 0, d.ErrUnavailable
+	}
+	e := t.QueryRow(c, `INSERT INTO achievement_daily_counts(player_id,achievement_id,day,count)VALUES($1,$2,DATE '1970-01-01'+$3::int,1)
+ON CONFLICT(player_id,achievement_id)DO UPDATE SET day=EXCLUDED.day,
+ count=CASE WHEN achievement_daily_counts.day=EXCLUDED.day THEN achievement_daily_counts.count+1 ELSE 1 END
+RETURNING count,day-DATE '1970-01-01'`, int64(pid), achievementID, day).Scan(&count, &storedDay)
+	if e != nil {
+		return 0, e
+	}
+	if storedDay != day {
+		return 0, d.ErrConflict
+	}
+	return count, nil
+}
+
+// DailyCountTx projects today's count; a row left on an earlier day reads 0 and
+// is not rewritten.
+func (Store) DailyCountTx(c context.Context, q tx.Queryer, pid identity.PlayerID, achievementID, day int64) (int64, error) {
+	var count, storedDay int64
+	if q == nil || !pid.Valid() || achievementID != d.GreatCustomerID || day != int64(int32(day)) {
+		return 0, d.ErrUnavailable
+	}
+	e := q.QueryRow(c, `SELECT count,day-DATE '1970-01-01' FROM achievement_daily_counts WHERE player_id=$1 AND achievement_id=$2`, int64(pid), achievementID).Scan(&count, &storedDay)
+	if errors.Is(e, kernelstore.ErrNoRows) {
+		return 0, nil
+	}
+	if e != nil {
+		return 0, e
+	}
+	if storedDay != day {
+		return 0, nil
+	}
+	return count, nil
+}
+
 // NoticeIDsDeliveredAtTx returns the achievement ids this login consumed, in
 // first-earned order and once per achievement (the notice-17 push dedupes the
 // same way).

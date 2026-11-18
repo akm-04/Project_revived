@@ -15,6 +15,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -188,7 +189,7 @@ func (s Service) Load(c context.Context, a identity.ActorContext, parent operati
 		if e != nil {
 			return e
 		}
-		out, e = s.viewTx(c, sc.Tx, catalog, a.PlayerID)
+		out, e = s.viewTx(c, sc.Tx, catalog, a.PlayerID, sc.Operation.DecisionAt())
 		return e
 	})
 	return out, e
@@ -299,7 +300,7 @@ func (s Service) earnedTx(c context.Context, q tx.Queryer, p identity.PlayerID) 
 	return root, streaks, earned, nil
 }
 
-func (s Service) viewTx(c context.Context, q tx.Queryer, catalog d.Catalog, p identity.PlayerID) (View, error) {
+func (s Service) viewTx(c context.Context, q tx.Queryer, catalog d.Catalog, p identity.PlayerID, at time.Time) (View, error) {
 	var out View
 	root, streaks, earned, e := s.earnedTx(c, q, p)
 	if e != nil {
@@ -307,8 +308,16 @@ func (s Service) viewTx(c context.Context, q tx.Queryer, catalog d.Catalog, p id
 	}
 	progress := map[int64]int64{d.SelectedID: root.Progress}
 	for _, streak := range streaks {
+		if streak.AchievementID == d.GreatCustomerID {
+			continue
+		}
 		progress[streak.AchievementID] = streak.Current
 	}
+	count, e := s.Store.DailyCountTx(c, q, p, d.GreatCustomerID, modes.Day(at))
+	if e != nil {
+		return out, e
+	}
+	progress[d.GreatCustomerID] = count
 	for _, row := range catalog.Rows {
 		entry := Entry{AchievementID: row.ID, Status: d.StatusOf(row.ID), Progress: progress[row.ID]}
 		for i, at := range earned[row.ID] {

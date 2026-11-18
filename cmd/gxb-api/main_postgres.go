@@ -428,15 +428,16 @@ func main() {
 	})
 	bootstrap.DetailContributors = append(bootstrap.DetailContributors, heroAssets.Bootstrap)
 	shopComposition := stockruntime.NewShopComposition(stockruntime.ShopDependencies{
-		Timed:       heroSvc.Timed,
-		Fresh:       pool,
-		Content:     contentDB,
-		Values:      i5db,
-		Privileges:  privileges,
-		I5:          i5svc,
-		Receipts:    receipts,
-		ReceiptRead: kernelstore.Reader{Queryer: pool},
-		Authority:   authority,
+		Timed:        heroSvc.Timed,
+		Fresh:        pool,
+		Content:      contentDB,
+		Values:       i5db,
+		Privileges:   privileges,
+		I5:           i5svc,
+		Receipts:     receipts,
+		ReceiptRead:  kernelstore.Reader{Queryer: pool},
+		Authority:    authority,
+		Achievements: achievements,
 	})
 	realtime := apprealtime.Service{
 		Authority: authority,
