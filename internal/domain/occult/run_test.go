@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"slices"
 	"testing"
 )
 
@@ -195,32 +196,171 @@ func TestSoloRefusesMoreHeroesThanDispatchLimit(t *testing.T) {
 	}
 }
 
-func TestEventsApplyInServerOrder(t *testing.T) {
+func TestPrepareEventsApplyOnce(t *testing.T) {
 	catalog := Catalog{EventPercent: 30, EventDispatch: 3}
+	intro := Campaign{ID: 20003, EventID: int64(EventIncreaseDispatch)}
 	run := NewRun(2, MultiCampaignType)
-	_ = run.BindStages(20003, []int64{500, 500})
-	_ = run.Enter(20003, 0, 11)
-	run.HeroStatus = map[string]map[string]HeroStatus{"11": {"1": {HP: 50, MP: 90, LimitHP: 100}, "2": {HP: 0, MP: 0, LimitHP: 100}}}
-	outcomes := run.ApplyEvents(catalog, 20003, []int64{5, 4, 3, 2, 2, 6, 0})
-	order := []EventType{}
-	for _, outcome := range outcomes {
-		order = append(order, outcome.Type)
+	outcomes := run.TriggerEvent(catalog, intro)
+	if len(outcomes) != 1 || outcomes[0].Type != EventIncreaseDispatch || outcomes[0].DispatchLimit != DispatchLimit+3 || run.DispatchLimit != DispatchLimit+3 {
+		t.Fatalf("dispatch event %+v limit=%d", outcomes, run.DispatchLimit)
 	}
-	if len(order) != 4 || order[0] != EventRecoverHP || order[1] != EventRecoverMP || order[2] != EventReviveHero || order[3] != EventIncreaseDispatch {
-		t.Fatalf("order=%v", order)
+	if len(run.TriggerEvent(catalog, intro)) != 0 || run.DispatchLimit != DispatchLimit+3 {
+		t.Fatal("a dispatch event fires once per campaign")
 	}
-	if got, _ := run.Status(11, 1); got != (HeroStatus{HP: 80, MP: 390, LimitHP: 100}) {
-		t.Fatalf("hero 1=%+v", got)
+	_ = run.BindStages(20004, []int64{500, 500})
+	_ = run.Enter(20004, 0, 11)
+	autoPass := Campaign{ID: 20004, EventID: int64(EventAutoPass)}
+	if outcomes = run.TriggerEvent(catalog, autoPass); len(outcomes) != 1 || !run.Cleared(20004) || run.Stages["20004"][0].InBattle != 0 {
+		t.Fatalf("auto pass outcomes=%v", outcomes)
 	}
-	if got, _ := run.Status(11, 2); got != (HeroStatus{HP: 30, MP: 300, LimitHP: 100}) {
-		t.Fatalf("revived hero 2=%+v", got)
+	if len(run.TriggerEvent(catalog, autoPass)) != 0 {
+		t.Fatal("an auto pass fires once per campaign")
 	}
-	if run.DispatchLimit != DispatchLimit+3 || outcomes[3].DispatchLimit != DispatchLimit+3 {
-		t.Fatalf("dispatch=%d", run.DispatchLimit)
+}
+
+func TestClearResultEventsDoNotFireAtPrepare(t *testing.T) {
+	catalog := generatedCatalog(t)
+	cases := []struct {
+		campaignID   int64
+		chapterID    int64
+		campaignType int64
+	}{
+		{30002, 3, MultiCampaignType},
+		{30016, 3, SingleCampaignType},
+		{30007, 3, MultiCampaignType},
+		{40015, 4, SingleCampaignType},
 	}
-	run.ApplyEvents(catalog, 20003, []int64{1})
-	if !run.Cleared(20003) || run.Stages["20003"][0].InBattle != 0 {
-		t.Fatal("auto pass clears the campaign")
+	for _, c := range cases {
+		campaign, found := catalog.Campaign(c.campaignID)
+		if !found {
+			t.Fatalf("campaign %d missing", c.campaignID)
+		}
+		run := NewRun(c.chapterID, c.campaignType)
+		if err := run.BindRoom(catalog); err != nil {
+			t.Fatal(err)
+		}
+		run.HeroStatus = map[string]map[string]HeroStatus{key(11): {
+			key(1): {HP: 50, MP: 100, LimitHP: 100},
+			key(2): {HP: 0, MP: 0, LimitHP: 100},
+		}}
+		if outcomes := run.TriggerEvent(catalog, campaign); len(outcomes) != 0 {
+			t.Fatalf("campaign %d applied %v at prepare", c.campaignID, outcomes)
+		}
+		if slices.Contains(run.EventsDone, campaign.ID) || run.ExtraPoints != 0 {
+			t.Fatalf("campaign %d was consumed at prepare: done=%v extra=%d", c.campaignID, run.EventsDone, run.ExtraPoints)
+		}
+		if status, _ := run.Status(11, 1); status.HP != 50 || status.MP != 100 {
+			t.Fatalf("campaign %d changed the final team before a result: %+v", c.campaignID, status)
+		}
+		if status, _ := run.Status(11, 2); status.HP != 0 {
+			t.Fatalf("campaign %d revived a dead girl before a result: %+v", c.campaignID, status)
+		}
+	}
+}
+
+func TestClearEventRecoversOnlyTheAcceptedFinalTeam(t *testing.T) {
+	catalog := generatedCatalog(t)
+	campaign, _ := catalog.Campaign(30002)
+	run := NewRun(3, MultiCampaignType)
+	if err := run.BindRoom(catalog); err != nil {
+		t.Fatal(err)
+	}
+	run.HeroStatus = map[string]map[string]HeroStatus{key(11): {
+		key(1): {HP: 50, MP: 100, LimitHP: 200},
+		key(2): {HP: 10, MP: 200, LimitHP: 200},
+	}}
+	finalTeam := []CampaignHero{{PlayerID: 11, HeroID: 1}}
+	run.RecordCampaignHeroes(campaign.ID, append(finalTeam, CampaignHero{PlayerID: 11, HeroID: 2}))
+	if len(run.ClearEvents(catalog, campaign, finalTeam)) != 0 {
+		t.Fatal("an uncleared campaign applied its clear event")
+	}
+	for index := range run.Stages["30002"] {
+		run.Stages["30002"][index].HP = 0
+	}
+	outcomes := run.ClearEvents(catalog, campaign, finalTeam)
+	if len(outcomes) != 1 || outcomes[0].Type != EventRecoverHP {
+		t.Fatalf("outcomes=%v", outcomes)
+	}
+	if status, _ := run.Status(11, 1); status.HP != 110 || status.MP != 100 {
+		t.Fatalf("the final team was not healed by 30%%: %+v", status)
+	}
+	if status, _ := run.Status(11, 2); status.HP != 10 || status.MP != 200 {
+		t.Fatalf("a girl outside the final team was healed: %+v", status)
+	}
+	if len(run.ClearEvents(catalog, campaign, finalTeam)) != 0 {
+		t.Fatal("a clear event fires once per campaign")
+	}
+}
+
+func TestClearEventRevivesOnlyTheFinalTeamDead(t *testing.T) {
+	catalog := generatedCatalog(t)
+	campaign, _ := catalog.Campaign(30007)
+	run := NewRun(3, MultiCampaignType)
+	if err := run.BindRoom(catalog); err != nil {
+		t.Fatal(err)
+	}
+	run.HeroStatus = map[string]map[string]HeroStatus{key(11): {
+		key(1): {HP: 0, MP: 0, LimitHP: 200},
+		key(2): {HP: 0, MP: 0, LimitHP: 200},
+	}}
+	for index := range run.Stages["30007"] {
+		run.Stages["30007"][index].HP = 0
+	}
+	outcomes := run.ClearEvents(catalog, campaign, []CampaignHero{{PlayerID: 11, HeroID: 1}})
+	if len(outcomes) != 1 || outcomes[0].Type != EventReviveHero {
+		t.Fatalf("outcomes=%v", outcomes)
+	}
+	if status, _ := run.Status(11, 1); status.HP != 60 {
+		t.Fatalf("the final team's dead girl was not revived: %+v", status)
+	}
+	if status, _ := run.Status(11, 2); status.HP != 0 {
+		t.Fatalf("a girl outside the final team was revived: %+v", status)
+	}
+}
+
+func TestExtraPointHonoursEventConditionAndIsConsumedOnce(t *testing.T) {
+	catalog := generatedCatalog(t)
+	campaign, _ := catalog.Campaign(40015)
+	run := NewRun(4, SingleCampaignType)
+	if err := run.BindRoom(catalog); err != nil {
+		t.Fatal(err)
+	}
+	for index := range run.Stages["40015"] {
+		run.Stages["40015"][index].HP = 0
+	}
+	eight := make([]CampaignHero, 0, campaign.EventCondition)
+	for heroID := int64(1); heroID <= campaign.EventCondition; heroID++ {
+		eight = append(eight, CampaignHero{PlayerID: 11, HeroID: heroID})
+	}
+	run.RecordCampaignHeroes(campaign.ID, eight)
+	if outcomes := run.ClearEvents(catalog, campaign, eight); len(outcomes) != 1 || outcomes[0].Type != EventExtraPoint || outcomes[0].ExtraPoints != 1000 || run.ExtraPoints != 1000 || run.Points != 1000 {
+		t.Fatalf("outcomes=%v extra=%d points=%d", outcomes, run.ExtraPoints, run.Points)
+	}
+	if len(run.ClearEvents(catalog, campaign, eight)) != 0 || run.ExtraPoints != 1000 || run.Points != 1000 {
+		t.Fatalf("the bonus was granted twice: extra=%d points=%d", run.ExtraPoints, run.Points)
+	}
+
+	tooMany := NewRun(4, SingleCampaignType)
+	if err := tooMany.BindRoom(catalog); err != nil {
+		t.Fatal(err)
+	}
+	for index := range tooMany.Stages["40015"] {
+		tooMany.Stages["40015"][index].HP = 0
+	}
+	nine := make([]CampaignHero, 0, campaign.EventCondition+1)
+	for heroID := int64(1); heroID <= campaign.EventCondition+1; heroID++ {
+		nine = append(nine, CampaignHero{PlayerID: 11, HeroID: heroID})
+	}
+	tooMany.RecordCampaignHeroes(campaign.ID, nine)
+	tooMany.RecordCampaignHeroes(campaign.ID, nine)
+	if outcomes := tooMany.ClearEvents(catalog, campaign, nine); len(outcomes) != 0 || tooMany.ExtraPoints != 0 {
+		t.Fatalf("nine girls passed condition %d: %v extra=%d", campaign.EventCondition, outcomes, tooMany.ExtraPoints)
+	}
+	if !slices.Contains(tooMany.EventsDone, campaign.ID) {
+		t.Fatal("a missed clear event was not consumed with its clearance")
+	}
+	if len(tooMany.CampaignHeroes[key(campaign.ID)]) != int(campaign.EventCondition+1) {
+		t.Fatalf("participants were not deduplicated: %v", tooMany.CampaignHeroes)
 	}
 }
 
@@ -258,11 +398,18 @@ func TestRoomMapReachabilityEventsAndChapterClear(t *testing.T) {
 		t.Fatal("clearing a campaign opens its unlocks, not the chapter")
 	}
 	eventful, _ := catalog.Campaign(20014)
-	outcomes := run.TriggerEvent(catalog, eventful)
+	if outcomes := run.TriggerEvent(catalog, eventful); len(outcomes) != 0 || run.ExtraPoints != 0 {
+		t.Fatalf("event 6 fired at prepare: %+v extra=%d", outcomes, run.ExtraPoints)
+	}
+	for index := range run.Stages["20014"] {
+		run.Stages["20014"][index].HP = 0
+	}
+	run.RecordCampaignHeroes(eventful.ID, []CampaignHero{{PlayerID: 11, HeroID: 1}})
+	outcomes := run.ClearEvents(catalog, eventful, nil)
 	if len(outcomes) != 1 || outcomes[0].Type != EventExtraPoint || outcomes[0].ExtraPoints != 2000 || run.ExtraPoints != 2000 {
 		t.Fatalf("event 6 bonus %+v extra=%d", outcomes, run.ExtraPoints)
 	}
-	if len(run.TriggerEvent(catalog, eventful)) != 0 || run.ExtraPoints != 2000 {
+	if len(run.ClearEvents(catalog, eventful, nil)) != 0 || run.ExtraPoints != 2000 {
 		t.Fatal("the bonus event fires once per campaign")
 	}
 	autoPass := Campaign{ID: 20012, EventID: int64(EventAutoPass)}
