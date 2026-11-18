@@ -13,18 +13,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 17,
-   "name": "LOAD_PLAYER_INFO",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/Player.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 20,
    "name": "LOAD_SCROLLS",
    "files": [
@@ -90,17 +78,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 35,
-   "name": "SHOP_MAGIC_UNLOCK",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/MagicShop.lua"
-   ],
-   "family": "SHOP",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 37,
    "name": "LOAD_SHOP_LIST",
    "files": [
@@ -122,30 +99,10 @@
    "stage": "I9-11"
   },
   {
-   "mid": 64,
-   "name": "EXPAND_HERO_SLOTS",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 65,
    "name": "LOAD_COLLECTED_HEROS",
    "files": [
     "app/common/network/Backend.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 66,
-   "name": "DISMISS_HERO",
-   "files": [
     "app/model/SelfPlayer.lua"
    ],
    "family": "HERO_ASSET_RESIDUAL",
@@ -336,48 +293,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 208,
-   "name": "LOAD_BATTLE_FORMATION",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/Player.lua"
-   ],
-   "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 209,
-   "name": "SET_FORMATION",
-   "files": [
-    "app/model/Player.lua"
-   ],
-   "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 211,
-   "name": "LOAD_FRIEND_REP_HEROS",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 212,
-   "name": "END_BATTLE",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 241,
    "name": "EXCHAGE_CODE_HERO",
    "files": [
@@ -391,26 +306,15 @@
    "stage": "I9-11"
   },
   {
-   "mid": 246,
-   "name": "SAKURA_FIGHT_RESULT",
-   "files": [
-    "app/model/Sakura.lua",
-    "app/scenes/BattleCreate.lua"
-   ],
-   "family": null,
-   "disposition": null,
-   "stage": null
-  },
-  {
    "mid": 279,
    "name": "ARENA_FIGHT_RESULT",
    "files": [
     "app/common/network/Backend.lua",
     "app/scenes/BattleCreateReport.lua"
    ],
-   "family": null,
-   "disposition": null,
-   "stage": null
+   "family": "BATTLE_LEGACY_ENVELOPE",
+   "disposition": "ACTIVE",
+   "stage": "I9-11"
   },
   {
    "mid": 435,
@@ -503,17 +407,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 1051,
-   "name": "HERO_SELL_AWARD",
-   "files": [
-    "app/windows/ActivitySelectHeroWindow.lua",
-    "app/windows/SelectSXHeroWindow.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 1170,
    "name": "BROCAST_FINISH_JIGSAW",
    "files": [
@@ -533,16 +426,6 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "stage": "I9-11"
-  },
-  {
-   "mid": 1412,
-   "name": "REGION_FIGHT_RESULT",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": null,
-   "disposition": null,
-   "stage": null
   },
   {
    "mid": 1864,
@@ -870,8 +753,8 @@
   "window_sender_mid_count": 140,
   "non_window_sender_mid_count": 433,
   "registration_status_counts": {
-   "inactive_fallback": 527,
-   "no_registration": 44,
+   "inactive_fallback": 536,
+   "no_registration": 35,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -893,7 +776,7 @@
    {
     "mid": 17,
     "name": "LOAD_PLAYER_INFO",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/Player.lua"
     ],
@@ -997,7 +880,7 @@
    {
     "mid": 35,
     "name": "SHOP_MAGIC_UNLOCK",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/MagicShop.lua"
     ],
@@ -1049,7 +932,7 @@
    {
     "mid": 64,
     "name": "EXPAND_HERO_SLOTS",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -1075,7 +958,7 @@
    {
     "mid": 66,
     "name": "DISMISS_HERO",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -1205,7 +1088,7 @@
    {
     "mid": 208,
     "name": "LOAD_BATTLE_FORMATION",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/Player.lua"
     ],
@@ -1218,7 +1101,7 @@
    {
     "mid": 209,
     "name": "SET_FORMATION",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/Player.lua"
     ],
@@ -1231,7 +1114,7 @@
    {
     "mid": 211,
     "name": "LOAD_FRIEND_REP_HEROS",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -1419,7 +1302,7 @@
    {
     "mid": 246,
     "name": "SAKURA_FIGHT_RESULT",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/Sakura.lua",
      "app/scenes/BattleCreate.lua"
@@ -2209,7 +2092,7 @@
    {
     "mid": 1051,
     "name": "HERO_SELL_AWARD",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/windows/ActivitySelectHeroWindow.lua",
      "app/windows/SelectSXHeroWindow.lua"
@@ -8486,11 +8369,26 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 575,
+  "count": 593,
   "mids": [
+   17,
    31,
+   35,
    36,
+   64,
+   66,
+   80,
+   84,
+   85,
    162,
+   208,
+   209,
+   210,
+   211,
+   212,
+   213,
+   224,
+   225,
    231,
    232,
    233,
@@ -8504,6 +8402,7 @@
    243,
    244,
    245,
+   246,
    247,
    248,
    249,
@@ -8573,6 +8472,7 @@
    1048,
    1049,
    1050,
+   1051,
    1120,
    1121,
    1122,
@@ -8631,6 +8531,7 @@
    1409,
    1410,
    1411,
+   1412,
    1413,
    1414,
    1415,
@@ -9073,6 +8974,21 @@
    "system": ""
   },
   {
+   "mid": 80,
+   "name": "LOAD_RUNE",
+   "system": ""
+  },
+  {
+   "mid": 84,
+   "name": "EQUIP_RUNE",
+   "system": ""
+  },
+  {
+   "mid": 85,
+   "name": "UNEQUIP_RUNE",
+   "system": ""
+  },
+  {
    "mid": 163,
    "name": "OPEN_AWAKE_MISSION",
    "system": "i5"
@@ -9096,6 +9012,26 @@
    "mid": 168,
    "name": "GIVE_UP_AWAKE_TWICE_MISSION",
    "system": "i5"
+  },
+  {
+   "mid": 210,
+   "name": "ENTER_BATTLE",
+   "system": ""
+  },
+  {
+   "mid": 213,
+   "name": "BATTLE_REVIVE",
+   "system": ""
+  },
+  {
+   "mid": 224,
+   "name": "LOAD_GIFTBOX",
+   "system": ""
+  },
+  {
+   "mid": 225,
+   "name": "RECEIVE_GIFT_BOX_ITEM",
+   "system": ""
   },
   {
    "mid": 539,
