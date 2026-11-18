@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-11c-core-shops"
+COMPILER_VERSION = "i9-11d-compat"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -157,6 +157,7 @@ SOURCE_MANIFEST = [
     ('data/tables/legend_reward.lua', 'cbcbe0077320c12820400225564cd1d0dc3f0d5af7ea86b36af98d58cc61efdf', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
     ('data/tables/translation.lua', '734790d99e4022575ebb3bb3e229cac21ffcf26c84d22dee28c76082dcaf8a36', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
     ('data/tables/message.lua', '538875e1f791c1faf2c0ad113eb73b1d3a53d1c07d9738f4c70315fa59e00e1d', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
+    ('data/tables/message_push.lua', '716316d7392f511572567d1b4ff65199cc11758fe39b59de0bd9e49d7d1c4aa7', 'I9_11D_COMPAT_MESSAGE_PUSH_SOURCE_BOUNDARY'),
     ('app/model/PeakArena.lua', '08ad1b2d481cce1e4b1ffd6d53830f28d5f6853deecd8275ed74efd97d64fbaf', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
     ('app/common/tables/PeakArenaRankTable.lua', '6b180815bdfd1e70b9cc62585bff5174cb798e4ea44a417419120860fd74e01e', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
     ('app/common/tables/PeakArenaRewardTable.lua', 'aa0a05d28378ddac1e2a5aa622b8c866680a51484c02a70315c5584edeb4d364', 'I7C5C_ONE_ON_ONE_SOURCE_BOUNDARY'),
@@ -493,6 +494,7 @@ ENABLED_CAPABILITIES = [
     "SOCIAL_CONTENT_I9_10E",
     "DAILY_BUY_INPUTS_I9_11B",
     "CORE_SHOPS_I9_11C",
+    "COMPAT_MESSAGE_PUSH_I9_11D",
 ]
 
 
@@ -745,6 +747,7 @@ from conquer_mode_content import build_conquer_mode
 from course_content import build_course
 from social_content import build_social
 from daily_buy_content import build_daily_buy_inputs
+from compat_content import build_message_push
 class CompileError(ValueError):
     pass
 
@@ -2794,6 +2797,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
             stone_item_by_item,
             CompileError,
         ),
+        "compat_message_push_catalog.json": build_message_push(parse_generated_lua_table(blobs["data/tables/message_push.lua"].data), blobs["data/tables/message_push.lua"].sha256, CompileError),
         "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,
         "function_gates.json": function_artifact,

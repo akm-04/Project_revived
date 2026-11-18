@@ -24,7 +24,8 @@
    "apppetcampaign.Mode",
    "appgodstrial.Mode",
    "appworldboss.Mode",
-   "appadventure.Mode"
+   "appadventure.Mode",
+   "appcompat.BootstrapProjection"
   ],
   "LoginReconcilers": [
    "i4store.PlayerLoginActivity",
@@ -40,6 +41,8 @@
   "mid_to_system": {
    "1": "bootstrap",
    "100": "playerdisplay",
+   "1025": "compat",
+   "1026": "compat",
    "1056": "bookskill",
    "1057": "bookskill",
    "1058": "bookskill",
@@ -191,6 +194,7 @@
    "1861": "mentor",
    "1862": "mentor",
    "1863": "mentor",
+   "1864": "compat",
    "187": "socialrelation",
    "1872": "arena",
    "1873": "arena",
@@ -341,6 +345,7 @@
    "278": "topfloor",
    "2784": "librarylocal",
    "2785": "librarylocal",
+   "279": "realtimeauth",
    "2790": "conquerschool",
    "28": "characterhero",
    "280": "topfloor",
@@ -713,6 +718,7 @@
    "petcampaign_players": "petcampaign",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
+   "player_compat_preferences": "compat",
    "player_course_admissions": "course",
    "player_course_heroes": "course",
    "player_course_roots": "course",
@@ -1012,6 +1018,15 @@
    "tables": 5
   },
   {
+   "callees": 3,
+   "callers": 0,
+   "mids": 3,
+   "name": "compat",
+   "path": "internal/application/compat",
+   "purpose": "",
+   "tables": 1
+  },
+  {
    "callees": 12,
    "callers": 4,
    "mids": 7,
@@ -1247,7 +1262,7 @@
   },
   {
    "callees": 13,
-   "callers": 60,
+   "callers": 61,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1473,7 +1488,7 @@
   {
    "callees": 2,
    "callers": 1,
-   "mids": 4,
+   "mids": 5,
    "name": "realtimeauth",
    "path": "internal/application/realtimeauth",
    "purpose": "orchestrates I3 gameplay-context authority for stock realtime discovery and admission",

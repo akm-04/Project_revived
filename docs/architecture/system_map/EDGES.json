@@ -540,6 +540,7 @@
     "*SnapshotTx"
    ]
   },
+  "compat": {},
   "conquerschool": {
    "achievement": [
     "*FactsTx"
@@ -1212,6 +1213,9 @@
     "DefaultProfile",
     "SnapshotTx",
     "Validate"
+   ],
+   "compat": [
+    "*FenceActorTx"
    ],
    "conquerschool": [
     "*DebitMaterialCostTx",
@@ -3240,6 +3244,18 @@
    ],
    "workplace": [
     "*Now"
+   ]
+  },
+  "compat": {
+   "i5": [
+    "*FenceActorTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*MessagePushCatalogTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
    ]
   },
   "conquerschool": {
@@ -6220,6 +6236,9 @@
   "combat": [],
   "commerceprivilege": [
    "cmd/gxb-api/main_postgres.go"
+  ],
+  "compat": [
+   "cmd/gxb-api/compat_postgres.go"
   ],
   "conquerschool": [
    "cmd/gxb-api/top_floor_postgres.go"

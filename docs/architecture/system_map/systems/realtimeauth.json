@@ -7,7 +7,7 @@
    "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
   },
   {
-   "count": 4,
+   "count": 5,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
   {
@@ -75,7 +75,7 @@
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
-   "count": 4,
+   "count": 5,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -85,6 +85,7 @@
  ],
  "decorated_by": [],
  "dispatcher_files": [
+  "internal/adapters/stockruntime/arena_result_dispatcher.go",
   "internal/adapters/stockruntime/function_click.go",
   "internal/adapters/stockruntime/guild_war_dispatcher.go",
   "internal/adapters/stockruntime/http_dispatchers.go",
@@ -127,6 +128,14 @@
    },
    "mid": 192,
    "name": "LOAD_CHAT_ROOM_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_result_dispatcher.go",
+    "line": 26
+   },
+   "mid": 279,
+   "name": "ARENA_FIGHT_RESULT"
   },
   {
    "handler": {

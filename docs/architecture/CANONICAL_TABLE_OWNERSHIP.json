@@ -2423,6 +2423,31 @@
         "retention": null
       }
     },
+    "player_compat_preferences": {
+      "allowed_query_owners": [
+        "compat"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/compatstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/compatstore/"
+      ],
+      "migration": "migrations/00176_i9_11d_compat_preferences.sql",
+      "owner": "compat",
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
     "player_currency_balances": {
       "allowed_query_owners": [
         "typed-economy"
@@ -5301,6 +5326,33 @@
         "via": "player_hero_roots",
         "kind": "ledger",
         "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "content_compat_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00176_i9_11d_compat_preferences.sql",
+      "owner": "content-registry",
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
         "references": [],
         "retention": null
       }

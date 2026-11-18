@@ -226,6 +226,7 @@ const verifyGuildBroadcastSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload
 const verifySocialGiftSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false) FROM content_social_gift_catalogs WHERE revision_id=$1`
 
 const verifySocialInputSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_social_input_catalogs WHERE revision_id=$1`
+const verifyCompatMessagePushSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_compat_catalogs WHERE revision_id=$1`
 
 func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle) (registry.Verification, error) {
 	if q == nil {
@@ -470,6 +471,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return v, err
 	}
 	v.Exact = v.Exact && socialInputExact
+	var compatMessagePushExact bool
+	err = q.QueryRow(ctx, verifyCompatMessagePushSQL, b.RevisionID(), string(b.CompatMessagePushJSON())).Scan(&compatMessagePushExact, &v.CompatMessagePushCount)
+	if err != nil {
+		return v, err
+	}
+	v.Exact = v.Exact && compatMessagePushExact
 	var broadcastExact bool
 	err = q.QueryRow(ctx, verifyGuildBroadcastSQL, b.RevisionID(), string(b.GuildBroadcastJSON())).Scan(&broadcastExact, &v.GuildBroadcastCount)
 	v.Exact = v.Exact && broadcastExact

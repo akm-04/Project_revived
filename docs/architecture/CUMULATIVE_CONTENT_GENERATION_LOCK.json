@@ -579,14 +579,32 @@
       "revision_id": "585dc763dc513a6416718194d8363c61e50d1c1c26d46a85fdb3e568d7a11987",
       "scope": "daily_buy_input_catalog.json gains vip.skill_buy/skill_max and refresh_cost.buy_skill_cost from the same exact archive for the I9-11A skill-point buy and cap rules; every other artifact byte-identical.",
       "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 75,
+      "stage": "I9-11C Core Shops",
+      "compiler_version": "i9-11c-core-shops",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "752d85fa407113c695678d4a6d323396acacb5d04f27dae0debaa1d3d7bcdd25",
+      "scope": "New shop_catalog.json artifact and CORE_SHOPS_I9_11C capability from the exact archive (shop_config plus the 30 shop item tables); every other artifact byte-identical. Registered by the lead at the 11D merge (the 11C merge 782fc150 omitted it).",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "stage": "I9-11D Compatibility",
+      "compiler_version": "i9-11d-compat",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "11902b0a5e92186765236aa0295d4e5939704c2cbeb46190e293c5fda46cc3bc",
+      "scope": "New compat_message_push_catalog.json artifact and COMPAT_MESSAGE_PUSH_I9_11D capability from the exact archive (message_push.lua ids and sha256); every existing artifact byte-identical. Merged onto I9-11C core shops (lead, 11D merge): revision recomputed over both artifact sets.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE",
+      "ordinal": 76
     }
   ],
   "current": {
-    "stage": "I9-11A Hero Assets",
-    "compiler_version": "i9-11a-hero-assets",
+    "stage": "I9-11D Compatibility",
+    "compiler_version": "i9-11d-compat",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "585dc763dc513a6416718194d8363c61e50d1c1c26d46a85fdb3e568d7a11987",
-    "scope": "daily_buy_input_catalog.json gains vip.skill_buy/skill_max and refresh_cost.buy_skill_cost from the same exact archive for the I9-11A skill-point buy and cap rules; every other artifact byte-identical.",
+    "revision_id": "11902b0a5e92186765236aa0295d4e5939704c2cbeb46190e293c5fda46cc3bc",
+    "scope": "New compat_message_push_catalog.json artifact and COMPAT_MESSAGE_PUSH_I9_11D capability from the exact archive (message_push.lua ids and sha256); every existing artifact byte-identical. Merged onto I9-11C core shops (lead, 11D merge): revision recomputed over both artifact sets.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }

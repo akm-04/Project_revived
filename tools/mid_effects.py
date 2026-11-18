@@ -29,6 +29,17 @@ OUTPUT_GO = ROOT / "internal" / "protocol" / "mids" / "effects_gen.go"
 
 WRITE_EFFECTS = {"state": "state", "receipt": "state", "none": "read"}
 
+# Routes whose trace reaches no transaction at all, so an empty transaction list
+# cannot decide them. Both are proved pure reads in the source and by contract:
+# MID 3 returns only the request-time server_time (projection/lobby/shapes.go
+# Explicit, I9_11D_COMPAT_V2 C10) and MID 279 returns the constant F4e terminal
+# without locking or settling (I9_11D_COMPAT_V2 C7). Replaying either from a
+# stored reply would move client countdowns or repeat a terminal.
+PURE_READ_MIDS = {
+    3: "I9_11D_COMPAT_V2 C10 read-only server_time",
+    279: "I9_11D_COMPAT_V2 C7 terminal settles nothing",
+}
+
 
 def json_text(value):
     return json.dumps(value, indent=1, ensure_ascii=False, sort_keys=True) + "\n"
@@ -73,6 +84,8 @@ def load_mid_classes(path=None):
 def mid_effect(row):
     if row.get("state_writes") or row.get("receipt_writes"):
         return "state"
+    if row.get("mid") in PURE_READ_MIDS:
+        return "read"
     if not row.get("transactions"):
         return "unknown"
     return WRITE_EFFECTS.get(row.get("writes"), "unknown")

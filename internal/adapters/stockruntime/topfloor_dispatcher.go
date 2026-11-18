@@ -15,7 +15,8 @@ import (
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-// Top Floor stock MIDs (src_64 mid.lua); 274/275/277/276/279 and ARENA_MODE stay unregistered.
+// Top Floor stock MIDs (src_64 mid.lua); 274/275/277/279 and ARENA_MODE stay
+// unregistered here. 276 is registered through TournamentMIDs.
 var TopFloorMIDs = []uint16{272, 273, 278, 280, 281, 288, 289, 290, 291, 292, 293, 294}
 
 type TopFloorPort interface {
