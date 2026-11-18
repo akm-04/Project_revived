@@ -25,6 +25,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/itemsenergy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 func itemsEnergyService(p *pg.Pool, db tx.Beginner) app.Service {
@@ -162,6 +163,7 @@ func TestI911BEnergyBuyCapAndCounterProjection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	replyconformance.Check(t, 97, body)
 	if body["buy_energy_times"] != int64(1) || body["energy"] != int64(220) || i911bScalar(t, database, a, "crystal") != 950 {
 		t.Fatalf("first energy buy %#v crystal=%d", body, i911bScalar(t, database, a, "crystal"))
 	}
@@ -204,6 +206,7 @@ func TestI911BGoldenHandAndTenfoldSpendOnce(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	replyconformance.Check(t, 96, body)
 	crit := body["crit"].(int64)
 	if crit != 1 && crit != 2 && crit != 3 && crit != 5 && crit != 10 {
 		t.Fatalf("crit %d", crit)
@@ -219,6 +222,7 @@ func TestI911BGoldenHandAndTenfoldSpendOnce(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	replyconformance.Check(t, 29, tenfold)
 	if tenfold["cost"] != int64(70) || tenfold["fumo"] == nil || tenfold["trial_info"] == nil || i911bScalar(t, database, a, "crystal") != 920 {
 		t.Fatalf("tenfold %#v", tenfold)
 	}
@@ -314,6 +318,7 @@ func TestI911BBoxFixedDrawReplayAndFailClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	replyconformance.Check(t, 241, body)
 	awards, ok := body["awards"].([]any)
 	if !ok || len(awards) == 0 || body["spirit_awards"] == nil {
 		t.Fatalf("box reply %#v", body)
@@ -368,6 +373,7 @@ func TestI911BBoxHeroDuplicateToStone(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	replyconformance.Check(t, 241, body)
 	awards := body["awards"].([]any)
 	found := false
 	for _, entry := range awards {

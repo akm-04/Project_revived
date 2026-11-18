@@ -102,6 +102,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "commands_test.go"
+  ]
  }
 }
