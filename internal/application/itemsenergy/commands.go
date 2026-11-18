@@ -2,6 +2,7 @@ package itemsenergy
 
 import (
 	"context"
+	"errors"
 	"sort"
 
 	appconsume "gxb.local/backend/v2/internal/application/dailyconsume"
@@ -141,6 +142,9 @@ func (s Service) EnergyBuy(c context.Context, actor identity.ActorContext, op op
 			return nil, err
 		}
 		counters, err := s.Counters.IncrementBuyTx(c, sc.Tx, actor.PlayerID, s.day(sc), appconsume.CounterBuyEnergy, allowance, sc.Operation.DecisionAt())
+		if errors.Is(err, appconsume.ErrRefused) {
+			return nil, d.ErrRefused
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -222,6 +226,9 @@ func (s Service) goldenHand(c context.Context, actor identity.ActorContext, op o
 		var counters appconsume.BuyCounters
 		if tenfold {
 			used, err := s.Counters.IncrementDailyTx(c, sc.Tx, actor.PlayerID, s.day(sc), 1, 1, sc.Operation.DecisionAt())
+			if errors.Is(err, appconsume.ErrRefused) {
+				return nil, d.ErrRefused
+			}
 			if err != nil {
 				return nil, err
 			}
@@ -241,6 +248,9 @@ func (s Service) goldenHand(c context.Context, actor identity.ActorContext, op o
 				return nil, err
 			}
 			counters, err = s.Counters.IncrementBuyTx(c, sc.Tx, actor.PlayerID, s.day(sc), counterID, allowance, sc.Operation.DecisionAt())
+			if errors.Is(err, appconsume.ErrRefused) {
+				return nil, d.ErrRefused
+			}
 			if err != nil {
 				return nil, err
 			}

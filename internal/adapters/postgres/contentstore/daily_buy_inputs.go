@@ -175,3 +175,13 @@ func (Store) DailyBuyInputsRevisionTx(ctx context.Context, q tx.Queryer, revisio
 	}
 	return ok, nil
 }
+
+// HeroFragmentsTx resolves the duplicate conversion of an owned hero from the
+// pinned summon catalog. It is the content edge of the 11B box stone rule.
+func (s Store) HeroFragmentsTx(ctx context.Context, q tx.Queryer, revision string, tableID int64) ([2]int64, error) {
+	catalog, err := s.SummonCatalogTx(ctx, q, revision)
+	if err != nil {
+		return [2]int64{}, err
+	}
+	return catalog.Fragments(tableID)
+}

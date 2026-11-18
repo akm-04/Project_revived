@@ -177,7 +177,7 @@ func (c Catalog) TenfoldCost(ordinal int64) (int64, error) {
 		return 0, err
 	}
 	rule, ok := c.DailyConsume[1]
-	if !ok || rule.Cost < 0 || rule.Num != 1 || rule.Value != 1 {
+	if !ok || rule.Cost < 0 || rule.Num != 1 {
 		return 0, ErrRefused
 	}
 	return cost + rule.Cost, nil

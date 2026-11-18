@@ -1330,8 +1330,10 @@
    ],
    "itemsenergy": [
     "*ApplyItemsEnergyExchangeTx",
+    "*ApplyMaterialDebitTx",
     "*FenceActorTx",
     "*PrepareItemsEnergyExchangeTx",
+    "*PrepareMaterialDebitTx",
     "*ReadProgressionTx",
     "*ReadScalarTx",
     "*ReadTemporalTx",
@@ -4502,8 +4504,10 @@
    ],
    "i5": [
     "*ApplyItemsEnergyExchangeTx",
+    "*ApplyMaterialDebitTx",
     "*FenceActorTx",
     "*PrepareItemsEnergyExchangeTx",
+    "*PrepareMaterialDebitTx",
     "*ReadProgressionTx",
     "*ReadScalarTx",
     "*ReadTemporalTx",
@@ -4512,7 +4516,8 @@
    ],
    "store:contentstore": [
     "*ActiveRevision",
-    "*DailyBuyInputsTx"
+    "*DailyBuyInputsTx",
+    "*HeroFragmentsTx"
    ],
    "store:i4store": [
     "*LockPlayerRootsTx"

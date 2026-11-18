@@ -49,13 +49,27 @@ func (s Service) ExchangeCode(c context.Context, actor identity.ActorContext, it
 		}
 		lines := rewardLines(rewards)
 		lines = append(lines, heroAwards.lines...)
-		restoration := rewardPlan(actor.PlayerID, "box_open", sc.Operation.Operation(), lines)
-		exchange := exchangePlan{
-			cost:        appi5.MaterialCost{Stacks: []appi5.StackMaterialCost{{ItemID: itemID, Amount: num}}},
-			restoration: restoration,
-		}
-		if _, err := s.settle(c, sc, actor, exchange, true); err != nil {
-			return nil, err
+		cost := appi5.MaterialCost{Stacks: []appi5.StackMaterialCost{{ItemID: itemID, Amount: num}}}
+		if len(lines) == 0 {
+			// A box restoring a new hero entity only has no fungible line; the
+			// hero owner materializes it below, inside the same transaction.
+			if s.Debiter == nil {
+				return nil, d.ErrUnavailable
+			}
+			prepared, err := s.Debiter.PrepareMaterialDebitTx(c, sc.Tx, actor.PlayerID, cost, sc.Operation.Operation())
+			if err != nil {
+				return nil, err
+			}
+			debit, err := s.Debiter.ApplyMaterialDebitTx(c, sc.Tx, prepared)
+			if err != nil {
+				return nil, err
+			}
+			recordDebit(c, debit)
+		} else {
+			exchange := exchangePlan{cost: cost, restoration: rewardPlan(actor.PlayerID, "box_open", sc.Operation.Operation(), lines)}
+			if _, err := s.settle(c, sc, actor, exchange, true); err != nil {
+				return nil, err
+			}
 		}
 		awards := rewardAwards(rewards)
 		awards = append(awards, heroAwards.awards...)
@@ -63,7 +77,7 @@ func (s Service) ExchangeCode(c context.Context, actor identity.ActorContext, it
 			return nil, err
 		}
 		if awards == nil {
-			awards = []map[string]any{}
+			awards = []any{}
 		}
 		return map[string]any{"awards": awards, "spirit_awards": []any{}}, nil
 	})
@@ -71,7 +85,7 @@ func (s Service) ExchangeCode(c context.Context, actor identity.ActorContext, it
 
 type heroRewards struct {
 	lines  []grant.Line
-	awards []map[string]any
+	awards []any
 }
 
 // resolveHeroRewards converts a hero already owned (or repeated inside the same
@@ -98,7 +112,7 @@ func (s Service) resolveHeroRewards(c context.Context, sc gen.TimedScope, pid id
 		_, repeated := seen[heroID]
 		seen[heroID] = struct{}{}
 		if owned || repeated {
-			stone, err := s.Fragments.Fragments(heroID)
+			stone, err := s.Fragments.HeroFragmentsTx(c, sc.Tx, catalog.Revision, heroID)
 			if err != nil {
 				return heroRewards{}, nil, d.ErrRefused
 			}
@@ -111,7 +125,7 @@ func (s Service) resolveHeroRewards(c context.Context, sc gen.TimedScope, pid id
 	return out, newHeroes, nil
 }
 
-func (s Service) materializeHeroes(c context.Context, sc gen.TimedScope, pid identity.PlayerID, catalog d.Catalog, heroes []int64, awards *[]map[string]any) error {
+func (s Service) materializeHeroes(c context.Context, sc gen.TimedScope, pid identity.PlayerID, catalog d.Catalog, heroes []int64, awards *[]any) error {
 	revision := catalog.Revision
 	for _, heroID := range heroes {
 		hero, admission, err := s.Heroes.AwardStoryPartnerTx(c, sc.Tx, pid, heroID, revision, sc.Operation.Operation())
@@ -172,8 +186,8 @@ func rewardLines(rewards d.Rewards) []grant.Line {
 	return lines
 }
 
-func rewardAwards(rewards d.Rewards) []map[string]any {
-	awards := make([]map[string]any, 0, len(rewards.Awards))
+func rewardAwards(rewards d.Rewards) []any {
+	awards := make([]any, 0, len(rewards.Awards))
 	for _, award := range rewards.Awards {
 		awards = append(awards, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum})
 	}

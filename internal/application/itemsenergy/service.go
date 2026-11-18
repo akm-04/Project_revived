@@ -59,6 +59,13 @@ type Counters interface {
 	IncrementDailyTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, int64, time.Time) (int64, error)
 }
 
+// MaterialDebiter is the I5-owned debit-only seam used when a box restores a
+// new hero entity and no fungible line.
+type MaterialDebiter interface {
+	PrepareMaterialDebitTx(context.Context, tx.Tx, identity.PlayerID, appi5.MaterialCost, operation.Context) (*appi5.PreparedMaterialDebit, error)
+	ApplyMaterialDebitTx(context.Context, tx.Tx, *appi5.PreparedMaterialDebit) (appi5.MaterialDebitResult, error)
+}
+
 type Privileges interface {
 	SnapshotTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (appi5.PrivilegeSnapshot, error)
 }
@@ -82,7 +89,7 @@ type Heroes interface {
 
 // HeroFragments is the summon owner's duplicate conversion for an owned hero.
 type HeroFragments interface {
-	Fragments(int64) ([2]int64, error)
+	HeroFragmentsTx(context.Context, tx.Queryer, string, int64) ([2]int64, error)
 }
 
 type HeroWire func(character.Hero) (map[string]any, error)
@@ -103,6 +110,7 @@ type Service struct {
 	Players     Players
 	Counters    Counters
 	Exchange    appi5.TxItemsEnergyExchange
+	Debiter     MaterialDebiter
 	Balances    Balances
 	Privileges  Privileges
 	Progression Progression
