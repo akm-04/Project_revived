@@ -844,10 +844,17 @@ foreign_processes = [(1, ['/usr/bin/go', 'test', './...']), (2, ['/opt/go-1.27.3
                      (3, ['/tmp/b001/audit.test', '-test.run=TestLatency']), (4, ['/tmp/renamed', '-test.v=test2json']),
                      (5, ['/srv/bin/postgres', '-D', '/elsewhere/data']), (6, ['/srv/bin/postgres', '-D', own_data]),
                      (7, ['/usr/bin/go', 'build', './...']), (8, ['postgres: akm gxb 127.0.0.1 idle']),
+                     (9, ['/srv/bin/postgres', '-D/attached/data']), (10, ['/srv/bin/postmaster', '--pgdata=/long/data']),
+                     (11, ['/srv/bin/postgres', '-p', '5999']), (12, ['postgres: walwriter']),
                      (os.getpid(), ['/usr/bin/go', 'test', './own'])]
 instance.descendant_of_gate = lambda pid: pid == os.getpid()
+instance.process_parent = lambda pid: {8: 5, 12: 6}.get(pid, 1)
+(instance.work / 'cluster/pgdata').mkdir(parents=True, exist_ok=True)
+(instance.work / 'cluster/pgdata/postmaster.pid').write_text('6\n')
 assert [found.split(':')[0] for found in instance.other_go_test_processes(foreign_processes)] == ['1', '2', '3', '4']
-assert [found.split(':')[0] for found in instance.running_worker_clusters(foreign_processes)] == ['5']
+# T28: attached -D, --pgdata= and PGDATA-only servers are foreign too; backends report through their postmaster.
+scanned = [found.split(':')[0] for found in instance.running_worker_clusters(foreign_processes)]
+assert [pid for pid in scanned if pid.isdigit()] == ['5', '9', '10', '11'], scanned
 instance.process_command_lines = lambda: ([], ['4242'])
 original_conditions = strict_gate.host_conditions
 strict_gate.host_conditions = clean_reading
@@ -1021,6 +1028,33 @@ finally:
     gate_pool.STOPPING.clear()
 assert launched and launched[0].returncode == -signal.SIGKILL, launched
 assert gate_pool.run_child(['true']).returncode == 0
+
+# T28: a late child that forked before Popen returned takes its descendants down with it; a surviving grandchild
+# would hold the output pipe open and block the stop.
+grandchild_file = Path(tempfile.mkdtemp()) / 'grandchild'
+
+
+class LateForkingSpawn(original_popen):
+    def __init__(self, *arguments, **options):
+        gate_pool.STOPPING.set()
+        super().__init__(*arguments, **options)
+        while not grandchild_file.exists() or not grandchild_file.read_text().strip():
+            time.sleep(0.01)
+
+
+subprocess.Popen = LateForkingSpawn
+started_at = time.monotonic()
+try:
+    gate_pool.run_child(['sh', '-c', f'sleep 30 & echo $! > {grandchild_file}; wait'], capture_output=True)
+    raise AssertionError('a late forking child ran on')
+except gate_pool.PoolError:
+    pass
+finally:
+    subprocess.Popen = original_popen
+    gate_pool.STOPPING.clear()
+assert time.monotonic() - started_at < 10, 'a surviving grandchild blocked the stop'
+grandchild = int(grandchild_file.read_text())
+assert not Path(f'/proc/{grandchild}').exists() or 'Z' in Path(f'/proc/{grandchild}/stat').read_text().rsplit(')', 1)[1].split()[0], grandchild
 
 # A start interrupted after the server launched still stops the cluster; init alone leaves nothing to stop.
 actions = []

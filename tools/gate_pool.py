@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import signal
 import subprocess
 import threading
 from pathlib import Path
@@ -197,6 +198,43 @@ def require_running():
         raise PoolError('the gate is stopping')
 
 
+def descendants(root):
+    children = collections.defaultdict(list)
+    for stat in Path('/proc').glob('[0-9]*/stat'):
+        try:
+            children[int(stat.read_text().rsplit(')', 1)[1].split()[1])].append(int(stat.parent.name))
+        except (OSError, ValueError, IndexError):
+            continue
+    found, pending = set(), [root]
+    while pending:
+        for child in children[pending.pop()]:
+            if child not in found:
+                found.add(child)
+                pending.append(child)
+    return found
+
+
+def kill_tree(root):
+    """SIGKILL a late child and everything it forked (A-104): stop the tree until it stops growing, since a stopped
+    process cannot fork, then kill it. Killing the child alone would orphan a grandchild that holds its output pipe."""
+    tree = set()
+    while True:
+        found = {root} | descendants(root)
+        if found == tree:
+            break
+        for pid in found - tree:
+            try:
+                os.kill(pid, signal.SIGSTOP)
+            except ProcessLookupError:
+                pass
+        tree = found
+    for pid in tree:
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+
+
 def run_child(arguments, capture_output=False, **options):
     """subprocess.run for unit work a stop must end. The stop handler sets STOPPING before it snapshots the process
     group, so a child born after that snapshot sees STOPPING here once Popen returns, and is killed by its own launcher."""
@@ -205,11 +243,11 @@ def run_child(arguments, capture_output=False, **options):
         options.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     with subprocess.Popen(arguments, **options) as process:
         if STOPPING.is_set():
-            process.kill()
+            kill_tree(process.pid)
         try:
             stdout, stderr = process.communicate()
         except BaseException:
-            process.kill()
+            kill_tree(process.pid)
             raise
     require_running()
     return subprocess.CompletedProcess(arguments, process.returncode, stdout, stderr)
