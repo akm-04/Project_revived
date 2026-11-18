@@ -78,6 +78,13 @@ type Functions interface {
 	ReadFunctionEligibilityTx(context.Context, tx.Queryer, identity.PlayerID, int64) (player.FunctionEligibility, bool, error)
 }
 
+// TeamShops is the guild campaign's team-shop availability rule: the chapter
+// that owns the shop is open, at chapter_version 2, and the member joined
+// before the run started (11C C3/C12).
+type TeamShops interface {
+	TeamShopEligibleTx(context.Context, tx.Queryer, identity.PlayerID, int64) (bool, error)
+}
+
 type Receipts interface {
 	FindTx(context.Context, tx.Queryer, receipt.Identity) (receipt.Receipt, bool, error)
 	PutTx(context.Context, tx.Tx, receipt.Receipt) (receipt.PutResult, error)
@@ -97,6 +104,7 @@ type Service struct {
 	Privileges  Privileges
 	Progression Progression
 	Functions   Functions
+	TeamShops   TeamShops
 	Receipts    Receipts
 	ReceiptRead receipt.Reader
 }
@@ -278,11 +286,14 @@ func (s Service) day(sc gen.TimedScope) int64 {
 	return modes.Day(sc.Operation.DecisionAt())
 }
 
-// available revalidates the function gate. Team shops stay unlisted and refuse
-// direct requests while the frozen guild campaign emits chapter_version 1 (C3).
+// available revalidates the function gate. A team shop is listed and served
+// only while the guild campaign's team predicate agrees, on every read.
 func (s Service) available(c context.Context, sc gen.TimedScope, pid identity.PlayerID, shop d.Shop) (bool, error) {
 	if shop.Team {
-		return false, nil
+		if s.TeamShops == nil {
+			return false, nil
+		}
+		return s.TeamShops.TeamShopEligibleTx(c, sc.Tx, pid, shop.HomologousID)
 	}
 	if shop.FunctionID <= 0 {
 		return true, nil

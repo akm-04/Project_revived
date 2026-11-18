@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
+	app "gxb.local/backend/v2/internal/application/shop"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -24,6 +25,10 @@ func i911cComposition(p *pg.Pool, a identity.ActorContext) stockruntime.ShopComp
 }
 
 func i911cCompositionAt(p *pg.Pool, a identity.ActorContext, authority gen.TimeAuthority) stockruntime.ShopComposition {
+	return i911cTeamComposition(p, a, authority, nil)
+}
+
+func i911cTeamComposition(p *pg.Pool, a identity.ActorContext, authority gen.TimeAuthority, teamShops app.TeamShops) stockruntime.ShopComposition {
 	content := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
@@ -42,6 +47,7 @@ func i911cCompositionAt(p *pg.Pool, a identity.ActorContext, authority gen.TimeA
 		Receipts:    receipts,
 		ReceiptRead: kernelstore.Reader{Queryer: p},
 		Authority:   playtestAuthority{actor: a},
+		TeamShops:   teamShops,
 	})
 }
 

@@ -25,6 +25,7 @@ type ShopDependencies struct {
 	Receipts    kernelstore.Store
 	ReceiptRead kernelstore.Reader
 	Authority   rt.GameplayAuthorityPort
+	TeamShops   app.TeamShops
 }
 
 // ShopComposition is the composed 11C owner plus its dispatcher.
@@ -47,6 +48,7 @@ func NewShopComposition(deps ShopDependencies) ShopComposition {
 		Privileges:  deps.Privileges,
 		Progression: deps.Values,
 		Functions:   deps.Values,
+		TeamShops:   deps.TeamShops,
 		Receipts:    deps.Receipts,
 		ReceiptRead: deps.ReceiptRead,
 	}
