@@ -79,6 +79,7 @@ type Progression interface {
 type Balances interface {
 	ReadTemporalTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.TemporalState, bool, error)
 	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
+	ReadStackTx(context.Context, tx.Queryer, identity.PlayerID, int64) (economy.StackState, bool, error)
 }
 
 type Heroes interface {
@@ -306,6 +307,21 @@ func (s Service) temporal(c context.Context, sc gen.TimedScope, pid identity.Pla
 		return 0, nil
 	}
 	return state.StoredAmount, nil
+}
+
+// requireStacks refuses a request above the current stack before any mutation
+// (C1 malformed body); I5 re-validates the same stack under its lock.
+func (s Service) requireStacks(c context.Context, sc gen.TimedScope, pid identity.PlayerID, costs []appi5.StackMaterialCost) error {
+	for _, cost := range costs {
+		state, exists, err := s.Balances.ReadStackTx(c, sc.Tx, pid, cost.ItemID)
+		if err != nil {
+			return err
+		}
+		if !exists || state.Quantity < cost.Amount {
+			return d.ErrInvalid
+		}
+	}
+	return nil
 }
 
 func (s Service) scalar(c context.Context, sc gen.TimedScope, pid identity.PlayerID, key string) (int64, error) {

@@ -37,6 +37,9 @@ func (s Service) ExchangeCode(c context.Context, actor identity.ActorContext, it
 		lines := rewardLines(rewards)
 		lines = append(lines, heroAwards.lines...)
 		cost := appi5.MaterialCost{Stacks: []appi5.StackMaterialCost{{ItemID: itemID, Amount: num}}}
+		if err = s.requireStacks(c, sc, actor.PlayerID, cost.Stacks); err != nil {
+			return nil, err
+		}
 		if len(lines) == 0 {
 			// A box restoring a new hero entity only has no fungible line; the
 			// hero owner materializes it below, inside the same transaction.

@@ -43,8 +43,12 @@ func (s Service) UseEnergyItem(c context.Context, actor identity.ActorContext, i
 		if err != nil {
 			return nil, err
 		}
+		cost := appi5.MaterialCost{Stacks: []appi5.StackMaterialCost{{ItemID: itemID, Amount: num}}}
+		if err = s.requireStacks(c, sc, actor.PlayerID, cost.Stacks); err != nil {
+			return nil, err
+		}
 		plan := exchangePlan{
-			cost:        appi5.MaterialCost{Stacks: []appi5.StackMaterialCost{{ItemID: itemID, Amount: num}}},
+			cost:        cost,
 			restoration: rewardPlan(actor.PlayerID, "item_use", sc.Operation.Operation(), []grant.Line{{Kind: grant.Temporal, ResourceKey: "energy", Amount: gain}}),
 		}
 		if _, err = s.settle(c, sc, actor, plan, false); err != nil {
@@ -94,6 +98,9 @@ func (s Service) sell(c context.Context, actor identity.ActorContext, op operati
 		for _, key := range order {
 			lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: key, Amount: scalars[key]})
 		}
+		if err := s.requireStacks(c, sc, actor.PlayerID, cost.Stacks); err != nil {
+			return nil, err
+		}
 		plan := exchangePlan{cost: cost, restoration: rewardPlan(actor.PlayerID, name, sc.Operation.Operation(), lines)}
 		if _, err := s.settle(c, sc, actor, plan, false); err != nil {
 			return nil, err
@@ -121,6 +128,9 @@ func (s Service) UseMagicItems(c context.Context, actor identity.ActorContext, i
 			}
 			cost.Stacks = append(cost.Stacks, appi5.StackMaterialCost{ItemID: aggregate.ItemID, Amount: aggregate.Num})
 			lines = append(lines, grants...)
+		}
+		if err := s.requireStacks(c, sc, actor.PlayerID, cost.Stacks); err != nil {
+			return nil, err
 		}
 		plan := exchangePlan{cost: cost, restoration: rewardPlan(actor.PlayerID, "item_use", sc.Operation.Operation(), mergeScalarLines(lines))}
 		if _, err := s.settle(c, sc, actor, plan, false); err != nil {

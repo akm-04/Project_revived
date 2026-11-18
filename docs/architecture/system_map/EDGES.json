@@ -1336,6 +1336,7 @@
     "*PrepareMaterialDebitTx",
     "*ReadProgressionTx",
     "*ReadScalarTx",
+    "*ReadStackTx",
     "*ReadTemporalTx",
     "*SnapshotTx",
     "RecordTx"
@@ -4510,6 +4511,7 @@
     "*PrepareMaterialDebitTx",
     "*ReadProgressionTx",
     "*ReadScalarTx",
+    "*ReadStackTx",
     "*ReadTemporalTx",
     "*SnapshotTx",
     "RecordTx"
