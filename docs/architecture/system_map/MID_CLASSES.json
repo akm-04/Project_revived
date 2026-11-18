@@ -442,8 +442,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -1125,7 +1125,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:282",
+    "internal/adapters/postgres/characterstore/store.go:314",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:327"
    ],
@@ -1408,8 +1408,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -1662,9 +1662,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:231",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:263",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -1923,7 +1923,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
+    "internal/adapters/postgres/characterstore/store.go:247",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
@@ -2097,7 +2097,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:282",
+    "internal/adapters/postgres/characterstore/store.go:314",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:327"
    ],
@@ -2251,7 +2251,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:231",
+    "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
@@ -2441,7 +2441,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
+    "internal/adapters/postgres/characterstore/store.go:247",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
     "internal/adapters/postgres/i5store/store.go:450",
@@ -2672,9 +2672,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:231",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:263",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -2974,7 +2974,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:231",
+    "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415"
@@ -3164,8 +3164,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
@@ -3602,7 +3602,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:231",
+    "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415"
@@ -3792,7 +3792,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
+    "internal/adapters/postgres/characterstore/store.go:247",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
     "internal/adapters/postgres/i5store/store.go:450",
@@ -4304,8 +4304,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -4773,8 +4773,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -5205,8 +5205,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -5442,7 +5442,92 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 265,
+     "line": 266,
+     "value": "serializable"
+    }
+   ],
+   "mid": 88,
+   "read_only": [
+    {
+     "file": "internal/application/characterhero/service.go",
+     "line": 266,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/characterhero/service.go:299"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/characterhero/service.go",
+     "line": 266,
+     "value": "3"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:63"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/characterhero/service.go",
+     "function": "Service.SaveBackpackSortType",
+     "isolation": "serializable",
+     "line": 266,
+     "read_only": "false",
+     "retry": "3"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 573,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by, COALESCE((SELECT schema_version FROM a),0)::integer AS schema_version, COALESCE((SELECT manifest::text FROM a),'{}') AS manifest_json"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 573,
+     "statement": "SELECT a.revision_id, a.activation_version, a.activated_at, a.activated_by, r.schema_version, r.manifest FROM gxb_content_activation a JOIN gxb_content_revisions r ON r.revision_id=a.revision_id WHERE a.slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 573,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "writes": "state"
+  },
+  {
+   "handler": "internal/adapters/stockruntime/hero_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/characterhero/service.go",
+     "line": 320,
      "value": "serializable"
     }
    ],
@@ -5450,17 +5535,17 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 265,
+     "line": 320,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/service.go:298"
+    "internal/application/characterhero/service.go:353"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 265,
+     "line": 320,
      "value": "3"
     }
    ],
@@ -5473,7 +5558,7 @@
      "file": "internal/application/characterhero/service.go",
      "function": "Service.SaveSortType",
      "isolation": "serializable",
-     "line": 265,
+     "line": 320,
      "read_only": "false",
      "retry": "3"
     }
@@ -5596,8 +5681,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -5923,8 +6008,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -6708,9 +6793,9 @@
     "internal/adapters/postgres/campaignstore/store.go:48",
     "internal/adapters/postgres/campaignstore/store.go:96",
     "internal/adapters/postgres/characterstore/pet.go:171",
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -7267,8 +7352,8 @@
     "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/campaignstore/store.go:48",
     "internal/adapters/postgres/campaignstore/store.go:96",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -7517,8 +7602,8 @@
    "state_writes": [
     "internal/adapters/postgres/campaignstore/store.go:48",
     "internal/adapters/postgres/campaignstore/store.go:96",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -7798,8 +7883,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -11467,8 +11552,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -11807,8 +11892,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -12089,8 +12174,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -12371,8 +12456,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -12653,8 +12738,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -12935,8 +13020,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -13217,8 +13302,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -13498,8 +13583,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -13763,8 +13848,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -14029,8 +14114,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -14414,8 +14499,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -15008,8 +15093,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -15602,8 +15687,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -16196,8 +16281,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -16790,8 +16875,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -17384,8 +17469,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -17978,8 +18063,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -18572,8 +18657,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -19166,8 +19251,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -19760,8 +19845,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -20354,8 +20439,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -20948,8 +21033,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -21542,8 +21627,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -22136,8 +22221,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -22730,8 +22815,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/frienddmstore/store.go:150",
     "internal/adapters/postgres/frienddmstore/store.go:193",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -23190,8 +23275,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -23689,8 +23774,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:225",
     "internal/adapters/postgres/combatstore/store.go:26",
@@ -24132,8 +24217,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -30595,7 +30680,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:231",
+    "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
@@ -30768,8 +30853,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i5store/store.go:450",
     "internal/adapters/postgres/i5store/store.go:465",
     "internal/adapters/postgres/i5store/store.go:483"
@@ -30897,8 +30982,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -32160,8 +32245,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -33034,8 +33119,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -33461,8 +33546,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -33983,8 +34068,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/signin.go:11",
@@ -34342,8 +34427,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -34565,8 +34650,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -34980,8 +35065,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:225",
     "internal/adapters/postgres/combatstore/store.go:26",
@@ -36418,8 +36503,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:225",
     "internal/adapters/postgres/combatstore/store.go:26",
@@ -40280,8 +40365,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -42258,8 +42343,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -42540,8 +42625,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/commerceprivilegestore/store.go:129",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
@@ -42753,8 +42838,8 @@
     "internal/adapters/postgres/arenastore/store.go:120",
     "internal/adapters/postgres/arenastore/store.go:242",
     "internal/adapters/postgres/arenastore/store.go:479",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -43551,8 +43636,8 @@
     "internal/adapters/postgres/arenastore/store.go:409",
     "internal/adapters/postgres/arenastore/store.go:460",
     "internal/adapters/postgres/arenastore/store.go:479",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:225",
     "internal/adapters/postgres/combatstore/store.go:26",
@@ -44002,8 +44087,8 @@
     "internal/adapters/postgres/arenastore/store.go:409",
     "internal/adapters/postgres/arenastore/store.go:460",
     "internal/adapters/postgres/arenastore/store.go:479",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -44811,8 +44896,8 @@
     "internal/adapters/postgres/arenastore/store.go:409",
     "internal/adapters/postgres/arenastore/store.go:460",
     "internal/adapters/postgres/arenastore/store.go:479",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -45625,8 +45710,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/pet.go:171",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -46242,8 +46327,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/pet.go:171",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -47084,8 +47169,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -47850,8 +47935,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -48341,8 +48426,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -48588,8 +48673,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -49848,8 +49933,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -50240,8 +50325,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -50632,8 +50717,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -51024,8 +51109,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -51416,8 +51501,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -51808,8 +51893,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -52200,8 +52285,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -52592,8 +52677,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -52984,8 +53069,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -53376,8 +53461,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -53768,8 +53853,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -54160,8 +54245,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -54552,8 +54637,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -55074,8 +55159,8 @@
     "internal/adapters/postgres/arenastore/store.go:120",
     "internal/adapters/postgres/arenastore/store.go:242",
     "internal/adapters/postgres/arenastore/store.go:479",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -55354,8 +55439,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -55746,8 +55831,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -56138,8 +56223,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -56530,8 +56615,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -56922,8 +57007,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -57314,8 +57399,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -57706,8 +57791,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -58860,8 +58945,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -59198,8 +59283,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -59536,8 +59621,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -59874,8 +59959,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -60212,8 +60297,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -60550,8 +60635,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -60919,8 +61004,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -61573,8 +61658,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -62227,8 +62312,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -62881,8 +62966,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -63535,8 +63620,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -64158,8 +64243,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -64496,8 +64581,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -64834,8 +64919,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -65172,8 +65257,8 @@
    "state_writes": [
     "internal/adapters/postgres/bookstore/admissions.go:45",
     "internal/adapters/postgres/bookstore/store.go:41",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -65541,8 +65626,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -66195,8 +66280,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -66849,8 +66934,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -67503,8 +67588,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -68157,8 +68242,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -68811,8 +68896,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -69465,8 +69550,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -70119,8 +70204,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -70773,8 +70858,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -71427,8 +71512,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -72081,8 +72166,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -74778,8 +74863,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/achievementstore/catalog.go:59",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -78655,8 +78740,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -78977,8 +79062,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -79299,8 +79384,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -79621,8 +79706,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -79943,8 +80028,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -80265,8 +80350,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -80587,8 +80672,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -80909,8 +80994,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -82200,8 +82285,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -83033,8 +83118,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
     "internal/adapters/postgres/guildstore/tea.go:60",
@@ -83287,8 +83372,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/guildstore/tea.go:149",
     "internal/adapters/postgres/guildstore/tea.go:167",
     "internal/adapters/postgres/guildstore/tea.go:178",
@@ -87323,9 +87408,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -88199,8 +88284,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -88424,8 +88509,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -89634,8 +89719,8 @@
    "state_writes": [
     "internal/adapters/postgres/campaignstore/store.go:48",
     "internal/adapters/postgres/campaignstore/store.go:96",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -90078,8 +90163,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -90467,8 +90552,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -90856,8 +90941,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -91245,8 +91330,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -91634,8 +91719,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -92023,8 +92108,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -92412,8 +92497,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -92801,8 +92886,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -93190,8 +93275,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -93579,8 +93664,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -93968,8 +94053,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -94357,8 +94442,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -94746,8 +94831,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -95135,8 +95220,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -95524,8 +95609,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -95837,7 +95922,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:268"
+    "internal/adapters/postgres/characterstore/store.go:300"
    ],
    "system": "characterhero",
    "transactions": [
@@ -96494,8 +96579,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:225",
     "internal/adapters/postgres/combatstore/store.go:26",
@@ -97176,8 +97261,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -97806,8 +97891,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -98069,8 +98154,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -98589,8 +98674,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:225",
     "internal/adapters/postgres/combatstore/store.go:26",
@@ -98844,8 +98929,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -101624,8 +101709,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -102143,8 +102228,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -102653,8 +102738,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -103202,8 +103287,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -103854,8 +103939,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -104403,8 +104488,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -104952,8 +105037,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -105501,8 +105586,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -106461,8 +106546,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -107777,8 +107862,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -108212,8 +108297,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -108665,8 +108750,8 @@
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -109186,8 +109271,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -110002,8 +110087,8 @@
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:107",
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -110260,8 +110345,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -111346,8 +111431,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -111884,8 +111969,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:97",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -114712,8 +114797,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -115039,8 +115124,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -115366,8 +115451,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -115693,8 +115778,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66",
     "internal/adapters/postgres/i5store/player_display.go:133",
@@ -117609,8 +117694,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/coursestore/admissions.go:45",
     "internal/adapters/postgres/coursestore/box.go:15",
     "internal/adapters/postgres/coursestore/store.go:136",
@@ -117983,9 +118068,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -118362,9 +118447,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -118741,9 +118826,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -119120,9 +119205,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -119499,9 +119584,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -119878,9 +119963,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -120257,9 +120342,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -120636,9 +120721,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -121015,9 +121100,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -121394,9 +121479,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -121773,9 +121858,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -122152,9 +122237,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -122531,9 +122616,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -122910,9 +122995,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -123289,9 +123374,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -123984,8 +124069,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -124818,8 +124903,8 @@
    "state_writes": [
     "internal/adapters/postgres/campaignstore/store.go:48",
     "internal/adapters/postgres/campaignstore/store.go:96",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -126431,9 +126516,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -126810,9 +126895,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -127189,9 +127274,9 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:215",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:247",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dormstore/admissions.go:45",
     "internal/adapters/postgres/dormstore/glue_purchase.go:26",
     "internal/adapters/postgres/dormstore/social_content.go:116",
@@ -128012,8 +128097,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -128294,8 +128379,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/characterstore/raw_awakening.go:89",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/awakening.go:18",
     "internal/adapters/postgres/i5store/awakening.go:61",
@@ -128983,8 +129068,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -129375,8 +129460,8 @@
     "internal/adapters/postgres/achievementstore/store.go:64",
     "internal/adapters/postgres/achievementstore/store.go:81",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
@@ -129916,8 +130001,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -130558,8 +130643,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -131200,8 +131285,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -131842,8 +131927,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -132484,8 +132569,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -133126,8 +133211,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -133768,8 +133853,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -134410,8 +134495,8 @@
     "internal/adapters/postgres/achievementstore/catalog.go:75",
     "internal/adapters/postgres/achievementstore/store.go:130",
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -135482,8 +135567,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/elementstore/admissions.go:45",
     "internal/adapters/postgres/elementstore/store.go:42",
     "internal/adapters/postgres/elementstore/store.go:98",
@@ -135814,8 +135899,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/elementstore/admissions.go:45",
     "internal/adapters/postgres/elementstore/store.go:42",
     "internal/adapters/postgres/elementstore/store.go:98",
@@ -136146,8 +136231,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/elementstore/admissions.go:45",
     "internal/adapters/postgres/elementstore/store.go:42",
     "internal/adapters/postgres/elementstore/store.go:98",
@@ -136478,8 +136563,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/elementstore/admissions.go:45",
     "internal/adapters/postgres/elementstore/store.go:42",
     "internal/adapters/postgres/elementstore/store.go:98",
@@ -136810,8 +136895,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/elementstore/admissions.go:45",
     "internal/adapters/postgres/elementstore/store.go:42",
     "internal/adapters/postgres/elementstore/store.go:98",
@@ -138704,8 +138789,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -141303,8 +141388,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
@@ -142336,8 +142421,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/godstrialstore/store.go:32",
     "internal/adapters/postgres/godstrialstore/store.go:39",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -143871,8 +143956,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/characterstore/store.go:63",
-    "internal/adapters/postgres/characterstore/store.go:77",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/commerceprivilegestore/store.go:36",
     "internal/adapters/postgres/commerceprivilegestore/store.go:70",
     "internal/adapters/postgres/commerceprivilegestore/store.go:99",
