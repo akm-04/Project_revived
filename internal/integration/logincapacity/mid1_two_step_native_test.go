@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -18,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/compatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
@@ -30,6 +32,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
+	appcompat "gxb.local/backend/v2/internal/application/compat"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -283,6 +286,7 @@ func twoStepContributors(p *postgres.Pool) []appboot.MID1DetailContributor {
 		characterstore.HeroBootstrapProjection{Content: content},
 		characterstore.PetBootstrapProjection{Content: content},
 		characterstore.SavedPresetBootstrapProjection{},
+		appcompat.BootstrapProjection{Store: compatstore.Store{}},
 	}
 }
 
@@ -353,6 +357,34 @@ func TestI9C14MID1TwoStepReplyMatchesPreSplitLogin(t *testing.T) {
 	}
 	if string(got)+"\n" != string(want) {
 		t.Fatalf("MID1 two-step reply differs from the pre-split reply:\n got: %s\nwant: %s", got, want)
+	}
+}
+
+// C4: a stored row can hold unsorted duplicate ids (R8 restore); MID 1 answers
+// the sorted de-duplicated set from the compat owner and never fails.
+func TestI9C14MID1ProjectsStoredMessagePushPreferences(t *testing.T) {
+	p := twoStepPool(t, 8)
+	revision := twoStepContentRevision(t, p)
+	fixture := seedTwoStepPlayer(t, p, twoStepAllocatePlayerID(t, p, 1), twoStepUUID(t, "22222222-2222-4222-8222-222222222201"), twoStepUUID(t, "22222222-2222-4222-8222-222222222202"), "22222222-2222-4222-8222-222222222203")
+	seedTwoStepOwnerRoots(t, p, fixture.playerID, revision)
+	seedTwoStepRoster(t, p, fixture.playerID, revision, 1)
+	seedTwoStepPet(t, p, fixture.playerID, revision)
+	seedTwoStepSavedPreset(t, p, fixture.playerID)
+	twoStepExec(t, p, `INSERT INTO player_compat_preferences(player_id,first_main_touch,message_push_ids,state_version,created_at,updated_at)VALUES($1,1,'{9,1,9}',4,$2,$2)`, int64(fixture.playerID), twoStepAt.Add(-time.Hour))
+
+	result, err := twoStepService(t, p, tx.NopHooks{}).MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: fixture.operation})
+	if err != nil {
+		t.Fatal(err)
+	}
+	record, ok := result.Detail["17"].(map[string]any)
+	if !ok {
+		t.Fatalf("MID 1 detail 17 = %#v", result.Detail["17"])
+	}
+	if record["first_main_touch"] != int64(1) {
+		t.Fatalf("first_main_touch = %#v", record["first_main_touch"])
+	}
+	if !reflect.DeepEqual(record["message_pushes"], []int64{1, 9}) {
+		t.Fatalf("message_pushes = %#v, want [1 9]", record["message_pushes"])
 	}
 }
 
