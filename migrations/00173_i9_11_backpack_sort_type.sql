@@ -5,4 +5,4 @@
 -- (player_hero_roots.sort_type, MID 89) but stays a separate fact.
 ALTER TABLE player_hero_roots
   ADD COLUMN backpack_sort_type integer NOT NULL DEFAULT 0
-  CHECK (backpack_sort_type BETWEEN 0 AND 8191);
+  CHECK (backpack_sort_type BETWEEN 0 AND 9);

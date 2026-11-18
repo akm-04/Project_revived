@@ -188,7 +188,6 @@ func TestPart2LibraryFailureRows(t *testing.T) {
 		{"mode unqualified", failLibraryMode(librarylocal.ErrUnqualified), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mode dialog closed", failLibraryMode(librarylocal.ErrDialogClosed), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mode act locked", failLibraryMode(librarylocal.ErrActLocked), http.StatusConflict, unprovenRefusalCode, ""},
-		{"mode act awarded", failLibraryMode(librarylocal.ErrActAwarded), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mode cg claimed", failLibraryMode(librarylocal.ErrCGClaimed), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mode bg owned", failLibraryMode(librarylocal.ErrBgOwned), http.StatusConflict, unprovenRefusalCode, ""},
 		{"mode insufficient", failLibraryMode(economy.ErrInsufficientBalance), http.StatusConflict, unprovenRefusalCode, ""},

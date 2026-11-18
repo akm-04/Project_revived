@@ -40,7 +40,6 @@ var (
 	ErrMarriageGate = errors.New("library: marriage requires maximum favor")
 	ErrDialogClosed = errors.New("library: dialog not opened")
 	ErrActLocked    = errors.New("library: act not unlocked")
-	ErrActAwarded   = errors.New("library: act award already claimed")
 	ErrTalkClaimed  = errors.New("library: school story reward already claimed")
 	ErrCGClaimed    = errors.New("library: memory CG reward already claimed")
 	ErrBgOwned      = errors.New("library: background already owned")
