@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
@@ -237,6 +238,32 @@ func TestI911CCoreShopsScheduleNative(t *testing.T) {
 	nextReset, nextDay := load(time.Date(2026, 11, 19, 5, 1, 0, 0, gmt8))
 	if nextReset != afterMidnight+1 || nextDay == midnightDay {
 		t.Fatalf("next 05:00 reset did not reroll: %d/%d -> %d/%d", afterMidnight, midnightDay, nextReset, nextDay)
+	}
+}
+
+// C8: an exhausted refresh ladder refuses without charging or rerolling.
+func TestI911CCoreShopsRefreshLadderNative(t *testing.T) {
+	p := pool(t)
+	revision := installed(t, p)
+	a := i911cPlayer(t, p, revision)
+	at := time.Date(2026, 11, 18, 12, 0, 0, 0, time.UTC)
+	clock := &i911cFixedClock{at: at}
+	dispatcher := i911cCompositionAt(p, a, clock).Dispatcher
+	i911cScalar(t, p, a, "crystal", 1_000_000)
+	i911cLoad(t, dispatcher, a, 1, at, 11)
+	exec(t, p, `UPDATE shop_players SET refresh_times=330,refresh_day=$3 WHERE player_id=$1 AND shop_type=$2`,
+		int64(a.PlayerID), int64(1), modes.Day(at))
+	before := i911cScalarAmount(t, p, a, "crystal")
+	generation, _ := i911cShopGeneration(t, p, a, 1)
+	response := i911cDispatchAt(t, dispatcher, a, 34, map[string]any{"shop_type": int64(1)}, at, 11)
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
+		t.Fatalf("exhausted refresh ladder: %+v", response)
+	}
+	if after := i911cScalarAmount(t, p, a, "crystal"); after != before {
+		t.Fatalf("exhausted refresh charged: %d -> %d", before, after)
+	}
+	if rerolled, _ := i911cShopGeneration(t, p, a, 1); rerolled != generation {
+		t.Fatalf("exhausted refresh rerolled: %d -> %d", generation, rerolled)
 	}
 }
 
