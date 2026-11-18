@@ -5,6 +5,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/itemsenergystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	appconsume "gxb.local/backend/v2/internal/application/dailyconsume"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -42,6 +43,7 @@ func NewHeroAssetsComposition(d HeroAssetsDependencies) HeroAssetsComposition {
 		Timed:       d.Timed,
 		Fresh:       d.Fresh,
 		Content:     d.Content,
+		Tuning:      itemsenergystore.Store{},
 		Fence:       d.Values,
 		Players:     i4store.PlayerRootLocker{},
 		Counters:    daily,

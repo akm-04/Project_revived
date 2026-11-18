@@ -70,6 +70,26 @@ func TestChargeCatalogBindsVipAwards(t *testing.T) {
 	}
 }
 
+func TestPrivilegeSkillMaxOverlay(t *testing.T) {
+	source := int64(10)
+	if got := (ChargeTuning{}).PrivilegeSkillMaxValue(source); got != source {
+		t.Fatalf("absent overlay = %d", got)
+	}
+	tunedValue := int64(25)
+	tuned := ChargeTuning{Version: 1, Mode: TuningGrant, PrivilegeSkillMax: &tunedValue}
+	if got := tuned.PrivilegeSkillMaxValue(source); got != 25 {
+		t.Fatalf("tuned overlay = %d", got)
+	}
+	negative := int64(-1)
+	if err := (ChargeTuning{Version: 1, Mode: TuningGrant, PrivilegeSkillMax: &negative}).Validate(); err == nil {
+		t.Fatal("negative privilege skill max admitted")
+	}
+	invalid := ChargeTuning{Version: 0, Mode: TuningGrant, PrivilegeSkillMax: &tunedValue}
+	if got := invalid.PrivilegeSkillMaxValue(source); got != source {
+		t.Fatalf("invalid overlay applied %d", got)
+	}
+}
+
 func TestCardsStackDaysAndLeftDaysRoundUp(t *testing.T) {
 	const now = int64(1000000)
 	c := Cards{}.Extended(CardMonth, 30, now)

@@ -224,11 +224,15 @@ func (s Charge) settle(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	}
 	now := at.Unix()
 	nextCards := cards.Extended(decided.Card, decided.CardDays, now)
+	privilegeSkillMax := catalog.PrivilegeSkillMax
+	if tuned {
+		privilegeSkillMax = tuning.PrivilegeSkillMaxValue(privilegeSkillMax)
+	}
 	if cards.PrivilegeActive(now) {
-		oldCap += catalog.PrivilegeSkillMax
+		oldCap += privilegeSkillMax
 	}
 	if nextCards.PrivilegeActive(now) {
-		newCap += catalog.PrivilegeSkillMax
+		newCap += privilegeSkillMax
 	}
 	if decided.Crystal > 0 {
 		current := sc.Operation.Operation()

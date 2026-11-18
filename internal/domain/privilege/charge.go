@@ -108,10 +108,16 @@ type ChargeTuning struct {
 	Version  int64                     `json:"version"`
 	Mode     string                    `json:"mode"`
 	Products map[string]ChargeOverride `json:"products"`
+	// PrivilegeSkillMax replaces the source monthly-privilege skill-point cap;
+	// nil keeps the source value.
+	PrivilegeSkillMax *int64 `json:"privilege_skill_max,omitempty"`
 }
 
 func (t ChargeTuning) Validate() error {
 	if t.Version < 1 || (t.Mode != TuningGrant && t.Mode != TuningDisabled) {
+		return ErrUnavailable
+	}
+	if t.PrivilegeSkillMax != nil && *t.PrivilegeSkillMax < 0 {
 		return ErrUnavailable
 	}
 	for _, o := range t.Products {
@@ -122,6 +128,15 @@ func (t ChargeTuning) Validate() error {
 		}
 	}
 	return nil
+}
+
+// PrivilegeSkillMaxValue applies the overlay's cap to the source value when the
+// overlay is valid and carries one.
+func (t ChargeTuning) PrivilegeSkillMaxValue(source int64) int64 {
+	if t.Validate() != nil || t.PrivilegeSkillMax == nil {
+		return source
+	}
+	return *t.PrivilegeSkillMax
 }
 
 type ChargeGrant struct {

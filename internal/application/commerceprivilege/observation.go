@@ -16,6 +16,7 @@ type Store interface {
 	SavePrivilegeTx(context.Context, tx.Tx, int64, d.State) error
 	ReadCardsTx(context.Context, tx.Queryer, identity.PlayerID) (d.Cards, error)
 	ReadVIPClaimedTx(context.Context, tx.Queryer, identity.PlayerID) ([]int64, error)
+	ChargeTuningTx(context.Context, tx.Queryer) (d.ChargeTuning, bool, error)
 }
 type Content interface {
 	PrivilegeCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
@@ -63,7 +64,15 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 		if e != nil {
 			return out, true, e
 		}
-		cap += chargeCatalog.PrivilegeSkillMax
+		tuning, tuned, e := p.Store.ChargeTuningTx(c, q)
+		if e != nil {
+			return out, true, e
+		}
+		privilegeSkillMax := chargeCatalog.PrivilegeSkillMax
+		if tuned {
+			privilegeSkillMax = tuning.PrivilegeSkillMaxValue(privilegeSkillMax)
+		}
+		cap += privilegeSkillMax
 	}
 	if revision == "" {
 		revision = s.ContentRevision
