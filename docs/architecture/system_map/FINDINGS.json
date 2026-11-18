@@ -2,49 +2,6 @@
  "note": "These lists are leads for a reviewer, not verdicts. Confirm each entry against the source it cites.",
  "client_mids_not_live": [
   {
-   "mid": 20,
-   "name": "LOAD_SCROLLS",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 21,
-   "name": "LOAD_ESSENCES",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 65,
-   "name": "LOAD_COLLECTED_HEROS",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 91,
-   "name": "OPEN_ACT_ITEM",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 144,
    "name": "LOAD_BUILDING",
    "files": [
@@ -135,16 +92,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 435,
-   "name": "LOAD_GET_REQUEST_PLAYERS",
-   "files": [
-    "app/model/GetRequestPlayers.lua"
-   ],
-   "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
    "mid": 514,
    "name": "CHAT_FROM_PLAYER",
    "files": [
@@ -211,56 +158,6 @@
     "app/common/network/Backend.lua"
    ],
    "family": "BROADCASTS",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 2065,
-   "name": "SELECT_DATE_HERO",
-   "files": [
-    "app/windows/activities/Activity1107.lua"
-   ],
-   "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 2066,
-   "name": "CHANGE_DATE_HERO",
-   "files": [
-    "app/windows/activities/Activity1107.lua"
-   ],
-   "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 2067,
-   "name": "SELECT_DATE_HERO_2",
-   "files": [
-    "app/windows/activities/Activity1126.lua"
-   ],
-   "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 2197,
-   "name": "ZHUGE_SELECT_DIALOG",
-   "files": [
-    "app/model/ZhugeFestival.lua"
-   ],
-   "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "stage": "I9-10"
-  },
-  {
-   "mid": 2198,
-   "name": "ZHUGE_END_DIALOG",
-   "files": [
-    "app/model/ZhugeFestival.lua"
-   ],
-   "family": "LIBRARY",
    "disposition": "ACTIVE",
    "stage": "I9-10"
   },
@@ -489,8 +386,8 @@
   "window_sender_mid_count": 138,
   "non_window_sender_mid_count": 416,
   "registration_status_counts": {
-   "inactive_fallback": 540,
-   "no_registration": 11,
+   "inactive_fallback": 550,
+   "no_registration": 1,
    "unattributed_registration": 3,
    "registration_without_dispatch_handler": 0
   },
@@ -525,7 +422,7 @@
    {
     "mid": 20,
     "name": "LOAD_SCROLLS",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -538,7 +435,7 @@
    {
     "mid": 21,
     "name": "LOAD_ESSENCES",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -603,7 +500,7 @@
    {
     "mid": 65,
     "name": "LOAD_COLLECTED_HEROS",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -629,7 +526,7 @@
    {
     "mid": 91,
     "name": "OPEN_ACT_ITEM",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/SelfPlayer.lua"
     ],
@@ -945,7 +842,7 @@
    {
     "mid": 435,
     "name": "LOAD_GET_REQUEST_PLAYERS",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/GetRequestPlayers.lua"
     ],
@@ -2707,7 +2604,7 @@
    {
     "mid": 2065,
     "name": "SELECT_DATE_HERO",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/windows/activities/Activity1107.lua"
     ],
@@ -2720,7 +2617,7 @@
    {
     "mid": 2066,
     "name": "CHANGE_DATE_HERO",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/windows/activities/Activity1107.lua"
     ],
@@ -2733,7 +2630,7 @@
    {
     "mid": 2067,
     "name": "SELECT_DATE_HERO_2",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/windows/activities/Activity1126.lua"
     ],
@@ -3149,7 +3046,7 @@
    {
     "mid": 2197,
     "name": "ZHUGE_SELECT_DIALOG",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/ZhugeFestival.lua"
     ],
@@ -3162,7 +3059,7 @@
    {
     "mid": 2198,
     "name": "ZHUGE_END_DIALOG",
-    "registration_status": "no_registration",
+    "registration_status": "inactive_fallback",
     "senders": [
      "app/model/ZhugeFestival.lua"
     ],
@@ -7834,18 +7731,22 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 599,
+  "count": 609,
   "mids": [
    6,
    17,
+   20,
+   21,
    31,
    35,
    36,
    64,
+   65,
    66,
    80,
    84,
    85,
+   91,
    120,
    162,
    208,
@@ -7882,6 +7783,7 @@
    275,
    277,
    302,
+   435,
    529,
    534,
    535,
@@ -8040,6 +7942,9 @@
    2050,
    2051,
    2052,
+   2065,
+   2066,
+   2067,
    2080,
    2081,
    2082,
@@ -8073,6 +7978,8 @@
    2194,
    2195,
    2196,
+   2197,
+   2198,
    2199,
    2200,
    2201,
