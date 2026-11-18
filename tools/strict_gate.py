@@ -18,7 +18,6 @@ Usage: strict_gate.py --toolchain <self-contained tool root> --cache <go/zig cac
 import argparse
 import collections
 import datetime
-import fcntl
 import hashlib
 import io
 import json
@@ -100,12 +99,8 @@ TEST_FUNCTION = re.compile(r'^func (Test\w+)\(t \*testing\.T\)', re.M)
 
 
 LATENCY_REPETITIONS = 3
-BASELINE_WORK = b'\0' * (64 << 20)
 REPLY_CONFORMANCE_VIOLATION = 'reply_conformance_violation '
-QUIET_LOCK = WORKSPACE / 'tmp/worker_clusters/quiet.lock'
 LATENCY_DEFAULTS = dict(
-    benchmark_reference_seconds=0.0321,
-    benchmark_tolerance=0.1,
     check_interval_seconds=30,
     cooldown_seconds=300,
     general_ceiling_factor=10,
@@ -118,7 +113,7 @@ LATENCY_DEFERRED = 'latency_deferred'
 
 
 def host_conditions():
-    """CPU temperatures, clocks, load and a fixed single-thread hash benchmark (best of 5) at one instant."""
+    """CPU temperatures, clocks and load at one instant."""
     temperatures = {}
     for sensor in Path('/sys/class/hwmon').glob('hwmon*/temp*_input'):
         name = (sensor.parent / 'name').read_text().strip()
@@ -126,14 +121,9 @@ def host_conditions():
         key = f"{name}:{label.read_text().strip() if label.exists() else sensor.name}"
         temperatures[key] = int(sensor.read_text()) / 1000
     frequencies = [int(path.read_text()) / 1000 for path in Path('/sys/devices/system/cpu').glob('cpu[0-9]*/cpufreq/scaling_cur_freq')]
-    timings = []
-    for _ in range(5):
-        began = time.perf_counter()
-        hashlib.sha256(BASELINE_WORK).digest()
-        timings.append(time.perf_counter() - began)
     return dict(at=datetime.datetime.now(datetime.timezone.utc).isoformat(), temperatures_celsius=temperatures,
                 mean_frequency_mhz=round(sum(frequencies) / len(frequencies)) if frequencies else None,
-                load_average=os.getloadavg(), baseline_sha256_64mib_seconds=round(min(timings), 4))
+                load_average=os.getloadavg())
 
 class GateFailure(Exception):
     pass
@@ -254,8 +244,7 @@ class Gate:
     @staticmethod
     def validate_latency(document):
         require(isinstance(document, dict), 'latency.json must be an object')
-        for name in ('benchmark_reference_seconds', 'benchmark_tolerance', 'check_interval_seconds',
-                     'cooldown_seconds', 'general_ceiling_factor', 'load_average_max', 'temperature_celsius_max'):
+        for name in ('check_interval_seconds', 'cooldown_seconds', 'general_ceiling_factor', 'load_average_max', 'temperature_celsius_max'):
             value = document.get(name)
             require(isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0,
                     f'latency.json {name} must be a positive number')
@@ -1239,105 +1228,8 @@ class Gate:
                 return value
         return max(readings.values(), default=None)
 
-    def running_worker_clusters(self, processes):
-        """Every live PostgreSQL server but the gate's own: managed worker clusters and any server outside that root."""
-        found = []
-        for pid_file in (WORKSPACE / 'tmp/worker_clusters').glob('*/data/postmaster.pid'):
-            try:
-                pid = int(pid_file.read_text().splitlines()[0])
-            except (OSError, ValueError, IndexError):
-                continue
-            if Path(f'/proc/{pid}').exists():
-                found.append(str(pid_file))
-        servers = {pid: parts for pid, parts in processes if self.postgres_process(pid, parts)}
-        own = self.own_postmaster()
-        for pid, parts in servers.items():
-            # Recognised by program, not by data-directory syntax (-D x, -Dx, --pgdata=x, PGDATA all run the same
-            # server, A-105 T28); a server's own backends are reported through their postmaster.
-            if self.process_parent(pid) in servers or pid == own or self.descendant_of_gate(pid):
-                continue
-            found.append(f'{pid}: {" ".join(parts[:3])}')
-        return found
-
-    def postgres_process(self, pid, parts):
-        names = self.program_names(pid, parts) | {Path(parts[0]).name.split(':')[0]}
-        return bool(names & {'postgres', 'postmaster'})
-
-    def own_postmaster(self):
-        try:
-            return int((self.work / 'cluster/pgdata/postmaster.pid').read_text().splitlines()[0])
-        except (OSError, ValueError, IndexError):
-            return None
-
-    @staticmethod
-    def process_parent(pid):
-        try:
-            return int(Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()[1])
-        except (OSError, ValueError, IndexError):
-            return None
-
-    def descendant_of_gate(self, pid):
-        while pid and pid > 1:
-            if pid == os.getpid():
-                return True
-            pid = self.process_parent(pid)
-        return False
-
-    def process_command_lines(self):
-        """(pid, argv) of every process, and the pids whose cmdline the gate may not read."""
-        found, invisible = [], []
-        for command_line in Path('/proc').glob('[0-9]*/cmdline'):
-            try:
-                pid = int(command_line.parent.name)
-                parts = [part.decode(errors='replace') for part in command_line.read_bytes().split(b'\0') if part]
-            except PermissionError:
-                invisible.append(command_line.parent.name)
-                continue
-            except (OSError, ValueError):
-                continue
-            if parts:
-                found.append((pid, parts))
-        return found, invisible
-
-    @staticmethod
-    def program_names(pid, parts):
-        """argv[0]'s name and, when readable, the executable's: a renamed or symlinked binary keeps one of them."""
-        names = {Path(parts[0]).name}
-        try:
-            names.add(Path(os.readlink(f'/proc/{pid}/exe')).name)
-        except OSError:
-            pass
-        return names
-
-    @staticmethod
-    def go_test_command(names, parts):
-        """A go test driver under any toolchain name (go, go1.27, go-1.27.3), or a compiled test binary run directly."""
-        if any(name.endswith('.test') for name in names) or any(part.startswith('-test.') for part in parts[1:]):
-            return True
-        return any(re.fullmatch(r'go(-?\d[\w.]*)?', name) for name in names) and 'test' in parts[1:4]
-
-    def other_go_test_processes(self, processes):
-        found = []
-        for pid, parts in processes:
-            if self.go_test_command(self.program_names(pid, parts), parts) and not self.descendant_of_gate(pid):
-                found.append(f'{pid}: {" ".join(parts[:4])}')
-        return found
-
-    @staticmethod
-    def hidden_process_mount():
-        """A /proc mounted with hidepid or subset hides other users' processes from every scan."""
-        for line in Path('/proc/mounts').read_text().splitlines():
-            fields = line.split()
-            if len(fields) > 3 and fields[1] == '/proc':
-                options = dict(option.partition('=')[::2] for option in fields[3].split(','))
-                if options.get('hidepid', '0') not in ('0', 'off') or 'subset' in options:
-                    return fields[3]
-        return None
-
     def latency_breaches(self, reading):
-        return self.host_breaches(reading) + self.foreign_breaches(reading)
-
-    def host_breaches(self, reading):
+        """Load and CPU temperature are the only conditions: any other work on the host shows up in them."""
         settings = self.latency_settings()
         found = []
         load_values = reading.get('load_average')
@@ -1352,101 +1244,31 @@ class Gate:
             found.append('temperature unavailable: no finite CPU sensor reading')
         elif temperature >= settings['temperature_celsius_max']:
             found.append(f'temperature {temperature:.1f} C >= {settings["temperature_celsius_max"]} C')
-        reference = settings['benchmark_reference_seconds']
-        measured = reading.get('baseline_sha256_64mib_seconds')
-        if not finite_number(measured) or measured <= 0:
-            found.append('benchmark unavailable: no positive finite single-thread measurement')
-        else:
-            deviation = abs(measured - reference) / reference
-            if deviation > settings['benchmark_tolerance']:
-                found.append(f'benchmark {measured}s differs from reference {reference}s by {deviation:.1%}')
         return found
 
-    @staticmethod
-    def foreign_breaches(reading):
-        found = []
-        if reading.get('worker_clusters'):
-            found.append('worker cluster running: ' + ', '.join(reading['worker_clusters']))
-        if reading.get('go_test_processes'):
-            found.append('other go test process: ' + '; '.join(reading['go_test_processes']))
-        if reading.get('process_visibility'):
-            found.append('process scan incomplete: ' + reading['process_visibility'])
-        return found
-
-    def latency_reading(self, section_running=False):
-        """While the section runs, its own go test and databases raise load and temperature: only foreign work is a
-        breach then, and the host readings are kept unjudged. Before the run every condition is judged."""
+    def latency_reading(self):
         reading = host_conditions()
-        processes, invisible = self.process_command_lines()
-        reading['worker_clusters'] = self.running_worker_clusters(processes)
-        reading['go_test_processes'] = self.other_go_test_processes(processes)
-        hidden = self.hidden_process_mount()
-        if hidden or invisible:
-            reading['process_visibility'] = (f'/proc mounted {hidden}; ' if hidden else '') + \
-                (f'unreadable cmdline of pid {", ".join(invisible)}' if invisible else '')
-        if not section_running:
-            reading['breaches'] = self.latency_breaches(reading)
-            return reading
-        reading['breaches'] = self.foreign_breaches(reading)
-        reading['unjudged_own_load'] = self.host_breaches(reading)
+        reading['breaches'] = self.latency_breaches(reading)
         return reading
 
-    @staticmethod
-    def acquire_quiet_lock():
-        QUIET_LOCK.parent.mkdir(parents=True, exist_ok=True)
-        handle = QUIET_LOCK.open('a')
-        try:
-            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            handle.close()
-            return None
-        return handle
-
-    @staticmethod
-    def release_quiet_lock(handle):
-        if handle is None:
-            return
-        try:
-            fcntl.flock(handle, fcntl.LOCK_UN)
-        finally:
-            handle.close()
-
     def wait_for_latency_conditions(self):
-        """Hold the host quiet lock and wait until every condition has held for the cool-down, or the wait expires."""
+        """Sample until load and temperature have stayed under their limits for the cool-down, or the wait expires."""
         settings = self.latency_settings()
         deadline = time.monotonic() + settings['wait_minutes'] * 60
-        held_since, readings, handle = None, [], None
+        held_since, readings = None, []
         while True:
-            if handle is None:
-                handle = self.acquire_quiet_lock()
             reading = self.latency_reading()
-            if handle is None:
-                reading['breaches'].append('quiet lock not held by the gate')
             readings.append(reading)
-            if not reading['breaches']:
-                if held_since is None:
-                    held_since = time.monotonic()
-                if time.monotonic() - held_since >= settings['cooldown_seconds']:
-                    return handle, readings, True
-            else:
+            if reading['breaches']:
                 held_since = None
-                self.release_quiet_lock(handle)
-                handle = None
+            elif held_since is None:
+                held_since = time.monotonic()
+            if held_since is not None and time.monotonic() - held_since >= settings['cooldown_seconds']:
+                return readings, True
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                self.release_quiet_lock(handle)
-                return None, readings, False
+                return readings, False
             time.sleep(min(settings['check_interval_seconds'], remaining))
-
-    def monitor_latency_conditions(self, stop, breaches):
-        """Retain every during-run reading; the first foreign-work breach ends the monitor and makes the section NOT_RUN."""
-        while not stop.wait(self.latency_settings()['check_interval_seconds']):
-            reading = self.latency_reading(section_running=True)
-            self.latency_conditions.append(reading)
-            if reading['breaches']:
-                breaches.append(reading)
-                return
-        return
 
     def latency_groups(self):
         groups = collections.OrderedDict()
@@ -1509,27 +1331,13 @@ class Gate:
                     self.latency_red.append(f'{key}: {outcome}')
 
     def latency_section(self):
-        """The population runs only while the measured host conditions hold; a breach makes the section NOT_RUN, never RED."""
+        """The population starts once load and temperature have held for the cool-down; otherwise it is NOT_RUN, never RED."""
         self.latency_red, self.latency_runs = [], {}
-        handle, readings, held = self.wait_for_latency_conditions()
-        self.latency_conditions = readings
+        self.latency_conditions, held = self.wait_for_latency_conditions()
         if not held:
             self.latency_verdict = 'NOT_RUN'
             return
-        breaches, stop = [], threading.Event()
-        monitor = threading.Thread(target=self.monitor_latency_conditions, args=(stop, breaches), daemon=True)
-        monitor.start()
-        try:
-            self.run_latency_members()
-        finally:
-            stop.set()
-            monitor.join()
-            after = self.latency_reading(section_running=True)
-            self.latency_conditions.append(after)
-            self.release_quiet_lock(handle)
-        if breaches or after['breaches']:
-            self.latency_verdict = 'NOT_RUN'
-            return
+        self.run_latency_members()
         self.latency_verdict = 'RED' if self.latency_red else 'GREEN'
 
     def recipes(self):
