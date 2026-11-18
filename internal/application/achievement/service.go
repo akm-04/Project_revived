@@ -69,6 +69,8 @@ type Store interface {
 	MarkNoticesDeliveredTx(context.Context, tx.Tx, identity.PlayerID, time.Time) error
 	TrophyRankTx(context.Context, tx.Queryer, identity.PlayerID, d.Catalog) (int64, error)
 	TrophyTopTx(context.Context, tx.Queryer, identity.LogicalServerID, d.Catalog, int) ([]d.TrophyStanding, error)
+	PutBossFactTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, int64, time.Time) (bool, error)
+	CountBossFactsTx(context.Context, tx.Queryer, identity.PlayerID, int64) (int64, error)
 }
 type Content interface {
 	AchievementCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)

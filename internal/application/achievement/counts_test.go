@@ -63,7 +63,7 @@ func (f petCampaignFake) MaxFloorTx(context.Context, tx.Queryer, identity.Player
 
 type campaignFake struct{ value int64 }
 
-func (f campaignFake) NormalStarsTx(context.Context, tx.Queryer, identity.PlayerID, string) (int64, error) {
+func (f campaignFake) MainChainStarsTx(context.Context, tx.Queryer, identity.PlayerID, string) (int64, error) {
 	return f.value, nil
 }
 
@@ -122,7 +122,7 @@ func TestOwnerCountsReadsEachOwnerFact(t *testing.T) {
 	}{
 		{"guild damage in tens of thousands", 100004, func(o *OwnerCounts) { o.GuildCampaign = guildCampaignFake{value: 99999} }, 9},
 		{"sky tower floor", 100005, func(o *OwnerCounts) { o.PetCampaign = petCampaignFake{value: 77} }, 77},
-		{"normal campaign stars", 100010, func(o *OwnerCounts) { o.Campaign = campaignFake{value: 612} }, 612},
+		{"main-chain campaign stars", 100010, func(o *OwnerCounts) { o.Campaign = campaignFake{value: 612} }, 612},
 		{"school stories", 100020, func(o *OwnerCounts) { o.SchoolStories = schoolStoryFake{value: 4} }, 4},
 		{"graduated students", 100022, func(o *OwnerCounts) { o.Mentor = mentorFake{value: 2} }, 2},
 		{"memoir tenth floor", 100024, func(o *OwnerCounts) { o.Memoir = memoirFake{value: 3} }, 3},
