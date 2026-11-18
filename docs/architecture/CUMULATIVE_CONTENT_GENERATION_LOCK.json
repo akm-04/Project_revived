@@ -561,14 +561,23 @@
       "revision_id": "6dae1539f42d3c6d26bb550be2d6d8fd68a03f4bbc024b696f6d42dc7216d838",
       "scope": "campaign_catalog.json nodes gain [partner_id, stone_item_id, stone_count] from campaign.lua assist_partner/assist_stone_num (repair-l1 #92); every other artifact byte-identical.",
       "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 73,
+      "stage": "I9-11B Items and Energy",
+      "compiler_version": "i9-11b-items-energy",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "e0f3fb07877d9375937058291110ca64cb6294c9263926c2900fa83155fd464e",
+      "scope": "New daily_buy_input_catalog.json artifact and DAILY_BUY_INPUTS_I9_11B capability from the exact archive: all stock item rows, referenced gift rows and their dropbox groups, VIP/monthly/refresh_cost/misc/daily_consume tunables; every existing artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
     }
   ],
   "current": {
-    "stage": "Repair L1 Campaign Assist",
-    "compiler_version": "repair-l1-campaign-assist",
+    "stage": "I9-11B Items and Energy",
+    "compiler_version": "i9-11b-items-energy",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "6dae1539f42d3c6d26bb550be2d6d8fd68a03f4bbc024b696f6d42dc7216d838",
-    "scope": "campaign_catalog.json nodes gain [partner_id, stone_item_id, stone_count] from campaign.lua assist_partner/assist_stone_num (repair-l1 #92); every other artifact byte-identical.",
+    "revision_id": "e0f3fb07877d9375937058291110ca64cb6294c9263926c2900fa83155fd464e",
+    "scope": "New daily_buy_input_catalog.json artifact and DAILY_BUY_INPUTS_I9_11B capability from the exact archive: all stock item rows, referenced gift rows and their dropbox groups, VIP/monthly/refresh_cost/misc/daily_consume tunables; every existing artifact byte-identical.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }

@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "repair-l1-campaign-assist"
+COMPILER_VERSION = "i9-11b-items-energy"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -491,6 +491,7 @@ ENABLED_CAPABILITIES = [
     "FRIEND_DM_EMOTICON_I7A6A",
     "SOCIAL_GIFT_I7A7A",
     "SOCIAL_CONTENT_I9_10E",
+    "DAILY_BUY_INPUTS_I9_11B",
 ]
 
 
@@ -708,6 +709,7 @@ from league_content import build_league
 from conquer_mode_content import build_conquer_mode
 from course_content import build_course
 from social_content import build_social
+from daily_buy_content import build_daily_buy_inputs
 class CompileError(ValueError):
     pass
 
@@ -1106,6 +1108,11 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     practice_type_rows = parse_generated_lua_table(blobs["data/tables/practice_type.lua"].data)
     practice_lock_rows = parse_generated_lua_table(blobs["data/tables/practice_lock.lua"].data)
     vip_rows = parse_generated_lua_table(blobs["data/tables/vip.lua"].data)
+    gift_rows = parse_generated_lua_table(blobs["data/tables/gift.lua"].data)
+    dropbox_rows = parse_generated_lua_table(blobs["data/tables/dropbox.lua"].data)
+    monthly_privilege_rows = parse_generated_lua_table(blobs["data/tables/monthly_privilege.lua"].data)
+    refresh_cost_rows = parse_generated_lua_table(blobs["data/tables/refresh_cost.lua"].data)
+    daily_consume_rows = parse_generated_lua_table(blobs["data/tables/daily_consume.lua"].data)
     assets = parse_generated_lua_table(blobs["data/tables/asset.lua"].data)
     pet_keys, pet_rows = parse_base64_indexed_lua_table(blobs["data/tables/pet.lua"].data)
     pet_exp_rows = parse_generated_lua_table(blobs["data/tables/pet_exp.lua"].data)
@@ -2718,6 +2725,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,
         "social_input_catalog.json": build_social(blobs, parse_generated_lua_table, CompileError),
+        "daily_buy_input_catalog.json": build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_privilege_rows, refresh_cost_rows, misc_by_key, daily_consume_rows, CompileError),
         "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,
         "function_gates.json": function_artifact,

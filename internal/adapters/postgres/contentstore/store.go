@@ -395,6 +395,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && elementExact
+	var dailyBuyExact bool
+	err = q.QueryRow(ctx, verifyDailyBuyInputsSQL, b.RevisionID(), string(b.DailyBuyInputsJSON())).Scan(&dailyBuyExact, &v.DailyBuyInputsCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && dailyBuyExact
 	var inscriptionExact bool
 	err = q.QueryRow(ctx, verifyInscriptionInputsSQL, b.RevisionID(), string(b.InscriptionInputsJSON())).Scan(&inscriptionExact, &v.InscriptionInputsCount)
 	if err != nil {
