@@ -142,6 +142,12 @@ func (s *store) SaveSortTypeTx(_ context.Context, _ tx.Tx, r character.HeroRoot,
 	return nil
 }
 
+func (s *store) SaveBackpackSortTypeTx(_ context.Context, _ tx.Tx, r character.HeroRoot, _ int64) error {
+	s.root = r
+	s.saves++
+	return nil
+}
+
 type receipts struct {
 	m map[receipt.Identity]receipt.Receipt
 }
@@ -266,5 +272,33 @@ func TestSaveSortReceiptIsOperationScoped(t *testing.T) {
 	}
 	if len(rr.m) != 2 {
 		t.Fatalf("receipts=%d", len(rr.m))
+	}
+}
+
+func TestSaveBackpackSortReceiptIsOperationScopedAndLeavesHeroSort(t *testing.T) {
+	now := time.Unix(1, 0).UTC()
+	st := &store{root: character.HeroRoot{PlayerID: 7, NextPartnerID: 1, SortType: 3, StateVersion: 1, CreatedAt: now, UpdatedAt: now}}
+	rr := &receipts{m: map[receipt.Identity]receipt.Receipt{}}
+	s := Service{Runner: tx.Runner{DB: fakeDB{}}, Store: st, Fencer: &fence{}, Content: gate(true), Receipts: rr, ReceiptRead: rr}
+	actor := testActor(t)
+	op1 := testOp(t, "44444444-4444-4444-8444-444444444444")
+	if err := s.SaveBackpackSortType(context.Background(), actor, 4, op1); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SaveBackpackSortType(context.Background(), actor, 4, op1); err != nil {
+		t.Fatal(err)
+	}
+	if st.saves != 1 || st.root.BackpackSortType != 4 || st.root.SortType != 3 {
+		t.Fatalf("root=%+v saves=%d", st.root, st.saves)
+	}
+	op2 := testOp(t, "55555555-5555-4555-8555-555555555555")
+	if err := s.SaveBackpackSortType(context.Background(), actor, character.MaxBackpackSortType+1, op2); err == nil {
+		t.Fatal("out of range accepted")
+	}
+	if err := s.SaveBackpackSortType(context.Background(), actor, 5, op2); err != nil {
+		t.Fatal(err)
+	}
+	if st.saves != 2 || st.root.BackpackSortType != 5 || st.root.SortType != 3 || len(rr.m) != 2 {
+		t.Fatalf("root=%+v saves=%d receipts=%d", st.root, st.saves, len(rr.m))
 	}
 }

@@ -23,6 +23,7 @@ import (
 type HeroServicePort interface {
 	RosterView(context.Context, identity.ActorContext, time.Time) (character.HeroRoot, []apphero.HeroRosterView, error)
 	SaveSortType(context.Context, identity.ActorContext, int64, operation.Context) error
+	SaveBackpackSortType(context.Context, identity.ActorContext, int64, operation.Context) error
 	UseExpItem(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.ExpResult, error)
 	UseExpItems(context.Context, identity.ActorContext, int64, []appi5.HeroExpItemDebit, operation.Context) (apphero.ExpResult, error)
 	EquipItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.EquipItemResult, error)
@@ -541,6 +542,18 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			body[strconv.FormatInt(origin, 10)] = qty
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	case 88: // BACKPACK_SORT_TYPE
+		sortType, err := requiredInt64(req.Envelope.Params, "sort_type")
+		if err != nil {
+			return badHero("invalid_backpack_sort_type")
+		}
+		if sortType < 0 || sortType > character.MaxBackpackSortType {
+			return failureReply(refusal(unprovenRefusalCode))
+		}
+		if err := d.Service.SaveBackpackSortType(ctx, actor, sortType, req.Envelope.Operation); err != nil {
+			return failHero(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 89:
 		sortType, err := requiredInt64(req.Envelope.Params, "sort_type")
 		if err != nil || sortType < 0 || sortType > character.MaxSortType {

@@ -13,7 +13,7 @@ import (
 // SOURCE_FACT: stock `time` is the stack's first acquisition/start timestamp.
 // Current Backpack.addItem merges later quantities without replacing that
 // timestamp, therefore UpdatedAt must never be projected here.
-func Build(stacks []economy.StackState) (map[string]any, error) {
+func Build(stacks []economy.StackState, sortType int64) (map[string]any, error) {
 	rows := make([]economy.StackState, len(stacks))
 	copy(rows, stacks)
 	sort.Slice(rows, func(i, j int) bool { return rows[i].ItemID < rows[j].ItemID })
@@ -33,7 +33,7 @@ func Build(stacks []economy.StackState) (map[string]any, error) {
 		})
 	}
 	return map[string]any{
-		"sort_type":   int64(0),
+		"sort_type":   sortType,
 		"list":        out,
 		"spirit_list": []any{},
 	}, nil

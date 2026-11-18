@@ -20,7 +20,7 @@ type Store struct{ Queryer tx.Queryer }
 func scanRoot(row tx.Row) (character.HeroRoot, error) {
 	var r character.HeroRoot
 	var pid int64
-	if err := row.Scan(&pid, &r.NextPartnerID, &r.SortType, &r.StateVersion, &r.CreatedAt, &r.UpdatedAt); err != nil {
+	if err := row.Scan(&pid, &r.NextPartnerID, &r.SortType, &r.BackpackSortType, &r.StateVersion, &r.CreatedAt, &r.UpdatedAt); err != nil {
 		return r, err
 	}
 	r.PlayerID = identity.PlayerID(pid)
@@ -58,6 +58,38 @@ func (Store) SaveSortTypeTx(ctx context.Context, t tx.Tx, r character.HeroRoot, 
 		return errors.New("character store: sort update lost race")
 	}
 	return nil
+}
+
+func (Store) SaveBackpackSortTypeTx(ctx context.Context, t tx.Tx, r character.HeroRoot, oldVersion int64) error {
+	if t == nil || r.Validate() != nil || oldVersion <= 0 {
+		return errors.New("character store: invalid backpack sort update")
+	}
+	tag, err := t.Exec(ctx, characterqueries.SaveBackpackSortType, int64(r.PlayerID), r.BackpackSortType, r.UpdatedAt.UTC(), oldVersion)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return errors.New("character store: backpack sort update lost race")
+	}
+	return nil
+}
+
+func (s Store) ReadBackpackSortType(ctx context.Context, pid identity.PlayerID) (int64, error) {
+	if s.Queryer == nil {
+		return 0, errors.New("character store: invalid backpack sort read")
+	}
+	return s.ReadBackpackSortTypeTx(ctx, s.Queryer, pid)
+}
+
+func (Store) ReadBackpackSortTypeTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) (int64, error) {
+	if q == nil || !pid.Valid() {
+		return 0, errors.New("character store: invalid backpack sort read")
+	}
+	var sortType int64
+	if err := q.QueryRow(ctx, characterqueries.ReadBackpackSortType, int64(pid)).Scan(&sortType); err != nil {
+		return 0, err
+	}
+	return sortType, nil
 }
 
 func (Store) SaveRootAllocatorTx(ctx context.Context, t tx.Tx, r character.HeroRoot, oldVersion int64) error {

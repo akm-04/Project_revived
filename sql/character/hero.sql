@@ -5,16 +5,23 @@ VALUES ($1,1,0,1,$2,$2)
 ON CONFLICT (player_id) DO NOTHING;
 
 -- name: ReadHeroRoot :one
-SELECT player_id,next_partner_id,sort_type,state_version,created_at,updated_at
+SELECT player_id,next_partner_id,sort_type,backpack_sort_type,state_version,created_at,updated_at
 FROM player_hero_roots WHERE player_id=$1;
 
 -- name: LockHeroRoot :one
-SELECT player_id,next_partner_id,sort_type,state_version,created_at,updated_at
+SELECT player_id,next_partner_id,sort_type,backpack_sort_type,state_version,created_at,updated_at
 FROM player_hero_roots WHERE player_id=$1 FOR UPDATE;
 
 -- name: SaveHeroSortType :execrows
 UPDATE player_hero_roots SET sort_type=$2,state_version=state_version+1,updated_at=$3
 WHERE player_id=$1 AND state_version=$4;
+
+-- name: SaveBackpackSortType :execrows
+UPDATE player_hero_roots SET backpack_sort_type=$2,state_version=state_version+1,updated_at=$3
+WHERE player_id=$1 AND state_version=$4;
+
+-- name: ReadBackpackSortType :one
+SELECT COALESCE((SELECT backpack_sort_type FROM player_hero_roots WHERE player_id=$1),0);
 
 -- name: SaveHeroRootAllocator :execrows
 UPDATE player_hero_roots

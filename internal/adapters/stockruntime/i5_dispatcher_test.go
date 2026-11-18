@@ -95,10 +95,16 @@ func i5Req(mid uint16, params map[string]any, now time.Time) httpedge.DispatchRe
 	return httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: operation.Context{StartedAt: now}, MID: mid, ReceivedAt: now, Params: params, Claims: wire.CredentialClaims{Token: "bearer", Region: 1}}}
 }
 
+type backpackSortFake struct{ sortType int64 }
+
+func (f backpackSortFake) ReadBackpackSortType(context.Context, identity.PlayerID) (int64, error) {
+	return f.sortType, nil
+}
+
 func TestI5MID81ProjectsCanonicalBackpackAcquiredTime(t *testing.T) {
 	now := time.Unix(1_700_000_100, 0).UTC()
 	svc := &i5WireFake{}
-	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
+	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, BackpackSort: backpackSortFake{sortType: 4}}
 	got := d.Dispatch(context.Background(), i5Req(81, map[string]any{}, now))
 	if got.HTTPStatus != 200 {
 		t.Fatalf("%+v", got)
@@ -111,7 +117,7 @@ func TestI5MID81ProjectsCanonicalBackpackAcquiredTime(t *testing.T) {
 	if row["table_id"] != int64(9001) || row["item_num"] != int64(3) || row["time"] != int64(1_700_000_000) {
 		t.Fatalf("row=%#v", row)
 	}
-	if got.Body["sort_type"] != int64(0) {
+	if got.Body["sort_type"] != int64(4) {
 		t.Fatalf("sort_type=%#v", got.Body["sort_type"])
 	}
 	if spirit, ok := got.Body["spirit_list"].([]any); !ok || len(spirit) != 0 {

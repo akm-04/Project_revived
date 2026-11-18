@@ -3,6 +3,7 @@ package publicprofile
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
 	"time"
 
@@ -17,6 +18,19 @@ import (
 type fakeRoster struct{ detail map[string]any }
 
 func (f fakeRoster) OverlayMID1(_ context.Context, _ tx.Queryer, _ identity.ActorContext, _ bool, _ time.Time, out map[string]any) error {
+	for k, v := range f.detail {
+		out[k] = v
+	}
+	return nil
+}
+
+type countingRoster struct {
+	detail map[string]any
+	calls  int
+}
+
+func (f *countingRoster) OverlayMID1(_ context.Context, _ tx.Queryer, _ identity.ActorContext, _ bool, _ time.Time, out map[string]any) error {
+	f.calls++
 	for k, v := range f.detail {
 		out[k] = v
 	}
@@ -76,6 +90,33 @@ func TestRosterRecordsComposeHeroPetAndPreserveUnknown(t *testing.T) {
 	}
 	if _, err = records.RecordTx(context.Background(), ca.CoherentReadScope{}, 9, 8); !errors.Is(err, ErrShowcaseUnavailable) {
 		t.Fatalf("missing hero err=%v", err)
+	}
+}
+
+func TestRosterRecordsComposeRosterOncePerSelection(t *testing.T) {
+	detail := richRoster().detail
+	heroRoster, petRoster := &countingRoster{detail: detail}, &countingRoster{detail: detail}
+	records := RosterRecords{Heroes: heroRoster, Pets: petRoster, Awakening: fakeAwakening{known: true}, Conquer: fakeConquer{}}
+	selection := Selection{7, 7, -3, 0, 0, 0}
+	got, err := records.RecordsTx(context.Background(), ca.CoherentReadScope{}, 9, selection)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if heroRoster.calls != 1 || petRoster.calls != 1 {
+		t.Fatalf("roster composed heroes=%d pets=%d", heroRoster.calls, petRoster.calls)
+	}
+	reference := RosterRecords{Heroes: richRoster(), Pets: richRoster(), Awakening: fakeAwakening{known: true}, Conquer: fakeConquer{}}
+	for i, id := range selection {
+		if id == 0 {
+			if len(got[i]) != 0 {
+				t.Fatalf("slot %d not empty", i)
+			}
+			continue
+		}
+		want, e := reference.RecordTx(context.Background(), ca.CoherentReadScope{}, 9, id)
+		if e != nil || !reflect.DeepEqual(got[i], want) {
+			t.Fatalf("slot %d got=%v want=%v err=%v", i, got[i], want, e)
+		}
 	}
 }
 

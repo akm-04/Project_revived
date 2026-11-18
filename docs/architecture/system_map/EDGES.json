@@ -2788,6 +2788,7 @@
     "*ListHeroes",
     "*LockRootTx",
     "*ReadRoot",
+    "*SaveBackpackSortTypeTx",
     "*SaveSortTypeTx"
    ],
    "store:characterstore": [

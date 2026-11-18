@@ -455,7 +455,7 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	projection := i5store.BootstrapProjection{Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}, MaxHeroColor: appi5.PreservationMaxHeroColorProvider{}}
+	projection := i5store.BootstrapProjection{Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}, MaxHeroColor: appi5.PreservationMaxHeroColorProvider{}, BackpackSort: characterstore.Store{Queryer: pool}}
 	if err = projection.OverlayMID1(ctx, pool, a, false, now, detail); err != nil {
 		t.Fatal(err)
 	}

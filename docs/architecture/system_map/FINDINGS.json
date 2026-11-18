@@ -184,16 +184,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 88,
-   "name": "BACKPACK_SORT_TYPE",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 90,
    "name": "USE_SKILL_POINT_ITEM",
    "files": [
@@ -876,12 +866,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 574,
+  "count": 573,
   "window_sender_mid_count": 140,
-  "non_window_sender_mid_count": 434,
+  "non_window_sender_mid_count": 433,
   "registration_status_counts": {
    "inactive_fallback": 527,
-   "no_registration": 45,
+   "no_registration": 44,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -1124,19 +1114,6 @@
    {
     "mid": 87,
     "name": "USE_MAGIC_ITEMS",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 88,
-    "name": "BACKPACK_SORT_TYPE",
     "registration_status": "no_registration",
     "senders": [
      "app/model/SelfPlayer.lua"
@@ -9270,7 +9247,7 @@
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-   "line": 382,
+   "line": 383,
    "code": 30001,
    "kind": "stock_code"
   },

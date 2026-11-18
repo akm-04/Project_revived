@@ -36,9 +36,10 @@ func (q *heroBootstrapQueryer) QueryRow(_ context.Context, query string, _ ...an
 			*(dest[0].(*int64)) = int64(q.root.PlayerID)
 			*(dest[1].(*int64)) = q.root.NextPartnerID
 			*(dest[2].(*int64)) = q.root.SortType
-			*(dest[3].(*int64)) = q.root.StateVersion
-			*(dest[4].(*time.Time)) = q.root.CreatedAt
-			*(dest[5].(*time.Time)) = q.root.UpdatedAt
+			*(dest[3].(*int64)) = q.root.BackpackSortType
+			*(dest[4].(*int64)) = q.root.StateVersion
+			*(dest[5].(*time.Time)) = q.root.CreatedAt
+			*(dest[6].(*time.Time)) = q.root.UpdatedAt
 			return nil
 		}}
 	case characterqueries.ListPlayerHeroes:

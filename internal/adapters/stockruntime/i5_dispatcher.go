@@ -40,6 +40,12 @@ type I5ServicePort interface {
 type SpiritBackpackProjector interface {
 	Backpack(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 }
+
+// BackpackSortReader reads the CharacterHero-owned player preference that the
+// stock backpack load reply carries as sort_type.
+type BackpackSortReader interface {
+	ReadBackpackSortType(context.Context, identity.PlayerID) (int64, error)
+}
 type MissionServicePort interface {
 	ClaimActivityChest(context.Context, identity.ActorContext, string, int64, operation.Context) (map[string]any, error)
 	ReadMissions(context.Context, identity.ActorContext, objective.StockFamily, operation.Context) (map[string]any, error)
@@ -59,6 +65,7 @@ type I5Dispatcher struct {
 	SignIn         SignInServicePort
 	Missions       MissionServicePort
 	SpiritBackpack SpiritBackpackProjector
+	BackpackSort   BackpackSortReader
 	Authority      apprealtime.GameplayAuthorityPort
 	Service        I5ServicePort
 }
@@ -131,11 +138,18 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			}
 			return okI5(body)
 		}
+		if d.BackpackSort == nil {
+			return failureReply(defect(nil))
+		}
 		stacks, err := d.Service.ListBackpack(ctx, actor)
 		if err != nil {
 			return failI5(err)
 		}
-		body, err := backpackproj.Build(stacks)
+		sortType, err := d.BackpackSort.ReadBackpackSortType(ctx, actor.PlayerID)
+		if err != nil {
+			return failI5(err)
+		}
+		body, err := backpackproj.Build(stacks, sortType)
 		if err != nil {
 			return failI5(err)
 		}

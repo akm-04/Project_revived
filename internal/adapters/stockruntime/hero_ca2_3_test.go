@@ -28,6 +28,9 @@ func (s *ca23HeroService) RosterView(_ context.Context, _ identity.ActorContext,
 func (s *ca23HeroService) SaveSortType(context.Context, identity.ActorContext, int64, operation.Context) error {
 	return nil
 }
+func (s *ca23HeroService) SaveBackpackSortType(context.Context, identity.ActorContext, int64, operation.Context) error {
+	return nil
+}
 func (s *ca23HeroService) UseExpItem(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.ExpResult, error) {
 	return apphero.ExpResult{}, nil
 }

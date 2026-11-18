@@ -234,7 +234,6 @@ var libraryModeFailureRows = []failureRow{
 	{match: library.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
 	{match: library.ErrDialogClosed, class: failureRefusal, code: unprovenRefusalCode},
 	{match: library.ErrActLocked, class: failureRefusal, code: unprovenRefusalCode},
-	{match: library.ErrActAwarded, class: failureRefusal, code: unprovenRefusalCode},
 	{match: library.ErrCGClaimed, class: failureRefusal, code: unprovenRefusalCode},
 	{match: library.ErrBgOwned, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},

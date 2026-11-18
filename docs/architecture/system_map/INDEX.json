@@ -567,6 +567,7 @@
    "857": "librarylocal",
    "866": "awakeningbattle",
    "867": "awakeningbattle",
+   "88": "characterhero",
    "89": "characterhero",
    "98": "playerdisplay"
   },
@@ -932,7 +933,7 @@
   {
    "callees": 26,
    "callers": 15,
-   "mids": 23,
+   "mids": 24,
    "name": "characterhero",
    "path": "internal/application/characterhero",
    "purpose": "",
