@@ -58,7 +58,13 @@ func (o adventureOpponents) RobotOpponentTx(context.Context, tx.Queryer, uint64)
 
 func adventureTestMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, opponents appadventure.Opponents) appadventure.Mode {
 	t.Helper()
-	fight := combatService(t, p)
+	return adventureTestModeWithFight(t, p, clock, opponents, combatService(t, p))
+}
+
+// adventureTestModeWithFight builds the production Adventure mode around a
+// caller-supplied combat service, so a native can wrap its worker.
+func adventureTestModeWithFight(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, opponents appadventure.Opponents, fight cb.Service) appadventure.Mode {
+	t.Helper()
 	values := i5store.Store{Queryer: p}
 	content := contentstore.Store{Queryer: p}
 	timed := gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}
