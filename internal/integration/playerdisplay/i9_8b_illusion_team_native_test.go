@@ -235,6 +235,110 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 	}
 }
 
+// TestI9_8BIllusionTeamFightPositiveHarmsNative pins that a team START credits
+// the clamped A-side damage, not zero and not the enemy's hurts. Maxed fixture
+// stats make the team strike every attempt UUID, so a wrong credit is
+// distinguishable from a legitimately harmless fight.
+func TestI9_8BIllusionTeamFightPositiveHarmsNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	team := &illusionTeamCombat{Service: s.Combat.(cb.Service)}
+	s.Combat = team
+	master, _ := illusionTeamOwner(t, p, server, 10001002)
+	mateOne, _ := illusionTeamOwner(t, p, server, 10001003, 10001004)
+	mateTwo, _ := illusionTeamOwner(t, p, server, 10001005, 10001006)
+	revision := installed(t, p)
+	contentStore := contentstore.Store{Queryer: p}
+	definition, err := contentStore.PetAcquisitionTx(ctx, p, revision, 10010001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grantGenuine(t, p, master, revision, "illusion master pet", []grant.Line{
+		{Kind: grant.StackItem, ItemID: definition.EggItemID, Amount: 1},
+		{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 10000}})
+	pets := genuinePetService(p)
+	ricky := must(pets.Summon(ctx, master, 10010001, op()))(t, "pet summon")
+	must(pets.CleanCD(ctx, master, ricky.PetID, op()))(t, "pet hatch")
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		exec(t, p, `UPDATE player_heroes SET level=100,star=5,color=15,raw_skill_1=100,raw_skill_2=100,raw_skill_3=100,raw_skill_4=100,raw_skill_5=100,raw_skill_6=100,state_version=state_version+1,updated_at=clock_timestamp() WHERE player_id=$1`, int64(member.PlayerID))
+	}
+
+	created, err := s.CreateRoom(ctx, master, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := illusionRoomID(t, created)
+	for _, member := range []identity.ActorContext{mateOne, mateTwo} {
+		if _, err = s.EnterRoom(ctx, member, roomID, op()); err != nil {
+			t.Fatal("join", err)
+		}
+	}
+	if _, err = s.Prepare(ctx, master, op()); err != nil {
+		t.Fatal("master 1351", err)
+	}
+	for _, step := range []struct {
+		member identity.ActorContext
+		pick   il.PartnerRequest
+	}{
+		{master, il.PartnerRequest{Heroes: []int64{}, PetID: 10010001}},
+		{master, il.PartnerRequest{Heroes: []int64{10001002}, PetID: 10010001}},
+		{mateOne, il.PartnerRequest{Heroes: []int64{10001003, 10001004}}},
+		{mateTwo, il.PartnerRequest{Heroes: []int64{10001005, 10001006}}},
+	} {
+		if _, err = s.SetPartner(ctx, step.member, step.pick, op()); err != nil {
+			t.Fatal("pick", err)
+		}
+	}
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		if _, err = s.Ready(ctx, member, op()); err != nil {
+			t.Fatal("1357", err)
+		}
+	}
+
+	fight, err := s.StartTeam(ctx, master, op())
+	if err != nil {
+		t.Fatal("team start", err)
+	}
+	content := reportContent(t, fight)
+	frozen := readTeamReport(t, content)
+	if frozen.hurt <= 0 {
+		t.Fatalf("A-side clamped damage %d is not positive", frozen.hurt)
+	}
+	if frozen.opponentHurt == frozen.hurt {
+		t.Fatalf("A and B harms are both %d", frozen.hurt)
+	}
+	state := illusionRoomState(t, p, roomID)
+	if state.AttemptID == "" || state.ReportID != state.AttemptID {
+		t.Fatalf("room did not freeze the report %+v", state)
+	}
+	durableHurt := func(member identity.PlayerID) int64 {
+		return scalar(t, p, `SELECT hurt FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=(SELECT open_day FROM illusion_occurrences WHERE logical_server_id=$1) AND player_id=$2`, int64(server), int64(member))
+	}
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		if n := team.settlementCount(member.PlayerID); n != 1 {
+			t.Fatalf("member %d settlement count %d", member.PlayerID, n)
+		}
+		if got := durableHurt(member.PlayerID); got != frozen.hurt {
+			t.Fatalf("member %d durable hurt %d want %d", member.PlayerID, got, frozen.hurt)
+		}
+	}
+
+	replay, err := s.StartTeam(ctx, master, op())
+	if err != nil || !sameReport(t, reportContent(t, replay), content) {
+		t.Fatalf("team replay %v", err)
+	}
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		if n := team.settlementCount(member.PlayerID); n != 1 {
+			t.Fatalf("team replay settled member %d %d times", member.PlayerID, n)
+		}
+		if got := durableHurt(member.PlayerID); got != frozen.hurt {
+			t.Fatalf("team replay changed member %d hurt %d want %d", member.PlayerID, got, frozen.hurt)
+		}
+	}
+}
+
 // TestI9_8BIllusionTeamPowerFloorNative pins C5 through the production pick
 // path: a hero's own force must reach the player's best-15 force divided by
 // team_power_limit (30), not the selected heroes' sum.
@@ -311,10 +415,12 @@ func reportContent(t *testing.T, body map[string]any) string {
 }
 
 // teamReport is C6's frozen report: its A-side harms (the accepted team
-// damage, clamped like the mode) and the C5 heroes the report actually fielded.
+// damage, clamped like the mode), the B side the mode must not credit, and the
+// C5 heroes the report actually fielded.
 type teamReport struct {
-	hurt   int64
-	heroes map[int64]bool
+	hurt         int64
+	opponentHurt int64
+	heroes       map[int64]bool
 }
 
 func readTeamReport(t *testing.T, content string) teamReport {
@@ -332,17 +438,21 @@ func readTeamReport(t *testing.T, content string) teamReport {
 	}
 	out := teamReport{heroes: map[int64]bool{}}
 	total := 0.0
+	opponent := 0.0
 	for key, fighter := range parsed.Fighter {
-		if !strings.HasPrefix(key, "A") {
-			continue
+		switch {
+		case strings.HasPrefix(key, "A"):
+			total += fighter.Harms
+			out.heroes[fighter.Hero.TableID] = true
+		case strings.HasPrefix(key, "B"):
+			opponent += fighter.Harms
 		}
-		total += fighter.Harms
-		out.heroes[fighter.Hero.TableID] = true
 	}
 	out.hurt = int64(total)
 	if out.hurt > di.DamageCap {
 		out.hurt = di.DamageCap
 	}
+	out.opponentHurt = int64(opponent)
 	return out
 }
 
