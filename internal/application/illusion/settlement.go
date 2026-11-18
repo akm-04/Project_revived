@@ -159,6 +159,15 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, occurrence d.Occurren
 			return err
 		}
 	}
+	// C4: the fact rides this settlement after the owner's ranks and the I5
+	// suffix; achievement rows are locked last. A failure retries the whole
+	// settlement (mail keeps its source key).
+	revision, _ := sc.Operation.Operation().Policies.Get("content")
+	for index, entry := range ranks {
+		if err = s.Achievements.ObserveFantasyTx(c, sc.Tx, revision, identity.PlayerID(entry.PlayerID), occurrence.CampaignID, occurrence.OpenDay, int64(index+1), entry.Hurt, at); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

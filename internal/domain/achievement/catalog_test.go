@@ -58,7 +58,12 @@ func TestStatusAndOwnedStateCounts(t *testing.T) {
 			t.Fatalf("new owned-state id %d not qualified", id)
 		}
 	}
-	for _, id := range []int64{100006, 100007, 100008, 100009, 100011, 100012, 100018, 100026} {
+	for _, id := range []int64{100006, 100007, 100012} {
+		if StatusOf(id) != Qualified {
+			t.Fatalf("settlement fact id %d not qualified", id)
+		}
+	}
+	for _, id := range []int64{100008, 100009, 100011, 100018, 100026} {
 		if StatusOf(id) != ModeNotLive {
 			t.Fatalf("unavailable id %d status %s", id, StatusOf(id))
 		}
@@ -72,7 +77,7 @@ func TestStatusAndOwnedStateCounts(t *testing.T) {
 			qualified++
 		}
 	}
-	if qualified != 24 {
+	if qualified != 27 {
 		t.Fatal(qualified)
 	}
 	c := catalog()

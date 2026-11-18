@@ -28,6 +28,17 @@ const (
 	GuildDamagePerTenThousand int64 = 10000
 )
 
+// I9-11E settlement-attached facts (C2/C3/C6). Their progress is a bounded row
+// count or a high-water pull result, never an owner value read on Load.
+const (
+	FantasyTopRankID       int64 = 100006
+	FantasyDamageID        int64 = 100007
+	GreatCustomerID        int64 = 100011
+	MediumTenPullID        int64 = 100012
+	FantasyTopRank         int64 = 3
+	FantasyDamageThreshold int64 = 5000000
+)
+
 // OwnedStateIDs lists every high-water tier over a current owner value; Load
 // observes all of them and each producer observes its own family.
 var OwnedStateIDs = []int64{NormalHeroesID, AwakenedHeroesID, SkinsID, PetsID, TextbooksID, RegionsID, SubjectsID, SuitsID, RoomsID, ExpandedRoomsID,
@@ -42,8 +53,8 @@ const (
 )
 
 var unavailable = map[int64]Status{
-	100006: ModeNotLive, 100007: ModeNotLive, 100008: ModeNotLive, 100009: ModeNotLive, 100011: ModeNotLive,
-	100012: ModeNotLive, 100018: ModeNotLive, 100026: ModeNotLive, 100033: OwnerUnknown,
+	100008: ModeNotLive, 100009: ModeNotLive, 100011: ModeNotLive,
+	100018: ModeNotLive, 100026: ModeNotLive, 100033: OwnerUnknown,
 }
 
 // StatusOf is the explicit per-definition producer coverage; it is never

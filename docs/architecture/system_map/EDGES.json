@@ -7,6 +7,9 @@
    "championsleague": [
     "*ObserveLeagueDaysTx"
    ],
+   "illusion": [
+    "*ObserveFantasyTx"
+   ],
    "librarylocal": [
     "*ApplyMarriageTx",
     "*PrepareMarriageTx"
@@ -17,6 +20,9 @@
    ],
    "publicprofile": [
     "*TrophyCountTx"
+   ],
+   "summon": [
+    "*ObserveMediumTenPullTx"
    ],
    "topfloor": [
     "*ObserveTopFloorDayTx"
@@ -64,7 +70,7 @@
   "broadcast": {},
   "campaign": {
    "achievement": [
-    "*NormalStarsTx"
+    "*MainChainStarsTx"
    ],
    "missioninputs": [
     "*ReadTx"
@@ -2178,7 +2184,7 @@
     "*BookInputsTx"
    ],
    "campaign": [
-    "*NormalStarsTx"
+    "*MainChainStarsTx"
    ],
    "characterasset": [
     "NewCoherentReadScope",
@@ -4308,6 +4314,9 @@
    ]
   },
   "illusion": {
+   "achievement": [
+    "*ObserveFantasyTx"
+   ],
    "characterasset": [
     "NewCoherentReadScope"
    ],
@@ -5743,6 +5752,9 @@
    ]
   },
   "summon": {
+   "achievement": [
+    "*ObserveMediumTenPullTx"
+   ],
    "characterhero": [
     "*AwardStoryPartnerTx",
     "*LockStoryRosterTx",

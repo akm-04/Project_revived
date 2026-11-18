@@ -32,20 +32,27 @@ import (
 )
 
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Heroes      Heroes
-	HeroWire    func(character.Hero) (map[string]any, error)
-	Grants      Grants
-	Costs       i5.TxMaterialCostDebiter
-	Facts       Facts
-	Privileges  i5.PrivilegeSnapshotProvider
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
-	Broadcast   broadcast.Emitter
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Heroes       Heroes
+	HeroWire     func(character.Hero) (map[string]any, error)
+	Grants       Grants
+	Costs        i5.TxMaterialCostDebiter
+	Facts        Facts
+	Privileges   i5.PrivilegeSnapshotProvider
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	Broadcast    broadcast.Emitter
+	Achievements Achievements
+}
+
+// Achievements is the I9-11E C6 producer port: the high-water girl count of one
+// medium "buy 10", observed after the I5 suffix inside the pull transaction.
+type Achievements interface {
+	ObserveMediumTenPullTx(context.Context, tx.Tx, identity.PlayerID, string, int64, time.Time) error
 }
 
 type Store interface {
@@ -101,7 +108,7 @@ func retry() tx.RetryPolicy {
 func (s Mode) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil &&
 		s.Heroes != nil && s.HeroWire != nil && s.Grants != nil && s.Costs != nil && s.Facts != nil && s.Privileges != nil && s.Receipts != nil && s.ReceiptRead != nil &&
-		s.Broadcast != nil
+		s.Broadcast != nil && s.Achievements != nil
 }
 
 func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, error) {
@@ -238,9 +245,55 @@ func (s Mode) Summon(c context.Context, a identity.ActorContext, q Pull, op oper
 		if out["result"], err = s.deliver(c, sc, a, v, slots, reward(itemID, amount, out), false); err != nil {
 			return nil, state, err
 		}
+		if isMediumTenPull(b) {
+			girls, err := girlResultCount(out["result"])
+			if err != nil {
+				return nil, state, err
+			}
+			if err = s.Achievements.ObserveMediumTenPullTx(c, sc.Tx, a.PlayerID, v.revision, girls, sc.Operation.DecisionAt()); err != nil {
+				return nil, state, err
+			}
+		}
 		out["summon_info"] = info(&v.catalog, state, v.day)
 		return out, state, nil
 	})
+}
+
+// mediumPullType/mediumTenPullIndex are the generated summon.lua button
+// {type 2, index 2, family medium_paid, pulls 10}.
+const (
+	mediumPullType     int64 = 2
+	mediumTenPullIndex int64 = 2
+)
+
+// isMediumTenPull selects only the medium paid "buy 10"; the one-pull medium,
+// free-crystal medium, tickets and SX never advance 100012.
+func isMediumTenPull(b d.Button) bool {
+	return b.Type == mediumPullType && b.Index == mediumTenPullIndex
+}
+
+// girlResultCount counts the result rows the girl animation plays for: a new
+// partner and a duplicate converted to stone. Item rows do not count.
+func girlResultCount(result any) (int64, error) {
+	rows, ok := result.([]any)
+	if !ok {
+		return 0, d.ErrUnavailable
+	}
+	var girls int64
+	for _, raw := range rows {
+		row, ok := raw.(map[string]any)
+		if !ok {
+			return 0, d.ErrUnavailable
+		}
+		if partner, _ := row["is_partner"].(bool); partner {
+			girls++
+			continue
+		}
+		if stone, _ := row["to_stone"].(bool); stone {
+			girls++
+		}
+	}
+	return girls, nil
 }
 
 // sx is a type 4 purchase: VIP gate, crystal, five static items and the dynamic slot (V1 sx_private_v2).

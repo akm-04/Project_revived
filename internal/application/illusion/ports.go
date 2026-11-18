@@ -131,6 +131,12 @@ type Mail interface {
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
+// Achievements is the I9-11E settlement-attached fact port; it runs inside the
+// settlement transaction after the rank list is frozen.
+type Achievements interface {
+	ObserveFantasyTx(context.Context, tx.Tx, string, identity.PlayerID, int64, int64, int64, int64, time.Time) error
+}
+
 type Mode struct {
 	Timed         gen.TimedRunner
 	Fresh         tx.Queryer
@@ -153,6 +159,7 @@ type Mode struct {
 	Guilds        Guilds
 	GuildActivity GuildActivity
 	Mail          Mail
+	Achievements  Achievements
 	Receipts      receipt.Store
 	ReceiptRead   receipt.Reader
 	// RetentionDays is the R8 cap (U4) on the owner's report window; zero
@@ -163,7 +170,7 @@ type Mode struct {
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil &&
 		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Facts != nil && s.Mail != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Facts != nil && s.Mail != nil && s.Achievements != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 // StartRequest is the stock 1346 request; a mate's pet is never sent by stock.

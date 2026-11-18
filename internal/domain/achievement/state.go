@@ -139,6 +139,9 @@ const (
 	ArenaStreakID    int64 = 100003
 	LeagueDaysID     int64 = 100032
 	StreakTopRank    int64 = 3
+	// FactCountPolicy covers the I9-11E facts whose producer settles a bounded
+	// count inside its own transaction; it is not an owner-value read.
+	FactCountPolicy = "I9_11E_ACHIEVEMENT_FACT_V1"
 )
 
 type streakProfile struct {
@@ -168,10 +171,15 @@ var streakProfiles = map[int64]streakProfile{
 	SuitsID:             {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
 	RoomsID:             {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
 	ExpandedRoomsID:     {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
-	TopFloorStreakID:    {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
-	WeeklyStreakID:      {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
-	WinStreakID:         {"C5C_ONE_ON_ONE_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
-	ArenaStreakID:       {"C5D_ARENA_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
+	// achievement.lua rows 100006/100007/100012: 1/3/6 bosses, 1/3/6 bosses,
+	// 3/4/5 girls in one "buy 10".
+	FantasyTopRankID: {FactCountPolicy, [3]int64{1, 3, 6}, 0},
+	FantasyDamageID:  {FactCountPolicy, [3]int64{1, 3, 6}, 0},
+	MediumTenPullID:  {FactCountPolicy, [3]int64{3, 4, 5}, 0},
+	TopFloorStreakID: {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
+	WeeklyStreakID:   {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
+	WinStreakID:      {"C5C_ONE_ON_ONE_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
+	ArenaStreakID:    {"C5D_ARENA_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
 }
 
 func StreakPolicy(id int64) string { return streakProfiles[id].policy }
@@ -248,6 +256,20 @@ func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak
 	}
 	s = s.advance(profile, next, at)
 	s.LastDay = &day
+	return s, true, s.Validate()
+}
+
+// ObserveHighWater records the best counted value ever seen; a lower later
+// observation leaves both progress and earned tiers alone.
+func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, bool, error) {
+	profile, err := s.profile(c, at)
+	if err != nil || profile.step != 0 || count < 0 {
+		return Streak{}, false, ErrConflict
+	}
+	if count <= s.Current {
+		return s, false, nil
+	}
+	s = s.advance(profile, count, at)
 	return s, true, s.Validate()
 }
 

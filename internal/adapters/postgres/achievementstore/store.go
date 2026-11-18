@@ -78,6 +78,61 @@ func (Store) SaveRootTx(c context.Context, t tx.Tx, r d.Root, old int64) error {
 	}
 	return nil
 }
+
+// PutBossFactTx records one qualified Fantasy fact once. The caller learns
+// whether the row is new, so a settlement retry does no further work.
+func (Store) PutBossFactTx(c context.Context, t tx.Tx, pid identity.PlayerID, achievementID, campaignID, occurrenceDay int64, at time.Time) (bool, error) {
+	if t == nil || !pid.Valid() || achievementID != d.FantasyTopRankID && achievementID != d.FantasyDamageID || campaignID < 1 || occurrenceDay < 1 || at.Unix() <= 0 {
+		return false, d.ErrUnavailable
+	}
+	tag, e := t.Exec(c, `INSERT INTO achievement_boss_facts(player_id,achievement_id,campaign_id,occurrence_day,created_at)VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`, int64(pid), achievementID, campaignID, occurrenceDay, at.UTC())
+	if e != nil {
+		return false, e
+	}
+	return tag.RowsAffected() == 1, nil
+}
+
+// CountBossFactsTx is the fact progress: at most one row per campaign.
+func (Store) CountBossFactsTx(c context.Context, q tx.Queryer, pid identity.PlayerID, achievementID int64) (int64, error) {
+	var count int64
+	if q == nil || !pid.Valid() || achievementID != d.FantasyTopRankID && achievementID != d.FantasyDamageID {
+		return 0, d.ErrUnavailable
+	}
+	if e := q.QueryRow(c, `SELECT count(*) FROM achievement_boss_facts WHERE player_id=$1 AND achievement_id=$2`, int64(pid), achievementID).Scan(&count); e != nil {
+		return 0, e
+	}
+	return count, nil
+}
+
+// MarkNoticesDeliveredAtTx consumes every pending notice inside the login
+// transaction; the MID1 detail projection reads back exactly this instant.
+// shortcut: the login instant correlates the claim with the read-only detail
+// projection; two logins in the same microsecond could show one popup twice.
+// Add a delivery operation column if that ever matters.
+func (Store) MarkNoticesDeliveredAtTx(c context.Context, t tx.Tx, pid identity.PlayerID, at time.Time) error {
+	if t == nil || !pid.Valid() || at.IsZero() {
+		return d.ErrUnavailable
+	}
+	_, e := t.Exec(c, `UPDATE achievement_notices SET delivered_at=$2 WHERE player_id=$1 AND delivered_at IS NULL`, int64(pid), at.UTC())
+	return e
+}
+
+// NoticeIDsDeliveredAtTx returns the achievement ids this login consumed, in
+// first-earned order and once per achievement (the notice-17 push dedupes the
+// same way).
+func (Store) NoticeIDsDeliveredAtTx(c context.Context, q tx.Queryer, pid identity.PlayerID, at time.Time) ([]int64, error) {
+	out := []int64{}
+	if q == nil || !pid.Valid() || at.IsZero() {
+		return out, d.ErrUnavailable
+	}
+	var raw string
+	e := q.QueryRow(c, `SELECT COALESCE(jsonb_agg(achievement_id ORDER BY first_notice),'[]'::jsonb)::text FROM (SELECT achievement_id,min(notice_id) AS first_notice FROM achievement_notices WHERE player_id=$1 AND delivered_at=$2 GROUP BY achievement_id) consumed`, int64(pid), at.UTC()).Scan(&raw)
+	if e != nil {
+		return out, e
+	}
+	return out, json.Unmarshal([]byte(raw), &out)
+}
+
 func (Store) PutEventTx(c context.Context, t tx.Tx, e app.Event) error {
 	if t == nil || e.Validate() != nil {
 		return d.ErrConflict

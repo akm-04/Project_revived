@@ -919,6 +919,26 @@
    "inbound": []
   },
   {
+   "table": "achievement_boss_facts",
+   "action": "restore",
+   "select": "SELECT * FROM \"achievement_boss_facts\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "achievement_daily_counts",
+   "action": "restore",
+   "select": "SELECT * FROM \"achievement_daily_counts\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
    "table": "achievement_events",
    "action": "restore",
    "select": "SELECT * FROM \"achievement_events\" WHERE \"player_id\" = $1::bigint",

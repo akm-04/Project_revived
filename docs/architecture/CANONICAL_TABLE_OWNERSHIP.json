@@ -5467,6 +5467,56 @@
         "retention": null
       }
     },
+    "achievement_boss_facts": {
+      "owner": "achievement",
+      "allowed_query_owners": [
+        "achievement"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00177_i9_11e_achievement_facts.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "players",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "achievement_daily_counts": {
+      "owner": "achievement",
+      "allowed_query_owners": [
+        "achievement"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/achievementstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00177_i9_11e_achievement_facts.sql",
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "players",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
     "content_one_on_one_catalogs": {
       "owner": "content-registry",
       "allowed_query_owners": [

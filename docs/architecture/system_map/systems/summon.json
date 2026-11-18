@@ -212,6 +212,7 @@
    "playerdisplay"
   ],
   "scenarios_naming": [
+   "i9_11e_achievement_medium_vending.json",
    "i9_3_strong_guide.json",
    "i9_3e_summon.json",
    "i9_3f_premium.json",
@@ -219,6 +220,8 @@
    "i9_4b_chest.json",
    "i9_8d_adventure.json"
   ],
-  "unit": []
+  "unit": [
+   "achievement_test.go"
+  ]
  }
 }

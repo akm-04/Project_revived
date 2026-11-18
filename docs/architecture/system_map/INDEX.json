@@ -24,7 +24,8 @@
    "apppetcampaign.Mode",
    "appgodstrial.Mode",
    "appworldboss.Mode",
-   "appadventure.Mode"
+   "appadventure.Mode",
+   "achievementstore.BootstrapProjection"
   ],
   "LoginReconcilers": [
    "i4store.PlayerLoginActivity",
@@ -33,7 +34,8 @@
    "appi5.SignInBootstrap",
    "appi5.MissionBootstrap",
    "appi5.AwakeningBootstrap",
-   "appi5.PetStarterLoginReconciler"
+   "appi5.PetStarterLoginReconciler",
+   "achievementstore.NoticeLoginReconciler"
   ]
  },
  "lookups": {
@@ -578,6 +580,8 @@
    "account_sessions": "bootstrap",
    "accounts": "bootstrap",
    "achievement_award_claims": "achievement",
+   "achievement_boss_facts": "achievement",
+   "achievement_daily_counts": "achievement",
    "achievement_events": "achievement",
    "achievement_notices": "achievement",
    "achievement_roots": "achievement",
@@ -824,12 +828,12 @@
  "systems": [
   {
    "callees": 21,
-   "callers": 6,
+   "callers": 8,
    "mids": 2,
    "name": "achievement",
    "path": "internal/application/achievement",
    "purpose": "owns earned tier facts",
-   "tables": 5
+   "tables": 7
   },
   {
    "callees": 2,
@@ -1237,7 +1241,7 @@
    "tables": 0
   },
   {
-   "callees": 16,
+   "callees": 17,
    "callers": 1,
    "mids": 17,
    "name": "illusion",
@@ -1588,7 +1592,7 @@
    "tables": 3
   },
   {
-   "callees": 6,
+   "callees": 7,
    "callers": 0,
    "mids": 5,
    "name": "summon",

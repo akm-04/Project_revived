@@ -1,0 +1,16 @@
+{
+ "name": "i9_11e_achievement_medium_vending",
+ "level": 20,
+ "grants": [
+  {"Kind": "SCALAR_CURRENCY", "ResourceKey": "crystal", "Amount": 3000}
+ ],
+ "steps": [
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:loadSummonInfo({},function(code) if code~=xyd.error.OK then error('vc-summon-info-'..tostring(code)) end xyd.WindowManager.get():openWindow('summon',{}) end)",
+  "wait:8",
+  "lua:local w=xyd.WindowManager.get():getWindow('summon') if not w then error('vc-summon-window') end w:crystalSummon(10)",
+  "wait:15",
+  "lua:local wm=xyd.WindowManager.get() for _,name in ipairs({'summon_result','summon'}) do if wm:getWindow(name) then wm:closeWindow(name) end end local m=xyd.ModelManager.get():loadModel(xyd.ModelType.ACHIEVEMENT) m:loadAchievementInfo({},function(code) if code~=xyd.error.OK then error('vc-achievement-load-'..tostring(code)) end local row for _,x in ipairs(m.achieveList) do if x.achieve_id==100012 then row=x end end if not row then error('vc-achievement-thirst-row') end if row.progress<1 then error('vc-achievement-thirst-progress-'..tostring(row.progress)) end end)"
+ ],
+ "settle_seconds": 10,
+ "expect_ok": [50, 56, 1302]
+}

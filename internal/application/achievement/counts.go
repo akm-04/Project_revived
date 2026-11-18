@@ -44,7 +44,7 @@ type PetCampaign interface {
 	MaxFloorTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
 }
 type Campaign interface {
-	NormalStarsTx(context.Context, tx.Queryer, identity.PlayerID, string) (int64, error)
+	MainChainStarsTx(context.Context, tx.Queryer, identity.PlayerID, string) (int64, error)
 }
 type SchoolStory interface {
 	SchoolStoryCountTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
@@ -155,7 +155,7 @@ func (o OwnerCounts) OwnedStateCountsTx(c context.Context, sc ca.CoherentReadSco
 		}
 	}
 	if wanted[d.CampaignStarsID] && o.Campaign != nil {
-		if stars, e := o.Campaign.NormalStarsTx(c, q, p, sc.ContentRevision); e == nil {
+		if stars, e := o.Campaign.MainChainStarsTx(c, q, p, sc.ContentRevision); e == nil {
 			out[d.CampaignStarsID] = stars
 		}
 	}

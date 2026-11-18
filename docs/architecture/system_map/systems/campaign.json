@@ -330,6 +330,7 @@
   ],
   "unit": [
    "awakening_test.go",
+   "reads_test.go",
    "start_choice_conformance_test.go"
   ]
  }

@@ -114,6 +114,8 @@
  "tables": {
   "owned": [
    "achievement_award_claims",
+   "achievement_boss_facts",
+   "achievement_daily_counts",
    "achievement_events",
    "achievement_notices",
    "achievement_roots",
@@ -123,6 +125,7 @@
    "account_sessions",
    "accounts",
    "achievement_award_claims",
+   "achievement_boss_facts",
    "achievement_events",
    "achievement_notices",
    "achievement_roots",
@@ -144,6 +147,7 @@
   ],
   "written": [
    "achievement_award_claims",
+   "achievement_boss_facts",
    "achievement_events",
    "achievement_notices",
    "achievement_roots",
@@ -157,7 +161,9 @@
   ],
   "scenarios_naming": [
    "achievement.json",
-   "display.json"
+   "display.json",
+   "i9_11e_achievement_fantasy.json",
+   "i9_11e_achievement_medium_vending.json"
   ],
   "unit": [
    "counts_test.go"
