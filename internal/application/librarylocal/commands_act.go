@@ -27,7 +27,10 @@ func (s Service) awardActTx(ctx context.Context, t tx.Tx, d Admission, catalog l
 		return facts, false, e
 	}
 	if !inserted {
-		return facts, false, lib.ErrActAwarded
+		// The stock touch window resends 844 before the first reply lands
+		// (HeroTouchGameWindow.lua:236-264). A repeat answers the current facts
+		// and grants nothing again.
+		return facts, false, nil
 	}
 	return facts.AwardAct(act, d.DecisionAt)
 }

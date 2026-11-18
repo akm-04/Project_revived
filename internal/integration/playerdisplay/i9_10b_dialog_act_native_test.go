@@ -5,6 +5,7 @@ package playerdisplay_test
 import (
 	"context"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -190,7 +191,7 @@ func TestI9_10B842ActSlotsAnd844OnceOnly(t *testing.T) {
 		t.Fatalf("act award replay status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(5) {
 		t.Fatalf("second act award status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	setLibraryFavor(t, p, a, 1, 100)
@@ -227,6 +228,78 @@ func TestI9_10B842ActSlotsAnd844OnceOnly(t *testing.T) {
 	if e != nil || len(awards) != 2 || awards[0].ActID != 1 || awards[1].ActID != 2 {
 		t.Fatalf("act award rows %+v %v", awards, e)
 	}
+}
+
+func TestI9_10B844RepeatAnswersSuccessWithoutGrant(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	bornHero(t, p, a, rev, 10001001, 1)
+
+	response := libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(5) {
+		t.Fatalf("first act award status %d body %+v", response.HTTPStatus, response.Body)
+	}
+	first := libraryFacts(t, p, a)
+	firstItems, firstQuantity := inventoryTotals(t, p, a)
+	firstCurrencies := currencyTotal(t, p, a)
+	firstFacts := objectiveFactReceipts(t, p, a)
+
+	// The stock touch window resends the same act while the first reply is in
+	// flight; the operation IDs differ, so this repeat is not a receipt replay.
+	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != first.Favor {
+		t.Fatalf("repeat act award status %d body %+v", response.HTTPStatus, response.Body)
+	}
+	second := libraryFacts(t, p, a)
+	if second.Favor != first.Favor || second.StateVersion != first.StateVersion {
+		t.Fatalf("repeat changed hero facts %+v want %+v", second, first)
+	}
+	if items, quantity := inventoryTotals(t, p, a); items != firstItems || quantity != firstQuantity {
+		t.Fatalf("repeat changed items rows=%d quantity=%d want %d/%d", items, quantity, firstItems, firstQuantity)
+	}
+	if currencies := currencyTotal(t, p, a); currencies != firstCurrencies {
+		t.Fatalf("repeat changed currencies %d want %d", currencies, firstCurrencies)
+	}
+	if facts := objectiveFactReceipts(t, p, a); facts != firstFacts {
+		t.Fatalf("repeat recorded objective facts %d want %d", facts, firstFacts)
+	}
+	awards, e := (librarystore.Store{}).ListActAwardsTx(ctx, p, a.PlayerID)
+	if e != nil || len(awards) != 1 || awards[0].ActID != 1 {
+		t.Fatalf("repeat act award rows %+v %v", awards, e)
+	}
+
+	response = libraryCall(t, p, a, 844, map[string]any{"partner_id": int64(1), "act_id": int64(2)})
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
+		t.Fatalf("locked act status %d body %+v", response.HTTPStatus, response.Body)
+	}
+}
+
+func inventoryTotals(t *testing.T, p *pg.Pool, a identity.ActorContext) (int64, int64) {
+	t.Helper()
+	var rows, quantity int64
+	if e := p.QueryRow(ctx, `SELECT COUNT(*),COALESCE(SUM(quantity),0) FROM player_item_stacks WHERE player_id=$1`, int64(a.PlayerID)).Scan(&rows, &quantity); e != nil {
+		t.Fatal(e)
+	}
+	return rows, quantity
+}
+
+func currencyTotal(t *testing.T, p *pg.Pool, a identity.ActorContext) int64 {
+	t.Helper()
+	var total int64
+	if e := p.QueryRow(ctx, `SELECT COALESCE(SUM(amount),0) FROM player_currency_balances WHERE player_id=$1`, int64(a.PlayerID)).Scan(&total); e != nil {
+		t.Fatal(e)
+	}
+	return total
+}
+
+func objectiveFactReceipts(t *testing.T, p *pg.Pool, a identity.ActorContext) int64 {
+	t.Helper()
+	var total int64
+	if e := p.QueryRow(ctx, `SELECT count(*) FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain='objective'`, strconv.FormatInt(int64(a.PlayerID), 10)).Scan(&total); e != nil {
+		t.Fatal(e)
+	}
+	return total
 }
 
 func TestI9_10B836And838ShareDialogProjection(t *testing.T) {
