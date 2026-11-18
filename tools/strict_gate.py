@@ -1249,12 +1249,25 @@ class Gate:
                 continue
             if Path(f'/proc/{pid}').exists():
                 found.append(str(pid_file))
-        own = (self.work / 'cluster/pgdata').resolve()
-        for pid, parts in processes:
-            if self.program_names(pid, parts) & {'postgres', 'postmaster'} and '-D' in parts[1:-1]:
-                if Path(parts[parts.index('-D') + 1]).resolve() != own and not self.descendant_of_gate(pid):
-                    found.append(f'{pid}: {" ".join(parts[:3])}')
+        servers = {pid: parts for pid, parts in processes if self.postgres_process(pid, parts)}
+        own = self.own_postmaster()
+        for pid, parts in servers.items():
+            # Recognised by program, not by data-directory syntax (-D x, -Dx, --pgdata=x, PGDATA all run the same
+            # server, A-105 T28); a server's own backends are reported through their postmaster.
+            if self.process_parent(pid) in servers or pid == own or self.descendant_of_gate(pid):
+                continue
+            found.append(f'{pid}: {" ".join(parts[:3])}')
         return found
+
+    def postgres_process(self, pid, parts):
+        names = self.program_names(pid, parts) | {Path(parts[0]).name.split(':')[0]}
+        return bool(names & {'postgres', 'postmaster'})
+
+    def own_postmaster(self):
+        try:
+            return int((self.work / 'cluster/pgdata/postmaster.pid').read_text().splitlines()[0])
+        except (OSError, ValueError, IndexError):
+            return None
 
     @staticmethod
     def process_parent(pid):
