@@ -228,7 +228,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 			return d.ErrDue
 		}
 		if at.Before(root.UpdatedAt) {
-			return d.ErrConflict
+			return d.ErrStaleTime
 		}
 		players, e := s.Store.PlayersTx(c, sc.Tx, true)
 		if e != nil {

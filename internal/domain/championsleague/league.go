@@ -29,6 +29,7 @@ var (
 	ErrInvalid     = errors.New("league: invalid request")
 	ErrRefused     = errors.New("league: request refused")
 	ErrConflict    = errors.New("league: conflicting state")
+	ErrStaleTime   = errors.New("league: decision time overtaken")
 	ErrDue         = errors.New("league: cutoff due")
 	ErrPending     = errors.New("league: battle pending")
 )
