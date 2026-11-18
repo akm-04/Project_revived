@@ -723,8 +723,9 @@ func main() {
 	socialDismissal := socialdismiss.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialRelationDB, Inbox: socialInboxDB}
 	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
 	giftReload := socialreload.Service{Runner: runner, Relations: socialRelationDB, Inbox: socialInboxDB, Observer: socialPresentation, Gifts: giftService}
-	if e := configureGuildInvite(ctx, pool, runner, &guildSvc, &giftService, &socialReads, &giftReload); e != nil {
-		log.Fatalf("Guild Invite bundle readiness: %v", e)
+	inviteProducer, inviteErr := prepareGuildInvite(ctx, pool, runner, &giftService, &socialReads, &giftReload)
+	if inviteErr != nil {
+		log.Fatalf("Guild Invite bundle readiness: %v", inviteErr)
 	}
 	socialReads.Gifts = giftService
 	giftReload.Gifts = giftService
@@ -733,6 +734,9 @@ func main() {
 	giftGroup, err := stockruntime.PrepareGiftStock(socialDispatcher, giftService, friendBase, giftReload)
 	if err != nil {
 		log.Fatalf("Gift consumer readiness: %v", err)
+	}
+	if inviteProducer != nil {
+		giftGroup = giftGroup.BindType10Producer(func() { guildSvc.InviteProjection = inviteProducer })
 	}
 	// Startup preserves the content-owner activation pointer. Only a compatible
 	// active catalog enables all Gift surfaces together; relation routes remain.
