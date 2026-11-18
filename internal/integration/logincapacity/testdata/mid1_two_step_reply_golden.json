@@ -182,7 +182,7 @@
    "max_energy": 0,
    "max_invitation": 0,
    "max_lev": 1,
-   "message_pushes": {},
+   "message_pushes": [],
    "month_card_end": 0,
    "month_card_start": 0,
    "occult_ticket": 0,

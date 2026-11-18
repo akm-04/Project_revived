@@ -12,7 +12,7 @@ import (
 type MissionBootstrap struct{ Owner Service }
 
 func (MissionBootstrap) Name() string     { return "i5.missions" }
-func (MissionBootstrap) Claims() []string { return []string{"160"} }
+func (MissionBootstrap) Claims() []string { return []string{"160", "2560"} }
 func (m MissionBootstrap) ReconcileCharacterLogin(ctx context.Context, t tx.Tx, actor identity.ActorContext, op operation.Context, at time.Time) error {
 	bound, err := m.Owner.bindActiveContentTx(ctx, t, op)
 	if err != nil {
