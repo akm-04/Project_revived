@@ -414,6 +414,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotDailyBuy != 1 {
 				return errors.New("content registry: daily-buy payload count drift")
 			}
+			gotShop, err := s.Repo.InsertShop(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotShop != 1 {
+				return errors.New("content registry: shop payload count drift")
+			}
 			gotInscription, err := s.Repo.InsertInscriptionInputs(tctx, scope.Tx, b)
 			if err != nil {
 				return err

@@ -84,6 +84,18 @@
    "mid": 2425,
    "path": "room_info.campaign_id",
    "reason": "MID 2425 serves both Illusion (room_info) and Defense (teamDefenseInfo) joins; campaign_id is read from the Defense room_info"
+  },
+  {
+   "client": "app/model/Shop.lua:168",
+   "mid": 32,
+   "path": "items[].stone_id",
+   "reason": "Shop.lua:168 truth-tests stone_id and then removes that item; cjson decodes JSON null to a truthy value, so only an absent key is safe for a non-stone row (I9_11C_CORE_SHOPS_V2 C4)"
+  },
+  {
+   "client": "app/model/Shop.lua:168",
+   "mid": 34,
+   "path": "items[].stone_id",
+   "reason": "Shop.lua:168 truth-tests stone_id and then removes that item; cjson decodes JSON null to a truthy value, so only an absent key is safe for a non-stone row (I9_11C_CORE_SHOPS_V2 C4)"
   }
  ]
 }

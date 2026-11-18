@@ -401,6 +401,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && dailyBuyExact
+	var shopExact bool
+	err = q.QueryRow(ctx, verifyShopSQL, b.RevisionID(), string(b.ShopJSON())).Scan(&shopExact, &v.ShopCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && shopExact
 	var inscriptionExact bool
 	err = q.QueryRow(ctx, verifyInscriptionInputsSQL, b.RevisionID(), string(b.InscriptionInputsJSON())).Scan(&inscriptionExact, &v.InscriptionInputsCount)
 	if err != nil {

@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-11a-hero-assets"
+COMPILER_VERSION = "i9-11c-core-shops"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -492,6 +492,7 @@ ENABLED_CAPABILITIES = [
     "SOCIAL_GIFT_I7A7A",
     "SOCIAL_CONTENT_I9_10E",
     "DAILY_BUY_INPUTS_I9_11B",
+    "CORE_SHOPS_I9_11C",
 ]
 
 
@@ -694,6 +695,40 @@ SOURCE_MANIFEST.append(('data/tables/adventure_event.lua', 'f45db938bd87f17a20fc
 SOURCE_MANIFEST.append(('data/tables/adventure_shop.lua', 'dc2763d25dd0b4401808c891750cc6d88c884f27cd1aa55faa31632494f70a8e', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/adventure_cards_dropbox.lua', 'cc232b84af76f1bce36f397752a2d12a8936f3efc7704431f04d415c3643878f', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
 SOURCE_MANIFEST.append(('data/tables/adventure_campaign.lua', 'ec0e7462ef98b975c029ad0a5a34b70d96d400835e9cb5177ca109fc3ebd0e41', 'I9_8D_ADVENTURE_SOURCE_BOUNDARY'))
+SOURCE_MANIFEST.append(('data/tables/shop_config.lua', 'a08d1d9c716b74d94161b984f48846bbdc09f52d7a0375a9c281d025cc1ba403', 'I9_11C_CORE_SHOPS_SOURCE_BOUNDARY'))
+for _shop_stock_table, _shop_stock_sha in (
+        ('shop_item', '905440f05d142fc9c6533d13edccbde5cddf910620516d9af5e42e6b432e5459'),
+        ('arena_shop_item', 'a0141228e4b259221631968d7c87984ef16ce71862b3bf59b29d95587ce0a493'),
+        ('crusade_shop_item', '46728a362b3ab1b502c804ad62f238387bcab323a0dd58ad9f8518c9b466be15'),
+        ('goblin_shop_item', 'f2ba0369a3643dcf49e9153b5197d99c84cfc775d97fe76b5f38b81cdcb34144'),
+        ('black_market_item', '85dfc041b7c5a090097ccb01df529390f4e7fa6e99fbcccafc0fb3697bfe3096'),
+        ('top_shop_item', '9950a08d3c6f5ba0c2259fcc860a607c07ee46565c7993ebf677092bb354ce98'),
+        ('guild_shop_item', '425fc05cb2165740eeb3ff5127af8efca8d6fad0a511cdbe570b0093c7b9a2d9'),
+        ('space_trip_item', '0329a0c3c9193213f3c8c3ec06444fb02fd404e9cc5c8239015364f33fad2a05'),
+        ('region_shop_item', '0f11ef9fd80308181857f0ac5c8dfa271e23248879a42a488a3f20a6bba2ee04'),
+        ('paradise_shop_item', '47badd6c8b0f17e89315906b929ac5072fa258c287655c8e3fdbacc0529f8874'),
+        ('library_shop_item', '62893cff85c63498198ed612ffe5f55f290b559be869e353f594793507f5456f'),
+        ('guild_friend_shop_item', '8b20eb2a5e8ba2d08538cffec396236b751df08b9117dd70f71deaf2ad09617e'),
+        ('vending_shop_item', 'd1b520788f1b75ebe812eb17c5792d73773fe415a6651bec520a00c4cf44a661'),
+        ('cross_arena_shop', 'bfddc4f279b857330ba92634799c2d685dafc50df1abb32864b445da4de2608f'),
+        ('team_shop7', 'bb74f05c840897d8f06dc8538af9201b06d0189d7e030c46c2dd782f0d836b0a'),
+        ('team_shop8', '67ea685288bff7a3ed5cd841291ba6ea26e51be2f83f96be6191d687acd4db2a'),
+        ('team_shop9', 'ea6bcadb7d87a4c14ec7ef1c23c35ad8019ba532be36451ebbe1f443fcfd6352'),
+        ('team_shop10', '6ee359c2c11ea0478f1eba055cd613c048166672d3130600a95996b21dfe791f'),
+        ('team_shop11', '30a8fe772a7c0fda4511725d5dd0ab400f4c73f8bd0c1a21a082dbacb519a823'),
+        ('team_shop12', 'de72bded1299dd9b61b0fdf05f827066c20f45fe524f5cab6a2758b940927ebe'),
+        ('team_shop13', 'dfd57f7ea4e462465261101c2a133dd9d85647590574378ddc68866e0d6fae9a'),
+        ('team_shop14', 'c047e549dc204a9aada7b58512821e99162003d4b1d156e56bb52c494b95d0de'),
+        ('team_shop15', '4821e4dab475ce34a996be6291a56d7ff63f0d020250bb12a6e1913e84f5de1c'),
+        ('team_shop16', '486ac98e047041e48f6bd4768cdf58d750865b22d1aa5ea6f314c04ecccc1ade'),
+        ('team_shop17', '22b58c681f0e847e895e610ec08ecefbe7d17c2c685e4b651262d182c132fece'),
+        ('team_shop18', 'a8ae98c2277b965deae41bb8d921cef726105a63bc08801c529f6ba21e8dffd3'),
+        ('team_shop19', 'f9fb2efbce42a0244c0e9812b6b0effc078f587846891e5447c19fdd0adc5710'),
+        ('team_shop20', '61d0809b384c01800c1c113663dcae8965790e9a0cf9d00e5ac3ffd4ebe32c92'),
+        ('team_shop21', '08d3e1284a92498ec3a634cf42732f24a3a982e6752cac5b485fe36ca5960b47'),
+        ('team_shop22', 'f6334511513f942872966427c46538dee74e4f8542d752687b9a54878d26b2f8')):
+    SOURCE_MANIFEST.append((f'data/tables/{_shop_stock_table}.lua', _shop_stock_sha, 'I9_11C_CORE_SHOPS_SOURCE_BOUNDARY'))
+from shop_content import build_shop_catalog
 from adventure_content import build_adventure
 from dodgeball_content import build_dodgeball
 from memoir_content import build_memoir
@@ -2684,6 +2719,25 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
     top_floor_artifact = build_top_floor(blobs, parse_generated_lua_table, pet_artifact["templates"],
                                          build_robot_lineups(partner_keys, partner_rows, indexed_field))
     top_floor_artifact["task_modes"] = build_task_modes(blobs, parse_generated_lua_table, parse_base64_indexed_lua_table, indexed_field)
+    # A sell_type 7/15 shop roll is priced in the product's own stone item. The
+    # stone lives on the hero (partner.stone_id) or pet (pet.stone_id) source row.
+    stone_item_by_item: dict[int, int] = {}
+    for item in items:
+        item_id = parse_int(item.get("id", ""), label="item.id", allow_zero=False, allow_negative=False)
+        pet_id = parse_int(item.get("pet_id") or "0", label=f"item[{item_id}].pet_id", allow_negative=False)
+        partner_id = parse_int(item.get("partner_id") or "0", label=f"item[{item_id}].partner_id", allow_negative=False)
+        if pet_id > 0:
+            pet_row = pet_rows.get(pet_id)
+            if pet_row is None:
+                continue
+            stone = parse_int(indexed_field(pet_keys, pet_row, "stone_id", row_id=pet_id) or "0", label=f"pet[{pet_id}].stone_id", allow_negative=False)
+        elif partner_id > 0 and partner_id in partner_rows:
+            stone = parse_int(indexed_field(partner_keys, partner_rows[partner_id], "stone_id", row_id=partner_id) or "0", label=f"partner[{partner_id}].stone_id", allow_negative=False)
+        else:
+            continue
+        if stone > 0:
+            stone_item_by_item[item_id] = stone
+
     artifacts = {
         "pet_campaign_catalog.json":build_petcampaign(blobs,parse_generated_lua_table,resources),
         "gods_trial_catalog.json":build_godstrial(blobs,parse_generated_lua_table,items),
@@ -2726,6 +2780,20 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "social_gift_catalog.json": social_gift_artifact,
         "social_input_catalog.json": build_social(blobs, parse_generated_lua_table, CompileError),
         "daily_buy_input_catalog.json": build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_privilege_rows, refresh_cost_rows, misc_by_key, daily_consume_rows, CompileError),
+        "shop_catalog.json": build_shop_catalog(
+            parse_generated_lua_table(blobs["data/tables/shop_config.lua"].data),
+            {table: parse_generated_lua_table(blobs[f"data/tables/{table}.lua"].data) for table in (
+                "shop_item", "arena_shop_item", "crusade_shop_item", "goblin_shop_item", "black_market_item",
+                "top_shop_item", "guild_shop_item", "space_trip_item", "region_shop_item", "paradise_shop_item",
+                "library_shop_item", "guild_friend_shop_item", "vending_shop_item", "cross_arena_shop",
+                "team_shop7", "team_shop8", "team_shop9", "team_shop10", "team_shop11", "team_shop12",
+                "team_shop13", "team_shop14", "team_shop15", "team_shop16", "team_shop17", "team_shop18",
+                "team_shop19", "team_shop20", "team_shop21", "team_shop22")},
+            dropbox_rows,
+            refresh_cost_rows,
+            stone_item_by_item,
+            CompileError,
+        ),
         "emoticon_catalog.json": emoticon_artifact,
         "equipment_primitives_catalog.json": equipment_artifact,
         "function_gates.json": function_artifact,

@@ -10029,6 +10029,83 @@
         "references": [],
         "retention": null
       }
+    },
+    "content_shop_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00175_i9_11c_core_shops.sql",
+      "owner": "content-registry",
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "shop_players": {
+      "owner": "Shop",
+      "migration": "migrations/00175_i9_11c_core_shops.sql",
+      "allowed_query_owners": [
+        "Shop"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/shopstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/shopstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "player_id"
+        ],
+        "retention": null
+      }
+    },
+    "shop_tuning": {
+      "owner": "Shop",
+      "migration": "migrations/00175_i9_11c_core_shops.sql",
+      "allowed_query_owners": [
+        "Shop"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/shopstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/shopstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     }
   }
 }
