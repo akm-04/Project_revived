@@ -121,6 +121,7 @@ type Directory interface {
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	HeroAcquisitionByItemTx(context.Context, tx.Queryer, string, int64) (character.HeroAcquisitionTemplate, error)
+	HeroScrollSXByItemTx(context.Context, tx.Queryer, string, int64) (bool, error)
 }
 
 type Heroes interface {
@@ -330,8 +331,12 @@ func (s Service) Request(c context.Context, a identity.ActorContext, itemID int6
 		if !owned {
 			return ErrNotOwner
 		}
+		sx, err := s.Content.HeroScrollSXByItemTx(c, t, revision, itemID)
+		if err != nil {
+			return err
+		}
 		need := s.Policy.NormalNeed
-		if tmpl.Kind == character.SuperHero {
+		if sx {
 			need = s.Policy.SXNeed
 		}
 		if err := s.Store.InsertWishTx(c, t, guild.Wish{PlayerID: a.PlayerID, GameDay: day, ItemID: itemID, NeedNum: need}); err != nil {

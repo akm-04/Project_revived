@@ -4025,7 +4025,8 @@
    ],
    "store:contentstore": [
     "*ActiveRevision",
-    "*HeroAcquisitionByItemTx"
+    "*HeroAcquisitionByItemTx",
+    "*HeroScrollSXByItemTx"
    ],
    "store:guildrentalread": [
     "*ProfileTx"
