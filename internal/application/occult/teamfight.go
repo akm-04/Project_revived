@@ -69,7 +69,19 @@ func memberIDs(view *roomView) []int64 {
 	return out
 }
 
-// TeamInvite answers 2374. The stage's event fires once and may pass it; else the
+// teamCampaignHeroes is every fielded girl of one accepted team fight, the
+// frozen final team a clear-result event is applied to.
+func teamCampaignHeroes(view *roomView, team *d.TeamFight) []d.CampaignHero {
+	var heroes []d.CampaignHero
+	for _, member := range teamRoster(view, team.StartPlayer) {
+		for _, heroID := range team.Pick(int64(member)).Fielded() {
+			heroes = append(heroes, d.CampaignHero{PlayerID: int64(member), HeroID: heroID})
+		}
+	}
+	return heroes
+}
+
+// TeamInvite answers 2374. The stage's prepare event fires once and may pass it; else the
 // caller becomes start_player, holds the stage and the other members are asked.
 func (s Mode) TeamInvite(c context.Context, a identity.ActorContext, campaignID, subID int64, op operation.Context) (map[string]any, error) {
 	return s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
@@ -494,9 +506,16 @@ func (s Mode) settleAttempt(c context.Context, sc gen.TimedScope, a identity.Act
 		return nil, err
 	}
 	view.state.RecordTeamHeroes(members)
+	finalTeam := teamCampaignHeroes(view, team)
+	view.state.RecordCampaignHeroes(team.CampaignID, finalTeam)
 	result, err := view.state.ApplyTeamResult(terminal.Resolution.Outcome.Star, enemies)
 	if err != nil {
 		return nil, err
+	}
+	if campaign, known := view.catalog.Campaign(team.CampaignID); known {
+		if err = s.applyClearEvents(c, sc, a, view, campaign, finalTeam); err != nil {
+			return nil, err
+		}
 	}
 	awards := map[identity.PlayerID][]d.Reward{}
 	if result.Won {

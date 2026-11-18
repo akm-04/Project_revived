@@ -155,7 +155,7 @@ func (c Catalog) Validate() error {
 		if len(campaign.StageTotalHP) != len(campaign.FightIDs) {
 			return ErrUnavailable
 		}
-		if campaign.EventID == int64(EventExtraPoint) && campaign.ExtraIntegral <= 0 {
+		if campaign.EventID == int64(EventExtraPoint) && (campaign.ExtraIntegral <= 0 || campaign.EventCondition <= 0) {
 			return ErrUnavailable
 		}
 		for index, total := range campaign.StageTotalHP {

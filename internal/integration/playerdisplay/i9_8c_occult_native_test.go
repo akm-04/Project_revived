@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -432,6 +433,64 @@ func TestI9_8COccultEventAutoPassNative(t *testing.T) {
 	}
 	if state := occultRoomState(t, p, room.ID); state.StagesOf(10017)[0].HP != 0 {
 		t.Fatal("auto pass left the stage standing")
+	}
+}
+
+// TestI9_11A127OccultClearEventNative proves the event 6 bonus is granted by the
+// accepted clearance (2372), not by the 2371 prepare, and only once.
+func TestI9_11A127OccultClearEventNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := occultOwner(t, p, server, 1)
+	s, _ := occultTestMode(t, p)
+	if _, err := s.CreateSolo(ctx, a, 4, op()); err != nil {
+		t.Fatal(err)
+	}
+	formation := []int64{partner}
+	for _, campaign := range []int64{40010, 40011, 40014} {
+		if _, err := s.Prepare(ctx, a, campaign, 1, op()); err != nil {
+			t.Fatalf("prepare %d: %v", campaign, err)
+		}
+		if _, err := s.StartFight(ctx, a, campaign, 1, op()); err != nil {
+			t.Fatalf("start %d: %v", campaign, err)
+		}
+		if _, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: campaign, SubID: 1, Star: 3, Formation: formation}, op()); err != nil {
+			t.Fatalf("settle %d: %v", campaign, err)
+		}
+	}
+	if _, err := s.Prepare(ctx, a, 40015, 1, op()); err != nil {
+		t.Fatalf("prepare 40015: %v", err)
+	}
+	room, found, err := (sharedroomstore.Store{}).ReadPlayerRoomTx(ctx, p, a.PlayerID, oc.RoomFamily, oc.RoomSlot)
+	if err != nil || !found {
+		t.Fatal(found, err)
+	}
+	prepared := occultRoomState(t, p, room.ID)
+	if prepared.ExtraPoints != 0 || slices.Contains(prepared.EventsDone, int64(40015)) {
+		t.Fatalf("40015 was consumed at prepare: extra=%d events_done=%v", prepared.ExtraPoints, prepared.EventsDone)
+	}
+	if _, err = s.StartFight(ctx, a, 40015, 1, op()); err != nil {
+		t.Fatal(err)
+	}
+	settled, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 40015, SubID: 1, Star: 3, Formation: formation}, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	detail := settled.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if detail["extra_point"] != int64(1000) {
+		t.Fatalf("the clear did not grant the event 6 bonus: %#v", detail)
+	}
+	cleared := occultRoomState(t, p, room.ID)
+	if cleared.ExtraPoints != 1000 || !slices.Contains(cleared.EventsDone, int64(40015)) {
+		t.Fatalf("the clear did not consume event 6: extra=%d events_done=%v", cleared.ExtraPoints, cleared.EventsDone)
+	}
+	duplicate, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 40015, SubID: 1, Star: 3, Formation: formation}, op())
+	if err != nil || !duplicate.Duplicate {
+		t.Fatalf("repeated 2372: %+v %v", duplicate, err)
+	}
+	after := occultRoomState(t, p, room.ID)
+	if after.ExtraPoints != 1000 {
+		t.Fatalf("a repeated result granted the bonus again: extra=%d", after.ExtraPoints)
 	}
 }
 

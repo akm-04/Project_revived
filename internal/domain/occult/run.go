@@ -56,7 +56,10 @@ type RunState struct {
 	Invites            []int64                          `json:"invites,omitempty"`
 	StayPositions      map[string]int64                 `json:"stay_positions,omitempty"`
 	EventsDone         []int64                          `json:"events_done,omitempty"`
-	Points             int64                            `json:"points"`
+	// CampaignHeroes is every girl the campaign's accepted battles fielded,
+	// once each; event 6 compares its size with the row's event_condition.
+	CampaignHeroes map[string][]CampaignHero `json:"campaign_heroes,omitempty"`
+	Points         int64                     `json:"points"`
 	// ExtraPoints is the accumulated event-6 bonus; Points is the chapter score
 	// including it, recomputed at each settle.
 	ExtraPoints  int64                      `json:"extra_points,omitempty"`
