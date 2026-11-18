@@ -95,6 +95,11 @@ type UploadRequest struct {
 	// RawBody is nil when the multipart body parsed, else the request body R4
 	// keeps as the quarantined raw record.
 	RawBody []byte
+	// EnvelopeSummary is a bounded text-only description of a parsed multipart
+	// envelope: part names, byte lengths and free-text values, never part bytes.
+	// It becomes the quarantine record when framing succeeded with no payload
+	// (A-132).
+	EnvelopeSummary []byte
 }
 
 // Quarantine reasons (R4).
@@ -164,6 +169,9 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 		raw := request.Payload
 		if request.RawBody != nil {
 			raw = redactedRawBody(request.RawBody, presentedCapability(request.Capability))
+		}
+		if len(raw) == 0 {
+			raw = redactedRawBody(request.EnvelopeSummary, presentedCapability(request.Capability))
 		}
 		upload.Attachment, upload.AttachmentTruncated = boundedCopy(raw, domain.MaxErrorLogBodyBytes)
 	}

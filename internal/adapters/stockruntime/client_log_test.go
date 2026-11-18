@@ -58,6 +58,45 @@ func TestMalformedMultipartKeepsTheQuarantinedRawRecord(t *testing.T) {
 	}
 }
 
+// A-132: a well-framed multipart that carries metadata but no payload is
+// quarantined with a bounded envelope diagnostic, never an empty attachment
+// (I85_CLIENT_LOG_INGEST_V1 R4). Secrets in the summary go through R8 redaction.
+func TestMetadataOnlyMultipartKeepsAnEnvelopeDiagnostic(t *testing.T) {
+	store := &clientLogMemoryStore{}
+	service := &app.Service{Store: store, Clock: clientLogClock{}}
+	handler := ClientLogHandler{Ingest: service, BasePath: "/client-log"}
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	if err := writer.WriteField("app_v", "1.0"); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.WriteField("token", "secret-token"); err != nil {
+		t.Fatal(err)
+	}
+	writer.Close()
+	request := httptest.NewRequest(http.MethodPost, "/client-log", bytes.NewReader(body.Bytes()))
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status=%d", recorder.Code)
+	}
+	if len(store.uploads) != 1 {
+		t.Fatalf("uploads=%d", len(store.uploads))
+	}
+	upload := store.uploads[0]
+	diagnostic := string(upload.Attachment)
+	if upload.QuarantineReason != app.QuarantineBadCompression {
+		t.Fatalf("reason=%q", upload.QuarantineReason)
+	}
+	if !strings.Contains(diagnostic, "app_v=1.0") || !strings.Contains(diagnostic, "token=") {
+		t.Fatalf("diagnostic=%q", diagnostic)
+	}
+	if strings.Contains(diagnostic, "secret-token") {
+		t.Fatalf("diagnostic leaked a secret: %q", diagnostic)
+	}
+}
+
 // A well-framed errorlog over the payload cap still keeps its parsed payload as
 // the raw record rather than the whole body.
 func TestOversizedErrorLogKeepsThePayloadAsTheRawRecord(t *testing.T) {

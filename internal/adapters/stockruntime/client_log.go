@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -75,8 +76,13 @@ func readUpload(r *http.Request) app.UploadRequest {
 		return malformedUpload(body, app.QuarantineMalformedMultipart)
 	}
 	request := app.UploadRequest{BodyBytes: len(body)}
-	if err := readParts(multipart.NewReader(bytes.NewReader(body), parameters["boundary"]), &request); err != nil {
+	envelope := &bytes.Buffer{}
+	if err := readParts(multipart.NewReader(bytes.NewReader(body), parameters["boundary"]), &request, envelope); err != nil {
 		return malformedUpload(body, app.QuarantineMalformedMultipart)
+	}
+	if len(request.Payload) == 0 {
+		summary, _ := domain.Truncate(envelope.String(), domain.MaxRawEnvelopeBytes)
+		request.EnvelopeSummary = []byte(summary)
 	}
 	if request.Kind == domain.KindErrorLog && len(body) > domain.MaxErrorLogBodyBytes {
 		request.Malformed = app.QuarantineOverCap
@@ -90,7 +96,7 @@ func malformedUpload(body []byte, reason string) app.UploadRequest {
 
 var errNoParts = errors.New("multipart body has no parts")
 
-func readParts(reader *multipart.Reader, request *app.UploadRequest) error {
+func readParts(reader *multipart.Reader, request *app.UploadRequest, envelope *bytes.Buffer) error {
 	for parts := 0; ; parts++ {
 		part, err := reader.NextPart()
 		if errors.Is(err, io.EOF) && parts == 0 {
@@ -106,6 +112,7 @@ func readParts(reader *multipart.Reader, request *app.UploadRequest) error {
 		if err != nil {
 			return err
 		}
+		writePartSummary(envelope, part, data)
 		if part.FileName() != "" {
 			request.Kind = domain.KindCrash
 			request.AttachmentName = part.FileName()
@@ -123,4 +130,20 @@ func readParts(reader *multipart.Reader, request *app.UploadRequest) error {
 			request.Token = string(data)
 		}
 	}
+}
+
+// freeTextParts are the stock form fields whose value is text, so a diagnostic
+// may quote it; every other part contributes only its name and byte length.
+var freeTextParts = map[string]bool{"app_v": true, "v": true, "token": true}
+
+// writePartSummary describes one part without copying its bytes (A-132). The
+// service applies R8 redaction to the summary before persistence.
+func writePartSummary(envelope *bytes.Buffer, part *multipart.Part, data []byte) {
+	name := part.FormName()
+	fmt.Fprintf(envelope, "part %s", name)
+	if freeTextParts[name] && part.FileName() == "" {
+		value, _ := domain.Truncate(string(data), domain.MaxRawEnvelopeBytes)
+		fmt.Fprintf(envelope, "=%s", value)
+	}
+	fmt.Fprintf(envelope, " bytes=%d\n", len(data))
 }

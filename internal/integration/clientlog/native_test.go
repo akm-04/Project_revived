@@ -258,6 +258,30 @@ func TestMalformedMultipartKeepsTheRawRecord(t *testing.T) {
 	}
 }
 
+// A-132: a well-framed multipart with metadata but no payload persists a
+// redacted envelope summary as its quarantine record before answering 200.
+func TestMetadataOnlyMultipartKeepsTheEnvelopeDiagnostic(t *testing.T) {
+	f := newFixture(t)
+	fields := map[string][]byte{"app_v": []byte("1.0"), "token": []byte("secret-token")}
+	if status := stockPost(t, f.logURL(t), fields, "", nil); status != http.StatusOK {
+		t.Fatalf("status=%d", status)
+	}
+	got := f.uploads(t, `account_uid=$1`, f.uid)
+	if len(got) != 1 || got[0].reason == nil || *got[0].reason != app.QuarantineBadCompression || got[0].attachment == 0 {
+		t.Fatalf("uploads=%+v", got)
+	}
+	var stored string
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT encode(attachment,'escape') FROM client_log_uploads WHERE account_uid=$1`, f.uid).Scan(&stored); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(stored, "app_v=1.0") || !strings.Contains(stored, "token=") {
+		t.Fatalf("attachment=%q", stored)
+	}
+	if strings.Contains(stored, "secret-token") {
+		t.Fatalf("attachment leaked a secret: %q", stored)
+	}
+}
+
 // TestRequestJournalKeepsRedactedMultipartEnvelope drives the production edge,
 // journal and store: an undecodable multipart upload must persist an envelope
 // with its field names but no file body and no token value (I85_REQUEST_JOURNAL_V1 R3).
