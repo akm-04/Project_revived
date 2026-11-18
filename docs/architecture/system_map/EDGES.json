@@ -590,6 +590,10 @@
     "*ReadTx",
     "Pipe"
    ],
+   "characterhero": [
+    "*AdvanceDailyTx",
+    "*LockBuyTx"
+   ],
    "heroassets": [
     "*AdvanceBuyTx",
     "*LockBuyTx",
@@ -2788,6 +2792,10 @@
    "characterpractice": [
     "ReduceAppliedPracticeContribution"
    ],
+   "dailyconsume": [
+    "*AdvanceDailyTx",
+    "*LockBuyTx"
+   ],
    "generation": [
     "DecisionAt",
     "Operation",
@@ -2947,6 +2955,7 @@
     "*HeroTemplateProgressionTx",
     "*HeroVowsRequiredLevelTx",
     "*PracticeRevisionTx",
+    "*QuickFumoRuleTx",
     "*SuperEquipmentCapTx",
     "*SuperEquipmentPositionTx",
     "*SuperEquipmentRevision",

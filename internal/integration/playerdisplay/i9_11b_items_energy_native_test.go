@@ -3,8 +3,10 @@
 package playerdisplay_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"reflect"
 	"sort"
@@ -16,17 +18,21 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
+	appconsume "gxb.local/backend/v2/internal/application/dailyconsume"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/missioninputs"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/itemsenergy"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -34,6 +40,10 @@ import (
 )
 
 func itemsEnergyComposition(p *postgres.Pool, db tx.Beginner, a identity.ActorContext) stockruntime.ItemsEnergyComposition {
+	return itemsEnergyCompositionAt(p, db, a, postgres.AuthoritativeTime{Queryer: p})
+}
+
+func itemsEnergyCompositionAt(p *postgres.Pool, db tx.Beginner, a identity.ActorContext, clock gen.TimeAuthority) stockruntime.ItemsEnergyComposition {
 	cs := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
 	runner := tx.Runner{DB: db}
@@ -47,11 +57,18 @@ func itemsEnergyComposition(p *postgres.Pool, db tx.Beginner, a identity.ActorCo
 		Observations: missioninputs.Reader{Spending: values, Heroes: characterstore.Store{Queryer: p},
 			Progression: values, Campaigns: campaignstore.Store{}, Privileges: privileges, Books: bookService(p, p)}}
 	heroDB := characterstore.Store{Queryer: p}
+	timed := gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: runner}
 	heroSvc := apphero.Service{Store: heroDB, AcquisitionStore: heroDB, Acquisition: cs,
 		CollectionAdmission: apphero.CatalogCollectionAdmission{Content: cs}, Content: cs, Fencer: values,
-		Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p},
+		Runner: runner, Timed: timed, ProgressionStore: heroDB, Progression: cs,
+		Economy: appi5.HeroProgressionDebiter{Store: values, Content: cs}, Backpack: values,
+		Equipment: cs, EquipmentResources: appi5.HeroEquipmentResourceDebiter{Store: values, Content: cs},
+		Fumo: cs, MaterialCosts: appi5.MaterialCostDebiter{Store: values, Content: cs},
+		AwakeningPositions: &apphero.AwakeningPositionResolver{Raw: characterstore.RawAwakeningStore{}, Content: cs, Queryer: p},
+		DailyConsume:       appconsume.Service{Store: dailyconsumestore.Store{}}}
 	return stockruntime.NewItemsEnergyComposition(stockruntime.ItemsEnergyDependencies{
-		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: runner},
+		Timed:       timed,
 		Fresh:       p,
 		Content:     cs,
 		Values:      values,
@@ -61,6 +78,7 @@ func itemsEnergyComposition(p *postgres.Pool, db tx.Beginner, a identity.ActorCo
 		Receipts:    receipts,
 		ReceiptRead: kernelstore.Reader{Queryer: p},
 		Authority:   playtestAuthority{a},
+		Fumo:        &heroSvc,
 	})
 }
 
@@ -127,6 +145,11 @@ func i911bScalar(t *testing.T, p *postgres.Pool, a identity.ActorContext, key st
 		t.Fatal(err)
 	}
 	return balance.Amount
+}
+
+func i911bScalarSet(t *testing.T, p *postgres.Pool, a identity.ActorContext, key string, amount int64) {
+	t.Helper()
+	exec(t, p, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,$2,$3,1,clock_timestamp()) ON CONFLICT(player_id,resource_key) DO UPDATE SET amount=excluded.amount`, int64(a.PlayerID), key, amount)
 }
 
 func i911bEnergy(t *testing.T, p *postgres.Pool, a identity.ActorContext) int64 {
@@ -272,19 +295,28 @@ func TestI911BGoldenHandAndTenfoldSpendOnce(t *testing.T) {
 	a, _, catalog := i911bFixture(t, database)
 	composition := itemsEnergyComposition(database, database, a)
 	dispatcher := composition.Dispatcher
+	decorated := stockruntime.Decorated{Next: dispatcher}
 	fixed := op()
 	fixed.EntropySeed = [32]byte{7, 11, 13, 17}
 	first := i911bRequest(a, 96, map[string]any{}, fixed)
-	manaBefore := i911bScalar(t, database, a, "mana")
-	response := dispatcher.Dispatch(ctx, first)
+	const manaStart = int64(5000)
+	i911bScalarSet(t, database, a, "mana", manaStart)
+	response := decorated.Dispatch(ctx, first)
 	i911bStatusCode(t, response)
 	replyconformance.Check(t, 96, response.Body)
 	expectedMana, expectedCrit, _, err := catalog.MidasMana(1, 1, 1, combat.NewStream(fixed.Derive("items-energy.golden-hand/v1", 0)))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if response.Body["crit"] != expectedCrit || i911bScalar(t, database, a, "mana")-manaBefore != expectedMana {
-		t.Fatalf("golden hand schedule crit=%v mana=%d want crit=%d mana=%d", response.Body["crit"], i911bScalar(t, database, a, "mana")-manaBefore, expectedCrit, expectedMana)
+	// F1: mana is the rolled gain, never the post-grant balance; economy_ still
+	// carries the balance from the owner's recorded write.
+	if response.Body["mana"] != expectedMana {
+		t.Fatalf("golden hand reply mana=%v want gain %d", response.Body["mana"], expectedMana)
+	}
+	i911bAssertGoldenHandBounds(t, catalog, 1, expectedMana)
+	economy, _ := response.Body["economy_"].(map[string]any)
+	if response.Body["crit"] != expectedCrit || i911bScalar(t, database, a, "mana")-manaStart != expectedMana || economy["mana"] != manaStart+expectedMana {
+		t.Fatalf("golden hand schedule crit=%v mana=%d economy=%v want crit=%d gain=%d balance=%d", response.Body["crit"], i911bScalar(t, database, a, "mana")-manaStart, economy, expectedCrit, expectedMana, manaStart+expectedMana)
 	}
 	if response.Body["cost"] != int64(10) || response.Body["buy_mana_times"] != int64(1) || i911bScalar(t, database, a, "crystal") != 990 {
 		t.Fatalf("golden hand %#v crystal=%d", response.Body, i911bScalar(t, database, a, "crystal"))
@@ -292,9 +324,19 @@ func TestI911BGoldenHandAndTenfoldSpendOnce(t *testing.T) {
 	if i911bGoldenHandFacts(t, database, a) != 1 {
 		t.Fatalf("golden-hand facts after MID96 = %d", i911bGoldenHandFacts(t, database, a))
 	}
-	tenfold := dispatcher.Dispatch(ctx, i911bRequest(a, 29, map[string]any{"consume_id": int64(1)}, op()))
+	tenfoldOp := op()
+	tenfoldOp.EntropySeed = [32]byte{19, 23, 29, 31}
+	tenfold := dispatcher.Dispatch(ctx, i911bRequest(a, 29, map[string]any{"consume_id": int64(1)}, tenfoldOp))
 	i911bStatusCode(t, tenfold)
 	replyconformance.Check(t, 29, tenfold.Body)
+	expectedTenfold, _, _, err := catalog.MidasMana(1, 2, 10, combat.NewStream(tenfoldOp.Derive("items-energy.golden-hand/v1", 0)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tenfold.Body["mana"] != expectedTenfold {
+		t.Fatalf("tenfold reply mana=%v want rolled total %d", tenfold.Body["mana"], expectedTenfold)
+	}
+	i911bAssertGoldenHandBounds(t, catalog, 10, expectedTenfold)
 	if tenfold.Body["cost"] != int64(70) || tenfold.Body["fumo"] == nil || tenfold.Body["trial_info"] == nil || i911bScalar(t, database, a, "crystal") != 920 {
 		t.Fatalf("tenfold %#v", tenfold.Body)
 	}
@@ -314,8 +356,15 @@ func TestI911BGoldenHandAndTenfoldSpendOnce(t *testing.T) {
 	crystal := i911bScalar(t, database, a, "crystal")
 	replay := dispatcher.Dispatch(ctx, first)
 	i911bStatusCode(t, replay)
-	if i911bBodyJSON(t, replay.Body) != i911bBodyJSON(t, response.Body) || i911bScalar(t, database, a, "crystal") != crystal {
-		t.Fatalf("replay %#v != %#v", replay.Body, response.Body)
+	wantReplay := map[string]any{}
+	for _, key := range []string{"cost", "crit", "mana", "buy_mana_times"} {
+		wantReplay[key] = response.Body[key]
+	}
+	if i911bBodyJSON(t, replay.Body) != i911bBodyJSON(t, wantReplay) {
+		t.Fatalf("replay %#v != %#v", replay.Body, wantReplay)
+	}
+	if i911bScalar(t, database, a, "crystal") != crystal {
+		t.Fatal("replay spent again")
 	}
 	if i911bGoldenHandFacts(t, database, a) != 2 {
 		t.Fatal("replay recorded a second fact")
@@ -485,5 +534,436 @@ func TestI911BBoxHeroDuplicateToStone(t *testing.T) {
 	}
 	if i911bStackQuantity(t, database, a, stone[0]) < stone[1] {
 		t.Fatal("stone not granted")
+	}
+}
+
+// i911bAssertGoldenHandBounds checks the rolled gain against the source float
+// and crit bounds, never against the wallet balance.
+func i911bAssertGoldenHandBounds(t *testing.T, catalog d.Catalog, multiplier, gain int64) {
+	t.Helper()
+	base, err := catalog.MidasSingleBase(1, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	floatUp := float64(catalog.Misc.MidasFloatUpBasisPoints) / 10000
+	maxCrit := int64(1)
+	for _, crit := range catalog.Misc.MidasCritTypes {
+		if crit > maxCrit {
+			maxCrit = crit
+		}
+	}
+	lower := int64(math.Ceil(base * float64(multiplier)))
+	upper := int64(math.Ceil(base * float64(multiplier) * (1 + floatUp) * float64(maxCrit)))
+	if gain < lower || gain > upper {
+		t.Fatalf("golden-hand gain %d outside [%d,%d]", gain, lower, upper)
+	}
+}
+
+func i911bFumoHero(t *testing.T, p *postgres.Pool, a identity.ActorContext, revision string, tableID, color, slot int64) character.Hero {
+	t.Helper()
+	h := bornHero(t, p, a, revision, tableID, tableID)
+	transaction, err := p.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer transaction.Rollback(ctx)
+	store := characterstore.Store{}
+	hero, err := store.LockHeroByPartnerIDTx(ctx, transaction, a.PlayerID, h.PartnerID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	previous := hero.StateVersion
+	hero.Color = color
+	hero.Equipment[slot-1] = 1
+	hero.StateVersion++
+	hero.UpdatedAt = time.Now().UTC()
+	if err := hero.ValidatePersistent(); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.SaveHeroStateTx(ctx, transaction, hero, previous); err != nil {
+		t.Fatal(err)
+	}
+	if err := transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	return hero
+}
+
+func i911bHeroFumo(t *testing.T, p *postgres.Pool, a identity.ActorContext, partnerID, slot int64) int64 {
+	t.Helper()
+	var fumo int64
+	err := p.QueryRow(ctx, `SELECT fumo_`+strconv.FormatInt(slot, 10)+` FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), partnerID).Scan(&fumo)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return 0
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	return fumo
+}
+
+func i911bDailyCounts(t *testing.T, p *postgres.Pool, a identity.ActorContext, day int64) map[int64]int64 {
+	t.Helper()
+	counts, err := (appconsume.Service{Store: dailyconsumestore.Store{}}).ReadTx(ctx, p, a.PlayerID, day)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return counts
+}
+
+func i911bScalarBalance(t *testing.T, p *postgres.Pool, a identity.ActorContext, key string) int64 {
+	t.Helper()
+	balance, found, err := (i5store.Store{}).ReadScalarTx(ctx, p, a.PlayerID, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !found {
+		return 0
+	}
+	return balance.Amount
+}
+
+func i911bTemporal(t *testing.T, p *postgres.Pool, a identity.ActorContext, key string) int64 {
+	t.Helper()
+	state, found, err := (i5store.Store{}).ReadTemporalTx(ctx, p, a.PlayerID, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !found {
+		return 0
+	}
+	return state.StoredAmount
+}
+
+// TestI911BQuickFumoOwnerRoute proves MID 29 consume_id 2 reaches the fumo
+// owner's transaction, not Campaign, and reports the post-grant raw Fumo.
+func TestI911BQuickFumoOwnerRoute(t *testing.T) {
+	database := pool(t)
+	a, revision, _ := i911bFixture(t, database)
+	composition := itemsEnergyComposition(database, database, a)
+	dispatcher := composition.Dispatcher
+	hero := i911bFumoHero(t, database, a, revision, 10001001, 3, 1)
+	i911bScalarSet(t, database, a, "crystal", 1000)
+	request := func() httpedge.DispatchRequest {
+		return i911bRequest(a, 29, map[string]any{"consume_id": int64(2), "partner_id": hero.PartnerID, "equip_index": int64(1)}, op())
+	}
+	response := dispatcher.Dispatch(ctx, request())
+	i911bStatusCode(t, response)
+	replyconformance.Check(t, 29, response.Body)
+	if response.Body["fumo"] != int64(150) || response.Body["cost"] != int64(20) {
+		t.Fatalf("quick fumo reply %#v", response.Body)
+	}
+	if i911bHeroFumo(t, database, a, hero.PartnerID, 1) != 150 || i911bScalarBalance(t, database, a, "crystal") != 980 {
+		t.Fatalf("quick fumo state fumo=%d crystal=%d", i911bHeroFumo(t, database, a, hero.PartnerID, 1), i911bScalarBalance(t, database, a, "crystal"))
+	}
+	dayCounts := i911bDailyCounts(t, database, a, modes.Day(time.Now().UTC()))
+	if dayCounts[2] != 1 {
+		t.Fatalf("daily_consume id 2 count = %d", dayCounts[2])
+	}
+	if pipe := appconsume.Pipe(dayCounts); len(pipe) < 4 || pipe[0:4] != "0|1|" {
+		t.Fatalf("MID 28 pipe projection %q", pipe)
+	}
+	second := dispatcher.Dispatch(ctx, request())
+	if second.HTTPStatus != http.StatusConflict || second.Body["error_code"] != int64(35028) {
+		t.Fatalf("second quick fumo status %d body %#v", second.HTTPStatus, second.Body)
+	}
+	if i911bHeroFumo(t, database, a, hero.PartnerID, 1) != 150 || i911bScalarBalance(t, database, a, "crystal") != 980 {
+		t.Fatal("refused quick fumo changed state")
+	}
+}
+
+// TestI911BBoxFixedChooseOneSpirit proves the MID 241 families C9 requires.
+func TestI911BBoxFixedChooseOneSpirit(t *testing.T) {
+	database := pool(t)
+	a, _, catalog := i911bFixture(t, database)
+	dispatcher := itemsEnergyComposition(database, database, a).Dispatcher
+	// Fixed (no-drops, no-hero) box: 50002102 -> gift 90040391 grants 1000 crystal.
+	if item, err := catalog.Item(50002102); err != nil || !reflect.DeepEqual(item.Gifts, []int64{90040391}) {
+		t.Fatalf("fixed box content drift %+v %v", item, err)
+	}
+	i911bStack(t, database, a, 50002102, 1)
+	crystalBefore := i911bScalarBalance(t, database, a, "crystal")
+	fixed := dispatcher.Dispatch(ctx, i911bRequest(a, 241, map[string]any{"item_id": int64(50002102), "gift_id": int64(90040391), "num": int64(1)}, op()))
+	i911bStatusCode(t, fixed)
+	replyconformance.Check(t, 241, fixed.Body)
+	if i911bScalarBalance(t, database, a, "crystal") != crystalBefore+1000 || i911bStackQuantity(t, database, a, 50002102) != 0 || len(fixed.Body["awards"].([]any)) != 0 {
+		t.Fatalf("fixed box %#v crystal=%d", fixed.Body, i911bScalarBalance(t, database, a, "crystal"))
+	}
+	// Choose-one item (one_in_more): the client sends one of the item's gift rows.
+	chooseItem, err := catalog.Item(50001052)
+	if err != nil || len(chooseItem.OneInMore) == 0 {
+		t.Fatalf("choose-one content missing: %v", err)
+	}
+	rewards, err := catalog.GiftRewards(catalog.Gifts[90001088], 1)
+	if err != nil || len(rewards.Heroes) != 1 {
+		t.Fatalf("choose-one gift rewards %+v %v", rewards, err)
+	}
+	i911bStack(t, database, a, 50001052, 1)
+	chosen := dispatcher.Dispatch(ctx, i911bRequest(a, 241, map[string]any{"item_id": int64(50001052), "gift_id": int64(90001088), "num": int64(1)}, op()))
+	i911bStatusCode(t, chosen)
+	replyconformance.Check(t, 241, chosen.Body)
+	if len(chosen.Body["awards"].([]any)) == 0 || i911bStackQuantity(t, database, a, 50001052) != 0 {
+		t.Fatalf("choose-one box %#v", chosen.Body)
+	}
+	// Spirit-energy gift row: 50002142 -> gift 90040410 grants 6 spirit energy.
+	before := i911bTemporal(t, database, a, "spirit_energy")
+	i911bStack(t, database, a, 50002142, 1)
+	spirit := dispatcher.Dispatch(ctx, i911bRequest(a, 241, map[string]any{"item_id": int64(50002142), "gift_id": int64(90040410), "num": int64(1)}, op()))
+	i911bStatusCode(t, spirit)
+	replyconformance.Check(t, 241, spirit.Body)
+	if i911bTemporal(t, database, a, "spirit_energy") != before+6 || i911bStackQuantity(t, database, a, 50002142) != 0 {
+		t.Fatalf("spirit gift %#v spirit=%d", spirit.Body, i911bTemporal(t, database, a, "spirit_energy"))
+	}
+}
+
+// TestI911BBoxFailClosedEquipAndZeroStack proves two C11 families reach the
+// production dispatcher and leave the stack intact. The equipment owner does
+// not exist yet, and a zero-stack item cannot be opened. The lucky_coin family
+// has no referenced gift row in the compiled bundle (see rules_test.go).
+func TestI911BBoxFailClosedEquipAndZeroStack(t *testing.T) {
+	database := pool(t)
+	a, _, catalog := i911bFixture(t, database)
+	dispatcher := itemsEnergyComposition(database, database, a).Dispatcher
+	for _, cell := range []struct {
+		itemID int64
+		giftID int64
+	}{
+		{50001190, 90050001},
+		{50001326, 1},
+	} {
+		if _, err := catalog.Item(cell.itemID); err != nil {
+			t.Fatalf("content row %d missing: %v", cell.itemID, err)
+		}
+		i911bStack(t, database, a, cell.itemID, 1)
+		response := dispatcher.Dispatch(ctx, i911bRequest(a, 241, map[string]any{"item_id": cell.itemID, "gift_id": cell.giftID, "num": int64(1)}, op()))
+		if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(35028) {
+			t.Fatalf("fail-closed %d status %d body %#v", cell.itemID, response.HTTPStatus, response.Body)
+		}
+		if i911bStackQuantity(t, database, a, cell.itemID) != 1 {
+			t.Fatalf("fail-closed %d debited the stack", cell.itemID)
+		}
+	}
+}
+
+// TestI911BSellAllOrNoneAt200Rows proves MID 86 validates every row before any
+// mutation, including at its 200-distinct-id bound.
+func TestI911BSellAllOrNoneAt200Rows(t *testing.T) {
+	database := pool(t)
+	a, _, catalog := i911bFixture(t, database)
+	dispatcher := itemsEnergyComposition(database, database, a).Dispatcher
+	sellable := make([]int64, 0, maxBatchTestItems)
+	for id := range catalog.Items {
+		item := catalog.Items[id]
+		if item.Type != -1 && item.Stack > 0 && (item.Mana > 0 || item.Crystal > 0) {
+			sellable = append(sellable, id)
+		}
+	}
+	sort.Slice(sellable, func(i, j int) bool { return sellable[i] < sellable[j] })
+	if len(sellable) < 199 {
+		t.Fatalf("only %d sellable items", len(sellable))
+	}
+	zeroPrice := int64(0)
+	for id := range catalog.Items {
+		item := catalog.Items[id]
+		if id != sellable[0] && item.Type != -1 && item.Stack > 0 && item.Mana == 0 && item.Crystal == 0 {
+			zeroPrice = id
+			break
+		}
+	}
+	if zeroPrice == 0 {
+		t.Fatal("no zero-price item")
+	}
+	i911bStack(t, database, a, sellable[0], 5)
+	manaBefore := i911bScalarBalance(t, database, a, "mana")
+	rows := func(last map[string]any) []any {
+		out := make([]any, 0, 200)
+		out = append(out, map[string]any{"item_id": sellable[0], "item_num": int64(1)})
+		for _, id := range sellable[1:199] {
+			out = append(out, map[string]any{"item_id": id, "item_num": int64(1)})
+		}
+		out = append(out, last)
+		return out
+	}
+	for _, last := range []map[string]any{
+		{"item_id": int64(999999999), "item_num": int64(1)},
+		{"item_id": zeroPrice, "item_num": int64(1)},
+	} {
+		response := dispatcher.Dispatch(ctx, i911bRequest(a, 86, map[string]any{"items": rows(last)}, op()))
+		if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(35028) {
+			t.Fatalf("all-or-none status %d body %#v", response.HTTPStatus, response.Body)
+		}
+		if i911bStackQuantity(t, database, a, sellable[0]) != 5 || i911bScalarBalance(t, database, a, "mana") != manaBefore {
+			t.Fatal("all-or-none sell mutated state")
+		}
+	}
+}
+
+const maxBatchTestItems = 200
+
+// TestI911BEnergyAllowanceExhausted proves MID 97 refuses the exhausted VIP0
+// allowance with 409+35028 after one accepted buy.
+func TestI911BEnergyAllowanceExhausted(t *testing.T) {
+	database := pool(t)
+	a, _, _ := i911bFixture(t, database)
+	dispatcher := itemsEnergyComposition(database, database, a).Dispatcher
+	first := dispatcher.Dispatch(ctx, i911bRequest(a, 97, map[string]any{}, op()))
+	i911bStatusCode(t, first)
+	crystal := i911bScalarBalance(t, database, a, "crystal")
+	energy := i911bEnergy(t, database, a)
+	second := dispatcher.Dispatch(ctx, i911bRequest(a, 97, map[string]any{}, op()))
+	if second.HTTPStatus != http.StatusConflict || second.Body["error_code"] != int64(35028) {
+		t.Fatalf("exhausted allowance status %d body %#v", second.HTTPStatus, second.Body)
+	}
+	if i911bScalarBalance(t, database, a, "crystal") != crystal || i911bEnergy(t, database, a) != energy {
+		t.Fatal("exhausted allowance charged")
+	}
+}
+
+type i911bClock struct{ at time.Time }
+
+func (c *i911bClock) Now(context.Context) (time.Time, error) { return c.at, nil }
+
+// TestI911BEnergyBuyResetsAtFive proves the 05:00 GMT+8 game-day reset by moving
+// the operation's decision time across the boundary, not by a +24h overlay.
+func TestI911BEnergyBuyResetsAtFive(t *testing.T) {
+	database := pool(t)
+	a, _, _ := i911bFixture(t, database)
+	// The next boundary keeps the pinned decision times after the fixture's
+	// privilege import while still crossing exactly one 05:00 GMT+8 reset.
+	boundary := modes.DayBegins(modes.Day(time.Now().UTC()) + 1)
+	before, after := boundary.Add(-time.Minute), boundary.Add(time.Minute)
+	clock := &i911bClock{at: before}
+	dispatcher := itemsEnergyCompositionAt(database, database, a, clock).Dispatcher
+	exec(t, database, `UPDATE player_temporal_resources SET regen_anchor_at=$2 WHERE player_id=$1 AND resource_key='energy'`, int64(a.PlayerID), before.Add(-time.Hour))
+	first := dispatcher.Dispatch(ctx, i911bRequest(a, 97, map[string]any{}, op()))
+	i911bStatusCode(t, first)
+	if first.Body["buy_energy_times"] != int64(1) {
+		t.Fatalf("pre-boundary buy %#v", first.Body)
+	}
+	detail := map[string]any{"17": map[string]any{}}
+	composition := itemsEnergyCompositionAt(database, database, a, clock)
+	if err := composition.MID1.OverlayMID1(ctx, database, a, false, before, detail); err != nil {
+		t.Fatal(err)
+	}
+	if detail["17"].(map[string]any)["buy_energy_times"] != int64(1) {
+		t.Fatalf("pre-boundary MID17 %#v", detail)
+	}
+	nextDay := map[string]any{"17": map[string]any{}}
+	if err := composition.MID1.OverlayMID1(ctx, database, a, false, after, nextDay); err != nil || nextDay["17"].(map[string]any)["buy_energy_times"] != int64(0) {
+		t.Fatalf("post-boundary MID17 %#v %v", nextDay, err)
+	}
+	clock.at = after
+	second := dispatcher.Dispatch(ctx, i911bRequest(a, 97, map[string]any{}, op()))
+	i911bStatusCode(t, second)
+	if second.Body["buy_energy_times"] != int64(1) {
+		t.Fatalf("post-boundary buy %#v", second.Body)
+	}
+	if i911bScalarBalance(t, database, a, "crystal") != 900 {
+		t.Fatalf("post-boundary crystal %d", i911bScalarBalance(t, database, a, "crystal"))
+	}
+	if counters, err := composition.Counters.Counters(ctx, a.PlayerID, after); err != nil || counters.BuyEnergyTimes != 1 {
+		t.Fatalf("post-boundary counter %+v %v", counters, err)
+	}
+}
+
+type i911bRollbackDB struct{ tx.Beginner }
+
+func (d i911bRollbackDB) Begin(c context.Context, o tx.Options) (tx.Tx, error) {
+	transaction, err := d.Beginner.Begin(c, o)
+	if err != nil {
+		return nil, err
+	}
+	return i911bRollbackTx{Tx: transaction}, nil
+}
+
+type i911bRollbackTx struct{ tx.Tx }
+
+func (t i911bRollbackTx) Commit(c context.Context) error {
+	_ = t.Tx.Rollback(c)
+	return errors.New("i9-11b injected rollback")
+}
+
+// TestI911BAtomicRollbackEveryWriteMID runs one accepted command per write MID
+// through a transaction whose COMMIT is replaced by ROLLBACK and proves no part
+// of any command survives.
+func TestI911BAtomicRollbackEveryWriteMID(t *testing.T) {
+	database := pool(t)
+	a, revision, catalog := i911bFixture(t, database)
+	rollback := itemsEnergyComposition(database, i911bRollbackDB{Beginner: database}, a).Dispatcher
+	energyItem, found := i911bFirstItem(catalog, func(item d.Item) bool {
+		return item.Type == 4 && item.SubType == 5 && item.Energy > 0 && item.Stack > 0
+	})
+	if !found {
+		t.Fatal("no energy item")
+	}
+	magicItem, found := i911bFirstItem(catalog, func(item d.Item) bool {
+		return item.SubType == 12 && item.Stack > 0 && (item.MagicEnergy > 0 || item.MagicDust > 0 || item.MagicLiquid > 0)
+	})
+	if !found {
+		t.Fatal("no magic item")
+	}
+	secondSell := int64(0)
+	for id, item := range catalog.Items {
+		if id != 41001 && item.Type != -1 && item.Stack > 0 && item.Mana > 0 {
+			secondSell = id
+			break
+		}
+	}
+	if secondSell == 0 {
+		t.Fatal("no second sell item")
+	}
+	hero := i911bFumoHero(t, database, a, revision, 10001001, 3, 1)
+	i911bStack(t, database, a, energyItem.ID, 5)
+	i911bStack(t, database, a, 41001, 4)
+	i911bStack(t, database, a, secondSell, 3)
+	i911bStack(t, database, a, magicItem.ID, 2)
+	i911bStack(t, database, a, 50002102, 3)
+	i911bScalarSet(t, database, a, "crystal", 1000)
+	i911bScalarSet(t, database, a, "mana", 5000)
+	dispatch := func(mid uint16, params map[string]any) {
+		t.Helper()
+		response := rollback.Dispatch(ctx, i911bRequest(a, mid, params, op()))
+		if response.HTTPStatus == http.StatusOK {
+			t.Fatalf("MID %d committed through the injected rollback: %#v", mid, response.Body)
+		}
+	}
+	dispatch(27, map[string]any{"item_id": energyItem.ID, "item_num": int64(2)})
+	if i911bStackQuantity(t, database, a, energyItem.ID) != 5 || i911bEnergy(t, database, a) != 100 {
+		t.Fatal("MID 27 rollback leaked")
+	}
+	dispatch(82, map[string]any{"item_id": int64(41001), "item_num": int64(1)})
+	if i911bStackQuantity(t, database, a, 41001) != 4 || i911bScalarBalance(t, database, a, "mana") != 5000 {
+		t.Fatal("MID 82 rollback leaked")
+	}
+	dispatch(86, map[string]any{"items": []any{map[string]any{"item_id": int64(41001), "item_num": int64(1)}, map[string]any{"item_id": secondSell, "item_num": int64(1)}}})
+	if i911bStackQuantity(t, database, a, 41001) != 4 || i911bStackQuantity(t, database, a, secondSell) != 3 {
+		t.Fatal("MID 86 rollback leaked")
+	}
+	dispatch(87, map[string]any{"items": []any{map[string]any{"item_id": magicItem.ID, "item_num": int64(1)}}})
+	if i911bStackQuantity(t, database, a, magicItem.ID) != 2 || i911bScalarBalance(t, database, a, "magic_energy") != 0 {
+		t.Fatal("MID 87 rollback leaked")
+	}
+	dispatch(96, map[string]any{})
+	if i911bScalarBalance(t, database, a, "crystal") != 1000 || i911bScalarBalance(t, database, a, "mana") != 5000 || i911bGoldenHandFacts(t, database, a) != 0 {
+		t.Fatal("MID 96 rollback leaked")
+	}
+	dispatch(97, map[string]any{})
+	if i911bScalarBalance(t, database, a, "crystal") != 1000 || i911bEnergy(t, database, a) != 100 {
+		t.Fatal("MID 97 rollback leaked")
+	}
+	dispatch(241, map[string]any{"item_id": int64(50002102), "gift_id": int64(90040391), "num": int64(1)})
+	if i911bStackQuantity(t, database, a, 50002102) != 3 || i911bScalarBalance(t, database, a, "crystal") != 1000 {
+		t.Fatal("MID 241 rollback leaked")
+	}
+	dispatch(29, map[string]any{"consume_id": int64(1)})
+	if i911bScalarBalance(t, database, a, "crystal") != 1000 || i911bScalarBalance(t, database, a, "mana") != 5000 {
+		t.Fatal("MID 29 id 1 rollback leaked")
+	}
+	dispatch(29, map[string]any{"consume_id": int64(2), "partner_id": hero.PartnerID, "equip_index": int64(1)})
+	if i911bScalarBalance(t, database, a, "crystal") != 1000 || i911bHeroFumo(t, database, a, hero.PartnerID, 1) != 0 {
+		t.Fatal("MID 29 id 2 rollback leaked")
+	}
+	if dayCounts := i911bDailyCounts(t, database, a, modes.Day(time.Now().UTC())); dayCounts[1] != 0 || dayCounts[2] != 0 {
+		t.Fatalf("daily counters leaked %v", dayCounts)
 	}
 }

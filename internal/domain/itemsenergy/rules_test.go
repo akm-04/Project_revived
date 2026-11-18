@@ -105,6 +105,39 @@ func TestGoldenHandPipeline(t *testing.T) {
 	}
 }
 
+type advancingUniform struct {
+	values []uint64
+	index  int
+}
+
+func (u *advancingUniform) Uniform(n uint64) uint64 {
+	value := u.values[u.index]
+	u.index++
+	if value >= n {
+		value = n - 1
+	}
+	return value
+}
+
+// TestMidasFloatBoundsArePinned pins the exact floor and ceiling of the
+// contract's one-ceil pipeline from the source float/crit bounds, independent
+// of any wallet balance.
+func TestMidasFloatBoundsArePinned(t *testing.T) {
+	catalog := testCatalog()
+	low, crit, _, err := catalog.MidasMana(1, 1, 1, &advancingUniform{values: []uint64{0, 0}})
+	if err != nil || crit != 1 || low != 20100 {
+		t.Fatalf("lower bound = %d %d %v", low, crit, err)
+	}
+	high, crit, _, err := catalog.MidasMana(1, 1, 1, &advancingUniform{values: []uint64{9999, uint64(1)<<53 - 1}})
+	if err != nil || crit != 2 || high != 42210 {
+		t.Fatalf("upper bound = %d %d %v", high, crit, err)
+	}
+	tenfold, _, _, err := catalog.MidasMana(1, 1, 10, &advancingUniform{values: []uint64{9999, uint64(1)<<53 - 1}})
+	if err != nil || tenfold != 422100 {
+		t.Fatalf("tenfold upper bound = %d %v", tenfold, err)
+	}
+}
+
 func TestBoxResolutionAndFailClosed(t *testing.T) {
 	catalog := testCatalog()
 	plan, err := catalog.ResolveBox(50000001, 100, 2)

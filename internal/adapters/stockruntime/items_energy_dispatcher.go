@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
+	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	app "gxb.local/backend/v2/internal/application/itemsenergy"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/itemsenergy"
@@ -33,12 +35,18 @@ type ItemsEnergyPort interface {
 	ExchangeCode(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (map[string]any, error)
 }
 
+// QuickFumoPort is the fumo owner's typed seam for MID 29 consume_id 2.
+type QuickFumoPort interface {
+	QuickFumo(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.QuickFumoResult, error)
+}
+
 // ItemsEnergyDispatcher answers I9_11B C1-C15. Campaign serves the shared
-// trial MIDs 28 and 29 ids 2..10 unchanged.
+// trial MIDs 28 and 29 ids 3..10 unchanged; the fumo owner serves id 2.
 type ItemsEnergyDispatcher struct {
 	Authority rt.GameplayAuthorityPort
 	Service   ItemsEnergyPort
 	Campaign  CampaignPort
+	Fumo      QuickFumoPort
 }
 
 func (o ItemsEnergyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -126,6 +134,18 @@ func (o ItemsEnergyDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 			body, err := o.Service.TenfoldGoldenHand(ctx, a, op)
 			return itemsEnergyReply(body, err)
 		}
+		if id == 2 {
+			if o.Fumo == nil {
+				return failureReply(defect(nil))
+			}
+			partnerID, firstErr := requiredInt64(p, "partner_id")
+			equipIndex, secondErr := requiredInt64(p, "equip_index")
+			if firstErr != nil || secondErr != nil || partnerID <= 0 || equipIndex < 1 || equipIndex > character.HeroEquipmentSlotCount {
+				return itemsEnergyMalformed()
+			}
+			result, err := o.Fumo.QuickFumo(ctx, a, partnerID, equipIndex, op)
+			return quickFumoReply(result, err)
+		}
 		if o.Campaign == nil {
 			return failureReply(defect(nil))
 		}
@@ -178,6 +198,30 @@ var itemsEnergyFailureRows = []failureRow{
 	{match: app.ErrEnergyCap, class: failureRefusal, code: 35031},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: d.ErrUnavailable, class: failureUnavailable},
+}
+
+func quickFumoReply(result apphero.QuickFumoResult, err error) httpedge.Response {
+	if err != nil {
+		return failureFromRows(quickFumoFailureRows, err)
+	}
+	// MID 29's registry paths are shared by every consume_id branch; the fumo
+	// client reads only fumo, so the other stock fields carry neutral values.
+	return okI5(map[string]any{
+		"fumo":       result.Fumo,
+		"cost":       result.Cost,
+		"crit":       int64(0),
+		"mana":       int64(0),
+		"trial_info": map[string]any{"left_times": int64(0)},
+	})
+}
+
+var quickFumoFailureRows = []failureRow{
+	{match: apphero.ErrHeroFumoUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroFumoContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEquipmentContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroProgressionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 }
 
 func itemsEnergyReply(body map[string]any, err error) httpedge.Response {

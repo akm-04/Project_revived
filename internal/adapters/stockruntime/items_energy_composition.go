@@ -31,6 +31,7 @@ type ItemsEnergyDependencies struct {
 	ReceiptRead kernelstore.Reader
 	Authority   rt.GameplayAuthorityPort
 	Campaign    CampaignPort
+	Fumo        QuickFumoPort
 }
 
 // ItemsEnergyComposition is the composed command owner plus the MID 1 and
@@ -66,7 +67,7 @@ func NewItemsEnergyComposition(d ItemsEnergyDependencies) ItemsEnergyComposition
 	}
 	return ItemsEnergyComposition{
 		Service:    service,
-		Dispatcher: ItemsEnergyDispatcher{Authority: d.Authority, Service: service, Campaign: d.Campaign},
+		Dispatcher: ItemsEnergyDispatcher{Authority: d.Authority, Service: service, Campaign: d.Campaign, Fumo: d.Fumo},
 		MID1:       app.Bootstrap{Counters: daily},
 		Counters:   app.BuyCounterReader{Reads: daily, Fresh: d.Fresh},
 	}
