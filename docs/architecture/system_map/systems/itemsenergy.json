@@ -75,10 +75,13 @@
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/itemsenergystore",
   "internal/adapters/postgres/kernelstore"
  ],
  "tables": {
-  "owned": [],
+  "owned": [
+   "items_energy_tuning"
+  ],
   "read": [
    "account_sessions",
    "accounts",
@@ -87,6 +90,7 @@
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
+   "items_energy_tuning",
    "player_currency_balances",
    "player_item_stacks",
    "player_progression",
@@ -98,9 +102,7 @@
   ]
  },
  "tests": {
-  "integration": [
-   "playerdisplay"
-  ],
+  "integration": [],
   "scenarios_naming": [],
   "unit": [
    "commands_test.go"

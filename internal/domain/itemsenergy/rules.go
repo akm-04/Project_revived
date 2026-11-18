@@ -7,8 +7,12 @@ import (
 )
 
 // SellUnitPrice is the stock rule: mana when positive, else crystal when
-// positive (SellDetailWindow.lua:65-85). A zero-price row is not sellable.
+// positive (SellDetailWindow.lua:65-85). An entity or zero-stack row and a
+// zero-price row are not sellable.
 func SellUnitPrice(item Item) (string, int64, bool) {
+	if item.Type == -1 || item.Stack <= 0 {
+		return "", 0, false
+	}
 	if item.Mana > 0 {
 		return "mana", item.Mana, true
 	}

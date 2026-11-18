@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/itemsenergy"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -173,14 +174,23 @@ func itemsEnergyMalformed() httpedge.Response {
 var itemsEnergyFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "items_energy_invalid_parameter"},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrStaleState, class: failureRefusal, code: staleConflictCode},
 	{match: app.ErrEnergyCap, class: failureRefusal, code: 35031},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: d.ErrUnavailable, class: failureUnavailable},
 }
 
 func itemsEnergyReply(body map[string]any, err error) httpedge.Response {
-	if err != nil {
-		return failureFromRows(itemsEnergyFailureRows, err)
+	if err == nil {
+		return okI5(body)
 	}
-	return okI5(body)
+	response := failureFromRows(itemsEnergyFailureRows, err)
+	// C2/C3: the 409 still carries the current energy and buy counter.
+	var projected *app.RefusalProjection
+	if errors.As(err, &projected) && response.HTTPStatus == http.StatusConflict {
+		for key, value := range projected.Body {
+			response.Body[key] = value
+		}
+	}
+	return response
 }

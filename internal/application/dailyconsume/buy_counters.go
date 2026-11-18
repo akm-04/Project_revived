@@ -44,66 +44,91 @@ func (s Service) ReadBuyTx(c context.Context, q tx.Queryer, p identity.PlayerID,
 	return buyCounters(counts, day), nil
 }
 
-// The counter row is rank 450, so callers advance it before the I5 exchange
-// closes ranks 700+. This is the one shared locked increment of a named buy
-// counter: it lazily starts a new game day, enforces the caller's allowance and
-// saves the whole counter map; a read path never calls it.
-func (s Service) IncrementBuyTx(c context.Context, t tx.Tx, p identity.PlayerID, day, id, limit int64, at time.Time) (BuyCounters, error) {
+// LockedCounters is the rank-450 counter row locked and read before any
+// mutation. A caller that also takes higher-rank locks prepares those first,
+// then calls Advance, so no lock is discovered after the counter write.
+type LockedCounters struct {
+	counts Counts
+	day    int64
+	at     time.Time
+}
+
+// LockBuyTx locks the counter row and normalises the named counters on read.
+func (s Service) LockBuyTx(c context.Context, t tx.Tx, p identity.PlayerID, day int64, at time.Time) (LockedCounters, BuyCounters, error) {
 	if s.Store == nil {
-		return BuyCounters{}, errors.New("daily consumption: unavailable")
+		return LockedCounters{}, BuyCounters{}, errors.New("daily consumption: unavailable")
 	}
+	counts, err := s.Store.LockTx(c, t, p, at)
+	if err != nil {
+		return LockedCounters{}, BuyCounters{}, err
+	}
+	return LockedCounters{counts: counts, day: day, at: at}, buyCounters(counts, day), nil
+}
+
+// AdvanceBuyTx advances one named buy counter in the locked row, enforcing the
+// caller's allowance, and saves the whole counter map.
+func (s Service) AdvanceBuyTx(c context.Context, t tx.Tx, p identity.PlayerID, locked LockedCounters, id, limit int64) (BuyCounters, error) {
 	if (id != CounterBuyMana && id != CounterBuyEnergy && id != CounterBuySkill) || limit <= 0 {
 		return BuyCounters{}, ErrRefused
 	}
-	counts, err := s.Store.LockTx(c, t, p, at)
+	counts, err := advanceLocked(locked, id, limit)
 	if err != nil {
 		return BuyCounters{}, err
 	}
-	current := counts[id]
-	if current.Period > day {
-		return BuyCounters{}, ErrRefused
-	}
-	next, err := current.Use(day, 1, limit)
-	if err != nil {
-		return BuyCounters{}, ErrRefused
-	}
-	if counts == nil {
-		counts = Counts{}
-	}
-	counts[id] = next
-	if err = s.Store.SaveTx(c, t, p, counts, at); err != nil {
+	if err = s.Store.SaveTx(c, t, p, counts, locked.at); err != nil {
 		return BuyCounters{}, err
 	}
-	return buyCounters(counts, day), nil
+	return buyCounters(counts, locked.day), nil
 }
 
-// IncrementDailyTx advances one daily_consume table id (1..10) under the same
-// locked row, for the tenfold Golden Hand slot.
-func (s Service) IncrementDailyTx(c context.Context, t tx.Tx, p identity.PlayerID, day, id, limit int64, at time.Time) (int64, error) {
-	if s.Store == nil {
-		return 0, errors.New("daily consumption: unavailable")
-	}
+// AdvanceDailyTx advances one daily_consume table id (1..10) in the locked row,
+// for the tenfold Golden Hand slot.
+func (s Service) AdvanceDailyTx(c context.Context, t tx.Tx, p identity.PlayerID, locked LockedCounters, id, limit int64) (int64, error) {
 	if id < 1 || id > 10 || limit <= 0 {
 		return 0, ErrRefused
 	}
-	counts, err := s.Store.LockTx(c, t, p, at)
+	counts, err := advanceLocked(locked, id, limit)
 	if err != nil {
 		return 0, err
 	}
-	current := counts[id]
-	if current.Period > day {
-		return 0, ErrRefused
+	if err = s.Store.SaveTx(c, t, p, counts, locked.at); err != nil {
+		return 0, err
 	}
-	next, err := current.Use(day, 1, limit)
+	return counts[id].Used, nil
+}
+
+func advanceLocked(locked LockedCounters, id, limit int64) (Counts, error) {
+	current := locked.counts[id]
+	if current.Period > locked.day {
+		return nil, ErrRefused
+	}
+	next, err := current.Use(locked.day, 1, limit)
 	if err != nil {
-		return 0, ErrRefused
+		return nil, ErrRefused
 	}
+	counts := locked.counts
 	if counts == nil {
 		counts = Counts{}
 	}
 	counts[id] = next
-	if err = s.Store.SaveTx(c, t, p, counts, at); err != nil {
+	return counts, nil
+}
+
+// IncrementBuyTx is the shared locked increment for callers that take no other
+// lock: it locks the rank-450 row, advances the counter and saves it.
+func (s Service) IncrementBuyTx(c context.Context, t tx.Tx, p identity.PlayerID, day, id, limit int64, at time.Time) (BuyCounters, error) {
+	locked, _, err := s.LockBuyTx(c, t, p, day, at)
+	if err != nil {
+		return BuyCounters{}, err
+	}
+	return s.AdvanceBuyTx(c, t, p, locked, id, limit)
+}
+
+// IncrementDailyTx is the shared locked increment of one daily_consume id.
+func (s Service) IncrementDailyTx(c context.Context, t tx.Tx, p identity.PlayerID, day, id, limit int64, at time.Time) (int64, error) {
+	locked, _, err := s.LockBuyTx(c, t, p, day, at)
+	if err != nil {
 		return 0, err
 	}
-	return next.Used, nil
+	return s.AdvanceDailyTx(c, t, p, locked, id, limit)
 }

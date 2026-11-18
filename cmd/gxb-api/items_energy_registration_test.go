@@ -7,11 +7,13 @@ import (
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-// TestItemsEnergyRoutesRegister proves the 11B MID set is registrable once and
-// leaves the shared campaign MIDs 28/29 unclaimed by its exclusive list.
+// TestItemsEnergyRoutesRegister proves the constructed 11B command owner is
+// registrable once and leaves the shared campaign MIDs 28/29 to the dispatcher
+// that also owns the 11B commands.
 func TestItemsEnergyRoutesRegister(t *testing.T) {
+	composition := stockruntime.NewItemsEnergyComposition(stockruntime.ItemsEnergyDependencies{})
+	dispatcher := stockruntime.ItemsEnergyDispatcher{Service: composition.Service}
 	router := httpedge.NewRouter()
-	dispatcher := stockruntime.ItemsEnergyDispatcher{}
 	registered := append(append([]uint16(nil), stockruntime.ItemsEnergyMIDs...), stockruntime.ItemsEnergySharedMIDs...)
 	for _, mid := range registered {
 		if err := router.Register(mid, dispatcher); err != nil {

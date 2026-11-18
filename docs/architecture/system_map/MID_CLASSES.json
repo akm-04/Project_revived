@@ -797,7 +797,219 @@
    "writes": "state"
   },
   {
-   "handler": "internal/adapters/stockruntime/campaign_dispatcher.go",
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
+    }
+   ],
+   "mid": 27,
+   "read_only": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:415",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/spiritstore/store.go:43"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
+     "read_only": "false",
+     "retry": "6"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
+   ],
+   "writes": "state"
+  },
+  {
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
    "isolation": [
     {
      "file": "internal/application/campaign/trials.go",
@@ -822,7 +1034,7 @@
     }
    ],
    "state_writes": [],
-   "system": "campaign",
+   "system": "characterhero",
    "transactions": [
     {
      "file": "internal/application/campaign/trials.go",
@@ -878,12 +1090,17 @@
    "writes": "none"
   },
   {
-   "handler": "internal/adapters/stockruntime/campaign_dispatcher.go",
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
    "isolation": [
     {
      "file": "internal/application/campaign/sweep.go",
      "line": 172,
      "value": "UNKNOWN"
+    },
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
     }
    ],
    "mid": 29,
@@ -892,39 +1109,74 @@
      "file": "internal/application/campaign/sweep.go",
      "line": 172,
      "value": "false"
+    },
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:235"
+    "internal/application/campaign/sweep.go:235",
+    "internal/application/i5/mission_facts.go:129",
+    "internal/application/i5/service.go:1396",
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
     {
      "file": "internal/application/campaign/sweep.go",
      "line": 172,
      "value": "6"
+    },
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
     }
    ],
    "state_writes": [
+    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/campaignstore/store.go:48",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/dailyconsumestore/store.go:38",
     "internal/adapters/postgres/dailyconsumestore/store.go:44",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
     "internal/adapters/postgres/i5store/missions.go:57",
     "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:736"
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/spiritstore/store.go:43"
    ],
-   "system": "campaign",
+   "system": "characterhero",
    "transactions": [
     {
      "file": "internal/application/campaign/sweep.go",
      "function": "Mode.purchase",
      "isolation": "UNKNOWN",
      "line": 172,
+     "read_only": "false",
+     "retry": "6"
+    },
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
      "read_only": "false",
      "retry": "6"
     }
@@ -941,6 +1193,16 @@
      "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -954,6 +1216,11 @@
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 160,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/missions.go",
@@ -976,6 +1243,11 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -984,6 +1256,21 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -1011,6 +1298,21 @@
      "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 784,
+     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -1027,6 +1329,16 @@
     },
     {
      "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
      "line": 664,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
     },
@@ -1034,6 +1346,11 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 664,
      "statement": "WITH locked AS MATERIALIZED ("
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -1047,8 +1364,11 @@
     }
    ],
    "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED apply at internal/application/campaign/sweep.go:216",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/campaign/sweep.go:172"
    ],
    "writes": "state"
@@ -5190,6 +5510,218 @@
    "writes": "none"
   },
   {
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
+    }
+   ],
+   "mid": 82,
+   "read_only": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:415",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/spiritstore/store.go:43"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
+     "read_only": "false",
+     "retry": "6"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
+   ],
+   "writes": "state"
+  },
+  {
    "handler": "internal/adapters/stockruntime/book_dispatcher.go",
    "isolation": [
     {
@@ -5558,6 +6090,430 @@
    "writes": "UNKNOWN"
   },
   {
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
+    }
+   ],
+   "mid": 86,
+   "read_only": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:415",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/spiritstore/store.go:43"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
+     "read_only": "false",
+     "retry": "6"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
+   ],
+   "writes": "state"
+  },
+  {
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
+    }
+   ],
+   "mid": 87,
+   "read_only": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:415",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/spiritstore/store.go:43"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
+     "read_only": "false",
+     "retry": "6"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
+   ],
+   "writes": "state"
+  },
+  {
    "handler": "internal/adapters/stockruntime/hero_dispatcher.go",
    "isolation": [
     {
@@ -5724,6 +6680,477 @@
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     }
+   ],
+   "writes": "state"
+  },
+  {
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
+    }
+   ],
+   "mid": 96,
+   "read_only": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/mission_facts.go:129",
+    "internal/application/i5/service.go:1396",
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/adventurestore/store.go:54",
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
+    "internal/adapters/postgres/dailyconsumestore/store.go:38",
+    "internal/adapters/postgres/dailyconsumestore/store.go:44",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/missions.go:14",
+    "internal/adapters/postgres/i5store/missions.go:45",
+    "internal/adapters/postgres/i5store/missions.go:57",
+    "internal/adapters/postgres/i5store/missions.go:65",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:415",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/spiritstore/store.go:43"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
+     "read_only": "false",
+     "retry": "6"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 19,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 44,
+     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 784,
+     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 664,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 664,
+     "statement": "WITH locked AS MATERIALIZED ("
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
+   ],
+   "writes": "state"
+  },
+  {
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
+    }
+   ],
+   "mid": 97,
+   "read_only": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
+    "internal/adapters/postgres/dailyconsumestore/store.go:38",
+    "internal/adapters/postgres/dailyconsumestore/store.go:44",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:415",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/spiritstore/store.go:43"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
+     "read_only": "false",
+     "retry": "6"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
    ],
    "writes": "state"
   },
@@ -24852,6 +26279,228 @@
     "inactive fallback registration: no dispatcher route to trace"
    ],
    "writes": "UNKNOWN"
+  },
+  {
+   "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+   "isolation": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "repeatable_read"
+    }
+   ],
+   "mid": 241,
+   "read_only": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "false"
+    }
+   ],
+   "receipt_writes": [
+    "internal/application/i5/service.go:717",
+    "internal/application/itemsenergy/service.go:225"
+   ],
+   "retry": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "line": 185,
+     "value": "6"
+    }
+   ],
+   "state_writes": [
+    "internal/adapters/postgres/characterstore/store.go:109",
+    "internal/adapters/postgres/characterstore/store.go:95",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:415",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/spiritstore/store.go:43"
+   ],
+   "system": "characterhero",
+   "transactions": [
+    {
+     "file": "internal/application/itemsenergy/service.go",
+     "function": "Service.execute",
+     "isolation": "repeatable_read",
+     "line": 185,
+     "read_only": "false",
+     "retry": "6"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/daily_buy_inputs.go",
+     "line": 26,
+     "statement": "SELECT payload::text FROM content_daily_buy_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 160,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_origin_catalog.go",
+     "line": 14,
+     "statement": "SELECT COALESCE(jsonb_agg(table_id ORDER BY table_id),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 245,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 261,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.initial_star,h.fragment_item_id, s.summon_fragment_count,s.summon_mana FROM gxb_content_hero_templates h JOIN gxb_content_hero_normal_star s ON s.revision_id=h.revision_id AND s.target_star=h.initial_star WHERE h.revision_id=$1 AND h.table_id=$2 AND h.origin_table_id=h.table_id AND h.kind='NORMAL'"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
+     "line": 21,
+     "statement": "SELECT payload::text FROM"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/privilege.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 508,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT EXISTS(SELECT 1 FROM a) AS exists, COALESCE((SELECT revision_id FROM a),'') AS revision_id, COALESCE((SELECT activation_version FROM a),0)::bigint AS activation_version, COALESCE((SELECT activated_at FROM a),'epoch'::timestamptz) AS activated_at, COALESCE((SELECT activated_by FROM a),'') AS activated_by"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "SELECT revision_id, activation_version, activated_at, activated_by FROM gxb_content_activation WHERE slot='content' )"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 563,
+     "statement": "WITH a AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 643,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 714,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 744,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 120,
+     "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT 1 FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id WHERE gc.digest=$1 AND c.ended_at IS NOT NULL AND c.end_reason='superseded' AND s.revoked_at IS NULL AND (s.absolute_expires_at IS NULL OR $2 < s.absolute_expires_at) AND (s.idle_timeout_seconds IS NULL OR $2 < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision)))"
+    },
+    {
+     "file": "internal/adapters/postgres/i4store/realtime_authority.go",
+     "line": 226,
+     "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/itemsenergystore/store.go",
+     "line": 17,
+     "statement": "SELECT payload::text,payload_version FROM items_energy_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 25,
+     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
+    },
+    {
+     "file": "internal/adapters/postgres/kernelstore/store.go",
+     "line": 61,
+     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    }
+   ],
+   "unknown": [
+    "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
+   ],
+   "writes": "state"
   },
   {
    "handler": "",

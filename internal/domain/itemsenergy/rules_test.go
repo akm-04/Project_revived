@@ -60,6 +60,12 @@ func TestSellAndItemUseRules(t *testing.T) {
 	if _, _, ok := SellUnitPrice(catalog.Items[50000007]); ok {
 		t.Fatal("zero-price item is sellable")
 	}
+	if _, _, ok := SellUnitPrice(catalog.Items[50000005]); ok {
+		t.Fatal("entity item is sellable")
+	}
+	if _, _, ok := SellUnitPrice(catalog.Items[50000006]); ok {
+		t.Fatal("zero-stack item is sellable")
+	}
 	if gain, err := EnergyItemGain(catalog.Items[50000001], 2); err != nil || gain != 100 {
 		t.Fatalf("energy gain = %d %v", gain, err)
 	}

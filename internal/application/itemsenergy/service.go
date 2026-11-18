@@ -45,6 +45,12 @@ type Content interface {
 	DailyBuyInputsTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 }
 
+// Tuning reads the D476 operator overlay; absent or invalid keeps the source
+// catalog in force and writes nothing.
+type Tuning interface {
+	TuningTx(context.Context, tx.Queryer) (d.Tuning, bool, error)
+}
+
 type Fence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
@@ -55,8 +61,9 @@ type Players interface {
 
 type Counters interface {
 	ReadBuyTx(context.Context, tx.Queryer, identity.PlayerID, int64) (appconsume.BuyCounters, error)
-	IncrementBuyTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, int64, time.Time) (appconsume.BuyCounters, error)
-	IncrementDailyTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, int64, time.Time) (int64, error)
+	LockBuyTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (appconsume.LockedCounters, appconsume.BuyCounters, error)
+	AdvanceBuyTx(context.Context, tx.Tx, identity.PlayerID, appconsume.LockedCounters, int64, int64) (appconsume.BuyCounters, error)
+	AdvanceDailyTx(context.Context, tx.Tx, identity.PlayerID, appconsume.LockedCounters, int64, int64) (int64, error)
 }
 
 // MaterialDebiter is the I5-owned debit-only seam used when a box restores a
@@ -107,6 +114,7 @@ type Service struct {
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
 	Content     Content
+	Tuning      Tuning
 	Fence       Fence
 	Players     Players
 	Counters    Counters
@@ -194,6 +202,10 @@ func (s Service) execute(c context.Context, a identity.ActorContext, op operatio
 		}
 		revision, _ := sc.Operation.Operation().Policies.Get("content")
 		catalog, err := s.Content.DailyBuyInputsTx(c, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		catalog, err = s.tuned(c, sc.Tx, catalog)
 		if err != nil {
 			return err
 		}
@@ -286,6 +298,59 @@ func (s Service) day(sc gen.TimedScope) int64 {
 	return modes.Day(sc.Operation.DecisionAt())
 }
 
+// tuned applies the D476 singleton overlay. An absent, invalid or unreadable
+// overlay leaves the source catalog in force.
+func (s Service) tuned(c context.Context, q tx.Queryer, catalog d.Catalog) (d.Catalog, error) {
+	if s.Tuning == nil {
+		return catalog, nil
+	}
+	tuning, found, err := s.Tuning.TuningTx(c, q)
+	if err != nil || !found {
+		return catalog, nil
+	}
+	tuned, err := catalog.Tune(tuning)
+	if err != nil {
+		return catalog, nil
+	}
+	return tuned, nil
+}
+
+// RefusalProjection carries the post-commit values a C2/C3 refusal must still
+// report ("including on a 409").
+type RefusalProjection struct {
+	Err  error
+	Body map[string]any
+}
+
+func (r *RefusalProjection) Error() string { return r.Err.Error() }
+func (r *RefusalProjection) Unwrap() error { return r.Err }
+
+func (s Service) projectEnergyRefusal(c context.Context, pid identity.PlayerID, at time.Time, err error) error {
+	if err == nil {
+		return nil
+	}
+	counters, readErr := s.Counters.ReadBuyTx(c, s.Fresh, pid, modes.Day(at))
+	if readErr != nil {
+		return err
+	}
+	energy, readErr := s.temporalFresh(c, pid)
+	if readErr != nil {
+		return err
+	}
+	return &RefusalProjection{Err: err, Body: map[string]any{"energy": energy, "buy_energy_times": counters.Energy}}
+}
+
+func (s Service) temporalFresh(c context.Context, pid identity.PlayerID) (int64, error) {
+	state, exists, err := s.Balances.ReadTemporalTx(c, s.Fresh, pid, "energy")
+	if err != nil {
+		return 0, err
+	}
+	if !exists {
+		return 0, nil
+	}
+	return state.StoredAmount, nil
+}
+
 func (s Service) snapshot(c context.Context, sc gen.TimedScope, pid identity.PlayerID, at time.Time) (appi5.PrivilegeSnapshot, error) {
 	return s.Privileges.SnapshotTx(c, sc.Tx, pid, at)
 }
@@ -309,8 +374,9 @@ func (s Service) temporal(c context.Context, sc gen.TimedScope, pid identity.Pla
 	return state.StoredAmount, nil
 }
 
-// requireStacks refuses a request above the current stack before any mutation
-// (C1 malformed body); I5 re-validates the same stack under its lock.
+// requireStacks refuses a well-formed request above the current stack as stale
+// state (D5 40002) before any mutation; I5 re-validates the same stack under
+// its lock.
 func (s Service) requireStacks(c context.Context, sc gen.TimedScope, pid identity.PlayerID, costs []appi5.StackMaterialCost) error {
 	for _, cost := range costs {
 		state, exists, err := s.Balances.ReadStackTx(c, sc.Tx, pid, cost.ItemID)
@@ -318,7 +384,7 @@ func (s Service) requireStacks(c context.Context, sc gen.TimedScope, pid identit
 			return err
 		}
 		if !exists || state.Quantity < cost.Amount {
-			return d.ErrInvalid
+			return d.ErrStaleState
 		}
 	}
 	return nil

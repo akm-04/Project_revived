@@ -36,6 +36,9 @@ func (s Service) ExchangeCode(c context.Context, actor identity.ActorContext, it
 		}
 		lines := rewardLines(rewards)
 		lines = append(lines, heroAwards.lines...)
+		if len(lines) == 0 && len(heroIDs) == 0 {
+			return nil, d.ErrRefused
+		}
 		cost := appi5.MaterialCost{Stacks: []appi5.StackMaterialCost{{ItemID: itemID, Amount: num}}}
 		if err = s.requireStacks(c, sc, actor.PlayerID, cost.Stacks); err != nil {
 			return nil, err

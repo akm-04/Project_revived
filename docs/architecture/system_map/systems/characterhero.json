@@ -5,27 +5,35 @@
  ],
  "contracts": [
   {
-   "count": 17,
+   "count": 20,
    "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
   },
   {
-   "count": 24,
+   "count": 33,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
   {
-   "count": 1,
+   "count": 2,
    "file": "docs/i9/GUILD_NAME_LENGTH_POLICY_V1.json"
   },
   {
-   "count": 9,
+   "count": 13,
    "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
   },
   {
-   "count": 12,
+   "count": 1,
+   "file": "docs/i9/I9_10A_NOTICEBOARD_POLICY.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10D_RANKBOARDS_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 13,
    "file": "docs/i9/I9_10F_MENTOR_V1.json"
   },
   {
-   "count": 7,
+   "count": 9,
    "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
   },
   {
@@ -51,6 +59,10 @@
   {
    "count": 2,
    "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_CAMPAIGN_V1.json"
   },
   {
    "count": 1,
@@ -89,11 +101,11 @@
    "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
   },
   {
-   "count": 1,
+   "count": 2,
    "file": "docs/i9/I9_ILLUSION_V1.json"
   },
   {
-   "count": 4,
+   "count": 5,
    "file": "docs/i9/I9_LIBRARY_V1.json"
   },
   {
@@ -113,15 +125,19 @@
    "file": "docs/i9/I9_MENTOR_LEVEL_GAP_POLICY.md"
   },
   {
-   "count": 17,
+   "count": 1,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 20,
    "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
   },
   {
-   "count": 17,
+   "count": 20,
    "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
   },
   {
-   "count": 24,
+   "count": 33,
    "file": "docs/i9/I9_MODE_SURFACE_V1.json"
   },
   {
@@ -153,7 +169,8 @@
   "observing"
  ],
  "dispatcher_files": [
-  "internal/adapters/stockruntime/hero_dispatcher.go"
+  "internal/adapters/stockruntime/hero_dispatcher.go",
+  "internal/adapters/stockruntime/items_energy_dispatcher.go"
  ],
  "facts": {
   "consumers": {},
@@ -215,6 +232,30 @@
   "OverlayRosterTx"
  ],
  "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 27,
+   "name": "USE_ENERGY_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 28,
+   "name": "DAILY_CONSUNME_LOAD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 29,
+   "name": "DAILY_CONSUNME"
+  },
   {
    "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
@@ -353,6 +394,30 @@
   },
   {
    "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 82,
+   "name": "SELL_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 86,
+   "name": "SELL_ITEMS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 87,
+   "name": "USE_MAGIC_ITEMS"
+  },
+  {
+   "handler": {
     "file": "internal/adapters/stockruntime/hero_dispatcher.go",
     "line": 83
    },
@@ -366,6 +431,30 @@
    },
    "mid": 89,
    "name": "SAVA_SORT_TYPE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 96,
+   "name": "USE_GOLDEN_HAND"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 97,
+   "name": "ADD_ENERGY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/items_energy_dispatcher.go",
+    "line": 44
+   },
+   "mid": 241,
+   "name": "EXCHAGE_CODE_HERO"
   },
   {
    "handler": {
@@ -490,6 +579,7 @@
    "conquer.json",
    "i9_10_topfloor_defense_required.json",
    "i9_10_topfloor_team_info_popup.json",
+   "i9_11_items_energy.json",
    "i9_3b_crystal.json",
    "i9_3b_sweep.json",
    "i9_3d_challenge_loss.json",

@@ -577,8 +577,9 @@
     "Pipe"
    ],
    "itemsenergy": [
-    "*IncrementBuyTx",
-    "*IncrementDailyTx",
+    "*AdvanceBuyTx",
+    "*AdvanceDailyTx",
+    "*LockBuyTx",
     "*ReadBuyTx"
    ]
   },
@@ -1339,6 +1340,7 @@
     "*ReadStackTx",
     "*ReadTemporalTx",
     "*SnapshotTx",
+    "PrepareTx",
     "RecordTx"
    ],
    "libraryforum": [
@@ -4494,8 +4496,9 @@
     "*SnapshotTx"
    ],
    "dailyconsume": [
-    "*IncrementBuyTx",
-    "*IncrementDailyTx",
+    "*AdvanceBuyTx",
+    "*AdvanceDailyTx",
+    "*LockBuyTx",
     "*ReadBuyTx"
    ],
    "generation": [
@@ -4514,6 +4517,7 @@
     "*ReadStackTx",
     "*ReadTemporalTx",
     "*SnapshotTx",
+    "PrepareTx",
     "RecordTx"
    ],
    "store:contentstore": [

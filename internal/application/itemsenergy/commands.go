@@ -30,7 +30,7 @@ func (s Service) UseEnergyItem(c context.Context, actor identity.ActorContext, i
 	if itemID <= 0 || num <= 0 {
 		return nil, d.ErrInvalid
 	}
-	return s.execute(c, actor, op, "item_use", map[string]any{"item_id": itemID, "item_num": num}, func(c context.Context, sc gen.TimedScope, catalog d.Catalog) (map[string]any, error) {
+	body, err := s.execute(c, actor, op, "item_use", map[string]any{"item_id": itemID, "item_num": num}, func(c context.Context, sc gen.TimedScope, catalog d.Catalog) (map[string]any, error) {
 		item, err := catalog.Item(itemID)
 		if err != nil {
 			return nil, err
@@ -60,6 +60,7 @@ func (s Service) UseEnergyItem(c context.Context, actor identity.ActorContext, i
 		}
 		return map[string]any{"energy": energy, "buy_energy_times": counters.Energy}, nil
 	})
+	return body, s.projectEnergyRefusal(c, actor.PlayerID, op.StartedAt, err)
 }
 
 func (s Service) SellItem(c context.Context, actor identity.ActorContext, itemID, num int64, op operation.Context) (map[string]any, error) {
@@ -142,7 +143,7 @@ func (s Service) UseMagicItems(c context.Context, actor identity.ActorContext, i
 
 // EnergyBuy answers MID 97: one crystal-funded stamina purchase.
 func (s Service) EnergyBuy(c context.Context, actor identity.ActorContext, op operation.Context) (map[string]any, error) {
-	return s.execute(c, actor, op, "energy_buy", map[string]any{}, func(c context.Context, sc gen.TimedScope, catalog d.Catalog) (map[string]any, error) {
+	body, err := s.execute(c, actor, op, "energy_buy", map[string]any{}, func(c context.Context, sc gen.TimedScope, catalog d.Catalog) (map[string]any, error) {
 		privilege, err := s.snapshot(c, sc, actor.PlayerID, sc.Operation.DecisionAt())
 		if err != nil {
 			return nil, err
@@ -151,20 +152,22 @@ func (s Service) EnergyBuy(c context.Context, actor identity.ActorContext, op op
 		if err != nil {
 			return nil, err
 		}
-		counters, err := s.Counters.IncrementBuyTx(c, sc.Tx, actor.PlayerID, s.day(sc), appconsume.CounterBuyEnergy, allowance, sc.Operation.DecisionAt())
-		if errors.Is(err, appconsume.ErrRefused) {
-			return nil, d.ErrRefused
-		}
+		locked, before, err := s.Counters.LockBuyTx(c, sc.Tx, actor.PlayerID, s.day(sc), sc.Operation.DecisionAt())
 		if err != nil {
 			return nil, err
 		}
-		ordinal := counters.Energy
+		ordinal := d.BuyOrdinal(before.Energy)
 		cost, err := catalog.EnergyBuyCost(ordinal)
 		if err != nil {
 			return nil, err
 		}
 		gain, err := catalog.EnergyBuyGrant()
 		if err != nil {
+			return nil, err
+		}
+		// B4 refuses at the cap before any other refusal, even when the crystal
+		// balance is also short (C3/B4).
+		if err = s.refuseAtEnergyCap(c, sc, catalog, actor.PlayerID); err != nil {
 			return nil, err
 		}
 		plan := exchangePlan{
@@ -176,6 +179,12 @@ func (s Service) EnergyBuy(c context.Context, actor identity.ActorContext, op op
 			return nil, err
 		}
 		if err = s.refuseAtEnergyCap(c, sc, catalog, actor.PlayerID); err != nil {
+			return nil, err
+		}
+		if _, err = s.Counters.AdvanceBuyTx(c, sc.Tx, actor.PlayerID, locked, appconsume.CounterBuyEnergy, allowance); err != nil {
+			if errors.Is(err, appconsume.ErrRefused) {
+				return nil, d.ErrRefused
+			}
 			return nil, err
 		}
 		applied, err := s.Exchange.ApplyItemsEnergyExchangeTx(c, sc.Tx, prepared)
@@ -192,6 +201,7 @@ func (s Service) EnergyBuy(c context.Context, actor identity.ActorContext, op op
 		}
 		return map[string]any{"energy": energy, "buy_energy_times": ordinal}, nil
 	})
+	return body, s.projectEnergyRefusal(c, actor.PlayerID, op.StartedAt, err)
 }
 
 func (s Service) refuseAtEnergyCap(c context.Context, sc gen.TimedScope, catalog d.Catalog, pid identity.PlayerID) error {
@@ -232,40 +242,22 @@ func (s Service) goldenHand(c context.Context, actor identity.ActorContext, op o
 		if err != nil {
 			return nil, err
 		}
-		var ordinal int64
-		var counters appconsume.BuyCounters
-		if tenfold {
-			used, err := s.Counters.IncrementDailyTx(c, sc.Tx, actor.PlayerID, s.day(sc), 1, 1, sc.Operation.DecisionAt())
-			if errors.Is(err, appconsume.ErrRefused) {
-				return nil, d.ErrRefused
-			}
-			if err != nil {
-				return nil, err
-			}
-			_ = used
-			counters, err = s.Counters.ReadBuyTx(c, sc.Tx, actor.PlayerID, s.day(sc))
-			if err != nil {
-				return nil, err
-			}
-			ordinal = d.BuyOrdinal(counters.Mana)
-		} else {
+		locked, counters, err := s.Counters.LockBuyTx(c, sc.Tx, actor.PlayerID, s.day(sc), sc.Operation.DecisionAt())
+		if err != nil {
+			return nil, err
+		}
+		allowance := int64(1)
+		if !tenfold {
 			privilege, err := s.snapshot(c, sc, actor.PlayerID, sc.Operation.DecisionAt())
 			if err != nil {
 				return nil, err
 			}
-			allowance, err := catalog.MidasAllowance(privilege.VIPLevel, privilege.MonthlyPrivilegeActive)
+			allowance, err = catalog.MidasAllowance(privilege.VIPLevel, privilege.MonthlyPrivilegeActive)
 			if err != nil {
 				return nil, err
 			}
-			counters, err = s.Counters.IncrementBuyTx(c, sc.Tx, actor.PlayerID, s.day(sc), counterID, allowance, sc.Operation.DecisionAt())
-			if errors.Is(err, appconsume.ErrRefused) {
-				return nil, d.ErrRefused
-			}
-			if err != nil {
-				return nil, err
-			}
-			ordinal = counters.Mana
 		}
+		ordinal := d.BuyOrdinal(counters.Mana)
 		stream := combat.NewStream(sc.Operation.Operation().Derive(goldenHandEntropyLabel, 0))
 		mana, crit, cost, err := catalog.MidasMana(level, ordinal, multiplier, stream)
 		if err != nil {
@@ -281,10 +273,40 @@ func (s Service) goldenHand(c context.Context, actor identity.ActorContext, op o
 			cost:        appi5.MaterialCost{Scalars: []appi5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: cost}}},
 			restoration: rewardPlan(actor.PlayerID, name, sc.Operation.Operation(), []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "mana", Amount: mana}}),
 		}
-		if _, err = s.settle(c, sc, actor, plan, false); err != nil {
+		factContext, err := s.Facts.PrepareTx(c, sc.Tx, actor.PlayerID, sc.Operation)
+		if err != nil {
 			return nil, err
 		}
-		if err = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "items-energy", SourceBusinessKey: sc.Operation.Operation().ID.String(), Kind: "GOLDEN_HAND_USED", Delta: 1}); err != nil {
+		prepared, err := s.Exchange.PrepareItemsEnergyExchangeTx(c, sc.Tx, actor, appi5.ItemsEnergyExchangeRequest{Cost: plan.cost, Restoration: plan.restoration}, sc.Operation.Operation())
+		if err != nil {
+			return nil, err
+		}
+		if tenfold {
+			if _, err = s.Counters.AdvanceDailyTx(c, sc.Tx, actor.PlayerID, locked, 1, 1); err != nil {
+				if errors.Is(err, appconsume.ErrRefused) {
+					return nil, d.ErrRefused
+				}
+				return nil, err
+			}
+		} else {
+			advanced, advanceErr := s.Counters.AdvanceBuyTx(c, sc.Tx, actor.PlayerID, locked, counterID, allowance)
+			if advanceErr != nil {
+				if errors.Is(advanceErr, appconsume.ErrRefused) {
+					return nil, d.ErrRefused
+				}
+				return nil, advanceErr
+			}
+			counters = advanced
+		}
+		applied, err := s.Exchange.ApplyItemsEnergyExchangeTx(c, sc.Tx, prepared)
+		if err != nil {
+			return nil, err
+		}
+		recordDebit(c, applied.Debit)
+		if err = s.recordRestoration(c, sc, actor.PlayerID, applied.Restoration); err != nil {
+			return nil, err
+		}
+		if err = s.Facts.RecordTx(factContext, sc.Tx, sc.Operation.Operation(), objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "items-energy", SourceBusinessKey: sc.Operation.Operation().ID.String(), Kind: "GOLDEN_HAND_USED", Delta: 1}); err != nil {
 			return nil, err
 		}
 		balance, err := s.scalar(c, sc, actor.PlayerID, "mana")

@@ -18,6 +18,7 @@ const PolicyID = "I9_11B_ITEMS_ENERGY_V2"
 
 var (
 	ErrInvalid     = errors.New("items-energy: invalid request")
+	ErrStaleState  = errors.New("items-energy: stale stack state")
 	ErrRefused     = errors.New("items-energy: refused")
 	ErrUnavailable = errors.New("items-energy: content unavailable")
 )
