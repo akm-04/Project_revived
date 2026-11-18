@@ -221,7 +221,7 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 			return d.ErrDue
 		}
 		if at.Before(root.UpdatedAt) {
-			return d.ErrConflict
+			return d.ErrStaleTime
 		}
 		m, ok, e := s.Store.MatchTx(c, sc.Tx, id)
 		if e != nil || !ok {

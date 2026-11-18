@@ -147,6 +147,7 @@ func (o LeagueDispatcher) Dispatch(c context.Context, req httpedge.DispatchReque
 
 var leagueFailureRows = []failureRow{
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "league_request_refused"},
 }
 

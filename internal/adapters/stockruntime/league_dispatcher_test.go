@@ -7,6 +7,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/championsleague"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"net/http"
 	"testing"
 	"time"
 )
@@ -28,6 +29,13 @@ func (f *leagueFake) Execute(_ context.Context, _ identity.ActorContext, c app.C
 	}
 	return v, nil
 }
+func TestI7C5FLeagueStaleDecisionTimeRefusal(t *testing.T) {
+	response := failLeague(d.ErrStaleTime)
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != staleConflictCode || response.Body["error_msg"] != "" {
+		t.Fatalf("a decision time overtaken by a committed later writer is 409/%d, got %d %#v", staleConflictCode, response.HTTPStatus, response.Body)
+	}
+}
+
 func TestI7C5FLeagueSourceWireAndInstanceParsing(t *testing.T) {
 	f := &leagueFake{}
 	actor := actorForHTTP(t)
