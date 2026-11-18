@@ -5204,22 +5204,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -5237,27 +5237,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -5273,22 +5273,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -5334,7 +5334,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -5342,7 +5342,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -5350,7 +5350,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -5358,7 +5358,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -5483,6 +5483,11 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -59144,22 +59149,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -59177,27 +59182,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -59213,22 +59218,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -59274,7 +59279,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -59282,7 +59287,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -59290,7 +59295,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -59298,7 +59303,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -59425,6 +59430,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -59482,22 +59492,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -59515,27 +59525,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -59551,22 +59561,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -59612,7 +59622,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -59620,7 +59630,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -59628,7 +59638,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -59636,7 +59646,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -59763,6 +59773,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -59820,22 +59835,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -59853,27 +59868,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -59889,22 +59904,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -59950,7 +59965,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -59958,7 +59973,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -59966,7 +59981,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -59974,7 +59989,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -60101,6 +60116,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -60158,22 +60178,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -60191,27 +60211,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -60227,22 +60247,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -60288,7 +60308,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -60296,7 +60316,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -60304,7 +60324,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -60312,7 +60332,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -60439,6 +60459,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -60496,22 +60521,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -60529,27 +60554,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -60565,22 +60590,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -60626,7 +60651,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -60634,7 +60659,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -60642,7 +60667,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -60650,7 +60675,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -60775,6 +60800,11 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -60834,22 +60864,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -60867,27 +60897,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -60903,22 +60933,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -60964,7 +60994,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -60972,7 +61002,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -60980,7 +61010,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -60988,7 +61018,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -61113,6 +61143,11 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -64442,22 +64477,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -64475,27 +64510,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -64511,22 +64546,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -64572,7 +64607,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -64580,7 +64615,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -64588,7 +64623,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -64596,7 +64631,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -64723,6 +64758,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -64780,22 +64820,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -64813,27 +64853,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -64849,22 +64889,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -64910,7 +64950,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -64918,7 +64958,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -64926,7 +64966,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -64934,7 +64974,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -65061,6 +65101,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -65118,22 +65163,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -65151,27 +65196,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -65187,22 +65232,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -65248,7 +65293,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -65256,7 +65301,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -65264,7 +65309,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -65272,7 +65317,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -65397,6 +65442,11 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -65456,22 +65506,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "serializable"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "serializable"
     }
    ],
@@ -65489,27 +65539,27 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "false"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/bookskill/service.go:235",
+    "internal/application/bookskill/service.go:239",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -65525,22 +65575,22 @@
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 280,
+     "line": 284,
      "value": "1"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 339,
+     "line": 343,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 414,
+     "line": 418,
      "value": "8"
     },
     {
      "file": "internal/application/bookskill/service.go",
-     "line": 455,
+     "line": 459,
      "value": "8"
     }
    ],
@@ -65586,7 +65636,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 280,
+     "line": 284,
      "read_only": "false",
      "retry": "1"
     },
@@ -65594,7 +65644,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 339,
+     "line": 343,
      "read_only": "false",
      "retry": "8"
     },
@@ -65602,7 +65652,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 414,
+     "line": 418,
      "read_only": "false",
      "retry": "8"
     },
@@ -65610,7 +65660,7 @@
      "file": "internal/application/bookskill/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 455,
+     "line": 459,
      "read_only": "false",
      "retry": "8"
     }
@@ -65735,6 +65785,11 @@
      "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 738,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/workshop_inputs.go",
+     "line": 77,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",

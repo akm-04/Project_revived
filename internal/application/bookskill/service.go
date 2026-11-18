@@ -148,6 +148,9 @@ type ValuePort interface {
 type MakeInfoPort interface {
 	MakeInfoTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (map[string]any, map[string]any, error)
 }
+type RecycleInfoPort interface {
+	RecycleInfoTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) (map[string]any, error)
+}
 type GrantPort interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
 }
@@ -156,19 +159,20 @@ type CostPort interface {
 	ApplyMaterialDebitTx(context.Context, tx.Tx, *i5.PreparedMaterialDebit) (i5.MaterialDebitResult, error)
 }
 type Service struct {
-	Timed    gen.TimedRunner
-	Reads    tx.Runner
-	Heroes   HeroPort
-	Owner    OwnerPort
-	Content  ContentPort
-	Players  playerroot.TxLocker
-	Fence    ActorFence
-	Costs    CostPort
-	Values   ValuePort
-	Grants   GrantPort
-	Exchange i5.TxMaterialExchange
-	MakeInfo MakeInfoPort
-	Receipts receipt.Store
+	Timed       gen.TimedRunner
+	Reads       tx.Runner
+	Heroes      HeroPort
+	Owner       OwnerPort
+	Content     ContentPort
+	Players     playerroot.TxLocker
+	Fence       ActorFence
+	Costs       CostPort
+	Values      ValuePort
+	Grants      GrantPort
+	Exchange    i5.TxMaterialExchange
+	MakeInfo    MakeInfoPort
+	RecycleInfo RecycleInfoPort
+	Receipts    receipt.Store
 }
 
 func (s Service) complete() bool {

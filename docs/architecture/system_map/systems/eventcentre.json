@@ -271,6 +271,7 @@
   ],
   "unit": [
    "makeinfo_test.go",
+   "recycleinfo_test.go",
    "start_choice_conformance_test.go"
   ]
  }

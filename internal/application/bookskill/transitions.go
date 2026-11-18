@@ -361,6 +361,19 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			body[k] = v
 		}
 		body["type"] = cmd.Type
+		if cmd.Family == Speed {
+			// MID 1077's stock consumers include RecycleWindow, which indexes
+			// trash_info unconditionally after the paid speed-up; project it from
+			// the event-centre owner now the new level is written.
+			if s.RecycleInfo == nil {
+				return nil, ErrUnavailable
+			}
+			trash, e := s.RecycleInfo.RecycleInfoTx(ctx, t, a.PlayerID, d.ContentRevision, at)
+			if e != nil {
+				return nil, e
+			}
+			body["trash_info"] = trash
+		}
 	case Cancel:
 		body["building_info"] = book.BuildingWire(st.Buildings[cmd.Type])
 	case Learn, GiveUp, SpeedSkill:

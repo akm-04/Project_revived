@@ -594,7 +594,8 @@
   },
   "eventcentre": {
    "bookskill": [
-    "*MakeInfoTx"
+    "*MakeInfoTx",
+    "*RecycleInfoTx"
    ]
   },
   "frienddm": {
@@ -2430,7 +2431,8 @@
   },
   "bookskill": {
    "eventcentre": [
-    "*MakeInfoTx"
+    "*MakeInfoTx",
+    "*RecycleInfoTx"
    ],
    "generation": [
     "Bind",
