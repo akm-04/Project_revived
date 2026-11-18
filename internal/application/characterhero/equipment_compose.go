@@ -17,7 +17,7 @@ import (
 
 var ErrEquipmentComposeUnqualified = errors.New("character hero: item is not a server-qualified equipment composition recipe")
 
-const equipmentComposePolicy = "CA4_1_EQUIPMENT_COMPOSE_V1"
+const equipmentComposePolicyVersion = "PASS534_CA4_1_IMPLEMENTATION_CONTRACT"
 
 func (s Service) validateEquipmentCompose() error {
 	if err := s.validate(); err != nil {
@@ -112,7 +112,7 @@ func (s Service) ComposeEquipmentItem(ctx context.Context, actor identity.ActorC
 			Operation:     "compose-equipment",
 			BusinessKey:   strconv.FormatInt(int64(actor.PlayerID), 10),
 			Occurrence:    bound.ID.String(),
-			PolicyVersion: equipmentComposePolicy,
+			PolicyVersion: equipmentComposePolicyVersion,
 		},
 		Lines: []grant.Line{{Kind: grant.StackItem, ItemID: itemID, Amount: amount}},
 	}
