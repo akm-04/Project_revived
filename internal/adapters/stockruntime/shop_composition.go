@@ -16,15 +16,16 @@ import (
 // ShopDependencies are the owners the production server and the natives pass
 // to the one 11C composition constructor.
 type ShopDependencies struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Content     contentstore.Store
-	Values      i5store.Store
-	Privileges  app.Privileges
-	I5          appi5.Service
-	Receipts    kernelstore.Store
-	ReceiptRead kernelstore.Reader
-	Authority   rt.GameplayAuthorityPort
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Content      contentstore.Store
+	Values       i5store.Store
+	Privileges   app.Privileges
+	I5           appi5.Service
+	Receipts     kernelstore.Store
+	ReceiptRead  kernelstore.Reader
+	Authority    rt.GameplayAuthorityPort
+	Achievements app.Achievements
 }
 
 // ShopComposition is the composed 11C owner plus its dispatcher.
@@ -35,20 +36,21 @@ type ShopComposition struct {
 
 func NewShopComposition(deps ShopDependencies) ShopComposition {
 	service := app.Service{
-		Timed:       deps.Timed,
-		Fresh:       deps.Fresh,
-		Content:     deps.Content,
-		Store:       shopstore.Store{},
-		Fence:       deps.Values,
-		Players:     i4store.PlayerRootLocker{},
-		Exchange:    deps.I5,
-		Debiter:     appi5.MaterialCostDebiter{Store: deps.Values, Content: deps.Content},
-		Balances:    deps.Values,
-		Privileges:  deps.Privileges,
-		Progression: deps.Values,
-		Functions:   deps.Values,
-		Receipts:    deps.Receipts,
-		ReceiptRead: deps.ReceiptRead,
+		Timed:        deps.Timed,
+		Fresh:        deps.Fresh,
+		Content:      deps.Content,
+		Store:        shopstore.Store{},
+		Fence:        deps.Values,
+		Players:      i4store.PlayerRootLocker{},
+		Exchange:     deps.I5,
+		Debiter:      appi5.MaterialCostDebiter{Store: deps.Values, Content: deps.Content},
+		Achievements: deps.Achievements,
+		Balances:     deps.Values,
+		Privileges:   deps.Privileges,
+		Progression:  deps.Values,
+		Functions:    deps.Values,
+		Receipts:     deps.Receipts,
+		ReceiptRead:  deps.ReceiptRead,
 	}
 	return ShopComposition{
 		Service:    service,

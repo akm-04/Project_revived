@@ -61,6 +61,12 @@ type Debiter interface {
 	ApplyMaterialDebitTx(context.Context, tx.Tx, *appi5.PreparedMaterialDebit) (appi5.MaterialDebitResult, error)
 }
 
+// Achievements is the 11E C7 typed port; a purchase calls it once inside the
+// settling transaction and it writes only achievement rows.
+type Achievements interface {
+	ObserveShopPurchaseTx(context.Context, tx.Tx, identity.PlayerID, string, time.Time) error
+}
+
 type Balances interface {
 	ReadStackTx(context.Context, tx.Queryer, identity.PlayerID, int64) (economy.StackState, bool, error)
 	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
@@ -85,20 +91,21 @@ type Receipts interface {
 
 // Service is the I9-11C command owner.
 type Service struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Content     Content
-	Store       Store
-	Fence       Fence
-	Players     Players
-	Exchange    Exchange
-	Debiter     Debiter
-	Balances    Balances
-	Privileges  Privileges
-	Progression Progression
-	Functions   Functions
-	Receipts    Receipts
-	ReceiptRead receipt.Reader
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Content      Content
+	Store        Store
+	Fence        Fence
+	Players      Players
+	Exchange     Exchange
+	Debiter      Debiter
+	Achievements Achievements
+	Balances     Balances
+	Privileges   Privileges
+	Progression  Progression
+	Functions    Functions
+	Receipts     Receipts
+	ReceiptRead  receipt.Reader
 }
 
 func Profile() tx.Profile {
@@ -111,7 +118,7 @@ func retry() tx.RetryPolicy {
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Content != nil &&
-		s.Store != nil && s.Fence != nil && s.Players != nil && s.Exchange != nil && s.Debiter != nil && s.Balances != nil &&
+		s.Store != nil && s.Fence != nil && s.Players != nil && s.Exchange != nil && s.Debiter != nil && s.Achievements != nil && s.Balances != nil &&
 		s.Privileges != nil && s.Progression != nil && s.Functions != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
@@ -362,6 +369,14 @@ func (s Service) regenerate(c context.Context, sc gen.TimedScope, catalog d.Cata
 	row.Generation = generation
 	row.Stock = d.Stock{ScheduleDay: day, ScheduleMark: mark, Slots: slots}
 	return nil
+}
+
+func (s Service) observePurchase(c context.Context, sc gen.TimedScope, pid identity.PlayerID) error {
+	revision, ok := sc.Operation.Operation().Policies.Get("content")
+	if !ok {
+		return d.ErrUnavailable
+	}
+	return s.Achievements.ObserveShopPurchaseTx(c, sc.Tx, pid, revision, sc.Operation.DecisionAt())
 }
 
 func (s Service) record(c context.Context, sc gen.TimedScope, pid identity.PlayerID, applied appi5.ItemsEnergyExchangeResult) error {

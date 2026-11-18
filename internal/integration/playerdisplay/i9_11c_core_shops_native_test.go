@@ -32,16 +32,19 @@ func i911cCompositionAt(p *pg.Pool, a identity.ActorContext, authority gen.TimeA
 	i5svc := appi5.Service{Runner: runner, Store: values, Content: content, Privileges: privileges,
 		Functions: appi5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{},
 		Backpack: values, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	achievements := catalogAchievements(p, fixedCounts{})
+	achievements.Runtime.Timed.Binder.Time = authority
 	return stockruntime.NewShopComposition(stockruntime.ShopDependencies{
-		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: authority}, Runner: runner},
-		Fresh:       p,
-		Content:     content,
-		Values:      values,
-		Privileges:  privileges,
-		I5:          i5svc,
-		Receipts:    receipts,
-		ReceiptRead: kernelstore.Reader{Queryer: p},
-		Authority:   playtestAuthority{actor: a},
+		Timed:        gen.TimedRunner{Binder: gen.Binder{Time: authority}, Runner: runner},
+		Fresh:        p,
+		Content:      content,
+		Values:       values,
+		Privileges:   privileges,
+		I5:           i5svc,
+		Receipts:     receipts,
+		ReceiptRead:  kernelstore.Reader{Queryer: p},
+		Authority:    playtestAuthority{actor: a},
+		Achievements: achievements,
 	})
 }
 
