@@ -4684,6 +4684,56 @@
         "retention": null
       }
     },
+    "content_daily_buy_input_catalogs": {
+      "allowed_query_owners": [
+        "content-registry"
+      ],
+      "allowed_read_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "allowed_write_paths": [
+        "sql/content/",
+        "internal/adapters/postgres/contentstore/",
+        "internal/adapters/postgres/contentqueries/"
+      ],
+      "migration": "migrations/00174_i9_11b_daily_buy_inputs.sql",
+      "owner": "content-registry",
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "items_energy_tuning": {
+      "allowed_query_owners": [
+        "ItemsEnergy"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/itemsenergystore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/itemsenergystore/"
+      ],
+      "migration": "migrations/00174_i9_11b_daily_buy_inputs.sql",
+      "owner": "ItemsEnergy",
+      "write_exceptions": [],
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
     "content_book_input_catalogs": {
       "allowed_query_owners": [
         "content-registry"

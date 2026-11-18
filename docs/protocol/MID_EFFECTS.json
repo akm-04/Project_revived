@@ -42,6 +42,10 @@
    "mid": 26
   },
   {
+   "effect": "state",
+   "mid": 27
+  },
+  {
    "effect": "read",
    "mid": 28
   },
@@ -171,6 +175,10 @@
   },
   {
    "effect": "state",
+   "mid": 82
+  },
+  {
+   "effect": "state",
    "mid": 83
   },
   {
@@ -183,11 +191,27 @@
   },
   {
    "effect": "state",
+   "mid": 86
+  },
+  {
+   "effect": "state",
+   "mid": 87
+  },
+  {
+   "effect": "state",
    "mid": 88
   },
   {
    "effect": "state",
    "mid": 89
+  },
+  {
+   "effect": "state",
+   "mid": 96
+  },
+  {
+   "effect": "state",
+   "mid": 97
   },
   {
    "effect": "state",
@@ -492,6 +516,10 @@
   {
    "effect": "unknown",
    "mid": 240
+  },
+  {
+   "effect": "state",
+   "mid": 241
   },
   {
    "effect": "unknown",

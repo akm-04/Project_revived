@@ -278,6 +278,11 @@
     "*ProviderRevision",
     "*ValidatePartnerEntityBatchLockedTx"
    ],
+   "itemsenergy": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
+   ],
    "march": [
     "*AwardStoryPartnerTx",
     "*LockStoryRosterTx"
@@ -500,6 +505,9 @@
    "illusion": [
     "*SnapshotTx"
    ],
+   "itemsenergy": [
+    "*SnapshotTx"
+   ],
    "missioninputs": [
     "*SnapshotTx"
    ],
@@ -567,6 +575,12 @@
     "*BuyTrialTx",
     "*ReadTx",
     "Pipe"
+   ],
+   "itemsenergy": [
+    "*AdvanceBuyTx",
+    "*AdvanceDailyTx",
+    "*LockBuyTx",
+    "*ReadBuyTx"
    ]
   },
   "dailyreset": {},
@@ -776,6 +790,11 @@
    "inscription": [
     "Bind",
     "DecisionAt",
+    "Run"
+   ],
+   "itemsenergy": [
+    "DecisionAt",
+    "Operation",
     "Run"
    ],
    "libraryforum": [
@@ -1310,6 +1329,20 @@
     "*PrepareInscriptionValueTx",
     "*ReadScalarTx"
    ],
+   "itemsenergy": [
+    "*ApplyItemsEnergyExchangeTx",
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareItemsEnergyExchangeTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
+    "*ReadScalarTx",
+    "*ReadStackTx",
+    "*ReadTemporalTx",
+    "*SnapshotTx",
+    "PrepareTx",
+    "RecordTx"
+   ],
    "libraryforum": [
     "*FenceActorTx"
    ],
@@ -1519,6 +1552,11 @@
    "spirit": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
+   ]
+  },
+  "itemsenergy": {
+   "dailyreset": [
+    "*Counters"
    ]
   },
   "libraryforum": {},
@@ -3279,7 +3317,11 @@
     "*DebitMaterialCostTx"
    ]
   },
-  "dailyreset": {},
+  "dailyreset": {
+   "itemsenergy": [
+    "*Counters"
+   ]
+  },
   "directorysync": {
    "i5": [
     "*ReadCanonicalDirectoryTx"
@@ -4436,6 +4478,53 @@
    "store:elementstore": [
     "*EnsureHeroTx",
     "*EnsureRootTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
+   ]
+  },
+  "itemsenergy": {
+   "characterhero": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
+   ],
+   "commerceprivilege": [
+    "*SnapshotTx"
+   ],
+   "dailyconsume": [
+    "*AdvanceBuyTx",
+    "*AdvanceDailyTx",
+    "*LockBuyTx",
+    "*ReadBuyTx"
+   ],
+   "generation": [
+    "DecisionAt",
+    "Operation",
+    "Run"
+   ],
+   "i5": [
+    "*ApplyItemsEnergyExchangeTx",
+    "*ApplyMaterialDebitTx",
+    "*FenceActorTx",
+    "*PrepareItemsEnergyExchangeTx",
+    "*PrepareMaterialDebitTx",
+    "*ReadProgressionTx",
+    "*ReadScalarTx",
+    "*ReadStackTx",
+    "*ReadTemporalTx",
+    "*SnapshotTx",
+    "PrepareTx",
+    "RecordTx"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*DailyBuyInputsTx",
+    "*HeroFragmentsTx"
    ],
    "store:i4store": [
     "*LockPlayerRootsTx"
@@ -6069,6 +6158,7 @@
   "inscription": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "itemsenergy": [],
   "libraryforum": [
    "cmd/gxb-api/main_postgres.go"
   ],

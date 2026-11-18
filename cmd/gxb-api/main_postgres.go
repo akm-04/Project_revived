@@ -398,6 +398,19 @@ func main() {
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
+	itemsEnergy := stockruntime.NewItemsEnergyComposition(stockruntime.ItemsEnergyDependencies{
+		Timed:       heroSvc.Timed,
+		Fresh:       pool,
+		Content:     contentDB,
+		Values:      i5db,
+		Privileges:  privileges,
+		I5:          i5svc,
+		Heroes:      heroSvc,
+		Receipts:    receipts,
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+		Authority:   authority,
+	})
+	bootstrap.DetailContributors = append(bootstrap.DetailContributors, itemsEnergy.MID1)
 	realtime := apprealtime.Service{
 		Authority: authority,
 		Guilds:    guildprojection.RealtimeMembership{Queryer: pool},
@@ -434,9 +447,10 @@ func main() {
 	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}
+	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
-	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: dailyreset.ZeroCounters{}}
+	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
@@ -447,6 +461,9 @@ func main() {
 	replayWindow := envDurationWithin("GXB_UNDELIVERED_REPLAY_WINDOW", 10*time.Minute, time.Minute, 30*time.Minute)
 	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher {
 		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics}
+	}
+	for _, mid := range stockruntime.ItemsEnergyMIDs {
+		mustRegister(mid, energyDispatcher)
 	}
 	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
 	publicStats := canonicalPublicStats(pool, contentDB, owners)
@@ -605,7 +622,15 @@ func main() {
 		}
 		campaign.StoryHeroes, campaign.Pets, campaign.MaxColor = heroSvc, petSvc, maxHeroColorPolicy
 		campaign.StoryWire = heroproj.StockHero
+		sharedEnergy := energyDispatcher
+		sharedEnergy.Campaign = campaign
+		for _, mid := range stockruntime.ItemsEnergySharedMIDs {
+			mustRegister(mid, sharedEnergy)
+		}
 		for _, mid := range stockruntime.CampaignMIDs {
+			if mid == 28 || mid == 29 {
+				continue
+			}
 			campaignD := stockruntime.CampaignDispatcher{Authority: authority, Service: campaign}
 			if mid == 114 {
 				mustRegister(mid, observing(authority, achievements, "Campaign", campaignD))

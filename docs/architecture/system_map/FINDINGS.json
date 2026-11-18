@@ -35,16 +35,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 27,
-   "name": "USE_ENERGY_ITEM",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 32,
    "name": "LOAD_SHOP",
    "files": [
@@ -110,37 +100,6 @@
    "stage": "I9-11"
   },
   {
-   "mid": 82,
-   "name": "SELL_ITEM",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 86,
-   "name": "SELL_ITEMS",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 87,
-   "name": "USE_MAGIC_ITEMS",
-   "files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 90,
    "name": "USE_SKILL_POINT_ITEM",
    "files": [
@@ -155,28 +114,6 @@
    "name": "OPEN_ACT_ITEM",
    "files": [
     "app/model/SelfPlayer.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 96,
-   "name": "USE_GOLDEN_HAND",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/GoldenHand.lua"
-   ],
-   "family": "GOLDEN_HAND",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 97,
-   "name": "ADD_ENERGY",
-   "files": [
-    "app/common/network/Backend.lua",
-    "app/model/AddEnergy.lua"
    ],
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
@@ -279,19 +216,6 @@
     "app/common/network/Backend.lua"
    ],
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 241,
-   "name": "EXCHAGE_CODE_HERO",
-   "files": [
-    "app/windows/ExchangeCodeHeroReward.lua",
-    "app/windows/GiftbagUseWindow.lua",
-    "app/windows/SelectEquipWindow.lua",
-    "app/windows/SelectSXHeroWindow.lua"
-   ],
-   "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "stage": "I9-11"
   },
@@ -698,12 +622,12 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 573,
-  "window_sender_mid_count": 140,
-  "non_window_sender_mid_count": 433,
+  "count": 566,
+  "window_sender_mid_count": 139,
+  "non_window_sender_mid_count": 427,
   "registration_status_counts": {
    "inactive_fallback": 540,
-   "no_registration": 31,
+   "no_registration": 24,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
@@ -751,19 +675,6 @@
    {
     "mid": 21,
     "name": "LOAD_ESSENCES",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 27,
-    "name": "USE_ENERGY_ITEM",
     "registration_status": "no_registration",
     "senders": [
      "app/model/SelfPlayer.lua"
@@ -918,45 +829,6 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 82,
-    "name": "SELL_ITEM",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 86,
-    "name": "SELL_ITEMS",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 87,
-    "name": "USE_MAGIC_ITEMS",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 90,
     "name": "USE_SKILL_POINT_ITEM",
     "registration_status": "no_registration",
@@ -979,32 +851,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 96,
-    "name": "USE_GOLDEN_HAND",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/GoldenHand.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/GoldenHand.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 97,
-    "name": "ADD_ENERGY",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/model/AddEnergy.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/AddEnergy.lua"
     ],
     "runtime_reachability": "unknown"
    },
@@ -1173,25 +1019,6 @@
     "non_window_sender_files": [
      "app/model/RedEnvelope.lua"
     ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 241,
-    "name": "EXCHAGE_CODE_HERO",
-    "registration_status": "no_registration",
-    "senders": [
-     "app/windows/ExchangeCodeHeroReward.lua",
-     "app/windows/GiftbagUseWindow.lua",
-     "app/windows/SelectEquipWindow.lua",
-     "app/windows/SelectSXHeroWindow.lua"
-    ],
-    "window_sender_files": [
-     "app/windows/ExchangeCodeHeroReward.lua",
-     "app/windows/GiftbagUseWindow.lua",
-     "app/windows/SelectEquipWindow.lua",
-     "app/windows/SelectSXHeroWindow.lua"
-    ],
-    "non_window_sender_files": [],
     "runtime_reachability": "unknown"
    },
    {
@@ -8278,15 +8105,6 @@
    ]
   },
   {
-   "fact": "GOLDEN_HAND_USED",
-   "missions": [
-    101
-   ],
-   "stages": [
-    "I9-11"
-   ]
-  },
-  {
    "fact": "HERO_PROMOTED",
    "missions": [
     2
@@ -9224,6 +9042,7 @@
     "identitylifecycle",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "march",
@@ -9280,6 +9099,7 @@
     "identitylifecycle",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "march",
@@ -9336,6 +9156,7 @@
     "identitylifecycle",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "march",
@@ -9451,6 +9272,7 @@
     "i5",
     "illusion",
     "inscription",
+    "itemsenergy",
     "libraryforum",
     "librarylocal",
     "mentor",
