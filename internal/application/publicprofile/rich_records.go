@@ -36,13 +36,16 @@ type RosterRecords struct {
 	Conquer   ConquerFacts
 }
 
-// shortcut: the roster is recomposed per showcase slot (up to six per 1829 read); memoize per scope if profile latency matters.
 func (r RosterRecords) RecordTx(c context.Context, sc characterasset.CoherentReadScope, pid identity.PlayerID, id int64) (map[string]any, error) {
 	if r.Heroes == nil || r.Pets == nil || r.Awakening == nil || r.Conquer == nil {
 		return nil, ErrShowcaseUnavailable
 	}
 	if id < 0 {
-		return r.petTx(c, sc, pid, -id)
+		rows, err := r.petRows(c, sc, pid)
+		if err != nil {
+			return nil, err
+		}
+		return petRecord(rows, -id)
 	}
 	rows, err := heroRows(c, r.Heroes, sc.Queryer(), pid, sc.ObservedAt)
 	if err != nil {
@@ -52,6 +55,62 @@ func (r RosterRecords) RecordTx(c context.Context, sc characterasset.CoherentRea
 	if !ok {
 		return nil, ErrShowcaseUnavailable
 	}
+	return r.heroRecord(c, sc, pid, id, row)
+}
+
+// RecordsTx serves every selected slot from one roster composition; 1829 and
+// 1832 ask for up to six records in a single transaction.
+func (r RosterRecords) RecordsTx(c context.Context, sc characterasset.CoherentReadScope, pid identity.PlayerID, selection Selection) ([6]map[string]any, error) {
+	var out [6]map[string]any
+	for i := range out {
+		out[i] = map[string]any{}
+	}
+	if r.Heroes == nil || r.Pets == nil || r.Awakening == nil || r.Conquer == nil {
+		return out, ErrShowcaseUnavailable
+	}
+	var heroes map[string]any
+	var pets []any
+	var petsLoaded bool
+	for i, id := range selection {
+		if id == 0 {
+			continue
+		}
+		if id < 0 {
+			if !petsLoaded {
+				rows, err := r.petRows(c, sc, pid)
+				if err != nil {
+					return out, err
+				}
+				pets, petsLoaded = rows, true
+			}
+			row, err := petRecord(pets, -id)
+			if err != nil {
+				return out, err
+			}
+			out[i] = row
+			continue
+		}
+		if heroes == nil {
+			rows, err := heroRows(c, r.Heroes, sc.Queryer(), pid, sc.ObservedAt)
+			if err != nil {
+				return out, err
+			}
+			heroes = rows
+		}
+		row, ok := heroes[strconv.FormatInt(id, 10)].(map[string]any)
+		if !ok {
+			return out, ErrShowcaseUnavailable
+		}
+		record, err := r.heroRecord(c, sc, pid, id, row)
+		if err != nil {
+			return out, err
+		}
+		out[i] = record
+	}
+	return out, nil
+}
+
+func (r RosterRecords) heroRecord(c context.Context, sc characterasset.CoherentReadScope, pid identity.PlayerID, id int64, row map[string]any) (map[string]any, error) {
 	out := maps.Clone(row)
 	ref := character.HeroRef{PlayerID: pid, PartnerID: id}
 	awakening, err := r.Awakening.RawAwakeningTx(c, sc, ref)
@@ -79,13 +138,17 @@ func (r RosterRecords) RecordTx(c context.Context, sc characterasset.CoherentRea
 	return out, nil
 }
 
-func (r RosterRecords) petTx(c context.Context, sc characterasset.CoherentReadScope, pid identity.PlayerID, petID int64) (map[string]any, error) {
+func (r RosterRecords) petRows(c context.Context, sc characterasset.CoherentReadScope, pid identity.PlayerID) ([]any, error) {
 	detail := map[string]any{}
 	if err := r.Pets.OverlayMID1(c, sc.Queryer(), identity.ActorContext{PlayerID: pid}, false, sc.ObservedAt, detail); err != nil {
 		return nil, err
 	}
 	body, _ := detail["780"].(map[string]any)
 	rows, _ := body["pets"].([]any)
+	return rows, nil
+}
+
+func petRecord(rows []any, petID int64) (map[string]any, error) {
 	for _, raw := range rows {
 		row, ok := raw.(map[string]any)
 		if ok && fmt.Sprint(row["pet_id"]) == strconv.FormatInt(petID, 10) {
