@@ -29,6 +29,7 @@ import (
 	unavailabledomainarena "gxb.local/backend/v2/internal/domain/arena"
 	unavailabledomaincampaign "gxb.local/backend/v2/internal/domain/campaign"
 	unavailabledomainchampionsleague "gxb.local/backend/v2/internal/domain/championsleague"
+	unavailabledomaincompat "gxb.local/backend/v2/internal/domain/compat"
 	unavailabledomainconquerschool "gxb.local/backend/v2/internal/domain/conquerschool"
 	unavailabledomaindodgeball "gxb.local/backend/v2/internal/domain/dodgeball"
 	unavailabledomaingodstrial "gxb.local/backend/v2/internal/domain/godstrial"
@@ -79,6 +80,7 @@ var unavailableSentinels = []error{
 	unavailabledomainarena.ErrUnavailable,
 	unavailabledomaincampaign.ErrUnavailable,
 	unavailabledomainchampionsleague.ErrUnavailable,
+	unavailabledomaincompat.ErrUnavailable,
 	unavailabledomainconquerschool.ErrUnavailable,
 	unavailabledomaindodgeball.ErrUnavailable,
 	unavailabledomaingodstrial.ErrUnavailable,
