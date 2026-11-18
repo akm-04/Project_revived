@@ -3,6 +3,7 @@ package i5
 import (
 	"context"
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
@@ -15,6 +16,12 @@ type missionActivityMemory struct{ catalog *objective.ActivityCatalog }
 
 func (m missionActivityMemory) MissionActivityCatalogTx(context.Context, tx.Queryer, string) (*objective.ActivityCatalog, error) {
 	return m.catalog, nil
+}
+
+func TestMissionBootstrapClaimsTheMID2560Detail(t *testing.T) {
+	if !slices.Contains((MissionBootstrap{}).Claims(), "2560") {
+		t.Fatalf("MissionBootstrap claims %v, want 2560", (MissionBootstrap{}).Claims())
+	}
 }
 
 func TestMissionBootstrapPublishesMissionRedmarksAsMID2560(t *testing.T) {

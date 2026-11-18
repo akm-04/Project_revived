@@ -129,7 +129,8 @@
  },
  "tests": {
   "integration": [
-   "compat"
+   "compat",
+   "logincapacity"
   ],
   "scenarios_naming": [
    "i9_11d_compat.json"
