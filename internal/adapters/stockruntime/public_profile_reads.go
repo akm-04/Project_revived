@@ -24,6 +24,13 @@ type PublicProfileReadDispatcher struct {
 	Showcase  PublicShowcaseCommands
 }
 
+// A privacy denial and an empty showcase slot are ordinary request refusals
+// (D5). Provider faults are deliberately absent and stay defects.
+var publicProfileReadFailureRows = []failureRow{
+	{match: publicprofile.ErrShowcasePrivate, class: failureRefusal, code: unprovenRefusalCode},
+	{match: publicprofile.ErrEmptyShowcase, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int) httpedge.Response {
 		switch status {
@@ -94,7 +101,7 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 			if errors.Is(e, publicprofile.ErrCommand) {
 				return fail(http.StatusBadRequest)
 			}
-			return failureFromRows(nil, e)
+			return failureFromRows(publicProfileReadFailureRows, e)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(0), "show_case": out.Records}}
 	}
@@ -126,7 +133,7 @@ func (d PublicProfileReadDispatcher) Dispatch(c context.Context, r httpedge.Disp
 	}
 	out, e := d.Service.Read(c, a, q, r.Envelope.Operation)
 	if e != nil {
-		return failureFromRows(nil, e)
+		return failureFromRows(publicProfileReadFailureRows, e)
 	}
 	body := make(map[string]any, len(out)+1)
 	for k, v := range out {
