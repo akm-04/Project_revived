@@ -1,6 +1,7 @@
 package illusion
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"slices"
@@ -160,10 +161,16 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, occurrence d.Occurren
 		}
 	}
 	// C4: the fact rides this settlement after the owner's ranks and the I5
-	// suffix; achievement rows are locked last. A failure retries the whole
-	// settlement (mail keeps its source key).
+	// suffix; achievement rows are locked last, in player order like the mail
+	// recipients. A failure retries the whole settlement (mail keeps its source key).
 	revision, _ := sc.Operation.Operation().Policies.Get("content")
-	for index, entry := range ranks {
+	positions := make([]int, len(ranks))
+	for index := range positions {
+		positions[index] = index
+	}
+	slices.SortFunc(positions, func(left, right int) int { return cmp.Compare(ranks[left].PlayerID, ranks[right].PlayerID) })
+	for _, index := range positions {
+		entry := ranks[index]
 		if err = s.Achievements.ObserveFantasyTx(c, sc.Tx, revision, identity.PlayerID(entry.PlayerID), occurrence.CampaignID, occurrence.OpenDay, int64(index+1), entry.Hurt, at); err != nil {
 			return err
 		}
