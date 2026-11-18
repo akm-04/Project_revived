@@ -705,3 +705,123 @@ func TestI7C5FLeagueChangedLineupReplaysOpenFightNative(t *testing.T) {
 		t.Fatalf("the frozen lineup must replay the settled result: %v", e)
 	}
 }
+
+// leagueGateClock fixes one decision time and holds the numbered Now call until
+// released, so a second service can commit after the binding was sampled.
+type leagueGateClock struct {
+	mu      sync.Mutex
+	at      time.Time
+	call    int
+	blockAt int
+	reached chan struct{}
+	release chan struct{}
+}
+
+func (c *leagueGateClock) Now(context.Context) (time.Time, error) {
+	c.mu.Lock()
+	c.call++
+	blocked := c.call == c.blockAt
+	at := c.at
+	c.mu.Unlock()
+	if !blocked {
+		return at, nil
+	}
+	close(c.reached)
+	<-c.release
+	return at, nil
+}
+
+type leaguePermanentFlight struct{ app.Combat }
+
+func (leaguePermanentFlight) ResolveDetached(context.Context, operation.Context, ids.UUID) *combat.Flight {
+	f := &combat.Flight{Done: make(chan struct{}), Err: cd.ErrResolverPermanent}
+	close(f.Done)
+	return f
+}
+func newLeagueGate(at time.Time, blockAt int) *leagueGateClock {
+	return &leagueGateClock{at: at, blockAt: blockAt, reached: make(chan struct{}), release: make(chan struct{})}
+}
+
+// TestI7C5FLeagueRequestOrderInfoNative: a request order inversion, not a clock
+// reversal, must be refused as stale (409/40002) on both 2800 and 2801 instead
+// of answering a server defect.
+func TestI7C5FLeagueRequestOrderInfoNative(t *testing.T) {
+	p := pool(t)
+	for _, test := range []struct {
+		name    string
+		command func(identity.ActorContext) app.Command
+	}{
+		{"2800-info", func(identity.ActorContext) app.Command { return app.Command{Kind: "INFO"} }},
+		{"2801-enemy", func(b identity.ActorContext) app.Command { return app.Command{Kind: "ENEMY", Enemy: b.PlayerID} }},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			s, clock, _, a, b, _, _ := leagueActors(t, p)
+			at, _ := clock.Now(ctx)
+			gate := newLeagueGate(at, 2)
+			released := false
+			defer func() {
+				if !released {
+					close(gate.release)
+				}
+			}()
+			stale := s
+			stale.Timed.Binder.Time = gate
+			later := s
+			later.Timed.Binder.Time = &leagueClock{at: at.Add(time.Millisecond)}
+			out := make(chan error, 1)
+			go func() {
+				_, e := stale.Execute(ctx, a, test.command(b), op())
+				out <- e
+			}()
+			<-gate.reached
+			if _, e := later.Execute(ctx, b, app.Command{Kind: "INFO"}, op()); e != nil {
+				t.Fatalf("later writer: %v", e)
+			}
+			close(gate.release)
+			released = true
+			if e := <-out; !errors.Is(e, d.ErrStaleTime) {
+				t.Fatalf("an overtaken INFO/ENEMY decision time must be a stale refusal, got %v", e)
+			}
+		})
+	}
+}
+
+// TestI7C5FLeagueRequestOrderTerminalNative: the same inversion between the
+// terminal decision binding and its root lock must be a stale refusal.
+func TestI7C5FLeagueRequestOrderTerminalNative(t *testing.T) {
+	p := pool(t)
+	s, clock, _, a, b, ha, _ := leagueActors(t, p)
+	at, _ := clock.Now(ctx)
+	leagueDo(t, s, a, app.Command{Kind: "ENEMY", Enemy: b.PlayerID})
+	stalled := s
+	stalled.Combat = stalledLeague{s.Combat}
+	if _, e := stalled.Execute(ctx, a, app.Command{Kind: "FIGHT", Enemy: b.PlayerID, Lineup: d.Lineup{Heroes: []int64{ha}}}, op()); e == nil {
+		t.Fatal("a withheld resolution reported a result")
+	}
+	gate := newLeagueGate(at, 4)
+	released := false
+	defer func() {
+		if !released {
+			close(gate.release)
+		}
+	}()
+	stale := s
+	stale.Combat = leaguePermanentFlight{s.Combat}
+	stale.Timed.Binder.Time = gate
+	later := s
+	later.Timed.Binder.Time = &leagueClock{at: at.Add(time.Millisecond)}
+	out := make(chan error, 1)
+	go func() {
+		_, e := stale.Execute(ctx, a, app.Command{Kind: "FIGHT", Enemy: b.PlayerID, Lineup: d.Lineup{Heroes: []int64{ha}}}, op())
+		out <- e
+	}()
+	<-gate.reached
+	if _, e := later.Execute(ctx, b, app.Command{Kind: "INFO"}, op()); e != nil {
+		t.Fatalf("later writer: %v", e)
+	}
+	close(gate.release)
+	released = true
+	if e := <-out; !errors.Is(e, d.ErrStaleTime) {
+		t.Fatalf("an overtaken terminal decision time must be a stale refusal, got %v", e)
+	}
+}
