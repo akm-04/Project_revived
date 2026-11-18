@@ -350,6 +350,7 @@
     "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
+    "*SettleMemberTx",
     "*StartTx",
     "*TerminalTx"
    ],
@@ -2270,6 +2271,7 @@
     "*CurrentAttemptTx",
     "*MonsterWaves",
     "*Resolve",
+    "*SettleMemberTx",
     "*StartTx",
     "*TerminalTx"
    ],
