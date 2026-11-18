@@ -33,6 +33,7 @@ const (
 const (
 	FantasyTopRankID       int64 = 100006
 	FantasyDamageID        int64 = 100007
+	GreatCustomerID        int64 = 100011
 	MediumTenPullID        int64 = 100012
 	FantasyTopRank         int64 = 3
 	FantasyDamageThreshold int64 = 5000000
@@ -52,7 +53,7 @@ const (
 )
 
 var unavailable = map[int64]Status{
-	100008: ModeNotLive, 100009: ModeNotLive, 100011: ModeNotLive,
+	100008: ModeNotLive, 100009: ModeNotLive,
 	100018: ModeNotLive, 100026: ModeNotLive, 100033: OwnerUnknown,
 }
 

@@ -82,6 +82,55 @@ func FuzzTierMonotonicity(f *testing.F) {
 	})
 }
 
+func TestGreatCustomerDailyCounts(t *testing.T) {
+	c := catalog()
+	c.Rows[GreatCustomerID-100001].Thresholds = [3]int64{10, 100, 200}
+	at := time.Unix(1700000000, 0).UTC()
+	s, err := NewStreak(100001, GreatCustomerID, strings.Repeat("a", 64), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	observe := func(count int64) (bool, error) {
+		t.Helper()
+		at = at.Add(time.Second)
+		var changed bool
+		s, changed, err = s.ObserveDailyCount(c, count, at)
+		return changed, err
+	}
+	if changed, e := observe(10); e != nil || !changed || s.CompleteTimes[0] == nil || s.CompleteTimes[1] != nil {
+		t.Fatalf("tier 1 at 10: %+v %v %v", s, changed, e)
+	}
+	if changed, e := observe(10); e != nil || changed {
+		t.Fatalf("the same count twice is a no-op: %+v %v %v", s, changed, e)
+	}
+	if changed, e := observe(100); e != nil || !changed || s.CompleteTimes[1] == nil || s.CompleteTimes[2] != nil {
+		t.Fatalf("tier 2 at 100: %+v %v %v", s, changed, e)
+	}
+	earned := s.CompleteTimes
+	if changed, e := observe(1); e != nil || !changed || s.Current != 1 {
+		t.Fatalf("a new day lowers progress: %+v %v %v", s, changed, e)
+	}
+	for i := range earned {
+		if earned[i] != nil && (s.CompleteTimes[i] == nil || !s.CompleteTimes[i].Equal(*earned[i])) {
+			t.Fatalf("tier %d revoked by the new day", i+1)
+		}
+	}
+	if _, e := observe(2000); e != nil || s.CompleteTimes[2] == nil {
+		t.Fatalf("tier 3 at 200: %+v %v", s, e)
+	}
+	// Thresholds are the catalog row's, not a constant: a 3 earns one tier here.
+	other := catalog()
+	other.Rows[GreatCustomerID-100001].Thresholds = [3]int64{2, 4, 6}
+	fresh, e := NewStreak(100002, GreatCustomerID, strings.Repeat("b", 64), at)
+	if e != nil {
+		t.Fatal(e)
+	}
+	fresh, changed, e := fresh.ObserveDailyCount(other, 3, at.Add(time.Second))
+	if e != nil || !changed || fresh.CompleteTimes[0] == nil || fresh.CompleteTimes[1] != nil {
+		t.Fatalf("catalog thresholds: %+v %v %v", fresh, changed, e)
+	}
+}
+
 func TestTopFloorStreakTiers(t *testing.T) {
 	c := Catalog{SchemaVersion: 1, PolicyID: Policy, SelectedID: SelectedID}
 	for i := int64(0); i < 33; i++ {

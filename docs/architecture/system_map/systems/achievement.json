@@ -126,6 +126,7 @@
    "accounts",
    "achievement_award_claims",
    "achievement_boss_facts",
+   "achievement_daily_counts",
    "achievement_events",
    "achievement_notices",
    "achievement_roots",
@@ -148,6 +149,7 @@
   "written": [
    "achievement_award_claims",
    "achievement_boss_facts",
+   "achievement_daily_counts",
    "achievement_events",
    "achievement_notices",
    "achievement_roots",

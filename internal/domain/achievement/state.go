@@ -175,6 +175,9 @@ var streakProfiles = map[int64]streakProfile{
 	// 3/4/5 girls in one "buy 10".
 	FantasyTopRankID: {FactCountPolicy, [3]int64{1, 3, 6}, 0},
 	FantasyDamageID:  {FactCountPolicy, [3]int64{1, 3, 6}, 0},
+	// 100011 is day-scoped: progress falls with a new day's first count; its
+	// thresholds come from the catalog row, not this profile.
+	GreatCustomerID:  {FactCountPolicy, [3]int64{}, 0},
 	MediumTenPullID:  {FactCountPolicy, [3]int64{3, 4, 5}, 0},
 	TopFloorStreakID: {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
 	WeeklyStreakID:   {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
@@ -218,7 +221,10 @@ func (s Streak) Validate() error {
 func (s Streak) profile(c Catalog, at time.Time) (streakProfile, error) {
 	profile := streakProfiles[s.AchievementID]
 	index := s.AchievementID - c.Rows[0].ID
-	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) || c.Rows[index].Thresholds != profile.thresholds || at.Before(s.UpdatedAt) {
+	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) || at.Before(s.UpdatedAt) {
+		return profile, ErrConflict
+	}
+	if s.AchievementID != GreatCustomerID && c.Rows[index].Thresholds != profile.thresholds {
 		return profile, ErrConflict
 	}
 	return profile, nil
@@ -269,6 +275,22 @@ func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, 
 	if count <= s.Current {
 		return s, false, nil
 	}
+	s = s.advance(profile, count, at)
+	return s, true, s.Validate()
+}
+
+// ObserveDailyCount records today's day-scoped count. Progress may fall when a
+// new day restarts the count; earned tiers are never cleared. The targets are
+// the pinned catalog row's thresholds, never constants.
+func (s Streak) ObserveDailyCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
+	profile, err := s.profile(c, at)
+	if err != nil || profile.step != 0 || count < 0 {
+		return Streak{}, false, ErrConflict
+	}
+	if count == s.Current {
+		return s, false, nil
+	}
+	profile.thresholds = c.Rows[s.AchievementID-c.Rows[0].ID].Thresholds
 	s = s.advance(profile, count, at)
 	return s, true, s.Validate()
 }
