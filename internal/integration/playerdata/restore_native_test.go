@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -348,6 +349,50 @@ func TestRestoreReplayRaisesVersions(t *testing.T) {
 	third := playerStateVersion(t, fixture.pool, player.id)
 	if third <= second {
 		t.Fatalf("replayed restore did not raise players.state_version: %d -> %d", second, third)
+	}
+}
+
+func compatPreferencesRow(t *testing.T, pool *pg.Pool, playerID int64) (int16, []int64, int64) {
+	t.Helper()
+	var firstMainTouch int16
+	var messagePushIDs []int64
+	var stateVersion int64
+	if err := pool.QueryRow(context.Background(), `SELECT first_main_touch,message_push_ids,state_version FROM player_compat_preferences WHERE player_id=$1`, playerID).Scan(&firstMainTouch, &messagePushIDs, &stateVersion); err != nil {
+		t.Fatal(err)
+	}
+	return firstMainTouch, messagePushIDs, stateVersion
+}
+
+// C1/R8 A-038: restoring a player_compat_preferences row keeps the exported
+// values and raises state_version to max(current, restored) + 1 on both sides.
+func TestRestoreRaisesCompatStateVersionAndKeepsValues(t *testing.T) {
+	fixture := newRestoreFixture(t)
+	player := seedPlayer(t, fixture.pool, false)
+	now := time.Now().UTC().Add(-time.Hour)
+	execSQL(t, fixture.pool, `INSERT INTO player_compat_preferences(player_id,first_main_touch,message_push_ids,state_version,created_at,updated_at)VALUES($1,1,'{9,1}',5,$2,$2)`, player.id, now)
+
+	document := fixture.exportPlayer(t, player.id)
+	execSQL(t, fixture.pool, `UPDATE player_compat_preferences SET first_main_touch=0,message_push_ids='{3}',state_version=9,updated_at=$2 WHERE player_id=$1`, player.id, now)
+	fixture.mustRestore(t, document, player.id)
+
+	firstMainTouch, messagePushIDs, stateVersion := compatPreferencesRow(t, fixture.pool, player.id)
+	if stateVersion != 10 {
+		t.Fatalf("state_version = %d, want max(9,5)+1 = 10", stateVersion)
+	}
+	if firstMainTouch != 1 || !slices.Equal(messagePushIDs, []int64{9, 1}) {
+		t.Fatalf("restored compat row = (%d, %v), want (1, [9 1])", firstMainTouch, messagePushIDs)
+	}
+
+	document = fixture.exportPlayer(t, player.id)
+	execSQL(t, fixture.pool, `UPDATE player_compat_preferences SET first_main_touch=0,message_push_ids='{3}',state_version=2,updated_at=$2 WHERE player_id=$1`, player.id, now)
+	fixture.mustRestore(t, document, player.id)
+
+	firstMainTouch, messagePushIDs, stateVersion = compatPreferencesRow(t, fixture.pool, player.id)
+	if stateVersion != 11 {
+		t.Fatalf("state_version = %d, want max(2,10)+1 = 11", stateVersion)
+	}
+	if firstMainTouch != 1 || !slices.Equal(messagePushIDs, []int64{9, 1}) {
+		t.Fatalf("restored compat row = (%d, %v), want (1, [9 1])", firstMainTouch, messagePushIDs)
 	}
 }
 
