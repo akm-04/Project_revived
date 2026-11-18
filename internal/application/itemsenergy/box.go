@@ -25,23 +25,10 @@ func (s Service) ExchangeCode(c context.Context, actor identity.ActorContext, it
 		if err != nil {
 			return nil, err
 		}
-		rewards, err := catalog.GiftRewards(plan.Gift, plan.Num)
+		stream := combat.NewStream(sc.Operation.Operation().Derive(boxEntropyLabel, 0))
+		rewards, err := catalog.RollBox(plan, stream)
 		if err != nil {
 			return nil, err
-		}
-		stream := combat.NewStream(sc.Operation.Operation().Derive(boxEntropyLabel, 0))
-		for _, groups := range plan.Units {
-			for _, group := range groups {
-				roll, err := catalog.DrawDrop(group, stream)
-				if err != nil {
-					return nil, err
-				}
-				drawn, err := catalog.DropReward(roll)
-				if err != nil {
-					return nil, err
-				}
-				rewards.Add(drawn)
-			}
 		}
 		heroAwards, heroIDs, err := s.resolveHeroRewards(c, sc, actor.PlayerID, catalog, rewards.Heroes)
 		if err != nil {

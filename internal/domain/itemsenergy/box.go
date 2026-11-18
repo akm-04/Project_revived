@@ -90,6 +90,29 @@ func (c Catalog) ResolveBox(itemID, giftID, num int64) (BoxPlan, error) {
 	return BoxPlan{Item: item, Gift: gift, Num: num, Units: units}, nil
 }
 
+// RollBox resolves every unit's fixed gift rows and then draws each drop group
+// in unit order, then gift.drops order (C10 entropy schedule).
+func (c Catalog) RollBox(plan BoxPlan, stream UniformSource) (Rewards, error) {
+	rewards, err := c.GiftRewards(plan.Gift, plan.Num)
+	if err != nil {
+		return Rewards{}, err
+	}
+	for _, groups := range plan.Units {
+		for _, group := range groups {
+			roll, err := c.DrawDrop(group, stream)
+			if err != nil {
+				return Rewards{}, err
+			}
+			drawn, err := c.DropReward(roll)
+			if err != nil {
+				return Rewards{}, err
+			}
+			rewards.Add(drawn)
+		}
+	}
+	return rewards, nil
+}
+
 // GiftRewards expands one gift row, repeated num times.
 func (c Catalog) GiftRewards(gift Gift, num int64) (Rewards, error) {
 	if num <= 0 {

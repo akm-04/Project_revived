@@ -132,3 +132,48 @@ func TestBoxResolutionAndFailClosed(t *testing.T) {
 		t.Fatalf("stack overflow accepted: %v", err)
 	}
 }
+
+type recordingUniform struct {
+	script []uint64
+	calls  []uint64
+}
+
+func (r *recordingUniform) Uniform(n uint64) uint64 {
+	r.calls = append(r.calls, n)
+	value := r.script[len(r.calls)-1]
+	if value >= n {
+		value = n - 1
+	}
+	return value
+}
+
+func TestBoxDrawScheduleIsUnitThenDropsOrder(t *testing.T) {
+	catalog := testCatalog()
+	catalog.Items[50000010] = Item{ID: 50000010, Type: 4, SubType: 1, Stack: 99, Gifts: []int64{300}}
+	catalog.Gifts[300] = Gift{ID: 300, Items: []int64{50000002}, ItemNums: []int64{1}, Drops: []int64{201, 201}}
+	plan, err := catalog.ResolveBox(50000010, 300, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stream := &recordingUniform{script: []uint64{0, 2, 2, 0}}
+	rewards, err := catalog.RollBox(plan, stream)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stream.calls) != 4 {
+		t.Fatalf("draw count = %d", len(stream.calls))
+	}
+	if rewards.Stacks[0].ItemID != 50000002 || rewards.Stacks[0].Amount != 2 {
+		t.Fatalf("fixed stacks = %+v", rewards.Stacks)
+	}
+	drawn := rewards.Stacks[1:]
+	want := []int64{50000002, 50000003, 50000003, 50000002}
+	if len(drawn) != len(want) {
+		t.Fatalf("drawn = %+v", drawn)
+	}
+	for index := range want {
+		if drawn[index].ItemID != want[index] {
+			t.Fatalf("draw %d = %d want %d (%+v)", index, drawn[index].ItemID, want[index], drawn)
+		}
+	}
+}
