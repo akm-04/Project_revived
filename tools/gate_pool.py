@@ -341,8 +341,11 @@ def parse_json_stream(text):
     return documents
 
 
-CODE_FILE_FIELDS = ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'EmbedFiles')
-SOURCE_FILE_FIELDS = ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles')
+# go list -test reports the files a test binary compiles in GoFiles: the package under test appears again as
+# "p [p.test]" (and "p_test [p.test]") with its _test.go files there. TestGoFiles/XTestGoFiles are listed for every
+# dependency too, though no dependency's tests are compiled, so reading them made unrelated tests decline reuse.
+CODE_FILE_FIELDS = ('GoFiles', 'CgoFiles', 'EmbedFiles')
+SOURCE_FILE_FIELDS = ('GoFiles', 'CgoFiles')
 UNSUPPORTED_COMPILER_FIELDS = ('SFiles', 'CFiles', 'CXXFiles', 'HFiles', 'SysoFiles', 'MFiles', 'FFiles',
                                'SwigFiles', 'SwigCXXFiles')
 GENERATED_TESTMAIN = 'generated_testmain.go'

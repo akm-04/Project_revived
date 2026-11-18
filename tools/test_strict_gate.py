@@ -116,8 +116,13 @@ elif arguments[0] == 'list':
     else:
         go_files = [name for name in directory_files(directory, '.go') if not name.endswith('_test.go')]
         test_files = [name for name in directory_files(directory, '.go') if name.endswith('_test.go')]
-        print(json.dumps({'ImportPath': 'example.com/mod/' + relative, 'Dir': directory, 'GoFiles': go_files,
+        import_path = 'example.com/mod/' + relative
+        print(json.dumps({'ImportPath': import_path, 'Dir': directory, 'GoFiles': go_files,
                           'TestGoFiles': test_files, 'XTestGoFiles': [], 'CgoFiles': [], 'EmbedFiles': []}))
+        if '-test' in arguments and test_files:
+            print(json.dumps({'ImportPath': f'{import_path} [{import_path}.test]', 'ForTest': import_path,
+                              'Dir': directory, 'GoFiles': go_files + test_files, 'TestGoFiles': test_files,
+                              'XTestGoFiles': [], 'CgoFiles': [], 'EmbedFiles': []}))
 elif '-list' in arguments:
     print('TestAlpha')
     print('TestBeta')
@@ -509,6 +514,19 @@ for unsupported in gate_pool.UNSUPPORTED_COMPILER_FIELDS:
         raise AssertionError(f'go list {unsupported} must decline reuse')
     except gate_pool.NotReusable as failure:
         assert unsupported in str(failure), failure
+
+# A dependency's own tests are not compiled into another package's test binary: its TestGoFiles are no input, so an
+# unresolvable path there never declines reuse of the dependent unit; the package's own test variant still carries them.
+(inputs_package / 'dependency_test.go').write_text('package fake\n\nfunc load() { os.ReadFile(name + suffix) }\n')
+dependency = code_records(other_absolute, 'example.com/mod/internal/fake', {'TestGoFiles': ['dependency_test.go']})[0]
+assert 'dependency_test.go' not in dependency['sources'] and all(
+    'dependency_test.go' not in name for name, _ in dependency['files']), dependency
+variant = gate_pool.code_inputs(json.dumps(dict(
+    Dir=str(inputs_package), ImportPath='example.com/mod/internal/fake [example.com/mod/internal/fake.test]',
+    ForTest='example.com/mod/internal/fake', GoFiles=['dependency_test.go'])), inputs_source)[0]
+assert variant['sources'] == ['dependency_test.go'] and [name for name, _ in variant['files']] == ['dependency_test.go'], \
+    variant
+(inputs_package / 'dependency_test.go').unlink()
 
 # S2: both database suites clone the river-provisioned template, so a package whose compiled files are equal under the two
 # tag sets hashes equal across the suite labels; a changed file still changes the code input (class 1).
