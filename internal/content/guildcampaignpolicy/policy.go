@@ -8,6 +8,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+
+	"gxb.local/backend/v2/internal/content/guildcampaigncatalog"
 )
 
 //go:embed generated/guild_campaign_policy.json
@@ -23,19 +25,20 @@ type NoticeMail struct {
 }
 
 type Policy struct {
-	PolicyID              string     `json:"policy_id"`
-	PolicyVersion         int64      `json:"policy_version"`
-	AttemptsPerChapterDay int64      `json:"attempts_per_chapter_day"`
-	PrepareSeconds        int64      `json:"prepare_seconds"`
-	BattleSeconds         int64      `json:"battle_seconds"`
-	RestSecondsOfDay      [2]int64   `json:"rest_seconds_of_day"`
-	ApplicationsPerDay    int64      `json:"applications_per_day"`
-	BossDamageRankFactor  int64      `json:"boss_damage_rank_multiplier"`
-	LastStrikeCoin        int64      `json:"last_strike_coin"`
-	MaxFightDamage        int64      `json:"max_fight_damage"`
-	NoticeMail            NoticeMail `json:"notice_mail"`
-	GuildLogRetentionDays int64      `json:"guild_log_retention_days"`
-	SourceMiscSHA256      string     `json:"source_misc_sha256"`
+	PolicyID              string          `json:"policy_id"`
+	PolicyVersion         int64           `json:"policy_version"`
+	AttemptsPerChapterDay int64           `json:"attempts_per_chapter_day"`
+	PrepareSeconds        int64           `json:"prepare_seconds"`
+	BattleSeconds         int64           `json:"battle_seconds"`
+	RestSecondsOfDay      [2]int64        `json:"rest_seconds_of_day"`
+	ApplicationsPerDay    int64           `json:"applications_per_day"`
+	BossDamageRankFactor  int64           `json:"boss_damage_rank_multiplier"`
+	LastStrikeCoin        int64           `json:"last_strike_coin"`
+	MaxFightDamage        int64           `json:"max_fight_damage"`
+	NoticeMail            NoticeMail      `json:"notice_mail"`
+	GuildLogRetentionDays int64           `json:"guild_log_retention_days"`
+	ChapterVersions       map[int64]int64 `json:"chapter_versions"`
+	SourceMiscSHA256      string          `json:"source_misc_sha256"`
 }
 
 type Builtin struct {
@@ -49,6 +52,17 @@ func LoadBuiltin() (Builtin, error) {
 		return Builtin{}, err
 	}
 	if err := p.Validate(); err != nil {
+		return Builtin{}, err
+	}
+	catalog, err := guildcampaigncatalog.LoadBuiltin()
+	if err != nil {
+		return Builtin{}, err
+	}
+	chapterIDs := make([]int64, 0, len(catalog.Catalog.Chapters))
+	for _, chapter := range catalog.Catalog.Chapters {
+		chapterIDs = append(chapterIDs, chapter.ChapterID)
+	}
+	if err := p.ValidateChapterVersions(chapterIDs); err != nil {
 		return Builtin{}, err
 	}
 	sum := sha256.Sum256(builtinJSON)
@@ -70,6 +84,26 @@ func (p Policy) Validate() error {
 	}
 	if p.NoticeMail.Enabled && (p.NoticeMail.OpenTitle == "" || p.NoticeMail.OpenBody == "" || p.NoticeMail.ResetTitle == "" || p.NoticeMail.ResetBody == "") {
 		return errors.New("guild campaign policy notice mail")
+	}
+	for chapterID, version := range p.ChapterVersions {
+		if chapterID <= 0 || (version != 1 && version != 2) {
+			return errors.New("guild campaign policy chapter version")
+		}
+	}
+	return nil
+}
+
+// ValidateChapterVersions refuses a mapping entry whose chapter is not in the
+// compiled catalog.
+func (p Policy) ValidateChapterVersions(chapterIDs []int64) error {
+	known := make(map[int64]struct{}, len(chapterIDs))
+	for _, chapterID := range chapterIDs {
+		known[chapterID] = struct{}{}
+	}
+	for chapterID := range p.ChapterVersions {
+		if _, ok := known[chapterID]; !ok {
+			return errors.New("guild campaign policy chapter version id")
+		}
 	}
 	return nil
 }

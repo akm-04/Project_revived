@@ -96,7 +96,9 @@
   ]
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "playerdisplay"
+  ],
   "scenarios_naming": [],
   "unit": []
  }

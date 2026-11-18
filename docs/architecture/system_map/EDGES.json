@@ -980,6 +980,9 @@
    ],
    "herorecommend": [
     "*HeroRecommendSourceTx"
+   ],
+   "shop": [
+    "*TeamShopEligibleTx"
    ]
   },
   "guildcore": {
@@ -5561,6 +5564,9 @@
     "DecisionAt",
     "Operation",
     "Run"
+   ],
+   "guildcampaign": [
+    "*TeamShopEligibleTx"
    ],
    "i5": [
     "*ApplyItemsEnergyExchangeTx",
