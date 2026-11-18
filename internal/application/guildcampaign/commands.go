@@ -491,10 +491,12 @@ func summaryEnemies(enemies []ResultEnemy) []cd.EnemyStatus {
 }
 
 // isRetry is C8's duplicate: the copy's last settled result is this member's at
-// this wave and nobody holds the copy since. A loss leaves the index unchanged,
-// so the settled index is compared rather than the current one.
+// this wave and this member has not started a new fight since, so the replay
+// writes nothing. Another member's claim or fight does not displace it. A loss
+// leaves the index unchanged, so the settled index is compared rather than the
+// current one.
 func isRetry(copy d.Copy, player identity.PlayerID, index int64) bool {
-	return copy.HolderID == 0 && copy.SettledBy == int64(player) && copy.SettledIndex == index
+	return copy.SettledBy == int64(player) && copy.SettledIndex == index && copy.HolderID != int64(player)
 }
 
 func replayBody(stored []byte) (Settled, error) {

@@ -168,7 +168,7 @@ func (r Reader) GuildOffers(c context.Context, a identity.ActorContext, kind gui
 	if requestedType > 0 {
 		rule, listed := r.Policy.Modes[requestedType]
 		if !listed || !rule.Enabled {
-			return List{Rows: []Row{}, RentCount: 1}, nil
+			return emptyList(kind, requestedType)
 		}
 	}
 	var list List
@@ -178,8 +178,8 @@ func (r Reader) GuildOffers(c context.Context, a identity.ActorContext, kind gui
 			return err
 		}
 		if !joined {
-			list = List{Rows: []Row{}, RentCount: 1}
-			return nil
+			list, err = emptyList(kind, requestedType)
+			return err
 		}
 		offers, err := r.Store.ListRentalOffersByGuildTx(c, sc.Tx, membership.GuildID, kind, listLimit)
 		if err != nil {
@@ -309,6 +309,17 @@ func admission(offer guild.RentalOffer, kind guild.RentalKind, uses []guild.Rent
 		return false, false
 	}
 	return false, affordable && unitLevel <= borrowerLimit
+}
+
+// emptyList is the early answer for a disabled type or a caller without a guild:
+// the client keeps its cached list until rent_count changes, so the empty list
+// carries the same kind/type/rows key a materialized empty list does (C6).
+func emptyList(kind guild.RentalKind, requestedType int64) (List, error) {
+	count, err := rentCount(kind, requestedType, nil)
+	if err != nil {
+		return List{}, err
+	}
+	return List{Rows: []Row{}, RentCount: count}, nil
 }
 
 // rentCount excludes observation metadata and interest: they change on reads

@@ -1,13 +1,18 @@
 package guildrental
 
 import (
-	"gxb.local/backend/v2/internal/application/characterasset"
-	"gxb.local/backend/v2/internal/domain/character"
+	"context"
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
+	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 func TestRentCountHashesVisibleRows(t *testing.T) {
@@ -89,6 +94,119 @@ func TestRentCountTracksPetDetails(t *testing.T) {
 	pet.Level++
 	if countForTest(t, guild.RentalPet, 0, []Row{row}) == baseline {
 		t.Fatal("pet level change retained cached key")
+	}
+}
+
+type emptyReadStore struct{}
+
+func (emptyReadStore) ReadMembershipTx(context.Context, tx.Queryer, identity.PlayerID) (guild.Membership, bool, error) {
+	return guild.Membership{}, false, nil
+}
+func (emptyReadStore) ListRentalOffersByGuildTx(context.Context, tx.Queryer, guild.ID, guild.RentalKind, int) ([]guild.RentalOffer, error) {
+	return nil, nil
+}
+func (emptyReadStore) ListLenderRentalOffersTx(context.Context, tx.Queryer, identity.PlayerID, guild.RentalKind, int) ([]guild.RentalOffer, error) {
+	return nil, nil
+}
+func (emptyReadStore) ReadRentalUsesDayTx(context.Context, tx.Queryer, identity.PlayerID, int64) ([]guild.RentalUse, error) {
+	return nil, nil
+}
+
+type emptyReadCharacters struct{}
+
+func (emptyReadCharacters) HeroProjectionTx(context.Context, tx.Queryer, string, time.Time, identity.PlayerID, int64) (HeroProjection, bool, error) {
+	return HeroProjection{}, false, nil
+}
+func (emptyReadCharacters) PetTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Pet, bool, error) {
+	return character.Pet{}, false, nil
+}
+
+type emptyReadProfiles struct{}
+
+func (emptyReadProfiles) ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error) {
+	return playerdirectory.Profile{}, false, nil
+}
+
+type emptyReadLevels struct{}
+
+func (emptyReadLevels) LevelTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error) {
+	return 1, nil
+}
+
+type emptyReadMana struct{}
+
+func (emptyReadMana) BalanceTx(context.Context, tx.Queryer, identity.PlayerID, string) (int64, bool, error) {
+	return 0, true, nil
+}
+
+type emptyReadPrivileges struct{}
+
+func (emptyReadPrivileges) SnapshotTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (i5.PrivilegeSnapshot, error) {
+	return i5.PrivilegeSnapshot{}, nil
+}
+
+type emptyReadContent struct{}
+
+func (emptyReadContent) ActiveRevision(context.Context, tx.Queryer) (string, error) {
+	return "rev", nil
+}
+func (emptyReadContent) HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error) {
+	return nil, nil
+}
+
+type emptyReadBeginner struct{}
+
+func (emptyReadBeginner) Begin(context.Context, tx.Options) (tx.Tx, error) { return guardTx{}, nil }
+
+func emptyListReader() Reader {
+	now := time.Unix(1700000000, 0).UTC()
+	return Reader{
+		Runner: tx.Runner{DB: emptyReadBeginner{}}, Store: emptyReadStore{}, Characters: emptyReadCharacters{},
+		Profiles: emptyReadProfiles{}, Levels: emptyReadLevels{}, Mana: emptyReadMana{}, Privileges: emptyReadPrivileges{},
+		Content: emptyReadContent{},
+		Now:     func(context.Context, tx.Queryer) (time.Time, error) { return now, nil },
+		Policy: Policy{
+			Money:     guild.RentalMoney{PriceForceDivisor: 1000, PriceFloorMana: 1000, HourlyInterestForceDivisor: 100, RecallMinimumSeconds: 1800, LevelUpCeiling: 5},
+			Modes:     map[int64]ModeRule{1: {Enabled: true}, 8: {Enabled: false}, 79: {Enabled: false}},
+			VIP:       map[int64]VIPLimit{0: {Lend: 2, LevelUp: 0}},
+			Departure: DepartureMail{Sender: "guild", Title: "rental", Body: "closed"},
+		},
+	}
+}
+
+// TestGuildOffersEmptyListsUseTheRowHash covers both early-empty answers: a
+// disabled requested type and a caller without a guild. Their cache identity is
+// the same kind/type/empty-rows hash a materialized empty list uses, so a stale
+// client list is never keyed by one shared literal (C6).
+func TestGuildOffersEmptyListsUseTheRowHash(t *testing.T) {
+	reader := emptyListReader()
+	actor := identity.ActorContext{LogicalServerID: 1, PlayerID: 9}
+	op := operation.Context{StartedAt: time.Unix(1700000000, 0).UTC()}
+	for _, requestedType := range []int64{8, 79} {
+		list, err := reader.GuildOffers(context.Background(), actor, guild.RentalHero, requestedType, op)
+		if err != nil {
+			t.Fatal("disabled type", requestedType, err)
+		}
+		if want := countForTest(t, guild.RentalHero, requestedType, nil); list.RentCount != want || list.RentCount == 1 {
+			t.Fatalf("disabled type %d rent_count %d want %d", requestedType, list.RentCount, want)
+		}
+		if len(list.Rows) != 0 {
+			t.Fatalf("disabled type %d rows %v", requestedType, list.Rows)
+		}
+	}
+	first, err := reader.GuildOffers(context.Background(), actor, guild.RentalHero, 1, op)
+	if err != nil {
+		t.Fatal("guildless type 1", err)
+	}
+	if want := countForTest(t, guild.RentalHero, 1, nil); first.RentCount != want || first.RentCount == 1 {
+		t.Fatalf("guildless type 1 rent_count %d want %d", first.RentCount, want)
+	}
+	second, err := reader.GuildOffers(context.Background(), actor, guild.RentalHero, 2, op)
+	if err != nil {
+		t.Fatal("guildless type 2", err)
+	}
+	if second.RentCount == first.RentCount {
+		t.Fatalf("guildless list key ignores the requested type: %d", first.RentCount)
 	}
 }
 
