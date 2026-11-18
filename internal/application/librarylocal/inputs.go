@@ -362,20 +362,6 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 			"mission_id": m.MissionID, "process": m.Process, "mission_state": m.MissionState,
 		})
 	}
-	logsByPartner := map[int64]map[string]any{}
-	acquiredAtByPartner := map[int64]time.Time{}
-	for _, row := range heroLogs {
-		entries := logsByPartner[row.PartnerID]
-		if entries == nil {
-			entries = map[string]any{}
-			logsByPartner[row.PartnerID] = entries
-		}
-		entries[strconv.FormatInt(row.LogID, 10)] = map[string]any{"time": row.OccurredAt.Unix()}
-		if row.LogID == lib.LogAcquired {
-			acquiredAtByPartner[row.PartnerID] = row.OccurredAt
-		}
-	}
-
 	infos := map[string]any{}
 	for _, h := range heroes {
 		f, e := s.HeroLibraryInputsTx(ctx, q, scope, h.PartnerID)
@@ -390,41 +376,13 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		if partnerMissions == nil {
 			partnerMissions = []any{}
 		}
-		partnerLogs := logsByPartner[h.PartnerID]
-		if partnerLogs == nil {
-			partnerLogs = map[string]any{}
-		}
-		acquiredAt := acquiredAtByPartner[h.PartnerID]
-		if acquiredAt.IsZero() {
-			// A backfilled facet keeps the Library row's creation time; the
-			// store persists it (librarystore/store.go:180, inserted at :206).
-			acquiredAt = f.Facts.CreatedAt
-		}
-		if _, present := partnerLogs[strconv.FormatInt(lib.LogAcquired, 10)]; !present {
-			// Imported facets (test_harness/import_legacy.py:1055 inserts the
-			// facet and no log rows) and pre-writer backfills have no explicit
-			// acquisition entry. PRIVATE_POLICY: the facet creation time is the
-			// acquisition time for every creation source.
-			partnerLogs[strconv.FormatInt(lib.LogAcquired, 10)] = map[string]any{"time": acquiredAt.Unix()}
-		}
-		for _, logID := range lib.FavorLogIDsCrossed(0, f.Facts.Favor) {
-			key := strconv.FormatInt(logID, 10)
-			if _, present := partnerLogs[key]; !present {
-				// Same reconstruction for intimacy milestones an import carried
-				// over without their crossing time. PRIVATE_POLICY.
-				partnerLogs[key] = map[string]any{"time": acquiredAt.Unix()}
-			}
-		}
-		for _, milestone := range lib.HoldTimeLogsReached(acquiredAt, at) {
-			partnerLogs[strconv.FormatInt(milestone.LogID, 10)] = map[string]any{"time": milestone.OccurredAt.Unix()}
-		}
 		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{
 			"favor_degree":     f.Facts.Favor,
 			"is_married":       bit(f.Facts.Married),
 			"partner_dialogs":  projectPartnerDialogs(catalog, rule.DialogEnabled, f.Facts.Favor, f.Facts.Married, h.PartnerID, dialogsByPartner[h.PartnerID]),
 			"partner_missions": partnerMissions,
 			"partner_acts":     projectPartnerActs(catalog, h.PartnerID, f.Facts.Favor, awards),
-			"partner_logs":     partnerLogs,
+			"partner_logs":     partnerLogMap(heroLogs, h.PartnerID, f.Facts.Favor, f.Facts.CreatedAt, at),
 		}
 	}
 
@@ -538,6 +496,36 @@ func (s Service) readPartnerDialogsOrActs(ctx context.Context, q tx.Queryer, a i
 // projectPartnerDialogs is the one sorted view 836, 838 and the saved 840 reply
 // share: statically open catalog dialogs plus retained known rows, with the
 // stored read/award/select bits preserved. It writes nothing.
+// partnerLogMap is the single Girls Log projection shared by 836 and the
+// library.partner_log.v1 notice. The explicit acquisition row wins; a facet
+// without one is dated from its creation time (PRIVATE_POLICY).
+func partnerLogMap(heroLogs []lib.HeroLogFact, partnerID, favor int64, created, at time.Time) map[string]any {
+	acquiredAt := created
+	out := map[string]any{}
+	for _, row := range heroLogs {
+		if row.PartnerID != partnerID {
+			continue
+		}
+		out[strconv.FormatInt(row.LogID, 10)] = map[string]any{"time": row.OccurredAt.Unix()}
+		if row.LogID == lib.LogAcquired {
+			acquiredAt = row.OccurredAt
+		}
+	}
+	if _, present := out[strconv.FormatInt(lib.LogAcquired, 10)]; !present {
+		out[strconv.FormatInt(lib.LogAcquired, 10)] = map[string]any{"time": acquiredAt.Unix()}
+	}
+	for _, logID := range lib.FavorLogIDsCrossed(0, favor) {
+		key := strconv.FormatInt(logID, 10)
+		if _, present := out[key]; !present {
+			out[key] = map[string]any{"time": acquiredAt.Unix()}
+		}
+	}
+	for _, milestone := range lib.HoldTimeLogsReached(acquiredAt, at) {
+		out[strconv.FormatInt(milestone.LogID, 10)] = map[string]any{"time": milestone.OccurredAt.Unix()}
+	}
+	return out
+}
+
 func projectPartnerDialogs(catalog lib.Catalog, enabled bool, favor int64, married bool, partnerID int64, stored []lib.DialogFact) []DialogRow {
 	if !enabled {
 		return []DialogRow{}

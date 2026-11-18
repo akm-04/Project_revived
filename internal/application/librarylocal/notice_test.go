@@ -1,0 +1,97 @@
+package librarylocal
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/foundation/tx"
+)
+
+func TestPartnerLogMapMatches836Sources(t *testing.T) {
+	created := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	explicit := created.Add(24 * time.Hour)
+	at := explicit.AddDate(0, 0, 100)
+	rows := []lib.HeroLogFact{
+		{PlayerID: 1, PartnerID: 1, LogID: lib.LogAcquired, OccurredAt: explicit},
+		{PlayerID: 1, PartnerID: 2, LogID: 20001, OccurredAt: at},
+	}
+	logs := partnerLogMap(rows, 1, 250, created, at)
+	if entry, ok := logs["10001"].(map[string]any); !ok || entry["time"] != explicit.Unix() {
+		t.Fatalf("explicit acquisition %#v", logs["10001"])
+	}
+	for _, id := range []string{"80001", "80006"} {
+		if entry, ok := logs[id].(map[string]any); !ok || entry["time"] != explicit.Unix() {
+			t.Fatalf("favor milestone %s %#v", id, logs[id])
+		}
+	}
+	if _, present := logs["80002"]; present {
+		t.Fatalf("favor 250 crossed 300 %#v", logs)
+	}
+	for _, id := range []string{"50001", "50002"} {
+		if _, present := logs[id]; !present {
+			t.Fatalf("hold-time milestone %s missing %#v", id, logs)
+		}
+	}
+	if _, present := logs["50003"]; present {
+		t.Fatalf("100 days reached 180 %#v", logs)
+	}
+	if _, present := logs["20001"]; present {
+		t.Fatal("the projection leaked another partner's row into partner 1")
+	}
+
+	// A facet without an explicit acquisition row is dated from creation.
+	fallback := partnerLogMap(nil, 1, 0, created, created.AddDate(0, 0, 30))
+	if entry, ok := fallback["10001"].(map[string]any); !ok || entry["time"] != created.Unix() {
+		t.Fatalf("creation fallback %#v", fallback["10001"])
+	}
+	if _, present := fallback["50001"]; !present {
+		t.Fatalf("30 days from creation missing 50001 %#v", fallback)
+	}
+}
+
+type noticeLogPort struct {
+	rows  []lib.HeroLogFact
+	facts lib.HeroFacts
+}
+
+func (p noticeLogPort) ListHeroLogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.HeroLogFact, error) {
+	return p.rows, nil
+}
+
+func (p noticeLogPort) ReadHeroTx(context.Context, tx.Queryer, character.HeroRef) (lib.HeroFacts, error) {
+	return p.facts, nil
+}
+
+func TestPartnerLogReaderUsesTheSharedProjection(t *testing.T) {
+	created := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
+	at := created.AddDate(0, 0, 31)
+	reader := PartnerLogReader{Queryer: noticeQueryer{}, Library: noticeLogPort{
+		rows:  []lib.HeroLogFact{{PlayerID: 7, PartnerID: 3, LogID: lib.LogAcquired, OccurredAt: created}},
+		facts: lib.HeroFacts{Favor: 100, CreatedAt: created},
+	}}
+	logs, err := reader.ReadPartnerLog(context.Background(), 7, 3, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := partnerLogMap([]lib.HeroLogFact{{PlayerID: 7, PartnerID: 3, LogID: lib.LogAcquired, OccurredAt: created}}, 3, 100, created, at)
+	if len(logs) != len(want) {
+		t.Fatalf("reader projection %#v, want %#v", logs, want)
+	}
+	for id, entry := range want {
+		got, present := logs[id].(map[string]any)
+		if !present || got["time"] != entry.(map[string]any)["time"] {
+			t.Fatalf("entry %s %#v", id, logs[id])
+		}
+	}
+	if PartnerLogRef(7, 3) != "7:3" {
+		t.Fatalf("ref %q", PartnerLogRef(7, 3))
+	}
+}
+
+type noticeQueryer struct{}
+
+func (noticeQueryer) QueryRow(context.Context, string, ...any) tx.Row { return nil }

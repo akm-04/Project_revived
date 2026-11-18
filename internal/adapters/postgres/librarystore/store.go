@@ -171,7 +171,7 @@ const insertHero = `INSERT INTO player_library_heroes(player_id,partner_id,state
 
 // InitFreshHeroTx only inserts a unique unpublished facet. It does not take an
 // existing Library root lock after I5 locks; bootstrap must already own its root.
-func (Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) error {
+func (s Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) error {
 	if t == nil {
 		return library.ErrInvalidFacts
 	}
@@ -188,12 +188,12 @@ func (Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef
 	}
 	// A new hero starts the Girls Log with its acquisition entry (type 1).
 	// PRIVATE_POLICY: every owned creation path records the Vending source.
-	_, e = t.Exec(ctx, `INSERT INTO player_library_hero_logs(player_id,partner_id,log_id,occurred_at)VALUES($1,$2,$3,$4)ON CONFLICT(player_id,partner_id,log_id)DO NOTHING`, int64(ref.PlayerID), ref.PartnerID, library.LogAcquired, now.UTC())
+	_, e = s.InsertHeroLogTx(ctx, t, library.HeroLogFact{PlayerID: ref.PlayerID, PartnerID: ref.PartnerID, LogID: library.LogAcquired, OccurredAt: now.UTC()})
 	return e
 }
 
 // BackfillMissingHeroTx preserves an explicit existing facet, including previews.
-func (Store) BackfillMissingHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) (bool, error) {
+func (s Store) BackfillMissingHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) (bool, error) {
 	if t == nil {
 		return false, library.ErrInvalidFacts
 	}
@@ -210,7 +210,7 @@ func (Store) BackfillMissingHeroTx(ctx context.Context, t tx.Tx, ref character.H
 	}
 	// A backfilled facet gets the same acquisition entry as a fresh one.
 	// PRIVATE_POLICY: every owned creation path records the Vending source.
-	_, e = t.Exec(ctx, `INSERT INTO player_library_hero_logs(player_id,partner_id,log_id,occurred_at)VALUES($1,$2,$3,$4)ON CONFLICT(player_id,partner_id,log_id)DO NOTHING`, int64(ref.PlayerID), ref.PartnerID, library.LogAcquired, now.UTC())
+	_, e = s.InsertHeroLogTx(ctx, t, library.HeroLogFact{PlayerID: ref.PlayerID, PartnerID: ref.PartnerID, LogID: library.LogAcquired, OccurredAt: now.UTC()})
 	return true, e
 }
 

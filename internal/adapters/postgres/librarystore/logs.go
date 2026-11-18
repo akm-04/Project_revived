@@ -2,8 +2,12 @@ package librarystore
 
 import (
 	"context"
+	"log"
 	"time"
 
+	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	app "gxb.local/backend/v2/internal/application/librarylocal"
+	"gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/domain/identity"
 	library "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -23,9 +27,10 @@ func (s Store) RecordHeroLogTx(ctx context.Context, t tx.Tx, pid identity.Player
 	return e
 }
 
-// InsertHeroLogTx records one milestone once. It reports whether this call
-// inserted the row so the event owner can decide its reply.
-func (Store) InsertHeroLogTx(ctx context.Context, t tx.Tx, f library.HeroLogFact) (bool, error) {
+// InsertHeroLogTx records one milestone once and is the only writer of the
+// Girls Log table. It reports whether this call inserted the row so the event
+// owner can decide its reply, and wakes the live projection only then.
+func (s Store) InsertHeroLogTx(ctx context.Context, t tx.Tx, f library.HeroLogFact) (bool, error) {
 	if t == nil || f.Validate() != nil {
 		return false, library.ErrInvalidFacts
 	}
@@ -35,5 +40,18 @@ func (Store) InsertHeroLogTx(ctx context.Context, t tx.Tx, f library.HeroLogFact
 	if e != nil {
 		return false, e
 	}
-	return tag.RowsAffected() == 1, nil
+	if tag.RowsAffected() != 1 {
+		return false, nil
+	}
+	s.wakePartnerLog(ctx, t, f)
+	return true, nil
+}
+
+// wakePartnerLog is D1 optional display: the row is already written, so a
+// wakeup failure is logged and never returned, fails the transaction or retries.
+func (Store) wakePartnerLog(ctx context.Context, t tx.Tx, f library.HeroLogFact) {
+	e := pg.EmitRealtimeWakeup(ctx, t, realtimewakeup.Envelope{Version: realtimewakeup.EnvelopeVersion, Route: app.PartnerLogNoticeRoute, Ref: app.PartnerLogRef(f.PlayerID, f.PartnerID)})
+	if e != nil {
+		log.Printf("library: Girls Log wakeup failed player=%d partner=%d log_id=%d: %v", f.PlayerID, f.PartnerID, f.LogID, e)
+	}
 }
