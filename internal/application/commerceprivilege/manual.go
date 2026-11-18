@@ -197,7 +197,7 @@ func (s Service) ImportManual(c context.Context, a Authority, q Import, op opera
 			out, e = decode(prior, a, q, fp)
 			return e
 		}
-		catalog, e := s.Content.PrivilegeCatalogTx(c, sc.Tx, rev)
+		catalog, _, _, e := tunedPrivilegeCatalog(c, s.Store, s.Content, sc.Tx, rev)
 		if e != nil {
 			return e
 		}
@@ -220,7 +220,7 @@ func (s Service) ImportManual(c context.Context, a Authority, q Import, op opera
 			if old.Validate() != nil || old.LogicalServerID != q.LogicalServerID || old.UpdatedAt.After(at) || q.Charge < old.Charge || old.StateVersion == math.MaxInt64 {
 				return d.ErrConflict
 			}
-			oc, e := s.Content.PrivilegeCatalogTx(c, sc.Tx, old.ContentRevision)
+			oc, _, _, e := tunedPrivilegeCatalog(c, s.Store, s.Content, sc.Tx, old.ContentRevision)
 			if e != nil {
 				return e
 			}

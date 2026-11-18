@@ -19,7 +19,7 @@ func TestI9I11ANativeTunedSkillTunablesDriveReplyAndCap(t *testing.T) {
 	i911aSetSkillPoint(t, database, actor, 10)
 	i911aStack(t, database, actor, 50001538, 5)
 	exec(t, database, `INSERT INTO items_energy_tuning(payload,payload_version,updated_at)VALUES($1::jsonb,1,clock_timestamp()) ON CONFLICT(singleton)DO UPDATE SET payload=excluded.payload,payload_version=excluded.payload_version,updated_at=excluded.updated_at`,
-		`{"version":1,"buy_skill_cost":[123],"vip_skill_max":{"2":50},"skill_point_item_amount":25}`)
+		`{"version":1,"buy_skill_cost":[123],"skill_point_item_amount":25}`)
 	t.Cleanup(func() { exec(t, database, `DELETE FROM items_energy_tuning`) })
 	dispatcher := i911aComposition(database, actor).Dispatcher
 
@@ -36,13 +36,13 @@ func TestI9I11ANativeTunedSkillTunablesDriveReplyAndCap(t *testing.T) {
 
 	exec(t, database, `INSERT INTO commerce_charge_cards(player_id,month_card_start,month_card_end,privilege_card_end,updated_at)VALUES($1,0,0,$2,clock_timestamp())`, int64(actor.PlayerID), time.Now().Add(time.Hour).Unix())
 	exec(t, database, `INSERT INTO commerce_recharge_tuning(singleton,payload,payload_version,updated_at)VALUES(true,$1::jsonb,1,clock_timestamp()) ON CONFLICT(singleton)DO UPDATE SET payload=excluded.payload,payload_version=excluded.payload_version,updated_at=excluded.updated_at`,
-		`{"version":1,"mode":"GRANT","privilege_skill_max":25}`)
+		`{"version":1,"mode":"GRANT","privilege_skill_max":25,"vip_skill_cap":{"2":7}}`)
 	t.Cleanup(func() { exec(t, database, `DELETE FROM commerce_recharge_tuning`) })
 	snapshot, err := privilegeProvider(database).SnapshotTx(ctx, database, actor.PlayerID, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if snapshot.SkillPointNaturalCap != 35 {
-		t.Fatalf("tuned privilege cap %d, want VIP2 source 10 + tuned 25", snapshot.SkillPointNaturalCap)
+	if snapshot.SkillPointNaturalCap != 32 {
+		t.Fatalf("tuned privilege cap %d, want tuned VIP2 7 + tuned 25", snapshot.SkillPointNaturalCap)
 	}
 }

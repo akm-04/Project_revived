@@ -22,10 +22,8 @@ type Tuning struct {
 	BuyManaCost   []int64 `json:"buy_mana_cost"`
 	BuyEnergyCost []int64 `json:"buy_energy_cost"`
 	BuySkillCost  []int64 `json:"buy_skill_cost"`
-	// VipSkillBuy and VipSkillMax are keyed by VIP level; an absent level keeps
-	// the source row.
+	// VipSkillBuy is keyed by VIP level; an absent level keeps the source row.
 	VipSkillBuy map[string]int64 `json:"vip_skill_buy"`
-	VipSkillMax map[string]int64 `json:"vip_skill_max"`
 	// SkillPointItemAmount replaces the skill points of the one stock
 	// skill-point item; 0 keeps the source amount.
 	SkillPointItemAmount int64 `json:"skill_point_item_amount"`
@@ -110,18 +108,6 @@ func tuneVipSkill(catalog *Catalog, t Tuning) error {
 			return errTuning
 		}
 		row.SkillBuy = value
-		catalog.VIP[level] = row
-	}
-	for rawLevel, value := range t.VipSkillMax {
-		level, err := strconv.ParseInt(rawLevel, 10, 64)
-		if err != nil || value < 0 {
-			return errTuning
-		}
-		row, ok := catalog.VIP[level]
-		if !ok {
-			return errTuning
-		}
-		row.SkillMax = value
 		catalog.VIP[level] = row
 	}
 	return nil

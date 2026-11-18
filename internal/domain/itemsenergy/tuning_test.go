@@ -41,18 +41,16 @@ func TestTuneAppliesValidatedOverlay(t *testing.T) {
 func TestTuneRejectsInvalidOverlay(t *testing.T) {
 	catalog := tuneTestCatalog()
 	for name, tuning := range map[string]Tuning{
-		"crit mismatch":    {MidasCritTypes: []int64{2}, MidasCritRates: []int64{1, 1}},
-		"zero rates":       {MidasCritTypes: []int64{2}, MidasCritRates: []int64{0}},
-		"cost ladder":      {BuyManaCost: []int64{1, 2}},
-		"negative cost":    {BuyManaCost: []int64{-1}},
-		"float order":      {MidasFloatUpBasisPoints: 10, MidasFloatDownBasisPoints: 20},
-		"skill ladder":     {BuySkillCost: []int64{1, 2}},
-		"skill negative":   {BuySkillCost: []int64{-1}},
-		"vip gate value":   {VipSkillBuy: map[string]int64{"2": 2}},
-		"vip gate level":   {VipSkillBuy: map[string]int64{"x": 1}},
-		"vip max negative": {VipSkillMax: map[string]int64{"15": -1}},
-		"vip max level":    {VipSkillMax: map[string]int64{"16": 90}},
-		"item negative":    {SkillPointItemAmount: -1},
+		"crit mismatch":  {MidasCritTypes: []int64{2}, MidasCritRates: []int64{1, 1}},
+		"zero rates":     {MidasCritTypes: []int64{2}, MidasCritRates: []int64{0}},
+		"cost ladder":    {BuyManaCost: []int64{1, 2}},
+		"negative cost":  {BuyManaCost: []int64{-1}},
+		"float order":    {MidasFloatUpBasisPoints: 10, MidasFloatDownBasisPoints: 20},
+		"skill ladder":   {BuySkillCost: []int64{1, 2}},
+		"skill negative": {BuySkillCost: []int64{-1}},
+		"vip gate value": {VipSkillBuy: map[string]int64{"2": 2}},
+		"vip gate level": {VipSkillBuy: map[string]int64{"x": 1}},
+		"item negative":  {SkillPointItemAmount: -1},
 	} {
 		if _, err := catalog.Tune(tuning); !errors.Is(err, errTuning) {
 			t.Fatalf("%s: %v", name, err)
@@ -65,18 +63,17 @@ func TestTuneAppliesSkillTunables(t *testing.T) {
 	tuned, err := catalog.Tune(Tuning{
 		BuySkillCost:         []int64{123},
 		VipSkillBuy:          map[string]int64{"2": 1},
-		VipSkillMax:          map[string]int64{"15": 90},
 		SkillPointItemAmount: 25,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if tuned.RefreshCost[1].BuySkillCost != 123 || tuned.VIP[2].SkillBuy != 1 ||
-		tuned.VIP[15].SkillMax != 90 || tuned.Items[SkillPointItemID].SkillPoint != 25 {
+		tuned.Items[SkillPointItemID].SkillPoint != 25 {
 		t.Fatalf("tuned skill values %+v %+v %+v", tuned.RefreshCost[1], tuned.VIP[2], tuned.Items[SkillPointItemID])
 	}
 	if catalog.RefreshCost[1].BuySkillCost != 30 || catalog.VIP[2].SkillBuy != 0 ||
-		catalog.VIP[15].SkillMax != 0 || catalog.Items[SkillPointItemID].SkillPoint != 10 {
+		catalog.Items[SkillPointItemID].SkillPoint != 10 {
 		t.Fatal("tune mutated the source catalog")
 	}
 }
@@ -88,7 +85,7 @@ func TestTuneAbsentSkillTunablesKeepSource(t *testing.T) {
 		t.Fatal(err)
 	}
 	if tuned.RefreshCost[1].BuySkillCost != 30 || tuned.VIP[2].SkillBuy != 0 ||
-		tuned.VIP[15].SkillMax != 0 || tuned.Items[SkillPointItemID].SkillPoint != 10 {
+		tuned.Items[SkillPointItemID].SkillPoint != 10 {
 		t.Fatalf("absent overlay changed source values %+v", tuned)
 	}
 }

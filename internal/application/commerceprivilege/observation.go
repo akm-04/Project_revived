@@ -23,6 +23,24 @@ type Content interface {
 	ChargeCatalogTx(context.Context, tx.Queryer, string) (d.ChargeCatalog, error)
 }
 
+// tunedPrivilegeCatalog reads the pinned catalog and applies the charge overlay
+// to its per-VIP skill caps. Callers that also read privilege_skill_max reuse
+// the returned overlay instead of reading it again.
+func tunedPrivilegeCatalog(c context.Context, store Store, content Content, q tx.Queryer, revision string) (d.Catalog, d.ChargeTuning, bool, error) {
+	catalog, e := content.PrivilegeCatalogTx(c, q, revision)
+	if e != nil {
+		return d.Catalog{}, d.ChargeTuning{}, false, e
+	}
+	tuning, tuned, e := store.ChargeTuningTx(c, q)
+	if e != nil {
+		return d.Catalog{}, d.ChargeTuning{}, false, e
+	}
+	if tuned {
+		catalog = tuning.TunedCatalog(catalog)
+	}
+	return catalog, tuning, tuned, nil
+}
+
 // Provider is shared by display and all existing VIP consumers. The old baseline
 // is only a named compatibility result for untouched legacy state; it does not
 // qualify cosmetic VIP. Known canonical facts always supersede that baseline.
@@ -43,7 +61,7 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if s.Validate() != nil || s.PlayerID != pid || s.UpdatedAt.After(at) {
 		return out, true, d.ErrConflict
 	}
-	catalog, e := p.Content.PrivilegeCatalogTx(c, q, s.ContentRevision)
+	catalog, tuning, tuned, e := tunedPrivilegeCatalog(c, p.Store, p.Content, q, s.ContentRevision)
 	if e != nil {
 		return out, true, e
 	}
@@ -61,10 +79,6 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	privilegeActive := cards.PrivilegeCardEnd > at.Unix()
 	if privilegeActive {
 		chargeCatalog, e := p.Content.ChargeCatalogTx(c, q, s.ContentRevision)
-		if e != nil {
-			return out, true, e
-		}
-		tuning, tuned, e := p.Store.ChargeTuningTx(c, q)
 		if e != nil {
 			return out, true, e
 		}
