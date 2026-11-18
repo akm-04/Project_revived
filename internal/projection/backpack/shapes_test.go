@@ -14,7 +14,7 @@ func TestBuildUsesAcquiredAtAndDeterministicItemOrder(t *testing.T) {
 	got, err := Build([]economy.StackState{
 		{PlayerID: identity.PlayerID(100001), ItemID: 20, Quantity: 2, StateVersion: 4, AcquiredAt: acquired, UpdatedAt: updated},
 		{PlayerID: identity.PlayerID(100001), ItemID: 10, Quantity: 7, StateVersion: 1, AcquiredAt: acquired.Add(time.Minute), UpdatedAt: updated},
-	})
+	}, 4)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,6 +32,9 @@ func TestBuildUsesAcquiredAtAndDeterministicItemOrder(t *testing.T) {
 	}
 	if second["time"] == updated.Unix() {
 		t.Fatal("projection used UpdatedAt instead of AcquiredAt")
+	}
+	if sortType := got["sort_type"]; sortType != int64(4) {
+		t.Fatalf("sort_type=%v", sortType)
 	}
 	if spirit := got["spirit_list"].([]any); len(spirit) != 0 {
 		t.Fatalf("spirit_list=%v", spirit)

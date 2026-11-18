@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"errors"
 	app "gxb.local/backend/v2/internal/application/spirit"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -11,14 +12,24 @@ import (
 type SpiritBackpackSnapshotPort interface {
 	BackpackSnapshot(context.Context, identity.ActorContext, operation.Context) (app.BackpackSnapshot, error)
 }
-type SpiritBackpackProjection struct{ Service SpiritBackpackSnapshotPort }
+type SpiritBackpackProjection struct {
+	Service SpiritBackpackSnapshotPort
+	Sort    BackpackSortReader
+}
 
 func (s SpiritBackpackProjection) Backpack(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
+	if s.Sort == nil {
+		return nil, errors.New("spirit backpack: missing backpack sort reader")
+	}
 	v, e := s.Service.BackpackSnapshot(c, a, op)
 	if e != nil {
 		return nil, e
 	}
-	body, e := backpackproj.Build(v.Stacks)
+	sortType, e := s.Sort.ReadBackpackSortType(c, a.PlayerID)
+	if e != nil {
+		return nil, e
+	}
+	body, e := backpackproj.Build(v.Stacks, sortType)
 	if e != nil {
 		return nil, e
 	}
