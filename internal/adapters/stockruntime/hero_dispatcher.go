@@ -64,6 +64,7 @@ type HeroSkillChoicePort interface {
 type HeroSkillLevelPort interface {
 	SetSkillLevel(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.HeroSkillLevelResult, error)
 	SetAllSkillLevels(context.Context, identity.ActorContext, int64, []apphero.HeroSkillLevelChange, operation.Context) (apphero.HeroSkillLevelResult, error)
+	SkillLevelView(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroSkillLevelResult, error)
 }
 type HeroRosterBodyPort interface {
 	Read(context.Context, identity.ActorContext, operation.Context, uint16, int64) (map[string]any, error)
@@ -129,7 +130,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		result, err := d.SkillLevels.SetAllSkillLevels(ctx, actor, partner, changes, req.Envelope.Operation)
 		if err != nil {
-			return failHeroSkillLevel(err)
+			return d.skillLevelRefusalBody(ctx, actor, partner, req.Envelope.Operation, failHeroSkillLevel(err))
 		}
 		body := map[string]any{"skills": result.SkillString(), "is_success": result.SuccessValue(), "skill_point": result.SkillPoint, "skill_time": result.SkillTime}
 		if !result.Success {
@@ -744,6 +745,27 @@ func failHeroSkillLevel(err error) httpedge.Response {
 		return failureReply(classified)
 	}
 	return failHero(err)
+}
+
+// skillLevelRefusalBody fills the four MID 39 fields the stock callback reads
+// unconditionally (C2/A-126). A 400 stays bodyless; only a 409 refusal is
+// enriched with the current committed state.
+func (d HeroDispatcher) skillLevelRefusalBody(ctx context.Context, actor identity.ActorContext, partner int64, op operation.Context, refusal httpedge.Response) httpedge.Response {
+	if refusal.HTTPStatus != http.StatusConflict || refusal.Body == nil || d.SkillLevels == nil {
+		return refusal
+	}
+	if _, written := refusal.Body["skills"]; written {
+		return refusal
+	}
+	view, err := d.SkillLevels.SkillLevelView(ctx, actor, partner, op)
+	if err != nil {
+		return refusal
+	}
+	refusal.Body["skills"] = view.SkillString()
+	refusal.Body["is_success"] = int64(0)
+	refusal.Body["skill_point"] = view.SkillPoint
+	refusal.Body["skill_time"] = view.SkillTime
+	return refusal
 }
 
 func badHero(code string) httpedge.Response {

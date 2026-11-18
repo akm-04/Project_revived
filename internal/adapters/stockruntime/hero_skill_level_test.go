@@ -32,6 +32,10 @@ func (stub *heroSkillLevelDispatchStub) SetAllSkillLevels(_ context.Context, _ i
 	return stub.bulkResult, nil
 }
 
+func (stub *heroSkillLevelDispatchStub) SkillLevelView(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroSkillLevelResult, error) {
+	return stub.bulkResult, nil
+}
+
 func TestHeroSkillLevelMIDsWireSuccessAndPrivateRefusal(t *testing.T) {
 	stub := &heroSkillLevelDispatchStub{
 		singleResult: apphero.HeroSkillLevelResult{SkillLevels: [6]int64{2, 1, 1, 1, 1, 1}, SkillPoint: 8, SkillTime: 1700000000, Success: true},

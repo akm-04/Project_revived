@@ -426,7 +426,7 @@
    "target": "I9-11",
    "v2": "unimplemented",
    "v1": null,
-   "note": "I9-11 V2 11A A1: no live sender; shared 409+35028 refusal"
+   "note": "I9-11 V2 11A A1: unreachable; no hero_slots_expand window and no heroSlot table, so no sender exists; shared 409+35028 refusal"
   },
   {
    "mid": 65,
@@ -445,7 +445,7 @@
    "target": "I9-11",
    "v2": "unimplemented",
    "v1": null,
-   "note": "I9-11 V2 11A A1: no live sender; shared 409+35028 refusal"
+   "note": "I9-11 V2 11A A1: unreachable; no code opens hero_setting, so no sender exists; shared 409+35028 refusal"
   },
   {
    "mid": 67,

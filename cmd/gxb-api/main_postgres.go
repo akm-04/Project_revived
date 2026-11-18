@@ -411,6 +411,18 @@ func main() {
 		Authority:   authority,
 	})
 	bootstrap.DetailContributors = append(bootstrap.DetailContributors, itemsEnergy.MID1)
+	heroAssets := stockruntime.NewHeroAssetsComposition(stockruntime.HeroAssetsDependencies{
+		Timed:       heroSvc.Timed,
+		Fresh:       pool,
+		Content:     contentDB,
+		Values:      i5db,
+		Privileges:  privileges,
+		I5:          i5svc,
+		Receipts:    receipts,
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+		Authority:   authority,
+	})
+	bootstrap.DetailContributors = append(bootstrap.DetailContributors, heroAssets.Bootstrap)
 	realtime := apprealtime.Service{
 		Authority: authority,
 		Guilds:    guildprojection.RealtimeMembership{Queryer: pool},
@@ -804,10 +816,14 @@ func main() {
 	mustRegister(1793, savedPresetD)
 	bookmarkSvc := apphero.BookmarkService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts}
 	skillSvc := apphero.SkillChoiceService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Inventory: i5db, Content: contentDB}
-	skillLevelSvc := apphero.HeroSkillLevelService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Books: bookSvc, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Resources: i5svc, DiscountBasisPoints: 10000}
+	skillLevelSvc := apphero.HeroSkillLevelService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Books: bookSvc, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Resources: i5svc, Points: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, DiscountBasisPoints: 10000}
 	heroD := observing(authority, achievements, "Hero", stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, SkillLevels: skillLevelSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection})
 	for _, mid := range []uint16{39, 53, 2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 88, 89, 304, 305, 2979} {
 		mustRegister(mid, heroD)
+	}
+	heroAssetsDispatcher := stockruntime.HeroAssetsDispatcher{Authority: authority, Service: heroAssets.Service}
+	for _, mid := range stockruntime.HeroAssetsMIDs {
+		mustRegister(mid, heroAssetsDispatcher)
 	}
 	evolutionD := stockruntime.EvolutionDispatcher{Authority: authority, Service: evolutionSvc}
 	for _, mid := range []uint16{2608, 2609} {

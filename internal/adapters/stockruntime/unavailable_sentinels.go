@@ -32,6 +32,7 @@ import (
 	unavailabledomainconquerschool "gxb.local/backend/v2/internal/domain/conquerschool"
 	unavailabledomaindodgeball "gxb.local/backend/v2/internal/domain/dodgeball"
 	unavailabledomaingodstrial "gxb.local/backend/v2/internal/domain/godstrial"
+	unavailabledomainheroassets "gxb.local/backend/v2/internal/domain/heroassets"
 	unavailabledomainherorecommend "gxb.local/backend/v2/internal/domain/herorecommend"
 	unavailabledomainillusion "gxb.local/backend/v2/internal/domain/illusion"
 	unavailabledomainitemsenergy "gxb.local/backend/v2/internal/domain/itemsenergy"
@@ -83,6 +84,7 @@ var unavailableSentinels = []error{
 	unavailabledomainconquerschool.ErrUnavailable,
 	unavailabledomaindodgeball.ErrUnavailable,
 	unavailabledomaingodstrial.ErrUnavailable,
+	unavailabledomainheroassets.ErrUnavailable,
 	unavailabledomainherorecommend.ErrUnavailable,
 	unavailabledomainillusion.ErrUnavailable,
 	unavailabledomainitemsenergy.ErrUnavailable,
