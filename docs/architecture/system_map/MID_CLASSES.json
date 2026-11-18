@@ -427,6 +427,36 @@
    "writes": "state"
   },
   {
+   "handler": "",
+   "isolation": [],
+   "mid": 20,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 21,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
    "handler": "internal/adapters/stockruntime/player_display.go",
    "isolation": [
     {
@@ -5120,6 +5150,21 @@
   {
    "handler": "",
    "isolation": [],
+   "mid": 65,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
    "mid": 66,
    "read_only": [],
    "receipt_writes": [],
@@ -7743,6 +7788,21 @@
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
    ],
    "writes": "state"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 91,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
   },
   {
    "handler": "internal/adapters/stockruntime/items_energy_dispatcher.go",
@@ -38705,6 +38765,21 @@
     }
    ],
    "writes": "state"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 435,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
   },
   {
    "handler": "internal/adapters/stockruntime/general_dm.go",
@@ -93434,6 +93509,51 @@
   {
    "handler": "",
    "isolation": [],
+   "mid": 2065,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 2066,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 2067,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
    "mid": 2080,
    "read_only": [],
    "receipt_writes": [],
@@ -99866,6 +99986,36 @@
    "handler": "",
    "isolation": [],
    "mid": 2196,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 2197,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 2198,
    "read_only": [],
    "receipt_writes": [],
    "retry": [],

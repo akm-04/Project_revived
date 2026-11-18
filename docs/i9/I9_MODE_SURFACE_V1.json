@@ -117,19 +117,21 @@
    "mid": 20,
    "name": "LOAD_SCROLLS",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 reality check: unreachable; loadScrolls has no caller and the client has no scroll table; shared 409+35028 refusal"
   },
   {
    "mid": 21,
    "name": "LOAD_ESSENCES",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 reality check: only the dead legacy HeroWindow calls loadEssences (no live opener); shared 409+35028 refusal"
   },
   {
    "mid": 23,
@@ -432,10 +434,11 @@
    "mid": 65,
    "name": "LOAD_COLLECTED_HEROS",
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 reality check: loadCollectedHeros has no caller; shared 409+35028 refusal"
   },
   {
    "mid": 66,
@@ -607,10 +610,11 @@
    "mid": 91,
    "name": "OPEN_ACT_ITEM",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: OpenActItemWindow is not in window.lua, so the request is never sent; shared 409+35028 refusal"
   },
   {
    "mid": 96,
@@ -2008,10 +2012,11 @@
    "mid": 435,
    "name": "LOAD_GET_REQUEST_PLAYERS",
    "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-10",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 reality check: the current client's guard sends MID 182 as ACCEPT_ALL_FRIEND_REQUEST (old LOAD_SEND_REQUEST_PLAYERS), so 435 is never reached; 176 already carries request_list; shared 409+35028 refusal"
   },
   {
    "mid": 513,
@@ -5774,28 +5779,31 @@
    "mid": 2065,
    "name": "SELECT_DATE_HERO",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1107 is never listed (only table 1026 has a provider); needs a date-activity owner with per-player state"
   },
   {
    "mid": 2066,
    "name": "CHANGE_DATE_HERO",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1107 is never listed; needs a date-activity owner"
   },
   {
    "mid": 2067,
    "name": "SELECT_DATE_HERO_2",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1126 is never listed; needs a date-activity owner"
   },
   {
    "mid": 2068,
@@ -6251,19 +6259,21 @@
    "mid": 2197,
    "name": "ZHUGE_SELECT_DIALOG",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1109 (Zhuge) is never open; needs a Zhuge activity owner"
   },
   {
    "mid": 2198,
    "name": "ZHUGE_END_DIALOG",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1109 (Zhuge) is never open; needs a Zhuge activity owner"
   },
   {
    "mid": 2199,
