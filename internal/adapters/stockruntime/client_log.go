@@ -64,28 +64,28 @@ func (h ClientLogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func readUpload(r *http.Request) app.UploadRequest {
 	body, err := io.ReadAll(io.LimitReader(r.Body, domain.MaxCrashBodyBytes+1))
-	request := app.UploadRequest{BodyBytes: len(body)}
 	if err != nil {
-		request.Malformed = app.QuarantineMalformedMultipart
-		return request
+		return malformedUpload(body, app.QuarantineMalformedMultipart)
 	}
 	if len(body) > domain.MaxCrashBodyBytes {
-		request.Malformed = app.QuarantineOverCap
-		return request
+		return malformedUpload(body, app.QuarantineOverCap)
 	}
 	mediaType, parameters, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil || mediaType != "multipart/form-data" || parameters["boundary"] == "" {
-		request.Malformed = app.QuarantineMalformedMultipart
-		return request
+		return malformedUpload(body, app.QuarantineMalformedMultipart)
 	}
+	request := app.UploadRequest{BodyBytes: len(body)}
 	if err := readParts(multipart.NewReader(bytes.NewReader(body), parameters["boundary"]), &request); err != nil {
-		request.Malformed = app.QuarantineMalformedMultipart
-		return request
+		return malformedUpload(body, app.QuarantineMalformedMultipart)
 	}
 	if request.Kind == domain.KindErrorLog && len(body) > domain.MaxErrorLogBodyBytes {
 		request.Malformed = app.QuarantineOverCap
 	}
 	return request
+}
+
+func malformedUpload(body []byte, reason string) app.UploadRequest {
+	return app.UploadRequest{BodyBytes: len(body), Malformed: reason, RawBody: body}
 }
 
 var errNoParts = errors.New("multipart body has no parts")

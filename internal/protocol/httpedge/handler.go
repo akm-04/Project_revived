@@ -192,7 +192,9 @@ func (h Handler) decode(r *http.Request) (*Decoded, *wire.EdgeError, bool) {
 	return decoded, edgeErr, false
 }
 
-func writeSaturated(w http.ResponseWriter) {
+// writeSaturated answers an admission refusal and keeps its cause in the journal row (I85_REQUEST_JOURNAL_V1 R2).
+func writeSaturated(w http.ResponseWriter, record *observability.RequestRecord, detail string) {
+	record.Cause = wire.NewError(wire.ErrSaturated, http.StatusServiceUnavailable, "edge_saturated", detail)
 	w.Header().Set("Retry-After", "1")
 	edgeFailure(w, wire.ErrSaturated, "edge_saturated")
 }
@@ -207,7 +209,7 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	budget := h.queueBudget()
 	decoded, edgeErr, saturated := h.decode(r)
 	if saturated {
-		writeSaturated(w)
+		writeSaturated(w, record, "decoding limit saturated")
 		return
 	}
 	if edgeErr != nil {
@@ -218,11 +220,11 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	}
 	defer decoded.Cleanup()
 	if h.QueueWait != nil && h.QueueWait.ExpectedWait() > budget-time.Since(arrived) {
-		writeSaturated(w)
+		writeSaturated(w, record, "queue budget exhausted")
 		return
 	}
 	if h.Admission == nil || !h.Admission.TryAcquire() {
-		writeSaturated(w)
+		writeSaturated(w, record, "in-flight limit saturated")
 		return
 	}
 	defer h.Admission.Release()

@@ -231,6 +231,33 @@ func TestBadUploadsAreQuarantinedUnattributedWhenNoOwnerIsProven(t *testing.T) {
 	}
 }
 
+// A-109: a malformed multipart upload keeps its raw body as the quarantine
+// record (I85_CLIENT_LOG_INGEST_V1 R4), including when the Content-Type carries
+// no boundary at all.
+func TestMalformedMultipartKeepsTheRawRecord(t *testing.T) {
+	f := newFixture(t)
+	body := "malformed-" + f.uid + "-body without multipart framing"
+	response, err := http.Post(f.logURL(t), "multipart/form-data", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	got := f.uploads(t, `account_uid=$1`, f.uid)
+	if len(got) != 1 || got[0].reason == nil || *got[0].reason != app.QuarantineMalformedMultipart || got[0].attachment != len(body) {
+		t.Fatalf("uploads=%+v", got)
+	}
+	var stored string
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT encode(attachment,'escape') FROM client_log_uploads WHERE account_uid=$1`, f.uid).Scan(&stored); err != nil {
+		t.Fatal(err)
+	}
+	if stored != body {
+		t.Fatalf("attachment=%q", stored)
+	}
+}
+
 // TestRequestJournalKeepsRedactedMultipartEnvelope drives the production edge,
 // journal and store: an undecodable multipart upload must persist an envelope
 // with its field names but no file body and no token value (I85_REQUEST_JOURNAL_V1 R3).
@@ -289,6 +316,47 @@ func TestRequestJournalKeepsRedactedMultipartEnvelope(t *testing.T) {
 	}
 	if strings.Contains(raw, "multipart-secret") {
 		t.Fatalf("token value stored: %q", raw)
+	}
+}
+
+// A-110: a saturated decoding admission persists a SERVER_ERROR row with its error class and cause (R2).
+func TestRequestJournalRecordsSaturatedAdmissionCause(t *testing.T) {
+	f := newFixture(t)
+	journal := app.NewJournal(f.store, nil)
+	admission, err := httpedge.NewAdmission(4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoding, err := httpedge.NewAdmission(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !decoding.TryAcquire() {
+		t.Fatal("acquire")
+	}
+	handler := httpedge.Handler{Limits: limits.Default(), Admission: admission, Decoding: decoding, Operations: operation.Factory{Clock: f.clock}, Router: httpedge.NewRouter(), Journal: journal}
+	server := httptest.NewServer(handler)
+	t.Cleanup(server.Close)
+
+	response, err := http.Post(server.URL, "application/x-www-form-urlencoded", strings.NewReader("payload=%7B%22mid%22%3A18%7D"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	stopped, stop := context.WithCancel(ctx)
+	stop()
+	journal.Run(stopped)
+
+	var outcome, errorClass, cause, retention string
+	err = f.pool.Raw().QueryRow(ctx, `SELECT outcome, error_class, cause, retention_class FROM request_journal WHERE http_status = 503 AND cause LIKE 'SATURATED:%' ORDER BY journal_id DESC LIMIT 1`).Scan(&outcome, &errorClass, &cause, &retention)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if outcome != "SERVER_ERROR" || errorClass == "" || !strings.Contains(cause, "decoding limit saturated") || retention != "ERROR" {
+		t.Fatalf("outcome=%s class=%q cause=%q retention=%s", outcome, errorClass, cause, retention)
 	}
 }
 
