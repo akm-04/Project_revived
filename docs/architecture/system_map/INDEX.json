@@ -697,6 +697,7 @@
    "petcampaign_players": "petcampaign",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
+   "player_compat_preferences": "compat",
    "player_course_admissions": "course",
    "player_course_heroes": "course",
    "player_course_roots": "course",
@@ -994,6 +995,15 @@
    "tables": 5
   },
   {
+   "callees": 3,
+   "callers": 0,
+   "mids": 0,
+   "name": "compat",
+   "path": "internal/application/compat",
+   "purpose": "",
+   "tables": 1
+  },
+  {
    "callees": 12,
    "callers": 4,
    "mids": 7,
@@ -1220,7 +1230,7 @@
   },
   {
    "callees": 13,
-   "callers": 57,
+   "callers": 58,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",

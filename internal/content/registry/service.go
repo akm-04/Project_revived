@@ -491,6 +491,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotSocialInput != 1 {
 				return errors.New("content registry: Social input payload count drift")
 			}
+			gotCompatMessagePush, err := s.Repo.InsertCompatMessagePush(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotCompatMessagePush != 1 {
+				return errors.New("content registry: compat message push payload count drift")
+			}
 			gotEmoticons, err := s.Repo.InsertEmoticons(tctx, scope.Tx, b)
 			if err != nil {
 				return err

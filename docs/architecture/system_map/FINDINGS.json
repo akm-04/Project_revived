@@ -9190,7 +9190,9 @@
    "kind": "code_1"
   }
  ],
- "systems_not_wired": [],
+ "systems_not_wired": [
+  "compat"
+ ],
  "tables_locked_by_many": [
   {
    "table": "account_sessions",
@@ -9206,6 +9208,7 @@
     "characterpractice",
     "charactersavedpreset",
     "commerceprivilege",
+    "compat",
     "conquerschool",
     "course",
     "dodgeball",
@@ -9262,6 +9265,7 @@
     "characterpractice",
     "charactersavedpreset",
     "commerceprivilege",
+    "compat",
     "conquerschool",
     "course",
     "dodgeball",
@@ -9318,6 +9322,7 @@
     "characterpractice",
     "charactersavedpreset",
     "commerceprivilege",
+    "compat",
     "conquerschool",
     "course",
     "dodgeball",
@@ -9431,6 +9436,7 @@
     "championsleague",
     "characterhero",
     "commerceprivilege",
+    "compat",
     "conquerschool",
     "course",
     "dodgeball",
