@@ -78,6 +78,38 @@ func TestI9_10FMentorAcceptRefusesBlockedPair(t *testing.T) {
 	assertNoMentorEffect(t, p, teacher.PlayerID, student.PlayerID)
 }
 
+// A-199: an application from a pair where either side blocks the other is
+// refused at apply with stock 34014, before any application row is written.
+func TestI9_10FMentorApplyRefusesBlockedPair(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	server := rankingServer(t, p)
+	teacher := mentorActorOn(t, p, server, 60)
+	student := mentorActorOn(t, p, server, 20)
+
+	at := time.Now().UTC().Add(-time.Hour)
+	seedSocialRoot(t, p, teacher.PlayerID, at)
+	seedSocialRoot(t, p, student.PlayerID, at)
+	exec(t, p, `INSERT INTO social_blocks(blocker_player_id,blocked_player_id,generation,active,activated_at,removed_at,state_version,updated_at)VALUES($1,$2,1,true,$3,NULL,1,$3)`, int64(teacher.PlayerID), int64(student.PlayerID), at)
+
+	expectMentorRefusal(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(teacher.PlayerID), "relation_type": int64(1), "msg": ""}), 1857, 34014)
+	var applications int64
+	if err := p.Raw().QueryRow(ctx, `SELECT count(*) FROM mentor_applications WHERE applicant_id=$1 AND target_id=$2`, int64(student.PlayerID), int64(teacher.PlayerID)).Scan(&applications); err != nil || applications != 0 {
+		t.Fatalf("blocked apply wrote applications=%d err=%v", applications, err)
+	}
+}
+
+// A-199: a target with no player root is the stock 20004 "This Player Doesn't
+// Exist", not the blocked-pair text.
+func TestI9_10FMentorApplyMissingTargetIsStockPlayerMissing(t *testing.T) {
+	p := pool(t)
+	service := mentorService(p)
+	server := rankingServer(t, p)
+	student := mentorActorOn(t, p, server, 20)
+	missing := identity.PlayerID(int64(server)*100000 + 99999)
+	expectMentorRefusal(t, mentorCall(t, service, student, 1857, map[string]any{"to_player_id": int64(missing), "relation_type": int64(1), "msg": ""}), 1857, 20004)
+}
+
 // DL-ab3dc95e: either side at the 80-friend cap refuses 34006 (own) / 34007
 // (other), as the codes in message.lua:352-436 name.
 func TestI9_10FMentorAcceptRefusesFullFriendList(t *testing.T) {

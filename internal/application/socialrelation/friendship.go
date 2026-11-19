@@ -64,17 +64,9 @@ func (ensurer FriendshipEnsurer) EnsureFriendshipTx(ctx context.Context, t tx.Tx
 	if found && existing.Active {
 		return false, nil
 	}
-	firstKey, err := BlockLockKey(first, second)
+	blockPairs, err := orderedBlockPairs(first, second)
 	if err != nil {
 		return false, err
-	}
-	secondKey, err := BlockLockKey(second, first)
-	if err != nil {
-		return false, err
-	}
-	blockPairs := [][2]identity.PlayerID{{first, second}, {second, first}}
-	if lockkey.Compare(secondKey, firstKey) < 0 {
-		blockPairs[0], blockPairs[1] = blockPairs[1], blockPairs[0]
 	}
 	for _, pair := range blockPairs {
 		block, found, err := ensurer.Store.LockBlockTx(ctx, t, pair[0], pair[1])
@@ -111,4 +103,43 @@ func (ensurer FriendshipEnsurer) EnsureFriendshipTx(ctx context.Context, t tx.Tx
 		}
 	}
 	return true, nil
+}
+
+// PairBlockedTx reports whether either direction of the pair holds an active
+// block. It is the typed observation an owner applies inside its own
+// transaction; the caller must already have fenced both players' I4 roots.
+func (ensurer FriendshipEnsurer) PairBlockedTx(ctx context.Context, t tx.Tx, first, second identity.PlayerID) (bool, error) {
+	if ensurer.Store == nil || t == nil || !first.Valid() || !second.Valid() || first == second {
+		return false, ErrInvalidCommand
+	}
+	blockPairs, err := orderedBlockPairs(first, second)
+	if err != nil {
+		return false, err
+	}
+	for _, pair := range blockPairs {
+		block, found, err := ensurer.Store.LockBlockTx(ctx, t, pair[0], pair[1])
+		if err != nil {
+			return false, err
+		}
+		if found && block.Active {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func orderedBlockPairs(first, second identity.PlayerID) ([][2]identity.PlayerID, error) {
+	firstKey, err := BlockLockKey(first, second)
+	if err != nil {
+		return nil, err
+	}
+	secondKey, err := BlockLockKey(second, first)
+	if err != nil {
+		return nil, err
+	}
+	pairs := [][2]identity.PlayerID{{first, second}, {second, first}}
+	if lockkey.Compare(secondKey, firstKey) < 0 {
+		pairs[0], pairs[1] = pairs[1], pairs[0]
+	}
+	return pairs, nil
 }

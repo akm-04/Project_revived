@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
@@ -30,6 +31,9 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 	var body map[string]any
 	err = service.runReceipted(ctx, actor, op, "apply", map[string]any{"target": int64(target), "relation_type": relationType, "message": message}, &body, func(ctx context.Context, t tx.Tx, at time.Time) error {
 		if err := lockPlayerRoots(ctx, service.Players, t, actor.LogicalServerID, actor.PlayerID, target); err != nil {
+			if errors.Is(err, playerroot.ErrPlayerRootNotFound) {
+				return refusal(MissingTargetCode)
+			}
 			return err
 		}
 		state, err := service.Store.LockStateTx(ctx, t, actor.PlayerID, actor.LogicalServerID, at)
@@ -45,6 +49,13 @@ func (service Service) Apply(ctx context.Context, actor identity.ActorContext, t
 			return err
 		}
 		if !found {
+			return refusal(MissingTargetCode)
+		}
+		blocked, err := service.Friendships.PairBlockedTx(ctx, t, actor.PlayerID, target)
+		if err != nil {
+			return err
+		}
+		if blocked {
 			return refusal(34014)
 		}
 		applicantGate, err := service.functionQualified(ctx, t, actor.PlayerID)
