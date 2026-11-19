@@ -110,7 +110,7 @@ func (s Service) resolveHeroRewards(c context.Context, sc gen.TimedScope, pid id
 				return heroRewards{}, nil, d.ErrRefused
 			}
 			out.lines = append(out.lines, grant.Line{Kind: grant.StackItem, ItemID: stone[0], Amount: stone[1]})
-			out.awards = append(out.awards, map[string]any{"table_id": stone[0], "item_num": stone[1], "to_stone": true})
+			out.awards = append(out.awards, map[string]any{"table_id": stone[0], "item_num": stone[1], "to_stone": true, "is_partner": false})
 			continue
 		}
 		newHeroes = append(newHeroes, heroID)
@@ -133,6 +133,7 @@ func (s Service) materializeHeroes(c context.Context, sc gen.TimedScope, pid ide
 			return err
 		}
 		wire["is_partner"] = true
+		wire["to_stone"] = false
 		// The client assigns one to a partner award itself; emit it for the
 		// shared awards[].item_num conformance path.
 		wire["item_num"] = int64(1)
@@ -185,7 +186,7 @@ func rewardLines(rewards d.Rewards) []grant.Line {
 func rewardAwards(rewards d.Rewards) []any {
 	awards := make([]any, 0, len(rewards.Awards))
 	for _, award := range rewards.Awards {
-		awards = append(awards, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum})
+		awards = append(awards, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum, "to_stone": false, "is_partner": false})
 	}
 	return awards
 }

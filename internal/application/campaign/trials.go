@@ -158,7 +158,12 @@ func (s Mode) BuyTrial(c context.Context, a identity.ActorContext, id int64, op 
 		if err != nil {
 			return nil, purchaseError(err)
 		}
-		return map[string]any{}, nil
+		buys, err := s.trialBuys(c, sc.Tx, a.PlayerID, v.day)
+		if err != nil {
+			return nil, err
+		}
+		remaining := v.catalog.TrialRemaining(r.Progress, group, v.day, buys[group.ConsumeID])
+		return map[string]any{"trial_info": map[string]any{"left_times": remaining}}, nil
 	})
 }
 

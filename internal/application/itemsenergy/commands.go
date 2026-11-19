@@ -310,7 +310,7 @@ func (s Service) goldenHand(c context.Context, actor identity.ActorContext, op o
 			return nil, err
 		}
 		if tenfold {
-			return map[string]any{"cost": cost, "crit": crit, "mana": mana, "fumo": map[string]any{}, "trial_info": map[string]any{"left_times": int64(0)}}, nil
+			return map[string]any{"consume_id": int64(1), "cost": cost, "crit": crit, "mana": mana, "fumo": map[string]any{}, "trial_info": map[string]any{"left_times": int64(0)}}, nil
 		}
 		return map[string]any{"cost": cost, "crit": crit, "mana": mana, "buy_mana_times": counters.Mana}, nil
 	})

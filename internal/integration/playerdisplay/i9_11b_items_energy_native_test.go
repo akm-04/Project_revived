@@ -287,6 +287,17 @@ func TestI911BTuningOverlayAndFallback(t *testing.T) {
 	if fallback.HTTPStatus != http.StatusConflict || fallback.Body["error_code"] != int64(35031) {
 		t.Fatalf("invalid overlay did not fall back to source: %d %#v", fallback.HTTPStatus, fallback.Body)
 	}
+	// One invalid field rejects the whole overlay: the source cap and the source
+	// 120 grant apply even though buy_energy_num is valid on its own.
+	exec(t, database, `UPDATE items_energy_tuning SET payload='{"energy_max_limit":-1,"buy_energy_num":240}'::jsonb`)
+	exec(t, database, `UPDATE player_temporal_resources SET stored_amount=100 WHERE player_id=$1 AND resource_key='energy'`, int64(a.PlayerID))
+	exec(t, database, `UPDATE daily_consumption_players SET counts='{}'::jsonb WHERE player_id=$1`, int64(a.PlayerID))
+	i911bScalarSet(t, database, a, "crystal", 1000)
+	mixed := dispatcher.Dispatch(ctx, i911bRequest(a, 97, map[string]any{}, op()))
+	i911bStatusCode(t, mixed)
+	if mixed.Body["energy"] != int64(220) {
+		t.Fatalf("mixed invalid overlay did not fall back to the source grant: %#v", mixed.Body)
+	}
 	exec(t, database, `DELETE FROM items_energy_tuning`)
 }
 
@@ -329,6 +340,9 @@ func TestI911BGoldenHandAndTenfoldSpendOnce(t *testing.T) {
 	tenfold := dispatcher.Dispatch(ctx, i911bRequest(a, 29, map[string]any{"consume_id": int64(1)}, tenfoldOp))
 	i911bStatusCode(t, tenfold)
 	replyconformance.Check(t, 29, tenfold.Body)
+	if tenfold.Body["consume_id"] != int64(1) {
+		t.Fatalf("tenfold consume_id %#v", tenfold.Body["consume_id"])
+	}
 	expectedTenfold, _, _, err := catalog.MidasMana(1, 2, 10, combat.NewStream(tenfoldOp.Derive("items-energy.golden-hand/v1", 0)))
 	if err != nil {
 		t.Fatal(err)
@@ -462,7 +476,7 @@ func TestI911BBoxScheduleAndReplay(t *testing.T) {
 	}
 	wantAwards := make([]any, 0, len(expected.Awards))
 	for _, award := range expected.Awards {
-		wantAwards = append(wantAwards, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum})
+		wantAwards = append(wantAwards, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum, "to_stone": false, "is_partner": false})
 	}
 	i911bStack(t, database, a, itemID, 3)
 	first := i911bRequest(a, 241, map[string]any{"item_id": itemID, "gift_id": giftID, "num": int64(1)}, fixed)
@@ -574,6 +588,9 @@ func TestI911BBoxHeroDuplicateToStone(t *testing.T) {
 	for _, entry := range response.Body["awards"].([]any) {
 		award, ok := entry.(map[string]any)
 		if ok && award["table_id"] == stone[0] && award["to_stone"] == true {
+			if award["is_partner"] != false {
+				t.Fatalf("stone award partner flag %#v", award)
+			}
 			found = true
 		}
 	}
@@ -698,6 +715,9 @@ func TestI911BQuickFumoOwnerRoute(t *testing.T) {
 	response := dispatcher.Dispatch(ctx, request())
 	i911bStatusCode(t, response)
 	replyconformance.Check(t, 29, response.Body)
+	if response.Body["consume_id"] != int64(2) {
+		t.Fatalf("fumo consume_id %#v", response.Body["consume_id"])
+	}
 	if response.Body["fumo"] != int64(150) || response.Body["cost"] != int64(20) {
 		t.Fatalf("quick fumo reply %#v", response.Body)
 	}
@@ -717,6 +737,42 @@ func TestI911BQuickFumoOwnerRoute(t *testing.T) {
 	}
 	if i911bHeroFumo(t, database, a, hero.PartnerID, 1) != 150 || i911bScalarBalance(t, database, a, "crystal") != 980 {
 		t.Fatal("refused quick fumo changed state")
+	}
+}
+
+// TestI911BTrialConsumeReplyCarriesRemaining proves MID 29 consume_id 3..10
+// answers the stock MapDetailWindow callback: the numeric branch id plus the
+// post-purchase trial allowance at trial_info.left_times.
+func TestI911BTrialConsumeReplyCarriesRemaining(t *testing.T) {
+	database := pool(t)
+	a, rev, _ := i911bFixture(t, database)
+	composition := itemsEnergyComposition(database, database, a)
+	composition.Dispatcher.Campaign = campaignMode(t, database)
+	dispatcher := composition.Dispatcher
+	compositeLevel(t, database, a, rev, 100)
+	cat, err := (contentstore.Store{Queryer: database}).CampaignCatalogTx(ctx, database, rev)
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := modes.Day(time.Now())
+	selected := -1
+	for index, group := range cat.TrialGroups {
+		if group.ConsumeID >= 3 && group.ConsumeID <= 10 && group.Scheduled(cat, day) {
+			selected = index
+			break
+		}
+	}
+	if selected < 0 {
+		t.Fatal("no scheduled trial group")
+	}
+	group := cat.TrialGroups[selected]
+	i911bScalarSet(t, database, a, "crystal", 10000)
+	response := dispatcher.Dispatch(ctx, i911bRequest(a, 29, map[string]any{"consume_id": group.ConsumeID}, op()))
+	i911bStatusCode(t, response)
+	replyconformance.Check(t, 29, response.Body)
+	info, _ := response.Body["trial_info"].(map[string]any)
+	if response.Body["consume_id"] != group.ConsumeID || info["left_times"] != group.DailyLimit+1 {
+		t.Fatalf("trial reply %#v want consume_id=%d left_times=%d", response.Body, group.ConsumeID, group.DailyLimit+1)
 	}
 }
 
@@ -750,8 +806,13 @@ func TestI911BBoxFixedChooseOneSpirit(t *testing.T) {
 	chosen := dispatcher.Dispatch(ctx, i911bRequest(a, 241, map[string]any{"item_id": int64(50001052), "gift_id": int64(90001088), "num": int64(1)}, op()))
 	i911bStatusCode(t, chosen)
 	replyconformance.Check(t, 241, chosen.Body)
-	if len(chosen.Body["awards"].([]any)) == 0 || i911bStackQuantity(t, database, a, 50001052) != 0 {
+	awards := chosen.Body["awards"].([]any)
+	if len(awards) == 0 || i911bStackQuantity(t, database, a, 50001052) != 0 {
 		t.Fatalf("choose-one box %#v", chosen.Body)
+	}
+	heroAward, ok := awards[0].(map[string]any)
+	if !ok || heroAward["is_partner"] != true || heroAward["to_stone"] != false {
+		t.Fatalf("choose-one hero award %#v", awards)
 	}
 	// Spirit-energy gift row: 50002142 -> gift 90040410 grants 6 spirit energy.
 	before := i911bTemporal(t, database, a, "spirit_energy")
