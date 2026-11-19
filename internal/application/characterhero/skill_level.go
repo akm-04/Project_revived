@@ -371,7 +371,7 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 		if hero.ValidatePersistent() != nil || hero.Ref() != ref {
 			return ErrHeroSkillLevelRequest
 		}
-		if at.Before(hero.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, hero.UpdatedAt)) {
 			return ErrHeroSkillLevelStaleTime
 		}
 		kind, err := s.Content.HeroKindTx(ctx, scope.Tx, hero.CreationContentRevision, hero.TableID)

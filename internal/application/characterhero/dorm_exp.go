@@ -3,6 +3,7 @@ package characterhero
 import (
 	"context"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
@@ -21,7 +22,7 @@ func (s Service) ApplyDormEXPLockedTx(ctx context.Context, t tx.Tx, ref characte
 	if e != nil {
 		return h, false, e
 	}
-	if observed.Before(h.UpdatedAt) {
+	if observed.Before(gen.EffectiveObservation(observed, h.UpdatedAt)) {
 		return h, false, errors.New("character: stale Dorm EXP time")
 	}
 	max, e := s.Progression.HeroMaxLevelTx(ctx, t, revision, playerLevel)

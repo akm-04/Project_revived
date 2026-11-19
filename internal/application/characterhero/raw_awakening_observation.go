@@ -3,6 +3,7 @@ package characterhero
 import (
 	"context"
 	"fmt"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
@@ -38,7 +39,7 @@ func (r RawAwakeningObservationReader) RawAwakeningTx(c context.Context, sc ca.C
 	if !found {
 		return out, character.ErrRawAwakeningUnavailable
 	}
-	if f.Validate() != nil || f.Ref != ref || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || sc.ObservedAt.Before(f.UpdatedAt) {
+	if f.Validate() != nil || f.Ref != ref || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || sc.ObservedAt.Before(gen.EffectiveObservation(sc.ObservedAt, f.UpdatedAt)) {
 		return out, character.ErrRawAwakeningUnavailable
 	}
 	producer := fmt.Sprintf("CharacterHero/%s/%d/%d/facet%d/%s", f.BirthPolicy, ref.PlayerID, ref.PartnerID, f.Version, f.BirthAt.UTC().Format(time.RFC3339Nano))

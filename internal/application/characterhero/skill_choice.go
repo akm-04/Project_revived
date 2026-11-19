@@ -230,7 +230,7 @@ func (s SkillChoiceService) ChangeSkill(c context.Context, a identity.ActorConte
 		if h.ValidatePersistent() != nil || h.Ref() != ref {
 			return ErrSkillChoiceRequest
 		}
-		if at.Before(h.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) {
 			return ErrSkillChoiceStaleTime
 		}
 		if h.TableID != 11001144 {
@@ -262,7 +262,7 @@ func (s SkillChoiceService) ChangeSkill(c context.Context, a identity.ActorConte
 		if !exists || book.Validate() != nil || book.PlayerID != a.PlayerID || book.ItemID != value || book.Quantity <= 0 {
 			return ErrSkillChoiceRequest
 		}
-		if at.Before(book.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, book.UpdatedAt)) {
 			return ErrSkillChoiceStaleTime
 		}
 		changed := h.RawSkills.ChoiceIDs[4] != desired

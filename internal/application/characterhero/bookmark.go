@@ -196,7 +196,7 @@ func (s BookmarkService) SetBookmark(c context.Context, a identity.ActorContext,
 		if h.ValidatePersistent() != nil || h.Ref() != ref {
 			return ErrBookmarkRequest
 		}
-		if at.Before(h.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) {
 			return ErrBookmarkStaleTime
 		}
 		changed := h.IsLike != value
