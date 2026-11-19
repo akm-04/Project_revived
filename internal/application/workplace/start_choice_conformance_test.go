@@ -113,28 +113,35 @@ func startChoiceOperation(t *testing.T, id ids.UUID, at time.Time) operation.Con
 
 func startChoiceMode(at time.Time, store *startChoiceStore, combat *startChoiceCombat) Mode {
 	return Mode{
-		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}},
-		Fresh:       startChoiceTx{},
-		Store:       store,
-		Content:     startChoiceContent{},
-		Fence:       startChoiceFence{},
-		Functions:   startChoiceFunctions{},
-		Directory:   startChoiceDirectory{},
-		Campaigns:   startChoiceCampaigns{},
-		Heroes:      startChoiceHeroes{},
-		HeroLocks:   startChoiceHeroLocks{},
-		HeroWire:    func(character.Hero) (map[string]any, error) { return map[string]any{}, nil },
-		Opponents:   startChoiceOpponents{},
-		Combat:      combat,
-		Stats:       startChoiceStats{},
-		Values:      startChoiceValues{},
-		Privileges:  startChoicePrivileges{},
-		Facts:       startChoiceFacts{},
-		Receipts:    startChoiceReceipts{},
-		ReceiptRead: startChoiceReceiptRead{},
-		Rental:      startChoiceRental{},
-		Broadcast:   startChoiceBroadcast{},
+		Timed:          gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}},
+		Fresh:          startChoiceTx{},
+		Store:          store,
+		Content:        startChoiceContent{},
+		Fence:          startChoiceFence{},
+		Functions:      startChoiceFunctions{},
+		Directory:      startChoiceDirectory{},
+		Campaigns:      startChoiceCampaigns{},
+		Heroes:         startChoiceHeroes{},
+		HeroLocks:      startChoiceHeroLocks{},
+		HeroWire:       func(character.Hero) (map[string]any, error) { return map[string]any{}, nil },
+		Opponents:      startChoiceOpponents{},
+		Combat:         combat,
+		Stats:          startChoiceStats{},
+		Values:         startChoiceValues{},
+		Privileges:     startChoicePrivileges{},
+		Facts:          startChoiceFacts{},
+		Receipts:       startChoiceReceipts{},
+		ReceiptRead:    startChoiceReceiptRead{},
+		Rental:         startChoiceRental{},
+		Broadcast:      startChoiceBroadcast{},
+		BattleObserver: startChoiceObserver{},
 	}
+}
+
+type startChoiceObserver struct{}
+
+func (startChoiceObserver) ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error {
+	return nil
 }
 
 // startChoiceCombat records the StartRequest the mode builder produced and

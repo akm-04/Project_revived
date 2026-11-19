@@ -107,29 +107,36 @@ type Facts interface {
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
+// BattleObserver is the Library owner's Girls Log battle-count port
+// (I9_11_GIRLS_LOG_V1 G2): one call per first settlement and owned hero.
+type BattleObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Players     Players
-	Functions   Functions
-	Directory   Directory
-	Presence    Presence
-	Heroes      Heroes
-	Pets        Heroes
-	Stats       Stats
-	Rooms       sharedroom.Service
-	RoomStore   sharedroom.Store
-	Invites     roominvite.Materializer
-	Combat      Combat
-	Tickets     i5.OccultTicketPort
-	Values      Values
-	Awakening   Awakening
-	Facts       Facts
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed          gen.TimedRunner
+	Fresh          tx.Queryer
+	Store          Store
+	Content        Content
+	Fence          Fence
+	Players        Players
+	Functions      Functions
+	Directory      Directory
+	Presence       Presence
+	Heroes         Heroes
+	Pets           Heroes
+	Stats          Stats
+	Rooms          sharedroom.Service
+	RoomStore      sharedroom.Store
+	Invites        roominvite.Materializer
+	Combat         Combat
+	Tickets        i5.OccultTicketPort
+	Values         Values
+	Awakening      Awakening
+	Facts          Facts
+	Receipts       receipt.Store
+	ReceiptRead    receipt.Reader
+	BattleObserver BattleObserver
 	// RetentionDays is the R8 cap (U4) on the owner's report window; zero
 	// keeps the owner window alone.
 	RetentionDays int
@@ -138,5 +145,5 @@ type Mode struct {
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil &&
 		s.Functions != nil && s.Directory != nil && s.Presence != nil && s.Heroes != nil && s.Combat != nil && s.Tickets != nil && s.Values != nil &&
-		s.Awakening != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil && s.Rooms.Store != nil && s.RoomStore != nil
+		s.Awakening != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil && s.BattleObserver != nil && s.Rooms.Store != nil && s.RoomStore != nil
 }

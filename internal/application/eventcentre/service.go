@@ -159,23 +159,30 @@ type FactsPort interface {
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
+// BattleObserver is the Library owner's Girls Log battle-count port
+// (I9_11_GIRLS_LOG_V1 G2): one call per first settlement and owned hero.
+type BattleObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
 type Service struct {
-	Timed    gen.TimedRunner
-	Reads    tx.Runner
-	Owner    OwnerPort
-	Book     BookPort
-	Content  ContentPort
-	Pets     PetPort
-	Players  playerroot.TxLocker
-	Fence    ActorFence
-	Costs    CostPort
-	Grants   GrantPort
-	Receipts receipt.Store
-	Heroes   BoardHeroes
-	Levels   BoardLevels
-	Stats    BoardStats
-	Combat   BoardCombat
-	Facts    FactsPort
+	Timed          gen.TimedRunner
+	Reads          tx.Runner
+	Owner          OwnerPort
+	Book           BookPort
+	Content        ContentPort
+	Pets           PetPort
+	Players        playerroot.TxLocker
+	Fence          ActorFence
+	Costs          CostPort
+	Grants         GrantPort
+	Receipts       receipt.Store
+	Heroes         BoardHeroes
+	Levels         BoardLevels
+	Stats          BoardStats
+	Combat         BoardCombat
+	Facts          FactsPort
+	BattleObserver BattleObserver
 }
 
 func (s Service) complete() bool {

@@ -28,7 +28,7 @@ import (
 )
 
 func (s Service) boardReady() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Owner != nil && s.Content != nil && s.Book != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil && s.Heroes != nil && s.Levels != nil && s.Stats != nil && s.Combat != nil && s.Facts != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Owner != nil && s.Content != nil && s.Book != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil && s.Heroes != nil && s.Levels != nil && s.Stats != nil && s.Combat != nil && s.Facts != nil && s.BattleObserver != nil
 }
 
 func (s Service) boardPin(ctx context.Context, op operation.Context) (operation.Context, string, error) {
@@ -396,9 +396,13 @@ func (s Service) BoardInfo(ctx context.Context, a identity.ActorContext, op oper
 		if err != nil {
 			return err
 		}
+		var settledMissions []ec.BoardMission
 		for _, mission := range state.Board.DueMissions(at.Unix(), catalog) {
 			if err = s.settleBoardMission(prepared, sc.Tx, a, valueop, catalog, &state.Board, mission, unresolvable[mission.Attempt]); err != nil {
 				return err
+			}
+			if !unresolvable[mission.Attempt] {
+				settledMissions = append(settledMissions, mission)
 			}
 		}
 		keep := make([]int64, 0, len(state.Board.History))
@@ -419,6 +423,13 @@ func (s Service) BoardInfo(ctx context.Context, a identity.ActorContext, op oper
 		root.UpdatedAt = at
 		if err = s.Owner.SaveRootTx(ctx, sc.Tx, root, previous); err != nil {
 			return err
+		}
+		// Each settled mission's own heroes; the counter lock is last.
+		for _, mission := range settledMissions {
+			partners := append([]int64{mission.Leader}, mission.Partners...)
+			if err = s.BattleObserver.ObserveBattleTx(ctx, sc.Tx, a.PlayerID, partners, at); err != nil {
+				return err
+			}
 		}
 		body = ec.BoardWire(state.Board)
 		return nil

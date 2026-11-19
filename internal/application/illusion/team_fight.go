@@ -186,12 +186,41 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 			if err != nil {
 				return err
 			}
-			return s.storeTeamInfo(sc, room, state, info)
+			if err = s.storeTeamInfo(sc, room, state, info); err != nil {
+				return err
+			}
+			// Each frozen member's own heroes; the counter lock is last.
+			snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, attemptUUID)
+			if err != nil {
+				return err
+			}
+			for _, member := range members {
+				if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, member, frozenPartners(snapshot, member), at); err != nil {
+					return err
+				}
+			}
+			return nil
 		}}, op)
 	if err != nil {
 		return nil, err
 	}
 	return reportArray(report), nil
+}
+
+// frozenPartners is the owned hero roster the attempt froze for one player:
+// borrowed, template and foreign actors never count.
+func frozenPartners(snapshot cd.Snapshot, player identity.PlayerID) []int64 {
+	partners := make([]int64, 0, len(snapshot.Battle.TeamA))
+	for _, actor := range snapshot.Battle.TeamA {
+		if actor.Kind != cd.HeroActor || identity.PlayerID(actor.Player) != player {
+			continue
+		}
+		if actor.Origin != cd.OwnedSelf && actor.Origin != cd.OwnedMember {
+			continue
+		}
+		partners = append(partners, actor.Identity)
+	}
+	return partners
 }
 
 // GetReport answers 1362 from the stored team report of the actor's server.

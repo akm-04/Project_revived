@@ -138,26 +138,27 @@ func newStartChoiceMode(at time.Time, content Content, combat Combat, adventureS
 	timed := gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}}
 	stubs := startChoiceStubs{}
 	return Mode{
-		Timed:     timed,
-		Fresh:     startChoiceTx{},
-		Store:     adventureStore,
-		Content:   content,
-		Functions: startChoiceFunctions{},
-		Directory: startChoiceDirectory{},
-		Guilds:    stubs,
-		Heroes:    startChoiceRoster{},
-		Pets:      stubs,
-		Stats:     stubs,
-		Combat:    combat,
-		Costs:     stubs,
-		Grants:    stubs,
-		Opponents: stubs,
-		Wake:      stubs,
-		Rooms:     sr.Service{Timed: timed, Fresh: startChoiceTx{}, Store: roomStore, Fence: startChoiceFence{}, Players: startChoiceRoots{}},
-		RoomStore: roomStore,
-		Mail:      stubs,
-		Partners:  stubs,
-		HeroWire:  func(character.Hero) (map[string]any, error) { return nil, nil },
+		Timed:          timed,
+		Fresh:          startChoiceTx{},
+		Store:          adventureStore,
+		Content:        content,
+		Functions:      startChoiceFunctions{},
+		Directory:      startChoiceDirectory{},
+		Guilds:         stubs,
+		Heroes:         startChoiceRoster{},
+		Pets:           stubs,
+		Stats:          stubs,
+		Combat:         combat,
+		Costs:          stubs,
+		Grants:         stubs,
+		Opponents:      stubs,
+		Wake:           stubs,
+		Rooms:          sr.Service{Timed: timed, Fresh: startChoiceTx{}, Store: roomStore, Fence: startChoiceFence{}, Players: startChoiceRoots{}},
+		RoomStore:      roomStore,
+		Mail:           stubs,
+		Partners:       stubs,
+		HeroWire:       func(character.Hero) (map[string]any, error) { return nil, nil },
+		BattleObserver: stubs,
 	}
 }
 
@@ -273,6 +274,7 @@ type startChoiceStubs struct {
 	Mail
 	Partners
 	Roster
+	BattleObserver
 }
 
 type startChoiceFence struct{}

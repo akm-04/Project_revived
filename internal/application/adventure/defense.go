@@ -321,7 +321,10 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 		}
 		state.AddPush(7, int64(a.PlayerID), true, map[string]any{"room_id": room.ID, "monster_pos": position,
 			"pos_status": map[string]any{"player_id": int64(0), "busy_type": int64(0)}, "monster_status": monsterKillers(state)})
-		return s.restoreRoom(sc, room, state)
+		if err = s.restoreRoom(sc, room, state); err != nil {
+			return err
+		}
+		return s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, at)
 	}}, op)
 	if err != nil {
 		return Response{}, err

@@ -520,6 +520,16 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 				return err
 			}
 		}
+		// Each frozen member's own heroes; the counter lock is last.
+		snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, started.Attempt.ID)
+		if err != nil {
+			return err
+		}
+		for _, member := range frozen {
+			if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, member, frozenPartners(snapshot, member), at); err != nil {
+				return err
+			}
+		}
 		return nil
 	}}, op)
 	if err != nil {
@@ -578,6 +588,22 @@ func (s Mode) coopBattle(c context.Context, sc gen.TimedScope, room sharedroom.R
 		}
 	}
 	return battle, true, nil
+}
+
+// frozenPartners is the owned hero roster the attempt froze for one player:
+// borrowed, template and foreign actors never count.
+func frozenPartners(snapshot cd.Snapshot, player identity.PlayerID) []int64 {
+	partners := make([]int64, 0, len(snapshot.Battle.TeamA))
+	for _, actor := range snapshot.Battle.TeamA {
+		if actor.Kind != cd.HeroActor || identity.PlayerID(actor.Player) != player {
+			continue
+		}
+		if actor.Origin != cd.OwnedSelf && actor.Origin != cd.OwnedMember {
+			continue
+		}
+		partners = append(partners, actor.Identity)
+	}
+	return partners
 }
 
 func (s Mode) coopRoomInfo(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState) (map[string]any, error) {

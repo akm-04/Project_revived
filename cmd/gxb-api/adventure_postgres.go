@@ -27,7 +27,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func canonicalAdventure(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, owner i5.Service, fight combat.Service, opponents appadventure.Opponents, rooms appsharedroom.Service, partners appadventure.Partners, heroWire appadventure.HeroWire, invites roominvite.Materializer, retentionDays int) appadventure.Mode {
+func canonicalAdventure(p *pg.Pool, r tx.Runner, content contentstore.Store, values i5store.Store, owner i5.Service, fight combat.Service, opponents appadventure.Opponents, rooms appsharedroom.Service, partners appadventure.Partners, heroWire appadventure.HeroWire, invites roominvite.Materializer, retentionDays int, battleObserver appadventure.BattleObserver) appadventure.Mode {
 	return appadventure.Mode{
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: r},
 		Fresh: p, Store: adventurestore.Store{}, Content: content,
@@ -35,7 +35,7 @@ func canonicalAdventure(p *pg.Pool, r tx.Runner, content contentstore.Store, val
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner,
 		Opponents: opponents, Wake: adventureWakeup{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Invites: invites, Mail: i5.SettlementMail{Store: values},
-		Partners: partners, HeroWire: heroWire, RetentionDays: retentionDays,
+		Partners: partners, HeroWire: heroWire, RetentionDays: retentionDays, BattleObserver: battleObserver,
 	}
 }
 
