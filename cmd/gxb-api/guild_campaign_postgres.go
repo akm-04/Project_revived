@@ -27,7 +27,7 @@ import (
 
 // canonicalGuildCampaign builds the one Guild Campaign owner of I9-9C.
 func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, revisions contentstore.Store, guildDB guildstore.Store, i5db i5store.Store, i5svc i5.Service,
-	catalog guildcampaigncontent.Catalog, policy guildcampaignpolicy.Policy, combatService combat.Service) (app.Mode, app.Payout) {
+	catalog guildcampaigncontent.Catalog, policy guildcampaignpolicy.Policy, combatService combat.Service, battleCounts app.BattleCountObserver) (app.Mode, app.Payout) {
 	settings := guildcampaigncontent.Settings(policy, catalog.Installed.Settings)
 	tables := catalog.ChapterInfos()
 	store := guildcampaignstore.Store{}
@@ -43,11 +43,12 @@ func canonicalGuildCampaign(p *pg.Pool, runner tx.Runner, revisions contentstore
 		Combat: combatService, Grants: i5svc, Facts: i5.ObjectiveFacts{Owner: i5svc, Open: i5db},
 		Directory: i4store.PlayerDirectoryReader{}, Mail: i5.SettlementMail{Store: i5db},
 		Roster: characterstore.Store{}, Awakenings: characterstore.RawAwakeningStore{},
-		Notifier:  guildCampaignNotifier{Execer: pg.AutocommitExecer(p)},
-		Timed:     gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
-		Fresh:     p,
-		Revisions: revisions,
-		Receipts:  kernelstore.Store{},
+		Notifier:     guildCampaignNotifier{Execer: pg.AutocommitExecer(p)},
+		Timed:        gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner},
+		Fresh:        p,
+		Revisions:    revisions,
+		Receipts:     kernelstore.Store{},
+		BattleCounts: battleCounts,
 	}
 	return mode, payout
 }

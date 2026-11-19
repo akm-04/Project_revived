@@ -526,8 +526,9 @@ func main() {
 	}
 	var teamShops appshop.TeamShops
 	if fightReady {
-		campaignMode, _ := canonicalGuildCampaign(pool, runner, contentDB, guildDB, i5db, i5svc, guildcampaigncontent.Catalog{Installed: campaignCatalog.Catalog}, campaignPolicy.Policy, fight)
+		campaignMode, _ := canonicalGuildCampaign(pool, runner, contentDB, guildDB, i5db, i5svc, guildcampaigncontent.Catalog{Installed: campaignCatalog.Catalog}, campaignPolicy.Policy, fight, librarySvc)
 		campaignMode.Metrics = txMetrics
+		requireGirlsLogObserver("Guild Campaign", campaignMode.BattleCounts)
 		guildSvc.Campaign = campaignMode
 		campaignD := stockruntime.GuildCampaignDispatcher{Authority: authority, Service: campaignMode}
 		for _, mid := range stockruntime.GuildCampaignMIDs {
@@ -563,7 +564,7 @@ func main() {
 		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Fresh: pool, Store: sharedroomstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{}}
 		fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
-		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
+		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight, librarySvc)
 		roomInvites := roominvite.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{},
 			Notices: postgres.RoomInviteNoticeListEmitter{Pool: pool, OnError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }},
@@ -573,7 +574,7 @@ func main() {
 		roomChat = illusion
 		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites, retentionPolicies.RetentionDays)
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners, broadcastEmitter, displayService)
-		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
+		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, librarySvc)
 		for _, mid := range stockruntime.MemoirMIDs {
 			memoirD := stockruntime.MemoirDispatcher{Authority: authority, Service: memoir}
 			if mid == 2310 || mid == 2313 {
@@ -586,11 +587,11 @@ func main() {
 		for _, mid := range stockruntime.DodgeballMIDs {
 			mustRegister(mid, stockruntime.DodgeballDispatcher{Authority: authority, Service: dodgeball})
 		}
-		godsTrial := canonicalGodsTrial(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight, spiritSvc)
+		godsTrial := canonicalGodsTrial(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight, spiritSvc, librarySvc)
 		for _, mid := range stockruntime.GodsTrialMIDs {
 			mustRegister(mid, stockruntime.GodsTrialDispatcher{Authority: authority, Service: godsTrial})
 		}
-		petCampaign := canonicalPetCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight)
+		petCampaign := canonicalPetCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight, librarySvc)
 		ranking.PetCampaign = petCampaign
 		for _, mid := range stockruntime.PetCampaignMIDs {
 			petD := stockruntime.PetCampaignDispatcher{Authority: authority, Service: petCampaign}
@@ -605,7 +606,7 @@ func main() {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.WorkplaceDispatcher{Authority: authority, Service: workplace}))
 		}
 
-		march := canonicalMarch(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
+		march := canonicalMarch(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, librarySvc)
 		for _, mid := range stockruntime.MarchMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.MarchDispatcher{Authority: authority, Service: march}))
 		}
@@ -649,10 +650,10 @@ func main() {
 			mustRegister(mid, stockruntime.LeagueDispatcher{Authority: authority, Service: league})
 		}
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
-		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight, broadcastEmitter)
-		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight)
+		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight, broadcastEmitter, librarySvc)
+		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc)
 		campaign.StarCaps = rentalStarCaps(rentalPolicy.Policy)
-		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, BattleCounts: librarySvc}
 		for _, mid := range []uint16{866, 867} {
 			mustRegister(mid, stockruntime.AwakeningBloodDispatcher{Authority: authority, Service: blood})
 		}
@@ -705,6 +706,14 @@ func main() {
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 		go runReconcile(ctx, pool, appoccult.Reconciler{Service: occultMode})
 		go runReconcile(ctx, pool, appadventure.Reconciler{Service: adventureMode})
+		requireGirlsLogObserver("Campaign", campaign.BattleCounts)
+		requireGirlsLogObserver("Conquer School", conquer.BattleCounts)
+		requireGirlsLogObserver("Awakening Battle", blood.BattleCounts)
+		requireGirlsLogObserver("World Boss", worldBoss.BattleCounts)
+		requireGirlsLogObserver("Memoir", memoir.BattleCounts)
+		requireGirlsLogObserver("Gods Trial", godsTrial.BattleCounts)
+		requireGirlsLogObserver("Pet Campaign", petCampaign.BattleCounts)
+		requireGirlsLogObserver("March", march.BattleCounts)
 	} else {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}
@@ -986,5 +995,13 @@ func main() {
 	log.Printf("gxb-api listening on %s; advertised realtime=%s:%d", cfg.HTTPAddr, host, port)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
+	}
+}
+
+// requireGirlsLogObserver refuses to start a settlement mode whose Girls Log
+// battle-count port (I9_11_GIRLS_LOG_V1) was not composed.
+func requireGirlsLogObserver(name string, observer any) {
+	if observer == nil {
+		log.Fatalf("Girls Log battle-count observer is not wired for %s", name)
 	}
 }
