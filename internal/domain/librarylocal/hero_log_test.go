@@ -69,6 +69,30 @@ func TestHoldTimeLogsReached(t *testing.T) {
 	}
 }
 
+func TestBattleLogIDsCrossed(t *testing.T) {
+	cases := []struct {
+		name     string
+		from, to int64
+		want     []int64
+	}{
+		{"first battle", 0, 1, []int64{60001}},
+		{"fiftieth", 49, 50, []int64{60002}},
+		{"hundredth", 99, 100, []int64{60003}},
+		{"thousandth", 999, 1000, []int64{60004}},
+		{"one step over all", 49, 1000, []int64{60002, 60003, 60004}},
+		{"above fifty to thousand", 99, 1000, []int64{60003, 60004}},
+		{"past thousand", 1000, 1001, []int64{}},
+		{"no step", 42, 42, []int64{}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := BattleLogIDsCrossed(c.from, c.to); !reflect.DeepEqual(got, c.want) {
+				t.Fatalf("battle (%d,%d] = %v, want %v", c.from, c.to, got, c.want)
+			}
+		})
+	}
+}
+
 func TestHeroLogColorAndStarIDs(t *testing.T) {
 	if id, ok := ColorLogID(2); !ok || id != 20001 {
 		t.Fatalf("color 2 %d %v", id, ok)

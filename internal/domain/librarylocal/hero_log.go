@@ -54,6 +54,12 @@ var holdTimeLogThresholds = []logThreshold{
 	{30, 50001}, {90, 50002}, {180, 50003}, {365, 50004},
 }
 
+// Settled battle counts (type 6) reached, from library_hero_log.lua rows 36-39.
+// No content catalog carries these thresholds, so they stay constants.
+var battleLogThresholds = []logThreshold{
+	{1, 60001}, {50, 60002}, {100, 60003}, {1000, 60004},
+}
+
 // HoldTimeLogMilestone is one type-5 entry, dated from acquisition.
 type HoldTimeLogMilestone struct {
 	LogID      int64
@@ -86,6 +92,11 @@ func FavorLogIDsCrossed(from, to int64) []int64 {
 // DialogueLogIDsReached returns the dialogue milestones in (from, to].
 func DialogueLogIDsReached(from, to int64) []int64 {
 	return crossed(dialogueLogThresholds, from, to)
+}
+
+// BattleLogIDsCrossed returns the settled-battle milestones in (from, to].
+func BattleLogIDsCrossed(from, to int64) []int64 {
+	return crossed(battleLogThresholds, from, to)
 }
 
 func crossed(table []logThreshold, from, to int64) []int64 {
