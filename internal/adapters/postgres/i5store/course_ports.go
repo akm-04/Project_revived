@@ -3,6 +3,7 @@ package i5store
 import (
 	"context"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -17,7 +18,7 @@ func (Store) ReadCoursePlayerStateTx(ctx context.Context, q tx.Queryer, p identi
 	if e := q.QueryRow(ctx, `SELECT level,state_version,updated_at FROM player_progression WHERE player_id=$1`, int64(p)).Scan(&out.Level, &out.LevelVersion, &out.UpdatedAt); e != nil {
 		return out, e
 	}
-	if out.Level < 1 || out.LevelVersion < 1 || at.Before(out.UpdatedAt) {
+	if out.Level < 1 || out.LevelVersion < 1 || at.Before(gen.EffectiveObservation(at, out.UpdatedAt)) {
 		return out, errors.New("i5: unqualified Course progression")
 	}
 	var id, ver *int64

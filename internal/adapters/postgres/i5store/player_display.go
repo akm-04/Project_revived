@@ -3,6 +3,7 @@ package i5store
 import (
 	"context"
 	"encoding/json"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
@@ -44,7 +45,7 @@ func (s Store) ReadDisplayStateTx(c context.Context, q tx.Queryer, pid identity.
 	return out, out.Validate()
 }
 func (Store) SaveDisplayStateTx(c context.Context, t tx.Tx, old, next app.State, at time.Time) error {
-	if t == nil || old.Validate() != nil || next.Validate() != nil || old.Basis.Profile.PlayerID != next.Basis.Profile.PlayerID || at.IsZero() || at.Before(old.Basis.Profile.UpdatedAt) {
+	if t == nil || old.Validate() != nil || next.Validate() != nil || old.Basis.Profile.PlayerID != next.Basis.Profile.PlayerID || at.IsZero() || at.Before(gen.EffectiveObservation(at, old.Basis.Profile.UpdatedAt)) {
 		return app.ErrConflict
 	}
 	p := next.Basis.Profile
