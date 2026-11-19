@@ -73,7 +73,13 @@ func Partners(v d.PartnersView) map[string]any {
 	rows := []map[string]any{}
 	for _, u := range v.Usage {
 		damage, _ := strconv.ParseFloat(u.Harms, 64)
-		rows = append(rows, map[string]any{"table_id": u.TableID, "total_fight": u.Fights, "win_fight": u.Wins, "total_damage": int64(damage), "total_kill": u.Kills})
+		row := map[string]any{"table_id": u.TableID, "total_fight": u.Fights, "win_fight": u.Wins, "total_damage": int64(damage), "total_kill": u.Kills}
+		// A-174/S17: RegionBattleScoresWindow.initHero sets the girl's star from
+		// this key; a girl the subject no longer owns omits it, never 0.
+		if u.Star != nil {
+			row["star"] = *u.Star
+		}
+		rows = append(rows, row)
 	}
 	return map[string]any{"partner_info": rows, "arena_info": map[string]any{"total_fight": v.Player.TotalFight, "win_times": v.Player.WinTimes, "point": v.Player.Point}}
 }

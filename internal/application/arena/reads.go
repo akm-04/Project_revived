@@ -7,6 +7,7 @@ import (
 
 	gen "gxb.local/backend/v2/internal/application/generation"
 	d "gxb.local/backend/v2/internal/domain/arena"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -17,19 +18,19 @@ import (
 // rankRows is the number of 301 rank_types 6 rows (C5D policy, as 5C).
 const rankRows = 50
 
-func (s Service) current(c context.Context, q tx.Queryer, pid identity.PlayerID, now time.Time) (d.Catalog, d.Player, error) {
+func (s Service) current(c context.Context, q tx.Queryer, pid identity.PlayerID, now time.Time) (string, d.Catalog, d.Player, error) {
 	if !s.ready() {
-		return d.Catalog{}, d.Player{}, d.ErrUnavailable
+		return "", d.Catalog{}, d.Player{}, d.ErrUnavailable
 	}
-	_, catalog, err := s.catalogTx(c, q)
+	revision, catalog, err := s.catalogTx(c, q)
 	if err != nil {
-		return d.Catalog{}, d.Player{}, err
+		return "", d.Catalog{}, d.Player{}, err
 	}
 	p, found, err := s.Store.ReadPlayerTx(c, q, pid, false)
 	if err != nil || !found {
-		return d.Catalog{}, d.Player{}, errors.Join(err, d.ErrRefused)
+		return revision, d.Catalog{}, d.Player{}, errors.Join(err, d.ErrRefused)
 	}
-	return catalog, catalog.Rolled(p, now), nil
+	return revision, catalog, catalog.Rolled(p, now), nil
 }
 
 // Partners answers GET_REARENA_PARTNERS: the requested player's season
@@ -50,12 +51,68 @@ func (s Service) Partners(c context.Context, a identity.ActorContext, subject id
 // partnersSubject is the Arena-owned subject read of one player's statistics.
 // An unknown subject is ErrRefused, which the dispatcher answers 409.
 func (s Service) partnersSubject(c context.Context, q tx.Queryer, subject identity.PlayerID, at time.Time) (d.Player, []d.Usage, error) {
-	_, p, err := s.current(c, q, subject, at)
+	revision, _, p, err := s.current(c, q, subject, at)
 	if err != nil {
 		return d.Player{}, nil, err
 	}
 	usage, err := s.Store.UsageTx(c, q, subject, p.Season)
-	return p, usage, err
+	if err != nil {
+		return d.Player{}, nil, err
+	}
+	if err = s.fillPartnerStars(c, q, revision, subject, usage); err != nil {
+		return d.Player{}, nil, err
+	}
+	return p, usage, nil
+}
+
+// fillPartnerStars adds each usage girl's current star from the subject's owned
+// heroes; a girl the subject no longer owns keeps no star.
+func (s Service) fillPartnerStars(c context.Context, q tx.Queryer, revision string, subject identity.PlayerID, usage []d.Usage) error {
+	if len(usage) == 0 {
+		return nil
+	}
+	templates, err := s.Content.ArenaTemplatesTx(c, q, revision)
+	if err != nil {
+		return err
+	}
+	owned, err := s.OwnedHeroes.ListHeroesTx(c, q, subject)
+	if err != nil {
+		return err
+	}
+	attachPartnerStars(usage, owned, templates)
+	return nil
+}
+
+// attachPartnerStars resolves each usage girl to the subject's strongest owned
+// copy, as lineupRows picks it, and records that copy's current star.
+func attachPartnerStars(usage []d.Usage, owned []character.Hero, templates d.Templates) {
+	strongest := make(map[int64]character.Hero, len(owned))
+	for _, hero := range owned {
+		base := templates.Base(hero.TableID)
+		if current, found := strongest[base]; !found || heroRanksAbove(hero, current) {
+			strongest[base] = hero
+		}
+	}
+	for index := range usage {
+		hero, found := strongest[templates.Base(usage[index].TableID)]
+		if !found {
+			continue
+		}
+		star := hero.Star
+		usage[index].Star = &star
+	}
+}
+
+// heroRanksAbove orders owned copies of one girl: most stars, then the highest
+// level, then the lowest partner id (C5D policy, as strongest does).
+func heroRanksAbove(candidate, current character.Hero) bool {
+	if candidate.Star != current.Star {
+		return candidate.Star > current.Star
+	}
+	if candidate.Level != current.Level {
+		return candidate.Level > current.Level
+	}
+	return candidate.PartnerID < current.PartnerID
 }
 
 // Records lists the retained ranked fights, newest first.

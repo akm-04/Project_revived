@@ -36,7 +36,8 @@ func (f *arenaFake) Partners(_ context.Context, _ identity.ActorContext, subject
 	if f.partnerErr != nil {
 		return d.PartnersView{}, f.partnerErr
 	}
-	return d.PartnersView{Player: arenaPlayer, Usage: []d.Usage{{TableID: 11001, Fights: 2, Wins: 1, Kills: 3, Harms: "1200.500000"}}}, nil
+	star := int64(4)
+	return d.PartnersView{Player: arenaPlayer, Usage: []d.Usage{{TableID: 11001, Fights: 2, Wins: 1, Kills: 3, Harms: "1200.500000", Star: &star}}}, nil
 }
 func (f *arenaFake) ModifyDefence(_ context.Context, _ identity.ActorContext, heroes []int64, pet int64, _ operation.Context) (d.Player, error) {
 	f.calls++
@@ -100,7 +101,8 @@ func TestI7C5DArenaWireShapes(t *testing.T) {
 		info["exchange_times_3"] != int64(2) || !reflect.DeepEqual(info["defence_formation"], []int64{1, 2, 3, 4, 5}) || info["pet_id"] != int64(9) || info["mission_time"] != int64(1700000000) {
 		t.Fatal("GET_REARENA_INFO", info)
 	}
-	if partners := call(769, map[string]any{}); partners["partner_info"].([]map[string]any)[0]["total_damage"] != int64(1200) {
+	if partners := call(769, map[string]any{}); partners["partner_info"].([]map[string]any)[0]["total_damage"] != int64(1200) ||
+		partners["partner_info"].([]map[string]any)[0]["star"] != int64(4) {
 		t.Fatal("GET_REARENA_PARTNERS", partners)
 	} else {
 		replyconformance.Check(t, 769, partners)
