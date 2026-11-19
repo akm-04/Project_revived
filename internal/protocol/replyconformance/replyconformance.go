@@ -37,7 +37,11 @@ type obligation struct {
 type midObligations struct {
 	unconditional obligation
 	discriminator string
-	branches      map[string]obligation
+	// requestDiscriminator is true when the discriminator is a request field
+	// (the client dispatches its reply reader on a request value), so the edge
+	// selects the branch from the decoded request instead of the reply.
+	requestDiscriminator bool
+	branches             map[string]obligation
 }
 
 var (
@@ -51,6 +55,16 @@ var (
 type Checker struct{}
 
 func (Checker) Check(mid uint16, reply any) []string {
+	return (Checker{}).checkWith(mid, nil, reply)
+}
+
+// CheckRequest is Check with the decoded request, so a MID whose client
+// dispatches its reader on a request field selects that branch (A-195).
+func (Checker) CheckRequest(mid uint16, request, reply any) []string {
+	return (Checker{}).checkWith(mid, request, reply)
+}
+
+func (Checker) checkWith(mid uint16, request, reply any) []string {
 	loadOnce.Do(load)
 	record, present := requiredByMID[mid]
 	if !present {
@@ -61,7 +75,11 @@ func (Checker) Check(mid uint16, reply any) []string {
 	if record.discriminator == "" {
 		return violations
 	}
-	value, present := discriminatorValue(reply, record.discriminator)
+	source := reply
+	if record.requestDiscriminator {
+		source = request
+	}
+	value, present := discriminatorValue(source, record.discriminator)
 	if !present {
 		return violations
 	}
@@ -126,8 +144,9 @@ type branchRecord struct {
 func load() {
 	var document struct {
 		MIDs map[string]struct {
-			Paths    []json.RawMessage                  `json:"paths"`
-			Branches map[string]map[string]branchRecord `json:"branches"`
+			Paths         []json.RawMessage                  `json:"paths"`
+			BranchRequest string                             `json:"branch_request"`
+			Branches      map[string]map[string]branchRecord `json:"branches"`
 		} `json:"mids"`
 	}
 	if err := json.Unmarshal(generated, &document); err != nil {
@@ -142,6 +161,7 @@ func load() {
 		entry := midObligations{unconditional: parseObligation(record.Paths)}
 		for discriminator, values := range record.Branches {
 			entry.discriminator = discriminator
+			entry.requestDiscriminator = record.BranchRequest == discriminator
 			entry.branches = make(map[string]obligation, len(values))
 			for value, branch := range values {
 				if branch.Status == "UNKNOWN" {
