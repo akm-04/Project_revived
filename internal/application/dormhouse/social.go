@@ -162,7 +162,7 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 	if err != nil {
 		return nil, err
 	}
-	if at.Before(targetRoot.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, targetRoot.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	if target != actor.PlayerID {
@@ -170,7 +170,7 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 		if err != nil {
 			return nil, err
 		}
-		if at.Before(actorRoot.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, actorRoot.UpdatedAt)) {
 			return nil, ErrStale
 		}
 	}
@@ -182,7 +182,7 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 	if !ok {
 		return nil, dorm.ErrInvalidFacts
 	}
-	if at.Before(room.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, room.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	roomTarget := dorm.RoomTarget{Server: logicalserver.PlayerRegion(target), Owner: target, HouseID: c.HouseID}

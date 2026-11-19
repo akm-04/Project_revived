@@ -3,6 +3,7 @@ package dormhouse
 import (
 	"context"
 	"gxb.local/backend/v2/internal/application/broadcast"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
@@ -31,7 +32,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(root.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	if c.Family == BuyGlue {
@@ -58,7 +59,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		if e != nil {
 			return nil, e
 		}
-		if at.Before(h.UpdatedAt) || at.Before(f.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, f.UpdatedAt)) {
 			return nil, ErrStale
 		}
 		facts[h.PartnerID] = f
@@ -86,7 +87,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if c.Family != Open && c.Family != Exchange && room.ID == 0 {
 		return nil, dorm.ErrInvalidFacts
 	}
-	if room.ID != 0 && at.Before(room.UpdatedAt) {
+	if room.ID != 0 && at.Before(gen.EffectiveObservation(at, room.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	cost := i5.MaterialCost{}
