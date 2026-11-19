@@ -13,6 +13,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -720,6 +721,7 @@ func requiredPipeIntegers(params map[string]any, key string) ([]int64, error) {
 }
 
 var heroFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: apphero.ErrHeroAppearanceUnavailable, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apphero.ErrHeroExpMax, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apphero.ErrHeroEvolutionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
