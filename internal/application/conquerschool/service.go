@@ -3,6 +3,7 @@ package conquerschool
 import (
 	"context"
 	"gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/character"
 	d "gxb.local/backend/v2/internal/domain/conquerschool"
@@ -60,7 +61,7 @@ func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadS
 	if e = f.Validate(c); e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(f.UpdatedAt) {
+	if scope.ObservedAt.Before(gen.EffectiveObservation(scope.ObservedAt, f.UpdatedAt)) {
 		return out, d.ErrStale
 	}
 	if !f.Known() {
@@ -100,7 +101,7 @@ func (s Service) HeroInputsTx(ctx context.Context, scope characterasset.Coherent
 	if root.PlayerID != ref.PlayerID || h.PlayerID != ref.PlayerID || h.PartnerID != ref.PartnerID || h.ValidatePersistent() != nil {
 		return out, d.ErrUnqualified
 	}
-	if scope.ObservedAt.Before(root.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
+	if scope.ObservedAt.Before(gen.EffectiveObservation(scope.ObservedAt, root.UpdatedAt)) || scope.ObservedAt.Before(gen.EffectiveObservation(scope.ObservedAt, h.UpdatedAt)) {
 		return out, d.ErrStale
 	}
 	h.Kind, e = s.Kinds.HeroKindTx(ctx, q, scope.ContentRevision, h.TableID)
@@ -151,7 +152,7 @@ func (s Service) PrepareWriteTx(ctx context.Context, t tx.Tx, server identity.Lo
 	if e = f.Validate(c); e != nil {
 		return nil, e
 	}
-	if op.StartedAt.Before(f.UpdatedAt) {
+	if op.StartedAt.Before(gen.EffectiveObservation(op.StartedAt, f.UpdatedAt)) {
 		return nil, d.ErrStale
 	}
 	return &PreparedWrite{before: f, catalog: c, op: op}, nil
