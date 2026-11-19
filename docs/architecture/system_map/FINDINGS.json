@@ -2,96 +2,6 @@
  "note": "These lists are leads for a reviewer, not verdicts. Confirm each entry against the source it cites.",
  "client_mids_not_live": [
   {
-   "mid": 144,
-   "name": "LOAD_BUILDING",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 145,
-   "name": "OPEN_BUILDING",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 146,
-   "name": "BUILDING_UPGRADE",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 147,
-   "name": "BUILDING_OUTPUT",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 148,
-   "name": "BUILIDNG_PARTNER",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 149,
-   "name": "LOAD_WISH_INFO",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 150,
-   "name": "WISH",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 151,
-   "name": "LOAD_ALL_BUILDING_INFO",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
-   "mid": 152,
-   "name": "LOAD_YANWUCHANG_HERO_EXP",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
-   "stage": "I9-11"
-  },
-  {
    "mid": 514,
    "name": "CHAT_FROM_PLAYER",
    "files": [
@@ -7731,7 +7641,7 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 609,
+  "count": 619,
   "mids": [
    6,
    17,
@@ -7740,6 +7650,7 @@
    31,
    35,
    36,
+   48,
    64,
    65,
    66,
@@ -7748,6 +7659,15 @@
    85,
    91,
    120,
+   144,
+   145,
+   146,
+   147,
+   148,
+   149,
+   150,
+   151,
+   152,
    162,
    208,
    209,
@@ -8354,6 +8274,11 @@
   {
    "mid": 6,
    "name": "LOAD_REGIONS",
+   "system": ""
+  },
+  {
+   "mid": 48,
+   "name": "LOAD_HERO",
    "system": ""
   },
   {

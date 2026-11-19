@@ -20,14 +20,14 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 196,
-   "ACTIVE": 397,
-   "INACTIVE_SUPERSEDED": 81,
-   "LATER": 497,
+   "ACTIVE": 377,
+   "INACTIVE_SUPERSEDED": 96,
+   "LATER": 502,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
-   "I9-11": 48,
-   "I9-10": 118,
+   "I9-11": 34,
+   "I9-10": 112,
    "I9-3": 17,
    "I9-4": 7,
    "I9-4D": 12,
@@ -54,7 +54,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -157,7 +157,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -204,7 +204,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -214,7 +214,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -224,7 +224,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -253,7 +253,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -263,7 +263,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -280,10 +280,11 @@
    "mid": 48,
    "name": "LOAD_HERO",
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only); shared 409+35028 refusal"
   },
   {
    "mid": 49,
@@ -529,7 +530,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -567,7 +568,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -576,7 +577,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -622,7 +623,7 @@
    "family": "GOLDEN_HAND",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -631,7 +632,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -874,82 +875,91 @@
    "mid": 144,
    "name": "LOAD_BUILDING",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 145,
    "name": "OPEN_BUILDING",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 146,
    "name": "BUILDING_UPGRADE",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 147,
    "name": "BUILDING_OUTPUT",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 148,
    "name": "BUILIDNG_PARTNER",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 149,
    "name": "LOAD_WISH_INFO",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 150,
    "name": "WISH",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 151,
    "name": "LOAD_ALL_BUILDING_INFO",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 152,
    "name": "LOAD_YANWUCHANG_HERO_EXP",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 160,
@@ -1434,7 +1444,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1628,7 +1638,7 @@
    "family": "BATTLE_LEGACY_ENVELOPE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null,
    "note": "11D C7: F4e duplicate terminal 200/30005"
   },
@@ -2694,7 +2704,7 @@
    "family": "BATTLE_LEGACY_ENVELOPE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3574,7 +3584,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -3583,7 +3593,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -5604,7 +5614,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -7624,7 +7634,8 @@
    "disposition": "ACTIVE",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "MID 1 detail only (SelfPlayer.lua:4199); real per-hero recommend scores owed: ShopDetailWindow.lua:59 and BattlePassShopDetailWindow.lua:35 concatenate a nil score (crash) when ID_RECOMMEND is open"
   },
   {
    "mid": 2512,
@@ -10120,7 +10131,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },

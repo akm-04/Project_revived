@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -27,9 +28,22 @@ def render() -> str:
     return "\n".join(lines) + "\n"
 
 
+def count_drift() -> list[str]:
+    """The surface's stored counts are hand-edited beside its rows; any drift is reported, never silently trusted."""
+    surface = json.loads(SURFACE.read_text(encoding="utf-8"))
+    rows = surface["mids"]
+    actual = {"by_disposition": Counter(row["disposition"] for row in rows),
+              "active_by_stage": Counter(row["target"] for row in rows if row["disposition"] == "ACTIVE")}
+    return [f"counts.{group} {dict(surface['counts'][group])} != rows {dict(actual[group])}"
+            for group in actual if Counter(surface["counts"][group]) != actual[group]]
+
+
 def main() -> None:
     text = render()
     if sys.argv[1:] == ["--check"]:
+        drift = count_drift()
+        if drift:
+            raise SystemExit("I9_MODE_SURFACE_V1 counts disagree with its rows: " + "; ".join(drift))
         if OUTPUT.read_text(encoding="utf-8") != text:
             raise SystemExit(f"{OUTPUT} is stale; run tools/generate_inactive_mids.py")
         return

@@ -2547,6 +2547,21 @@
    "writes": "state"
   },
   {
+   "handler": "",
+   "isolation": [],
+   "mid": 48,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
    "handler": "internal/adapters/stockruntime/hero_dispatcher.go",
    "isolation": [
     {
@@ -14526,6 +14541,141 @@
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 144,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 145,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 146,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 147,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 148,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 149,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 150,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 151,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 152,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
   },
   {
    "handler": "internal/adapters/stockruntime/i5_dispatcher.go",
