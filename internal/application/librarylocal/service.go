@@ -586,7 +586,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 		if e != nil {
 			return e
 		}
-		if d.DecisionAt.Before(root.UpdatedAt) {
+		if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, root.UpdatedAt)) {
 			return ErrStale
 		}
 		costOp := d.Operation
@@ -675,7 +675,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if e != nil {
 				return e
 			}
-			if d.DecisionAt.Before(facts.UpdatedAt) || d.DecisionAt.Before(h.UpdatedAt) {
+			if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, facts.UpdatedAt)) || d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, h.UpdatedAt)) {
 				return ErrStale
 			}
 			old := facts.StateVersion
