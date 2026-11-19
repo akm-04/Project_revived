@@ -2,6 +2,7 @@ package socialinboxstore
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/socialinbox"
@@ -30,7 +31,7 @@ func (Store) InsertRoomInviteNoticeTx(c context.Context, t tx.Tx, n socialinbox.
 }
 
 func (Store) UpdateRoomInviteNoticeTx(c context.Context, t tx.Tx, n socialinbox.Notice, at time.Time) (socialinbox.Notice, error) {
-	if t == nil || socialinbox.ValidateRoomInviteLifecycle(n) != nil || at.IsZero() || at.Before(n.UpdatedAt) {
+	if t == nil || socialinbox.ValidateRoomInviteLifecycle(n) != nil || at.IsZero() || at.Before(gen.EffectiveObservation(at, n.UpdatedAt)) {
 		return socialinbox.Notice{}, socialinbox.ErrInvalidNotice
 	}
 	tag, err := t.Exec(c, `UPDATE social_notices SET active=true,dismissed_at=NULL,notice_time=$4,updated_at=$4,related_player_id=$5,state_version=state_version+1 WHERE recipient_player_id=$1 AND notice_id=$2 AND state_version=$3`,
