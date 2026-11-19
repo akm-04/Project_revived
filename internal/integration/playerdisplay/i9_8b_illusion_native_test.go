@@ -377,21 +377,24 @@ func TestI9_8BIllusionBoardFrozenUntilNextOpeningNative(t *testing.T) {
 		}
 		return body["rank_list"].([]map[string]any)[0]["rank_info"].(map[string]any)["my_rank"].(map[string]any)
 	}
-	if board()["hurt"] != int64(1000) {
-		t.Fatal("open board", board())
+	// A-177: the killed run's cost time rides in the fractional hurt; the
+	// integer text stays the canonical damage.
+	clearedHurt := func(stage string) {
+		t.Helper()
+		hurt, ok := board()["hurt"].(float64)
+		if !ok || int64(hurt) != 1000 || hurt-float64(int64(hurt)) == 0 {
+			t.Fatalf("%s board hurt %#v", stage, board()["hurt"])
+		}
 	}
+	clearedHurt("open")
 	settleDay := modes.Day(clock.at)
 	clock.Set(modes.DayBegins(settleDay).Add(17 * time.Hour))
 	if _, err := (il.Reconciler{Service: s}).Reconcile(ctx, mustTimed(t, op(), clock.at), 100); err != nil {
 		t.Fatal(err)
 	}
-	if board()["hurt"] != int64(1000) {
-		t.Fatal("the settled board was cleared at settlement", board())
-	}
+	clearedHurt("settled")
 	clock.Set(modes.DayBegins(settleDay + 1).Add(time.Hour))
-	if board()["hurt"] != int64(1000) {
-		t.Fatal("the settled board was cleared on the rest day", board())
-	}
+	clearedHurt("rest day")
 	clock.Set(modes.DayBegins(settleDay + d.CycleDays).Add(3 * time.Hour))
 	if len(board()) != 0 {
 		t.Fatal("the next opening did not clear the board", board())

@@ -64,9 +64,33 @@ func (s Mode) playerBoard(c context.Context, a identity.ActorContext, subtype in
 	}
 	mine := map[string]any{}
 	if rank > 0 {
-		mine = map[string]any{"rank": rank, "hurt": hurt}
+		mine = map[string]any{"rank": rank, "hurt": rankedHurt(ordered, rank, hurt)}
 	}
 	return rankListBody(subtype, mine, rows), nil
+}
+
+// rankedHurt is the display value of a ranked row; a rank found beyond the
+// read window has no stored entry and keeps the integer hurt RankOf returned.
+func rankedHurt(ordered []d.Result, rank, hurt int64) any {
+	if rank < 1 || rank > int64(len(ordered)) {
+		return hurt
+	}
+	return rankHurt(ordered[rank-1])
+}
+
+// costTimeFramesPerSecond is the stock combat clock: BattleCreate increments
+// ctx.battle.count once per update frame and battleConfig.lua sets frames = 30.
+const costTimeFramesPerSecond int64 = 30
+
+// rankHurt encodes a cleared run's seconds in the fractional part of the 301
+// hurt value, the inverse of the stock decoder in NewRankWindow.lua:797-824
+// (seconds = round((1/30) / fraction)). Losses and unknown times stay integer.
+func rankHurt(entry d.Result) any {
+	if !entry.Killed || entry.CostTime <= 0 {
+		return entry.Hurt
+	}
+	seconds := max((entry.CostTime+costTimeFramesPerSecond/2)/costTimeFramesPerSecond, 1)
+	return float64(entry.Hurt) + 1/(float64(costTimeFramesPerSecond)*float64(seconds))
 }
 
 func (s Mode) playerRows(c context.Context, ordered []d.Result, limit int) ([]map[string]any, error) {
@@ -79,12 +103,12 @@ func (s Mode) playerRows(c context.Context, ordered []d.Result, limit int) ([]ma
 		if !found {
 			continue
 		}
-		rows = append(rows, playerRow(profile, entry.Hurt, int64(index+1)))
+		rows = append(rows, playerRow(profile, rankHurt(entry), int64(index+1)))
 	}
 	return rows, nil
 }
 
-func playerRow(profile playerdirectory.Profile, hurt, rank int64) map[string]any {
+func playerRow(profile playerdirectory.Profile, hurt any, rank int64) map[string]any {
 	return map[string]any{"player_id": int64(profile.PlayerID), "player_name": profile.Name, "level": profile.Level,
 		"avatar_id": profile.AvatarID, "avatar_frame_id": profile.AvatarFrameID, "conquer_lev": profile.ConquerLevel,
 		"conquer_loop_id": profile.ConquerLoopID, "hurt": hurt, "rank": rank}

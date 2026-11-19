@@ -313,6 +313,7 @@
    "i9_8b_illusion.json"
   ],
   "unit": [
+   "member_team_test.go",
    "rank_test.go",
    "service_test.go",
    "settlement_achievement_test.go",
