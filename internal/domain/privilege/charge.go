@@ -151,7 +151,7 @@ func (t ChargeTuning) PrivilegeSkillMaxValue(source int64) int64 {
 // TunedCatalog applies the overlay's per-VIP skill caps. An invalid overlay, or
 // one the source catalog cannot represent, keeps the source catalog in force.
 func (t ChargeTuning) TunedCatalog(source Catalog) Catalog {
-	if t.Validate() != nil || len(t.VipSkillCap) == 0 {
+	if t.Validate() != nil || len(t.VipSkillCap) == 0 || source.Validate() != nil {
 		return source
 	}
 	tuned := source

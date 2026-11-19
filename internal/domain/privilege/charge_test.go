@@ -127,6 +127,15 @@ func TestVipSkillCapOverlay(t *testing.T) {
 	}
 }
 
+func TestTunedCatalogKeepsAnInvalidSource(t *testing.T) {
+	invalid := Catalog{SchemaVersion: 1, PolicyID: CatalogPolicy, Rows: []Threshold{{Level: 0, Charge: 0, SkillCap: 10}}}
+	tuning := ChargeTuning{Version: 1, Mode: TuningGrant, VipSkillCap: map[string]int64{"2": 7}}
+	tuned := tuning.TunedCatalog(invalid)
+	if len(tuned.Rows) != 1 || tuned.Rows[0] != invalid.Rows[0] {
+		t.Fatalf("invalid source rewritten: %+v", tuned)
+	}
+}
+
 func TestCardsStackDaysAndLeftDaysRoundUp(t *testing.T) {
 	const now = int64(1000000)
 	c := Cards{}.Extended(CardMonth, 30, now)
