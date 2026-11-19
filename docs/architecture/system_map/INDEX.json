@@ -879,7 +879,7 @@
    "tables": 4
   },
   {
-   "callees": 15,
+   "callees": 16,
    "callers": 3,
    "mids": 39,
    "name": "arena",
@@ -933,7 +933,7 @@
    "tables": 2
   },
   {
-   "callees": 14,
+   "callees": 15,
    "callers": 1,
    "mids": 8,
    "name": "championsleague",
@@ -1321,7 +1321,7 @@
   },
   {
    "callees": 13,
-   "callers": 5,
+   "callers": 9,
    "mids": 23,
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
@@ -1374,7 +1374,7 @@
    "tables": 4
   },
   {
-   "callees": 12,
+   "callees": 13,
    "callers": 3,
    "mids": 10,
    "name": "oneonone",
@@ -1662,7 +1662,7 @@
    "tables": 2
   },
   {
-   "callees": 15,
+   "callees": 16,
    "callers": 5,
    "mids": 23,
    "name": "topfloor",

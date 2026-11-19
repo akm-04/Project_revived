@@ -91,6 +91,12 @@ type Entitlements interface {
 	ReadSourceMailTx(context.Context, tx.Queryer, identity.PlayerID, string, string) (mail.Record, bool, error)
 	ReadDisplayEntitlementsTx(context.Context, tx.Queryer, identity.PlayerID, string) ([]playerdisplay.Origin, error)
 }
+
+// BattleCounts is the Girls Log producer port (I9_11_GIRLS_LOG_V1 G2): one
+// settled battle raises the player's per-hero battle counts.
+type BattleCounts interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
 type Service struct {
 	Timed        gen.TimedRunner
 	Fresh        tx.Queryer
@@ -111,10 +117,11 @@ type Service struct {
 	Entitlements Entitlements
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
+	BattleCounts BattleCounts
 }
 
 func (s Service) ready() bool {
-	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Progression != nil && s.Combat != nil && s.Grants != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Players != nil && s.Recipient != nil && s.Entitlements != nil && s.Receipts != nil && s.ReceiptRead != nil
+	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Progression != nil && s.Combat != nil && s.Grants != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Players != nil && s.Recipient != nil && s.Entitlements != nil && s.Receipts != nil && s.ReceiptRead != nil && s.BattleCounts != nil
 }
 
 // Command carries owned instance identities, never Region Arena table IDs.

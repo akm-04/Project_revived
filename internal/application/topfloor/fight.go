@@ -507,7 +507,12 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 	done := f
 	stamp := at.UTC()
 	done.Status, done.Outcome, done.SettledAt, done.StateVersion = d.StatusSettled, &outcome, &stamp, f.StateVersion+1
-	return s.Store.FinishFightTx(c, sc.Tx, done, f.StateVersion)
+	if err = s.Store.FinishFightTx(c, sc.Tx, done, f.StateVersion); err != nil {
+		return err
+	}
+	// Only the challenger's formation is frozen on the fight; the defender has no
+	// stored own roster here, so no defender count is claimed (G2 H2).
+	return s.BattleCounts.ObserveBattleTx(c, sc.Tx, f.Challenger, f.Formation, at)
 }
 
 // fightSide is one Top Floor player's view of a settled fight; report side "A" is the challenger.

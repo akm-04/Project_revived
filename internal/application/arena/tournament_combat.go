@@ -196,6 +196,7 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 			return d.ErrConflict
 		}
 		current.Wins = [2]int{}
+		settledRounds := []int{}
 		for round, attempt := range current.Attempts[:current.Selection.TeamCount()] {
 			if current.Wins[0] >= current.RequiredWins() || current.Wins[1] >= current.RequiredWins() {
 				break
@@ -219,6 +220,7 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 				}
 				current.RoundResults[round] = winner
 				current.GenuineBattles++
+				settledRounds = append(settledRounds, round)
 			}
 			if winner == 1 || winner == 2 {
 				current.Wins[winner-1]++
@@ -264,6 +266,15 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 		current.Status, current.SettledAt = d.RoomSettled, at
 		current.StateVersion++
 		current.NoticeVersion++
+		// One count per genuine round per player, from each player's own frozen
+		// selection; the counter lock stays the last lock of the transaction.
+		for _, round := range settledRounds {
+			for side, player := range current.Selection.Players {
+				if err := service.BattleCounts.ObserveBattleTx(requestContext, scope.Tx, player, current.Selection.Teams[side][round].Heroes, at); err != nil {
+					return err
+				}
+			}
+		}
 		return nil
 	})
 }

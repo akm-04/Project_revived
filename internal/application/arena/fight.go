@@ -594,12 +594,19 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 	attacker, defender := players[m.Attacker][1], players[m.Defender][1]
 	outcome := d.Outcome{Forfeit: forfeit, StarBefore: attacker.Star}
 	var report []byte
+	attackerPartners, defenderPartners := []int64{}, []int64{}
 	if !forfeit {
 		settled, err := s.Combat.TerminalTx(c, sc.Tx, combat.TerminalRequest{Locator: locator(m.ID), GenerationRef: d.ContractID, TerminalKind: terminalKind, SemanticReceiptID: semanticReceipt(m.ID), At: at})
 		if err != nil {
 			return err
 		}
 		outcome.Win, report = settled.Resolution.Outcome.Star > 0, settled.Report
+		if attackerPartners, err = reportPartners(report, "A", outcome.Win); err != nil {
+			return err
+		}
+		if defenderPartners, err = reportPartners(report, "B", !outcome.Win); err != nil {
+			return err
+		}
 	}
 	c, err = s.Facts.PrepareTx(c, sc.Tx, m.Attacker, sc.Operation)
 	if err != nil {
@@ -630,7 +637,34 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 	done := m
 	stamp := at.UTC()
 	done.Status, done.Outcome, done.SettledAt, done.StateVersion = d.StatusSettled, &outcome, &stamp, m.StateVersion+1
-	return s.Store.SaveMatchTx(c, sc.Tx, done, m.StateVersion)
+	if err = s.Store.SaveMatchTx(c, sc.Tx, done, m.StateVersion); err != nil {
+		return err
+	}
+	if forfeit {
+		return nil
+	}
+	if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Attacker, attackerPartners, at); err != nil {
+		return err
+	}
+	// The defender's own result is only settled by a ranked match; an abandoned
+	// forfeit or an unranked practice/stale-season fight counts only the attacker.
+	if !ranked {
+		return nil
+	}
+	return s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Defender, defenderPartners, at)
+}
+
+// reportPartners lists one side's fighting partner ids from the persisted battle report.
+func reportPartners(report []byte, side string, won bool) ([]int64, error) {
+	uses, err := cd.Usage(report, side, won)
+	if err != nil {
+		return nil, err
+	}
+	partners := make([]int64, 0, len(uses))
+	for _, use := range uses {
+		partners = append(partners, use.PartnerID)
+	}
+	return partners, nil
 }
 
 func (s Service) applyRanked(c context.Context, sc gen.TimedScope, catalog d.Catalog, revision string, m d.Match, attacker, defender *d.Player, outcome *d.Outcome, report []byte) error {

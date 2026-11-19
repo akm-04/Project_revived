@@ -1639,8 +1639,17 @@
     "*MarriedHeroCountTx",
     "*SchoolStoryCountTx"
    ],
+   "arena": [
+    "*ObserveBattleTx"
+   ],
+   "championsleague": [
+    "*ObserveBattleTx"
+   ],
    "combat": [
     "*PlayerCollectionInputsTx"
+   ],
+   "oneonone": [
+    "*ObserveBattleTx"
    ],
    "playerdisplay": [
     "*TitleProgressTx"
@@ -1651,6 +1660,9 @@
    "publicstats": [
     "*HeroLibraryInputsTx",
     "*PlayerCollectionInputsTx"
+   ],
+   "topfloor": [
+    "*ObserveBattleTx"
    ]
   },
   "march": {},
@@ -2476,6 +2488,9 @@
    "interface:arena.Roster": [
     "*OverlayMID1"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "playerroot": [
     "CanonicalPlayerIDs",
     "Validate"
@@ -2713,6 +2728,9 @@
    ],
    "interface:championsleague.Roster": [
     "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "playerdisplay": [
     "*ReceiveOriginTx",
@@ -5065,6 +5083,9 @@
    "interface:oneonone.Roster": [
     "*OverlayMID1"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "store:contentstore": [
     "*ActiveRevision",
     "*OneOnOneCatalogTx",
@@ -6091,6 +6112,9 @@
    ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "playerdisplay": [
     "*ReadEffectivePlayerDisplayTx"

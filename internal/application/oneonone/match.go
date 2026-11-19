@@ -492,7 +492,26 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 	done2 := m
 	stamp := at.UTC()
 	done2.Status, done2.Outcome, done2.SettledAt, done2.StateVersion = d.StatusSettled, &outcome, &stamp, m.StateVersion+1
-	return s.Store.FinishMatchTx(c, sc.Tx, done2, m.StateVersion)
+	if err = s.Store.FinishMatchTx(c, sc.Tx, done2, m.StateVersion); err != nil {
+		return err
+	}
+	if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Attacker, foughtHeroes(m.AttackTeams, m.Rounds, wins), at); err != nil {
+		return err
+	}
+	return s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Defender, foughtHeroes(m.DefenseTeams, m.Rounds, wins), at)
+}
+
+// foughtHeroes is one side's own lineup in the rounds that reached a settled
+// result; a forfeited round was decided without a battle and does not count.
+func foughtHeroes(teams []d.Team, rounds []d.Round, wins []int64) []int64 {
+	heroes := []int64{}
+	for index := range wins {
+		if index >= len(teams) || rounds[index].Forfeit() {
+			continue
+		}
+		heroes = append(heroes, teams[index].Heroes...)
+	}
+	return heroes
 }
 
 // close ends a match whose rounds can no longer produce results; the consumed

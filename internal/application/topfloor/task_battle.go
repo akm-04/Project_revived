@@ -404,7 +404,12 @@ func (service Service) settleTask(requestContext context.Context, fight domain.T
 		current.Fight.Outcome = &outcome
 		current.Fight.SettledAt = &at
 		current.Fight.StateVersion++
-		return service.Store.FinishTaskFightTx(requestContext, scope.Tx, current, previous)
+		if err = service.Store.FinishTaskFightTx(requestContext, scope.Tx, current, previous); err != nil {
+			return err
+		}
+		// Only the challenger's formation is frozen on the fight; the defender has
+		// no stored own roster here, so no defender count is claimed (G2 H2).
+		return service.BattleCounts.ObserveBattleTx(requestContext, scope.Tx, current.Fight.Challenger, current.Fight.Formation, at)
 	})
 	return err
 }
