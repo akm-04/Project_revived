@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	dm "gxb.local/backend/v2/internal/application/frienddm"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -164,7 +165,7 @@ func (Store) ApplyTx(c context.Context, t tx.Tx, m dm.Manifest, changes []dm.Cha
 	seen := map[string]bool{}
 	for _, v := range changes {
 		before, ok := allowed[v.Before.Occurrence.ID]
-		if !ok || seen[before.Occurrence.ID] || before.Version != v.Before.Version || before.Status != dm.Pending || !v.Status.Valid() || !v.At.Equal(at) || v.ClaimGeneration < before.ClaimGeneration || at.Before(before.UpdatedAt) {
+		if !ok || seen[before.Occurrence.ID] || before.Version != v.Before.Version || before.Status != dm.Pending || !v.Status.Valid() || !v.At.Equal(at) || v.ClaimGeneration < before.ClaimGeneration || at.Before(gen.EffectiveObservation(at, before.UpdatedAt)) {
 			return dm.ErrInvalid
 		}
 		seen[before.Occurrence.ID] = true
