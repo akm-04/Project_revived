@@ -40,6 +40,16 @@ PURE_READ_MIDS = {
     279: "I9_11D_COMPAT_V2 C7 terminal settles nothing",
 }
 
+# Routes the trace cannot decide (their transaction flags are arguments) but
+# whose handler is a read by construction. MID 37 lists the served shops through
+# Service.List, whose transaction is read-only and which records no receipt
+# (application/shop/commands.go List -> run readOnly=true, service.go run
+# ReadOnly: readOnly). MID 38 is not here: closing a temp shop is a write route
+# (I9_11C_CORE_SHOPS_V2 C11), so it stays state.
+EVIDENCE_READ_MIDS = {
+    37: "I9_11C_CORE_SHOPS_V2 C4/C12 read-only shop list",
+}
+
 
 def json_text(value):
     return json.dumps(value, indent=1, ensure_ascii=False, sort_keys=True) + "\n"
@@ -82,6 +92,8 @@ def load_mid_classes(path=None):
 
 
 def mid_effect(row):
+    if row.get("mid") in EVIDENCE_READ_MIDS:
+        return "read"
     if row.get("state_writes") or row.get("receipt_writes"):
         return "state"
     if row.get("mid") in PURE_READ_MIDS:

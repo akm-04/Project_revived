@@ -771,6 +771,85 @@ func (w *world) handlerOf(dispatcherType, dispatcherFile string) (string, string
 	return "", "", 0
 }
 
+// compositionServiceApp resolves the application package that owns the Service
+// of an adapter composition, e.g. shopComposition.Service built by
+// stockruntime.NewShopComposition whose result declares Service app.Service.
+// The composition's dependency packages are not the route owner.
+func (w *world) compositionServiceApp(fieldValue ast.Expr, sc *scope, pkg *packageInfo) (string, bool) {
+	selector, ok := unwrap(fieldValue).(*ast.SelectorExpr)
+	if !ok {
+		return "", false
+	}
+	base, ok := unwrap(selector.X).(*ast.Ident)
+	if !ok {
+		return "", false
+	}
+	binding, found := w.bindingFor(base, sc, pkg)
+	if !found {
+		return "", false
+	}
+	call, ok := unwrap(binding.expr).(*ast.CallExpr)
+	if !ok {
+		return "", false
+	}
+	constructor, ok := unwrap(call.Fun).(*ast.SelectorExpr)
+	if !ok {
+		return "", false
+	}
+	alias, ok := unwrap(constructor.X).(*ast.Ident)
+	if !ok {
+		return "", false
+	}
+	if path, exists := binding.file.imports[alias.Name]; !exists || path != modulePath+"internal/adapters/stockruntime" {
+		return "", false
+	}
+	definition, found := w.resolveCallDef(call, sc, binding.file, pkg, 0)
+	if !found || definition.node.Type.Results == nil || len(definition.node.Type.Results.List) != 1 {
+		return "", false
+	}
+	resultPath, resultType, ok := w.resolveTypeRef(definition.node.Type.Results.List[0].Type, definition.file)
+	if !ok {
+		return "", false
+	}
+	typeFile, exists := w.packageAt(resultPath).types[resultType]
+	if !exists {
+		return "", false
+	}
+	serviceType := structFieldType(typeFile.ast, resultType, selector.Sel.Name)
+	appPath, _, ok := w.resolveTypeRef(serviceType, typeFile)
+	if !ok || !strings.HasPrefix(appPath, modulePath+"internal/application/") {
+		return "", false
+	}
+	return strings.TrimPrefix(appPath, modulePath+"internal/application/"), true
+}
+
+func structFieldType(file *ast.File, typeName, fieldName string) ast.Expr {
+	for _, decl := range file.Decls {
+		general, ok := decl.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+		for _, raw := range general.Specs {
+			spec, ok := raw.(*ast.TypeSpec)
+			if !ok || spec.Name.Name != typeName {
+				continue
+			}
+			structType, ok := spec.Type.(*ast.StructType)
+			if !ok {
+				return nil
+			}
+			for _, field := range structType.Fields.List {
+				for _, name := range field.Names {
+					if name.Name == fieldName {
+						return field.Type
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (w *world) attribute(dispatcherExpr ast.Expr, sc *scope, fc *fileContext, pkg *packageInfo, registrationFile string) (string, string, string, string, []string, string) {
 	literal, literalFile := w.findDispatcherLiteral(dispatcherExpr, sc, fc, pkg, 0)
 	dispatcherType := ""
@@ -816,6 +895,10 @@ func (w *world) attribute(dispatcherExpr ast.Expr, sc *scope, fc *fileContext, p
 		for _, field := range literalFields {
 			key, ok := field.Key.(*ast.Ident)
 			if !ok || key.Name != "Service" {
+				continue
+			}
+			if app, ok := w.compositionServiceApp(field.Value, sc, pkg); ok {
+				owner = app
 				continue
 			}
 			fieldRefs := w.refsOf(field.Value, sc, literalFile, pkg)
