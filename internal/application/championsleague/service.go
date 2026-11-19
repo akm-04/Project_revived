@@ -227,7 +227,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 		if due(cat, root, at) {
 			return d.ErrDue
 		}
-		if at.Before(root.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
 			return d.ErrStaleTime
 		}
 		players, e := s.Store.PlayersTx(c, sc.Tx, true)

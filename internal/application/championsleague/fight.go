@@ -220,7 +220,7 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 		if due(cat, root, at) {
 			return d.ErrDue
 		}
-		if at.Before(root.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
 			return d.ErrStaleTime
 		}
 		m, ok, e := s.Store.MatchTx(c, sc.Tx, id)
