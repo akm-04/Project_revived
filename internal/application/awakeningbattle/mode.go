@@ -36,11 +36,17 @@ type Mode struct {
 	Fence interface {
 		FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 	}
-	Heroes      i5.AwakeningHeroes
-	Missions    i5.AwakeningBloodPort
-	Combat      Combat
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Heroes       i5.AwakeningHeroes
+	Missions     i5.AwakeningBloodPort
+	Combat       Combat
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 func locator(a identity.ActorContext) cd.Locator {
@@ -178,7 +184,11 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 		}
 		r.ActorAccountUID, r.ContextID, r.PolicyVersion = string(actor.AccountUID), actor.ContextID.UUID(), objective.AwakeningContract
 		_, e = s.Receipts.PutTx(ctx, sc.Tx, r)
-		return e
+		// A drained RESULT of a completed mission is a replay of its settlement.
+		if e != nil || refused || attested.Drained {
+			return e
+		}
+		return s.BattleCounts.ObserveBattleTx(ctx, sc.Tx, actor.PlayerID, []int64{a.OwnerID}, sc.Operation.DecisionAt())
 	})
 	if e != nil {
 		return nil, e

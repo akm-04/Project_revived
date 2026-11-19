@@ -270,6 +270,9 @@ func (mode Mode) MonsterResult(ctx context.Context, actor identity.ActorContext,
 		response := projection(*state)
 		response["awards"] = awards
 		state.LastGrid, state.LastResult = request.Grid, response
+		if err = mode.BattleCounts.ObserveBattleTx(ctx, current.timed.Tx, actor.PlayerID, request.Report.Formation, current.timed.Operation.DecisionAt()); err != nil {
+			return nil, err
+		}
 		return response, nil
 	})
 }

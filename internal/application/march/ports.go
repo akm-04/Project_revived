@@ -67,23 +67,29 @@ type Grants interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
 }
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Functions   Functions
-	Directory   Directory
-	HeroLocks   HeroLocks
-	Heroes      Heroes
-	Roster      Roster
-	HeroWire    func(character.Hero) (map[string]any, error)
-	Opponents   Opponents
-	Stats       combat.Stats
-	Combat      Combat
-	Facts       Facts
-	Grants      Grants
-	Costs       i5.TxMaterialCostDebiter
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Functions    Functions
+	Directory    Directory
+	HeroLocks    HeroLocks
+	Heroes       Heroes
+	Roster       Roster
+	HeroWire     func(character.Hero) (map[string]any, error)
+	Opponents    Opponents
+	Stats        combat.Stats
+	Combat       Combat
+	Facts        Facts
+	Grants       Grants
+	Costs        i5.TxMaterialCostDebiter
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }

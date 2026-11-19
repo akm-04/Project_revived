@@ -92,6 +92,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		if err = s.fillStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), out); err != nil {
 			return nil, err
 		}
+		if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, q.Report.Formation, sc.Operation.DecisionAt()); err != nil {
+			return nil, err
+		}
 		return out, nil
 	})
 	if err == nil && (refused || refusalReply(out)) {

@@ -282,6 +282,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 			r.LastResultFloor = q.Floor
 			r.LastResultPet = p.Pet
 		}
+		if e = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, p.Formation, sc.Operation.DecisionAt()); e != nil {
+			return nil, e
+		}
 		return out, nil
 	})
 	if e == nil && (refused || refusalBody(out)) {

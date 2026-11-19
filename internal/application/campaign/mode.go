@@ -57,16 +57,22 @@ type Mode struct {
 	MaxColor     i5.MaxHeroColorPolicyProvider
 	Combat       Combat
 	// StarCaps clamps a winning fight that froze a BORROWED attacker (C13).
-	StarCaps    map[int64]int64
-	Energy      i5.TxTemporalDebiter
-	Grants      Grants
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       i5.TxMaterialCostDebiter
-	Progression Progression
-	Stages      Stages
-	Facts       Facts
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	StarCaps     map[int64]int64
+	Energy       i5.TxTemporalDebiter
+	Grants       Grants
+	Privileges   i5.PrivilegeSnapshotProvider
+	Costs        i5.TxMaterialCostDebiter
+	Progression  Progression
+	Stages       Stages
+	Facts        Facts
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 type Progression interface {
@@ -802,6 +808,12 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	next.StateVersion++
 	if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, next, nil, at); err != nil {
 		return Settled{}, false, err
+	}
+	// The cloud branch carries no own formation, so it counts no battle.
+	if !d.Cloud(request.Type) {
+		if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, heroes, at); err != nil {
+			return Settled{}, false, err
+		}
 	}
 	return Settled{Body: body}, false, nil
 }

@@ -888,7 +888,7 @@
    "tables": 13
   },
   {
-   "callees": 7,
+   "callees": 8,
    "callers": 0,
    "mids": 2,
    "name": "awakeningbattle",
@@ -924,7 +924,7 @@
    "tables": 1
   },
   {
-   "callees": 13,
+   "callees": 14,
    "callers": 3,
    "mids": 11,
    "name": "campaign",
@@ -1032,7 +1032,7 @@
    "tables": 1
   },
   {
-   "callees": 12,
+   "callees": 13,
    "callers": 4,
    "mids": 7,
    "name": "conquerschool",
@@ -1149,7 +1149,7 @@
    "tables": 1
   },
   {
-   "callees": 10,
+   "callees": 11,
    "callers": 0,
    "mids": 6,
    "name": "godstrial",
@@ -1167,7 +1167,7 @@
    "tables": 2
   },
   {
-   "callees": 10,
+   "callees": 11,
    "callers": 4,
    "mids": 14,
    "name": "guildcampaign",
@@ -1321,7 +1321,7 @@
   },
   {
    "callees": 13,
-   "callers": 5,
+   "callers": 14,
    "mids": 23,
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
@@ -1329,7 +1329,7 @@
    "tables": 11
   },
   {
-   "callees": 13,
+   "callees": 14,
    "callers": 0,
    "mids": 7,
    "name": "march",
@@ -1338,7 +1338,7 @@
    "tables": 1
   },
   {
-   "callees": 10,
+   "callees": 11,
    "callers": 1,
    "mids": 12,
    "name": "memoir",
@@ -1383,7 +1383,7 @@
    "tables": 8
   },
   {
-   "callees": 12,
+   "callees": 13,
    "callers": 1,
    "mids": 12,
    "name": "petcampaign",
@@ -1680,7 +1680,7 @@
    "tables": 1
   },
   {
-   "callees": 11,
+   "callees": 12,
    "callers": 1,
    "mids": 5,
    "name": "worldboss",

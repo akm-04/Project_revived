@@ -274,6 +274,9 @@ func (mode Mode) resumePlayer(ctx context.Context, actor identity.ActorContext, 
 		response["battle_info"] = map[string]any{"battle_report": string(settled.Report), "star": settled.Resolution.Outcome.Star, "health_status": map[string]any{"team_A": health}, "library_mission_formations": map[string]any{}}
 		response["awards"] = awards
 		state.LastGrid, state.LastResult = pending.Grid, response
+		if err = mode.BattleCounts.ObserveBattleTx(ctx, current.timed.Tx, actor.PlayerID, pending.Formation, current.timed.Operation.DecisionAt()); err != nil {
+			return nil, err
+		}
 		return response, nil
 	})
 }
