@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
+	"gxb.local/backend/v2/internal/domain/economy"
 )
 
 func TestHeroFailureRowTable(t *testing.T) {
@@ -36,6 +37,10 @@ func TestHeroFailureRowTable(t *testing.T) {
 		{"fumo content inactive", apphero.ErrHeroFumoContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
 		{"promotion content inactive", apphero.ErrHeroPromotionContentInactive, http.StatusConflict, unprovenRefusalCode, ""},
 		{"capacity unavailable", apphero.ErrHeroCapacityUnavailable, http.StatusInternalServerError, unprovenRefusalCode, ""},
+		{"balance diamonds", economy.InsufficientBalance("crystal"), http.StatusConflict, insufficientDiamondCode, ""},
+		{"balance coins", economy.InsufficientBalance("mana"), http.StatusConflict, insufficientCoinCode, ""},
+		{"balance stamina", economy.InsufficientBalance("energy"), http.StatusConflict, insufficientStaminaCode, ""},
+		{"balance other", economy.InsufficientBalance("guild_coin"), http.StatusConflict, unprovenRefusalCode, ""},
 	}
 	for _, row := range cases {
 		t.Run(row.name, func(t *testing.T) {

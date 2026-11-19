@@ -16,12 +16,14 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/marchstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	combat "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/march"
 	"gxb.local/backend/v2/internal/application/missioninputs"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/march"
@@ -298,8 +300,14 @@ func TestI9_5AMarchNativeAllStagesExtraAndConcurrentValue(t *testing.T) {
 			if e = tr.Commit(ctx); e != nil {
 				t.Fatal(e)
 			}
-			if _, e = s.Extra(ctx, a, op()); !errors.Is(e, d.ErrRefused) || marchRecord(t, p, a).Extra {
+			if _, e = s.Extra(ctx, a, op()); !errors.Is(e, economy.ErrInsufficientBalance) || marchRecord(t, p, a).Extra {
 				t.Fatal("insufficient Mystic purchase consumed chest", e)
+			}
+			dispatcher := stockruntime.MarchDispatcher{Authority: playtestAuthority{a}, Service: s}
+			refused := dispatcher.Dispatch(ctx, playtestRequest(a, 341, map[string]any{}))
+			replayed := dispatcher.Dispatch(ctx, playtestRequest(a, 341, map[string]any{}))
+			if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(20005) || replayed.HTTPStatus != 409 || replayed.Body["error_code"] != int64(20005) || marchRecord(t, p, a).Extra {
+				t.Fatalf("MID341 short crystal reply = %+v replay = %+v", refused, replayed)
 			}
 			grantGenuine(t, p, a, rev, "march-mystic-fixture", []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: before}})
 			good, bad := marchPair(t, func() (map[string]any, error) { return s.Extra(ctx, a, op()) })
