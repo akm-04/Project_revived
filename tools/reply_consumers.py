@@ -660,14 +660,15 @@ class Extractor:
         arguments, _ = split_arguments(tokens, position + 1)
         if not arguments:
             return
-        mid = self.request_mid(tokens, arguments[0])
-        if mid is None:
+        mids = self.request_mids(file, tokens, position, arguments[0])
+        if not mids:
             return
         line = tokens[position].line
         callback_present = len(arguments) >= 3 and tokens[arguments[2][0]].value != "nil"
-        if callback_present:
-            self.analyze_callback(mid, file, tokens, arguments, position, line)
-        self.analyze_event_reply(mid, file, line, callback_present)
+        for mid in sorted(mids):
+            if callback_present:
+                self.analyze_callback(mid, file, tokens, arguments, position, line)
+            self.analyze_event_reply(mid, file, line, callback_present)
 
     def analyze_callback(self, mid, file, tokens, arguments, position, line) -> None:
         callback_start, callback_end = arguments[2]
@@ -708,19 +709,41 @@ class Extractor:
             return
         self.record_callback(mid, _unknown(file, line, f"callback expression {expression[:80]!r} is not resolvable statically"))
 
-    def request_mid(self, tokens: list[Token], argument: tuple[int, int]) -> int | None:
+    def request_mids(self, file: str, tokens: list[Token], position: int, argument: tuple[int, int]) -> frozenset[int]:
         start, end = argument
         values = [token.value for token in tokens[start:end]]
         if len(values) == 5 and values[1:4] == [".", "mid", "."]:
-            return self.mid_symbols.get(values[4])
+            return mid_set(self.mid_symbols[values[4]]) if values[4] in self.mid_symbols else frozenset()
         if len(values) == 3 and values[0] == "mid" and values[1] == ".":
-            return self.mid_symbols.get(values[2])
+            return mid_set(self.mid_symbols[values[2]]) if values[2] in self.mid_symbols else frozenset()
         if len(values) == 1 and tokens[start].kind == "number":
             try:
-                return int(values[0], 0)
+                return mid_set(int(values[0], 0))
             except ValueError:
-                return None
-        return None
+                return frozenset()
+        if end - start == 1 and tokens[start].kind == "name":
+            return self.local_mids(file, tokens, position, values[0])
+        return frozenset()
+
+    def local_mids(self, file: str, tokens: list[Token], position: int, name: str) -> frozenset[int]:
+        """A local that one function reassigns from several mid symbols is a MID
+        selector (SweepWindow picks the sweep MID by campaign type); every
+        assignment names a MID this request site can send."""
+        function = self.index(file).innermost[position]
+        start = function.body_start if function is not None else 0
+        declared = False
+        mids: set[int] = set()
+        cursor = start + 1
+        while cursor < position:
+            token = tokens[cursor]
+            assignment = token.kind == "name" and token.value == name and tokens[cursor + 1].value == "="
+            source = [token.value for token in tokens[cursor + 2:cursor + 5]]
+            symbol = tokens[cursor + 6].value if cursor + 6 < len(tokens) else ""
+            if assignment and source == ["xyd", ".", "mid"] and tokens[cursor + 5].value == "." and symbol in self.mid_symbols:
+                declared = declared or tokens[cursor - 1].value == "local"
+                mids.add(self.mid_symbols[symbol])
+            cursor += 1
+        return frozenset(mids) if declared and len(mids) > 1 else frozenset()
 
     def analyze_forwarded_callback(self, mid, file, line, enclosing, parameter) -> None:
         method = enclosing.name

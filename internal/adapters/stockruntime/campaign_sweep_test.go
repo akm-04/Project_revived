@@ -11,6 +11,16 @@ func TestCampaignSweepStockParams(t *testing.T) {
 	if _, ok := campaignSweep(p); !ok {
 		t.Fatal("stock compose params refused")
 	}
+	for _, kind := range []int64{2, 11, 16, 21, 40, 42} {
+		trial := map[string]any{}
+		for k, v := range p {
+			trial[k] = v
+		}
+		trial["campaign_type"] = kind
+		if _, ok := campaignSweep(trial); !ok {
+			t.Fatal("supported campaign type refused", kind)
+		}
+	}
 	for key, value := range map[string]any{"sweep_num": 11, "sweep_type": 3, "campaign_type": 24, "formation": "1|0|0|0|0"} {
 		q := map[string]any{}
 		for k, v := range p {

@@ -96,6 +96,126 @@
    "mid": 34,
    "path": "items[].stone_id",
    "reason": "Shop.lua:168 truth-tests stone_id and then removes that item; cjson decodes JSON null to a truthy value, so only an absent key is safe for a non-stone row (I9_11C_CORE_SHOPS_V2 C4)"
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:587",
+   "mid": 117,
+   "path": "award_infos",
+   "reason": "award_infos is read only in the FOURTH_ANNI_MAP branch of SweepWindow's shared sweep callback (SweepWindow.lua:587); MID 117 is never sent for that campaign type."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:587",
+   "mid": 117,
+   "path": "award_infos[]",
+   "reason": "award_infos is read only in the FOURTH_ANNI_MAP branch of SweepWindow's shared sweep callback (SweepWindow.lua:587); MID 117 is never sent for that campaign type."
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:379",
+   "mid": 117,
+   "path": "chapter_event",
+   "reason": "handleChapterEvent reads reply.chapter_event only under `if var_17_0 and var_17_0.chapter_id` (SelfPlayer.lua:379); a sweep sends no chapter event, so the field is absent by design."
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:379",
+   "mid": 117,
+   "path": "chapter_event.cost",
+   "reason": "the chapter-event row exists only when the client branch above is taken; these fields describe a stored event of a cleared chapter, not a sweep reply."
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:379",
+   "mid": 117,
+   "path": "chapter_event.is_open",
+   "reason": "the chapter-event row exists only when the client branch above is taken; these fields describe a stored event of a cleared chapter, not a sweep reply."
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:379",
+   "mid": 117,
+   "path": "chapter_event.left_times",
+   "reason": "the chapter-event row exists only when the client branch above is taken; these fields describe a stored event of a cleared chapter, not a sweep reply."
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:379",
+   "mid": 117,
+   "path": "chapter_event.record",
+   "reason": "the chapter-event row exists only when the client branch above is taken; these fields describe a stored event of a cleared chapter, not a sweep reply."
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:379",
+   "mid": 117,
+   "path": "chapter_event.val",
+   "reason": "the chapter-event row exists only when the client branch above is taken; these fields describe a stored event of a cleared chapter, not a sweep reply."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:713",
+   "mid": 117,
+   "path": "trial.id",
+   "reason": "the `trial` row is present only for a group without NextID (11-15/40-42); a NextID group sends `challenge`, so this child is required only on the other client branch (SweepWindow.lua:713)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:713",
+   "mid": 117,
+   "path": "trial.is_open",
+   "reason": "the `trial` row is present only for a group without NextID (11-15/40-42); a NextID group sends `challenge`, so this child is required only on the other client branch (SweepWindow.lua:713)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:713",
+   "mid": 117,
+   "path": "trial.last_id",
+   "reason": "the `trial` row is present only for a group without NextID (11-15/40-42); a NextID group sends `challenge`, so this child is required only on the other client branch (SweepWindow.lua:713)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:713",
+   "mid": 117,
+   "path": "trial.left_times",
+   "reason": "the `trial` row is present only for a group without NextID (11-15/40-42); a NextID group sends `challenge`, so this child is required only on the other client branch (SweepWindow.lua:713)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:713",
+   "mid": 117,
+   "path": "trial.max_times",
+   "reason": "the `trial` row is present only for a group without NextID (11-15/40-42); a NextID group sends `challenge`, so this child is required only on the other client branch (SweepWindow.lua:713)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:727",
+   "mid": 117,
+   "path": "challenge.id",
+   "reason": "the `challenge` row is present only for a group with NextID (16-21); a group without NextID sends `trial`, so this child is required only on the other client branch (SweepWindow.lua:727)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:727",
+   "mid": 117,
+   "path": "challenge.is_open",
+   "reason": "the `challenge` row is present only for a group with NextID (16-21); a group without NextID sends `trial`, so this child is required only on the other client branch (SweepWindow.lua:727)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:727",
+   "mid": 117,
+   "path": "challenge.last_id",
+   "reason": "the `challenge` row is present only for a group with NextID (16-21); a group without NextID sends `trial`, so this child is required only on the other client branch (SweepWindow.lua:727)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:727",
+   "mid": 117,
+   "path": "challenge.left_times",
+   "reason": "the `challenge` row is present only for a group with NextID (16-21); a group without NextID sends `trial`, so this child is required only on the other client branch (SweepWindow.lua:727)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:727",
+   "mid": 117,
+   "path": "challenge.max_times",
+   "reason": "the `challenge` row is present only for a group with NextID (16-21); a group without NextID sends `trial`, so this child is required only on the other client branch (SweepWindow.lua:727)."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:661",
+   "mid": 117,
+   "path": "items[].item_id",
+   "reason": "SweepWindow holds items as one row per sweep run and then iterates each row (SweepWindow.lua:661-681); the generator collapses both list levels into items[].item_id, so a nested per-run array cannot satisfy the leaf while items and items[] still hold."
+  },
+  {
+   "client": "app/windows/SweepWindow.lua:661",
+   "mid": 117,
+   "path": "items[].item_num",
+   "reason": "SweepWindow holds items as one row per sweep run and then iterates each row (SweepWindow.lua:661-681); the generator collapses both list levels into items[].item_id, so a nested per-run array cannot satisfy the leaf while items and items[] still hold."
   }
  ]
 }

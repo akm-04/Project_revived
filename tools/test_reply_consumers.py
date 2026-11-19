@@ -431,6 +431,35 @@ class StorageBindingCycleTests(unittest.TestCase):
         self.assertIn("detail.challenge_times[]", paths)
 
 
+def indirect_mid_blobs():
+    return {
+        "app/common/network/mid.lua": "xyd.mid.SWEEP_CAMPAIGN = 9001\nxyd.mid.SWEEP_OTHER = 9002\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/windows/SweepWindow.lua": (
+            'local var_0_0 = class("SweepWindow")\n'
+            "function var_0_0.sweep(arg_1_0)\n"
+            "\tlocal var_1_0 = xyd.mid.SWEEP_CAMPAIGN\n"
+            "\tif arg_1_0.kind == 1 then\n"
+            "\t\tvar_1_0 = xyd.mid.SWEEP_OTHER\n"
+            "\tend\n"
+            "\txyd.Backend.get():request(var_1_0, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\tprint(arg_2_1.items)\n"
+            "\tend)\n"
+            "end\n"
+        ),
+    }
+
+
+class IndirectMidTests(unittest.TestCase):
+    def test_a_local_selected_from_several_mids_contributes_its_readers(self):
+        payload = reply_consumers.build(indirect_mid_blobs(), collapse=False)
+        self.assertEqual({"items"}, required_paths(payload, 9001))
+        self.assertEqual({"items"}, required_paths(payload, 9002))
+        self.assertTrue(payload["mids"]["9001"]["callbacks"])
+
+
 class ReplyConsumerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
