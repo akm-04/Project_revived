@@ -113,7 +113,7 @@ func (s Service) PrepareMarriageTx(c context.Context, t tx.Tx, e lib.MarriageEve
 	if err != nil {
 		return nil, err
 	}
-	if ok && (r.Validate() != nil || r.UpdatedAt.After(e.DecisionAt)) {
+	if ok && r.Validate() != nil {
 		return nil, d.ErrConflict
 	}
 	if !ok {
@@ -222,7 +222,7 @@ func (s Service) ReadTierFactsTx(c context.Context, sc ca.CoherentReadScope, q R
 	if !found {
 		return out, d.ErrUnavailable
 	}
-	if r.PlayerID != q.Player || r.Validate() != nil || r.UpdatedAt.After(sc.ObservedAt) {
+	if r.PlayerID != q.Player || r.Validate() != nil {
 		return out, d.ErrConflict
 	}
 	if _, e = s.Content.AchievementCatalogTx(c, sc.Queryer(), r.ContentRevision); e != nil {

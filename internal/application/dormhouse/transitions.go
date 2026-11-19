@@ -3,6 +3,7 @@ package dormhouse
 import (
 	"context"
 	"gxb.local/backend/v2/internal/application/broadcast"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
@@ -31,9 +32,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(root.UpdatedAt) {
-		return nil, ErrStale
-	}
 	if c.Family == BuyGlue {
 		return s.buyGlueTx(ctx, t, a, d, catalog)
 	}
@@ -57,9 +55,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		f, e := s.Owner.ReadHeroTx(ctx, t, h.Ref())
 		if e != nil {
 			return nil, e
-		}
-		if at.Before(h.UpdatedAt) || at.Before(f.UpdatedAt) {
-			return nil, ErrStale
 		}
 		facts[h.PartnerID] = f
 	}
@@ -85,9 +80,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	room := rooms[c.HouseID]
 	if c.Family != Open && c.Family != Exchange && room.ID == 0 {
 		return nil, dorm.ErrInvalidFacts
-	}
-	if room.ID != 0 && at.Before(room.UpdatedAt) {
-		return nil, ErrStale
 	}
 	cost := i5.MaterialCost{}
 	var plan *dorm.ResidentPlan
@@ -264,7 +256,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	touchRoom := func(r dorm.Room) error {
 		old := r.StateVersion
 		r.StateVersion++
-		r.UpdatedAt = at
+		r.UpdatedAt = gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
 		rooms[r.ID] = r
 		return s.Owner.SaveRoomTx(ctx, t, r, old)
 	}
@@ -300,7 +292,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			old := f.StateVersion
 			f.StateVersion++
 			f.Equipment[c.Index-1] = 1
-			f.UpdatedAt = at
+			f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt)
 			if e = s.Owner.SaveHeroTx(ctx, t, f, old); e != nil {
 				return nil, e
 			}
@@ -324,7 +316,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			old := f.StateVersion
 			f.StateVersion++
 			f.HouseID = destination
-			f.UpdatedAt = at
+			f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt)
 			f.LoungeAnchor = time.Time{}
 			if destination != 0 && rooms[destination].MainType == dorm.LoungeType {
 				f.LoungeAnchor = at
@@ -369,7 +361,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if c.Family != Open && mutated {
 		old := root.StateVersion
 		root.StateVersion++
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, t, root, old); e != nil {
 			return nil, e
 		}
@@ -407,7 +399,7 @@ func (s Service) completePendingExpansion(ctx context.Context, t tx.Tx, a identi
 	room.StateVersion++
 	room.ExpansionLevel = room.Pending.NextLevel
 	room.Pending = nil
-	room.UpdatedAt = at
+	room.UpdatedAt = gen.EffectiveObservation(at, room.UpdatedAt, room.CreatedAt)
 	rooms[room.ID] = room
 	if e := s.Owner.SaveRoomTx(ctx, t, room, old); e != nil {
 		return e
@@ -441,7 +433,7 @@ func (s Service) settleLounge(ctx context.Context, t tx.Tx, r dorm.Room, heroes 
 		}
 		old := f.StateVersion
 		f.StateVersion++
-		f.UpdatedAt = at
+		f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt)
 		f.LoungeAnchor = v.Anchor
 		f.LoungeFraction = v.Fraction
 		if cap {

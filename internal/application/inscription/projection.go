@@ -72,9 +72,6 @@ func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(r.UpdatedAt) {
-		return out, ErrStale
-	}
 	c, e := s.Content.InscriptionCatalogTx(ctx, q, scope.ContentRevision)
 	if e != nil {
 		return out, e
@@ -85,9 +82,6 @@ func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScop
 	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(pop.UpdatedAt) {
-		return out, ErrStale
 	}
 	return Inputs{r, c, pop.StateVersion, map[int64]bool{}, scope.ObservedAt, scope.ContentRevision}, nil
 }
@@ -132,9 +126,6 @@ func (s Service) CompleteSuitCountTx(ctx context.Context, q tx.Queryer, scope In
 		if !ok {
 			return 0, ins.ErrUnqualified
 		}
-		if scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
-			return 0, ErrStale
-		}
 		if e = f.Facts.Validate(v.Catalog); e != nil {
 			return 0, e
 		}
@@ -164,9 +155,6 @@ func (s Service) HeroInscriptionInputsTx(ctx context.Context, q tx.Queryer, scop
 	f, e := s.Owner.ReadHeroTx(ctx, q, scope.Player, id)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
-		return out, ErrStale
 	}
 	if e = f.Facts.Validate(v.Catalog); e != nil {
 		return out, e

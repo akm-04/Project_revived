@@ -224,9 +224,6 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, q Command, 
 		if e != nil || current.Validate() != nil {
 			return ErrConflict
 		}
-		if at.Before(current.Basis.Profile.UpdatedAt) {
-			return ErrConflict
-		}
 		next := current
 		if q.Kind == "avatar" {
 			v, yes := p.Find("avatar", q.ID)

@@ -76,7 +76,7 @@ func (s Service) HeroLibraryInputsTx(ctx context.Context, q tx.Queryer, scope In
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(root.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(facts.UpdatedAt) || catalog.Feeding.ValidateApplied(facts.Applied) != nil {
+	if catalog.Feeding.ValidateApplied(facts.Applied) != nil {
 		return out, lib.ErrUnqualified
 	}
 	bonus, e := facts.FavorBonusBP()
@@ -104,9 +104,6 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 	lr, e := s.Library.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(hr.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) {
-		return out, lib.ErrUnqualified
 	}
 	out.PopulationVersion = hr.StateVersion
 	out.LibraryRootVersion = lr.StateVersion
@@ -136,9 +133,6 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 		}
 		f, ok := byPartner[h.PartnerID]
 		if !ok {
-			return out, lib.ErrUnqualified
-		}
-		if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) {
 			return out, lib.ErrUnqualified
 		}
 		if f.Married {

@@ -78,7 +78,7 @@ func (s PrivilegeTransitionOwner) PreparePrivilegeTransitionTx(c context.Context
 	if e != nil {
 		return nil, e
 	}
-	if !ok || state.Validate() != nil || state.UpdatedAt.After(at) || state.ContentRevision == "" {
+	if !ok || state.Validate() != nil || state.ContentRevision == "" {
 		return nil, economy.ErrInvalidTemporalPolicy
 	}
 	rp, e := s.Content.ResolveResourceTx(c, t, state.ContentRevision, grant.Line{Kind: grant.Temporal, ResourceKey: "skill_point", Amount: 1})

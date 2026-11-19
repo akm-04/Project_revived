@@ -158,32 +158,12 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 	c := admission.Command
 	at := admission.DecisionAt
 	target := c.socialTarget(actor.PlayerID)
-	targetRoot, err := s.Owner.ReadRootTx(ctx, t, target)
-	if err != nil {
-		return nil, err
-	}
-	if at.Before(targetRoot.UpdatedAt) {
-		return nil, ErrStale
-	}
-	if target != actor.PlayerID {
-		actorRoot, err := s.Owner.ReadRootTx(ctx, t, actor.PlayerID)
-		if err != nil {
-			return nil, err
-		}
-		if at.Before(actorRoot.UpdatedAt) {
-			return nil, ErrStale
-		}
-	}
 	rooms, err := s.Owner.ListRoomsTx(ctx, t, target)
 	if err != nil {
 		return nil, err
 	}
-	room, ok := rooms[c.HouseID]
-	if !ok {
+	if _, ok := rooms[c.HouseID]; !ok {
 		return nil, dorm.ErrInvalidFacts
-	}
-	if at.Before(room.UpdatedAt) {
-		return nil, ErrStale
 	}
 	roomTarget := dorm.RoomTarget{Server: logicalserver.PlayerRegion(target), Owner: target, HouseID: c.HouseID}
 	values, err := s.Values.ReadDormPlayerStateTx(ctx, t, target, at)
@@ -335,7 +315,7 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 func (s Service) saveSocialRoom(ctx context.Context, t tx.Tx, state dorm.SocialRoomState, at time.Time) error {
 	previous := state.StateVersion
 	state.StateVersion = previous + 1
-	state.UpdatedAt = at.UTC()
+	state.UpdatedAt = gen.EffectiveObservation(at, state.UpdatedAt).UTC()
 	return s.Social.SaveSocialRoomTx(ctx, t, state, previous)
 }
 

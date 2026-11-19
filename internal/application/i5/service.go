@@ -351,8 +351,8 @@ func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 			if err != nil {
 				return GrantResult{}, err
 			}
-			if exists && (op.StartedAt.Before(balance.UpdatedAt) || balance.StateVersion == math.MaxInt64) {
-				return GrantResult{}, errors.New("SocialGift scalar clock/version regression")
+			if exists && balance.StateVersion == math.MaxInt64 {
+				return GrantResult{}, errors.New("SocialGift scalar version regression")
 			}
 		}
 	}
@@ -385,6 +385,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			if err != nil {
 				return GrantResult{}, err
 			}
+			storedUpdatedAt := st.UpdatedAt
 			if !exists && policy.DailyFloorMinimum != nil {
 				st = economy.ScalarBalance{PlayerID: plan.PlayerID, ResourceKey: line.ResourceKey, StateVersion: 1, UpdatedAt: now}
 			}
@@ -399,6 +400,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				if err != nil {
 					return GrantResult{}, err
 				}
+				st.UpdatedAt = gen.EffectiveObservation(now, storedUpdatedAt)
 			}
 			if err := s.Store.SaveScalarTx(ctx, t, st, exists); err != nil {
 				return GrantResult{}, err

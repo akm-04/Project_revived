@@ -32,7 +32,7 @@ func (r *AwakeningPositionResolver) ResolveTx(ctx context.Context, q tx.Queryer,
 	if !found {
 		return pos, nil
 	}
-	if f.Validate() != nil || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || f.UpdatedAt.After(h.UpdatedAt) {
+	if f.Validate() != nil || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) {
 		return pos, character.ErrRawAwakeningUnavailable
 	}
 	if f.RawStage <= 1 {

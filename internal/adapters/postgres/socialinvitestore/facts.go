@@ -114,7 +114,7 @@ func (reader FactsReader) ReadInviteeFactsTx(ctx context.Context, scope tx.Scope
 	if err != nil {
 		return out, err
 	}
-	if progression.PlayerID != player || progression.Validate() != nil || progression.UpdatedAt.After(at) {
+	if progression.PlayerID != player || progression.Validate() != nil {
 		return out, application.ErrFacts
 	}
 	privilegeSnapshot, err := reader.Privilege.ReadCosmeticPrivilegeTx(ctx, scope.Tx, player, revision, at)

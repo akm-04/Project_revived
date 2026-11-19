@@ -57,7 +57,7 @@ func (Store) CompletedTasksTx(ctx context.Context, query tx.Queryer, player iden
 			row.CompletedAt = &completed
 		}
 		record := application.TaskRecord{Task: domain.Task{OperationID: identifier, Caller: row.Caller, Target: row.Target, LogicalServerID: row.Server, StartedAt: row.StartedAt, ExpiresAt: row.ExpiresAt, CompletedAt: row.CompletedAt, Status: row.Status, Baseline: domain.Baseline{AcademyLevel: row.Level, OwnedHeroCount: row.Heroes, ChargeTotal: row.Charge}}, ContentRevision: row.Revision, PolicyVersion: row.Policy, StateVersion: row.Version, UpdatedAt: row.UpdatedAt}
-		if !validRecord(record) || record.Task.Caller != player || record.Task.LogicalServerID != server || record.Task.Status != domain.StatusCompleted || record.Task.CompletedAt.After(at) || record.UpdatedAt.After(at) {
+		if !validRecord(record) || record.Task.Caller != player || record.Task.LogicalServerID != server || record.Task.Status != domain.StatusCompleted {
 			return nil, application.ErrAwardFacts
 		}
 		result = append(result, record)

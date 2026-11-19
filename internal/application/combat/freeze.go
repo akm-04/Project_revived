@@ -427,7 +427,7 @@ func (f *freezer) player(ctx context.Context, player identity.PlayerID) error {
 	}
 	books := map[string]int64{}
 	for _, stack := range stacks {
-		if stack.Validate() != nil || stack.PlayerID != player || scope.ObservedAt.Before(stack.UpdatedAt) {
+		if stack.Validate() != nil || stack.PlayerID != player {
 			return unavailable("stacks", d.ErrStale)
 		}
 		if stack.ItemID >= d.ExclusiveBookFirst && stack.ItemID <= d.ExclusiveBookLast && stack.Quantity > 0 {

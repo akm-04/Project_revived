@@ -45,7 +45,7 @@ func (s InscriptionHeroPort) InscriptionEligibilityTx(c context.Context, q tx.Qu
 	if e != nil {
 		return app.Eligibility{}, e
 	}
-	if f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || at.Before(h.UpdatedAt) || at.Before(f.UpdatedAt) {
+	if f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) {
 		return app.Eligibility{}, app.ErrUnavailable
 	}
 	kind, e := s.Content.HeroKindTx(c, q, revision, h.TableID)

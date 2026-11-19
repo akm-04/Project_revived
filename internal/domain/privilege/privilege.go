@@ -120,7 +120,7 @@ type Snapshot struct {
 }
 
 func (s Snapshot) Validate(pid identity.PlayerID, revision string, at time.Time) error {
-	if s.State.Validate() != nil || s.State.PlayerID != pid || s.ObservationRevision != revision || !RevisionValid(revision) || at.IsZero() || !s.ObservedAt.Equal(at) || s.State.UpdatedAt.After(at) || s.SkillPointCap < 0 || s.ProviderRevision != ManualPolicy+"/"+s.State.ContentRevision {
+	if s.State.Validate() != nil || s.State.PlayerID != pid || s.ObservationRevision != revision || !RevisionValid(revision) || at.IsZero() || !s.ObservedAt.Equal(at) || s.SkillPointCap < 0 || s.ProviderRevision != ManualPolicy+"/"+s.State.ContentRevision {
 		return ErrUnavailable
 	}
 	return nil

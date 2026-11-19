@@ -684,6 +684,7 @@
    "bookskill": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "campaign": [
@@ -693,32 +694,38 @@
    ],
    "championsleague": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
    "characterhero": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
    "characterpet": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
    "commerceprivilege": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
    "conquerschool": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
    "course": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "dodgeball": [
@@ -729,17 +736,20 @@
    "dormhouse": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
    "elementequipment": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "eventcentre": [
     "Bind",
-    "DecisionAt"
+    "DecisionAt",
+    "EffectiveObservation"
    ],
    "frienddm": [
     "DecisionAt",
@@ -799,6 +809,7 @@
    "heroevolution": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "heroforce": [
@@ -812,6 +823,7 @@
    "i5": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -824,6 +836,7 @@
    "inscription": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "itemsenergy": [
@@ -838,6 +851,7 @@
    "librarylocal": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Run"
    ],
@@ -883,6 +897,7 @@
    ],
    "publicprofile": [
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Operation",
     "Run"
@@ -937,15 +952,18 @@
    ],
    "socialrecall": [
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "socialrelation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "spirit": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "summon": [
@@ -2616,6 +2634,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -2766,6 +2785,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -2880,6 +2900,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3073,6 +3094,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3304,6 +3326,7 @@
   "commerceprivilege": {
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3371,6 +3394,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3431,6 +3455,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -3556,6 +3581,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3655,6 +3681,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -3730,7 +3757,8 @@
    ],
    "generation": [
     "Bind",
-    "DecisionAt"
+    "DecisionAt",
+    "EffectiveObservation"
    ],
    "i5": [
     "*ApplyMaterialDebitTx",
@@ -4352,6 +4380,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -4504,6 +4533,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -4671,6 +4701,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -4808,6 +4839,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Run"
    ],
@@ -5436,6 +5468,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Operation",
     "Run"
@@ -5988,6 +6021,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -6015,6 +6049,7 @@
   "socialrelation": {
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "playerpresentation": [
@@ -6075,6 +6110,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [

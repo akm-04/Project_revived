@@ -107,9 +107,6 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if e != nil {
 			return e
 		}
-		if at.Before(root.UpdatedAt) {
-			return ErrStale
-		}
 		catalog, e := s.Content.DormCatalogTx(ctx, sc.Tx, rev)
 		if e != nil {
 			return e
@@ -166,9 +163,6 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		}
 		if pid != a.PlayerID && wire.Social[house].Hidden {
 			return dorm.ErrHidden
-		}
-		if at.Before(r.UpdatedAt) {
-			return ErrStale
 		}
 		if own {
 			values, e = s.Values.LockDormPlayerStateTx(ctx, sc.Tx, pid, at)
@@ -277,17 +271,11 @@ func (s Service) DormHouseInputsTx(ctx context.Context, q tx.Queryer, scope Inpu
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(dr.UpdatedAt) || scope.ObservedAt.Before(hr.UpdatedAt) {
-		return out, dorm.ErrUnqualified
-	}
 	out = HeroInputs{Hero: h, Facts: f, PopulationVersion: hr.StateVersion, DormRootVersion: dr.StateVersion, ContentRevision: scope.ContentRevision, ObservedAt: scope.ObservedAt}
 	if f.HouseID != 0 {
 		r, e := s.Owner.ReadRoomTx(ctx, q, scope.Player, f.HouseID)
 		if e != nil {
 			return out, e
-		}
-		if scope.ObservedAt.Before(r.UpdatedAt) {
-			return out, dorm.ErrUnqualified
 		}
 		out.Room = &r
 		if r.MainType != dorm.LoungeType {
@@ -328,14 +316,8 @@ func (s Service) VillaCountTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(dr.UpdatedAt) || scope.ObservedAt.Before(hr.UpdatedAt) {
-		return out, dorm.ErrUnqualified
-	}
 	out = VillaInputs{PopulationVersion: hr.StateVersion, DormRootVersion: dr.StateVersion, ContentRevision: scope.ContentRevision, ObservedAt: scope.ObservedAt}
 	for _, r := range rooms {
-		if scope.ObservedAt.Before(r.UpdatedAt) {
-			return out, dorm.ErrUnqualified
-		}
 		if r.MainType == 4 {
 			out.Count++
 		}

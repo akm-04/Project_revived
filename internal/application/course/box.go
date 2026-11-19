@@ -16,9 +16,6 @@ import (
 // the box dropbox and answers the post-claim availability flag.
 func (s Service) applyGiftBox(ctx context.Context, t tx.Tx, a identity.ActorContext, d Admission, root course.Root) (map[string]any, error) {
 	at := d.DecisionAt
-	if at.Before(root.UpdatedAt) {
-		return nil, ErrStale
-	}
 	rule, found, e := s.Content.CourseGiftBoxRuleTx(ctx, t, d.ContentRevision, d.Command.ItemID)
 	if e != nil {
 		return nil, e

@@ -154,7 +154,7 @@ func (awarder Awarder) AwardTx(ctx context.Context, scope tx.Scope, actor identi
 	completed := make([]domain.CompletedTarget, 0, len(records))
 	for _, record := range records {
 		task := record.Task
-		if task.Validate() != nil || task.Status != domain.StatusCompleted || task.Caller != actor.PlayerID || task.LogicalServerID != actor.LogicalServerID || task.CompletedAt.After(at) || record.UpdatedAt.After(at) || record.StateVersion < 1 || record.PolicyVersion != RecallPolicyVersion || characterasset.ValidateExactRevisionID(record.ContentRevision) != nil {
+		if task.Validate() != nil || task.Status != domain.StatusCompleted || task.Caller != actor.PlayerID || task.LogicalServerID != actor.LogicalServerID || record.StateVersion < 1 || record.PolicyVersion != RecallPolicyVersion || characterasset.ValidateExactRevisionID(record.ContentRevision) != nil {
 			return out, ErrAwardFacts
 		}
 		current, err := awarder.Current.ReadRecallCurrentTx(ctx, scope, task.Target, revision, at)

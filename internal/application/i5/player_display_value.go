@@ -3,6 +3,7 @@ package i5
 import (
 	"context"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -70,12 +71,11 @@ func (s DisplayValueOwner) PrepareDisplayValueTx(c context.Context, t tx.Tx, a i
 	if !ok {
 		return nil, economy.ErrUnknownResource
 	}
-	if at.Before(b.UpdatedAt) {
-		return nil, player.ErrDisplay
-	}
+	storedUpdatedAt := b.UpdatedAt
 	if _, e = b.Debit(out.amount, at); e != nil {
 		return nil, e
 	}
+	b.UpdatedAt = gen.EffectiveObservation(at, storedUpdatedAt)
 	out.balance = b
 	if q.BuyID > 0 {
 		st, has, e := s.Store.LockStackTx(c, t, a.PlayerID, q.BuyID, at)

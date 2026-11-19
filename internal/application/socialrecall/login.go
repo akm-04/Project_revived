@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/bootstrap"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
@@ -68,9 +69,6 @@ func (reconciler LoginReconciler) ReconcileCharacterLogin(ctx context.Context, t
 	if task.Status != domain.StatusActive {
 		return nil
 	}
-	if at.Before(previous.UpdatedAt) {
-		return nil
-	}
 	next, changed, err := task.Complete(at)
 	if err != nil {
 		return err
@@ -87,6 +85,6 @@ func (reconciler LoginReconciler) ReconcileCharacterLogin(ctx context.Context, t
 	nextRecord := previous
 	nextRecord.Task = next
 	nextRecord.StateVersion++
-	nextRecord.UpdatedAt = at.UTC()
+	nextRecord.UpdatedAt = gen.EffectiveObservation(at, previous.UpdatedAt).UTC()
 	return reconciler.Owner.SaveRecallLoginTransitionTx(ctx, transaction, previous, nextRecord)
 }

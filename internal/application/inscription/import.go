@@ -99,9 +99,6 @@ func (s Service) RunImport(ctx context.Context, input VerifiedImport, values Cer
 		if e != nil {
 			return e
 		}
-		if at.Before(r.UpdatedAt) {
-			return ErrStale
-		}
 		digest, found, e := owner.ReadImportProofTx(ctx, sc.Tx, v.Player)
 		if e != nil {
 			return e
@@ -134,7 +131,7 @@ func (s Service) RunImport(ctx context.Context, input VerifiedImport, values Cer
 			if e != nil {
 				return e
 			}
-			if f.Version != 1 || f.Facts != ins.SeedHero() || at.Before(f.UpdatedAt) {
+			if f.Version != 1 || f.Facts != ins.SeedHero() {
 				return ins.ErrInvalid
 			}
 			f.Facts = h.Facts
@@ -146,14 +143,14 @@ func (s Service) RunImport(ctx context.Context, input VerifiedImport, values Cer
 		old := r.Version
 		r.Version++
 		r.Facts = v.Facts.Clone()
-		r.UpdatedAt = at
+		r.UpdatedAt = gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, sc.Tx, r, old); e != nil {
 			return e
 		}
 		for _, f := range facets {
 			old := f.Version
 			f.Version++
-			f.UpdatedAt = at
+			f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt, f.CreatedAt)
 			if e = s.Owner.SaveHeroTx(ctx, sc.Tx, f, old); e != nil {
 				return e
 			}

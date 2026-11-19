@@ -44,11 +44,11 @@ func (s Store) ReadDisplayStateTx(c context.Context, q tx.Queryer, pid identity.
 	return out, out.Validate()
 }
 func (Store) SaveDisplayStateTx(c context.Context, t tx.Tx, old, next app.State, at time.Time) error {
-	if t == nil || old.Validate() != nil || next.Validate() != nil || old.Basis.Profile.PlayerID != next.Basis.Profile.PlayerID || at.IsZero() || at.Before(old.Basis.Profile.UpdatedAt) {
+	if t == nil || old.Validate() != nil || next.Validate() != nil || old.Basis.Profile.PlayerID != next.Basis.Profile.PlayerID || at.IsZero() {
 		return app.ErrConflict
 	}
 	p := next.Basis.Profile
-	tag, e := t.Exec(c, `UPDATE player_profiles SET display_name=$2,avatar_id=$3,avatar_frame_id=$4,state_version=state_version+1,updated_at=$5 WHERE player_id=$1 AND state_version=$6`, int64(p.PlayerID), p.DisplayName, p.AvatarID, p.AvatarFrameID, at, old.Basis.Profile.StateVersion)
+	tag, e := t.Exec(c, `UPDATE player_profiles SET display_name=$2,avatar_id=$3,avatar_frame_id=$4,state_version=state_version+1,updated_at=GREATEST($5,updated_at,created_at) WHERE player_id=$1 AND state_version=$6`, int64(p.PlayerID), p.DisplayName, p.AvatarID, p.AvatarFrameID, at, old.Basis.Profile.StateVersion)
 	if e != nil {
 		return e
 	}

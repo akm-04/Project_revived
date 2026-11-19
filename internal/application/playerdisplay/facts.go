@@ -111,14 +111,14 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 	if e != nil {
 		return out, e
 	}
-	if state.Validate() != nil || state.Basis.Profile.PlayerID != q.PlayerID || state.Basis.Progression.PlayerID != q.PlayerID || state.Basis.Profile.UpdatedAt.After(sc.ObservedAt) || state.Basis.Progression.UpdatedAt.After(sc.ObservedAt) {
+	if state.Validate() != nil || state.Basis.Profile.PlayerID != q.PlayerID || state.Basis.Progression.PlayerID != q.PlayerID {
 		return out, ErrConflict
 	}
 	pop, e := s.Population.ReadDisplayPopulationTx(c, sc, q.PlayerID)
 	if e != nil {
 		return out, e
 	}
-	if pop.PlayerID != q.PlayerID || pop.Revision != sc.ContentRevision || !pop.ObservedAt.Equal(sc.ObservedAt) || pop.RootVersion < 1 || pop.RootUpdatedAt.After(sc.ObservedAt) || pop.Digest != PopulationDigest(pop.Heroes) {
+	if pop.PlayerID != q.PlayerID || pop.Revision != sc.ContentRevision || !pop.ObservedAt.Equal(sc.ObservedAt) || pop.RootVersion < 1 || pop.Digest != PopulationDigest(pop.Heroes) {
 		return out, ErrConflict
 	}
 	for _, h := range pop.Heroes {
@@ -130,12 +130,12 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 	if e != nil {
 		return out, e
 	}
-	if inv.PlayerID != q.PlayerID || inv.RootVersion < 1 || inv.CreatedAt.IsZero() || inv.CreatedAt.After(sc.ObservedAt) {
+	if inv.PlayerID != q.PlayerID || inv.RootVersion < 1 || inv.CreatedAt.IsZero() {
 		return out, ErrConflict
 	}
 	stacks := map[int64]economy.StackState{}
 	for _, v := range inv.Stacks {
-		if v.Validate() != nil || v.PlayerID != q.PlayerID || v.UpdatedAt.After(sc.ObservedAt) {
+		if v.Validate() != nil || v.PlayerID != q.PlayerID {
 			return out, ErrConflict
 		}
 		if _, ok := stacks[v.ItemID]; ok {

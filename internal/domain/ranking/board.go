@@ -322,14 +322,15 @@ func beginBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID) (Boa
 	if r.Validate() != nil || !revision(rev) || op.IsZero() || at.Unix() <= 0 {
 		return out, Board{}, ErrSnapshot
 	}
-	if at.Before(r.UpdatedAt) {
-		return out, Board{}, ErrStale
+	observedAt := at
+	if r.UpdatedAt.After(observedAt) {
+		observedAt = r.UpdatedAt
 	}
 	if r.StateVersion == math.MaxInt64 || r.NextGeneration == math.MaxInt64 {
 		return out, Board{}, ErrSnapshot
 	}
 	b, _ := BoardOf(r.Policy)
-	return BoardSnapshot{Server: r.Server, Policy: r.Policy, Revision: rev, Generation: r.NextGeneration, OperationID: op, ObservedAt: at.UTC(), Entries: []BoardEntry{}}, b, nil
+	return BoardSnapshot{Server: r.Server, Policy: r.Policy, Revision: rev, Generation: r.NextGeneration, OperationID: op, ObservedAt: observedAt.UTC(), Entries: []BoardEntry{}}, b, nil
 }
 
 func finishBoardSnapshot(r BoardRoot, out BoardSnapshot, byID map[int64]BoardEntry, at time.Time) (BoardRoot, BoardSnapshot, error) {
@@ -364,10 +365,11 @@ func FreezeBoardSnapshot(root BoardRoot, at time.Time, rev string, op ids.UUID, 
 	if e != nil {
 		return BoardRoot{}, BoardSnapshot{}, e
 	}
+	observedAt := out.ObservedAt
 	byID := map[int64]BoardEntry{}
 	for _, v := range entries {
 		m := v.Metric
-		if !m.valid(b, at, rev) || !v.Display.valid(m.Player) || v.ScoreSince.IsZero() || v.ScoreSince.After(at) {
+		if !m.valid(b, observedAt, rev) || !v.Display.valid(m.Player) || v.ScoreSince.IsZero() || v.ScoreSince.After(observedAt) {
 			return BoardRoot{}, BoardSnapshot{}, ErrSnapshot
 		}
 		if _, dup := byID[int64(m.Player)]; dup {
@@ -377,7 +379,7 @@ func FreezeBoardSnapshot(root BoardRoot, at time.Time, rev string, op ids.UUID, 
 		byID[int64(m.Player)] = v
 		out.Entries = append(out.Entries, v)
 	}
-	return finishBoardSnapshot(root, out, byID, at)
+	return finishBoardSnapshot(root, out, byID, observedAt)
 }
 
 // BoardWeek is the canonical Monday 05:00 GMT+8 game week (I9_MODE_FRAMEWORK_V1 F7).

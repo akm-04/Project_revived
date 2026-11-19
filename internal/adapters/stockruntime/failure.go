@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/objective"
+	"gxb.local/backend/v2/internal/domain/privilege"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -193,6 +194,9 @@ var sharedFailureRows = []failureRow{
 	{match: objective.ErrAwakeningRefused, class: failureRefusal, code: unprovenRefusalCode},
 	// A room invite over its PRIVATE_POLICY sender rate is a permanent refusal.
 	{match: approominvite.ErrSenderLimited, class: failureRefusal, code: unprovenRefusalCode},
+	// A malformed canonical privilege row is a permanent refusal, never a defect
+	// (K5: the login path reaches this row without a dispatcher-specific one).
+	{match: privilege.ErrConflict, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 // isTransient lists the faults where the same request may succeed later. A

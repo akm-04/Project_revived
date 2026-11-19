@@ -34,11 +34,6 @@ func (s Service) BackpackSnapshot(ctx context.Context, a identity.ActorContext, 
 		if e != nil {
 			return e
 		}
-		for _, x := range stacks {
-			if bound.DecisionAt().Before(x.UpdatedAt) {
-				return ErrStale
-			}
-		}
 		spirits, e := s.InventoryTx(ctx, sc.Tx, InputScope{a.PlayerID, rev, bound.DecisionAt()})
 		if e != nil {
 			return e

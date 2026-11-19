@@ -41,9 +41,6 @@ func (s Service) BookInputsTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(root.UpdatedAt) {
-		return out, book.ErrStaleTime
-	}
 	c, e := s.Content.BookCatalogTx(ctx, q, scope.ContentRevision)
 	if e != nil {
 		return out, e
@@ -80,9 +77,6 @@ func (s Service) HeroBookInputsTx(ctx context.Context, q tx.Queryer, scope Input
 	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, scope.Player, ref.PartnerID)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(r.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
-		return out, book.ErrStaleTime
 	}
 	v, e := s.BookInputsTx(ctx, q, scope)
 	if e != nil {
@@ -194,9 +188,6 @@ func (s Service) readSnapshot(ctx context.Context, q tx.Queryer, player identity
 	if e != nil {
 		return nil, false, e
 	}
-	if at.Before(r.UpdatedAt) {
-		return nil, false, ErrStale
-	}
 	c, e := s.Content.BookCatalogTx(ctx, q, rev)
 	if e != nil {
 		return nil, false, e
@@ -227,9 +218,6 @@ func (s Service) settledRead(ctx context.Context, a identity.ActorContext, mid u
 		if e != nil {
 			return e
 		}
-		if at.Before(r.UpdatedAt) {
-			return ErrStale
-		}
 		c, e := s.Content.BookCatalogTx(ctx, sc.Tx, rev)
 		if e != nil {
 			return e
@@ -244,7 +232,7 @@ func (s Service) settledRead(ctx context.Context, a identity.ActorContext, mid u
 		if !reflect.DeepEqual(before, r.Facts) {
 			old := r.Version
 			r.Version++
-			r.UpdatedAt = at
+			r.UpdatedAt = gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
 			if e = s.Owner.SaveRootTx(ctx, sc.Tx, r, old); e != nil {
 				return e
 			}

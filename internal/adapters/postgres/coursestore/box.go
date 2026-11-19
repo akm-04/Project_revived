@@ -16,7 +16,7 @@ func (Store) ClaimGiftBoxDayTx(ctx context.Context, t tx.Tx, p identity.PlayerID
 	if !p.Valid() || at.IsZero() {
 		return course.ErrUnqualified
 	}
-	tag, e := t.Exec(ctx, `UPDATE player_course_roots SET gift_box_day=$2,state_version=state_version+1,updated_at=$3 WHERE player_id=$1 AND gift_box_day<>$2`, int64(p), day, at)
+	tag, e := t.Exec(ctx, `UPDATE player_course_roots SET gift_box_day=$2,state_version=state_version+1,updated_at=GREATEST($3,updated_at,created_at) WHERE player_id=$1 AND gift_box_day<>$2`, int64(p), day, at)
 	if e != nil {
 		return e
 	}

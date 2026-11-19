@@ -220,9 +220,6 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 		if due(cat, root, at) {
 			return d.ErrDue
 		}
-		if at.Before(root.UpdatedAt) {
-			return d.ErrStaleTime
-		}
 		m, ok, e := s.Store.MatchTx(c, sc.Tx, id)
 		if e != nil || !ok {
 			return errors.Join(e, d.ErrConflict)
@@ -316,7 +313,7 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 		}
 		old = root.Version
 		root.Version++
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if e = s.Store.PutRootTx(c, sc.Tx, root, old); e != nil {
 			return e
 		}

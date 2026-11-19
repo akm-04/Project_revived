@@ -165,9 +165,6 @@ func (s Service) OverlayRosterTx(c context.Context, q tx.Queryer, actor identity
 		if h.Raw == nil {
 			continue
 		}
-		if at.Before(h.Raw.UpdatedAt) || at.Before(h.Hero.UpdatedAt) {
-			return character.ErrRawAwakeningUnavailable
-		}
 		row, ok := rows[fmt.Sprint(h.Hero.PartnerID)].(map[string]any)
 		if !ok {
 			return errors.New("awakening roster Hero missing")

@@ -30,10 +30,10 @@ func (Store) InsertRoomInviteNoticeTx(c context.Context, t tx.Tx, n socialinbox.
 }
 
 func (Store) UpdateRoomInviteNoticeTx(c context.Context, t tx.Tx, n socialinbox.Notice, at time.Time) (socialinbox.Notice, error) {
-	if t == nil || socialinbox.ValidateRoomInviteLifecycle(n) != nil || at.IsZero() || at.Before(n.UpdatedAt) {
+	if t == nil || socialinbox.ValidateRoomInviteLifecycle(n) != nil || at.IsZero() {
 		return socialinbox.Notice{}, socialinbox.ErrInvalidNotice
 	}
-	tag, err := t.Exec(c, `UPDATE social_notices SET active=true,dismissed_at=NULL,notice_time=$4,updated_at=$4,related_player_id=$5,state_version=state_version+1 WHERE recipient_player_id=$1 AND notice_id=$2 AND state_version=$3`,
+	tag, err := t.Exec(c, `UPDATE social_notices SET active=true,dismissed_at=NULL,notice_time=$4,updated_at=GREATEST($4,updated_at,created_at),related_player_id=$5,state_version=state_version+1 WHERE recipient_player_id=$1 AND notice_id=$2 AND state_version=$3`,
 		int64(n.RecipientPlayerID), int64(n.NoticeID), n.StateVersion, at.UTC(), int64(n.RelatedPlayerID))
 	if err != nil {
 		return socialinbox.Notice{}, err

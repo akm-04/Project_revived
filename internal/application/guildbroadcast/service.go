@@ -250,9 +250,6 @@ func (s Service) Submit(c context.Context, actor identity.ActorContext, request 
 		if g.PolicyRevision != p.GuildCoreRevision {
 			return ErrContent
 		}
-		if g.UpdatedAt.After(at) {
-			return ErrStale
-		}
 		// GUILD_BROADCAST_DAILY_LIMIT_V1 counts inside the broadcast transaction
 		// under the locked guild row, so concurrent submits cannot both see an
 		// unused slot. A replay returned above and never consumes the day.
@@ -298,9 +295,6 @@ func (s Service) Submit(c context.Context, actor identity.ActorContext, request 
 				return e
 			}
 			if !ok || !sameMembership(m, snapshot) || m.GuildID != gid {
-				return ErrStale
-			}
-			if m.JoinedAt.After(at) || m.UpdatedAt.After(at) {
 				return ErrStale
 			}
 			ev, ok, e := s.Guild.LatestMembershipEventTx(c, sc.Tx, m.PlayerID)

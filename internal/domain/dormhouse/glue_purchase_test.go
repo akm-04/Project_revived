@@ -37,8 +37,13 @@ func TestGluePurchaseCounterUsesSourceLadderAndReadOnlyDayReset(t *testing.T) {
 	if _, err = EffectiveGluePurchaseCount(&second, player, 0, at); err == nil {
 		t.Fatal("backwards day accepted")
 	}
-	if _, err = EffectiveGluePurchaseCount(&second, player, 2, at.Add(-time.Second)); err == nil {
-		t.Fatal("backwards timestamp accepted")
+	// K2/K3: a backwards clock step observes at the stored row and keeps the
+	// written timestamp monotone; it is not a stale-time refusal.
+	if count, err = EffectiveGluePurchaseCount(&second, player, 2, at.Add(-time.Second)); err != nil || count != 0 {
+		t.Fatalf("backwards timestamp: count=%d err=%v", count, err)
+	}
+	if planned, _, err := rules.PlanPurchase(&second, player, 0, 2, at.Add(-time.Second)); err != nil || planned.UpdatedAt.Before(second.UpdatedAt) {
+		t.Fatalf("backwards purchase stamp = %+v %v", planned, err)
 	}
 	if _, err = EffectiveGluePurchaseCount(&second, identity.PlayerID(8), 2, at); err == nil {
 		t.Fatal("foreign counter accepted")

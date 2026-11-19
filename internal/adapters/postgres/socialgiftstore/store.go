@@ -183,13 +183,13 @@ func (Store) Counts(c context.Context, q tx.Queryer, p identity.PlayerID, day st
 	return a, b, e
 }
 func (Store) PutEpoch(c context.Context, t tx.Tx, e sg.Epoch, exists bool, at time.Time) error {
-	if e.Validate() != nil || at.Before(e.UpdatedAt) {
+	if e.Validate() != nil {
 		return sg.ErrClock
 	}
 	var tag tx.CommandTag
 	var err error
 	if exists {
-		tag, err = t.Exec(c, `UPDATE social_gift_epochs SET state_version=state_version+1,updated_at=$5 WHERE player_id=$1 AND policy_id=$2 AND day_token=$3 AND state_version=$4 AND generation_id=$6::uuid`, int64(e.Player), sg.DayPolicy, e.Day, e.Version, at, e.Generation.UUID().String())
+		tag, err = t.Exec(c, `UPDATE social_gift_epochs SET state_version=state_version+1,updated_at=GREATEST($5,updated_at,created_at) WHERE player_id=$1 AND policy_id=$2 AND day_token=$3 AND state_version=$4 AND generation_id=$6::uuid`, int64(e.Player), sg.DayPolicy, e.Day, e.Version, at, e.Generation.UUID().String())
 	} else {
 		tag, err = t.Exec(c, `INSERT INTO social_gift_epochs(player_id,policy_id,day_token,generation_id,state_version,created_at,updated_at) VALUES($1,$2,$3,$4::uuid,1,$5,$5)`, int64(e.Player), sg.DayPolicy, e.Day, e.Generation.UUID().String(), at)
 	}

@@ -106,9 +106,6 @@ func (s Service) HeroElementInputsTx(ctx context.Context, q tx.Queryer, scope In
 			if e = v.Validate(); e != nil {
 				return out, e
 			}
-			if scope.ObservedAt.Before(v.UpdatedAt) {
-				return out, ErrStale
-			}
 			if v.ItemID >= 50000001 && v.ItemID <= 50000025 && v.Quantity > 0 {
 				out.ExclusiveBookCount++
 			}

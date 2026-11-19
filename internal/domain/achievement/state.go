@@ -57,7 +57,13 @@ func (r Root) Validate() error {
 // ObservePopulation reuses I5's pure objective reducer; Achievement remains the
 // sole persistence owner. No I5 stock-family rows or award claims are created.
 func (r Root) ObservePopulation(c Catalog, n int64, at time.Time) (Root, bool, error) {
-	if r.Validate() != nil || c.Validate() != nil || n < 1 || n > 9007199254740991 || at.Before(r.UpdatedAt) {
+	// The domain layer cannot import the application helper (I0 import matrix),
+	// so the effective observation is computed locally for the write.
+	observedAt := at
+	if r.UpdatedAt.After(observedAt) {
+		observedAt = r.UpdatedAt
+	}
+	if r.Validate() != nil || c.Validate() != nil || n < 1 || n > 9007199254740991 {
 		return Root{}, false, ErrConflict
 	}
 	old := r.Progress
@@ -66,7 +72,7 @@ func (r Root) ObservePopulation(c Catalog, n int64, at time.Time) (Root, bool, e
 		inst := objective.Instance{PlayerID: r.PlayerID, ProgramID: Policy, ObjectiveID: int64(j + 1), DefinitionRevision: Policy, ContentRevision: r.ContentRevision, Progress: r.Progress, CompletedAt: times[j], ClaimState: objective.Unclaimed, StateVersion: r.StateVersion}
 		def := objective.Definition{ProgramID: Policy, ObjectiveID: int64(j + 1), DefinitionRevision: Policy, Strategy: objective.HighWaterFromCanonicalState, AcceptedFactKind: "MARRIED_HERO_POPULATION", Target: target}
 		fact := objective.Fact{PlayerID: r.PlayerID, SourceDomain: "Library", SourceBusinessKey: "validated-prepared-source-transition", Kind: def.AcceptedFactKind, Value: n}
-		v, _, e := objective.ApplyFact(inst, def, fact, at)
+		v, _, e := objective.ApplyFact(inst, def, fact, observedAt)
 		if e != nil {
 			return Root{}, false, e
 		}
@@ -75,7 +81,7 @@ func (r Root) ObservePopulation(c Catalog, n int64, at time.Time) (Root, bool, e
 	if n > old {
 		r.Progress = n
 		r.StateVersion++
-		r.UpdatedAt = at.UTC()
+		r.UpdatedAt = observedAt.UTC()
 	}
 	return r, n > old, r.Validate()
 }
@@ -223,14 +229,11 @@ func (s Streak) Validate() error {
 	return nil
 }
 
-func (s Streak) profile(c Catalog, at time.Time) (streakProfile, error) {
+func (s Streak) profile(c Catalog) (streakProfile, error) {
 	profile := streakProfiles[s.AchievementID]
 	index := s.AchievementID - c.Rows[0].ID
 	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) {
 		return profile, ErrConflict
-	}
-	if at.Before(s.UpdatedAt) {
-		return profile, ErrOvertaken
 	}
 	if s.AchievementID != GreatCustomerID && c.Rows[index].Thresholds != profile.thresholds {
 		return profile, ErrConflict
@@ -254,7 +257,7 @@ func (s Streak) advance(profile streakProfile, next int64, at time.Time) Streak 
 // ObserveDay applies one settled period (a day number); a period at or before
 // the last observed one is a no-op.
 func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak, bool, error) {
-	profile, err := s.profile(c, at)
+	profile, err := s.profile(c)
 	if err != nil {
 		return Streak{}, false, err
 	}
@@ -279,7 +282,7 @@ func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak
 // ObserveHighWater records the best counted value ever seen; a lower later
 // observation leaves both progress and earned tiers alone.
 func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, bool, error) {
-	profile, err := s.profile(c, at)
+	profile, err := s.profile(c)
 	if err != nil {
 		return Streak{}, false, err
 	}
@@ -289,7 +292,7 @@ func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, 
 	if count <= s.Current {
 		return s, false, nil
 	}
-	s = s.advance(profile, count, at)
+	s = s.advance(profile, count, s.effectiveObservation(at))
 	return s, true, s.Validate()
 }
 
@@ -297,7 +300,7 @@ func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, 
 // new day restarts the count; earned tiers are never cleared. The targets are
 // the pinned catalog row's thresholds, never constants.
 func (s Streak) ObserveDailyCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
-	profile, err := s.profile(c, at)
+	profile, err := s.profile(c)
 	if err != nil {
 		return Streak{}, false, err
 	}
@@ -308,13 +311,26 @@ func (s Streak) ObserveDailyCount(c Catalog, count int64, at time.Time) (Streak,
 		return s, false, nil
 	}
 	profile.thresholds = c.Rows[s.AchievementID-c.Rows[0].ID].Thresholds
-	s = s.advance(profile, count, at)
+	s = s.advance(profile, count, s.effectiveObservation(at))
 	return s, true, s.Validate()
+}
+
+// effectiveObservation keeps a writer's timestamps monotone after a clock
+// rollback (the application helper is not importable from the domain layer).
+func (s Streak) effectiveObservation(at time.Time) time.Time {
+	observedAt := at
+	if s.UpdatedAt.After(observedAt) {
+		observedAt = s.UpdatedAt
+	}
+	if s.CreatedAt.After(observedAt) {
+		observedAt = s.CreatedAt
+	}
+	return observedAt
 }
 
 // ObserveCount records a counted streak's current value.
 func (s Streak) ObserveCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
-	profile, err := s.profile(c, at)
+	profile, err := s.profile(c)
 	if err != nil {
 		return Streak{}, false, err
 	}
@@ -324,6 +340,6 @@ func (s Streak) ObserveCount(c Catalog, count int64, at time.Time) (Streak, bool
 	if count == s.Current {
 		return s, false, nil
 	}
-	s = s.advance(profile, count, at)
+	s = s.advance(profile, count, s.effectiveObservation(at))
 	return s, true, s.Validate()
 }

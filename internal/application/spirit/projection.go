@@ -55,14 +55,6 @@ func (s Service) inventoryTx(ctx context.Context, q tx.Queryer, scope InputScope
 	if e != nil {
 		return r, c, nil, nil, e
 	}
-	if scope.ObservedAt.Before(r.UpdatedAt) {
-		return r, c, nil, nil, ErrStale
-	}
-	for _, f := range fs {
-		if scope.ObservedAt.Before(f.UpdatedAt) {
-			return r, c, nil, nil, ErrStale
-		}
-	}
 	return r, c, fs, owners, nil
 }
 func (s Service) InventoryTx(ctx context.Context, q tx.Queryer, scope InputScope) ([]map[string]any, error) {
@@ -97,9 +89,6 @@ func (s Service) HeroSpiritInputsTx(ctx context.Context, q tx.Queryer, scope Inp
 	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(pop.UpdatedAt) {
-		return out, ErrStale
 	}
 	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, scope.Player, id)
 	if e != nil {

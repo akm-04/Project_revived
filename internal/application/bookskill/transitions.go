@@ -2,6 +2,7 @@ package bookskill
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -113,9 +114,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	root, e := s.Owner.ReadRootTx(ctx, t, a.PlayerID)
 	if e != nil {
 		return nil, e
-	}
-	if at.Before(root.UpdatedAt) {
-		return nil, ErrStale
 	}
 	c, e := s.Content.BookCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
@@ -350,7 +348,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := root.Version
 		root.Version++
 		root.Facts = st
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, t, root, old); e != nil {
 			return nil, e
 		}

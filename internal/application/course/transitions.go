@@ -2,6 +2,7 @@ package course
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	course "gxb.local/backend/v2/internal/domain/course"
@@ -50,9 +51,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	f, e := s.Owner.ReadHeroTx(ctx, t, a.PlayerID, cmd.PartnerID)
 	if e != nil {
 		return nil, e
-	}
-	if at.Before(r.UpdatedAt) || at.Before(f.UpdatedAt) {
-		return nil, ErrStale
 	}
 	c, e := s.Content.CourseCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
@@ -307,7 +305,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := r.Version
 		r.Version++
 		r.Facts = st
-		r.UpdatedAt = at
+		r.UpdatedAt = gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, t, r, old); e != nil {
 			return nil, e
 		}
@@ -316,7 +314,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := f.Version
 		f.Version++
 		f.Facts = facts
-		f.UpdatedAt = at
+		f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt, f.CreatedAt)
 		if e = s.Owner.SaveHeroTx(ctx, t, f, old); e != nil {
 			return nil, e
 		}

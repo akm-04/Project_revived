@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/spirit"
@@ -89,9 +90,6 @@ func (s Service) MaterializeSpiritBatchTx(c context.Context, t tx.Tx, b i5.Spiri
 	if e != nil {
 		return nil, e
 	}
-	if op.StartedAt.Before(r.UpdatedAt) {
-		return nil, ErrStale
-	}
 	cat, e := s.Content.SpiritCatalogTx(c, t, b.ContentRevision)
 	if e != nil {
 		return nil, e
@@ -127,7 +125,7 @@ func (s Service) MaterializeSpiritBatchTx(c context.Context, t tx.Tx, b i5.Spiri
 	}
 	old := r.Version
 	r.Version++
-	r.UpdatedAt = op.StartedAt
+	r.UpdatedAt = gen.EffectiveObservation(op.StartedAt, r.UpdatedAt, r.CreatedAt)
 	if e = s.Owner.SaveRootTx(c, t, r, old); e != nil {
 		return nil, e
 	}

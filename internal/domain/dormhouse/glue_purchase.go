@@ -33,7 +33,7 @@ func EffectiveGluePurchaseCount(previous *GluePurchases, player identity.PlayerI
 	if previous.Validate() != nil || previous.Player != player {
 		return 0, ErrInvalidFacts
 	}
-	if previous.GameDay > gameDay || at.Before(previous.UpdatedAt) {
+	if previous.GameDay > gameDay {
 		return 0, ErrStaleTime
 	}
 	if previous.GameDay < gameDay {
@@ -65,5 +65,9 @@ func (rules GlueRules) PlanPurchase(previous *GluePurchases, player identity.Pla
 		}
 		version = previous.StateVersion + 1
 	}
-	return GluePurchases{Player: player, GameDay: gameDay, Count: count + 1, StateVersion: version, UpdatedAt: at.UTC()}, cost, nil
+	stamp := at.UTC()
+	if previous != nil && previous.UpdatedAt.After(stamp) {
+		stamp = previous.UpdatedAt
+	}
+	return GluePurchases{Player: player, GameDay: gameDay, Count: count + 1, StateVersion: version, UpdatedAt: stamp}, cost, nil
 }

@@ -28,7 +28,7 @@ func (r HeroLevelReader) ReadHeroLevelsTx(c context.Context, sc ca.CoherentReadS
 	if err != nil {
 		return out, err
 	}
-	if root.Validate() != nil || root.PlayerID != pid || root.UpdatedAt.After(sc.ObservedAt) {
+	if root.Validate() != nil || root.PlayerID != pid {
 		return out, ca.ErrInvalidCoherentReadScope
 	}
 	out.RootVersion = root.StateVersion
@@ -37,7 +37,7 @@ func (r HeroLevelReader) ReadHeroLevelsTx(c context.Context, sc ca.CoherentReadS
 		return out, err
 	}
 	for _, hero := range heroes {
-		if hero.ValidatePersistent() != nil || hero.PlayerID != pid || hero.CreatedAt.After(hero.UpdatedAt) || hero.UpdatedAt.After(sc.ObservedAt) || hero.Level < 1 {
+		if hero.ValidatePersistent() != nil || hero.PlayerID != pid || hero.CreatedAt.After(hero.UpdatedAt) || hero.Level < 1 {
 			return ca.HeroLevelPopulation{}, ca.ErrInvalidCoherentReadScope
 		}
 		out.OwnedCount++
