@@ -43,7 +43,7 @@ func (c Catalog) NewRoom(root Root, rooms map[int64]Room, tableID, floor, pos in
 	if root.UpdatedAt.After(observedAt) {
 		observedAt = root.UpdatedAt
 	}
-	if root.Validate() != nil || !ValidRevision(revision) || now.IsZero() || observedAt.Before(root.UpdatedAt) {
+	if root.Validate() != nil || !ValidRevision(revision) || now.IsZero() {
 		return Root{}, Room{}, ErrInvalidFacts
 	}
 	rule, ok := c.Rooms[tableID]

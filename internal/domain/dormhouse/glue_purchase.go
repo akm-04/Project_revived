@@ -33,11 +33,7 @@ func EffectiveGluePurchaseCount(previous *GluePurchases, player identity.PlayerI
 	if previous.Validate() != nil || previous.Player != player {
 		return 0, ErrInvalidFacts
 	}
-	observedAt := at
-	if previous.UpdatedAt.After(observedAt) {
-		observedAt = previous.UpdatedAt
-	}
-	if previous.GameDay > gameDay || observedAt.Before(previous.UpdatedAt) {
+	if previous.GameDay > gameDay {
 		return 0, ErrStaleTime
 	}
 	if previous.GameDay < gameDay {
