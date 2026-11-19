@@ -1162,7 +1162,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "UNKNOWN"
     },
     {
@@ -1180,7 +1180,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "false"
     },
     {
@@ -1195,7 +1195,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:271",
+    "internal/application/campaign/sweep.go:273",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1398",
     "internal/application/i5/service.go:719",
@@ -1204,7 +1204,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "6"
     },
     {
@@ -1252,7 +1252,7 @@
      "file": "internal/application/campaign/sweep.go",
      "function": "Mode.purchase",
      "isolation": "UNKNOWN",
-     "line": 208,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     },
@@ -1508,11 +1508,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/fumo_service.go:270",
-    "UNRESOLVED apply at internal/application/campaign/sweep.go:252",
+    "UNRESOLVED apply at internal/application/campaign/sweep.go:254",
     "UNRESOLVED body at internal/application/itemsenergy/service.go:212",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:208"
+    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:210"
    ],
    "writes": "state"
   },
@@ -9480,7 +9480,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 288,
+     "line": 290,
      "value": "repeatable_read"
     }
    ],
@@ -9488,7 +9488,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 288,
+     "line": 290,
      "value": "true"
     }
    ],
@@ -9496,7 +9496,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 288,
+     "line": 290,
      "value": "6"
     }
    ],
@@ -9507,7 +9507,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Load",
      "isolation": "repeatable_read",
-     "line": 288,
+     "line": 290,
      "read_only": "true",
      "retry": "6"
     }
@@ -9561,7 +9561,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 395,
+     "line": 397,
      "value": "repeatable_read"
     }
    ],
@@ -9569,7 +9569,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 395,
+     "line": 397,
      "value": "false"
     }
    ],
@@ -9580,7 +9580,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 395,
+     "line": 397,
      "value": "6"
     }
    ],
@@ -9613,7 +9613,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Fight",
      "isolation": "repeatable_read",
-     "line": 395,
+     "line": 397,
      "read_only": "false",
      "retry": "6"
     }
@@ -9966,7 +9966,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:304",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:306",
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
@@ -9982,7 +9982,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 599,
+     "line": 601,
      "value": "repeatable_read"
     }
    ],
@@ -9990,12 +9990,12 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 599,
+     "line": 601,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/mode.go:614",
+    "internal/application/campaign/mode.go:616",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1398",
     "internal/application/i5/service.go:719"
@@ -10003,7 +10003,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 599,
+     "line": 601,
      "value": "6"
     }
    ],
@@ -10048,7 +10048,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Result",
      "isolation": "repeatable_read",
-     "line": 599,
+     "line": 601,
      "read_only": "false",
      "retry": "6"
     }
@@ -10282,7 +10282,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:304",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:306",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
@@ -10374,7 +10374,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "UNKNOWN"
     }
    ],
@@ -10382,17 +10382,17 @@
    "read_only": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:271"
+    "internal/application/campaign/sweep.go:273"
    ],
    "retry": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "6"
     }
    ],
@@ -10415,7 +10415,7 @@
      "file": "internal/application/campaign/sweep.go",
      "function": "Mode.purchase",
      "isolation": "UNKNOWN",
-     "line": 208,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     }
@@ -10548,9 +10548,9 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/campaign/sweep.go:252",
+    "UNRESOLVED apply at internal/application/campaign/sweep.go:254",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:208"
+    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:210"
    ],
    "writes": "state"
   },
@@ -10559,7 +10559,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "UNKNOWN"
     }
    ],
@@ -10567,12 +10567,12 @@
    "read_only": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:271",
+    "internal/application/campaign/sweep.go:273",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1398",
     "internal/application/i5/service.go:719"
@@ -10580,7 +10580,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "6"
     }
    ],
@@ -10617,7 +10617,7 @@
      "file": "internal/application/campaign/sweep.go",
      "function": "Mode.purchase",
      "isolation": "UNKNOWN",
-     "line": 208,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     }
@@ -10806,9 +10806,9 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/campaign/sweep.go:252",
+    "UNRESOLVED apply at internal/application/campaign/sweep.go:254",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:208"
+    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:210"
    ],
    "writes": "state"
   },
@@ -10817,7 +10817,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "UNKNOWN"
     }
    ],
@@ -10825,18 +10825,18 @@
    "read_only": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:271",
+    "internal/application/campaign/sweep.go:273",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "6"
     }
    ],
@@ -10870,7 +10870,7 @@
      "file": "internal/application/campaign/sweep.go",
      "function": "Mode.purchase",
      "isolation": "UNKNOWN",
-     "line": 208,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     }
@@ -11049,9 +11049,9 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/campaign/sweep.go:252",
+    "UNRESOLVED apply at internal/application/campaign/sweep.go:254",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:208"
+    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:210"
    ],
    "writes": "state"
   },
@@ -11436,7 +11436,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/awards.go",
-     "line": 165,
+     "line": 203,
      "value": "repeatable_read"
     }
    ],
@@ -11444,7 +11444,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/awards.go",
-     "line": 165,
+     "line": 203,
      "value": "true"
     }
    ],
@@ -11452,7 +11452,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/awards.go",
-     "line": 165,
+     "line": 203,
      "value": "6"
     }
    ],
@@ -11463,7 +11463,7 @@
      "file": "internal/application/campaign/awards.go",
      "function": "Mode.Caps",
      "isolation": "repeatable_read",
-     "line": 165,
+     "line": 203,
      "read_only": "true",
      "retry": "6"
     }
@@ -95064,7 +95064,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "UNKNOWN"
     }
    ],
@@ -95072,17 +95072,18 @@
    "read_only": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:271"
+    "internal/application/campaign/sweep.go:273",
+    "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "6"
     }
    ],
@@ -95092,11 +95093,24 @@
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:26",
+    "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
     "internal/adapters/postgres/i5store/missions.go:57",
     "internal/adapters/postgres/i5store/missions.go:65",
-    "internal/adapters/postgres/i5store/store.go:736"
+    "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:270",
+    "internal/adapters/postgres/i5store/store.go:327",
+    "internal/adapters/postgres/i5store/store.go:384",
+    "internal/adapters/postgres/i5store/store.go:431",
+    "internal/adapters/postgres/i5store/store.go:450",
+    "internal/adapters/postgres/i5store/store.go:465",
+    "internal/adapters/postgres/i5store/store.go:483",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "campaign",
    "transactions": [
@@ -95104,7 +95118,7 @@
      "file": "internal/application/campaign/sweep.go",
      "function": "Mode.purchase",
      "isolation": "UNKNOWN",
-     "line": 208,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     }
@@ -95141,9 +95155,29 @@
      "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_dorm_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
+     "line": 170,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/hero_origin_catalog.go",
      "line": 14,
      "statement": "SELECT COALESCE(jsonb_agg(table_id ORDER BY table_id),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/hero_progression.go",
+     "line": 246,
+     "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
     },
     {
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
@@ -95171,6 +95205,11 @@
      "statement": "SELECT payload::text FROM"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/pet_acquisition.go",
+     "line": 69,
+     "statement": "SELECT starter_egg_item_id,hatch_cost_param FROM gxb_content_pet_acquisition_policy WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -95179,6 +95218,21 @@
      "file": "internal/adapters/postgres/contentstore/privilege.go",
      "line": 25,
      "statement": "SELECT payload::text FROM content_privilege_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/spirit_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_spirit_input_catalogs WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 521,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)"
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
@@ -95196,6 +95250,26 @@
      "statement": "WITH a AS ("
     },
     {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 656,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND class=$2 AND resource_key=$3"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 656,
+     "statement": "SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COALESCE(item_id,0), COALESCE(stack_cap,0),COALESCE(overflow_to_mail,false),COALESCE(regen_seconds,0), COALESCE(regen_amount,0),COALESCE(cap_rule,''),COALESCE(static_cap,0),COALESCE(specialized_owner,''),COALESCE(reason,'') FROM gxb_content_resource_definitions WHERE revision_id=$1 AND item_id=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 727,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'level',level,'max_energy',max_energy,'award_energy',award_energy,'total_exp',total_exp ) ORDER BY level),'[]'::jsonb)::text FROM gxb_content_player_progression WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 757,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -95209,6 +95283,16 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 220,
+     "statement": "SELECT COALESCE(temporal_regen_seconds,0),COALESCE(temporal_regen_amount,0),COALESCE(temporal_natural_cap,0),temporal_allow_explicit_above_cap FROM i5_resource_registry WHERE class='TEMPORAL' AND resource_key=$1 AND policy_version=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
      "file": "internal/adapters/postgres/i5store/store.go",
@@ -95233,9 +95317,9 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/campaign/sweep.go:252",
+    "UNRESOLVED apply at internal/application/campaign/sweep.go:254",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:208"
+    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:210"
    ],
    "writes": "state"
   },
@@ -130780,7 +130864,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "UNKNOWN"
     }
    ],
@@ -130788,18 +130872,18 @@
    "read_only": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/sweep.go:271",
+    "internal/application/campaign/sweep.go:273",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/campaign/sweep.go",
-     "line": 208,
+     "line": 210,
      "value": "6"
     }
    ],
@@ -130833,7 +130917,7 @@
      "file": "internal/application/campaign/sweep.go",
      "function": "Mode.purchase",
      "isolation": "UNKNOWN",
-     "line": 208,
+     "line": 210,
      "read_only": "false",
      "retry": "6"
     }
@@ -131012,9 +131096,9 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/campaign/sweep.go:252",
+    "UNRESOLVED apply at internal/application/campaign/sweep.go:254",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:208"
+    "transaction isolation not statically decidable at internal/application/campaign/sweep.go:210"
    ],
    "writes": "state"
   },

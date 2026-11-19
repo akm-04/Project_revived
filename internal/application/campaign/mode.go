@@ -31,6 +31,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -89,6 +90,7 @@ type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	CampaignCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	ResolveProgressionPolicyTx(context.Context, tx.Queryer, string) (player.ProgressionPolicy, error)
+	SummonCatalogTx(context.Context, tx.Queryer, string) (summon.Catalog, error)
 }
 
 type Fence interface {
@@ -440,8 +442,8 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil {
 			return err
 		}
-		if balance < node.EnergyCost {
-			return fmt.Errorf("%w: energy %d below %d", d.ErrRefused, balance, node.EnergyCost)
+		if err = energyShortfall(balance, node.EnergyCost); err != nil {
+			return err
 		}
 		stage := generation(node.Type, node.ID)
 		if record.PendingGeneration != stage {
@@ -830,15 +832,22 @@ func (s Mode) drained(record d.Record, stage string) (Settled, bool, error) {
 	return Settled{Body: body, Duplicate: true}, false, nil
 }
 
-// debit spends the result's energy (D102); short energy refuses and leaves the attempt open.
+// energyShortfall is the 113 preview: a known short energy balance is the typed
+// D5 balance cause, so the dispatcher can answer 20007 instead of a generic refusal.
+func energyShortfall(balance, cost int64) error {
+	if balance >= cost {
+		return nil
+	}
+	return economy.InsufficientBalance(campaignEnergy)
+}
+
+// debit spends the result's energy (D102); a short balance returns the typed
+// cause and leaves the attempt open.
 func (s Mode) debit(c context.Context, sc gen.TimedScope, pid identity.PlayerID, amount int64) error {
 	if amount <= 0 {
 		return nil
 	}
 	_, err := s.Energy.DebitTemporalTx(c, sc.Tx, pid, campaignEnergy, amount, sc.Operation.Operation())
-	if errors.Is(err, economy.ErrInsufficientBalance) {
-		return fmt.Errorf("%w: energy below %d", d.ErrRefused, amount)
-	}
 	return err
 }
 

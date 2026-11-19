@@ -2758,7 +2758,8 @@
    "store:contentstore": [
     "*ActiveRevision",
     "*CampaignCatalogTx",
-    "*ResolveProgressionPolicyTx"
+    "*ResolveProgressionPolicyTx",
+    "*SummonCatalogTx"
    ],
    "store:guildrentalread": [
     "*ProfileTx"
