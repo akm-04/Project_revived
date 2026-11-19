@@ -34,7 +34,7 @@ func a128HeroService(p *pg.Pool) characterhero.Service {
 
 func a128ComposeDispatcher(t *testing.T, p *pg.Pool, a identity.ActorContext) stockruntime.ComposeDispatcher {
 	t.Helper()
-	return stockruntime.ComposeDispatcher{Authority: fixedBookAuthority{actor: a}, Book: stockruntime.NewCoalescedBookRead(bookService(p, p)), Equipment: a128HeroService(p)}
+	return stockruntime.ComposeDispatcher{Authority: fixedBookAuthority{actor: a}, Book: stockruntime.NewCoalescedBookRead(bookService(p, p)), Furniture: a128DormService(p), Equipment: a128HeroService(p)}
 }
 
 func a128ComposeRequest(t *testing.T, a identity.ActorContext, itemID, amount int64, op operation.Context) httpedge.DispatchRequest {
@@ -159,8 +159,9 @@ func TestA128EquipmentCategoryBoundaries(t *testing.T) {
 		t.Fatalf("book compose status=%d body=%#v", got.HTTPStatus, got.Body)
 	}
 
-	// Furniture paper, activity skin dot and pet equipment recipes stay refused.
-	for _, itemID := range []int64{50020001, 50001433, 80001024} {
+	// Activity skin dot and pet equipment recipes stay refused; furniture
+	// papers now route to the Dorm owner and are covered by the furniture test.
+	for _, itemID := range []int64{50001433, 80001024} {
 		got := dispatcher.Dispatch(ctx, a128ComposeRequest(t, a, itemID, 1, op()))
 		if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != int64(35028) {
 			t.Fatalf("item %d status=%d body=%#v", itemID, got.HTTPStatus, got.Body)

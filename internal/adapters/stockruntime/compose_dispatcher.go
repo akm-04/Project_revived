@@ -5,7 +5,9 @@ import (
 
 	appbook "gxb.local/backend/v2/internal/application/bookskill"
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
+	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
+	dormdomain "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -17,13 +19,19 @@ type EquipmentComposePort interface {
 	ComposeEquipmentItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
 }
 
-// ComposeDispatcher routes MID 83 by the server-qualified recipe owner. Book
-// composition keeps the Book owner; hero equipment composition runs through
-// the Character owner's CA4-1 recipe graph. Any other category (furniture,
-// activity, unknown) is refused by the equipment owner before mutation.
+// FurnitureComposePort is the Dorm-owned MID 83 furniture and blueprint
+// category. Membership in the recipe set, never item type, claims the id.
+type FurnitureComposePort interface {
+	OwnsFurnitureComposeItem(context.Context, int64, operation.Context) (bool, error)
+	ComposeFurnitureItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
+}
+
+// ComposeDispatcher routes MID 83 by the server-qualified recipe owner: Book,
+// then Dorm furniture/blueprint, then the Character owner's CA4-1 recipe graph.
 type ComposeDispatcher struct {
 	Authority rt.GameplayAuthorityPort
 	Book      BookPort
+	Furniture FurnitureComposePort
 	Equipment EquipmentComposePort
 }
 
@@ -32,7 +40,7 @@ func (d ComposeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	if fail != nil {
 		return *fail
 	}
-	if d.Book == nil || d.Equipment == nil {
+	if d.Book == nil || d.Furniture == nil || d.Equipment == nil {
 		return failureReply(defect(nil))
 	}
 	if req.Envelope.MID != 83 {
@@ -64,11 +72,34 @@ func (d ComposeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		}
 		return okI5(result.Body)
 	}
+	owned, err = d.Furniture.OwnsFurnitureComposeItem(ctx, itemID, req.Envelope.Operation)
+	if err != nil {
+		return failFurnitureCompose(err)
+	}
+	if owned {
+		body, err := d.Furniture.ComposeFurnitureItem(ctx, a, itemID, amount, req.Envelope.Operation)
+		if err != nil {
+			return failFurnitureCompose(err)
+		}
+		return okI5(body)
+	}
 	body, err := d.Equipment.ComposeEquipmentItem(ctx, a, itemID, amount, req.Envelope.Operation)
 	if err != nil {
 		return failEquipmentCompose(err)
 	}
 	return okI5(body)
+}
+
+var furnitureComposeFailureRows = []failureRow{
+	{match: appdorm.ErrFurnitureComposeUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appdorm.ErrFurnitureBlueprintNotOwned, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appdorm.ErrFurnitureLevelTooLow, class: failureRefusal, code: unprovenRefusalCode},
+	{match: dormdomain.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
+func failFurnitureCompose(err error) httpedge.Response {
+	return failureFromRows(furnitureComposeFailureRows, err)
 }
 
 var equipmentComposeFailureRows = []failureRow{

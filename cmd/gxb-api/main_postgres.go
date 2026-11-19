@@ -303,7 +303,7 @@ func main() {
 	librarySvc.Stacks = i5db
 	librarySvc.Skins = heroDB
 	forumSvc := applibraryforum.Service{Timed: heroSvc.Timed, Reads: runner, Store: libraryforumstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Directory: i4store.PlayerDirectoryReader{}, Characters: heroDB}
-	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts, GluePurchases: dormstore.Store{}, GlueValues: i5svc, GluePrivileges: privileges, Social: dormstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Moderation: contentDB, Broadcast: broadcastEmitter}
+	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, GluePurchases: dormstore.Store{}, GlueValues: i5svc, GluePrivileges: privileges, Social: dormstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Moderation: contentDB, Broadcast: broadcastEmitter}
 	bookSvc := appbook.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: bookstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
 	eventCentreSvc := appeventcentre.Service{Timed: heroSvc.Timed, Reads: runner, Owner: eventcentrestore.Store{}, Book: bookSvc, Content: contentDB, Pets: characterstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Grants: i5svc, Receipts: receipts, BattleObserver: librarySvc}
 	if eventCentreSvc.BattleObserver == nil {
@@ -908,7 +908,7 @@ func main() {
 	for _, mid := range []uint16{1056, 1057, 1058, 1059, 1060, 1061, 1077, 1078, 1079, 1080} {
 		mustRegister(mid, observing(authority, achievements, "Book", bookD))
 	}
-	composeD := stockruntime.ComposeDispatcher{Authority: authority, Book: stockruntime.NewCoalescedBookRead(bookSvc), Equipment: heroSvc}
+	composeD := stockruntime.ComposeDispatcher{Authority: authority, Book: stockruntime.NewCoalescedBookRead(bookSvc), Furniture: dormSvc, Equipment: heroSvc}
 	mustRegister(83, observing(authority, achievements, "Book", composeD))
 	eventCentreD := stockruntime.EventCentreDispatcher{Authority: authority, Service: eventCentreSvc}
 	for _, mid := range []uint16{1072, 1073, 1074, 1075, 1076, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091} {
