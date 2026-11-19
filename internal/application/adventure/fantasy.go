@@ -121,6 +121,10 @@ func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request R
 		if _, err = s.finish(c, sc.Tx, a, occurrence, at); err != nil {
 			return nil, err
 		}
+		// The attempt froze the formation at START; the counter lock is last.
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, current.Formation, at); err != nil {
+			return nil, err
+		}
 		return body, nil
 	})
 	return Response{Body: body, Duplicate: duplicate}, err

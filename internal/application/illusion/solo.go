@@ -221,6 +221,9 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		if err = s.recordFantasy(c, sc, a, current.Attempt.ID.String()); err != nil {
 			return Response{}, err
 		}
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, current.Formation, at); err != nil {
+			return Response{}, err
+		}
 		body, err := s.terminalBody(c, sc.Tx, generation, a.PlayerID, accepted)
 		if err != nil {
 			return Response{}, err

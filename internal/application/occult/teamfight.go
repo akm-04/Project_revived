@@ -542,8 +542,30 @@ func (s Mode) settleAttempt(c context.Context, sc gen.TimedScope, a identity.Act
 	if err = s.unreadyAll(view); err != nil {
 		return nil, err
 	}
+	// Each frozen member's own heroes; the counter lock is last.
+	for _, member := range teamRoster(view, team.StartPlayer) {
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, member, frozenPartners(snapshot, member), view.at); err != nil {
+			return nil, err
+		}
+	}
 	body := map[string]any{"battle_report": string(report), "award_info": map[string]any{"awards": rewardRows(awards[a.PlayerID])}}
 	return body, s.fillState(c, sc, a, view, body, result.Score)
+}
+
+// frozenPartners is the owned hero roster the attempt froze for one player:
+// borrowed, template and foreign actors never count.
+func frozenPartners(snapshot cd.Snapshot, player identity.PlayerID) []int64 {
+	partners := make([]int64, 0, len(snapshot.Battle.TeamA))
+	for _, actor := range snapshot.Battle.TeamA {
+		if actor.Kind != cd.HeroActor || identity.PlayerID(actor.Player) != player {
+			continue
+		}
+		if actor.Origin != cd.OwnedSelf && actor.Origin != cd.OwnedMember {
+			continue
+		}
+		partners = append(partners, actor.Identity)
+	}
+	return partners
 }
 
 func (s Mode) unreadyAll(view *roomView) error {

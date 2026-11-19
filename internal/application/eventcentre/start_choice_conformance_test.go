@@ -2,6 +2,7 @@ package eventcentre
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
@@ -38,9 +39,13 @@ func TestStartChoiceConformanceEventCentreBoard(t *testing.T) {
 	actor := identity.ActorContext{PlayerID: 7, LogicalServerID: 1}
 	owner := &startChoiceOwner{root: startChoiceRoot(at)}
 	combat := &startChoiceCombat{}
-	service := startChoiceService(at, owner, combat)
+	observer := &startChoiceObserver{}
+	service := startChoiceService(at, owner, combat, observer)
 	if _, err := service.BoardInfo(context.Background(), actor, startChoiceOperation(t, ids.UUID{1}, at)); err != nil {
 		t.Fatalf("first 1083: %v", err)
+	}
+	if !reflect.DeepEqual(observer.partners, []int64{1, 2}) {
+		t.Fatalf("settled mission observation %v, want the frozen leader and partner", observer.partners)
 	}
 	if len(combat.requests) != 1 {
 		t.Fatalf("captured %d START requests, want one", len(combat.requests))
@@ -66,24 +71,34 @@ func startChoiceRoot(at time.Time) ec.Root {
 	return ec.Root{Player: 7, Version: 1, Revision: startChoiceRevision, Facts: facts, CreatedAt: at.Add(-time.Hour), UpdatedAt: at.Add(-time.Hour)}
 }
 
-func startChoiceService(at time.Time, owner *startChoiceOwner, combat *startChoiceCombat) Service {
+type startChoiceObserver struct {
+	partners []int64
+}
+
+func (o *startChoiceObserver) ObserveBattleTx(_ context.Context, _ tx.Tx, _ identity.PlayerID, partners []int64, _ time.Time) error {
+	o.partners = append([]int64(nil), partners...)
+	return nil
+}
+
+func startChoiceService(at time.Time, owner *startChoiceOwner, combat *startChoiceCombat, observer BattleObserver) Service {
 	return Service{
-		Timed:    gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}},
-		Reads:    tx.Runner{DB: startChoiceBeginner{}},
-		Owner:    owner,
-		Book:     startChoiceBook{},
-		Content:  startChoiceContent{},
-		Pets:     startChoicePets{},
-		Players:  startChoicePlayers{},
-		Fence:    startChoiceFence{},
-		Costs:    startChoiceCosts{},
-		Grants:   startChoiceGrants{},
-		Receipts: startChoiceReceipts{},
-		Heroes:   startChoiceHeroes{},
-		Levels:   startChoiceLevels{},
-		Stats:    startChoiceStats{},
-		Combat:   combat,
-		Facts:    startChoiceFacts{},
+		Timed:          gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}},
+		Reads:          tx.Runner{DB: startChoiceBeginner{}},
+		Owner:          owner,
+		Book:           startChoiceBook{},
+		Content:        startChoiceContent{},
+		Pets:           startChoicePets{},
+		Players:        startChoicePlayers{},
+		Fence:          startChoiceFence{},
+		Costs:          startChoiceCosts{},
+		Grants:         startChoiceGrants{},
+		Receipts:       startChoiceReceipts{},
+		Heroes:         startChoiceHeroes{},
+		Levels:         startChoiceLevels{},
+		Stats:          startChoiceStats{},
+		Combat:         combat,
+		Facts:          startChoiceFacts{},
+		BattleObserver: observer,
 	}
 }
 

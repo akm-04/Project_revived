@@ -870,7 +870,7 @@
    "tables": 0
   },
   {
-   "callees": 14,
+   "callees": 15,
    "callers": 1,
    "mids": 20,
    "name": "adventure",
@@ -1104,7 +1104,7 @@
    "tables": 3
   },
   {
-   "callees": 11,
+   "callees": 12,
    "callers": 1,
    "mids": 16,
    "name": "eventcentre",
@@ -1284,7 +1284,7 @@
    "tables": 0
   },
   {
-   "callees": 17,
+   "callees": 18,
    "callers": 1,
    "mids": 17,
    "name": "illusion",
@@ -1321,7 +1321,7 @@
   },
   {
    "callees": 13,
-   "callers": 5,
+   "callers": 10,
    "mids": 23,
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
@@ -1365,7 +1365,7 @@
    "tables": 0
   },
   {
-   "callees": 15,
+   "callees": 16,
    "callers": 1,
    "mids": 23,
    "name": "occult",
@@ -1671,7 +1671,7 @@
    "tables": 17
   },
   {
-   "callees": 15,
+   "callees": 16,
    "callers": 19,
    "mids": 5,
    "name": "workplace",

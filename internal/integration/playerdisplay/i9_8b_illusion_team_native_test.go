@@ -178,6 +178,9 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatalf("member %d settlement count %d", member.PlayerID, n)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 2)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 2)
 	frozen := readTeamReport(t, content)
 	for _, table := range []int64{10001002, 10001003, 10001004, 10001005, 10001006, 10010001} {
 		if !frozen.heroes[table] {
@@ -203,6 +206,9 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatalf("team replay settled member %d %d times", member.PlayerID, n)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 2)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 2)
 	report, err := s.GetReport(ctx, a, state.ReportID, op())
 	if err != nil || !sameReport(t, reportContent(t, report), content) {
 		t.Fatalf("1362 replay %v", err)

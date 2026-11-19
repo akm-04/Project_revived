@@ -95,6 +95,9 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if _, err = s.finish(c, sc.Tx, a, current, at); err != nil {
 			return err
 		}
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, at); err != nil {
+			return err
+		}
 		response.Body = map[string]any{"battle_report": string(terminal.Report), "is_win": boolNumber(d.IsWin(star)), "awards": awards}
 		return nil
 	})

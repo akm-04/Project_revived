@@ -534,9 +534,15 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		view.state.Points = baseScore + view.state.ExtraPoints
 		body := map[string]any{"award_info": map[string]any{"awards": []map[string]any{}}}
 		if !result.Won {
+			if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, view.at); err != nil {
+				return nil, err
+			}
 			return body, s.fillState(c, sc, a, view, body, baseScore)
 		}
 		if err = s.settleIfCleared(c, sc, a, view, body); err != nil {
+			return nil, err
+		}
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, view.at); err != nil {
 			return nil, err
 		}
 		return body, s.fillState(c, sc, a, view, body, baseScore)

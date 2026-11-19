@@ -40,8 +40,9 @@ func TestA133CoopResultSettlesFrozenRoster(t *testing.T) {
 		onResolve: func() { roomStore.room = left }}
 	adventureStore := &coopAdventureStore{}
 	mailbox := &coopMailRecorder{}
+	observer := &coopBattleObserver{partners: map[identity.PlayerID][]int64{}}
 	mode := newCoopTestMode(at, startChoiceContent{fantasy: illusion.Catalog{Campaigns: []illusion.Campaign{{ID: 9001, FightID: 21}}}},
-		combat, adventureStore, mailbox, roomStore)
+		combat, adventureStore, mailbox, roomStore, observer)
 
 	if _, err := mode.StartCoop(context.Background(), a, startChoiceOperation(t, ids.UUID{9}, at)); err != nil {
 		t.Fatal("RESULT:", err)
@@ -59,9 +60,23 @@ func TestA133CoopResultSettlesFrozenRoster(t *testing.T) {
 	if slices.Contains(combat.settled, b.PlayerID) == false {
 		t.Fatal("the departed member got no settlement")
 	}
+	for _, member := range want {
+		if !slices.Equal(observer.partners[member], []int64{101, 102}) {
+			t.Fatalf("member %d observation %v, want its own frozen heroes", member, observer.partners[member])
+		}
+	}
 }
 
-func newCoopTestMode(at time.Time, content Content, combat Combat, store Store, mailbox Mail, roomStore *startChoiceRoomStore) Mode {
+type coopBattleObserver struct {
+	partners map[identity.PlayerID][]int64
+}
+
+func (o *coopBattleObserver) ObserveBattleTx(_ context.Context, _ tx.Tx, player identity.PlayerID, partners []int64, _ time.Time) error {
+	o.partners[player] = append([]int64(nil), partners...)
+	return nil
+}
+
+func newCoopTestMode(at time.Time, content Content, combat Combat, store Store, mailbox Mail, roomStore *startChoiceRoomStore, observer BattleObserver) Mode {
 	timed := gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}}
 	stubs := startChoiceStubs{}
 	return Mode{Timed: timed, Fresh: startChoiceTx{}, Store: store, Content: content,
@@ -69,7 +84,7 @@ func newCoopTestMode(at time.Time, content Content, combat Combat, store Store, 
 		Stats: stubs, Combat: combat, Costs: stubs, Grants: stubs, Opponents: stubs, Wake: stubs,
 		Rooms:     sr.Service{Timed: timed, Fresh: startChoiceTx{}, Store: roomStore, Fence: startChoiceFence{}, Players: startChoiceRoots{}},
 		RoomStore: roomStore, Mail: mailbox, Partners: stubs,
-		HeroWire: func(character.Hero) (map[string]any, error) { return nil, nil }}
+		HeroWire: func(character.Hero) (map[string]any, error) { return nil, nil }, BattleObserver: observer}
 }
 
 func coopTestRoom(t *testing.T, at time.Time, owner identity.PlayerID, seated []identity.PlayerID) sharedroom.Room {
@@ -122,6 +137,20 @@ func (c *coopRosterCombat) AttemptMembersTx(context.Context, tx.Queryer, ids.UUI
 }
 
 func (c *coopRosterCombat) MonsterWaves(int64) ([][]cb.Participant, error) { return nil, nil }
+
+func (c *coopRosterCombat) SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error) {
+	var snapshot cd.Snapshot
+	for index, member := range c.frozen {
+		origin := cd.OwnedSelf
+		if index > 0 {
+			origin = cd.OwnedMember
+		}
+		for _, hero := range []int64{101, 102} {
+			snapshot.Battle.TeamA = append(snapshot.Battle.TeamA, cd.Actor{Origin: origin, Kind: cd.HeroActor, Player: int64(member), Identity: hero})
+		}
+	}
+	return snapshot, nil
+}
 
 func (c *coopRosterCombat) SettleMemberTx(_ context.Context, _ tx.Tx, request cb.MemberSettleRequest) (cb.MemberSettled, error) {
 	if !slices.Contains(c.frozen, request.Member) {

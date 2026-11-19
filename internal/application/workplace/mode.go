@@ -61,7 +61,7 @@ func withRevision(op operation.Context, rev string) (operation.Context, error) {
 	return op, err
 }
 func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, error) {
-	if s.Fresh == nil || s.Store == nil || s.Content == nil || s.Fence == nil || s.Functions == nil || s.Directory == nil || s.Campaigns == nil || s.Heroes == nil || s.HeroLocks == nil || s.Values == nil || s.Privileges == nil || s.Facts == nil || s.Combat == nil || s.Stats == nil || s.Opponents == nil || s.HeroWire == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Broadcast == nil || s.Rental == nil {
+	if s.Fresh == nil || s.Store == nil || s.Content == nil || s.Fence == nil || s.Functions == nil || s.Directory == nil || s.Campaigns == nil || s.Heroes == nil || s.HeroLocks == nil || s.Values == nil || s.Privileges == nil || s.Facts == nil || s.Combat == nil || s.Stats == nil || s.Opponents == nil || s.HeroWire == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Broadcast == nil || s.Rental == nil || s.BattleObserver == nil {
 		return op, d.ErrUnavailable
 	}
 	if _, ok := op.Policies.Get("content"); ok {

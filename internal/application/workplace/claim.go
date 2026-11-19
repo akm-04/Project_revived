@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"sort"
 	"time"
 )
 
@@ -159,8 +160,29 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 		delete(r.Slots, teamID)
 		out := map[string]any{"team_info": team(v, r, teamID), "award": o.Award}
 		r.Last[teamID] = out
+		if o.Attempt != "" && !resolverFailed {
+			partners := rivalCrewPartners(o.Workers, cat.Policy.MaxCombatCrew)
+			if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, partners, sc.Operation.DecisionAt()); err != nil {
+				return nil, err
+			}
+		}
 		return out, nil
 	})
+}
+
+// rivalCrewPartners is the frozen crew the rival battle fielded: the outgoing
+// workers by power, capped at the policy's combat crew size.
+func rivalCrewPartners(workers []d.Worker, max int) []int64 {
+	crew := append([]d.Worker(nil), workers...)
+	sort.SliceStable(crew, func(i, j int) bool { return crew[i].Power > crew[j].Power })
+	if len(crew) > max {
+		crew = crew[:max]
+	}
+	partners := make([]int64, 0, len(crew))
+	for _, worker := range crew {
+		partners = append(partners, worker.PartnerID)
+	}
+	return partners
 }
 
 type fixedTime struct{ at time.Time }

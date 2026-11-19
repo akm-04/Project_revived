@@ -62,7 +62,8 @@ func occultMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority) oc.Mode {
 	mode := oc.Mode{Timed: timed, Fresh: p, Store: occultstore.Store{}, Content: content, Fence: values, Players: i4store.PlayerRootLocker{},
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Presence: presencestore.Store{Queryer: p}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats,
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Combat: fight, Tickets: owner, Values: owner, Awakening: owner,
-		Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p},
+		BattleObserver: libraryService(p, p)}
 	mode.Invites = roomInviteMaterializer(t, p)
 	return mode
 }
@@ -267,6 +268,9 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	duplicate, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 10015, SubID: 1, Star: 3, Formation: formation}, op())
 	if err != nil || !duplicate.Duplicate {
 		t.Fatalf("duplicate %+v %v", duplicate, err)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, partner); count != 1 {
+		t.Fatalf("occult solo with its duplicate counted %d, want 1", count)
 	}
 	if _, err = s.Prepare(ctx, a, 10015, 1, op()); err != nil {
 		t.Fatal("prepare", err)

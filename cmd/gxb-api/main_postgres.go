@@ -305,7 +305,10 @@ func main() {
 	forumSvc := applibraryforum.Service{Timed: heroSvc.Timed, Reads: runner, Store: libraryforumstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Directory: i4store.PlayerDirectoryReader{}, Characters: heroDB}
 	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts, GluePurchases: dormstore.Store{}, GlueValues: i5svc, GluePrivileges: privileges, Social: dormstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Moderation: contentDB, Broadcast: broadcastEmitter}
 	bookSvc := appbook.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: bookstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
-	eventCentreSvc := appeventcentre.Service{Timed: heroSvc.Timed, Reads: runner, Owner: eventcentrestore.Store{}, Book: bookSvc, Content: contentDB, Pets: characterstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Grants: i5svc, Receipts: receipts}
+	eventCentreSvc := appeventcentre.Service{Timed: heroSvc.Timed, Reads: runner, Owner: eventcentrestore.Store{}, Book: bookSvc, Content: contentDB, Pets: characterstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Grants: i5svc, Receipts: receipts, BattleObserver: librarySvc}
+	if eventCentreSvc.BattleObserver == nil {
+		log.Fatal("I9-11G2 Event Centre board battle observer is not composed")
+	}
 	bookSvc.MakeInfo = eventCentreSvc
 	bookSvc.RecycleInfo = eventCentreSvc
 	courseSvc := appcourse.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.CourseHeroPort{Store: heroDB}, Owner: coursestore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts, Privileges: privileges}
@@ -568,10 +571,16 @@ func main() {
 			Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{},
 			Notices: postgres.RoomInviteNoticeListEmitter{Pool: pool, OnError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }},
 			Limiter: roominvite.NewSenderRateLimiter(envPositiveDuration("GXB_ROOM_INVITE_SENDER_INTERVAL", roominvite.DefaultSenderInterval), envPositiveInt("GXB_ROOM_INVITE_SENDER_BURST", roominvite.DefaultSenderBurst))}
-		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms, roomInvites, achievements, retentionPolicies.RetentionDays)
+		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms, roomInvites, achievements, retentionPolicies.RetentionDays, librarySvc)
+		if illusion.BattleObserver == nil {
+			log.Fatal("I9-11G2 Illusion battle observer is not composed")
+		}
 		ranking.Illusion = illusion
 		roomChat = illusion
-		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites, retentionPolicies.RetentionDays)
+		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites, retentionPolicies.RetentionDays, librarySvc)
+		if occultMode.BattleObserver == nil {
+			log.Fatal("I9-11G2 Occult battle observer is not composed")
+		}
 		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners, broadcastEmitter, displayService)
 		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
 		for _, mid := range stockruntime.MemoirMIDs {
@@ -600,7 +609,10 @@ func main() {
 			}
 			mustRegister(mid, petD)
 		}
-		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, rentalReads, broadcastEmitter)
+		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, rentalReads, broadcastEmitter, librarySvc)
+		if workplace.BattleObserver == nil {
+			log.Fatal("I9-11G2 Workplace battle observer is not composed")
+		}
 		for _, mid := range stockruntime.WorkplaceMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.WorkplaceDispatcher{Authority: authority, Service: workplace}))
 		}
@@ -684,7 +696,10 @@ func main() {
 		for _, mid := range stockruntime.IllusionMIDs {
 			mustRegister(mid, stockruntime.IllusionDispatcher{Authority: authority, Service: illusion})
 		}
-		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero, roomInvites, retentionPolicies.RetentionDays)
+		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero, roomInvites, retentionPolicies.RetentionDays, librarySvc)
+		if adventureMode.BattleObserver == nil {
+			log.Fatal("I9-11G2 Adventure battle observer is not composed")
+		}
 		// 1362 is shared: Illusion answers its own reports, Adventure the co-op ones.
 		for _, mid := range stockruntime.IllusionRoomMIDs {
 			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion, ReportFallback: adventureMode})

@@ -34,6 +34,9 @@ func TestI9_10SophiaSingleSettleReplyShape(t *testing.T) {
 	if _, hasAwards := loss.Body["awards"]; hasAwards {
 		t.Fatalf("a loss must omit awards, got %#v", loss.Body)
 	}
+	if count := girlsLogCount(t, p, loser.PlayerID, loserPicks[0]); count != 1 {
+		t.Fatalf("a loss counted %d, want the Girls Log battle count to include it", count)
+	}
 
 	putAdventureOccurrence(t, p, winner.PlayerID, da.EventIllusion, da.IllusionHiddenBoss, clock.at, clock.at.Add(2*time.Hour), "sophia-win")
 	if _, err = mode.StartSingle(ctx, winner, appadventure.FightRequest{Formation: []int64{winnerPicks[0]}}, opContext); err != nil {
@@ -52,5 +55,14 @@ func TestI9_10SophiaSingleSettleReplyShape(t *testing.T) {
 	}
 	if rows := scalar(t, p, `SELECT count(*) FROM adventure_single_attempts_retired_r5d WHERE player_id=$1`, int64(winner.PlayerID)); rows != 0 {
 		t.Fatal("mode-local attempt row", rows)
+	}
+	if count := girlsLogCount(t, p, winner.PlayerID, winnerPicks[0]); count != 1 {
+		t.Fatalf("a win counted %d, want one per settled battle", count)
+	}
+	if _, err = mode.SettleSingle(ctx, winner, appadventure.ResultRequest{Star: 1, Damage: 9000000, Formation: []int64{winnerPicks[0]}}, opContext); err != nil {
+		t.Fatal("result replay", err)
+	}
+	if count := girlsLogCount(t, p, winner.PlayerID, winnerPicks[0]); count != 1 {
+		t.Fatalf("a replayed result counted %d, want 1", count)
 	}
 }

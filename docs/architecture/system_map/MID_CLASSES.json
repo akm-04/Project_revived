@@ -27217,7 +27217,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "serializable"
     },
     {
@@ -27255,7 +27255,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "false"
     },
     {
@@ -27299,7 +27299,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "6"
     },
     {
@@ -27326,6 +27326,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/mentorstore/missions.go:68",
     "internal/adapters/postgres/mentorstore/relationships.go:124",
     "internal/adapters/postgres/socialinvitestore/store.go:110",
@@ -27380,7 +27382,7 @@
      "file": "internal/application/workplace/claim.go",
      "function": "Mode.Claim",
      "isolation": "serializable",
-     "line": 41,
+     "line": 42,
      "read_only": "false",
      "retry": "6"
     },
@@ -27623,6 +27625,11 @@
      "file": "internal/adapters/postgres/mentorstore/transaction.go",
      "line": 13,
      "statement": "SELECT current_setting('transaction_read_only')::boolean"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/socialexchangestore/store.go",
@@ -39054,7 +39061,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "serializable"
     },
     {
@@ -39092,7 +39099,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "false"
     },
     {
@@ -39136,7 +39143,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "6"
     },
     {
@@ -39163,6 +39170,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/mentorstore/missions.go:68",
     "internal/adapters/postgres/mentorstore/relationships.go:124",
     "internal/adapters/postgres/socialinvitestore/store.go:110",
@@ -39217,7 +39226,7 @@
      "file": "internal/application/workplace/claim.go",
      "function": "Mode.Claim",
      "isolation": "serializable",
-     "line": 41,
+     "line": 42,
      "read_only": "false",
      "retry": "6"
     },
@@ -39460,6 +39469,11 @@
      "file": "internal/adapters/postgres/mentorstore/transaction.go",
      "line": 13,
      "statement": "SELECT current_setting('transaction_read_only')::boolean"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/socialexchangestore/store.go",
@@ -40565,7 +40579,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "serializable"
     },
     {
@@ -40588,7 +40602,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "false"
     },
     {
@@ -40614,7 +40628,7 @@
     },
     {
      "file": "internal/application/workplace/claim.go",
-     "line": 41,
+     "line": 42,
      "value": "6"
     },
     {
@@ -40641,6 +40655,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43",
     "internal/adapters/postgres/workplacestore/store.go:32",
     "internal/adapters/postgres/workplacestore/store.go:39"
@@ -40667,7 +40683,7 @@
      "file": "internal/application/workplace/claim.go",
      "function": "Mode.Claim",
      "isolation": "serializable",
-     "line": 41,
+     "line": 42,
      "read_only": "false",
      "retry": "6"
     },
@@ -40860,6 +40876,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -65505,22 +65526,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -65548,27 +65569,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -65596,22 +65617,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -65651,6 +65672,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -65691,7 +65714,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -65699,7 +65722,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -65707,7 +65730,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -65715,7 +65738,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -66117,6 +66140,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -66164,22 +66192,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -66207,27 +66235,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -66255,22 +66283,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -66310,6 +66338,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -66350,7 +66380,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -66358,7 +66388,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -66366,7 +66396,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -66374,7 +66404,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -66776,6 +66806,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -66823,22 +66858,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -66866,27 +66901,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -66914,22 +66949,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -66969,6 +67004,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -67009,7 +67046,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -67017,7 +67054,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -67025,7 +67062,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -67033,7 +67070,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -67435,6 +67472,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -67482,22 +67524,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -67525,27 +67567,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -67573,22 +67615,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -67628,6 +67670,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -67668,7 +67712,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -67676,7 +67720,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -67684,7 +67728,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -67692,7 +67736,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -68092,6 +68136,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -68141,22 +68190,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -68184,27 +68233,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -68232,22 +68281,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -68287,6 +68336,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -68327,7 +68378,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -68335,7 +68386,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -68343,7 +68394,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -68351,7 +68402,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -68751,6 +68802,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -70192,22 +70248,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -70235,27 +70291,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -70283,22 +70339,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -70338,6 +70394,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -70378,7 +70436,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -70386,7 +70444,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -70394,7 +70452,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -70402,7 +70460,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -70804,6 +70862,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -70851,22 +70914,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -70894,27 +70957,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -70942,22 +71005,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -70997,6 +71060,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -71037,7 +71102,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -71045,7 +71110,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -71053,7 +71118,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -71061,7 +71126,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -71463,6 +71528,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -71510,22 +71580,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -71553,27 +71623,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -71601,22 +71671,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -71656,6 +71726,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -71696,7 +71768,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -71704,7 +71776,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -71712,7 +71784,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -71720,7 +71792,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -72122,6 +72194,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -72169,22 +72246,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -72212,27 +72289,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -72260,22 +72337,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -72315,6 +72392,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -72355,7 +72434,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -72363,7 +72442,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -72371,7 +72450,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -72379,7 +72458,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -72781,6 +72860,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -72828,22 +72912,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -72871,27 +72955,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -72919,22 +73003,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -72974,6 +73058,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -73014,7 +73100,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -73022,7 +73108,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -73030,7 +73116,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -73038,7 +73124,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -73440,6 +73526,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -73487,22 +73578,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -73530,27 +73621,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -73578,22 +73669,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -73633,6 +73724,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -73673,7 +73766,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -73681,7 +73774,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -73689,7 +73782,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -73697,7 +73790,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -74099,6 +74192,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -74146,22 +74244,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -74189,27 +74287,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -74237,22 +74335,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -74292,6 +74390,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -74332,7 +74432,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -74340,7 +74440,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -74348,7 +74448,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -74356,7 +74456,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -74758,6 +74858,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -74805,22 +74910,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -74848,27 +74953,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -74896,22 +75001,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -74951,6 +75056,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -74991,7 +75098,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -74999,7 +75106,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -75007,7 +75114,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -75015,7 +75122,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -75417,6 +75524,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -75464,22 +75576,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -75507,27 +75619,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -75555,22 +75667,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -75610,6 +75722,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -75650,7 +75764,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -75658,7 +75772,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -75666,7 +75780,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -75674,7 +75788,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -76076,6 +76190,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -76123,22 +76242,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -76166,27 +76285,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -76214,22 +76333,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -76269,6 +76388,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -76309,7 +76430,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -76317,7 +76438,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -76325,7 +76446,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -76333,7 +76454,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -76733,6 +76854,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -76782,22 +76908,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "serializable"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "repeatable_read"
     }
    ],
@@ -76825,27 +76951,27 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "false"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/eventcentre/service.go:264",
+    "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -76873,22 +76999,22 @@
     },
     {
      "file": "internal/application/eventcentre/board.go",
-     "line": 600,
+     "line": 611,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 299,
+     "line": 306,
      "value": "1"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 353,
+     "line": 360,
      "value": "8"
     },
     {
      "file": "internal/application/eventcentre/service.go",
-     "line": 406,
+     "line": 413,
      "value": "1"
     }
    ],
@@ -76928,6 +77054,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "eventcentre",
@@ -76968,7 +77096,7 @@
      "file": "internal/application/eventcentre/board.go",
      "function": "Service.BoardReport",
      "isolation": "repeatable_read",
-     "line": 600,
+     "line": 611,
      "read_only": "false",
      "retry": "1"
     },
@@ -76976,7 +77104,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 299,
+     "line": 306,
      "read_only": "false",
      "retry": "1"
     },
@@ -76984,7 +77112,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 353,
+     "line": 360,
      "read_only": "false",
      "retry": "8"
     },
@@ -76992,7 +77120,7 @@
      "file": "internal/application/eventcentre/service.go",
      "function": "Service.Read",
      "isolation": "repeatable_read",
-     "line": 406,
+     "line": 413,
      "read_only": "false",
      "retry": "1"
     }
@@ -77392,6 +77520,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -81014,7 +81147,9 @@
     "internal/adapters/postgres/illusionstore/store.go:51",
     "internal/adapters/postgres/illusionstore/store.go:59",
     "internal/adapters/postgres/illusionstore/store.go:79",
-    "internal/adapters/postgres/illusionstore/store.go:88"
+    "internal/adapters/postgres/illusionstore/store.go:88",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32"
    ],
    "system": "illusion",
    "transactions": [
@@ -81162,6 +81297,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -82411,6 +82551,8 @@
     "internal/adapters/postgres/illusionstore/store.go:59",
     "internal/adapters/postgres/illusionstore/store.go:79",
     "internal/adapters/postgres/illusionstore/store.go:88",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -82946,7 +83088,7 @@
    "isolation": [
     {
      "file": "internal/application/illusion/team_fight.go",
-     "line": 203,
+     "line": 232,
      "value": "repeatable_read"
     }
    ],
@@ -82954,7 +83096,7 @@
    "read_only": [
     {
      "file": "internal/application/illusion/team_fight.go",
-     "line": 203,
+     "line": 232,
      "value": "true"
     }
    ],
@@ -82962,7 +83104,7 @@
    "retry": [
     {
      "file": "internal/application/illusion/team_fight.go",
-     "line": 203,
+     "line": 232,
      "value": "1"
     }
    ],
@@ -82973,7 +83115,7 @@
      "file": "internal/application/illusion/team_fight.go",
      "function": "Mode.GetReport",
      "isolation": "repeatable_read",
-     "line": 203,
+     "line": 232,
      "read_only": "true",
      "retry": "1"
     }
@@ -83124,7 +83266,7 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/solo.go:330",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/solo.go:333",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:526"
    ],
    "writes": "UNKNOWN"
@@ -106935,6 +107077,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -107457,6 +107601,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -107973,6 +108119,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -108526,6 +108674,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -109182,6 +109332,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -109735,6 +109887,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -110288,6 +110442,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -110841,6 +110997,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/occultstore/store.go:113",
     "internal/adapters/postgres/occultstore/store.go:22",
     "internal/adapters/postgres/occultstore/store.go:55",
@@ -111439,7 +111597,7 @@
    "isolation": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 681,
+     "line": 703,
      "value": "repeatable_read"
     }
    ],
@@ -111447,7 +111605,7 @@
    "read_only": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 681,
+     "line": 703,
      "value": "true"
     }
    ],
@@ -111455,7 +111613,7 @@
    "retry": [
     {
      "file": "internal/application/occult/teamfight.go",
-     "line": 681,
+     "line": 703,
      "value": "1"
     }
    ],
@@ -111466,7 +111624,7 @@
      "file": "internal/application/occult/teamfight.go",
      "function": "Mode.TeamReport",
      "isolation": "repeatable_read",
-     "line": 681,
+     "line": 703,
      "read_only": "true",
      "retry": "1"
     }
@@ -112155,6 +112313,8 @@
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -112353,6 +112513,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -112751,7 +112913,7 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
@@ -113477,8 +113639,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:620",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:646",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED apply at internal/application/adventure/service.go:121",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -113917,8 +114079,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:620",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:646",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED apply at internal/application/adventure/service.go:121",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -114034,6 +114196,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "adventure",
@@ -114446,6 +114610,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -114901,8 +115070,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:620",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:646",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED apply at internal/application/adventure/service.go:121",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -115373,6 +115542,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "adventure",
@@ -115551,6 +115722,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -115990,8 +116166,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:620",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:646",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED apply at internal/application/adventure/service.go:121",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -117081,8 +117257,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:620",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:646",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED apply at internal/application/adventure/service.go:121",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
@@ -117189,8 +117365,8 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:620"
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:646"
    ],
    "writes": "state"
   },
@@ -117624,8 +117800,8 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:604",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:620",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:630",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/adventure/coop.go:646",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
     "UNRESOLVED apply at internal/application/adventure/service.go:121",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",

@@ -343,6 +343,9 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 			t.Fatalf("member %d settled %d times", member.PlayerID, count)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 1)
 	stored, err := s.TeamReport(ctx, b, state.Team.ReportKey, op())
 	if err != nil || occultStoredReport(t, stored) != report {
 		t.Fatalf("2382 replay %v", err)
@@ -370,6 +373,9 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 			t.Fatalf("replay settled member %d %d times", member.PlayerID, count)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 1)
 }
 
 // A lost team fight saves the enemies' and the girls' end states (client rule 6,

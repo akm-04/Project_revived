@@ -76,7 +76,7 @@ func adventureTestModeWithFight(t *testing.T, p *pg.Pool, clock gen.TimeAuthorit
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner, Opponents: opponents, Wake: adventureWake{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Mail: i5.SettlementMail{Store: values},
-		Partners: ownerSummoner(p), HeroWire: heroproj.StockHero}
+		Partners: ownerSummoner(p), HeroWire: heroproj.StockHero, BattleObserver: libraryService(p, p)}
 	mode.Invites = roomInviteMaterializer(t, p)
 	return mode
 }
@@ -322,6 +322,19 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 	if _, ok := response.Body["awards"].([]any); !ok {
 		t.Fatalf("2419 awards shape %#v", response.Body["awards"])
 	}
+	if count := girlsLogCount(t, p, a.PlayerID, picks[0]); count != 1 {
+		t.Fatalf("PVP counted %d for the fighting hero, want 1", count)
+	}
+	if rows := girlsLogRows(t, p, defender.PlayerID); len(rows) != 0 {
+		t.Fatalf("the opponent's heroes were counted for the opponent: %v", rows)
+	}
+	// The finished occurrence refuses a second result and counts nothing more.
+	if _, err = mode.Fight(ctx, a, appadventure.FightRequest{Formation: []int64{picks[0]}}, opContext); !errors.Is(err, d.ErrExpired) {
+		t.Fatalf("PVP result replay %v", err)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, picks[0]); count != 1 {
+		t.Fatalf("a refused PVP result counted %d, want 1", count)
+	}
 
 	// Robot fallback: no Arena opponent, a template team resolves.
 	clock.Set(clock.at.Add(time.Minute))
@@ -333,6 +346,12 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 	}
 	if report, _ = response.Body["battle_report"].(string); report == "" {
 		t.Fatal("robot report missing")
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, picks[0]); count != 2 {
+		t.Fatalf("robot PVP counted %d, want one more for the player's own hero", count)
+	}
+	if rows := girlsLogRows(t, p, a.PlayerID); len(rows) != 1 {
+		t.Fatalf("robot PVP counted a non-owned actor: %v", rows)
 	}
 }
 
@@ -391,6 +410,9 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 			t.Fatal("defense result", err)
 		}
 	}
+	if count := girlsLogCount(t, p, a.PlayerID, aPicks[0]); count != int64(d.DefenseTriesPerPosition) {
+		t.Fatalf("defense counted %d, want one per settled try (%d)", count, d.DefenseTriesPerPosition)
+	}
 	if _, err = mode.PrepareDefense(ctx, a, 1, opContext); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("fourth try %v", err)
 	}
@@ -415,6 +437,12 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	awards, _ := defenseResult.Body["awards"].(map[string]any)
 	if _, ok := awards["awards"].([]any); !ok {
 		t.Fatalf("2410 awards.awards must be an array: %#v", defenseResult.Body)
+	}
+	if count := girlsLogCount(t, p, b.PlayerID, bPicks[0]); count != 1 {
+		t.Fatalf("the winning member counted %d, want 1", count)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, aPicks[0]); count != int64(d.DefenseTriesPerPosition) {
+		t.Fatalf("a refused result changed the first member's count to %d", count)
 	}
 	var raw string
 	if err = p.QueryRow(ctx, `SELECT payload::text FROM shared_rooms WHERE room_id=$1`, roomID).Scan(&raw); err != nil {
@@ -482,12 +510,27 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 			t.Fatal("prepare coop", err)
 		}
 	}
+	coopMembers := []struct {
+		actor identity.ActorContext
+		picks []int64
+	}{{a, aPicks}, {b, bPicks}, {c, cPicks}}
+	coopBefore := map[identity.PlayerID]map[int64]int64{}
+	for _, member := range coopMembers {
+		coopBefore[member.actor.PlayerID] = girlsLogRows(t, p, member.actor.PlayerID)
+	}
 	report, err := mode.StartCoop(ctx, a, opContext)
 	if err != nil {
 		t.Fatal("start coop", err)
 	}
 	if text, _ := report["battle_report"].(string); text == "" {
 		t.Fatal("coop report missing")
+	}
+	for _, member := range coopMembers {
+		for _, pick := range member.picks {
+			if count := girlsLogCount(t, p, member.actor.PlayerID, pick); count != coopBefore[member.actor.PlayerID][pick]+1 {
+				t.Fatalf("coop member %d pick %d counted %d, want one more than %d", member.actor.PlayerID, pick, count, coopBefore[member.actor.PlayerID][pick])
+			}
+		}
 	}
 	if err = p.QueryRow(ctx, `SELECT payload::text FROM shared_rooms WHERE room_id=$1`, coopID).Scan(&raw); err != nil {
 		t.Fatal(err)
@@ -559,6 +602,13 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		t.Fatal("coop replay", err)
 	} else if text, _ := replay["battle_report"].(string); text == "" {
 		t.Fatal("coop replay report missing")
+	}
+	for _, member := range coopMembers {
+		for _, pick := range member.picks {
+			if count := girlsLogCount(t, p, member.actor.PlayerID, pick); count != coopBefore[member.actor.PlayerID][pick]+1 {
+				t.Fatalf("a replay changed coop member %d pick %d to %d", member.actor.PlayerID, pick, count)
+			}
+		}
 	}
 	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_ILLUSION' AND source_key=$1`, state.ReportID); mails != 3 {
 		t.Fatal("coop replay mailed again")
