@@ -21,10 +21,6 @@ func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorConte
 	} else {
 		r.Normalize(modes.Day(at), at.Unix())
 	}
-	out := r.Normal()
-	if r.Sweep != nil && at.Unix() >= r.Sweep.Due {
-		out["awards"] = r.Sweep.Awards
-	}
-	detail["822"] = out
+	detail["822"] = r.Normal()
 	return nil
 }

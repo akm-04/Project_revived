@@ -36,14 +36,10 @@ func (s Mode) Load(c context.Context, a identity.ActorContext, op operation.Cont
 	})
 }
 
-// Detail822 never grants the due preview it projects.
+// Detail822 is a read-only redpoint preview; FinishSweep is the only grant.
 func (s Mode) Detail(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	return s.run(c, a, "detail", struct{}{}, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
-		out := r.Normal()
-		if r.Sweep != nil && sc.Operation.DecisionAt().Unix() >= r.Sweep.Due {
-			out["awards"] = r.Sweep.Awards
-		}
-		return out, nil
+		return r.Normal(), nil
 	})
 }
 func award(f d.Floor, first, vip bool) ([]grant.Line, []map[string]any) {
