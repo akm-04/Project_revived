@@ -295,8 +295,9 @@ FROM gxb_content_revisions WHERE revision_id=$3`, drifted, "00000000000000000000
 	}
 }
 
-// D5 (A-140): a purchase whose decision time is older than a newer accepted
-// purchase refuses 409+40002 and rolls back its count, debit, grant and slot.
+// K3': a purchase whose decision time is older than a newer accepted purchase
+// is clamped to the stored observation; it settles once and moves no stored
+// timestamp backwards.
 func TestI911CCoreShopsOvertakenPurchaseNative(t *testing.T) {
 	p := pool(t)
 	revision := installed(t, p)
@@ -328,15 +329,21 @@ func TestI911CCoreShopsOvertakenPurchaseNative(t *testing.T) {
 	crystalBefore := i911cScalarAmount(t, p, a, "crystal")
 	receiptsBefore := i911cShopReceiptCount(t, p, a)
 
+	currency, otherCurrency := "mana", "crystal"
+	currencyBefore, otherBefore := manaBefore, crystalBefore
+	if first["sell_type"] == int64(2) {
+		currency, otherCurrency = "crystal", "mana"
+		currencyBefore, otherBefore = crystalBefore, manaBefore
+	}
 	clock.Queue(older)
-	if overtaken := i911cDispatchAt(t, dispatcher, a, 33, map[string]any{"shop_type": int64(1), "index": first["index"]}, older, 28); overtaken.HTTPStatus != 409 || overtaken.Body["error_code"] != int64(40002) {
-		t.Fatalf("overtaken purchase: %+v", overtaken)
+	if clamped := i911cDispatchAt(t, dispatcher, a, 33, map[string]any{"shop_type": int64(1), "index": first["index"]}, older, 28); clamped.HTTPStatus != 200 {
+		t.Fatalf("overtaken purchase was refused: %+v", clamped)
 	}
-	if got := i911cScalarAmount(t, p, a, "mana"); got != manaBefore {
-		t.Fatalf("overtaken purchase debited mana: %d -> %d", manaBefore, got)
+	if got := i911cScalarAmount(t, p, a, currency); got != currencyBefore-first["sell_price"].(int64) {
+		t.Fatalf("overtaken purchase debited %s: %d -> %d (price %v)", currency, currencyBefore, got, first["sell_price"])
 	}
-	if got := i911cScalarAmount(t, p, a, "crystal"); got != crystalBefore {
-		t.Fatalf("overtaken purchase debited crystal: %d -> %d", crystalBefore, got)
+	if got := i911cScalarAmount(t, p, a, otherCurrency); got != otherBefore {
+		t.Fatalf("overtaken purchase debited %s: %d -> %d", otherCurrency, otherBefore, got)
 	}
 	var dayAfter, countAfter, streakVersionAfter int64
 	var streakUpdatedAfter time.Time
@@ -346,17 +353,17 @@ func TestI911CCoreShopsOvertakenPurchaseNative(t *testing.T) {
 	if err := p.QueryRow(ctx, `SELECT state_version,updated_at FROM achievement_streaks WHERE player_id=$1 AND achievement_id=100011`, int64(a.PlayerID)).Scan(&streakVersionAfter, &streakUpdatedAfter); err != nil {
 		t.Fatal(err)
 	}
-	if dayAfter != dayBefore || countAfter != countBefore || streakVersionAfter != streakVersionBefore || !streakUpdatedAfter.Equal(streakUpdatedBefore) {
-		t.Fatalf("overtaken purchase changed the achievement: day %d->%d count %d->%d version %d->%d",
-			dayBefore, dayAfter, countBefore, countAfter, streakVersionBefore, streakVersionAfter)
+	if dayAfter != dayBefore || countAfter != countBefore+1 || streakVersionAfter <= streakVersionBefore || !streakUpdatedAfter.Equal(streakUpdatedBefore) {
+		t.Fatalf("overtaken purchase achievement: day %d->%d count %d->%d version %d->%d updated %v->%v",
+			dayBefore, dayAfter, countBefore, countAfter, streakVersionBefore, streakVersionAfter, streakUpdatedBefore, streakUpdatedAfter)
 	}
-	if got := i911cShopReceiptCount(t, p, a); got != receiptsBefore {
-		t.Fatalf("overtaken purchase wrote a receipt: %d -> %d", receiptsBefore, got)
+	if got := i911cShopReceiptCount(t, p, a); got != receiptsBefore+1 {
+		t.Fatalf("overtaken purchase receipt: %d -> %d", receiptsBefore, got)
 	}
 	clock.Queue(atLoad)
 	for _, item := range i911cLoad(t, dispatcher, a, 1, atLoad, 28) {
-		if item["index"] == first["index"] && item["isbuy"] != int64(0) {
-			t.Fatalf("overtaken purchase kept the slot: %#v", item)
+		if item["index"] == first["index"] && item["isbuy"] == int64(0) {
+			t.Fatalf("overtaken purchase did not keep its slot: %#v", item)
 		}
 	}
 }

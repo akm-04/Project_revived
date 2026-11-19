@@ -33,8 +33,23 @@ func TestI9I11ANativeSkillLevel53ThroughHeroDispatcher(t *testing.T) {
 		t.Fatalf("MID 53 success body %#v", upgrade.Body)
 	}
 	exec(t, database, `UPDATE player_heroes SET updated_at=clock_timestamp()+interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
-	stale := i911aDispatch(t, dispatcher, actor, 53, map[string]any{"partner_id": int64(1), "skill_index": int64(2)}, op())
-	i911aExpect(t, stale, http.StatusConflict, 40002)
+	var forwardStamp time.Time
+	if err := database.QueryRow(ctx, `SELECT updated_at FROM player_heroes WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID)).Scan(&forwardStamp); err != nil {
+		t.Fatal(err)
+	}
+	// K3: a decision before the stored hero write is clamped, not refused.
+	forward := i911aDispatch(t, dispatcher, actor, 53, map[string]any{"partner_id": int64(1), "skill_index": int64(2)}, op())
+	i911aExpect(t, forward, http.StatusOK, 0)
+	if forward.Body["skill_point"] != int64(8) {
+		t.Fatalf("MID 53 forward body %#v", forward.Body)
+	}
+	var clamped time.Time
+	if err := database.QueryRow(ctx, `SELECT updated_at FROM player_heroes WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID)).Scan(&clamped); err != nil {
+		t.Fatal(err)
+	}
+	if !clamped.Equal(forwardStamp) {
+		t.Fatalf("MID 53 forward clamp %v want %v", clamped, forwardStamp)
+	}
 }
 
 func i911aDecorated(database *postgres.Pool, composition stockruntime.HeroAssetsComposition) httpedge.Dispatcher {

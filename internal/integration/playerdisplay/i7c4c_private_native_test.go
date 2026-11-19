@@ -247,7 +247,8 @@ func TestI7C4CPrivateAwakenCountsNormalAndSuperWithoutSkinEligibility(t *testing
 		t.Fatal(got, e)
 	}
 	exec(t, p, `UPDATE player_heroes SET updated_at=clock_timestamp()+interval '1 hour',state_version=state_version+1 WHERE player_id=$1 AND partner_id=1`, int64(a.PlayerID))
-	if _, e = privateRead(t, p, a, rev, []int64{1009}); e == nil {
-		t.Fatal("future owner state accepted")
+	// K7: the stored forward timestamp no longer refuses the roster read.
+	if forward, e := privateRead(t, p, a, rev, []int64{1009}); e != nil || forward[0].Value != 1 {
+		t.Fatal("future owner state read", forward, e)
 	}
 }

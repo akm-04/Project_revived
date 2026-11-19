@@ -212,7 +212,9 @@ func TestI7C4CConcurrentSelectionsAndFutureOwner(t *testing.T) {
 		}
 	}
 	exec(t, p, `UPDATE player_library_roots SET updated_at=clock_timestamp()+interval '1 day' WHERE player_id=$1`, int64(a.PlayerID))
-	if _, e := readMetrics(t, p, a, rev, []int64{1010}); e == nil {
-		t.Fatal("future owner qualified")
+	// K7: the stored forward timestamp no longer refuses the owner read; this
+	// fixture has no marriage, so the canonical count is zero.
+	if forward, e := readMetrics(t, p, a, rev, []int64{1010}); e != nil || forward[0].FieldID != 1010 || forward[0].Value != 0 {
+		t.Fatal("future owner read", forward, e)
 	}
 }

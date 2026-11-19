@@ -11,6 +11,7 @@ import (
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/application/i5"
 	d "gxb.local/backend/v2/internal/domain/campaign"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -241,7 +242,9 @@ func TestI9_3DBoundaryRollbackAndPurchaseRefusalNative(t *testing.T) {
 	for !g.Scheduled(cat, modes.Day(clock.at)) {
 		clock.Set(clock.at.Add(24 * time.Hour))
 	}
-	if _, e = s.BuyTrial(ctx, a, g.ConsumeID, op()); !errors.Is(e, d.ErrRefused) {
+	// P1: the named crystal balance cause replaces the rule refusal.
+	var balance *economy.InsufficientBalanceError
+	if _, e = s.BuyTrial(ctx, a, g.ConsumeID, op()); !errors.Is(e, economy.ErrInsufficientBalance) || !errors.As(e, &balance) || balance.ResourceKey != "crystal" {
 		t.Fatal("short crystal", e)
 	}
 	daily, e := s.TrialLoad(ctx, a, 28, op())

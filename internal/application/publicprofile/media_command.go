@@ -276,7 +276,9 @@ func (s MediaService) Publish(c context.Context, a identity.ActorContext, d asse
 		} else {
 			ref = current.Reference
 		}
-		h := MediaHistory{Operation: bound.ID, PlayerID: a.PlayerID, Server: a.LogicalServerID, Reference: ref, RootVersion: root.StateVersion, DecisionAt: at}
+		// K2': the stored history observation is E, so it never predates the root it belongs to.
+		observedAt := gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
+		h := MediaHistory{Operation: bound.ID, PlayerID: a.PlayerID, Server: a.LogicalServerID, Reference: ref, RootVersion: root.StateVersion, DecisionAt: observedAt}
 		if e = s.Media.InsertMediaHistoryTx(c, sc.Tx, h); e != nil {
 			return e
 		}
@@ -301,7 +303,7 @@ func (s MediaService) Publish(c context.Context, a identity.ActorContext, d asse
 		rr.PolicyVersion = profile.PolicyVersion
 		rr.ActorAccountUID = string(a.AccountUID)
 		rr.ContextID = a.ContextID.UUID()
-		rr.RecordedAt = at
+		rr.RecordedAt = observedAt
 		put, e := cs.Receipts.PutTx(c, sc.Tx, rr)
 		if e != nil {
 			return e

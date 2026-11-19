@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/summon"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -128,7 +129,8 @@ func TestI9_3FPremiumNative(t *testing.T) {
 	if body, e = s.ExchangeVows(ctx, b, app.VowsExchange{TableID: 11001, Times: 2}, op()); e != nil || fmt.Sprint(body["awards"]) != fmt.Sprintf("[map[item_num:2 table_id:%d]]", scroll) || stackQuantity(t, p, b.PlayerID, 50001666) != 50 || stackQuantity(t, p, b.PlayerID, scroll) != before+2 {
 		t.Fatal("306", body, e)
 	}
-	if _, e = s.ExchangeVows(ctx, b, app.VowsExchange{TableID: 11001, Times: 1}, op()); !errors.Is(e, d.ErrRefused) {
+	// P1: a stack-material shortfall returns the typed balance cause.
+	if _, e = s.ExchangeVows(ctx, b, app.VowsExchange{TableID: 11001, Times: 1}, op()); !errors.Is(e, economy.ErrInsufficientBalance) {
 		t.Fatal("306 without essence", e)
 	}
 }

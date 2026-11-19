@@ -39,7 +39,8 @@ func (service Service) buyGlueTx(ctx context.Context, transaction tx.Tx, actor i
 	if err != nil {
 		return nil, err
 	}
-	if err = privileges.Validate(actor.PlayerID, admission.ContentRevision, at); err != nil {
+	// K2': the snapshot's ObservedAt is E, so a stale decision validates at it instead of refusing.
+	if err = privileges.Validate(actor.PlayerID, admission.ContentRevision, privileges.ObservedAt); err != nil {
 		return nil, err
 	}
 	stored, exists, err := service.GluePurchases.ReadGluePurchasesTx(ctx, transaction, actor.PlayerID)

@@ -468,16 +468,28 @@ func TestI9I11ANativeSkillUpgradeAdvancesMission10007(t *testing.T) {
 	}
 
 	exec(t, database, `UPDATE player_heroes SET updated_at=clock_timestamp()+interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
-	stale := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
-	i911aExpect(t, stale, http.StatusConflict, 40002)
-	if progress, _, _ := i911aMissionProgress(t, database, actor, 10007); progress != 3 {
-		t.Fatalf("stale refusal advanced mission 10007 to %d", progress)
+	var forwardStamp time.Time
+	if err := database.QueryRow(ctx, `SELECT updated_at FROM player_heroes WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID)).Scan(&forwardStamp); err != nil {
+		t.Fatal(err)
+	}
+	// K3: a decision before the stored hero write is clamped, not refused.
+	forward := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, forward, http.StatusOK, 0)
+	var clamped time.Time
+	if err := database.QueryRow(ctx, `SELECT updated_at FROM player_heroes WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID)).Scan(&clamped); err != nil {
+		t.Fatal(err)
+	}
+	if !clamped.Equal(forwardStamp) {
+		t.Fatalf("forward write clamp %v want %v", clamped, forwardStamp)
+	}
+	if progress, _, _ := i911aMissionProgress(t, database, actor, 10007); progress != 4 {
+		t.Fatalf("forward write did not advance mission 10007 to 4: %d", progress)
 	}
 
 	exec(t, database, `UPDATE player_heroes SET raw_skill_1=150,state_version=state_version+1,updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
 	noChange := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
 	i911aExpect(t, noChange, http.StatusConflict, unproven)
-	if progress, _, _ := i911aMissionProgress(t, database, actor, 10007); progress != 3 {
+	if progress, _, _ := i911aMissionProgress(t, database, actor, 10007); progress != 4 {
 		t.Fatalf("N=0 plan advanced mission 10007 to %d", progress)
 	}
 }
@@ -494,15 +506,20 @@ func TestI9I11ANativeSkillUpgradeRefusalBodyAndFact107(t *testing.T) {
 	exec(t, database, `UPDATE player_temporal_resources SET regen_anchor_at=NULL WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))
 
 	exec(t, database, `UPDATE player_heroes SET updated_at=clock_timestamp()+interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
-	stale := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
-	i911aExpect(t, stale, http.StatusConflict, 40002)
-	if stale.Body["skills"] != "1|1|1|1|1|1" || stale.Body["is_success"] != int64(0) || stale.Body["skill_point"] != int64(10) || stale.Body["skill_time"] != int64(0) {
-		t.Fatalf("MID 39 refusal body %#v", stale.Body)
+	// K3: a decision before the stored hero write is clamped, not refused.
+	forward := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, op())
+	i911aExpect(t, forward, http.StatusOK, 0)
+	if forward.Body["skills"] != "2|1|1|1|1|1" || forward.Body["is_success"] != int64(1) {
+		t.Fatalf("MID 39 forward body %#v", forward.Body)
 	}
-	if len(recorder.facts) != 0 {
-		t.Fatalf("stale refusal emitted facts %#v", recorder.facts)
+	if len(recorder.facts) != 1 || recorder.facts[0].Kind != "HERO_SKILL_UPGRADED" || recorder.facts[0].Delta != 1 {
+		t.Fatalf("forward write facts %#v", recorder.facts)
 	}
-	exec(t, database, `UPDATE player_heroes SET updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
+	// Fixture reset only: the accepted forward-dated write already applied.
+	exec(t, database, `UPDATE player_heroes SET raw_skill_1=1,state_version=state_version+1,updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(actor.PlayerID))
+	exec(t, database, `UPDATE player_temporal_resources SET stored_amount=10,regen_anchor_at=NULL,state_version=state_version+1,updated_at=clock_timestamp() WHERE player_id=$1 AND resource_key='skill_point'`, int64(actor.PlayerID))
+	exec(t, database, `UPDATE player_currency_balances SET amount=1000000 WHERE player_id=$1 AND resource_key='mana'`, int64(actor.PlayerID))
+	recorder.facts = nil
 
 	upgradeOp := op()
 	upgrade := i911aDispatch(t, dispatcher, actor, 39, map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "2"}, upgradeOp)

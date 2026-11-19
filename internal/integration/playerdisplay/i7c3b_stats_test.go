@@ -285,11 +285,14 @@ func TestI7C3BNativeHeroConditionalOwnersMissingAwakeningAndStaleRoot(t *testing
 	ls := libraryService(p, p)
 	at := time.Now().UTC()
 	scope := lib.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: at}
-	if _, e = ls.HeroLibraryInputsTx(ctx, tr, scope, 1); e == nil {
-		t.Fatal("future Library root accepted")
+	// K7: the stored forward timestamp no longer refuses either input read.
+	heroInputs, e := ls.HeroLibraryInputsTx(ctx, tr, scope, 1)
+	if e != nil || heroInputs.Hero.PartnerID != 1 || heroInputs.ContentRevision != rev {
+		t.Fatal("future Library root read", heroInputs, e)
 	}
-	if _, e = ls.PlayerCollectionInputsTx(ctx, tr, scope); e == nil {
-		t.Fatal("future collection root accepted")
+	collection, e := ls.PlayerCollectionInputsTx(ctx, tr, scope)
+	if e != nil || collection.Player != a.PlayerID || collection.ContentRevision != rev {
+		t.Fatal("future collection root read", collection, e)
 	}
 }
 
