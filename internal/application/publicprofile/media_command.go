@@ -256,9 +256,6 @@ func (s MediaService) Publish(c context.Context, a identity.ActorContext, d asse
 			return e
 		}
 		root, present := prep.Existing()
-		if present && at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
-			return ErrInvalidState
-		}
 		current, exists, e := s.Media.ReadCurrentMediaTx(c, sc.Tx, a.PlayerID)
 		if e != nil {
 			return e
