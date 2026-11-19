@@ -28,9 +28,6 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if err != nil {
 		return false, err
 	}
-	if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, pop.UpdatedAt)) {
-		return false, ErrStale
-	}
 	kind, err := s.Content.HeroKindTx(ctx, q, rev, h.TableID)
 	if err != nil {
 		return false, err
@@ -62,9 +59,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(gen.EffectiveObservation(at, r.UpdatedAt)) {
-		return nil, ErrStale
-	}
 	c, e := s.Content.InscriptionCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
 		return nil, e
@@ -79,9 +73,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		f, e = s.Owner.ReadHeroTx(ctx, t, a.PlayerID, cmd.PartnerID)
 		if e != nil {
 			return nil, e
-		}
-		if at.Before(gen.EffectiveObservation(at, f.UpdatedAt)) {
-			return nil, ErrStale
 		}
 		if e = f.Facts.Validate(c); e != nil {
 			return nil, e
@@ -323,7 +314,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := r.Version
 		r.Version++
 		r.Facts = st
-		r.UpdatedAt = at
+		r.UpdatedAt = gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, t, r, old); e != nil {
 			return nil, e
 		}
@@ -331,7 +322,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if cmd.PartnerID > 0 && !reflect.DeepEqual(oldHero, f.Facts) {
 		old := f.Version
 		f.Version++
-		f.UpdatedAt = at
+		f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt, f.CreatedAt)
 		if e = s.Owner.SaveHeroTx(ctx, t, f, old); e != nil {
 			return nil, e
 		}
