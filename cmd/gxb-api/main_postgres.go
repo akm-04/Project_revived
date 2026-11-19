@@ -556,6 +556,7 @@ func main() {
 		Authority:    authority,
 		TeamShops:    teamShops,
 		Achievements: achievements,
+		Facts:        appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}},
 	})
 	shopDispatcher := stockruntime.ShopDispatcher{Authority: authority, Service: shopComposition.Service}
 	for _, mid := range stockruntime.ShopMIDs {

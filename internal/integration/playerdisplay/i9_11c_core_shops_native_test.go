@@ -28,7 +28,11 @@ func i911cCompositionAt(p *pg.Pool, a identity.ActorContext, authority gen.TimeA
 	return i911cTeamComposition(p, a, authority, nil)
 }
 
-func i911cTeamComposition(p *pg.Pool, a identity.ActorContext, authority gen.TimeAuthority, teamShops app.TeamShops) stockruntime.ShopComposition {
+func i911cCompositionWithFacts(p *pg.Pool, a identity.ActorContext, authority gen.TimeAuthority, facts app.ObjectiveFacts) stockruntime.ShopComposition {
+	return i911cTeamComposition(p, a, authority, nil, facts)
+}
+
+func i911cTeamComposition(p *pg.Pool, a identity.ActorContext, authority gen.TimeAuthority, teamShops app.TeamShops, facts ...app.ObjectiveFacts) stockruntime.ShopComposition {
 	content := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
@@ -39,6 +43,10 @@ func i911cTeamComposition(p *pg.Pool, a identity.ActorContext, authority gen.Tim
 		Backpack: values, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}}
 	achievements := catalogAchievements(p, fixedCounts{})
 	achievements.Runtime.Timed.Binder.Time = authority
+	factPort := app.ObjectiveFacts(appi5.ObjectiveFacts{Owner: i5svc, Open: values})
+	if len(facts) > 0 && facts[0] != nil {
+		factPort = facts[0]
+	}
 	return stockruntime.NewShopComposition(stockruntime.ShopDependencies{
 		Timed:        gen.TimedRunner{Binder: gen.Binder{Time: authority}, Runner: runner},
 		Fresh:        p,
@@ -51,6 +59,7 @@ func i911cTeamComposition(p *pg.Pool, a identity.ActorContext, authority gen.Tim
 		Authority:    playtestAuthority{actor: a},
 		TeamShops:    teamShops,
 		Achievements: achievements,
+		Facts:        factPort,
 	})
 }
 
