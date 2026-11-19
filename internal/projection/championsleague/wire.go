@@ -36,6 +36,15 @@ func stamp(t int64) int64 {
 	}
 	return t
 }
+func SelfDefense(v d.EnemyView) map[string]any {
+	row := Face(v.Face)
+	row["rank"] = v.Rank
+	row["point"] = v.Player.Points
+	row["last_attacked_time"] = stamp(v.Player.LastAttacked.Unix())
+	row["heros"] = append([]int64{}, v.Lineup.Heroes...)
+	row["pet"] = v.Lineup.Pet
+	return row
+}
 func Info(v d.InfoView) map[string]any {
 	enemies := []map[string]any{}
 	for _, x := range v.Enemies {
@@ -49,7 +58,7 @@ func Info(v d.InfoView) map[string]any {
 		rank["ori_group"] = v.Final.Group
 		rank["ori_rank"] = v.Final.Rank
 	}
-	return map[string]any{"base_info": map[string]any{"season_count": p.Season, "total_fight": p.Fights, "win_fight": p.Wins, "last_attacked_time": stamp(p.LastAttacked.Unix()), "last_win_time": stamp(p.LastWin.Unix()), "can_daily_award": flag(p.ClaimedDay < day && p.LastWin.Unix() > boundary), "last_day_group": p.LastDay.Group, "last_day_rank": p.LastDay.Rank}, "rank_info": rank, "defense_info": Enemy(v.Defense), "enemy_info": enemies, "stage": int64(2) - flag(v.Active), "server_time": v.At.Unix()}
+	return map[string]any{"base_info": map[string]any{"season_count": p.Season, "total_fight": p.Fights, "win_fight": p.Wins, "last_attacked_time": stamp(p.LastAttacked.Unix()), "last_win_time": stamp(p.LastWin.Unix()), "can_daily_award": flag(p.ClaimedDay < day && p.LastWin.Unix() > boundary), "last_day_group": p.LastDay.Group, "last_day_rank": p.LastDay.Rank}, "rank_info": rank, "defense_info": SelfDefense(v.Defense), "enemy_info": enemies, "stage": int64(2) - flag(v.Active), "server_time": v.At.Unix()}
 }
 func report(raw []byte) []map[string]any {
 	if len(raw) == 0 {

@@ -10,6 +10,7 @@ type EnemyView struct {
 	Rank   int64
 	Heroes []map[string]any
 	Pet    map[string]any
+	Lineup Lineup
 }
 type InfoView struct {
 	Player  Player

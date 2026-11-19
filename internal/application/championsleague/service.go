@@ -157,7 +157,7 @@ func (s Service) enemy(c context.Context, q tx.Queryer, players []d.Player, p d.
 	if v.Face, e = s.face(c, q, p.ID); e != nil {
 		return v, e
 	}
-	v.Heroes, v.Pet, e = s.displayRows(c, q, p.ID, p.Defense, at)
+	v.Lineup, v.Heroes, v.Pet, e = s.displayRows(c, q, p.ID, p.Defense, at)
 	return v, e
 }
 

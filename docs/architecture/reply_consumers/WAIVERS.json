@@ -246,6 +246,18 @@
    "mid": 771,
    "path": "pet_info",
    "reason": "SelectTeamRearenaWindow reads arg_1_2.pet_info only under `if arg_1_2.pet_id ~= 0` (SelectTeamRearenaWindow.lua:66); the arena match reply omits pet_info and sends pet_id 0 for a defender with no pet."
+  },
+  {
+   "client": "app/windows/ChampionsLeagueWinodw.lua:802",
+   "mid": 2800,
+   "path": "rank_info.ori_group",
+   "reason": "the client reads `rankInfo.ori_group or rankInfo.group` (ChampionsLeagueWinodw.lua:802-803), so it accepts the field being absent until a final or prior placement exists; emitting 0 would win the Lua `or` and display group 0."
+  },
+  {
+   "client": "app/windows/ChampionsLeagueWinodw.lua:803",
+   "mid": 2800,
+   "path": "rank_info.ori_rank",
+   "reason": "the client reads `rankInfo.ori_rank or rankInfo.rank` (ChampionsLeagueWinodw.lua:802-803), so it accepts the field being absent until a final or prior placement exists; emitting 0 would win the Lua `or` and display rank 0."
   }
  ]
 }
