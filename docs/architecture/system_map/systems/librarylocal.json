@@ -343,6 +343,7 @@
  "tables": {
   "owned": [
    "library_hero_battle_counts",
+   "library_hero_dialogue_counts",
    "player_library_act_awards",
    "player_library_admissions",
    "player_library_backgrounds",
@@ -362,6 +363,7 @@
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
+   "library_hero_dialogue_counts",
    "player_hero_roots",
    "player_hero_skin_entitlements",
    "player_heroes",
@@ -381,6 +383,7 @@
   "written": [
    "gxb_operation_receipts",
    "library_hero_battle_counts",
+   "library_hero_dialogue_counts",
    "player_library_act_awards",
    "player_library_admissions",
    "player_library_backgrounds",

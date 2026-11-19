@@ -19,7 +19,7 @@ func TestPartnerLogMapMatches836Sources(t *testing.T) {
 		{PlayerID: 1, PartnerID: 1, LogID: lib.LogAcquired, OccurredAt: explicit},
 		{PlayerID: 1, PartnerID: 2, LogID: 20001, OccurredAt: at},
 	}
-	logs := partnerLogMap(rows, 1, 250, created, at)
+	logs := partnerLogMap(rows, 1, 250, 0, created, at)
 	if entry, ok := logs["10001"].(map[string]any); !ok || entry["time"] != explicit.Unix() {
 		t.Fatalf("explicit acquisition %#v", logs["10001"])
 	}
@@ -44,22 +44,42 @@ func TestPartnerLogMapMatches836Sources(t *testing.T) {
 	}
 
 	// A facet without an explicit acquisition row is dated from creation.
-	fallback := partnerLogMap(nil, 1, 0, created, created.AddDate(0, 0, 30))
+	fallback := partnerLogMap(nil, 1, 0, 0, created, created.AddDate(0, 0, 30))
 	if entry, ok := fallback["10001"].(map[string]any); !ok || entry["time"] != created.Unix() {
 		t.Fatalf("creation fallback %#v", fallback["10001"])
 	}
 	if _, present := fallback["50001"]; !present {
 		t.Fatalf("30 days from creation missing 50001 %#v", fallback)
 	}
+
+	// The durable completion counter supplies the type-7 entries even when no
+	// milestone row was written, and a written row keeps its own time.
+	completed := partnerLogMap([]lib.HeroLogFact{{PlayerID: 1, PartnerID: 1, LogID: 70001, OccurredAt: explicit}}, 1, 0, 30, created, at)
+	if entry, ok := completed["70001"].(map[string]any); !ok || entry["time"] != explicit.Unix() {
+		t.Fatalf("written dialogue milestone %#v", completed["70001"])
+	}
+	for _, id := range []string{"70002", "70003"} {
+		if entry, ok := completed[id].(map[string]any); !ok || entry["time"] != created.Unix() {
+			t.Fatalf("counter dialogue milestone %s %#v", id, completed[id])
+		}
+	}
+	if _, present := completed["70004"]; present {
+		t.Fatalf("30 completions reached 50 %#v", completed)
+	}
 }
 
 type noticeLogPort struct {
-	rows  []lib.HeroLogFact
-	facts lib.HeroFacts
+	rows     []lib.HeroLogFact
+	facts    lib.HeroFacts
+	dialogue map[int64]int64
 }
 
 func (p noticeLogPort) ListHeroLogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.HeroLogFact, error) {
 	return p.rows, nil
+}
+
+func (p noticeLogPort) ListHeroDialogueCountsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]int64, error) {
+	return p.dialogue, nil
 }
 
 func (p noticeLogPort) ReadHeroTx(context.Context, tx.Queryer, character.HeroRef) (lib.HeroFacts, error) {
@@ -70,14 +90,15 @@ func TestPartnerLogReaderUsesTheSharedProjection(t *testing.T) {
 	created := time.Date(2026, 2, 1, 0, 0, 0, 0, time.UTC)
 	at := created.AddDate(0, 0, 31)
 	reader := PartnerLogReader{Queryer: noticeQueryer{}, Library: noticeLogPort{
-		rows:  []lib.HeroLogFact{{PlayerID: 7, PartnerID: 3, LogID: lib.LogAcquired, OccurredAt: created}},
-		facts: lib.HeroFacts{Favor: 100, CreatedAt: created},
+		rows:     []lib.HeroLogFact{{PlayerID: 7, PartnerID: 3, LogID: lib.LogAcquired, OccurredAt: created}},
+		facts:    lib.HeroFacts{Favor: 100, CreatedAt: created},
+		dialogue: map[int64]int64{3: 30},
 	}}
 	logs, err := reader.ReadPartnerLog(context.Background(), 7, 3, at)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := partnerLogMap([]lib.HeroLogFact{{PlayerID: 7, PartnerID: 3, LogID: lib.LogAcquired, OccurredAt: created}}, 3, 100, created, at)
+	want := partnerLogMap([]lib.HeroLogFact{{PlayerID: 7, PartnerID: 3, LogID: lib.LogAcquired, OccurredAt: created}}, 3, 100, 30, created, at)
 	if len(logs) != len(want) {
 		t.Fatalf("reader projection %#v, want %#v", logs, want)
 	}

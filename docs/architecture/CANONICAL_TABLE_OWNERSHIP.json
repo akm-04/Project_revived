@@ -4170,6 +4170,33 @@
         "retention": null
       }
     },
+    "library_hero_dialogue_counts": {
+      "owner": "library-local-progression",
+      "migration": "migrations/00182_i9_11s16_dialogue_counts.sql",
+      "allowed_query_owners": [
+        "library-local-progression"
+      ],
+      "allowed_write_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "allowed_read_paths": [
+        "sql/library/",
+        "internal/adapters/postgres/librarystore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": "players",
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
     "player_library_roots": {
       "owner": "library-local-progression",
       "migration": "migrations/00049_i7c2b_library_inputs.sql",

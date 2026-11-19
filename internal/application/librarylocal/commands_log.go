@@ -9,21 +9,16 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// recordDialogueLogsTx writes the type-7 milestones reached by the hero's
-// awarded dialog count. Inserts are once-only, so a replay is harmless; an
-// invalid row is dropped per D1 by RecordHeroLogTx.
-func (s Service) recordDialogueLogsTx(ctx context.Context, t tx.Tx, player identity.PlayerID, partnerID int64, at time.Time) error {
-	rows, e := s.Library.ListDialogsTx(ctx, t, player)
+// recordDialogueCompletionTx counts one completed talk of the hero and writes
+// the type-7 milestones it crosses. The durable counter, not the distinct
+// awarded dialog rows, is the completion count, so a repeat talk counts too.
+// An invalid milestone row is dropped per D1 by RecordHeroLogTx.
+func (s Service) recordDialogueCompletionTx(ctx context.Context, t tx.Tx, player identity.PlayerID, partnerID int64, at time.Time) error {
+	previous, e := s.Library.BumpHeroDialogueCountTx(ctx, t, player, partnerID)
 	if e != nil {
 		return e
 	}
-	count := int64(0)
-	for _, row := range rows {
-		if row.PartnerID == partnerID && row.IsAwarded {
-			count++
-		}
-	}
-	for _, logID := range lib.DialogueLogIDsReached(0, count) {
+	for _, logID := range lib.DialogueLogIDsReached(previous, previous+1) {
 		if e = s.RecordHeroLogTx(ctx, t, lib.HeroLogFact{PlayerID: player, PartnerID: partnerID, LogID: logID, OccurredAt: at}); e != nil {
 			return e
 		}

@@ -72,3 +72,4 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00179: I9-11 G2a (I9_11_GIRLS_LOG_V1): durable per-hero battle counts for the Girls Log type-6 milestones 60001-60004 at 1/50/100/1000 settled battles. Counts start at 0 at deploy; no invented history. Empty on upgrade.
 - 00180: I9-11 A-134 (I9_GUILD_CAMPAIGN_V1 C8): drops the unwritten copy-level replay slot of guild_campaign_copies (settled_by with its 00161 foreign key, settled_index, settled_body); guild campaign replay is per member. No data is read from them.
 - 00181: I9-11 P2 (A-163): the memoir_tuning D476 operator overlay row (box drop rates, absent or invalid keeps the source catalog). No player state; empty on upgrade.
+- 00182: I9-11 T34 S16 (A-168): durable per-hero completed-dialogue counts for the Girls Log type-7 milestones 70001-70004 (1/10/30/50 dialogues; repeats count). Backfill: the existing distinct awarded dialogue rows, the only recorded lower bound.

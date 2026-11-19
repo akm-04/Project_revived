@@ -701,6 +701,7 @@
    "library_forum_comments": "libraryforum",
    "library_forum_reactions": "libraryforum",
    "library_hero_battle_counts": "librarylocal",
+   "library_hero_dialogue_counts": "librarylocal",
    "logical_servers": "bootstrap",
    "march_players": "march",
    "memoir_players": "memoir",
@@ -1328,7 +1329,7 @@
    "name": "librarylocal",
    "path": "internal/application/librarylocal",
    "purpose": "",
-   "tables": 11
+   "tables": 12
   },
   {
    "callees": 14,

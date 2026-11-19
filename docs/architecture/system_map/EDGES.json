@@ -4897,6 +4897,7 @@
    "store:librarystore": [
     "*BackfillMissingHeroTx",
     "*BumpHeroBattleCountTx",
+    "*BumpHeroDialogueCountTx",
     "*EnsureMissionTx",
     "*EnsurePlayerRootTx",
     "*InsertActAwardTx",
@@ -4907,6 +4908,7 @@
     "*ListBackgroundsTx",
     "*ListCGClaimsTx",
     "*ListDialogsTx",
+    "*ListHeroDialogueCountsTx",
     "*ListHeroLogsTx",
     "*ListHeroesTx",
     "*ListMissionsTx",
