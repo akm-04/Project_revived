@@ -10,7 +10,6 @@ import (
 	course "gxb.local/backend/v2/internal/application/course"
 	dorm "gxb.local/backend/v2/internal/application/dormhouse"
 	elem "gxb.local/backend/v2/internal/application/elementequipment"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	evo "gxb.local/backend/v2/internal/application/heroevolution"
 	ins "gxb.local/backend/v2/internal/application/inscription"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
@@ -153,7 +152,7 @@ func pinned(rev string, at time.Time, sc ca.CoherentReadScope) bool {
 	return rev == sc.ContentRevision && at.Equal(sc.ObservedAt)
 }
 func sameHero(h character.Hero, b ca.HeroBaseObservation, sc ca.CoherentReadScope) bool {
-	return h.ValidatePersistent() == nil && h.Ref() == b.Ref && h.TableID == b.TableID && h.OriginTableID == b.OriginTableID && h.Level == b.Level && h.Color == b.Color && h.Star == b.Star && h.StateVersion == b.StateVersion && h.CreationContentRevision == b.CreationContentRevision && !sc.ObservedAt.Before(gen.EffectiveObservation(sc.ObservedAt, h.UpdatedAt)) && (h.Kind == "" || h.Kind == b.Kind)
+	return h.ValidatePersistent() == nil && h.Ref() == b.Ref && h.TableID == b.TableID && h.OriginTableID == b.OriginTableID && h.Level == b.Level && h.Color == b.Color && h.Star == b.Star && h.StateVersion == b.StateVersion && h.CreationContentRevision == b.CreationContentRevision && (h.Kind == "" || h.Kind == b.Kind)
 }
 func inputs(eq, prom, fumo, practice n.Vector, ref string) map[string]rules.Observation {
 	m := map[string]rules.Observation{}
@@ -216,7 +215,7 @@ func (scoped Service) PetTx(ctx context.Context, sc ca.CoherentReadScope, ref ch
 	if e != nil {
 		return out, e
 	}
-	if p.ValidatePersistent() != nil || p.Ref() != ref || p.TableID != b.TableID || p.OriginTableID != b.OriginTableID || p.Level != b.Level || p.Color != b.Color || p.Star != b.Star || p.Skills != b.Skills || p.StateVersion != b.StateVersion || p.CreationContentRevision != b.CreationContentRevision || sc.ObservedAt.Before(gen.EffectiveObservation(sc.ObservedAt, p.UpdatedAt)) {
+	if p.ValidatePersistent() != nil || p.Ref() != ref || p.TableID != b.TableID || p.OriginTableID != b.OriginTableID || p.Level != b.Level || p.Color != b.Color || p.Star != b.Star || p.Skills != b.Skills || p.StateVersion != b.StateVersion || p.CreationContentRevision != b.CreationContentRevision {
 		return out, ErrUnqualified
 	}
 	eq, prom, fumo, e := m.Inputs.Equipment("Pet", b.TableID, int(b.Color), slots(o.Equipment.Value))

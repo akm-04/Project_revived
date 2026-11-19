@@ -120,17 +120,20 @@ func TestUnavailableStaleForeignAndReplayFailClosed(t *testing.T) {
 			f.p.StateVersion++
 			s.Pets = f
 		},
-		func(s *Service, sc *ca.CoherentReadScope, v *View) {
-			f := s.Pets.(petFixture)
-			f.p.UpdatedAt = sc.ObservedAt.Add(time.Second)
-			s.Pets = f
-		},
 	} {
 		ss, scope, view := s, sc, View{Kind: Self, Viewer: 1}
 		change(&ss, &scope, &view)
 		if _, e := ss.PetTx(context.Background(), scope, ref, view); e == nil {
 			t.Fatal("unqualified accepted")
 		}
+	}
+	// K7: a row written before a backwards clock step is accepted rather than
+	// refused as stale.
+	forward := s.Pets.(petFixture)
+	forward.p.UpdatedAt = sc.ObservedAt.Add(time.Hour)
+	s.Pets = forward
+	if _, e := s.PetTx(context.Background(), sc, ref, View{Kind: Self, Viewer: 1}); e != nil {
+		t.Fatalf("forward-dated pet refused: %v", e)
 	}
 	if _, e := s.HeroTx(context.Background(), sc, character.HeroRef{PlayerID: 1, PartnerID: 1}, View{Kind: Self, Viewer: 1}); !errors.Is(e, ErrUnqualified) {
 		t.Fatal("missing raw awakening was defaulted", e)
