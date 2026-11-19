@@ -7,6 +7,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/championsleague"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"net/http"
 	"testing"
 	"time"
@@ -60,6 +61,7 @@ func TestI7C5FLeagueSourceWireAndInstanceParsing(t *testing.T) {
 	if defense["pet"] != int64(5) {
 		t.Fatalf("2800 defense_info.pet = %#v, want the numeric pet id", defense["pet"])
 	}
+	replyconformance.Check(t, 2800, info)
 	enemy := call(2801, map[string]any{"enemy_id": n("200007")})
 	if enemy["player_id"] != int64(200007) {
 		t.Fatal(enemy)

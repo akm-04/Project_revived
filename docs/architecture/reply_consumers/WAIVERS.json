@@ -228,6 +228,18 @@
    "mid": 2313,
    "path": "awards",
    "reason": "handleRewards(arg_6_1.awards, callback) takes its nil branch when awards is absent (SelfPlayer.lua:4324-4330) and runs the close/refresh callback; the server omits awards when the grant has no representable row (an empty draw or a fully mailed reward)."
+  },
+  {
+   "client": "app/windows/ChampionsLeagueWinodw.lua:802",
+   "mid": 2800,
+   "path": "rank_info.ori_group",
+   "reason": "the client reads `rankInfo.ori_group or rankInfo.group` (ChampionsLeagueWinodw.lua:802-803), so it accepts the field being absent until a final or prior placement exists; emitting 0 would win the Lua `or` and display group 0."
+  },
+  {
+   "client": "app/windows/ChampionsLeagueWinodw.lua:803",
+   "mid": 2800,
+   "path": "rank_info.ori_rank",
+   "reason": "the client reads `rankInfo.ori_rank or rankInfo.rank` (ChampionsLeagueWinodw.lua:802-803), so it accepts the field being absent until a final or prior placement exists; emitting 0 would win the Lua `or` and display rank 0."
   }
  ]
 }
