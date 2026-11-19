@@ -586,9 +586,6 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 		if e != nil {
 			return e
 		}
-		if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, root.UpdatedAt)) {
-			return ErrStale
-		}
 		costOp := d.Operation
 		costOp.StartedAt = d.DecisionAt
 		if d.Command.Family == SpecialClaim {
@@ -608,6 +605,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if e != nil {
 				return e
 			}
+			next.UpdatedAt = gen.EffectiveObservation(d.DecisionAt, root.UpdatedAt, root.CreatedAt)
 			out.Changed = changed
 			out.StateVersion = next.StateVersion
 			if changed {
@@ -674,9 +672,6 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			facts, e := s.Library.LockHeroTx(ctx, sc.Tx, h.Ref())
 			if e != nil {
 				return e
-			}
-			if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, facts.UpdatedAt)) || d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, h.UpdatedAt)) {
-				return ErrStale
 			}
 			old := facts.StateVersion
 			oldFavor := facts.Favor
@@ -773,6 +768,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				return e
 			}
 			if changed {
+				facts.UpdatedAt = gen.EffectiveObservation(d.DecisionAt, facts.UpdatedAt, facts.CreatedAt)
 				if e = s.Library.SaveHeroTx(ctx, sc.Tx, facts, old); e != nil {
 					return e
 				}
