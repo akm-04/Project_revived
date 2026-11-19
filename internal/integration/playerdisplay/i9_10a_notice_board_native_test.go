@@ -29,22 +29,23 @@ func boardService(t *testing.T, database *pg.Pool, books appbook.Service) appeve
 	t.Helper()
 	values := i5store.Store{Queryer: database}
 	return appeventcentre.Service{
-		Timed:    books.Timed,
-		Reads:    tx.Runner{DB: database},
-		Owner:    eventcentrestore.Store{},
-		Book:     books,
-		Content:  contentstore.Store{Queryer: database},
-		Pets:     characterstore.Store{},
-		Players:  i4store.PlayerRootLocker{},
-		Fence:    values,
-		Costs:    i5.MaterialCostDebiter{Store: values, Content: contentstore.Store{Queryer: database}},
-		Grants:   books.Grants,
-		Receipts: kernelstore.Store{},
-		Heroes:   characterstore.Store{Queryer: database},
-		Levels:   values,
-		Stats:    rawBirthStats(database),
-		Combat:   combatService(t, database),
-		Facts:    i5.ObjectiveFacts{Owner: missionOwner(database), Open: i5store.Store{Queryer: database}},
+		Timed:          books.Timed,
+		Reads:          tx.Runner{DB: database},
+		Owner:          eventcentrestore.Store{},
+		Book:           books,
+		Content:        contentstore.Store{Queryer: database},
+		Pets:           characterstore.Store{},
+		Players:        i4store.PlayerRootLocker{},
+		Fence:          values,
+		Costs:          i5.MaterialCostDebiter{Store: values, Content: contentstore.Store{Queryer: database}},
+		Grants:         books.Grants,
+		Receipts:       kernelstore.Store{},
+		Heroes:         characterstore.Store{Queryer: database},
+		Levels:         values,
+		Stats:          rawBirthStats(database),
+		Combat:         combatService(t, database),
+		Facts:          i5.ObjectiveFacts{Owner: missionOwner(database), Open: i5store.Store{Queryer: database}},
+		BattleObserver: libraryService(database, database),
 	}
 }
 
@@ -247,6 +248,12 @@ func TestI910ANoticeBoardNative(t *testing.T) {
 	if manaAfter.Amount != manaBefore.Amount {
 		t.Fatalf("loss changed mana %d -> %d", manaBefore.Amount, manaAfter.Amount)
 	}
+	if count := girlsLogCount(t, database, actor.PlayerID, 1); count != 1 {
+		t.Fatalf("settled board mission counted %d, want 1", count)
+	}
+	if rows := girlsLogRows(t, database, actor.PlayerID); len(rows) != 1 {
+		t.Fatalf("settled board mission counted non-participants: %v", rows)
+	}
 	reportID := boardNumber(t, run, "battle_id")
 	report := dispatcher.Dispatch(ctx, playtestRequest(actor, 1087, map[string]any{"battle_id": reportID}))
 	if report.HTTPStatus != 200 {
@@ -276,6 +283,9 @@ func TestI910ANoticeBoardNative(t *testing.T) {
 	againMana, _, err := i5store.Store{Queryer: database}.ReadScalarTx(ctx, database, actor.PlayerID, ec.BoardDepositResourceKey)
 	if err != nil || againMana.Amount != manaAfter.Amount {
 		t.Fatalf("repeat settlement changed mana %+v %v", againMana, err)
+	}
+	if count := girlsLogCount(t, database, actor.PlayerID, 1); count != 1 {
+		t.Fatalf("a repeated board read counted %d, want 1", count)
 	}
 
 	// Win settlement with award: inject a due mission with six strong heroes.
@@ -314,6 +324,17 @@ func TestI910ANoticeBoardNative(t *testing.T) {
 	}
 	if manaAfterWin.Amount != manaBeforeWin.Amount+500000 {
 		t.Fatalf("win award mana %d -> %d", manaBeforeWin.Amount, manaAfterWin.Amount)
+	}
+	if count := girlsLogCount(t, database, actor.PlayerID, 1); count != 2 {
+		t.Fatalf("the leader's two settled missions counted %d, want 2", count)
+	}
+	for _, partner := range []int64{2, 3, 4, 5, 6} {
+		if count := girlsLogCount(t, database, actor.PlayerID, partner); count != 1 {
+			t.Fatalf("win partner %d counted %d, want 1", partner, count)
+		}
+	}
+	if rows := girlsLogRows(t, database, actor.PlayerID); len(rows) != 6 {
+		t.Fatalf("board counted non-participants: %v", rows)
 	}
 	winReport := dispatcher.Dispatch(ctx, playtestRequest(actor, 1087, map[string]any{"battle_id": boardNumber(t, winRun, "battle_id")}))
 	if winReport.HTTPStatus != 200 {

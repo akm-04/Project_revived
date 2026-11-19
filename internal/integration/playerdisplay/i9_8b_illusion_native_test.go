@@ -76,7 +76,8 @@ func illusionService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, privileg
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Combat: fight, Privileges: privileges,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values},
 		Guilds: guilds, GuildActivity: guildstore.Store{Queryer: p}, Mail: i5.SettlementMail{Store: values}, Achievements: catalogAchievements(p, fixedCounts{}),
-		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		BattleObserver: libraryService(p, p),
+		Receipts:       kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 	mode.Invites = roomInviteMaterializer(t, p)
 	return mode
 }
@@ -199,6 +200,9 @@ func TestI9_8BIllusionStartSettleDuplicateNative(t *testing.T) {
 	}
 	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempt_settlements WHERE player_id=$1 AND damage=500`, int64(a.PlayerID)); n != 1 {
 		t.Fatal("settlement rows", n)
+	}
+	if n := girlsLogCount(t, p, a.PlayerID, partner); n != 1 {
+		t.Fatalf("illusion solo with its duplicate counted %d, want 1", n)
 	}
 	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
 		t.Fatal("mode-local attempt row", n)

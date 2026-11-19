@@ -38,7 +38,7 @@ func (f *workplaceTime) Now(_ context.Context) (time.Time, error) { return f.at,
 func workplaceMode(t *testing.T, p *pg.Pool, clock *workplaceTime) app.Mode {
 	m := marchMode(t, p)
 	owner := m.Grants.(i5.Service)
-	return app.Mode{Timed: m.Timed, Fresh: p, Store: workplacestore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Directory: m.Directory, Campaigns: campaignstore.Store{}, Heroes: m.Heroes, HeroLocks: characterstore.WorkplaceHeroPort{Store: characterstore.Store{Queryer: p}}, HeroWire: m.HeroWire, Opponents: topFloorService(t, p), Combat: combatService(t, p), Stats: m.Stats, Values: owner, Privileges: owner.Privileges, Facts: m.Facts, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead, Broadcast: pg.BroadcastEmitter{}, Rental: guildrental.Reader{Store: guildstore.Store{Queryer: p}}}
+	return app.Mode{Timed: m.Timed, Fresh: p, Store: workplacestore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Directory: m.Directory, Campaigns: campaignstore.Store{}, Heroes: m.Heroes, HeroLocks: characterstore.WorkplaceHeroPort{Store: characterstore.Store{Queryer: p}}, HeroWire: m.HeroWire, Opponents: topFloorService(t, p), Combat: combatService(t, p), Stats: m.Stats, Values: owner, Privileges: owner.Privileges, Facts: m.Facts, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead, Broadcast: pg.BroadcastEmitter{}, Rental: guildrental.Reader{Store: guildstore.Store{Queryer: p}}, BattleObserver: libraryService(p, p)}
 }
 func workplaceRecord(t *testing.T, p *pg.Pool, a identity.ActorContext) d.State {
 	t.Helper()
@@ -279,6 +279,9 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	if mails() != mailBefore+1 {
 		t.Fatal("overflow Mail not once", mailBefore, mails())
 	}
+	if count := girlsLogCount(t, p, a.PlayerID, h.PartnerID); count != 0 {
+		t.Fatalf("a job without a rival counted %d", count)
+	}
 	second := workplaceOperation(quote, len(job.Chests), true, 2)
 	if _, err = s.Dispatch(ctx, a, request, second); err != nil {
 		t.Fatal("second occurrence", err)
@@ -319,6 +322,15 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	clock.at = clock.at.Add(time.Hour)
 	if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
 		t.Fatal("automatic rival claim", err)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, h.PartnerID); count != 1 {
+		t.Fatalf("the rival battle counted %d, want 1", count)
+	}
+	if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
+		t.Fatal("claimed job reread", err)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, h.PartnerID); count != 1 {
+		t.Fatalf("a claimed job reread counted %d, want 1", count)
 	}
 	final := workplaceRecord(t, p, a)
 	if len(final.Diary) != 2 || fmt.Sprint(final.Diary[0]["with_battle"]) != "1" {
