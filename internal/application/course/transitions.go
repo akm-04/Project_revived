@@ -2,6 +2,7 @@ package course
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	course "gxb.local/backend/v2/internal/domain/course"
@@ -51,7 +52,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(r.UpdatedAt) || at.Before(f.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, r.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, f.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	c, e := s.Content.CourseCatalogTx(ctx, t, d.ContentRevision)
