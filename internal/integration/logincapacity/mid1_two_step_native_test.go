@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -26,6 +27,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/herorecommendstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
@@ -34,9 +36,11 @@ import (
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	appcompat "gxb.local/backend/v2/internal/application/compat"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
+	appherorecommend "gxb.local/backend/v2/internal/application/herorecommend"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
+	hrd "gxb.local/backend/v2/internal/domain/herorecommend"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -279,6 +283,7 @@ func seedTwoStepSavedPreset(t *testing.T, p *postgres.Pool, playerID identity.Pl
 
 func twoStepContributors(p *postgres.Pool) []appboot.MID1DetailContributor {
 	content := contentstore.Store{Queryer: p}
+	heroRecommend := appherorecommend.Service{Store: herorecommendstore.Store{}, Content: content}
 	return []appboot.MID1DetailContributor{
 		appdorm.GlueBootstrap{Owner: dormstore.Store{}},
 		guildprojection.BootstrapProjection{},
@@ -287,7 +292,34 @@ func twoStepContributors(p *postgres.Pool) []appboot.MID1DetailContributor {
 		characterstore.PetBootstrapProjection{Content: content},
 		characterstore.SavedPresetBootstrapProjection{},
 		appcompat.BootstrapProjection{Store: compatstore.Store{}},
+		herorecommendstore.BootstrapProjection{Service: heroRecommend},
 	}
+}
+
+func twoStepHeroRecommendScores(t *testing.T, detail map[string]any) map[string]any {
+	t.Helper()
+	raw, err := json.Marshal(detail)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded map[string]any
+	if err := json.Unmarshal(raw, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	body, ok := decoded["2501"].(map[string]any)
+	if !ok {
+		t.Fatalf("detail 2501 = %#v, want a flat object", decoded["2501"])
+	}
+	if _, wrapped := body["scores"]; wrapped {
+		t.Fatalf("detail 2501 carries a scores wrapper: %#v", body)
+	}
+	for key, value := range body {
+		number, ok := value.(float64)
+		if !ok || number != math.Trunc(number) {
+			t.Fatalf("detail 2501[%s]=%#v, want an integer", key, value)
+		}
+	}
+	return body
 }
 
 func twoStepService(t *testing.T, p *postgres.Pool, hooks tx.Hooks) i4store.BootstrapService {
@@ -517,5 +549,80 @@ func TestI9C14MID1ReplayReturnsEqualReplyAndWritesNothing(t *testing.T) {
 	}
 	if replayStateVersion != stateVersion {
 		t.Fatalf("replay changed player state_version %d -> %d", stateVersion, replayStateVersion)
+	}
+}
+
+// MID 2501 is served as a MID 1 detail: no request site exists, and every
+// origin catalogue id must be present so the client's shop detail lookup never
+// concatenates nil.
+func TestI9RSMID1HeroRecommendScoresZeroWithoutSnapshot(t *testing.T) {
+	p := twoStepPool(t, 8)
+	revision := twoStepContentRevision(t, p)
+	fixture := seedTwoStepPlayer(t, p, twoStepAllocatePlayerID(t, p, 1), twoStepUUID(t, "44444444-4444-4444-8444-444444444401"), twoStepUUID(t, "44444444-4444-4444-8444-444444444402"), "44444444-4444-4444-8444-444444444403")
+	seedTwoStepOwnerRoots(t, p, fixture.playerID, revision)
+	seedTwoStepRoster(t, p, fixture.playerID, revision, 1)
+	seedTwoStepPet(t, p, fixture.playerID, revision)
+	seedTwoStepSavedPreset(t, p, fixture.playerID)
+	result, err := twoStepService(t, p, tx.NopHooks{}).MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: fixture.operation})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := twoStepHeroRecommendScores(t, result.Detail)
+	origins, err := (contentstore.Store{Queryer: p}).HeroOriginCatalogTx(context.Background(), p, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(body) != len(origins) {
+		t.Fatalf("detail 2501 has %d keys, catalogue has %d", len(body), len(origins))
+	}
+	for _, tableID := range origins {
+		if value := body[fmt.Sprintf("%d", tableID)]; value != float64(0) {
+			t.Fatalf("detail 2501[%d]=%#v, want 0 without a snapshot", tableID, value)
+		}
+	}
+}
+
+func TestI9RSMID1HeroRecommendScoresFromSnapshot(t *testing.T) {
+	p := twoStepPool(t, 8)
+	revision := twoStepContentRevision(t, p)
+	origins, err := (contentstore.Store{Queryer: p}).HeroOriginCatalogTx(context.Background(), p, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(origins) < 2 {
+		t.Fatalf("catalogue has %d origin ids", len(origins))
+	}
+	scored, absent := origins[0], origins[len(origins)-1]
+	fixture := seedTwoStepPlayer(t, p, twoStepAllocatePlayerID(t, p, 1), twoStepUUID(t, "55555555-5555-4555-8555-555555555501"), twoStepUUID(t, "55555555-5555-4555-8555-555555555502"), "55555555-5555-4555-8555-555555555503")
+	seedTwoStepOwnerRoots(t, p, fixture.playerID, revision)
+	seedTwoStepRoster(t, p, fixture.playerID, revision, 1)
+	seedTwoStepPet(t, p, fixture.playerID, revision)
+	seedTwoStepSavedPreset(t, p, fixture.playerID)
+	snapshot := hrd.Snapshot{Schema: hrd.Schema, Server: 1, Generation: appherorecommend.WeekStart(twoStepAt).Unix(), Revision: revision, ObservedAt: twoStepAt, Digest: strings.Repeat("a", 64),
+		Overview: hrd.Overview{SubRankList: map[string][]int64{}, TotalRankList: []map[string]any{{"table_id": scored, "recommend_score": int64(42)}}}, Details: map[string]hrd.Detail{}}
+	transaction, err := p.Begin(context.Background(), tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer transaction.Rollback(context.Background())
+	if err := (herorecommendstore.Store{}).InsertSnapshotTx(context.Background(), transaction, snapshot); err != nil {
+		t.Fatal(err)
+	}
+	if err := transaction.Commit(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	result, err := twoStepService(t, p, tx.NopHooks{}).MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: fixture.operation})
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := twoStepHeroRecommendScores(t, result.Detail)
+	if len(body) != len(origins) {
+		t.Fatalf("detail 2501 has %d keys, catalogue has %d", len(body), len(origins))
+	}
+	if value := body[fmt.Sprintf("%d", scored)]; value != float64(42) {
+		t.Fatalf("detail 2501[%d]=%#v, want 42", scored, value)
+	}
+	if value := body[fmt.Sprintf("%d", absent)]; value != float64(0) {
+		t.Fatalf("detail 2501[%d]=%#v, want 0 for a hero absent from the list", absent, value)
 	}
 }

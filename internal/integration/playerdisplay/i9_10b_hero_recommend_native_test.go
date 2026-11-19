@@ -196,6 +196,10 @@ func (c *recommendCountingContent) ActiveRevision(context.Context, tx.Queryer) (
 	return c.revision, nil
 }
 
+func (c *recommendCountingContent) HeroOriginCatalogTx(context.Context, tx.Queryer, string) ([]int64, error) {
+	return nil, nil
+}
+
 type recommendUnusedDirectory struct{}
 
 func (recommendUnusedDirectory) ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error) {
