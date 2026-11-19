@@ -228,6 +228,12 @@
    "mid": 2313,
    "path": "awards",
    "reason": "handleRewards(arg_6_1.awards, callback) takes its nil branch when awards is absent (SelfPlayer.lua:4324-4330) and runs the close/refresh callback; the server omits awards when the grant has no representable row (an empty draw or a fully mailed reward)."
+  },
+  {
+   "client": "app/windows/SelectTeamRearenaWindow.lua:66",
+   "mid": 771,
+   "path": "pet_info",
+   "reason": "SelectTeamRearenaWindow reads arg_1_2.pet_info only under `if arg_1_2.pet_id ~= 0` (SelectTeamRearenaWindow.lua:66); the arena match reply omits pet_info and sends pet_id 0 for a defender with no pet."
   }
  ]
 }

@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type arenaFake struct {
@@ -101,12 +102,16 @@ func TestI7C5DArenaWireShapes(t *testing.T) {
 	}
 	if partners := call(769, map[string]any{}); partners["partner_info"].([]map[string]any)[0]["total_damage"] != int64(1200) {
 		t.Fatal("GET_REARENA_PARTNERS", partners)
+	} else {
+		replyconformance.Check(t, 769, partners)
 	}
 	if saved := call(770, map[string]any{"heros": []any{n("1"), n("2"), n("3"), n("4"), n("5")}, "pet_id": n("9")}); saved["pet_id"] != int64(9) {
 		t.Fatal("REARENA_MODIFY_DEFENCE", saved)
 	}
 	if enemy := call(771, map[string]any{"is_practice": n("1")}); enemy["player_id"] != int64(200007) || enemy["region_name"] != "S2" || enemy["self_region_name"] != "S1" || enemy["total_fight"] != int64(5) {
 		t.Fatal("REARENA_MATCH_ENEMY", enemy)
+	} else {
+		replyconformance.Check(t, 771, enemy)
 	}
 	if call(772, map[string]any{})["is_back_battle"] != int64(1) {
 		t.Fatal("REARENA_START_FIGHT answers a server battle")
