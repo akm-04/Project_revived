@@ -202,6 +202,11 @@ func TestI911CCoreShopsNative(t *testing.T) {
 		}
 	}
 
+	// A purchase never generates stock, so the client loads type 30 first.
+	vending := i911cDispatch(t, dispatcher, a, 32, map[string]any{"shop_type": int64(30)})
+	if vending.HTTPStatus != 200 {
+		t.Fatalf("MID 32 type 30: %+v", vending)
+	}
 	noCoin := i911cDispatch(t, dispatcher, a, 33, map[string]any{"shop_type": int64(30), "index": int64(1)})
 	if noCoin.HTTPStatus != 409 || noCoin.Body["error_code"] != int64(35028) {
 		t.Fatalf("type 30 minted summon_coin: %+v", noCoin)

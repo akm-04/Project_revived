@@ -14,6 +14,11 @@ const SelectedID int64 = 100014
 var ErrUnavailable = errors.New("achievement: unavailable history or producer")
 var ErrConflict = errors.New("achievement: conflicting fact or coherent scope")
 
+// ErrOvertaken is an observation whose decision time is older than the stored
+// row. A producer that raced a newer accepted command must be refused as stale
+// state, not reported as corruption.
+var ErrOvertaken = errors.New("achievement: observation overtaken by a newer fact")
+
 func RevisionValid(s string) bool {
 	b, e := hex.DecodeString(s)
 	return e == nil && len(b) == 32 && hex.EncodeToString(b) == s
@@ -221,8 +226,11 @@ func (s Streak) Validate() error {
 func (s Streak) profile(c Catalog, at time.Time) (streakProfile, error) {
 	profile := streakProfiles[s.AchievementID]
 	index := s.AchievementID - c.Rows[0].ID
-	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) || at.Before(s.UpdatedAt) {
+	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) {
 		return profile, ErrConflict
+	}
+	if at.Before(s.UpdatedAt) {
+		return profile, ErrOvertaken
 	}
 	if s.AchievementID != GreatCustomerID && c.Rows[index].Thresholds != profile.thresholds {
 		return profile, ErrConflict
@@ -247,7 +255,10 @@ func (s Streak) advance(profile streakProfile, next int64, at time.Time) Streak 
 // the last observed one is a no-op.
 func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak, bool, error) {
 	profile, err := s.profile(c, at)
-	if err != nil || profile.step == 0 {
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step == 0 {
 		return Streak{}, false, ErrConflict
 	}
 	if s.LastDay != nil && day <= *s.LastDay {
@@ -269,7 +280,10 @@ func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak
 // observation leaves both progress and earned tiers alone.
 func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, bool, error) {
 	profile, err := s.profile(c, at)
-	if err != nil || profile.step != 0 || count < 0 {
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step != 0 || count < 0 {
 		return Streak{}, false, ErrConflict
 	}
 	if count <= s.Current {
@@ -284,7 +298,10 @@ func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, 
 // the pinned catalog row's thresholds, never constants.
 func (s Streak) ObserveDailyCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
 	profile, err := s.profile(c, at)
-	if err != nil || profile.step != 0 || count < 0 {
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step != 0 || count < 0 {
 		return Streak{}, false, ErrConflict
 	}
 	if count == s.Current {
@@ -298,7 +315,10 @@ func (s Streak) ObserveDailyCount(c Catalog, count int64, at time.Time) (Streak,
 // ObserveCount records a counted streak's current value.
 func (s Streak) ObserveCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
 	profile, err := s.profile(c, at)
-	if err != nil || profile.step != 0 || count < 0 {
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step != 0 || count < 0 {
 		return Streak{}, false, ErrConflict
 	}
 	if count == s.Current {

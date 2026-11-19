@@ -1,6 +1,7 @@
 package achievement
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -128,6 +129,27 @@ func TestGreatCustomerDailyCounts(t *testing.T) {
 	fresh, changed, e := fresh.ObserveDailyCount(other, 3, at.Add(time.Second))
 	if e != nil || !changed || fresh.CompleteTimes[0] == nil || fresh.CompleteTimes[1] != nil {
 		t.Fatalf("catalog thresholds: %+v %v %v", fresh, changed, e)
+	}
+}
+
+func TestGreatCustomerOvertakenTimeIsTyped(t *testing.T) {
+	c := catalog()
+	c.Rows[GreatCustomerID-100001].Thresholds = [3]int64{10, 100, 200}
+	at := time.Unix(1700000000, 0).UTC()
+	s, err := NewStreak(100001, GreatCustomerID, strings.Repeat("a", 64), at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s, _, err = s.ObserveDailyCount(c, 1, at); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err = s.ObserveDailyCount(c, 2, at.Add(-time.Second)); !errors.Is(err, ErrOvertaken) {
+		t.Fatalf("older observation = %v, want ErrOvertaken", err)
+	}
+	broken := s
+	broken.ContentRevision = "short"
+	if _, _, err = broken.ObserveDailyCount(c, 3, at.Add(time.Second)); !errors.Is(err, ErrConflict) {
+		t.Fatalf("corrupt state = %v, want ErrConflict", err)
 	}
 }
 
