@@ -128,6 +128,8 @@ func TestPart2ConquerLeagueFailureRows(t *testing.T) {
 func TestPart2OneOnOneFailureRows(t *testing.T) {
 	assertPart2FailureCases(t, []part2FailureCase{
 		{"offer stale", failOneOnOne(oneonone.ErrOfferStale), http.StatusConflict, oneOnOneRankChangedError, ""},
+		{"closed hours", failOneOnOne(oneonone.ErrClosedHours), http.StatusConflict, oneOnOneClosedHoursError, ""},
+		{"low points", failOneOnOne(oneonone.ErrOpponentLowPoints), http.StatusConflict, oneOnOneLowPointsError, ""},
 		{"refused", failOneOnOne(oneonone.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid", failOneOnOne(oneonone.ErrInvalid), http.StatusBadRequest, 0, "one_on_one_request_refused"},
 		{"unresolved", failOneOnOne(apponeonone.ErrUnresolved), http.StatusServiceUnavailable, serverBusyCode, ""},

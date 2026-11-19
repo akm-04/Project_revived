@@ -88,7 +88,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2480,
    "name": "LOAD_PEAK_ARENA"
@@ -96,7 +96,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2481,
    "name": "PEAK_CHANGE_TEAMS"
@@ -104,7 +104,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2482,
    "name": "MATCH_ENEMIES"
@@ -112,7 +112,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2483,
    "name": "GET_ENEMY_TEAM"
@@ -120,7 +120,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2484,
    "name": "PEAK_START_FIGHT"
@@ -128,7 +128,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2485,
    "name": "PEAK_RECORDS"
@@ -136,7 +136,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2486,
    "name": "BUY_PEAK_TIMES"
@@ -144,7 +144,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2487,
    "name": "PEAK_RECORDS_LIST"
@@ -152,7 +152,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2488,
    "name": "RESET_PEAK_TIME"
@@ -160,7 +160,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
-    "line": 56
+    "line": 55
    },
    "mid": 2489,
    "name": "PEAK_RECORDS_DETAIL"

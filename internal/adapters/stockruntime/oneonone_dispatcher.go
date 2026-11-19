@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/oneonone"
@@ -107,14 +106,6 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return badHero("invalid_one_on_one_parameter")
 		}
 		v, err := o.Service.Start(ctx, a, app.StartCommand{Formations: teams, Enemy: identity.PlayerID(enemy)}, op)
-		if errors.Is(err, d.ErrOpponentLowPoints) {
-			// Source message 30003 "Your opponent has lower than 1000 points, can't fight", answered in-band.
-			return okI5(map[string]any{"error_code": int64(30003)})
-		}
-		if errors.Is(err, d.ErrClosedHours) {
-			// Source message 30002 "1 on 1 opens from 8:00 to 22:00 everyday", answered in-band.
-			return okI5(map[string]any{"error_code": int64(30002)})
-		}
 		if err != nil {
 			return failOneOnOne(err)
 		}
@@ -165,10 +156,6 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return badHero("invalid_one_on_one_parameter")
 		}
 		v, err := o.Service.RecordDetail(ctx, id)
-		if errors.Is(err, d.ErrRefused) {
-			// A shared record that is no longer retained answers empty (MessageManager toast).
-			return okI5(map[string]any{})
-		}
 		if err != nil {
 			return failOneOnOne(err)
 		}
@@ -181,8 +168,17 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 // please refresh and challenge again"), shown by the shared Backend error toast.
 const oneOnOneRankChangedError = 35026
 
+// Stock message codes for the closed-hours and low-point refusals, shown by the
+// shared Backend error toast like 35026.
+const (
+	oneOnOneClosedHoursError = 30002
+	oneOnOneLowPointsError   = 30003
+)
+
 var oneOnOneFailureRows = []failureRow{
 	{match: d.ErrOfferStale, class: failureRefusal, code: oneOnOneRankChangedError},
+	{match: d.ErrClosedHours, class: failureRefusal, code: oneOnOneClosedHoursError},
+	{match: d.ErrOpponentLowPoints, class: failureRefusal, code: oneOnOneLowPointsError},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "one_on_one_request_refused"},
 	{match: app.ErrUnresolved, class: failureUnavailable},

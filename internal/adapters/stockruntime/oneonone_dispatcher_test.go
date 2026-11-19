@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -124,8 +125,8 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 		t.Fatal("PEAK_START_FIGHT", started)
 	}
 	f.closed = true
-	if call(2484, map[string]any{"formations": []any{"3"}, "enemy_id": n("200007")})["error_code"] != int64(30002) {
-		t.Fatal("closed hours answer in-band 30002")
+	if r := dispatcher.Dispatch(context.Background(), heroReq(t, 2484, map[string]any{"formations": []any{"3"}, "enemy_id": n("200007")})); r.HTTPStatus != http.StatusConflict || r.Body["error_code"] != int64(oneOnOneClosedHoursError) {
+		t.Fatalf("closed hours response=%+v", r)
 	}
 	if call(2485, map[string]any{"report_key": "a"})["report"] != `{"star":1}` {
 		t.Fatal("PEAK_RECORDS report")
@@ -141,7 +142,10 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 	if call(2486, map[string]any{})["left_times"] != int64(10) || call(2488, map[string]any{})["left_times"] != int64(7) {
 		t.Fatal("buy / reset")
 	}
-	if len(call(2489, map[string]any{"record_id": n("404"), "player_id": n("100001")})) != 0 || call(2489, map[string]any{"record_id": n("5")})["wins"] == nil {
+	if r := dispatcher.Dispatch(context.Background(), heroReq(t, 2489, map[string]any{"record_id": n("404"), "player_id": n("100001")})); r.HTTPStatus != http.StatusConflict || r.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("expired record response=%+v", r)
+	}
+	if call(2489, map[string]any{"record_id": n("5")})["wins"] == nil {
 		t.Fatal("PEAK_RECORDS_DETAIL")
 	}
 	before := f.calls
@@ -165,10 +169,26 @@ func TestOneOnOneStaleOfferIsRankChangedConflict(t *testing.T) {
 	}
 }
 
-func TestOneOnOneLowPointsAnswersInBand30003(t *testing.T) {
+func TestOneOnOneLowPointsIsRefusal(t *testing.T) {
 	dispatcher := OneOnOneDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &oneOnOneFake{lowPoints: true}}
 	response := dispatcher.Dispatch(context.Background(), heroReq(t, 2484, map[string]any{"formations": []any{"3"}, "enemy_id": json.Number("200007")}))
-	if response.HTTPStatus != 200 || response.Body["error_code"] != int64(30003) {
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(oneOnOneLowPointsError) {
 		t.Fatalf("low points response=%+v", response)
+	}
+}
+
+func TestOneOnOneClosedHoursIsRefusal(t *testing.T) {
+	dispatcher := OneOnOneDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &oneOnOneFake{closed: true}}
+	response := dispatcher.Dispatch(context.Background(), heroReq(t, 2484, map[string]any{"formations": []any{"3"}, "enemy_id": json.Number("200007")}))
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(oneOnOneClosedHoursError) {
+		t.Fatalf("closed hours response=%+v", response)
+	}
+}
+
+func TestOneOnOneExpiredRecordIsRefusal(t *testing.T) {
+	dispatcher := OneOnOneDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &oneOnOneFake{}}
+	response := dispatcher.Dispatch(context.Background(), heroReq(t, 2489, map[string]any{"record_id": json.Number("404")}))
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("expired record response=%+v", response)
 	}
 }

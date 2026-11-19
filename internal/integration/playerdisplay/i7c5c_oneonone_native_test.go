@@ -925,7 +925,7 @@ func oneOnOneGlobalRank(t *testing.T, p *pg.Pool, pid identity.PlayerID) int64 {
 }
 
 // TestI9_10OneOnOneLowPointsRefusalNative proves source message 30003 is
-// returned in-band through the production dispatcher and consumes no try.
+// refused 409 through the production dispatcher and consumes no try.
 func TestI9_10OneOnOneLowPointsRefusalNative(t *testing.T) {
 	p := pool(t)
 	defer p.Close()
@@ -957,7 +957,7 @@ func TestI9_10OneOnOneLowPointsRefusalNative(t *testing.T) {
 		httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 2484, Operation: op(), ReceivedAt: time.Now().UTC(),
 			Claims: wire.CredentialClaims{Token: "fixture", Region: int64(a.LogicalServerID)},
 			Params: map[string]any{"formations": []any{"1", "2", "3"}, "enemy_id": json.Number(strconv.FormatInt(int64(b.PlayerID), 10))}}})
-	if response.HTTPStatus != http.StatusOK || response.Body["error_code"] != int64(30003) {
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(30003) {
 		t.Fatalf("low-point START response=%+v", response)
 	}
 	if scalar(t, p, `SELECT tries_left FROM one_on_one_players WHERE player_id=$1`, int64(a.PlayerID)) != beforeTries {
@@ -965,5 +965,94 @@ func TestI9_10OneOnOneLowPointsRefusalNative(t *testing.T) {
 	}
 	if scalar(t, p, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1`, int64(a.PlayerID)) != 0 {
 		t.Fatal("a refused low-point challenge created a match")
+	}
+}
+
+// TestI9_11OneOnOneExpiredRecordRefusalNative: a retained record detail answers
+// 200, an evicted record answers 409 + 35028 through the production dispatcher,
+// and 2485 keeps its shape.
+func TestI9_11OneOnOneExpiredRecordRefusalNative(t *testing.T) {
+	databasePool := pool(t)
+	defer databasePool.Close()
+	service := oneOnOneService(t, databasePool)
+	server := rankingServer(t, databasePool)
+	actor, heroes := oneOnOnePlayer(t, databasePool, server)
+	enemy, enemyHeroes := oneOnOnePlayer(t, databasePool, server)
+	for _, side := range []struct {
+		actor  identity.ActorContext
+		heroes []int64
+	}{{actor, heroes}, {enemy, enemyHeroes}} {
+		if _, err := service.Load(ctx, side.actor, op()); err != nil {
+			t.Fatal(err)
+		}
+		if err := service.ChangeTeams(ctx, side.actor, teamsOf(side.heroes, 3), op()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	exec(t, databasePool, `UPDATE one_on_one_players SET points=4500,state_version=state_version+1 WHERE player_id=$1`, int64(enemy.PlayerID))
+	pinOneOnOneOffer(t, databasePool, actor, enemy.PlayerID)
+	if !oneOnOneCatalog(t, databasePool).Open(time.Now()) {
+		t.Skip("1 on 1 START is closed outside 08:00-22:00 GMT+8")
+	}
+	result, err := startSettled(service, actor, app.StartCommand{Formations: teamsOf(heroes, 3), Enemy: enemy.PlayerID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	records, err := service.Records(ctx, actor, op())
+	if err != nil || len(records) != 1 {
+		t.Fatalf("attacker records=%v err=%v", records, err)
+	}
+	retained := records[0].Record.ID
+	dispatcher := stockruntime.OneOnOneDispatcher{Authority: fixedSocialAuthority{actor: actor}, Service: service}
+	reply := func(mid uint16, params map[string]any) httpedge.Response {
+		t.Helper()
+		return dispatcher.Dispatch(ctx, httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: mid, Operation: op(), ReceivedAt: time.Now().UTC(),
+			Claims: wire.CredentialClaims{Token: "fixture", Region: int64(actor.LogicalServerID)}, Params: params}})
+	}
+	recordParam := map[string]any{"record_id": json.Number(strconv.FormatInt(retained, 10))}
+	if kept := reply(2489, recordParam); kept.HTTPStatus != http.StatusOK || kept.Body["wins"] == nil {
+		t.Fatalf("retained record response=%+v", kept)
+	}
+	// Twenty newer records plus one written through the owner's eviction path
+	// drop the real record, which is the owner's oldest.
+	exec(t, databasePool, `INSERT INTO one_on_one_matches(match_id,attacker_id,defender_id,mode,start_fingerprint,attack_teams,defense_teams,started_at,status,outcome,settled_at,state_version)
+		SELECT gen_random_uuid(),$1,$2,1,repeat('e',64),'[{"heroes":[1]}]'::jsonb,'[{"heroes":[1]}]'::jsonb,now(),'SETTLED','{"wins":[1],"win":true}'::jsonb,now(),1 FROM generate_series(1,21)`,
+		int64(actor.PlayerID), int64(enemy.PlayerID))
+	exec(t, databasePool, `INSERT INTO one_on_one_records(owner_player_id,match_id,is_attack,win,mode,recorded_at)
+		SELECT $1,match_id,true,false,1,now() FROM one_on_one_matches WHERE attacker_id=$1 AND start_fingerprint=repeat('e',64) ORDER BY match_id LIMIT 20`, int64(actor.PlayerID))
+	var spare string
+	if err := databasePool.Raw().QueryRow(ctx, `SELECT m.match_id::text FROM one_on_one_matches m WHERE m.attacker_id=$1 AND m.start_fingerprint=repeat('e',64)
+		AND NOT EXISTS(SELECT 1 FROM one_on_one_records r WHERE r.owner_player_id=$1 AND r.match_id=m.match_id) LIMIT 1`, int64(actor.PlayerID)).Scan(&spare); err != nil {
+		t.Fatal(err)
+	}
+	spareID, err := ids.ParseUUID(spare)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transaction, err := databasePool.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = (oneononestore.Store{}).InsertRecordTx(ctx, transaction, d.Record{Owner: actor.PlayerID, MatchID: spareID, Attack: true, Mode: d.ModeNormal, At: time.Now()}, 20); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if gone := reply(2489, recordParam); gone.HTTPStatus != http.StatusConflict || gone.Body["error_code"] != int64(35028) || gone.Body["error_msg"] != "" {
+		t.Fatalf("evicted record response=%+v", gone)
+	}
+	reportKey := ""
+	for _, candidate := range result.ReportKeys {
+		if candidate != "" {
+			reportKey = candidate
+			break
+		}
+	}
+	if reportKey == "" {
+		t.Fatal("the settled match produced no report key")
+	}
+	if report := reply(2485, map[string]any{"report_key": reportKey}); report.HTTPStatus != http.StatusOK || report.Body["report"] == nil || report.Body["report"] == "" {
+		t.Fatalf("retained report response=%+v", report)
 	}
 }
