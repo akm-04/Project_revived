@@ -114,9 +114,6 @@ func (store Store) PrepareStartStateTx(ctx context.Context, transaction tx.Tx, c
 	if err != nil {
 		return application.StartState{}, err
 	}
-	if reserved && at.Before(gen.EffectiveObservation(at, previous.UpdatedAt)) {
-		return application.StartState{}, application.ErrLoginFacts
-	}
 	if reserved && !at.Before(previous.Task.ExpiresAt) {
 		if previous.StateVersion == math.MaxInt64 {
 			return application.StartState{}, application.ErrLoginFacts
@@ -127,7 +124,7 @@ func (store Store) PrepareStartStateTx(ctx context.Context, transaction tx.Tx, c
 			return application.StartState{}, err
 		}
 		next.StateVersion++
-		next.UpdatedAt = at
+		next.UpdatedAt = gen.EffectiveObservation(at, previous.UpdatedAt)
 		if err := store.SaveRecallLoginTransitionTx(ctx, transaction, previous, next); err != nil {
 			return application.StartState{}, err
 		}

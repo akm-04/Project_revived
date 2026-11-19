@@ -2,7 +2,6 @@ package socialrecallstore
 
 import (
 	"context"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
@@ -159,7 +158,7 @@ func (reader TargetReader) currentFactsTx(ctx context.Context, scope tx.Scope, t
 	if err != nil {
 		return domainrecall.Baseline{}, err
 	}
-	if progression.PlayerID != target || progression.Validate() != nil || progression.UpdatedAt.After(gen.EffectiveObservation(at, progression.UpdatedAt)) {
+	if progression.PlayerID != target || progression.Validate() != nil {
 		return domainrecall.Baseline{}, socialrecall.ErrStartFacts
 	}
 
