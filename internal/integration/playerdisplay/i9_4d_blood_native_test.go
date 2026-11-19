@@ -18,6 +18,7 @@ import (
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	pet "gxb.local/backend/v2/internal/application/characterpet"
+	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/publicstats"
@@ -62,13 +63,24 @@ func i94AwakeningOwners(p *pg.Pool) (i5.Service, hero.Service) {
 	return owner, heroes
 }
 
-func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
-	p := pool(t)
+// bloodNativeFixture is the qualified stage-2 Blood occurrence shared by the
+// Blood natives: the owner hero is awakened to raw stage 2 with its gear.
+type bloodNativeFixture struct {
+	actor   identity.ActorContext
+	ref     character.HeroRef
+	owner   i5.Service
+	heroes  hero.Service
+	fight   combat.Service
+	content contentstore.Store
+	values  i5store.Store
+}
+
+func newBloodNativeFixture(t *testing.T, p *pg.Pool) bloodNativeFixture {
+	t.Helper()
 	actor, rev, ref := combatOwner(t, p, rankingServer(t, p))
 	store := characterstore.Store{Queryer: p}
 	content := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
-	runner := tx.Runner{DB: p}
 	// Declared awakened/progression/equipment fixture; ordinary origin and progression are qualified separately.
 	exec(t, p, `UPDATE player_heroes SET table_id=11001001,level=100,color=15,equip_1=1,equip_2=1,equip_3=1,equip_4=1,equip_5=1,equip_6=1 WHERE player_id=$1 AND partner_id=$2`, int64(actor.PlayerID), ref.PartnerID)
 	// This older explicit Character fixture also needs the production function-state owner for D359.
@@ -106,7 +118,18 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	stats.Owned = owned
 	fight.Inputs.Stats = stats
 	fight.Inputs.Heroes = characterstore.HeroBootstrapProjection{Content: content, Awakening: heroes, AwakeningPositions: heroes.AwakeningPositions, Library: libraryService(p, p), Dorm: dormService(p, p), Book: bookService(p, p), Course: courseService(p, p), Inscription: inscriptionService(p, p), Element: elementService(p, p), Spirit: spiritService(p, p), Evolution: evolutionService(p, p)}
-	mode := awakeningbattle.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Content: content, Fence: values, Heroes: heroes, Missions: owner, Combat: fight, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p)}
+	return bloodNativeFixture{actor: actor, ref: ref, owner: owner, heroes: heroes, fight: fight, content: content, values: values}
+}
+
+func (f bloodNativeFixture) mode(p *pg.Pool, clock gen.TimeAuthority) awakeningbattle.Mode {
+	return awakeningbattle.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}, Fresh: p, Content: f.content, Fence: f.values, Heroes: f.heroes, Missions: f.owner, Combat: f.fight, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p)}
+}
+
+func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
+	p := pool(t)
+	f := newBloodNativeFixture(t, p)
+	mode := f.mode(p, pg.AuthoritativeTime{Queryer: p})
+	actor, ref, owner, fight := f.actor, f.ref, f.owner, f.fight
 	absent, e := mode.Result(ctx, actor, 2001002, 20, op())
 	if !errors.Is(e, objective.ErrAwakeningRefused) || absent["error_code"] != int64(1) {
 		t.Fatal("unstarted result", absent, e)
@@ -134,7 +157,7 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	if _, err := broken.Result(ctx, actor, 2001002, 20, op()); err == nil {
 		t.Fatal("completion failure committed Combat")
 	}
-	root, err := values.ReadAwakeningTx(ctx, p, actor.PlayerID)
+	root, err := f.values.ReadAwakeningTx(ctx, p, actor.PlayerID)
 	if err != nil || root.Active[1].Complete {
 		t.Fatal("failed terminal mutated objective", err)
 	}

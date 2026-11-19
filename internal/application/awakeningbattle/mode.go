@@ -26,6 +26,8 @@ import (
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
 	AttestSummaryTx(context.Context, tx.Tx, combat.SummaryRequest) (combat.SummaryAttested, error)
+	StartEvidenceTx(context.Context, tx.Queryer, cd.Locator, string) (cd.Attempt, bool, error)
+	CloseTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Closed, error)
 }
 type Mode struct {
 	Timed   gen.TimedRunner
@@ -100,8 +102,21 @@ func (s Mode) Start(ctx context.Context, actor identity.ActorContext, id int64, 
 			return e
 		}
 		fp := sha256.Sum256(raw)
+		fingerprint := hex.EncodeToString(fp[:])
+		// An equivalent START replays the stored attempt only within its result
+		// deadline; past it the attempt is retired here so the retry can fight.
+		existing, found, e := s.Combat.StartEvidenceTx(ctx, sc.Tx, locator(actor), fingerprint)
+		if e != nil {
+			return e
+		}
+		if found && !at.Before(existing.ResultDeadline) {
+			closeRequest := combat.TerminalRequest{Locator: locator(actor), GenerationRef: generation(a), TerminalKind: "AWAKENING_BLOOD_EXPIRED", SemanticReceiptID: "blood-expired:" + existing.ID.String(), At: at}
+			if _, e := s.Combat.CloseTx(ctx, sc.Tx, closeRequest); e != nil && !errors.Is(e, combat.ErrAttemptNotFound) {
+				return e
+			}
+		}
 		// Source 866 omits the selected team; this snapshots only its mandatory canonical girl witness.
-		_, e = s.Combat.StartTx(ctx, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeAwakeningBlood, Actor: actor, Locator: locator(actor), GenerationRef: generation(a), StartFingerprint: hex.EncodeToString(fp[:]), ResultDeadline: at.Add(time.Duration(frozen.WindowSeconds) * time.Second), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Battle: combat.BattleRequest{CampaignType: 27, BattleID: id, Formation: []int64{a.OwnerID}, TeamA: []combat.Participant{{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: actor.PlayerID, Identity: a.OwnerID}}}})
+		_, e = s.Combat.StartTx(ctx, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeAwakeningBlood, Actor: actor, Locator: locator(actor), GenerationRef: generation(a), StartFingerprint: fingerprint, ResultDeadline: at.Add(time.Duration(frozen.WindowSeconds) * time.Second), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Battle: combat.BattleRequest{CampaignType: 27, BattleID: id, Formation: []int64{a.OwnerID}, TeamA: []combat.Participant{{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: actor.PlayerID, Identity: a.OwnerID}}}})
 		return e
 	})
 	if e != nil {

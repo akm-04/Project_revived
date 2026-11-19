@@ -70,15 +70,38 @@ func startChoiceMode(at time.Time, occurrence objective.AwakeInstance, combat *s
 }
 
 // startChoiceCombat records the StartRequest the mode builder produced and
-// answers like a frozen START.
+// answers like a frozen START. An existing unresolved attempt is the one the
+// combat owner would find, so the mode's expiry branch is observable.
 type startChoiceCombat struct {
 	Combat
 	requests []appcombat.StartRequest
+	existing *cd.Attempt
+	evidence []string
+	closes   []appcombat.TerminalRequest
+	calls    []string
 }
 
 func (c *startChoiceCombat) StartTx(_ context.Context, _ tx.Tx, _ ca.CoherentReadScope, request appcombat.StartRequest) (appcombat.Started, error) {
+	c.calls = append(c.calls, "start")
 	c.requests = append(c.requests, request)
 	return appcombat.Started{Attempt: cd.Attempt{ID: ids.UUID{byte(len(c.requests))}}}, nil
+}
+
+func (c *startChoiceCombat) StartEvidenceTx(_ context.Context, _ tx.Queryer, _ cd.Locator, fingerprint string) (cd.Attempt, bool, error) {
+	c.calls = append(c.calls, "evidence")
+	c.evidence = append(c.evidence, fingerprint)
+	if c.existing == nil {
+		return cd.Attempt{}, false, nil
+	}
+	return *c.existing, true, nil
+}
+
+func (c *startChoiceCombat) CloseTx(_ context.Context, _ tx.Tx, request appcombat.TerminalRequest) (appcombat.Closed, error) {
+	c.calls = append(c.calls, "close")
+	c.closes = append(c.closes, request)
+	closed := *c.existing
+	c.existing = nil
+	return appcombat.Closed{Attempt: closed}, nil
 }
 
 func (c *startChoiceCombat) AttestSummaryTx(context.Context, tx.Tx, appcombat.SummaryRequest) (appcombat.SummaryAttested, error) {
