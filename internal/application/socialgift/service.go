@@ -136,7 +136,7 @@ func (s Service) root(c context.Context, t tx.Tx, pid identity.PlayerID) (social
 	return r, nil
 }
 func preflightRoot(r socialrelation.Root, at time.Time) error {
-	if r.StateVersion == math.MaxInt64 || at.Before(r.UpdatedAt) || at.Before(r.CreatedAt) {
+	if r.StateVersion == math.MaxInt64 || at.Before(gen.EffectiveObservation(at, r.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, r.CreatedAt)) {
 		return ErrClock
 	}
 	return nil
@@ -191,11 +191,11 @@ func (s Service) epoch(c context.Context, t tx.Tx, pid identity.PlayerID, day st
 			}
 		}
 	}
-	if have && (last.Day > used || at.Before(last.UpdatedAt) || last.Version == math.MaxInt64) {
+	if have && (last.Day > used || at.Before(gen.EffectiveObservation(at, last.UpdatedAt)) || last.Version == math.MaxInt64) {
 		return e, ok, used, ErrClock
 	}
 	if ok {
-		if e.Version == math.MaxInt64 || at.Before(e.UpdatedAt) {
+		if e.Version == math.MaxInt64 || at.Before(gen.EffectiveObservation(at, e.UpdatedAt)) {
 			return e, ok, used, ErrClock
 		}
 		return e, true, used, nil
