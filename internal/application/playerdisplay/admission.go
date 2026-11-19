@@ -2,7 +2,6 @@ package playerdisplay
 
 import (
 	"context"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
@@ -98,9 +97,6 @@ func (s Service) admit(c context.Context, a identity.ActorContext, q Command, o 
 		state, e := s.Store.ReadDisplayStateTx(c, sc.Tx, a.PlayerID, true)
 		if e != nil {
 			return e
-		}
-		if at.Before(gen.EffectiveObservation(at, state.Basis.Profile.UpdatedAt)) {
-			return ErrConflict
 		}
 		needed = q.Kind == "purchase" || q.Kind == "rename" && state.Basis.Profile.DisplayName != "" && state.Basis.Profile.DisplayName != q.Name
 		if !needed {
