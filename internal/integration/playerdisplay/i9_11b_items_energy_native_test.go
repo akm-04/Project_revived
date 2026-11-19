@@ -340,6 +340,9 @@ func TestI911BGoldenHandAndTenfoldSpendOnce(t *testing.T) {
 	tenfold := dispatcher.Dispatch(ctx, i911bRequest(a, 29, map[string]any{"consume_id": int64(1)}, tenfoldOp))
 	i911bStatusCode(t, tenfold)
 	replyconformance.Check(t, 29, tenfold.Body)
+	if tenfold.Body["consume_id"] != int64(1) {
+		t.Fatalf("tenfold consume_id %#v", tenfold.Body["consume_id"])
+	}
 	expectedTenfold, _, _, err := catalog.MidasMana(1, 2, 10, combat.NewStream(tenfoldOp.Derive("items-energy.golden-hand/v1", 0)))
 	if err != nil {
 		t.Fatal(err)
@@ -712,6 +715,9 @@ func TestI911BQuickFumoOwnerRoute(t *testing.T) {
 	response := dispatcher.Dispatch(ctx, request())
 	i911bStatusCode(t, response)
 	replyconformance.Check(t, 29, response.Body)
+	if response.Body["consume_id"] != int64(2) {
+		t.Fatalf("fumo consume_id %#v", response.Body["consume_id"])
+	}
 	if response.Body["fumo"] != int64(150) || response.Body["cost"] != int64(20) {
 		t.Fatalf("quick fumo reply %#v", response.Body)
 	}
@@ -731,6 +737,42 @@ func TestI911BQuickFumoOwnerRoute(t *testing.T) {
 	}
 	if i911bHeroFumo(t, database, a, hero.PartnerID, 1) != 150 || i911bScalarBalance(t, database, a, "crystal") != 980 {
 		t.Fatal("refused quick fumo changed state")
+	}
+}
+
+// TestI911BTrialConsumeReplyCarriesRemaining proves MID 29 consume_id 3..10
+// answers the stock MapDetailWindow callback: the numeric branch id plus the
+// post-purchase trial allowance at trial_info.left_times.
+func TestI911BTrialConsumeReplyCarriesRemaining(t *testing.T) {
+	database := pool(t)
+	a, rev, _ := i911bFixture(t, database)
+	composition := itemsEnergyComposition(database, database, a)
+	composition.Dispatcher.Campaign = campaignMode(t, database)
+	dispatcher := composition.Dispatcher
+	compositeLevel(t, database, a, rev, 100)
+	cat, err := (contentstore.Store{Queryer: database}).CampaignCatalogTx(ctx, database, rev)
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := modes.Day(time.Now())
+	selected := -1
+	for index, group := range cat.TrialGroups {
+		if group.ConsumeID >= 3 && group.ConsumeID <= 10 && group.Scheduled(cat, day) {
+			selected = index
+			break
+		}
+	}
+	if selected < 0 {
+		t.Fatal("no scheduled trial group")
+	}
+	group := cat.TrialGroups[selected]
+	i911bScalarSet(t, database, a, "crystal", 10000)
+	response := dispatcher.Dispatch(ctx, i911bRequest(a, 29, map[string]any{"consume_id": group.ConsumeID}, op()))
+	i911bStatusCode(t, response)
+	replyconformance.Check(t, 29, response.Body)
+	info, _ := response.Body["trial_info"].(map[string]any)
+	if response.Body["consume_id"] != group.ConsumeID || info["left_times"] != group.DailyLimit+1 {
+		t.Fatalf("trial reply %#v want consume_id=%d left_times=%d", response.Body, group.ConsumeID, group.DailyLimit+1)
 	}
 }
 

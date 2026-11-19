@@ -153,6 +153,13 @@ func (o ItemsEnergyDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 		if err != nil {
 			return failCampaign(err)
 		}
+		// MapDetailWindow.lua:756-766 reads only trial_info.left_times on this
+		// branch; the other MID 29 paths stay neutral because they are REQUIRED.
+		body["consume_id"] = id
+		body["cost"] = int64(0)
+		body["crit"] = int64(0)
+		body["mana"] = int64(0)
+		body["fumo"] = map[string]any{}
 		return okI5(body)
 	}
 	return failureReply(refusal(unprovenRefusalCode))
@@ -207,6 +214,7 @@ func quickFumoReply(result apphero.QuickFumoResult, err error) httpedge.Response
 	// MID 29's registry paths are shared by every consume_id branch; the fumo
 	// client reads only fumo, so the other stock fields carry neutral values.
 	return okI5(map[string]any{
+		"consume_id": int64(2),
 		"fumo":       result.Fumo,
 		"cost":       result.Cost,
 		"crit":       int64(0),
