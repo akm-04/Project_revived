@@ -47,6 +47,21 @@ const (
 	HeroSkillLevelRefusalNoChange           HeroSkillLevelRefusal = "no_change"
 )
 
+// HeroSkillLevelRefusalError aborts the transaction for a request whose plan
+// cannot commit, so a refusal changes no state and writes no receipt
+// (I9_11A C11, LEAD_SEAMS section 1). The fields are the committed-state values
+// the reply carries; they were read before the refusal aborted the transaction.
+type HeroSkillLevelRefusalError struct {
+	Reason      HeroSkillLevelRefusal
+	SkillLevels [6]int64
+	SkillPoint  int64
+	SkillTime   int64
+}
+
+func (e HeroSkillLevelRefusalError) Error() string {
+	return "character hero: skill level refused: " + string(e.Reason)
+}
+
 type HeroSkillLevelStore interface {
 	LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Hero, error)
 	ReadHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, error)
@@ -64,7 +79,7 @@ type HeroSkillLevelBooks interface {
 type HeroSkillLevelContent interface {
 	HeroRawSkillsActive(context.Context) (string, bool, error)
 	HeroSkillCatalogTx(context.Context, tx.Queryer, string, int64) (character.HeroSkillCatalog, error)
-	HeroKind(context.Context, string, int64) (character.HeroKind, error)
+	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
 }
 
 type HeroSkillLevelChange struct {
@@ -275,14 +290,16 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 	}
 	var known HeroSkillLevelResult
 	var found bool
+	// The fence instant is sampled before the read transaction opens: the pool
+	// time authority cannot be queried again from inside an open transaction (C1-2).
+	at, err := s.Timed.Binder.Time.Now(ctx)
+	if err != nil {
+		return HeroSkillLevelResult{}, err
+	}
 	readResult, err := s.Reads.Run(ctx, op, profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
 		var err error
 		known, found, err = s.proof(ctx, scope.Tx, actor, partner, family, changes, op)
 		if err != nil || !found {
-			return err
-		}
-		at, err := s.Timed.Binder.Time.Now(ctx)
-		if err != nil {
 			return err
 		}
 		return s.Fence.FenceActorTx(ctx, scope.Tx, actor, at)
@@ -357,7 +374,7 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 		if at.Before(hero.UpdatedAt) {
 			return ErrHeroSkillLevelStaleTime
 		}
-		kind, err := s.Content.HeroKind(ctx, hero.CreationContentRevision, hero.TableID)
+		kind, err := s.Content.HeroKindTx(ctx, scope.Tx, hero.CreationContentRevision, hero.TableID)
 		if err != nil {
 			return err
 		}
@@ -408,47 +425,51 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 		}
 		// C11: a refusal distinguishes the coin wallet from every other
 		// permanent cause. Coins win when both balances are short, matching the
-		// stock "Not enough coins" toast.
+		// stock "Not enough coins" toast. The returned error rolls the transaction
+		// back, so the mission root rollover above and the receipt below are not
+		// committed.
+		refused := HeroSkillLevelRefusalError{SkillLevels: result.SkillLevels, SkillPoint: result.SkillPoint, SkillTime: result.SkillTime}
 		switch {
 		case !planValid:
-			result.RefusalReason = HeroSkillLevelRefusalNoChange
+			refused.Reason = HeroSkillLevelRefusalNoChange
 		case prepared.ManaShort:
-			result.RefusalReason = HeroSkillLevelRefusalInsufficientMana
+			refused.Reason = HeroSkillLevelRefusalInsufficientMana
 		case prepared.PointsShort:
-			result.RefusalReason = HeroSkillLevelRefusalInsufficientPoints
+			refused.Reason = HeroSkillLevelRefusalInsufficientPoints
 		}
-		if planValid && prepared.Affordable {
-			oldVersion := hero.StateVersion
-			for _, change := range changes {
-				index := change.Slot - 1
-				hero.RawSkills.Levels[index] += change.Count
-			}
-			hero.StateVersion++
-			hero.UpdatedAt = at
-			if err := s.Store.SaveHeroSkillLevelsTx(ctx, scope.Tx, hero, oldVersion); err != nil {
+		if refused.Reason != HeroSkillLevelRefusalNone {
+			return refused
+		}
+		oldVersion := hero.StateVersion
+		for _, change := range changes {
+			index := change.Slot - 1
+			hero.RawSkills.Levels[index] += change.Count
+		}
+		hero.StateVersion++
+		hero.UpdatedAt = at
+		if err := s.Store.SaveHeroSkillLevelsTx(ctx, scope.Tx, hero, oldVersion); err != nil {
+			return err
+		}
+		resources, err := s.Resources.ApplyHeroSkillLevelCostTx(ctx, scope.Tx, prepared)
+		if err != nil {
+			return err
+		}
+		result.SkillLevels = hero.RawSkills.Levels
+		result.SkillPoint = resources.SkillPoint
+		result.SkillTime = resources.SkillTime
+		result.StateVersion = hero.StateVersion
+		result.Success = true
+		result.Changed = true
+		// C3: exactly one fact per accepted request; the receipt replay path
+		// returns above and never reaches this code.
+		changedLevels := int64(0)
+		for _, change := range changes {
+			changedLevels += change.Count
+		}
+		if changedLevels > 0 {
+			fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "character-hero", SourceBusinessKey: op.ID.String(), Kind: "HERO_SKILL_UPGRADED", Delta: changedLevels}
+			if err := s.Facts.RecordTx(factContext, scope.Tx, scope.Operation.Operation(), fact); err != nil {
 				return err
-			}
-			resources, err := s.Resources.ApplyHeroSkillLevelCostTx(ctx, scope.Tx, prepared)
-			if err != nil {
-				return err
-			}
-			result.SkillLevels = hero.RawSkills.Levels
-			result.SkillPoint = resources.SkillPoint
-			result.SkillTime = resources.SkillTime
-			result.StateVersion = hero.StateVersion
-			result.Success = true
-			result.Changed = true
-			// C3: exactly one fact per accepted request; the receipt replay path
-			// returns above and never reaches this code.
-			changedLevels := int64(0)
-			for _, change := range changes {
-				changedLevels += change.Count
-			}
-			if changedLevels > 0 {
-				fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "character-hero", SourceBusinessKey: op.ID.String(), Kind: "HERO_SKILL_UPGRADED", Delta: changedLevels}
-				if err := s.Facts.RecordTx(factContext, scope.Tx, scope.Operation.Operation(), fact); err != nil {
-					return err
-				}
 			}
 		}
 		payload, err := json.Marshal(result)
@@ -539,8 +560,14 @@ func heroSkillLevelCost(hero character.Hero, kind character.HeroKind, skillIDs [
 }
 
 func (r HeroSkillLevelResult) SkillString() string {
-	parts := make([]string, len(r.SkillLevels))
-	for index, level := range r.SkillLevels {
+	return HeroSkillLevelsString(r.SkillLevels)
+}
+
+// HeroSkillLevelsString renders the pipe-separated skills field the stock MID
+// 39 callback splits (C1).
+func HeroSkillLevelsString(levels [6]int64) string {
+	parts := make([]string, len(levels))
+	for index, level := range levels {
 		parts[index] = strconv.FormatInt(level, 10)
 	}
 	return strings.Join(parts, "|")
