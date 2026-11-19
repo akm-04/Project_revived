@@ -48,6 +48,7 @@ import (
 	librarydomain "gxb.local/backend/v2/internal/domain/librarylocal"
 	mentordomain "gxb.local/backend/v2/internal/domain/mentor"
 	occultdomain "gxb.local/backend/v2/internal/domain/occult"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"reflect"
 	"strconv"
@@ -73,7 +74,7 @@ func catalogAchievements(p *pg.Pool, counts ach.Counter) ach.Service {
 	content := contentstore.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
 	grants := i5.Service{Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c4fa-achievement-native-fixture-secret")}
-	runtime := &ach.Runtime{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Active: content, Counts: counts, Fence: values, Grants: grants, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Servers: i4store.ServerNames{}}
+	runtime := &ach.Runtime{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Active: content, Counts: counts, Fence: values, Grants: grants, Stacks: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Servers: i4store.ServerNames{}}
 	return ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p), Runtime: runtime}
 }
 
@@ -531,6 +532,87 @@ func TestI7C4FBOwnerFactCountsObserve(t *testing.T) {
 		got := entry(view, id)
 		if got.Progress != progress || got.CompleteTimes[0] == 0 {
 			t.Fatalf("achievement %d progress=%d complete=%v, want %d and tier 1", id, got.Progress, got.CompleteTimes, progress)
+		}
+	}
+}
+
+// seedAchievementStreaks records earned tier-3 rows for producers a fixture
+// does not run, so a claim test can reach the level 5/6 rewards.
+func seedAchievementStreaks(t *testing.T, p *pg.Pool, a identity.ActorContext, revision string, ids []int64) {
+	t.Helper()
+	at := time.Now().UTC().Truncate(time.Microsecond)
+	day := int64(1)
+	periodic := map[int64]bool{d.TopFloorStreakID: true, d.WeeklyStreakID: true}
+	tr, e := p.Begin(ctx, tx.Options{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer tr.Rollback(ctx)
+	for _, id := range ids {
+		streak, e := d.NewStreak(a.PlayerID, id, revision, at)
+		if e != nil {
+			t.Fatal(e)
+		}
+		streak.Current = 3
+		streak.CompleteTimes = [3]*time.Time{&at, &at, &at}
+		if periodic[id] {
+			streak.LastDay = &day
+		}
+		if e = (achievementstore.Store{}).SaveStreakTx(ctx, tr, streak, 0); e != nil {
+			t.Fatalf("streak %d: %v", id, e)
+		}
+	}
+	if e = tr.Commit(ctx); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func assertFirstAward(t *testing.T, p *pg.Pool, a identity.ActorContext, claim ach.ClaimResult, wantItem, wantNumber int64) {
+	t.Helper()
+	if len(claim.Awards) == 0 || claim.Awards[0].TableID != wantItem || claim.Awards[0].ItemNum != wantNumber {
+		t.Fatalf("first award: %+v, want item %d number %d", claim.Awards, wantItem, wantNumber)
+	}
+	var quantity int64
+	if e := p.QueryRow(ctx, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, int64(a.PlayerID), wantItem).Scan(&quantity); e != nil || quantity != wantNumber {
+		t.Fatalf("durable stack %d %v", quantity, e)
+	}
+}
+
+func TestI9_11S15AchievementFirstRewardStackNative(t *testing.T) {
+	p := pool(t)
+	a, revision := libraryFixture(t, p, false)
+	counts := fixedCounts{}
+	for _, id := range d.OwnedStateIDs {
+		counts[id] = 100000
+	}
+	service := catalogAchievements(p, counts)
+	if _, e := service.Load(ctx, a, op()); e != nil {
+		t.Fatal(e)
+	}
+	seedAchievementStreaks(t, p, a, revision, []int64{d.TopFloorStreakID, d.WeeklyStreakID, d.ArenaStreakID, d.FantasyTopRankID, d.FantasyDamageID, d.GreatCustomerID, d.MediumTenPullID, d.WinStreakID, d.LeagueDaysID})
+	view, e := service.Load(ctx, a, op())
+	if e != nil || view.TotalPoints < 40000 {
+		t.Fatalf("fixture points %d %v", view.TotalPoints, e)
+	}
+	levels := []int64{2, 3, 4, 5, 6}
+	operations := make([]operation.Context, len(levels))
+	for index := range levels {
+		operations[index] = op()
+	}
+	for index, level := range levels {
+		claim, e := service.Claim(ctx, a, operations[index])
+		if e != nil || claim.Level != level {
+			t.Fatalf("claim level %d: %+v %v", level, claim, e)
+		}
+		if level == 5 {
+			assertFirstAward(t, p, a, claim, 50001181, 3)
+		}
+		if level == 6 {
+			assertFirstAward(t, p, a, claim, 50001181, 9)
+			replay, e := service.Claim(ctx, a, operations[index])
+			if e != nil || !reflect.DeepEqual(replay, claim) {
+				t.Fatalf("receipt replay %+v %v", replay, e)
+			}
 		}
 	}
 }

@@ -1104,6 +1104,7 @@
   "i5": {
    "achievement": [
     "*FenceActorTx",
+    "*ReadStackTx",
     "*SettleGrantTx"
    ],
    "adventure": [
@@ -2393,6 +2394,7 @@
    ],
    "i5": [
     "*FenceActorTx",
+    "*ReadStackTx",
     "*SettleGrantTx"
    ],
    "inscription": [

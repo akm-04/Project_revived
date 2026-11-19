@@ -143,6 +143,7 @@
    "player_directory_profiles",
    "player_hero_roots",
    "player_heroes",
+   "player_item_stacks",
    "player_pet_roots",
    "player_pets"
   ],
@@ -168,6 +169,7 @@
    "i9_11e_achievement_medium_vending.json"
   ],
   "unit": [
+   "claim_first_award_test.go",
    "counts_test.go"
   ]
  }
