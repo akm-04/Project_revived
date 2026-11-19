@@ -2,7 +2,6 @@ package socialinbox
 
 import (
 	"context"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -101,7 +100,7 @@ func (s GiftService) ApplyTx(c context.Context, t tx.Tx, p PreparedGift) (Notice
 	return out, MatchGift(out, p.descriptor)
 }
 func PreflightConsumption(n Notice, at time.Time) error {
-	if !n.Active || n.VersionExhausted() || at.Before(gen.EffectiveObservation(at, n.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, n.NoticeTime)) {
+	if !n.Active || n.VersionExhausted() {
 		return ErrInvalidNotice
 	}
 	return nil
