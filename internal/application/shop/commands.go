@@ -303,11 +303,17 @@ func (s Service) info(c context.Context, sc gen.TimedScope, catalog d.Catalog, s
 		}
 		items = append(items, item)
 	}
-	return map[string]any{
+	reply := map[string]any{
 		"shop_type": shop.Type, "refresh_times": row.EffectiveRefreshTimes(s.day(sc)),
 		"open_time": int64(0), "is_open": int64(1), "count_down": int64(0), "items": items,
-		"hot_hero": int64(0), "cost_stone": []any{}, "is_awarded": []any{},
-	}, nil
+		"cost_stone": []any{}, "is_awarded": []any{},
+	}
+	// Space (type 8) serves no featured stock while 1396 is I10; a numeric 0 is
+	// truthy in Lua and opens the featured dialog (ShopWindow.lua:1722).
+	if shop.Type != 8 {
+		reply["hot_hero"] = int64(0)
+	}
+	return reply, nil
 }
 
 func (s Service) priceFor(c context.Context, sc gen.TimedScope, catalog d.Catalog, shop d.Shop, slot d.StockSlot, pid identity.PlayerID) (int64, error) {

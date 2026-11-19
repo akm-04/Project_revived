@@ -228,6 +228,18 @@
    "mid": 2313,
    "path": "awards",
    "reason": "handleRewards(arg_6_1.awards, callback) takes its nil branch when awards is absent (SelfPlayer.lua:4324-4330) and runs the close/refresh callback; the server omits awards when the grant has no representable row (an empty draw or a fully mailed reward)."
+  },
+  {
+   "client": "app/windows/ShopWindow.lua:1722",
+   "mid": 32,
+   "path": "hot_hero",
+   "reason": "checkShowDialog truth-tests hotHero_[shopType].hot_hero (ShopWindow.lua:1715-1726); a numeric 0 is truthy in Lua and would open the featured dialog while shop type 8 serves no featured stock (1396 is I10), so the Space shop reply omits the key (I9_11_T34_REPAIRS_V1 S8)."
+  },
+  {
+   "client": "app/windows/ShopWindow.lua:1722",
+   "mid": 34,
+   "path": "hot_hero",
+   "reason": "onShopRefresh_ passes the refresh reply to onShopInfo_, which caches hot_hero, and checkShowDialog truth-tests it (ShopWindow.lua:1715-1726); shop type 8 serves no featured stock while 1396 is I10, so the refresh reply omits the key (I9_11_T34_REPAIRS_V1 S8)."
   }
  ]
 }

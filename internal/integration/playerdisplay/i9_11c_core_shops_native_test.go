@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 func i911cComposition(p *pg.Pool, a identity.ActorContext) stockruntime.ShopComposition {
@@ -147,6 +148,7 @@ func TestI911CCoreShopsNative(t *testing.T) {
 	if load.HTTPStatus != 200 || load.Body["shop_type"] != int64(1) || load.Body["is_open"] != int64(1) || load.Body["open_time"] != int64(0) || load.Body["count_down"] != int64(0) {
 		t.Fatalf("MID 32 type 1: %+v", load)
 	}
+	replyconformance.Check(t, 32, load.Body)
 	items := i911cItems(t, load)
 	if len(items) != 8 {
 		t.Fatalf("type 1 slot count %d, want 8", len(items))
@@ -202,6 +204,7 @@ func TestI911CCoreShopsNative(t *testing.T) {
 	if refresh.HTTPStatus != 200 || refresh.Body["refresh_times"] != int64(1) {
 		t.Fatalf("MID 34: %+v", refresh)
 	}
+	replyconformance.Check(t, 34, refresh.Body)
 	if after := i911cScalarAmount(t, p, a, "crystal"); after != crystalBeforeRefresh-50 {
 		t.Fatalf("refresh debit %d -> %d, want 50", crystalBeforeRefresh, after)
 	}

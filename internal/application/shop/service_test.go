@@ -95,6 +95,24 @@ func TestObservePurchaseMapsAchievementOvertaken(t *testing.T) {
 	}
 }
 
+func TestInfoOmitsHotHeroForSpaceShopWithoutFeaturedStock(t *testing.T) {
+	sc, _ := purchaseScope(t)
+	catalog := d.Catalog{Shops: map[int64]d.Shop{8: {Type: 8}, 1: {Type: 1}}}
+	service := Service{}
+	for _, testCase := range []struct {
+		shopType int64
+		present  bool
+	}{{shopType: 8, present: false}, {shopType: 1, present: true}} {
+		reply, err := service.info(context.Background(), sc, catalog, catalog.Shops[testCase.shopType], d.Row{}, identity.PlayerID(10001001))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, present := reply["hot_hero"]; present != testCase.present {
+			t.Fatalf("shop type %d hot_hero present=%t, want %t", testCase.shopType, present, testCase.present)
+		}
+	}
+}
+
 func TestCrystalDebitReadsOnlyTheCrystalScalar(t *testing.T) {
 	mixed := appi5.MaterialCost{Scalars: []appi5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: 30}, {ResourceKey: "mana", Amount: 7}}}
 	if got := crystalDebit(mixed); got != 30 {
