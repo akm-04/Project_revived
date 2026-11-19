@@ -61,9 +61,6 @@ func (s Service) FactsTx(ctx context.Context, scope characterasset.CoherentReadS
 	if e = f.Validate(c); e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(gen.EffectiveObservation(scope.ObservedAt, f.UpdatedAt)) {
-		return out, d.ErrStale
-	}
 	if !f.Known() {
 		return out, d.ErrUnavailable
 	}
@@ -100,9 +97,6 @@ func (s Service) HeroInputsTx(ctx context.Context, scope characterasset.Coherent
 	}
 	if root.PlayerID != ref.PlayerID || h.PlayerID != ref.PlayerID || h.PartnerID != ref.PartnerID || h.ValidatePersistent() != nil {
 		return out, d.ErrUnqualified
-	}
-	if scope.ObservedAt.Before(gen.EffectiveObservation(scope.ObservedAt, root.UpdatedAt)) || scope.ObservedAt.Before(gen.EffectiveObservation(scope.ObservedAt, h.UpdatedAt)) {
-		return out, d.ErrStale
 	}
 	h.Kind, e = s.Kinds.HeroKindTx(ctx, q, scope.ContentRevision, h.TableID)
 	if e != nil || h.Validate() != nil {
@@ -152,9 +146,6 @@ func (s Service) PrepareWriteTx(ctx context.Context, t tx.Tx, server identity.Lo
 	if e = f.Validate(c); e != nil {
 		return nil, e
 	}
-	if op.StartedAt.Before(gen.EffectiveObservation(op.StartedAt, f.UpdatedAt)) {
-		return nil, d.ErrStale
-	}
 	return &PreparedWrite{before: f, catalog: c, op: op}, nil
 }
 func (s Service) ApplyWriteTx(ctx context.Context, t tx.Tx, p *PreparedWrite, progress d.Progress, run *d.Run, originRef string) (d.Facts, error) {
@@ -164,7 +155,7 @@ func (s Service) ApplyWriteTx(ctx context.Context, t tx.Tx, p *PreparedWrite, pr
 	f := p.before
 	f.Version++
 	f.ContentRevision, _ = p.op.Policies.Get("content")
-	f.UpdatedAt = p.op.StartedAt
+	f.UpdatedAt = gen.EffectiveObservation(p.op.StartedAt, p.before.UpdatedAt, p.before.CreatedAt)
 	f.Payload = d.Payload{Kind: d.Retained, Policy: d.Policy, OriginOperation: p.op.ID, OriginRef: originRef, Progress: &progress, Run: run}
 	f.Payload = f.Payload.Clone()
 	if e := f.Validate(p.catalog); e != nil {
