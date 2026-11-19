@@ -215,7 +215,7 @@ func TestI9_8DAdventureTriggerReadsAndExpiryNative(t *testing.T) {
 		t.Fatal("first info did not create the defense room")
 	}
 
-	// 10002 and 10003 have no producer and never fire.
+	// 10002 has no producer yet; SHOP_PURCHASE (10003) is produced by the shop.
 	for _, kind := range []string{"FAVOR", "STORE_SPEND"} {
 		if _, ok := d.EventForFactKind(kind); ok {
 			t.Fatal("kind has an event", kind)

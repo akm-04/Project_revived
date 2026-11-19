@@ -52,6 +52,10 @@ const CampaignSweepKind = "CAMPAIGN_SWEEP"
 // feeds mission 10029 and Adventure 10002 (C17, D481).
 const IntimacyImprovedKind = "INTIMACY_IMPROVED"
 
+// ShopPurchaseKind is one settling shop purchase that debited crystal; it feeds
+// Adventure 10003 (C4, D368).
+const ShopPurchaseKind = "SHOP_PURCHASE"
+
 // VoyageFinishedKind is one notice board mission the Event Centre settled; it
 // feeds mission 10030 (fact 125, I9-MISSION-PRODUCERS).
 const VoyageFinishedKind = "VOYAGE_FINISHED"

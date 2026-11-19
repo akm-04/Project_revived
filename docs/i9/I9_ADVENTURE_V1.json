@@ -39,9 +39,9 @@
  "design": "stages/I9-8/PLAN.md, research/adventure.md",
  "clauses": [
   "C1 Function 68 level 11; 2416 also MID1 detail; list is authoritative, finish push idempotent",
-  "C2 Triggers: one observer in objective RecordTx maps fact kinds to events (sweep 10001, PVP_FIGHT 10004, SUMMON 10005, FANTASY 10006) with table rate, Derive entropy, one active per type; rank amendment D369",
+  "C2 Triggers: one observer in objective RecordTx maps fact kinds to events (sweep 10001, SHOP_PURCHASE 10003, PVP_FIGHT 10004, SUMMON 10005, FANTASY 10006) with table rate, Derive entropy, one active per type; rank amendment D369",
   "C3 Lifetime end = occurrence time + time_limit; reads after expiry refuse with 35029",
-  "C4 10002 favor never fires until I9-10 ships ADD_FAVOR 840 and only for an owned hero below the favor limit (client crash otherwise); 10003 fires when I9-11 shops debit",
+  "C4 10002 favor never fires until I9-10 ships ADD_FAVOR 840 and only for an owned hero below the favor limit (client crash otherwise); 10003 fires when an I9-11 shop purchase debits crystal (SHOP_PURCHASE)",
   "C5 Defense 10001: room created on first info for its occurrence, 6 seats, band ±5, 3 monsters, 3 tries per position per occurrence, attested and clamped",
   "C6 Illusion 10006: single 2421/2422 attested and clamped; co-op 2411 is one server report, same key to all, awards by mail to all",
   "C7 PVP 10004: opponent from Arena standings within adventure_fight_ranking_section, robot fallback; is_win = star>0 added beside the report, awards in reply",

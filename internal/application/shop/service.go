@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	d "gxb.local/backend/v2/internal/domain/shop"
 	"gxb.local/backend/v2/internal/foundation/changes"
@@ -69,6 +70,12 @@ type Achievements interface {
 	ObserveShopPurchaseTx(context.Context, tx.Tx, identity.PlayerID, string, time.Time) error
 }
 
+// ObjectiveFacts is the objective-fact port; a purchase that debits crystal
+// reports one SHOP_PURCHASE fact inside the settling transaction (C4).
+type ObjectiveFacts interface {
+	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
+}
+
 type Balances interface {
 	ReadStackTx(context.Context, tx.Queryer, identity.PlayerID, int64) (economy.StackState, bool, error)
 	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
@@ -114,6 +121,7 @@ type Service struct {
 	Functions    Functions
 	TeamShops    TeamShops
 	Achievements Achievements
+	Facts        ObjectiveFacts
 	Receipts     Receipts
 	ReceiptRead  receipt.Reader
 }
@@ -128,7 +136,7 @@ func retry() tx.RetryPolicy {
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Content != nil &&
-		s.Store != nil && s.Fence != nil && s.Players != nil && s.Exchange != nil && s.Debiter != nil && s.Achievements != nil && s.Balances != nil &&
+		s.Store != nil && s.Fence != nil && s.Players != nil && s.Exchange != nil && s.Debiter != nil && s.Achievements != nil && s.Facts != nil && s.Balances != nil &&
 		s.Privileges != nil && s.Progression != nil && s.Functions != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
@@ -399,10 +407,20 @@ func (s Service) regenerate(c context.Context, sc gen.TimedScope, catalog d.Cata
 	return nil
 }
 
-func (s Service) observePurchase(c context.Context, sc gen.TimedScope, pid identity.PlayerID) error {
+func (s Service) observePurchase(c context.Context, sc gen.TimedScope, pid identity.PlayerID, crystal int64) error {
 	revision, ok := sc.Operation.Operation().Policies.Get("content")
 	if !ok {
 		return d.ErrUnavailable
+	}
+	// The receipt guard runs this body once per operation, so a replay, a
+	// refusal and a coin-only purchase record no fact. The fact is written
+	// before the achievement rows, which lock last (LEAD_SEAMS_I9-11 V2 §2).
+	if crystal > 0 {
+		op := sc.Operation.Operation()
+		fact := objective.Fact{PlayerID: pid, SourceDomain: "shop", SourceBusinessKey: op.ID.String(), Kind: objective.ShopPurchaseKind, Delta: crystal}
+		if err := s.Facts.RecordTx(c, sc.Tx, op, fact); err != nil {
+			return err
+		}
 	}
 	err := s.Achievements.ObserveShopPurchaseTx(c, sc.Tx, pid, revision, sc.Operation.DecisionAt())
 	// A purchase overtaken by a newer accepted one lost the race; the client

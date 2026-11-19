@@ -27,6 +27,7 @@ type ShopDependencies struct {
 	Authority    rt.GameplayAuthorityPort
 	TeamShops    app.TeamShops
 	Achievements app.Achievements
+	Facts        app.ObjectiveFacts
 }
 
 // ShopComposition is the composed 11C owner plus its dispatcher.
@@ -51,6 +52,7 @@ func NewShopComposition(deps ShopDependencies) ShopComposition {
 		Functions:    deps.Values,
 		TeamShops:    deps.TeamShops,
 		Achievements: deps.Achievements,
+		Facts:        deps.Facts,
 		Receipts:     deps.Receipts,
 		ReceiptRead:  deps.ReceiptRead,
 	}

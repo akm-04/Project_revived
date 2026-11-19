@@ -127,7 +127,7 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err = s.save(c, sc, row, false); err != nil {
 			return nil, err
 		}
-		if err = s.observePurchase(c, sc, actor.PlayerID); err != nil {
+		if err = s.observePurchase(c, sc, actor.PlayerID, crystalDebit(cost)); err != nil {
 			return nil, err
 		}
 		return map[string]any{"shop_type": shop.Type, "index": request.Index, "isbuy": int64(1), "isBuy": int64(1), "buy_times": int64(1)}, nil
@@ -199,7 +199,7 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 		if err = s.save(c, sc, row, false); err != nil {
 			return nil, err
 		}
-		if err = s.observePurchase(c, sc, actor.PlayerID); err != nil {
+		if err = s.observePurchase(c, sc, actor.PlayerID, crystalDebit(cost)); err != nil {
 			return nil, err
 		}
 		isBuy := make([]int64, len(request.List))
@@ -470,6 +470,18 @@ func (s Service) addStoneDebit(c context.Context, sc gen.TimedScope, pid identit
 	}
 	bill.stacks[stoneID] += price
 	return nil
+}
+
+// crystalDebit is the crystal part of a settled cost; only a purchase with a
+// crystal debit above zero reports the Adventure Store fact (C4).
+func crystalDebit(cost appi5.MaterialCost) int64 {
+	key, _ := d.SellCrystal.ScalarKey()
+	for _, scalar := range cost.Scalars {
+		if scalar.ResourceKey == key {
+			return scalar.Amount
+		}
+	}
+	return 0
 }
 
 func scalarCosts(values map[string]int64) []appi5.ScalarMaterialCost {

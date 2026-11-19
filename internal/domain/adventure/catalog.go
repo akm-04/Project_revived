@@ -98,8 +98,7 @@ func Profile(id int64) (Event, bool) {
 	return sourceEvents[index], true
 }
 
-// EventForFactKind is the one fact-kind to event map. 10003 has no producer yet
-// (C4, D368) and is deliberately absent.
+// EventForFactKind is the one fact-kind to event map.
 func EventForFactKind(kind string) (Event, bool) {
 	switch kind {
 	case SweepFactKind:
@@ -112,6 +111,8 @@ func EventForFactKind(kind string) (Event, bool) {
 		return Profile(EventIllusion)
 	case objective.IntimacyImprovedKind:
 		return Profile(EventFavor)
+	case objective.ShopPurchaseKind:
+		return Profile(EventShop)
 	default:
 		return Event{}, false
 	}
