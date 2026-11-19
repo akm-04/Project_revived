@@ -131,8 +131,26 @@ func TestI9_5CTowerNativeProgressAndTimedSweep(t *testing.T) {
 		t.Fatal("forged finish must not avoid crystal requirement")
 	}
 	clock.at = time.Unix(r.Sweep.Due, 0).UTC()
-	if _, e = s.Detail(ctx, a, op()); e != nil {
+	detail, e := s.Detail(ctx, a, op())
+	if e != nil {
 		t.Fatal("redpoint", e)
+	}
+	if _, ok := detail["awards"]; ok {
+		t.Fatalf("822 detail carries an uncommitted award: %v", detail)
+	}
+	login := map[string]any{}
+	if e = s.OverlayMID1(ctx, p, a, false, clock.at, login); e != nil {
+		t.Fatal("login detail", e)
+	}
+	redpoint, ok := login["822"].(map[string]any)
+	if !ok {
+		t.Fatalf("login detail 822 missing: %v", login)
+	}
+	if _, ok = redpoint["awards"]; ok {
+		t.Fatalf("822 login redpoint carries an uncommitted award: %v", redpoint)
+	}
+	if _, ok = redpoint["begin_sweep_time"]; !ok {
+		t.Fatalf("822 login redpoint lost begin_sweep_time: %v", redpoint)
 	}
 	before := petCampaignRecord(t, p, a)
 	if before.Current != 0 || before.Sweep == nil {
@@ -197,6 +215,15 @@ func TestI9_5CTowerNativeProgressAndTimedSweep(t *testing.T) {
 	t.Log(fmt.Sprintf("genuine77 victories -> reset ->4620s durable sweep -> next78, revision%s", rev))
 }
 
+func requireFloorArrays(t *testing.T, body map[string]any, fields ...string) {
+	t.Helper()
+	for _, field := range fields {
+		values, ok := body[field].([]int64)
+		if !ok || len(values) != 20 {
+			t.Fatalf("%s is not a 20-element int array: %#v", field, body[field])
+		}
+	}
+}
 func seedTowerProgress(t *testing.T, p *pg.Pool, a identity.ActorContext, r d.State, at time.Time) {
 	t.Helper()
 	tr, e := p.Begin(ctx, tx.Options{})
@@ -339,14 +366,18 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	if stackQuantity(t, p, a.PlayerID, 50001328) != tickets-1 {
 		t.Fatal("exact START double charged")
 	}
-	if _, e := s.Result(ctx, a, app.Result{Win: true, Kind: 2, Floor: 1}, op()); e != nil {
+	result, e := s.Result(ctx, a, app.Result{Win: true, Kind: 2, Floor: 1}, op())
+	if e != nil {
 		t.Fatal(e)
 	}
+	requireFloorArrays(t, result["info"].(map[string]any)["super"].(map[string]any), "buy_info", "sweep_info")
 	for i := 0; i < 3; i++ {
 		call := op()
-		if _, e := s.EliteSweep(ctx, a, 230001, call); e != nil {
+		sweepOut, e := s.EliteSweep(ctx, a, 230001, call)
+		if e != nil {
 			t.Fatal("raid", i, e)
 		}
+		requireFloorArrays(t, sweepOut, "sweep_info")
 		if _, e := s.EliteSweep(ctx, a, 230001, call); e != nil {
 			t.Fatal("exact elite retry", e)
 		}
@@ -355,9 +386,11 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 		t.Fatal("fourth free raid", e)
 	}
 	buy := op()
-	if _, e := s.BuyElite(ctx, a, 1, buy); e != nil {
+	buyOut, e := s.BuyElite(ctx, a, 1, buy)
+	if e != nil {
 		t.Fatal("buy3", e)
 	}
+	requireFloorArrays(t, buyOut, "buy_info", "sweep_info")
 	if _, e := s.BuyElite(ctx, a, 1, buy); e != nil {
 		t.Fatal("exact buy retry", e)
 	}
@@ -371,6 +404,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	if e != nil || reloaded["super"].(map[string]any)["max_floor"] != int64(1) {
 		t.Fatal(reloaded, e)
 	}
+	requireFloorArrays(t, reloaded["super"].(map[string]any), "buy_info", "sweep_info")
 
 	// Stage1 equipment is an explicit prior-crafting fixture, not a claim that this test earned30 fragments.
 	// The new source producer above earns real fragments; the final challenge below must use real Cloud START/RESULT.
