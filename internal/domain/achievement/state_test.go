@@ -41,9 +41,13 @@ func TestEarnedTierBoundariesAndStableFirstCompletion(t *testing.T) {
 	if e != nil || changed || v.StateVersion != old.StateVersion || v.Progress != 25 {
 		t.Fatal("population fall revoked earned facts", v, e)
 	}
-	if _, _, e = r.ObservePopulation(catalog(), 26, at); e == nil {
-		t.Fatal("stale time")
+	// K2/K3: a backwards observation is taken at the stored fact and writes a
+	// timestamp no earlier than the stored one.
+	next, changed, e := r.ObservePopulation(catalog(), 26, at)
+	if e != nil || !changed || next.UpdatedAt.Before(r.UpdatedAt) || next.UpdatedAt.Before(next.CreatedAt) {
+		t.Fatalf("backwards observation = %+v %v %v", next, changed, e)
 	}
+	r = next
 	if _, _, e = r.ObservePopulation(catalog(), 9007199254740992, at.Add(time.Hour)); e == nil {
 		t.Fatal("unsafe population")
 	}
@@ -143,9 +147,13 @@ func TestGreatCustomerOvertakenTimeIsTyped(t *testing.T) {
 	if s, _, err = s.ObserveDailyCount(c, 1, at); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err = s.ObserveDailyCount(c, 2, at.Add(-time.Second)); !errors.Is(err, ErrOvertaken) {
-		t.Fatalf("older observation = %v, want ErrOvertaken", err)
+	// K2: a backwards clock step observes at the stored fact; it is not an
+	// overtaking error, and the written timestamps never move backwards.
+	next, changed, err := s.ObserveDailyCount(c, 2, at.Add(-time.Second))
+	if err != nil || !changed || next.UpdatedAt.Before(s.UpdatedAt) || next.UpdatedAt.Before(next.CreatedAt) {
+		t.Fatalf("backwards observation = %+v %v %v", next, changed, err)
 	}
+	s = next
 	broken := s
 	broken.ContentRevision = "short"
 	if _, _, err = broken.ObserveDailyCount(c, 3, at.Add(time.Second)); !errors.Is(err, ErrConflict) {
