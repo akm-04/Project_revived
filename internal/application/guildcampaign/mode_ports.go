@@ -387,7 +387,9 @@ func (m Mode) BindContent(c context.Context, op operation.Context) (operation.Co
 }
 
 func (m Mode) ready() bool {
-	return m.ModeStore != nil && m.Content != nil && m.Combat != nil && m.Grants != nil && m.Facts != nil && m.Directory != nil && m.Mail != nil && m.Fence != nil && m.Players != nil && m.Receipts != nil
+	// Receipts is required only by Settle (610); reads and other writes must
+	// stay available to a composition that does not settle results.
+	return m.ModeStore != nil && m.Content != nil && m.Combat != nil && m.Grants != nil && m.Facts != nil && m.Directory != nil && m.Mail != nil && m.Fence != nil && m.Players != nil
 }
 
 // TxProfile resolves one member's display row inside a transaction.
