@@ -22,6 +22,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"sync"
 	"testing"
 	"time"
@@ -363,6 +364,7 @@ func TestSignInNativeCrystalAwardWireAndCustody(t *testing.T) {
 			t.Fatal(err)
 		}
 		body = response.Body
+		replyconformance.Check(t, 353, body)
 		if award.Crystal > 0 {
 			wire := body["award"].(map[string]any)
 			if wire["table_id"] != int64(-1) || wire["item_num"] != award.Crystal || wire["to_stone"] != false || wire["crystal"] != award.Crystal {
@@ -372,6 +374,7 @@ func TestSignInNativeCrystalAwardWireAndCustody(t *testing.T) {
 			if replayErr != nil {
 				t.Fatal(replayErr)
 			}
+			replyconformance.Check(t, 353, replay)
 			// A stored receipt round-trips through JSON, so its numbers decode as float64.
 			if replayedAward := replay["award"].(map[string]any); replayedAward["crystal"] != float64(award.Crystal) {
 				t.Fatal("Crystal replay wire", replay)

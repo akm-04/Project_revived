@@ -169,7 +169,7 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 			return err
 		}
 		lines := []grant.Line{}
-		wire := map[string]any{"table_id": award.ItemID, "item_num": award.ItemNum, "to_stone": false}
+		wire := map[string]any{"table_id": award.ItemID, "item_num": award.ItemNum, "to_stone": false, "is_partner": false}
 		if award.Crystal > 0 {
 			wire["table_id"] = int64(-1)
 			wire["item_num"] = award.Crystal
@@ -192,7 +192,7 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 				if err != nil {
 					return err
 				}
-				wire = map[string]any{"table_id": stone[0], "item_num": stone[1], "to_stone": true}
+				wire = map[string]any{"table_id": stone[0], "item_num": stone[1], "to_stone": true, "is_partner": false}
 				lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: stone[0], Amount: stone[1]})
 			} else {
 				wire, err = s.SignIn.HeroWire(hero)
