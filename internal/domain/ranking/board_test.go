@@ -38,8 +38,9 @@ func TestGirlsSnapshotRejectsIncompleteConflictingOrTamperedInputs(t *testing.T)
 	if _, _, e := FreezeBoardSnapshot(r, at, rev, op, []BoardEntry{one, one}); e == nil {
 		t.Fatal("duplicate subject")
 	}
-	if _, _, e := FreezeBoardSnapshot(r, at.Add(-time.Second), rev, op, []BoardEntry{one}); e != ErrStale {
-		t.Fatal(e)
+	// K2: a backwards observation is taken at the stored board fact.
+	if _, backwards, e := FreezeBoardSnapshot(r, at.Add(-time.Second), rev, op, []BoardEntry{one}); e != nil || !backwards.ObservedAt.Equal(r.UpdatedAt) {
+		t.Fatal("backwards observation", backwards, e)
 	}
 	_, s, e := FreezeBoardSnapshot(r, at, rev, op, []BoardEntry{one})
 	if e != nil {

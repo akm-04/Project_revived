@@ -96,8 +96,9 @@ func TestFreezeBoardSnapshotRejectsInvalidEntries(t *testing.T) {
 			t.Fatal("accepted invalid frozen entry", entries)
 		}
 	}
-	if _, _, e := FreezeBoardSnapshot(root, at.Add(-time.Second), rev, op, []BoardEntry{good}); e != ErrStale {
-		t.Fatal(e)
+	// K2: a backwards observation is taken at the stored board fact.
+	if _, backwards, e := FreezeBoardSnapshot(root, at.Add(-time.Second), rev, op, []BoardEntry{good}); e != nil || !backwards.ObservedAt.Equal(root.UpdatedAt) {
+		t.Fatal("backwards observation", backwards, e)
 	}
 }
 
