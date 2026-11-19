@@ -82,5 +82,6 @@
   "Push notices 20/21/24 timing; this leaf produces none",
   "Fact 125 production owner (not 10B)",
   "gift_reward row format for talk awards; 2141 original award source (mapping is PRIVATE_POLICY D485); 836 partner_acts hole form"
- ]
+ ],
+ "C26_girls_log": "The Girls Log (partner logs) is governed by I9_11_GIRLS_LOG_V1 (registered 2026-11-19; Sol A-124/A-125, sweep T5). G1: a newly written partner log reaches an online owner as PLAYER_NOTICE notice_type 24 {partner_id, log_info} after commit (SelfPlayer.lua:3216-3217). G2: every settled battle of value that fields an owned girl bumps her count in library_hero_battle_counts (migration 00179) once per settlement, and crossing 1/50/100/1000 battles writes log 60001/60002/60003/60004 once, in the settling transaction with the library lock last; practice, replays, report views and modes with no own-hero roster count nothing (P-GL1, RQ1-RQ4 user-approved 2026-11-19)."
 }
