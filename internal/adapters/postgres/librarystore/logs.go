@@ -2,7 +2,6 @@ package librarystore
 
 import (
 	"context"
-	"log"
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
@@ -43,15 +42,15 @@ func (s Store) InsertHeroLogTx(ctx context.Context, t tx.Tx, f library.HeroLogFa
 	if tag.RowsAffected() != 1 {
 		return false, nil
 	}
-	s.wakePartnerLog(ctx, t, f)
+	if e = s.wakePartnerLog(ctx, t, f); e != nil {
+		return false, e
+	}
 	return true, nil
 }
 
-// wakePartnerLog is D1 optional display: the row is already written, so a
-// wakeup failure is logged and never returned, fails the transaction or retries.
-func (Store) wakePartnerLog(ctx context.Context, t tx.Tx, f library.HeroLogFact) {
-	e := pg.EmitRealtimeWakeup(ctx, t, realtimewakeup.Envelope{Version: realtimewakeup.EnvelopeVersion, Route: app.PartnerLogNoticeRoute, Ref: app.PartnerLogRef(f.PlayerID, f.PartnerID)})
-	if e != nil {
-		log.Printf("library: Girls Log wakeup failed player=%d partner=%d log_id=%d: %v", f.PlayerID, f.PartnerID, f.LogID, e)
-	}
+// wakePartnerLog sends the transactional NOTIFY the committed row depends on.
+// A failed statement aborts the caller's transaction, so the error must reach
+// the caller instead of being swallowed: the row is not kept either way.
+func (Store) wakePartnerLog(ctx context.Context, t tx.Tx, f library.HeroLogFact) error {
+	return pg.EmitRealtimeWakeup(ctx, t, realtimewakeup.Envelope{Version: realtimewakeup.EnvelopeVersion, Route: app.PartnerLogNoticeRoute, Ref: app.PartnerLogRef(f.PlayerID, f.PartnerID)})
 }
