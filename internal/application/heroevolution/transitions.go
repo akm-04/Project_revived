@@ -20,16 +20,9 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if h.ValidatePersistent() != nil {
 		return nil, evo.ErrUnqualified
 	}
-	pop, e := s.Heroes.ReadRootTx(ctx, t, a.PlayerID)
-	if e != nil {
-		return nil, e
-	}
 	f, e := s.Owner.ReadHeroTx(ctx, t, a.PlayerID, d.Command.PartnerID)
 	if e != nil {
 		return nil, e
-	}
-	if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, h.UpdatedAt)) || d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, pop.UpdatedAt)) || d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, f.UpdatedAt)) {
-		return nil, ErrStale
 	}
 	c, e := s.Content.EvolutionCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
@@ -71,7 +64,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	old := f.Version
 	f.Facts = next
 	f.Version++
-	f.UpdatedAt = d.DecisionAt
+	f.UpdatedAt = gen.EffectiveObservation(d.DecisionAt, f.UpdatedAt, f.CreatedAt)
 	if e = s.Owner.SaveHeroTx(ctx, t, f, old); e != nil {
 		return nil, e
 	}
