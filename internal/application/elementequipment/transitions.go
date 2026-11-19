@@ -2,6 +2,7 @@ package elementequipment
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	elem "gxb.local/backend/v2/internal/domain/elementequipment"
@@ -18,7 +19,7 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if e != nil {
 		return false, e
 	}
-	if at.Before(h.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) {
 		return false, ErrStale
 	}
 	if e = h.ValidatePersistent(); e != nil {
@@ -35,7 +36,7 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if e = level.Validate(); e != nil {
 		return false, e
 	}
-	if at.Before(level.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, level.UpdatedAt)) {
 		return false, ErrStale
 	}
 	rule, e := s.Content.ResolveProgressionPolicyTx(ctx, q, rev)
@@ -138,7 +139,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if d.DecisionAt.Before(root.UpdatedAt) {
+	if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, root.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	cat, e := s.Content.ElementCatalogTx(ctx, t, d.ContentRevision)
@@ -160,7 +161,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		if e != nil {
 			return nil, e
 		}
-		if d.DecisionAt.Before(f.UpdatedAt) || d.DecisionAt.Before(h.UpdatedAt) {
+		if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, f.UpdatedAt)) || d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, h.UpdatedAt)) {
 			return nil, ErrStale
 		}
 		if e = validateHeroFacts(f.Facts, cat, h); e != nil {
