@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
@@ -224,7 +225,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, q Command, 
 		if e != nil || current.Validate() != nil {
 			return ErrConflict
 		}
-		if at.Before(current.Basis.Profile.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, current.Basis.Profile.UpdatedAt)) {
 			return ErrConflict
 		}
 		next := current
