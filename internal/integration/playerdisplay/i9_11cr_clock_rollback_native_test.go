@@ -74,9 +74,15 @@ func clockRollbackService(p *pg.Pool, clock *i911cFixedClock, secret []byte) i4s
 
 func clockRollbackLogin(t *testing.T, dispatcher stockruntime.BootstrapDispatcher, sidRaw, loginRaw string, at time.Time, seed byte) httpedge.Response {
 	t.Helper()
+	// operation.Factory draws a fresh entropy seed; Derive keys the MID1 context
+	// and credential ids off that seed alone, so a fixed seed would collide with
+	// another test's login in the same database.
+	operation := op()
+	operation.StartedAt = at
+	operation.EntropySeed[0] = seed
 	return dispatcher.Dispatch(ctx, httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{
 		MID:       1,
-		Operation: i911cFixedOperation(at, seed),
+		Operation: operation,
 		Params:    map[string]any{"sid": sidRaw, "login_token": loginRaw, "region": int64(1)},
 	}})
 }
