@@ -165,7 +165,7 @@ func (Store) ApplyTx(c context.Context, t tx.Tx, m dm.Manifest, changes []dm.Cha
 	seen := map[string]bool{}
 	for _, v := range changes {
 		before, ok := allowed[v.Before.Occurrence.ID]
-		if !ok || seen[before.Occurrence.ID] || before.Version != v.Before.Version || before.Status != dm.Pending || !v.Status.Valid() || !v.At.Equal(at) || v.ClaimGeneration < before.ClaimGeneration || at.Before(gen.EffectiveObservation(at, before.UpdatedAt)) {
+		if !ok || seen[before.Occurrence.ID] || before.Version != v.Before.Version || before.Status != dm.Pending || !v.Status.Valid() || !v.At.Equal(at) || v.ClaimGeneration < before.ClaimGeneration {
 			return dm.ErrInvalid
 		}
 		seen[before.Occurrence.ID] = true
@@ -174,7 +174,7 @@ func (Store) ApplyTx(c context.Context, t tx.Tx, m dm.Manifest, changes []dm.Cha
 		after.ClaimGeneration = v.ClaimGeneration
 		after.OwnerFence = v.OwnerFence
 		after.ExpiresAt = v.ExpiresAt
-		after.UpdatedAt = at
+		after.UpdatedAt = gen.EffectiveObservation(at, before.UpdatedAt)
 		after.Version++
 		if after.Validate() != nil {
 			return dm.ErrInvalid
