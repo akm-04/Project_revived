@@ -357,6 +357,7 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	roomID := adventureRoomID(t, info)
+	replyconformance.Check(t, 2417, info)
 	defenseDetail := info["detail"].(map[string]any)
 	positions, ok := defenseDetail["pos_statuses"].([]any)
 	if !ok || len(positions) != d.DefenseMonsterCount {
@@ -371,8 +372,13 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		t.Fatalf("2417 challenge_times sibling %#v", defenseDetail)
 	}
 	putAdventureOccurrence(t, p, b.PlayerID, d.EventDefense, 0, now, now.Add(time.Hour), "defense-room-b")
-	if _, err = mode.EnterDefense(ctx, b, roomID, opContext); err != nil {
+	joinedDefense, err := mode.EnterDefense(ctx, b, roomID, opContext)
+	if err != nil {
 		t.Fatal("defense join", err)
+	}
+	replyconformance.Check(t, 2425, joinedDefense)
+	if statuses, ok := joinedDefense["monster_statuses"].([]any); !ok || len(statuses) != d.DefenseMonsterCount || statuses[0] != "" {
+		t.Fatalf("2425 defense monster_statuses %#v", joinedDefense)
 	}
 	for try := 0; try < d.DefenseTriesPerPosition; try++ {
 		if _, err = mode.PrepareDefense(ctx, a, 1, opContext); err != nil {
@@ -453,6 +459,9 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 			t.Fatal("coop join", joinErr)
 		}
 		replyconformance.Check(t, 2425, joined)
+		if statuses, ok := joined["monster_statuses"].([]any); !ok || len(statuses) != d.DefenseMonsterCount || statuses[0] != "" {
+			t.Fatalf("2425 co-op monster_statuses %#v", joined)
+		}
 	}
 	if _, err = mode.EnterTeamFight(ctx, a, opContext); err != nil {
 		t.Fatal("enter team fight", err)

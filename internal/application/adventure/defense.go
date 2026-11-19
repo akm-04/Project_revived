@@ -112,11 +112,10 @@ func (s Mode) defenseDetail(c context.Context, q tx.Queryer, room sharedroom.Roo
 		return nil, err
 	}
 	positions := make([]any, d.DefenseMonsterCount)
-	monsters := make([]any, d.DefenseMonsterCount)
+	monsters := monsterStatuses(state)
 	for position := 1; position <= d.DefenseMonsterCount; position++ {
 		busy := state.Busy[position-1]
 		positions[position-1] = map[string]any{"player_id": busy.Player, "busy_type": busy.Type}
-		monsters[position-1] = state.Monsters[position-1].Killer
 	}
 	tries := state.TriesOf(int64(viewer))
 	challenges := make([]any, len(tries))
@@ -130,6 +129,16 @@ func (s Mode) defenseDetail(c context.Context, q tx.Queryer, room sharedroom.Roo
 		},
 		"pos_statuses": positions, "monster_statuses": monsters, "challenge_times": challenges,
 	}, nil
+}
+
+// monsterStatuses is the killer name per position; the same shared room state
+// backs both room types, and an unsolved position keeps the empty string.
+func monsterStatuses(state d.RoomState) []any {
+	monsters := make([]any, d.DefenseMonsterCount)
+	for position := 1; position <= d.DefenseMonsterCount; position++ {
+		monsters[position-1] = state.Monsters[position-1].Killer
+	}
+	return monsters
 }
 
 // EnterDefense answers 2425 with the server-side band and capacity.

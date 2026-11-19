@@ -145,7 +145,9 @@ func (s Mode) EnterCoop(c context.Context, a identity.ActorContext, roomID int64
 	if err != nil {
 		return nil, err
 	}
-	return map[string]any{"room_info": info}, nil
+	// MID 2425 carries monster_statuses on both branches; a co-op room has no
+	// solved position, so every entry is the empty killer string.
+	return map[string]any{"room_info": info, "monster_statuses": monsterStatuses(state)}, nil
 }
 
 // InviteCoop answers 2427: the target is appended for the room wakeup.
