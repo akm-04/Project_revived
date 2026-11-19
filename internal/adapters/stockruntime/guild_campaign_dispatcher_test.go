@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -282,4 +283,48 @@ func TestI9_9CDispatcherSettleBodyAndAlternativeNumbers(t *testing.T) {
 
 func (campaignStub) BindContent(_ context.Context, op operation.Context) (operation.Context, error) {
 	return op, nil
+}
+
+func awardParams(mid uint16) map[string]any {
+	if mid == 606 {
+		return map[string]any{"chapter_id": int64(7), "award_id": int64(20001091)}
+	}
+	return map[string]any{"chapter_id": int64(7)}
+}
+
+func TestI9_11T34AwardWireSelfApplyItemIDOnlyWhenApplied(t *testing.T) {
+	// ApplyQueueWindow.lua:127-160 and ApplyRewardWindow.lua:119-150 test the
+	// field's truthiness, and Lua treats 0 as true, so an unapplied member owes
+	// no item_id key; rank stays required.
+	unapplied := &campaignStub{award: app.AwardBody{NextApplyTime: 60, SelfRank: 2}}
+	for _, mid := range []uint16{605, 606} {
+		got := campaignDispatch(t, unapplied, mid, awardParams(mid))
+		if got.HTTPStatus != http.StatusOK {
+			t.Fatalf("%d unapplied %+v", mid, got)
+		}
+		info, ok := got.Body["self_apply_info"].(map[string]any)
+		if !ok {
+			t.Fatalf("%d self_apply_info=%+v", mid, got.Body)
+		}
+		if _, exists := info["item_id"]; exists {
+			t.Fatalf("%d unapplied carried item_id: %+v", mid, info)
+		}
+		if info["rank"] != int64(2) {
+			t.Fatalf("%d unapplied rank=%+v", mid, info)
+		}
+		replyconformance.Check(t, mid, got.Body)
+	}
+
+	applied := &campaignStub{award: app.AwardBody{NextApplyTime: 60, SelfItemID: 20001091, SelfRank: 1, ApplyTimes: 1}}
+	for _, mid := range []uint16{605, 606} {
+		got := campaignDispatch(t, applied, mid, awardParams(mid))
+		if got.HTTPStatus != http.StatusOK {
+			t.Fatalf("%d applied %+v", mid, got)
+		}
+		info := got.Body["self_apply_info"].(map[string]any)
+		if info["item_id"] != int64(20001091) {
+			t.Fatalf("%d applied item_id=%+v", mid, info)
+		}
+		replyconformance.Check(t, mid, got.Body)
+	}
 }

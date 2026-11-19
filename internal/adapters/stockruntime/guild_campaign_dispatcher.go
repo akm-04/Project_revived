@@ -381,8 +381,14 @@ func awardWire(body guildcampaign.AwardBody) map[string]any {
 		awards = append(awards, map[string]any{"award_id": award.AwardID, "award_num": award.AwardNum, "self_rank": award.SelfRank,
 			"self_apply": award.SelfApply, "apply_member": members})
 	}
+	selfApplyInfo := map[string]any{"rank": body.SelfRank}
+	// The stock application windows test item_id's truthiness and Lua treats 0
+	// as true, so an unapplied member must omit the key (A-185).
+	if body.SelfItemID != 0 {
+		selfApplyInfo["item_id"] = body.SelfItemID
+	}
 	return map[string]any{"award_infos": awards, "award_next_time": body.NextApplyTime,
-		"self_apply_info": map[string]any{"item_id": body.SelfItemID, "rank": body.SelfRank}, "guild_equip_apply_times": body.ApplyTimes}
+		"self_apply_info": selfApplyInfo, "guild_equip_apply_times": body.ApplyTimes}
 }
 
 func damageRank(rows []guildcampaign.RankRow) []any {
